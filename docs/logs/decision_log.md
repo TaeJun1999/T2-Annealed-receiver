@@ -281,6 +281,34 @@ baseline 겸 대안 Module H. 구현: `GMMPrior.fit`(EM, zero-mean 복소 성분
 
 ---
 
+## [2026-09-18] D-19 승인 (사용자 "Continue", 세션 6 첫 턴) + 보정 R1~R7 — exp_0925 kill test 확정
+"Continue" = 제시한 기본값 채택(세션 3 관례와 동일). 의도와 다르면 "보류" 한마디로 되돌린다. D-19 본문(위 2026-09-18 항목)은 그대로 유효하며, 아래 보정만 추가한다. **모든 보정은 BLER을 한 번도 보기 전에 확정**(사전 등록).
+- **R1 (prior 정의 확정).** D-19의 "섹터 ±60°"가 모호했다 [세션 6 유도, 정확]. **전기각** 해석($\psi\in[-\pi/3,\pi/3]$, $\lambda/2$ ULA에서 물리 ±19.5°)이 D-19 원문이며 앙상블 공분산이 정보를 가진다(8×4 유효 rank 12.6/32). **물리각** 해석($\theta\sim U(\pm60°)$, $\psi=\pi\sin\theta$)은 앙상블 공분산이 거의 백색(유효 rank 31.6/32)이라 D-19의 전제가 성립하지 않는다. → prior 3종: **U**(전 범위 균등, 앙상블 $=\mathbf I$ [정확]), **S**(전기각 ±π/3 = D-19 원문, **K1 결정 셀**), **P**(물리 120° 섹터, 맥락·범위 판단용). 참 prior는 세 경우 모두 $K_{\rm true}=32\times32$ 격자 혼합으로 *정의*.
+- **R1b (범위 한정 분기, 원문보다 관대).** K1이 (H, S)에서 발동하더라도, prior P에서 **교차-$T_p$ goodput 포락선** 이득(exactEP-true vs 2차 모멘트 포락선)이 연속 3개 이상 SNR 점에서 ≥5%이면 결론은 "중단"이 아니라 **주장 범위 한정**(앙상블 공분산이 정보를 갖지 않는 채널로 한정)으로 한다.
+- **R2 (H4 셀 추가).** $T_p=2$·$\mathbf R_{t,\rm ens}=\mathbf I$(prior U/P)에서는 2차 모멘트 방법의 첫 패스 $\mathrm{NMSE}_\infty=1-T_p/N_t=0.5$ [정확, F5 폐형식] — 같은 $T_p$에서 (d)−(a)를 비교하면 공허하다. 따라서 8×4·$T=16$·$T_p=4(=N_t)$ 셀을 추가하고, headline은 **교차-$T_p$ goodput 포락선**($K/T$: $T_p=2$ 3.125, $T_p=4$ 2.625)으로도 읽는다.
+- **R3 (arm (b) 강화 — 우리 논지에 불리한 방향).** full-covariance EM은 $N=32$, $n=10^4$에서 과적합한다 [측정, 적합 단계만]. → (i) MAP shrinkage $\kappa\in\{0,16,64,256\}$, (ii) 검증 우도 early stopping, (iii) 성분별 Kronecker 구조 $\mathbf C_k=\mathbf T_k\otimes\mathbf R_k$(flip-flop M-step). **선택은 오직 검증 우도**로 하며 BLER을 보지 않는다. **b\*** := 검증 우도 최대인 Hgmm arm. **K3는 (c)가 원문 `Hgmm-K32`와 `b*`를 둘 다 이겨야 성립.**
+- **R4 (clip 규칙 확인).** site clip 후 $\boldsymbol\eta$ 보존(현 코드)은 belief 평균을 tilted 평균에서 이동시킨다; 정밀도 고정 시 KL 최적은 평균 보존 [정확]. 진단 arm `-mp`를 병행하고, `-mp` 쌍의 판정이 다르면 **미결**로 둔다.
+- **R5 (K1 불확실성).** SNR@BLER 0.1 이득의 90% paired bootstrap CI가 0.5 dB를 걸치면 미결 → $n$ 증량.
+- **R6·R7 (검정력 하한, 신규).** K2는 "반대 결과를 탐지할 수 있었을 때"만 발동한다: 격자 위에 결정 점 3개가 존재하고(R7), 그중 2개 이상에서 불일치 쌍이 6개 이상(R6; 양측 sign test가 $p<.05$에 도달할 수 있는 최소값)이어야 한다. 미달이면 **미결**(n 증량 또는 SNR 격자 확장). 결정 점 = `Hgmm-K32`의 BLER@16이 0.1에 $|\log_{10}|$ 기준으로 가장 가까운 3점([0.005, 0.9] 내).
+판정은 `exp_0925_analysis.py` §5가 기계적으로 계산한다(보조 자료; 최종 판독은 사람이 한다).
+
+## [2026-09-18] 기록 [정확, 폐형식] — 세션 6 유도 1: prior S/P의 앙상블 2차 모멘트와 첫 패스
+격자 혼합 prior의 앙상블 공분산은 $\hat{\mathbf C}=\mathbf R_{t,\rm ens}^{\rm T}\otimes\mathbf R_{r,\rm ens}$, $\mathbf R_{\cdot,\rm ens}=\frac1{K_g}\sum_a \mathbf R(\psi_a)$ [정확; 격자 지수 독립]. 수치(성분 $\rho_c=0.7$, $K_g=32$):
+- **U:** $\mathbf R_{t,\rm ens}=\mathbf R_{r,\rm ens}=\mathbf I$ (오차 $\le5\times10^{-16}$) — 2차 모멘트가 정보를 전혀 갖지 않음.
+- **S(전기각):** eig $\mathbf R_{t,\rm ens}$ = 2.123/1.185/0.456/0.236; $\mathbf R_{r,\rm ens}$(8) = 2.358…0.204; 유효 rank 6.7/16(4×4), 12.6/32(8×4).
+- **P(물리 120°):** $\mathbf R_{t,\rm ens}=\mathbf I$, eig $\mathbf R_{r,\rm ens}$ = 1.114…0.735 — 거의 백색(유효 rank 31.6/32).
+$T_p=2$ 첫 패스 $\mathrm{NMSE}_\infty=\mathrm{tr}\,\mathbf S/\mathrm{tr}\,\mathbf R_t$ (F5 폐형식): U·P는 DFT에서 0.500(파일럿 포착 전력 0.500), S는 DFT 0.233 → **eig 파일럿 0.173**(포착 0.827). → 파일럿 규칙: S만 eig, U·P는 DFT(eig가 무의미).
+
+## [2026-09-18] 기록 [정확] — 세션 6 유도 2: EP site clip의 평균 보존
+moment-matched $(\mathbf m,\boldsymbol\Sigma)$에서 site를 $\boldsymbol\Lambda=\boldsymbol\Sigma^{-1}-\mathbf G$, $\boldsymbol\eta=\boldsymbol\Sigma^{-1}\mathbf m-\mathbf b$로 만든 뒤 $\boldsymbol\Lambda$의 고윳값을 $\lambda_{\min}$으로 clip하면, **$\boldsymbol\eta$를 보존하는 현 규칙**의 belief 평균은 $(\boldsymbol\Lambda_c+\mathbf G)^{-1}(\boldsymbol\eta+\mathbf b)\ne\mathbf m$이 된다. 정밀도 $\mathbf P=\boldsymbol\Lambda_c+\mathbf G$를 고정하면 $\mathrm{KL}(\mathcal{CN}(\mathbf m,\boldsymbol\Sigma)\,\|\,\mathcal{CN}(\boldsymbol\mu,\mathbf P^{-1}))$는 $\boldsymbol\mu=\mathbf m$에서 최소 ⇒ **평균 보존** $\boldsymbol\eta=(\boldsymbol\Lambda_c+\mathbf G)\mathbf m-\mathbf b$가 KL 최적 [정확]. 무작위 $(\mathbf G,\mathbf b)$ 점검에서 상대 평균 이동 $|\boldsymbol\mu-\mathbf m|^2/|\mathbf m|^2$ = 0.04~0.09(8×4, clip 6/8회) [측정, 코드 점검]. 수신기 성능 영향은 **미측정** → exp_0925의 `-mp` arm(Q-34).
+적용 범위: `GMMPriorB.ep_site`(정확 site 경로)와 `RouteAClip._matrix_site`(D-14 경로) 둘 다. `clip='eta'`가 기존 `RouteA`와 로그 완전 일치(차이 0.0)임을 단위 테스트 T6로 고정.
+
+## [2026-09-18] 기록 [측정, 적합 단계 한정] — 세션 6: full-covariance EM의 과적합과 대안
+prior S, 8×4($N=32$), $n_{\rm train}=10^4$, $n_{\rm val}=n_{\rm test}=5000$, plain EM($\kappa=0$, 300회 상한, restart 1): $K=16$ train−val 격차 2.07 / KL(true‖fit) 1.45; $K=64$ 격차 **8.00** / KL **4.21**; Gaussian 표본 공분산 prior KL 9.72. 4×4 $K=32$: 격차 1.39 / KL 0.69. → 성분당 $N^2$ 복소 자유도가 $n/K$ 표본을 압도. (b)가 허수아비가 되면 K3가 잘못 발동할 수 있으므로 R3 도입. EM 구현 [정확]: $\sum_k\pi_k\mathbf C_k$ = 표본 공분산($\kappa=$ floor $=0$일 때 단위 테스트 $\le10^{-12}$), Kronecker M-step은 가중 matrix-normal MLE(단위 테스트: $K=1$에서 LL(full)≥LL(kron)≥LL(true), 계수 오차 $O(n^{-1/2})$), $\kappa\to\infty$에서 $\mathbf C_k\to\hat{\mathbf C}$.
+
+## [2026-09-18] 기록 — 세션 6: exp_0925 코드 작성 완료(실행 대기), `t2_route_a.py` 무변경
+신규 `Demo/t2_gmm.py`(`GMMPriorB` 배치 1024성분 `ep_site`/`denoise_full`, `RouteAClip`, `fit_gmm_em`, U/S/P 생성기), `exp_0925_run.py`(`prior`/`fit`/`time`/`K`), `exp_0925_analysis.py`, `exp_0925_tests.py`. **`t2_route_a.py`·`t2_trellis.py`는 건드리지 않았다**(회귀 테스트 t0/t6 보호). 단위 테스트 전 항목 PASS(T1 tilted 모멘트 $\le6\times10^{-12}$, belief 수준 $\le10^{-9}$; T2 $\le5\times10^{-14}$; T3 EM 항등식·복원; T3k Kronecker; T4 prior 정의; T6 `RouteAClip`=`RouteA` 차이 0.0). 스모크($n\le4$, 수치 폐기)로 fit→K→analysis 전 경로 확인, 산출물 삭제. 비용 추정: 셀 H 4.2 s/trial, R 1.9 s/trial → 51점×$n$=640에서 192코어 약 11~12분; fit 약 1~2분.
+
 ## Experiment log
 
 ```
@@ -433,7 +461,12 @@ exp_0924 R-A v2 bridge ladder (Q-29) | 상태: **완료(2026-09-18, n=1000, 커�
 ```
 
 ```
-exp_0925 kill test (D-19) | 상태: **설계만, 코드 미작성(다음 세션)** | 목적: score prior 분기와 T2 현 설계의 중단 여부를 M2 학습 전에 판정
-설정·arm·기준: 위 D-19 항목. 필요한 코드: GMMPrior.fit(EM), 연속 각도 참 prior(K_true=1024, prior U/S), 러너 세트 "K"(Nr 4/8, T 28/16, Tp=2, SNR 3점+), ep_site의 batched inverse(성분 1024개).
+exp_0925 kill test (D-19 + 보정 R1~R7) | 상태: **코드 작성·단위 테스트 완료(세션 6), 실행 대기** | 목적: score prior 분기와 T2 현 설계의 중단 여부를 M2 학습 전에 판정
+설정: QPSK (133,171)_8 nu=6, Nt=4, 16반복, 모든 joint arm = D-15 + LOO + beta 0.7. 참 prior = 32x32 각도 격자 혼합(K_true=1024, 성분 rho_c=0.7), prior U/S/P(R1).
+      셀 H(headline) 8x4 T=16 Tp=2 eig(S)/DFT(U,P) SNR -3..15 dB 7점; H4 동일 Tp=4(R2); R(비교용) 4x4 T=28 Tp=2 SNR 9/12/15. n=640/점, seed 20260925.
+      arm: lmmseC_pf(a) / Hgmm-K{16,32,64}·Hgmm-kron(b, 검증 우도로 kappa·정지·K 선택 → b*) / Hscore-exact(c) / exactEP-true(d) / Hscore-K32 / *-mp(clip 진단) / pilot_C / pilot_Hgmm-K32 / genie / oracle_pf.
+      적합: ntrain=1e4, n_val=n_test=5000, family{full,kron} x K{16,32,64} x kappa{0,16,64,256} x restart 3, 선택은 검증 우도만(BLER 미사용).
+명령: python exp_0925_tests.py | tee exp_0925_tests.txt ; python exp_0925_run.py prior | tee exp_0925_prior.txt ; python exp_0925_run.py fit ; python exp_0925_run.py K ; python exp_0925_analysis.py | tee exp_0925_results.txt
+코드: t2_gmm.py, exp_0925_run.py, exp_0925_analysis.py, exp_0925_tests.py (t2_route_a.py 무변경). raw: Demo/exp_0925_raw/*.npz, 적합: Demo/exp_0925_fits/*.npz
+사전 검산(Claude): 단위 테스트 전 항목 PASS, 스모크 n<=4 전 경로(수치 폐기). 판독 기준: 위 D-19 + R1~R7 (analysis §5가 기계적으로 출력).
 ```
-

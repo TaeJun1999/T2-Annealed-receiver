@@ -35,6 +35,11 @@
 - **GMM 기반 CME** — Koller, Fesl, Turan, Utschick, "An Asymptotically MSE-Optimal Estimator Based on Gaussian Mixture Models", IEEE TSP 70:4109–4123 (2022), arXiv:2112.12499 [V: 초록]: 채널 표본에 GMM 적합 → 폐형식 CME. **감시 그룹(Utschick).** 우리 GMM testbed의 `exactEP` 기준과 같은 계산 구조 → Q-32(전략). 후속: structured covariances(arXiv:2205.03634), mixtures of factor analyzers(ACSSC 2023), **"Diffusion-based Generative Prior for Low-Complexity MIMO Channel Estimation"(arXiv:2403.03545) [V: dblp 제목만 — 원문 VERIFY]**.
 - 판정 변화 없음(시나리오 1): 위 계열은 pilot-only 채널 추정이며 부호·bilinear 결합 없음[초록 수준 확인]. 단 기여 ③의 "prior 모듈" 서술은 GMM-CME를 baseline으로 명시해야 함.
 
+## [2026-09-18] 세션 6 메모 (sweep 아님; 웹 검색 0건 — 코드 세션)
+- 새로 생긴 [VERIFY] 대상(10-01 sweep에 추가): (a) **구조화 공분산 GMM 채널 추정** — Kronecker/matrix-normal 성분 GMM 적합의 선행. 후보 arXiv:2205.03634(Utschick 그룹, "structured covariances" [V: 제목만])와 mixtures of factor analyzers(ACSSC 2023 [M]) 본문 확인; 우리는 이것을 kill test의 baseline 강화(R3)로만 쓰므로 위협은 아니지만, GMM arm의 서술에 인용 필요. (b) **EP/moment-matching에서 site 정밀도 clip 시 평균 보존 규칙**의 선행(EP 문헌의 "moment matching with PSD projection" 관행 [M] — Minka, Seeger, power-EP 계열에서 표준일 가능성이 높음; 표준이면 우리 것으로 주장하지 않고 관행으로 인용). (c) 각도 규약(전기각 vs 물리각) 관련 없음.
+- 추가 키워드: `Kronecker structured Gaussian mixture channel prior`, `matrix normal mixture channel estimation`, `expectation propagation site precision positive definite projection`, `moment matching mean preserving damping EP`.
+- 판정 변화 없음(시나리오 1 유지). 감시 그룹 동일.
+
 ## 예정
 - [ ] 10-01 sweep 추가 키워드: `second-order Tweedie posterior covariance inverse problem`, `denoiser Jacobian covariance diffusion`, `EP bilinear tilted moments channel estimation`, `semi-blind fewer pilots than antennas turbo`.
 - [ ] 2026-10-01 전수 sweep. 특히 확인: 2604.19061 v2 여부, Wadayama–Takahashi "SC-VAMP + channel estimation / bilinear / MIMO", Segarra 그룹 coded diffusion JCESD, Choukroun–Wolf 2026 score decoder 후속.
@@ -42,5 +47,6 @@
 - [ ] 10-01 sweep 추가 키워드(세션 4): `pilot contamination-free semi-blind fewer pilots than transmit antennas turbo`, `score-based posterior sampling channel estimation turbo decoding`, `isotropic denoiser interface VAMP rank-deficient`, `eigen-aligned pilots correlated MIMO joint estimation decoding`.
 - [ ] 10-01 sweep 추가 키워드(세션 5): `SNIPS channel estimation`, `diffusion posterior sampling expectation propagation moments`, `Rao-Blackwellized Tweedie posterior covariance`, `noisy inpainting diffusion MIMO channel pilots fewer than antennas`, `annealed Langevin joint channel estimation decoding coded`. 원문 확인: SNIPS 본문, 2405.13712의 [22–25], TMPD/ΠGDM [M].
 - [ ] 10-01 sweep 추가(세션 5-2): `Gaussian mixture model channel estimator turbo / joint decoding / semi-blind`, `Utschick diffusion prior channel estimation` (2403.03545 원문·후속), `moment matching posterior sampling wireless`.
+- [ ] 10-01 sweep 추가(세션 6): `Kronecker structured Gaussian mixture channel prior`, `matrix normal mixture channel estimation`, `expectation propagation site precision positive definite projection`, `moment matching mean preserving damping EP`. 원문 확인: 2205.03634.
 - [ ] 10-01 sweep **최우선**(세션 5-3, Q-33): `Gaussian mixture model channel estimation turbo receiver`, `GMM prior joint channel estimation decoding`, `GMM semi-blind channel estimation data-aided Utschick`, `conditionally Gaussian channel prior expectation propagation bilinear`. 2112.12499 본문에서 "채널은 조건부 Gaussian → GMM이 자연스럽다"는 논거의 원문 확인 [M → VERIFY].
 
