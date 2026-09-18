@@ -43,4 +43,6 @@
 - **Q-25(b) 닫힘 (2026-09-18):** GMM에서는 D-15 위에서도 D-13+D-14 묶음이 유의(47:17 등), 단독으로는 아님. (c) 학습 score는 열림.
 - **Q-27 (열림, Phase 3, 높음):** `D13+14_pf`가 `exactEP_pf`에 유의하게 뒤진다(73:35 등). 원인 후보: (a) 등방 노이즈 denoiser 인터페이스(스칼라 $\nu^q$)가 cavity의 비등방성을 버림, (b) D-14 행렬 site의 $\lambda_{\min}$ clipping, (c) n_inner=1. 등방 인터페이스를 유지한 채 줄일 수 있는가(예: whitening 후 denoise — 학습 score에서는 불가?, 다중 $\nu$ 평가)? 유도 먼저.
 - **Q-28 (열림, Phase 3, 높음 — headline):** goodput 이득 상한이 파일럿 비율에 묶임($T=28$: 최대 +8.9%). 오버헤드가 큰 영역 후보: (a) $T=16$($T_p=4$: $K=42$, $T_p=2$: $K=50$, +19%; 단 부호 길이 절반), (b) $N_t=8$, $N_r=16$(러너의 NT 하드코딩 해제 필요, 비용 ↑). 8x4·$\rho=0.7$ 기준.
+- **Q-28 갱신 (2026-09-18, exp_0921 B-T):** 8x4·$T=16$에서 goodput +6~7%(3~15 dB), 동일 goodput 2.85에서 ≈4.8 dB, goodput 3.0은 pilot-only 도달 불가. headline 표현을 "동일 goodput SNR 이득 + 도달 불가 영역"으로. 남은 것: (a) 8x4·$T=16$에서 A/C 세트 재확인(D-15, 묶음), (b) $\rho$ 민감도(0.5), (c) eig 파일럿의 전력 불균등 ablation.
+- **Q-27 갱신 (2026-09-18):** 원인 (a) 확정[정확+검증]: $\nu^q=\frac{1-\kappa}{\kappa}\nu^E+\frac1{\kappa g}$ — $T_p<N_t$에서 SNR-무관 floor, 미관측 방향 자기 되먹임. 남은 것: `exp_0922_interface.py`로 첫 패스 손실 정량화 → R-A(annealed posterior sampling + warm start) 설계·비용 평가. (b) clipping, (c) n_inner는 부차(n_inner는 floor를 못 없앰[정확]).
 
