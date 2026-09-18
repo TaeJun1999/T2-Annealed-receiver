@@ -187,6 +187,18 @@ form A에서 $\bar{\mathbf x}_n=\mathbf 0$이면 데이터 site는 $\mathbf A_n=
 **$\rho=0.9$:** genie 자체가 8.8 dB 필요. $T_p=4$ joint 11.3 vs pilot 11.4(이득 없음, 저SNR에서만 18:1, 13:2), $T_p=3$ eig joint 12.3. → $\rho=0.9$는 headline 영역이 아님(강한 상관 = prior가 이미 채널을 거의 결정, 남는 손실은 다중화 자체).
 **주의 [VERIFY]:** 18 dB 점에서 모든 수신기가 15 dB보다 나쁨($T_p=2$ eig joint .013→.069, pilot .29→.33, $\tau^L$@1도 1.371→1.384) → SNR별 독립 시드의 표본 효과로 판단(수신기 공통). 결정 점은 n 증량으로 확인. 개선안: SNR 간 common random numbers(같은 $H,u,$ perm, 노이즈만 스케일) 옵션 — 미도입.
 
+## [2026-09-18] D-15 승인 (사용자, reversible) — L_H는 a-posteriori 소비, L_X는 extrinsic + LOO
+사용자 메시지 "D-15 승인 하면 되는건가?"(2026-09-18)를 설명 후 승인으로 기록; 의도와 다르면 "보류" 한마디로 되돌린다. 근거: exp_0919(시드 20260919)와 exp_0921 A(시드 20260921, $\beta=0.7$·16 반복) 두 시드·8점에서 일관(87:11, 70:14, 51:13, 34:6 등), LOO 필수(2:31 등), posterior 경로 damping 불필요(Q-24).
+귀결: (1) v1 기본 구성 = `colored`/(`belief`+`matrix`) + `feedback='posterior'` + `loo=True` + `beta=0.7` + `beta_fb=None` + `n_inner=1`. 단 **`RouteA`의 생성자 기본값은 바꾸지 않는다**(회귀 테스트 t0/t6이 기본값 = extrinsic·$\beta=1$에 의존) → 다음 코드 변경 때 preset 헬퍼(`RouteA.v1(...)`)로 추가. (2) 서술 변경: "extrinsic coupling"은 **L_X 방향(복호기→검출기)** 에만 해당, L_H(채널 추정)는 APP를 소비 — 지도교수 확인 목록에 확정 항목으로 추가. (3) 기여 목록 재평가는 exp_0921 C(Q-25(b)) 결과 후.
+
+## [2026-09-18] 기록 — exp_0921 B 확장(4x4 $\rho=0.7$ n=640, 8x4 n=320) + C(GMM, n=320) 판독 (커밋 f877eb8; 서버 2분 08초)
+**B, 4x4 $\rho=0.7$ n=640 [측정].** SNR@0.1: $T_p=4$ pilot 4.9 / joint 3.8(**1.1 dB**) / genie 1.4; $T_p=3$ eig pilot 8.2 / joint 4.8; $T_p=2$ eig joint 9.4, DFT 12.9. n=160의 18 dB 비단조성은 사라짐(표본 효과 확인).
+**정정 — F5는 4x4에서 floor가 맞다.** $T_p=2$ eig joint BLER@16 12/15/18 dB = .052/.041/.036, DFT 15/18 dB = .087/.083(09-18 오전의 "완만한 기울기, hard floor 아님" 서술은 n=320·15 dB까지만 본 과대 해석). $T_p=3$ eig는 joint .006/.005/.002 vs pilot .023/.011/.011.
+**goodput 포락선 정정(n=640).** joint/pilot 이득: 0 dB +114%, 3 dB +26%, 6 dB +4.1%, 9 dB +3.6%, 12~18 dB **+1.1~1.8%**(n=160의 +3~6%는 표본 효과 포함). pilot-only도 $T_p=3$ eig로 3.32까지 가기 때문. → **4x4 headline = 저SNR ≈1.1 dB, 그 외 goodput 1~4%. 약함.**
+**B, 8x4 n=320 [측정] — 더 나은 영역.** $T_p=2$ eig: joint SNR@0.1 **2.4 dB** vs pilot-only 9.0 dB(DFT: 3.5 vs >18). joint BLER 9/12/15/18 dB = .013/.009/.003/**.000** (floor 없음) vs pilot-only .100/.094/.075/.059 (floor). 포락선 이득 0 dB +10%, 3 dB +4.8%, 9~18 dB +3.3~4.3%; 18 dB에서 joint $T_p=2$가 상한 $K/T=3.50$ 도달(pilot-only 최선은 $T_p=3$의 3.357). → **$N_r>N_t$에서 F5 floor 소멸; "$T_p<N_t$는 joint에서만 성립"이 깨끗하게 보임.** 단 goodput 이득의 상한이 파일럿 비율($4/28$)에 묶여 있어 수 %가 한계 → 파일럿 오버헤드가 큰 영역(짧은 $T$ 또는 큰 $N_t$)이 필요(Q-28).
+**C, GMM [측정].** (1) D-15는 모든 site 규칙에서 성립: $T_p=2$ 9 dB `v0` 136:6, `D13` 106:14, `D13+14` 86:10, `exactEP` 115:7. (2) Q-25(b): $T_p=2$ @16 BLER 9/12/15 dB — `v0_pf` .450/.438/.406, `D13_pf` .406/.397/.378, `D14_pf` .456/.428/.406, **`D13+14_pf` .381/.344/.362**, `exactEP_pf` .319/.263/.244, `oracle_pf` .231/.156/.147, `lmmseC_pf` .525/.494/.431, `pilot_gmm` .869/.841/.809, genie 0. paired: `v0_pf` vs `D13+14_pf` 56:34($p=.026$), 47:17(.0002), 44:30(.13); D-14 단독은 v0와 동일(24:26, 26:23, 26:26), D-13 단독은 방향만(48:34, 39:26, 41:32; @8은 $p=.05/.006/.06$) → **비Gaussian testbed에서는 D-13+D-14 묶음이 D-15 위에서도 유의(단, 둘이 함께일 때만).** $T_p=4$에서는 모든 `_pf`가 동률(v0_pf .178 ≈ 묶음 .200 ≈ exactEP .200 ≈ oracle .191; pilot_gmm .356). (3) **score 인터페이스의 비용:** `D13+14_pf` vs `exactEP_pf` 53:33(.04), 61:35(.01), 73:35(.0003) — 등방 노이즈 denoiser만 쓰는 경로가 정확 mixture-EP site에 유의하게 뒤짐(Q-27). (4) `exactEP_pf` vs `oracle_pf` 36:8, 42:8, 43:12 — 성분 불확실성의 Gaussian 사영 손실이 큼. (5) 2차 모멘트 방법 대비: `lmmseC_pf` vs `D13+14_pf` 74:28, 61:13, 52:30, vs `v0_pf` 39:15, 29:11, 21:13 → "2차 모멘트를 넘는 prior의 이득" 지지.
+**기여 목록 재평가(잠정).** ① D-15(APP→L_H, ext+LOO→L_X) = 두 testbed 모두에서 지배적 요인. ② D-13+D-14 묶음 = 비Gaussian·$T_p<N_t$에서 유의, Gaussian에서는 수렴 속도. ③ 등방 인터페이스의 비용(Q-27)은 정량화된 한계로 보고. ④ regime = $N_r>N_t$, $T_p<N_t$, 정렬 파일럿; goodput headline은 오버헤드가 큰 영역에서 재측정 필요.
+
 ---
 
 ## Experiment log
@@ -283,7 +295,7 @@ exp_0920 | 목적: 학습 없는 **비-Gaussian** testbed — Gaussian-mixture �
 ```
 
 ```
-exp_0921 | 상태: **A 완료(2026-09-18, n=320, 결과 Demo/exp_0921_results.txt — A 블록이 두 번 append됨, 동일 내용), B(4x4) 완료(2026-09-18, n=160, 커밋 0e905f7, Demo/exp_0921_results_B.txt); 다음: rho=0.7 n=640 증량 + 8x4** | 목적: A = D-15 기준 T2 표, B = Q-20 regime scan(headline 영역 탐색)
+exp_0921 | 상태: **A 완료(2026-09-18, n=320, 결과 Demo/exp_0921_results.txt — A 블록이 두 번 append됨, 동일 내용), B(4x4) 완료(2026-09-18, n=160, 커밋 0e905f7, Demo/exp_0921_results_B.txt); B 확장(n=640, 8x4 n=320) + C(n=320) 완료(커밋 f877eb8, Demo/exp_0921_results_{A,B,C}.txt)** | 목적: A = D-15 기준 T2 표, B = Q-20 regime scan(headline 영역 탐색)
 설정: QPSK, (133,171)_8, T=28, Nt=4, 16 반복 기록(@8 = 같은 궤적의 index 7), 시드 20260921+100+SNR, chunk 40, M-1 + paired sign test + 실패 분류(stuck/cyc2/other; BER 궤적 11..16 기준 조작적 정의).
       A: rho=0.7, 4x4; Tp=4: 0/3/6/9 dB, Tp=2: 6/9/12/15 dB; n=320. 변형 15: colored x {ext,post} x beta{1,.7}, col_post_b0.7_fbd(beta_fb=.7), col_postnoloo_b0.7,
          v0 x {ext,post} x beta{1,.7}, belief1 x {ext,post} (beta .7), pilot beta{1,.7}, genie.
@@ -294,7 +306,7 @@ exp_0921 | 상태: **A 완료(2026-09-18, n=320, 결과 Demo/exp_0921_results.tx
 ```
 
 ```
-exp_0921 C | 상태: **코드 전달, 실행 대기** | 목적: Q-25(b) — GMM testbed(exp_0920 prior, 정확 score)에서 D-15가 켜지면 D-13/D-14가 여전히 필요한가
+exp_0921 C | 상태: **완료(2026-09-18, n=320, 커밋 f877eb8)** | 목적: Q-25(b) — GMM testbed(exp_0920 prior, 정확 score)에서 D-15가 켜지면 D-13/D-14가 여전히 필요한가
 설정: QPSK 4x4, T=28, DFT 파일럿, rho_c=0.7, beta=0.7, n_inner=1, 16 반복, 시드 20260921+100+SNR, n=320. Tp=4: 3/6/9 dB, Tp=2: 9/12/15 dB.
       변형 14: {v0, D13, D13+14, exactEP} x {ext, pf}, D14_pf, lmmseC_pf, pilot_gmm, pilot_C, genie, oracle_pf(참 성분의 Gaussian prior).
       메모(Q-20(d)): 이 testbed는 앙상블 공분산이 정확히 I → 2차 모멘트 기반 "정렬 파일럿"은 DFT와 구별 불가. 정렬 파일럿 실험은 C에 넣지 않음.
