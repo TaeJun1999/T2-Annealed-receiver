@@ -470,3 +470,25 @@ exp_0925 kill test (D-19 + 보정 R1~R7) | 상태: **코드 작성·단위 테�
 코드: t2_gmm.py, exp_0925_run.py, exp_0925_analysis.py, exp_0925_tests.py (t2_route_a.py 무변경). raw: Demo/exp_0925_raw/*.npz, 적합: Demo/exp_0925_fits/*.npz
 사전 검산(Claude): 단위 테스트 전 항목 PASS, 스모크 n<=4 전 경로(수치 폐기). 판독 기준: 위 D-19 + R1~R7 (analysis §5가 기계적으로 출력).
 ```
+
+## [2026-09-18] 기록 [측정] — 세션 7 판독 ①: exp_0925 fit 공정성 (workspace: GPT)
+
+근거: repo 52b0102의 Demo/exp_0925_fit.txt 및 fit NPZ 36개.
+GPT에서 기존 산출물을 재집계·판독했으며 새 실험 실행은 없음.
+ntrain=10000, nval=ntest=5000, SEED=20260925.
+36/36 fit의 kappa/restart가 저장된 validation 우도 argmax와 일치.
+
+b*는 Nr=4/8 모두 Hgmm-kron이며 U/P는 K64, S는 K32.
+Gaussian 대비 test KL 감소율: 모든 36 fit >=80.58%, b* 96.46~98.45%.
+현재 testbed에서 Q-35의 "Gaussian 대비 KL 미개선인 약한 (b)" 우려는
+해당하지 않음. 새로운 수치 합격 기준을 추가한 것은 아니다.
+R3 유지: (c)는 원문 Hgmm-K32와 b*를 모두 이겨야 K3가 성립한다.
+최적 GMM, posterior 정확성 또는 BLER 우위는 이 표로 주장하지 않음.
+
+현재 상태: exp_0925 실행 완료, 판독 ①만 완료·②~⑥ 미착수.
+실행 이력은 docs/EXPERIMENTS.md 참조. 기존 "실행 대기" 항목은
+작성 당시 기록으로 보존한다.
+D-19 및 R1~R7 변경 없음. K1/K2/K3 판정 없음.
+exp_0925_results.txt, exp_0925_K.txt 및 raw 수신기 데이터 미열람.
+
+상세: [fit-only 검산표](../../Demo/exp_0925_fit_table.md).

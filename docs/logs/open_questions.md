@@ -60,3 +60,10 @@
 - **Q-34 (열림, Phase 3, 중간 — exp_0925로 측정):** EP site의 고윳값 clip에서 $\boldsymbol\eta$ 보존(현 코드) vs **평균 보존**(KL 최적 [정확, 세션 6 유도]). 무작위 $(\mathbf G,\mathbf b)$에서 belief 평균이 상대적으로 4~9% 이동[측정, 코드 점검]하지만 수신기 성능 영향은 미측정. exp_0925의 `-mp` arm으로 세 경로(정확 site, D-14 one-shot) 동시 측정. 결과가 유의하면 (i) `RouteA`/`GMMPrior`의 기본 clip 규칙 변경 여부(회귀 테스트 t0/t6 영향 확인 필요), (ii) 세션 4~5의 `lam_min=1e-6` 결과(특히 Q-31의 표본 모멘트 site clip 손실)를 재해석해야 하는지. 주의: Q-31에서 측정한 KL→KLc 손실은 $\boldsymbol\eta$ 보존 규칙 하의 값이다.
 - **Q-35 (열림, Phase 2/M2, 높음 — kill test의 공정성):** 유한 표본 GMM 적합의 강도. $N=32$, $n_{\rm train}=10^4$에서 full-covariance EM은 과적합($K=64$: train−val 8.0 nat, KL 4.2) [측정, 적합 단계]. 대책으로 MAP shrinkage $\kappa$·검증 우도 조기 종료·Kronecker 구조 성분을 넣었고 선택은 검증 우도로만 한다(R3). 남은 것: (a) $n_{\rm train}$ 민감도(kill test 판정이 훈련 표본 수에 얼마나 의존하는가 — $10^3$/$10^5$ 추가 실행은 K2 발동 시에만), (b) Kronecker 구조가 참 prior와 **같은 족**이라 (b)에 유리한 편향이 있는지(참 prior 성분이 정확히 Kronecker이므로: 이는 GMM에 유리한 쪽 = 우리 논지에 보수적이지만, 논문 서술에서는 명시해야 함), (c) 실제 채널 dataset(CDL 등)에서는 이 구조 이점이 사라지는가.
 - **Q-36 (열림, 낮음 — 서술):** prior 정의의 각도 규약. D-19의 "±60°"가 전기각/물리각에서 다른 prior를 준다 [정확, 세션 6]. 논문·노트 전반에서 $\psi$(전기각)와 $\theta$(물리각)를 항상 구분해 적는다. 기존 `steer_corr(n, rho, psi)` 호출부(exp_0920, exp_0921 C, exp_0923/0924)는 모두 전기각 기준이며 재해석 불필요.
+
+- **Q-35 갱신 (2026-09-18, 세션 7, workspace GPT) [측정]:**
+  판독 ① 완료. b*=Hgmm-kron(U/P: K64, S: K32; Nr=4/8 공통).
+  Gaussian 대비 test KL 96.46~98.45% 감소로 현재 testbed·ntrain=10000에서
+  "KL 미개선인 약한 (b)" 우려는 해당하지 않음. R3 유지.
+  학습 표본 수 민감도·Kronecker 구조 일치 이점·CDL에서의 성립 여부는
+  미해결이므로 Q-35는 열림 유지. K 판정은 하지 않음.
