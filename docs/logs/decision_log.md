@@ -262,6 +262,23 @@ posterior denoiser 3종: **X** 정확 mixture(GMM 전용; 이산화 오차만 �
 ## [2026-09-18] D-17 상태 갱신 — **보류 유지.** v1 표집기는 사전 기준 미달로 기각(ablation·회귀용으로 코드 유지). v2는 exp_0924 판독 후 재심.
 exp_0924 사전 등록 기준: (i) `PSinit-K16/K128` ≈ `PS-M32`(NMSE ±1%p, KL/N ±10%) → 마지막 수준 corrector 무편향. (ii) `RA2X-L12`가 $T_p=2$에서 NMSE ≤ exact×1.06 → 이산화는 $L\le12$로 충분. (iii) **`RA2J-L12`가 $T_p=2$에서 D13+D14 대비 NMSE 격차의 ≥2/3 회수 + KL/N ≤ PS-M32×1.5 + KL 99% 분위 ≤ D13+D14의 1/3** → D-17 승인 제안 + turbo 통합. (iv) `RA2S`가 (iii)을 충족하면 bridge에서 Jacobian 제거. (iii) 미달·(ii) 충족이면 손실은 Gaussian guidance 근사 → 다중 가설/SMC류 검토 또는 R-A 포기 후 F6을 "정량화된 한계"로만 보고.
 
+## [2026-09-18] 기록 — exp_0924 판독 (사용자 실행, 커밋 06c28ca; GMM 4x4 첫 패스, n=1000, exp_0923과 paired, 30초)
+**사전 등록 기준 대비 [측정].** v1 회귀: 전 셀 $0.0$ ✔. (i) `PSinit-K16/K128` ≈ `PS-M32`(NMSE +2.0~3.9% vs +2.1~3.5%, KL/N ±3%) ✔ → **마지막 수준 corrector는 무편향.** (ii) `RA2X`: $T_p=2$ NMSE +5.1/+5.0/+3.6%(L12), **L6(NFE 5)에서도 +5.1/+4.9/+3.9%**, KL/N .094/.118/.136 ≈ PS(.090/.114/.126), w_true .665/.751/.766 ≈ exact ✔ → **bridge 구조·이산화는 문제가 아님; 정확 posterior denoiser가 있으면 5스텝이면 충분.** (iii) **미달 — 그것도 one-shot보다 나쁨.** `RA2J-L12` $T_p=2$: NMSE **+19.2/+20.7/+19.7%** vs D13+D14 +14.7/+17.4/+15.1%; KL/N .239/.260/.268(one-shot .382/.380/.358보다는 낮음), KL 99% .55/.58/.63 vs 1.26/1.38/1.43(비 .42~.44 > 기준 1/3), **KLc/N(site clip 왕복 후) .402/.513/.547 vs one-shot .382/.380/.358 — 수신기가 보는 값으로는 one-shot보다 나쁨**; clip 94~95%. $L$=24(+18.0/+19.6/+18.9), $K_{\rm fin}$=8, $M$=128(+16.7/+18.3/+17.4) 모두 무효. $T_p=3$: +14.9/+24.7/+23.8 vs one-shot +8.4/+10.3/+11.4. aniso: +10.6/+4.0/+3.4 vs +2.1/+0.3/+0.1. (iv) `RA2S`는 J보다 더 나쁨(+24~26%) ✘.
+**부수 측정(Q-31).** 표본 모멘트 site의 clip 손실: PS-M32 KL→KLc는 $T_p=2$에서 작지만(.114→.122) aniso 고SNR에서 큼(.084→**.502** at 18 dB; exact 자신은 .0006). v1 `RA-M32-L24-K4`의 KLc는 $T_p=2$ .221/.374/.452 — 12·18 dB에서 one-shot(.380/.358)보다 낫지 않음.
+**결론[측정 + 추론].** 손실 전부가 **Gaussian(모멘트 정합) guidance 근사**에서 나온다: X(정확 mixture posterior denoiser)는 5스텝으로 PS에 도달, J는 one-shot보다 나쁨. J가 쓰는 정보 = 한 점 $(\mathbf z,\nu)$에서의 등방 denoiser 평균 + Jacobian = D-14와 같은 정보 → 비등방 likelihood 하의 성분 evidence를 복원할 수 없음. 즉 **F6은 one-shot 인터페이스의 결함이 아니라 "등방 score + 2차(Gaussian) closure"의 정보적 한계**이며, 제거하려면 (a) 비등방 likelihood의 tilted 모멘트를 폐형식으로 주는 prior 표현(GMM) 또는 (b) 고비용 표집(v1: NFE 439×32 chain에서 NMSE 격차 40~56% 회수, 학습 score에서는 오차 누적 추가)이 필요. (정리 아님; GMM testbed 4x4 첫 패스에서의 측정.)
+
+## [2026-09-18] D-17 철회(제안 → 기본값 적용, reversible) — R-A(표집 기반 Module H) 중단
+이유: (1) v1은 사전 기준 미달(exp_0923), v2-J/S는 one-shot보다 나쁨(exp_0924) — 사전 등록된 분기 "(iii) 미달·(ii) 충족 → R-A 포기 후 F6을 정량화된 한계로 보고"에 해당. (2) v2-X가 작동하려면 mixture posterior denoiser가 필요 = 매개변수 prior가 있다는 뜻이고, 그러면 표집 없이 `ep_site`가 정확 site를 준다. (3) SMC/twisted류는 밀도 또는 추가 근사가 필요하고 학습 score의 오차 누적까지 고려하면 $N=16$~$32$ 영역에서 H-GMM(D-18)을 이길 전망이 낮음[추측]. 유지: `t2_ra_sampler.py`(항등식·RB 추정기·사다리 = F6 분석 도구), noise-splitting 항등식 [정확], 오식별 꼬리 측정. 억지로 (L,K,M)을 키워 맞추지 않는다.
+
+## [2026-09-18] D-18 (사용자 승인 "H는 넣자") — Module H-GMM: 채널 dataset에 GMM 적합 → 정확 mixture EP site (`exact_prior=True`)
+baseline 겸 대안 Module H. 구현: `GMMPrior.fit`(EM, zero-mean 복소 성분, full covariance, $K\in\{16,32,64\}$) → `RouteA(mode='colored', exact_prior=True, feedback='posterior', beta=0.7)`(기존 `exactEP_pf` 경로 그대로). prior art: GMM 기반 CME = Koller–Fesl–Turan–Utschick, IEEE TSP 2022 [V: 초록]; 우리 것은 그것을 bilinear turbo 수신기의 EP site로 쓰는 것(선행 여부 VERIFY — 10-01 sweep 최우선).
+
+## [2026-09-18] D-19 (제안, 승인 대기) — 중단 기준(kill test)을 M2 학습 **이전**에 실행: exp_0925
+**동기(사용자 질문: "baseline을 못 넘으면 중단이 맞지 않나").** 동의. 단 (i) 어느 baseline을 (ii) 어떤 여유로 (iii) 무엇을 중단하는지 사전 등록한다. score network를 학습하기 전에 판정 가능: **정확 score**는 어떤 학습 score보다도 유리한 상한이므로, "정확 score + one-shot 인터페이스(D13+D14)"가 "유한 표본에 적합한 GMM + 정확 site"를 못 이기면 score 분기는 학습 없이 기각된다.
+**설계.** 참 prior = 연속 각도 혼합(송·수신 각도 $\psi_t,\psi_r$ 연속 균등 → 조밀 격자 $K_{\rm true}=32\times32$ 성분 GMM으로 *정의*; 유한 $K$ GMM으로 정확 표현 불가). 두 종류: **U**(전 각도 균등; 앙상블 공분산 $=\mathbf I$ → 비Gaussian prior에 최대로 유리), **S**(섹터 ±60° 제한; 앙상블 공분산이 정보를 가짐 → 현실 쪽). arm(모두 D-15+LOO, $\beta=0.7$, 16반복): (a) `lmmseC_pf` 표본 공분산 Gaussian prior, (b) `Hgmm-K{16,32,64}` ($N_{\rm train}=10^4$ 표본 EM 적합), (c) `Hscore-exact` 참 prior의 정확 score + D13+D14, (d) `exactEP-true` 참 prior 정확 site(모든 방법의 상한), pilot-only·genie. 영역: 4x4 $T=28$ $T_p=2$(exp_0921 C와 비교 가능) + **8x4 $T=16$ $T_p=2$(headline)**, n≥640.
+**기준(사전 등록).** **K1:** prior S·headline 영역에서 상한 (d)가 (a) 대비 SNR@BLER 0.1 이득 < 0.5 dB → "학습 prior" 기여 무효 → **T2를 현 설계대로는 중단 제안**(D-15+LOO·regime 결과는 T1로 이관, lemma는 note로 보존). **K2:** (c)가 (b, $K$=32)를 paired sign test($p<.05$, SNR 3점 중 2점)로 이기지 못함 → **score prior 분기(M2 score model, D-13/D-14 묶음의 기여 ②) 중단**; 남는 선택지 = "GMM-prior EP turbo 수신기"로의 전환인데 이는 Utschick 그룹 선행 조사 후에만 결정. **K3:** (c) > (b) → M2 진행.
+**사전 예상[추측].** K2 발동 가능성이 높다: 무선 채널은 대규모 기하 조건부 Gaussian이라 GMM이 구조적으로 맞고, 비등방 likelihood의 tilted 모멘트가 폐형식인 반면 score prior는 F6을 안고 간다. score/diffusion prior의 자리는 GMM 적합이 불가능한 고차원(대규모 배열·광대역)일 가능성 — 8x4 짧은 패킷 영역 밖.
+
 ---
 
 ## Experiment log
@@ -407,11 +424,16 @@ exp_0923 R-A first pass (Q-27/Q-29) | 상태: **완료(2026-09-18, n=1000, 커�
 ```
 
 ```
-exp_0924 R-A v2 bridge ladder (Q-29) | 상태: **코드 전달, 실행 대기** | 목적: v1 표집기 미달의 원인 분리 + v2 bridge(posterior diffusion + 정확 handover) 평가
+exp_0924 R-A v2 bridge ladder (Q-29) | 상태: **완료(2026-09-18, n=1000, 커밋 06c28ca, 30초) — (i)(ii) 충족, (iii)(iv) 미달 → D-17 철회(위 09-18 항목)** | 목적: v1 표집기 미달의 원인 분리 + v2 bridge(posterior diffusion + 정확 handover) 평가
 설정: exp_0923과 같은 GMM·같은 첫 패스 데이터(data rng [20260923, case, snr, trial] -> exp_0923 행과 paired), 경우 Tp3/Tp2/aniso x SNR{6,12,18}, n=1000, M=32, nu_1=10.
       사다리: exact, D13+D14, PS-M32, RA-M32-L24-K4(v1, exp_0923과 같은 표집 시드 -> 회귀), PSinit-K{16,128}, RA2X-L{6,12,24}, RA2J-L{6,12,24}, RA2S-L{12,24}, RA2J-L12-K8, RA2J-L12-M128.
 출력: NFE, nJ, NMSE(+% vs exact), w_true, P_map, KL/N(mean/median/99%), KLc/N(site clip 1e-6 왕복 후 = 수신기가 보는 값), covErr, clip%, v1 회귀 오차. raw: exp_0924_raw/<case>_snr<S>.npz
 명령: python exp_0924_ra2_bridge.py | tee exp_0924_results.txt      코드: t2_ra_sampler.py(v2 추가분; v1 부분 무변경), exp_0924_ra2_bridge.py
 사전 검산(Claude): v2-X/J Gaussian 폐형식 <=5e-14(L=2 포함); v1 회귀 <=1e-14; n=2 smoke(수치 폐기). 판독 기준: 위 D-17 상태 갱신 항목 (i)~(iv).
+```
+
+```
+exp_0925 kill test (D-19) | 상태: **설계만, 코드 미작성(다음 세션)** | 목적: score prior 분기와 T2 현 설계의 중단 여부를 M2 학습 전에 판정
+설정·arm·기준: 위 D-19 항목. 필요한 코드: GMMPrior.fit(EM), 연속 각도 참 prior(K_true=1024, prior U/S), 러너 세트 "K"(Nr 4/8, T 28/16, Tp=2, SNR 3점+), ep_site의 batched inverse(성분 1024개).
 ```
 
