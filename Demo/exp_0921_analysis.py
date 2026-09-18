@@ -1,4 +1,4 @@
-"""exp_0921 analysis (measurement convention M-1).  usage: python exp_0921_analysis.py [A|B|all]   -> stdout + exp_0921_results.txt (append per set)
+"""exp_0921 analysis (measurement convention M-1).  usage: python exp_0921_analysis.py [A|B|all]   -> stdout + exp_0921_results_{which}.txt (overwritten per run)
 Reads exp_0921_raw/*.npz, concatenates the chunks of each point in skip order (warns if the chunk sequence has holes).
 Iteration indices: '@8' = trajectory index 7, '@16' = index 15 (same run).
 Failure classes of blocks that fail at @16, from the BER trajectory of iterations 11..16 (operational definition, exp_0921):
@@ -134,4 +134,4 @@ if __name__ == "__main__":
     which = sys.argv[1] if len(sys.argv) > 1 else "all"
     if which in ("A", "all"): analyse_A()
     if which in ("B", "all"): analyse_B()
-    with open(os.path.join(HERE, "exp_0921_results.txt"), "a") as f: f.write("\n".join(_out) + "\n")
+    with open(os.path.join(HERE, f"exp_0921_results_{which}.txt"), "w") as f: f.write("\n".join(_out) + "\n")
