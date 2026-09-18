@@ -492,3 +492,23 @@ D-19 및 R1~R7 변경 없음. K1/K2/K3 판정 없음.
 exp_0925_results.txt, exp_0925_K.txt 및 raw 수신기 데이터 미열람.
 
 상세: [fit-only 검산표](../../Demo/exp_0925_fit_table.md).
+
+## [2026-09-18] D-19 보정 R8 (사전 등록, 결과 미열람 상태에서 확정) — b* 구조 일치에 따른 해석 비대칭
+
+a968f33에서 누락되어 보정 기록. 판독 ②~⑥ 착수 전이며 exp_0925_results.txt 미열람 상태에서 확정되었다.
+
+근거: 판독 ①에서 b*가 Hgmm-kron으로 확정됨(U/P K64, S K32). 추가로 raw npz 9개 셀×prior의
+meta|bstar/meta|kron_K를 교차 확인한 결과 전부 Hgmm-kron으로 fit 재계산과 일치 — 수신기 실행이
+쓴 b*와 판독 대상 b*가 동일하다(workspace: Claude, 메타데이터만 열람, 수신기 결과 미열람).
+세션 6 §1.2의 참 prior는 성분이 정확히 Kronecker이므로 b*는 참 prior와 같은 족이다.
+Q-35(b)가 가설로 적어둔 구조 일치 편향이 실현된 상태가 되었다.
+
+- (c)가 b*를 이기면: 구조적으로 유리한 baseline을 이긴 것이므로 K3를 액면대로 받는다.
+- (c)가 b*에 지면: K2 조건을 충족하더라도 "score 분기 중단"을 곧바로 결론하지 않는다.
+  결론을 "합성 Kronecker prior에서, 구조가 일치하는 GMM baseline에 대해 우세를 보이지 못함"으로
+  한정하고, 중단 판단은 Q-35(c)(CDL 등 실제 dataset에서 구조 이점이 사라지는가)의 최소 확인
+  이후로 미룬다.
+- 단, full-covariance Hgmm-K32에 지는 경우는 이 완화를 적용하지 않는다. 구조 일치 이점이 없는
+  baseline이므로 진짜 패배로 기록한다.
+
+R1~R7 변경 없음. K1/K2/K3 판정 없음. 상세 수치: Demo/exp_0925_fit_table.md.
