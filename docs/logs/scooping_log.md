@@ -31,10 +31,15 @@
 - 2204.07122(Arvinte–Tamir) Alg. 1 원문 확인 [V]: ALD 점추정, likelihood 분모에 annealing 항, 50표본 평균을 approximate MMSE로 사용. 보정된 공분산·turbo 결합 없음.
 - **판정 변화 없음(시나리오 1 유지).** 기여 목록 영향: ③(F6 + R-A 처방)에서 표집기 자체는 prior art 조합임을 명시, 우리 것은 "EP site용 Rao-Blackwell 모멘트 + D-13/D-14와의 관계 + $\chi$ 전환 + turbo 통합".
 
+## [2026-09-18] 세션 5 메모 2 (sweep 아님; 웹 검색 1건)
+- **GMM 기반 CME** — Koller, Fesl, Turan, Utschick, "An Asymptotically MSE-Optimal Estimator Based on Gaussian Mixture Models", IEEE TSP 70:4109–4123 (2022), arXiv:2112.12499 [V: 초록]: 채널 표본에 GMM 적합 → 폐형식 CME. **감시 그룹(Utschick).** 우리 GMM testbed의 `exactEP` 기준과 같은 계산 구조 → Q-32(전략). 후속: structured covariances(arXiv:2205.03634), mixtures of factor analyzers(ACSSC 2023), **"Diffusion-based Generative Prior for Low-Complexity MIMO Channel Estimation"(arXiv:2403.03545) [V: dblp 제목만 — 원문 VERIFY]**.
+- 판정 변화 없음(시나리오 1): 위 계열은 pilot-only 채널 추정이며 부호·bilinear 결합 없음[초록 수준 확인]. 단 기여 ③의 "prior 모듈" 서술은 GMM-CME를 baseline으로 명시해야 함.
+
 ## 예정
 - [ ] 10-01 sweep 추가 키워드: `second-order Tweedie posterior covariance inverse problem`, `denoiser Jacobian covariance diffusion`, `EP bilinear tilted moments channel estimation`, `semi-blind fewer pilots than antennas turbo`.
 - [ ] 2026-10-01 전수 sweep. 특히 확인: 2604.19061 v2 여부, Wadayama–Takahashi "SC-VAMP + channel estimation / bilinear / MIMO", Segarra 그룹 coded diffusion JCESD, Choukroun–Wolf 2026 score decoder 후속.
 - [ ] 동반 노트 Phase 0 항목: `plug-and-play decoder`, `code-aware denoiser`, `HMM denoiser diffusion`, `structured prior Tweedie` 검색 (미실시).
 - [ ] 10-01 sweep 추가 키워드(세션 4): `pilot contamination-free semi-blind fewer pilots than transmit antennas turbo`, `score-based posterior sampling channel estimation turbo decoding`, `isotropic denoiser interface VAMP rank-deficient`, `eigen-aligned pilots correlated MIMO joint estimation decoding`.
 - [ ] 10-01 sweep 추가 키워드(세션 5): `SNIPS channel estimation`, `diffusion posterior sampling expectation propagation moments`, `Rao-Blackwellized Tweedie posterior covariance`, `noisy inpainting diffusion MIMO channel pilots fewer than antennas`, `annealed Langevin joint channel estimation decoding coded`. 원문 확인: SNIPS 본문, 2405.13712의 [22–25], TMPD/ΠGDM [M].
+- [ ] 10-01 sweep 추가(세션 5-2): `Gaussian mixture model channel estimator turbo / joint decoding / semi-blind`, `Utschick diffusion prior channel estimation` (2403.03545 원문·후속), `moment matching posterior sampling wireless`.
 

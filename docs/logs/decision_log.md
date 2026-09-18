@@ -244,6 +244,24 @@ $\mathbf H_{\rm est}\leftarrow\mathbf H_{\rm est}+\alpha_0r^i\cdot\frac{(\mathbf
 ## [2026-09-18] D-17 (제안, 승인 대기 — exp_0923 판독 후 확정) — Module H의 R-A 경로: noise-splitting PC 표집 + Rao-Blackwell 모멘트, $\chi$가 큰 초기 패스에서만
 제안: `hsite='ra'`: $(\mathbf m,\mathrm{Cov})$ ← R-A, site $\boldsymbol\Lambda=\mathrm{Cov}^{-1}-\mathbf G$, $\boldsymbol\eta=\mathrm{Cov}^{-1}\mathbf m-\mathbf b$(D-14·`ep_site`와 같은 하류 인터페이스). $\chi\le\chi_0$이면 기존 D-13+D-14(비용 0). 기본 $(M,L,K)$와 $\chi_0$는 exp_0923 + turbo 통합 실험(세트 C, $T_p=2$, n≥640, 목표 = `exactEP_pf` 재현) 후 결정. 코드: `Demo/t2_ra_sampler.py`(신규; `t2_route_a.py`는 무변경).
 
+## [2026-09-18] 기록 — exp_0923 판독 (사용자 실행, 커밋 6f19360; GMM 4x4 첫 패스, n=1000, 25초) + raw 재분석
+**사전 등록 기준 대비 [측정].** (1) $T_p=4$ 전 행 일치 ✔. (2) 정확 표집기 `PS-M32`: NMSE exact 대비 +2.1~3.5%($T_p=2,3$ 전 점; 기준 ≤+4%) ✔, KL/N $T_p=2$ .090/.114/.126 vs D13+D14 .382/.380/.358 ✔; `PS-M128` +0.2~1.1%, KL/N .005~.023; 정확 표집기 가중 = exact $\le8\times10^{-12}$. **→ 항등식 + Rao-Blackwell 추정기는 작동하며 $M=32$면 Monte Carlo 바닥이 충분히 낮다.** (3) **미달.** `RA-M32-L24-K4`(NFE 123): $T_p=2$ NMSE +10.5/+13.7/+13.6% vs D13+D14 +14.7/+17.4/+15.1% → 격차 회수 29/21/10%(기준 ≥2/3); $T_p=3$ 12·18 dB에서는 D13+D14보다 **나쁨**(+11.6/+15.9 vs +10.3/+11.4%). `RA-M32-L48-K8`(NFE 439)도 51/56/40% → 미달. KL/N은 PS-M32의 1.65배(L24K4)·1.2~1.3배(L48K8)로 KL 기준만 충족. **→ 사전 규칙대로 "표집기 재설계".** (4) `-J1` = all-J(KL/N 차이 0~4%) ✔ → **Rao-Blackwell 단계의 Jacobian은 chain 1개로 충분.**
+**그 밖의 측정.** (a) $M=8$은 공분산 불능($T_p=2$ KL/N .85~8.7). (b) aniso($\chi\approx2.5$~$3$): D13+D14가 이미 +0.1~2.1%, KL/N .0006~.016 — $M=32$ 표집(+2.3%, KL/N .06~.08)이 오히려 나쁨 → **$\chi$ 전환의 근거: $\chi\lesssim3$이면 one-shot.** aniso에서 RA ≈ PS(.0732 vs .0735) → weak 좌표 경로는 정상, 편향은 **null 공간 표집**에 국한. (c) v1 편향은 SNR과 함께 커지고 $(L,K)$에 느리게 수렴; `w_true` .56~.59(L24K4), .61~.66(L48K8) vs exact .67~.77; $P_{\rm map}$은 exact에 근접(.73~.81 vs .76~.84); site clip 86~92%(L24K4; exact 40~47%) = 과분산의 서명.
+**raw 재분석 (one-shot 인터페이스가 참 성분을 맞혔는지로 조건화).** $T_p=2$에서 one-shot $P_{\rm map}$ 정답률 41~45%. *정답군* NMSE: exact .220~.251 / D13+D14 .229~.261 / PS-M32 .226~.256 — **D13+D14 ≈ exact.** *오답군*: exact .546~.586 / **D13+D14 .664~.696(+19~22%)** / PS-M32 .562~.604 / RA-L48K8 .591~.629. KL/N 분위(50/90/99%), 12 dB: D13+D14 .23/**.94/1.38**, PS-M32 .11/.16/.23, RA-L48K8 .14/.21/.30. 부호 검정($T_p=2$ 12 dB): D13+D14 vs PS-M32 579:421($p=7\times10^{-7}$), vs RA-L48K8 544:456($p=.006$); $T_p=3$은 전부 동률(차이는 꼬리에서만).
+**해석.** F6의 손실은 "평균적으로 조금 나쁨"이 아니라 **성분 오식별 시의 확신에 찬 오답(무거운 꼬리)** — turbo 자기강화에 가장 위험한 형태[추측: BLER 인과는 미측정]. R-A의 가치는 꼬리 제거. v1 표집기의 편향은 전 시행에 걸친 넓은 확산(w_true 결손 .05~.15).
+**v1 편향의 원인[추측 → exp_0924에서 분리].** replacement형 bridge는 수준 $l$에서 $p(\mathbf z_u^{l}|\mathbf z_o^{l})$(잡음 섞인 관측 좌표 조건)을 표적으로 하나 올바른 표적은 $p(\mathbf z_u^{l}|\boldsymbol\upsilon)$(깨끗한 관측 조건): 성분 선택이 일어나는 굵은 수준에서 관측 정보를 과소 사용 → 성분 빈도가 확산. 마지막 수준의 corrector는 조건수 $\sim c_{\max}/\nu_L\approx470$(12 dB)~$1900$(18 dB) ($c_{\max}=7.42$)이라 $K_{\rm fin}=8$로는 교정 불가[근사].
+
+## [2026-09-18] 기록 [정확(Gaussian) + 폐형식 검증] — R-A v2 bridge: posterior diffusion + 정확 handover
+**구성.** fresh-noise 확산 $\mathbf z^l=\mathbf h+\mathbf n_l$, $\mathbf n_l\sim\mathcal{CN}(\mathbf 0,\nu_l\mathbf I)$ ($\mathbf y$와 독립). [정확] $p(\mathbf z^{l+1}|\mathbf z^l,\mathbf h)=\mathcal{CN}(a\mathbf z^l+(1-a)\mathbf h,\ \nu_{l+1}(1-a)\mathbf I)$, $a=\nu_{l+1}/\nu_l$ ⇒ $p(\mathbf h|\mathbf z^l,\mathbf y)\approx\mathcal{CN}(\mathbf m_+,\mathbf S_+)$이면
+$$\mathbf z^{l+1}\,|\,\mathbf z^l,\mathbf y\sim\mathcal{CN}\big(a\mathbf z^l+(1-a)\mathbf m_+,\ \nu_{l+1}(1-a)\mathbf I+(1-a)^2\mathbf S_+\big).$$
+posterior denoiser 3종: **X** 정확 mixture(GMM 전용; 이산화 오차만 분리), **J** $p(\mathbf h|\mathbf z^l)\approx\mathcal{CN}(D,\nu\mathbf J)$ × 정확 likelihood: $\mathbf S_+=(\mathbf I+\boldsymbol\Sigma\mathbf G)^{-1}\boldsymbol\Sigma$, $\mathbf m_+=(\mathbf I+\boldsymbol\Sigma\mathbf G)^{-1}(D+\boldsymbol\Sigma\mathbf b)$, $\boldsymbol\Sigma=\nu\mathbf J$ (**= 매 스텝의 D-14 연산**), **S** $\boldsymbol\Sigma=\nu\frac{\bar c}{\bar c+\nu}\mathbf I$(Jacobian 없음).
+**handover [정확: clamp·null 좌표].** $\nu_L=1/g_{\max}$에서 null 좌표의 $\mathbf e_u$는 관측 잡음의 일부가 아니므로 fresh-noise 표본의 $\mathbf z_u$ 주변분포 = $\pi'_{\nu_L}$의 $\mathbf z_u$ 주변분포; clamp 좌표는 $\upsilon$로 설정. weak 좌표만 근사 → 정확 표적 corrector $K_{\rm fin}$ 스텝으로 수리. 이후 Rao-Blackwell 모멘트는 v1과 동일.
+**검증(폐형식, Monte Carlo 없음).** Gaussian prior(K=1): X·J의 $(\mathbf m_+,\mathbf S_+)$ = 정확 $p(\mathbf h|\mathbf z,\mathbf y)$ 모멘트 $\le4\times10^{-14}$; ancestral 재귀로 전파한 $\mathbf z^l$의 (평균, 공분산) = 정확 noised posterior $\mathcal{CN}(\mathbf m_\pi,\mathbf S_\pi+\nu_l\mathbf I)$, **모든 수준·$L=2$ 포함** $\le5\times10^{-14}$ ⇒ **v2-J는 Gaussian prior에서 스텝 크기와 무관하게 정확**(v1에는 없던 성질). v1 회귀: exp_0924의 `RA-M32-L24-K4` 행이 exp_0923 raw와 $\le10^{-14}$ 일치(n=2 smoke).
+**우리 것 / prior art.** J형은 moment-matching posterior sampling 계열(arXiv:2405.13712 §4.2 [V: 발췌])과 같은 근사족 — prior art. 우리 것: (a) 그 위에 noise-splitting 정확 handover + Rao-Blackwell 모멘트를 붙여 **EP site용 보정 모멘트**로 쓰는 것, (b) "매 스텝 = D-14 연산, one-shot D-13+D-14 = 단일점" 이라는 식별, (c) 오식별 꼬리(조건부 분석)라는 F6의 실패 양상 측정.
+
+## [2026-09-18] D-17 상태 갱신 — **보류 유지.** v1 표집기는 사전 기준 미달로 기각(ablation·회귀용으로 코드 유지). v2는 exp_0924 판독 후 재심.
+exp_0924 사전 등록 기준: (i) `PSinit-K16/K128` ≈ `PS-M32`(NMSE ±1%p, KL/N ±10%) → 마지막 수준 corrector 무편향. (ii) `RA2X-L12`가 $T_p=2$에서 NMSE ≤ exact×1.06 → 이산화는 $L\le12$로 충분. (iii) **`RA2J-L12`가 $T_p=2$에서 D13+D14 대비 NMSE 격차의 ≥2/3 회수 + KL/N ≤ PS-M32×1.5 + KL 99% 분위 ≤ D13+D14의 1/3** → D-17 승인 제안 + turbo 통합. (iv) `RA2S`가 (iii)을 충족하면 bridge에서 Jacobian 제거. (iii) 미달·(ii) 충족이면 손실은 Gaussian guidance 근사 → 다중 가설/SMC류 검토 또는 R-A 포기 후 F6을 "정량화된 한계"로만 보고.
+
 ---
 
 ## Experiment log
@@ -377,7 +395,7 @@ exp_0922 interface (Q-27) | 상태: **완료(2026-09-18, n=2000, 커밋 2a276fe,
 ```
 
 ```
-exp_0923 R-A first pass (Q-27/Q-29) | 상태: **코드 전달, 실행 대기** | 목적: 등방 score만 쓰는 annealed posterior sampling(R-A)이 exact-EP 모멘트를 어느 비용에서 회수하는가
+exp_0923 R-A first pass (Q-27/Q-29) | 상태: **완료(2026-09-18, n=1000, 커밋 6f19360, 25초) — 기준 (1)(2)(4) 충족, (3) 미달 → 표집기 재설계(위 09-18 항목)** | 목적: 등방 score만 쓰는 annealed posterior sampling(R-A)이 exact-EP 모멘트를 어느 비용에서 회수하는가
 설정: GMM(exp_0920 prior, rho_c=0.7), 4x4, 첫 패스. 경우: Tp4/Tp3/Tp2(DFT), aniso(전력 1 파일럿 2개 + -10 dB 파일럿 2개; weak 좌표 경로 점검) x SNR{6,12,18}, n=1000.
       방법(같은 (H,W)에 paired): exact, D13+D14, LMMSE(I), PS-M{8,32,128}(정확 표집기 = M-chain Monte Carlo 바닥), RA-M{M}-L{L}-K{K}: (32,12,2),(32,24,4),(32,48,8),(8,24,4),(128,24,4),
       -J1(Jacobian 1개만). delta=0.3, nu_1=10, K_fin=2K. 시드: data rng [20260923, case, snr, trial], sampler rng [..., method] (jobs/chunk 무관 재현).
@@ -386,5 +404,14 @@ exp_0923 R-A first pass (Q-27/Q-29) | 상태: **코드 전달, 실행 대기** |
 사전 검산(Claude, Monte Carlo 아님): noise-splitting 항등식 폐형식 <=7e-13; 정확 표집기 가중 = exact <=5e-14; Tp4 전 행 일치; n=2 smoke(수치 폐기).
 판독 기준(사전 등록): (1) Tp4 전 행 일치. (2) PS-M32의 NMSE <= exact x 1.04, KL/N << D13+D14. (3) RA-M32-L24-K4가 Tp2에서 D13+D14 대비 NMSE 격차의 >=2/3 회수하고 KL/N이 PS-M32의 2배 이내 -> turbo 통합 진행;
       미달이면 (L,K) 증량 행(RA-M32-L48-K8)로 판단, 그것도 미달이면 표집기 재설계. (4) -J1 행이 all-J 행과 KL/N 10% 이내면 Jacobian 1개 채택.
+```
+
+```
+exp_0924 R-A v2 bridge ladder (Q-29) | 상태: **코드 전달, 실행 대기** | 목적: v1 표집기 미달의 원인 분리 + v2 bridge(posterior diffusion + 정확 handover) 평가
+설정: exp_0923과 같은 GMM·같은 첫 패스 데이터(data rng [20260923, case, snr, trial] -> exp_0923 행과 paired), 경우 Tp3/Tp2/aniso x SNR{6,12,18}, n=1000, M=32, nu_1=10.
+      사다리: exact, D13+D14, PS-M32, RA-M32-L24-K4(v1, exp_0923과 같은 표집 시드 -> 회귀), PSinit-K{16,128}, RA2X-L{6,12,24}, RA2J-L{6,12,24}, RA2S-L{12,24}, RA2J-L12-K8, RA2J-L12-M128.
+출력: NFE, nJ, NMSE(+% vs exact), w_true, P_map, KL/N(mean/median/99%), KLc/N(site clip 1e-6 왕복 후 = 수신기가 보는 값), covErr, clip%, v1 회귀 오차. raw: exp_0924_raw/<case>_snr<S>.npz
+명령: python exp_0924_ra2_bridge.py | tee exp_0924_results.txt      코드: t2_ra_sampler.py(v2 추가분; v1 부분 무변경), exp_0924_ra2_bridge.py
+사전 검산(Claude): v2-X/J Gaussian 폐형식 <=5e-14(L=2 포함); v1 회귀 <=1e-14; n=2 smoke(수치 폐기). 판독 기준: 위 D-17 상태 갱신 항목 (i)~(iv).
 ```
 
