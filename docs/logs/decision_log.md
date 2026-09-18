@@ -1,0 +1,304 @@
+# T2 Decision Log
+
+> 형식: `[날짜] D-번호 결정 / 이유 / 대안 / 근거`. 되돌릴 수 있는 결정은 "(reversible)" 표시. 표기: 기술 용어 영어, 수식 LaTeX. 상태: 정확 / 근사 / 추측.
+
+---
+
+## [2026-09-15] D-01 — 분산 규약: 복소 per-entry로 통일, Tweedie는 Wirtinger 형
+
+**결정.**
+1. 복소 확률변수에 붙는 모든 분산 기호($\sigma^2$, $\sigma_t^2$, $v_n$, $\tau$, $\mathbf C^{\setminus n}$)는 **per complex entry**: $w\sim\mathcal{CN}(0,\sigma^2)\Leftrightarrow\mathbb E|w|^2=\sigma^2$, real/imag 각각 $\sigma^2/2$. (MIMO 모델 $\mathbf W\sim\mathcal{CN}(0,\sigma^2\mathbf I)$, Sionna `no`, 3GPP $N_0$와 일치.)
+2. 복소 Tweedie: $\mathbb E[\mathbf x\mid\tilde{\mathbf x}_t]=\tilde{\mathbf x}_t+\sigma_t^2\,\nabla_{\tilde{\mathbf x}_t^*}\log p_t(\tilde{\mathbf x}_t)$, $\nabla_{\mathbf z^*}=\tfrac12(\nabla_{\mathbf z_{\rm r}}+j\nabla_{\mathbf z_{\rm i}})$. 앞에 계수 2 없음. 실수 stacking 등가형: 실수 차원당 분산 $\sigma_t^2/2$, $\hat{\mathbf x}_{\mathbb R}=\tilde{\mathbf x}_{\mathbb R}+\tfrac{\sigma_t^2}{2}\nabla\log p_t$.
+3. Onsager divergence는 $\partial\hat x_n/\partial r_n$ (not $\partial/\partial r_n^*$) $=v_n/\tau$. 따라서 variance-ratio $\alpha=v_{\rm post}/v_{\rm in}$는 실수·복소 표현 모두에서 정규화 divergence와 같다 (정확 MMSE denoiser일 때).
+4. 채널 신뢰도 규칙: $L_c=2/(\text{constellation 축 방향 실수 노이즈 분산})$. 실수 모델: $L_c=2/\sigma^2$ (핸드오프 표기 그대로). 복소 embedding(per-entry $\sigma^2$): BPSK는 $\mathrm{Re}\{\tilde x\}$에 $L_c=4/\sigma^2$. 두 값 모두 $4E_s/N_0$ ($N_0$ per complex entry). 코드: Sionna `no`에 대해 `Lc = 4/no`.
+5. Lemma는 실수 모델로 진술($L_c(t)=2/\sigma_t^2$ 문자 그대로), 복소 corollary($L_c(t)=4/\sigma_t^2$)를 붙인다. 복소 수신기에서 lemma 호출 시 $\sigma_t^2\leftarrow\tau_t/2$.
+6. 포트폴리오 conventions file(README §3.5)의 한 줄을 다음으로 수정 제안: "$L_c=2/\sigma^2$ (real) $=4/\sigma^2$ (complex per-entry) $=4E_s/N_0$".
+
+**이유.** 핸드오프 §2는 $\mathbf W\sim\mathcal{CN}(0,\sigma^2)$(복소 per-entry)와 $L_c=2/\sigma^2$(실수 관례)를 같은 기호로 쓰고 있어 BPSK-on-complex에서 factor 2 충돌. 실험 exp_0915 T4: $L_c=4/\sigma_c^2$이면 brute force와 $10^{-15}$ 일치, $L_c=2/\sigma_c^2$이면 $\sigma_c^2=3$에서 최대 오차 $0.495$.
+**대안.** 실수 차원당 통일(기각: MIMO 모델·Sionna·VAMP 메시지 분산과 충돌).
+**근거.** exp_0915 (T4, cplx Tweedie 오차 $\le 2\times10^{-9}$, 유한차분 정밀도).
+
+---
+
+## [2026-09-15] D-02 — arXiv:2604.19061 판정: 시나리오 1 ("proceed as planned")
+
+**세 답(원문 근거).**
+- (i) 채널: **알려진** linear mixing $\mathbf H\in\mathbb R^{M\times N}$ (i.i.d. $\mathcal N(0,1/M)$; 실험은 $32\times32$ block-diagonal) + **알려진** component-wise nonlinearity $f=\tanh$. Eq. (1)–(2) §II-B; Module C가 $\mathbf H^\top\mathbf H$를 직접 사용 (eqs. (16)–(17) §III-C1); §IV-B Fig. 4 caption. 채널 추정·파일럿·bilinear 언급 없음 (원문 없음).
+- (ii) 학습된 채널 prior: **없음**. Prior module(B)은 LDPC code constraint $p_X$ (§III-C3). "learned score"는 likelihood module A에서 $f$가 unknown일 때의 가능성으로만 언급(§III-C2 끝, §V future work) — 구현 없음.
+- (iii) Denoiser: **LDPC BP만** (§III-C3, eqs. (23)–(24); Kaira BP, 20 inner iter). BCJR/trellis/convolutional 없음 (원문 없음). 원문 스스로 "BP 출력 ≠ true MMSE $\mathbb E[\mathbf x\mid\mathbf r_x^{\rm in}]$", variance-ratio $\alpha^B$는 surrogate라고 명시(§III-C3).
+
+**잔여 novelty.** (i)+(ii)+(iii)+(iv) 유지. 단 (ii)의 문장을 수정: "$t\leftrightarrow L_c$ 대응" 자체는 원문 §III-C3의 $L_i^{\rm in}=2r_{x,i}^{\rm in}/v_x^{\rm in}$과 고전 turbo에 이미 있음. 우리 것은 (a) trellis에서 decoder 출력이 **정확한** Tweedie denoiser이자 code prior의 score라는 lemma, (b) Onsager 항이 posterior variance로 **정확**(원문은 BP surrogate), (c) diffusion 시간축=$L_c$ 축의 annealing 해석과 message-variance 유도 스케줄.
+
+**차별화 문장(확정).** "2604.19061은 known $\mathbf H$·known $f$·BPSK·LDPC-BP denoiser이며 채널 추정, 파일럿, 학습된 prior, trellis 정확성 중 어느 것도 다루지 않는다."
+**추가 관찰.** 원문 §I·§III-C3은 "LLR subtraction은 heuristic"이라 주장하고 Fig. 3에서 moment-domain extrinsic이 LLR-domain보다 좋음(LDPC BP). 정확 BCJR에서는 LLR subtraction이 exact cavity marginal이므로 이 주장은 정확 decoder에는 적용되지 않음 → Q-04.
+**스쿠핑 위험.** 여전히 높음: §III-A "general Markov chain $X_1\to\cdots\to X_L$" 일반성 + [11]의 data-driven score learning → 채널 module 추가는 그들에게 한 걸음. 단 bilinear(unknown $\mathbf H$)는 단일 latent Markov chain이 아니므로 BiG-AMP/BAd-VAMP형 coupling이 별도로 필요(Q-08). §V future work: SE, clipping/1-bit, unknown $f$ score learning — 채널 추정 없음.
+
+---
+
+## [2026-09-15] D-03 — Lemma v0 범위 (reversible)
+
+- 포함: terminated convolutional code, BPSK ($0\mapsto+1$), 등방 실수 Gaussian $\sigma_t^2$, 정확 Log-MAP BCJR, uniform codeword prior (a priori $L_a$가 있으면 tilted prior에 대해 여전히 정확), puncturing은 erasure($L_{\rm ch}=0$)로 처리 시 정확(exp_0915 T6), bit interleaver(BPSK)는 permutation이라 무해.
+- 제외: tail-biting(circular BCJR은 근사; 정확하려면 $2^\nu$회 pass), Max-Log-MAP(exp_0915 T5: 오차 최대 0.78), turbo/LDPC(근사, M6에서 EXIT로 특성화).
+- QAM: symbol-level super-section trellis면 정확(exp_0915 T7: $10^{-15}$); bit-marginal 파이프라인은 근사(NMSE $\le3.5\times10^{-2}$, $|\Delta v|\le0.11$ at $\tau=1$). 경로 선택은 Q-02.
+
+---
+
+## [2026-09-15] D-04 — 첫 실험 부호: rate-1/2 convolutional $(133,171)_8$, $\nu=6$, terminated (default, 지도교수 승인 대기)
+
+이유: lemma가 정확히 성립하는 유일한 부호족; 핸드오프 §0 권고. LDPC는 M6.
+
+---
+
+## [2026-09-16] D-05 — Q-02 승인: QAM은 심볼 단위 super-section trellis를 주 방식으로
+
+**결정.** 심볼 단위 super-section BCJR(정확, Lemma 2)을 주 방식으로 채택; 비트 marginal 파이프라인(BICM bit metric → 비트 BCJR → product of marginals)은 ablation 전용. Interleaver 정책: symbol interleaver(또는 심볼 그룹 내부 비트 permutation)만 허용, 비트 인터리버가 심볼 경계를 넘지 않음(A7).
+**이유.** exp_0916: super-section BCJR은 brute force와 $\le7\times10^{-15}$ 일치($K=16$, 65,536 codeword 포함); 비트 파이프라인은 $(133,171)_8$·16-QAM·$\tau=1$에서 NMSE $5.2\times10^{-2}$, 심볼 최대 오차 $0.52$, $|\Delta v|$ 평균 $0.21$. rate-1/2·16-QAM에서 branch metric 수는 비트 BCJR과 동일($2^\nu\cdot4$/심볼). 사용자 승인 2026-09-16.
+**대안.** 비트 파이프라인 + 오차 보고(기각: 정확성 lemma의 payoff를 QAM에서 잃음).
+
+## [2026-09-16] D-06 — QAM 라벨링·그룹 규약 (reversible)
+
+3GPP TS 38.211 §5.1.4 Gray 식 채택(QPSK/16/64-QAM): I는 $(b_0,b_2,\dots)$, Q는 $(b_1,b_3,\dots)$; 심볼 그룹은 연속 $m$ coded bits(section 순, $q=m/n_c$ info bits/심볼). [VERIFY] Sionna `Constellation("qam", m)` 라벨링과 일치 여부(Q-13).
+
+## [2026-09-16] D-07 — Lemma v1 확정, M1-lemma 완료
+
+`lemma_decoder_score_v1.md`: Lemma 1(실수 BPSK), Corollary 1.1(복소 embedding)·1.2(puncturing, tilted prior), Lemma 2(심볼 단위 QAM: 정확 심볼 사후, 복소 Tweedie, Wirtinger Jacobian $\partial\bar x_n/\partial r_j=\tau^{-1}(\mathbb E[x_nx_j^*]-\bar x_n\bar x_j^*)$, 정확 비트 marginal), Remark 2.1(비트 파이프라인 근사 정량). 동반 노트 §8 완료 조건(정리·증명·가정 한 페이지 + $K\le20$ brute force 통과) 충족. M1 잔여: 없음. M1–M2 잔여: 채널 score 모델.
+
+---
+
+## [2026-09-17] D-08 (제안, 승인 대기) — route (a)의 골격은 EP/VAMP형 3-module, BiG-AMP형은 baseline (ii)
+
+**제안.** Module D(Lemma 2 BCJR, 정확 extrinsic) / Module H(학습 score + Onsager) / Module L_X(LOO cavity + EP-LMMSE 검출) / Module L_H(가중 soft-symbol LS = EP site). 세부는 `route_a_design_v0.md` §3.
+**이유.** (1) $8\times4$, $T\le56$에서 AMP Onsager는 large-system 근사(BiG-AMP §IV의 damping 필요); (2) T1 LOO = EP cavity, 유한 $T$에서 정확; (3) 2604.19061 Module C(eq. (16)–(17))는 $\mathbf C^{\setminus n}=\mathbf 0$ 특수경우로 환원되어 비교가 깨끗함.
+**대안.** BiG-AMP Table III에 (R13)–(R14)를 BCJR로, (R15)–(R16)을 score denoiser로 바꾼 AMP형 — baseline group (ii)/(iv)로 구현(§2.3).
+
+## [2026-09-17] D-09 (제안, D-08과 함께 승인 대기) — 채널 denoiser의 Onsager 항은 정확 autodiff Jacobian trace
+
+**이유.** exp_0917 (Gaussian prior 폐형): $N=32$에서 단일 표본 Fisher 추정 $\mathrm{std}(\hat\alpha)=0.015\sim0.13$ → $v_{\rm ext}$ 상대오차 $28\sim63\%$; Hutchinson $K=16$은 $8\sim25\%$, $\nu=0.01$에서 발산. 정확 trace는 $2N_rN_t=64$회 JVP 또는 Jacobian 1회, 분산 0. Fisher 형은 (a) 대규모 배열($N\gtrsim10^3$: $6\sim13\%$), (b) 여러 블록 병렬 처리 시 배치 평균($B=8$에서 std $\sqrt8$배 감소), (c) score 모델 진단(curl 항)에 한정.
+**부수 결과 [정확].** 복소 per-entry 규약에서 SC-VAMP (4)는 $\alpha=1-\tfrac{\nu}{N}J_c$, $J_c=\mathbb E\|\nabla_{\mathbf q^*}\log p\|^2$, $N$=복소 entry 수로 그대로 성립(유도 §1.8, 수치 검증 F1 mean = 폐형).
+
+## [2026-09-17] 기록 — 원문 복사 완료
+2601.07095: (1)–(15), (24)–(26), (30)–(33), (36)–(39), (41), (44)–(48), (64)–(70), §VI-A/D. 1310.2632v3: (1)–(3), (D1)–(D3), (I1)–(I2), (R1)–(R17), (71)–(72), (76)–(77), (93)–(98). 번역 표와 함께 `route_a_design_v0.md`에 보관. 기억으로 재구성한 식 없음.
+
+## [2026-09-17] 기록 — 세션 1 종료
+`T2_session1_handoff_2026-09-17.md` 생성. 다음 채팅의 첫 질문은 D-08/D-09 승인 여부(기본값: 승인 후 exp_0918). 커서: exp_0918 → M2.
+
+---
+
+## [2026-09-16] D-08 승인 · D-09 승인 (사용자, 세션 2 첫 턴)
+
+route (a) = EP/VAMP형 3-module(D-08), 채널 denoiser Onsager = 정확 autodiff Jacobian trace(D-09). exp_0918 착수.
+**날짜 메모.** 세션 2의 실제 날짜(시스템 시각)는 2026-09-16으로 핸드오프 기준일 09-17보다 앞선다(역전). 로그는 실제 날짜로 적고, 실험 파일명 `exp_0918`은 핸드오프 커서 식별자로 유지.
+**파일 정리.** `decision_log__1_/__2_/__3_`, `open_questions__1_/__2_`는 구본·중간본. 이 파일과 `open_questions.md`가 세션 2 기준본.
+
+## [2026-09-16] D-10 (기본값 적용, reversible) — L_H likelihood site는 marginalization 형(form A); v0의 $+\sum_n d_n\,\mathrm{diag}(\boldsymbol\tau_n)$ 항은 ablation 전용
+
+**결정.** 채널 factor $f_n(\mathbf H,\mathbf x_n)=\mathcal{CN}(\mathbf y_n;\mathbf H\mathbf x_n,\sigma^2\mathbf I)$의 $\mathbf H$쪽 site는 $\mathbf x_n\sim\mathcal{CN}(\mathbf r_n,\mathbf T_n)$을 marginalize한 $\mathcal{CN}(\mathbf y_n;\mathbf H\mathbf r_n,\sigma^2\mathbf I+\mathbf H\mathbf T_n\mathbf H^H)$의 공분산을 $d_n^{-1}\mathbf I$, $d_n=(\sigma^2+\sum_j\tau_{jn}\mathbb E|h_{ij}|^2)^{-1}$로 선형화한 Gaussian: 행 precision $d_n\mathbf r_n\mathbf r_n^H$, $\mathbf G=\bar{\mathbf X}\mathbf D\bar{\mathbf X}^H$ (form A; BiG-AMP (R11)과 같은 구조; T1 §3.3의 L_X 형과 대칭).
+**이유.** v0의 $\mathbf G=\bar{\mathbf X}\mathbf D\bar{\mathbf X}^H+\sum_nd_n\mathrm{diag}(\boldsymbol\tau_n)$는 심볼 불확실성을 noise inflation($d_n$)과 precision 증가(diag 항)로 두 번 센다. diag 항은 $\exp\mathbb E_{\mathbf x}[\log f_n]$(mean-field/EM, T1의 $\boldsymbol\Sigma=\bar{\mathbf X}\bar{\mathbf X}^H+\sum_n\mathrm{diag}(\mathbf v_n)$) 형에서만 나온다. [우리, 유도; 정확(선형화 안에서)]
+**대안.** form B(v0 hybrid) — ablation. **근거.** exp_0918 T3: form B는 NMSE 1.6~2.2배, BLER 2~3배 나쁨(4점 모두).
+**부수 결과 [정확].** form A + LMMSE에서 $\boldsymbol\Sigma^{\rm post}_n\preceq\mathbf T_n$, $\mathbf G\succeq\mathbf 0$이므로 L_X·L_H의 extrinsic precision은 구성상 음이 아니다; 무한 분산(precision 0)만 clamp. Q-15의 "비정정" 사례는 심볼별 $\alpha^D>1$(pointwise $v_k>\tau^L_k$, 이진 prior에서 $r\approx0$이면 발생) 한 곳으로 좁혀짐.
+
+## [2026-09-16] 기록 — exp_0918 구현 규약 (`t2_route_a.py`)
+- 채널 side 대수는 $\mathbf h=\mathrm{vec}(\mathbf H)$(column-major, $h_{i+N_rj}=H_{ij}$)의 명시적 $N\times N$ 행렬: site $\mathbf A_n=d_n(\mathbf r_n^*\mathbf r_n^{\rm T})\otimes\mathbf I_{N_r}$, $\mathbf b_n=d_n\,\mathbf r_n^*\otimes\mathbf y_n$; LOO cavity $\mathbf P^{\setminus n}=\mathbf P-\mathbf A_n$(T1 §3.2, 정확); L_X 노이즈 공분산 $\mathbf R_n=\sigma^2\mathbf I+\sum_{jj'}M_{jj'}\boldsymbol\Sigma^{[j,j']}$, $\mathbf M=\mathbf r_n\mathbf r_n^H+\mathbf T_n$(일반 공분산까지 정확; Kronecker면 v0의 $\mathrm{tr}(\mathbf C^{\setminus n}\mathbf M)$로 환원).
+- G-1 guard: $\mathbf C_q=(\mathbf G+\mathbf I/\nu_{\max})^{-1}$, $\nu_{\max}=10^4$ (초기 $\mathbf G$ 특이, $T_p<N_t$). I-2: 선형화용 2차 모멘트 $\mathbb E|h_{ij}|^2$는 직전 반복의 채널 posterior(초기값 prior), scalar/colored 동일 규칙(v0는 site belief). I-3: 초기 site $\hat{\mathbf H}^E=\mathbf 0$, $\nu^E=\mathrm{tr}(\mathbf C)/N$ = Module H at $\nu^q\to\infty$의 극한(2604.19061 "large value"의 구체화).
+- 파일럿: DFT$_{N_t}$의 앞 $T_p$열(unit modulus). 인터리버: 데이터 격자 위 random symbol permutation(trial별 고정). 부호 블록 = 데이터 격자 전체($N_s=N_tT_d$, $K=N_s/2-6$).
+- `BitTrellis`: 이진 feed-forward trellis 전용 벡터화 Log-MAP(각 상태의 predecessor 2개, 동일 입력) — `bcjr_bits`와 $7\times10^{-15}$ 일치. `SymbolTrellis.bcjr`: 심볼별 $\tau_n$ + `return_info`(하위 호환).
+- 기준 수신기: `colored`(Gaussian prior를 L_H에 정확히 fold; Gaussian에서는 "비등방 $\mathbf C_q$를 받는 Module H"와 동일 — Q-07 상한), `pilot_only`(파일럿 + 정확 colored prior LMMSE 1회 후 L_X↔D turbo), `genie`(known $\mathbf H$, $\mathbf C^{\setminus n}=\mathbf 0$ = 2604.19061 Module C 구조 + BCJR).
+
+## [2026-09-16] D-11 (제안, 승인 대기) — Module H의 hybrid 초기화: 파일럿 단계는 채널 dataset의 2차 모멘트 $\hat{\mathbf C}$를 L_H에 fold(colored Gaussian), 이후 score-based H(스칼라 $\nu^q$)
+
+**근거.** exp_0918b T4b($T_p=2<N_t$): scalar site의 BLER 손실은 대부분 "시작"(첫 반복의 prior 등방화)에서 온다 — colored-init 1회만으로 격차의 ~3/4가 닫힘(6 dB: 0.188→0.150 vs colored 0.138; 9 dB: 0.163→0.075 vs 0.050). 복호 성공 블록의 NMSE는 전 변형 동일(median 0.0047~0.0096)이므로 site 자체는 추정 품질을 해치지 않음. 학습 score에서 $\hat{\mathbf C}$는 dataset 표본 공분산이라 추가 학습 없이 얻어지고, Gaussian-site EP(colored)의 첫 반복은 정확 폐형(Kronecker 없이도 $N\le32$ 행렬). 잔여 격차(cinit1 vs colored, damping 후 9 dB 0.037 vs 0.013)는 colored-noise score(M2 stretch, Q-07)로만 닫힘.
+**대안.** (i) 처음부터 colored-noise score 학습(비용 큼, M2 후반), (ii) 스칼라 유지(기각: $T_p<N_t$ 손실).
+
+## [2026-09-16] D-12 (제안, 승인 대기) — decoder extrinsic $(r^D,\tau^D)$ damping $\beta=0.7$ 기본값
+
+**근거.** exp_0918b T4a/T4c: F3(후반 NMSE 점프)의 정체는 **처음부터 복호 실패한 블록의 주기-2 limit cycle**(두 확신 오답 codeword 사이 진동, NMSE $0.36\leftrightarrow0.19$, BER $0.357\leftrightarrow0.405$; scalar·colored 동일, 성공 블록은 scalar = colored 0.0116). $\beta=0.7$이면 cycle이 깨져 실패 블록이 구조됨: $T_p=4$ 6 dB BLER $0.025\to0.000$; $T_p=2$ 6 dB scalar $0.188\to0.163$, cinit1 $0.150\to0.087$, colored $0.138\to0.100$; 9 dB $0.163\to0.087$, $0.075\to0.037$, $0.050\to0.013$. 대가: 수렴 반복 2→5회. $\epsilon\in\{10^{-6},10^{-3}\}$는 무관. BiG-AMP (97)–(98)·v0 의사코드의 damping 위치와 일치.
+
+## [2026-09-16] 기록 — 측정 규약(M-1): 채널 NMSE는 평균 대신 **median + 복호 성공 조건부** 보고
+실패 블록의 NMSE(0.4~0.7)가 평균을 지배(exp_0918 T3 colored 0.17 vs 성공 블록 0.0096). 수신기 비교는 BLER + 조건부 NMSE + "구조된 블록 수(t=2 실패 → t=8 성공)"로.
+
+---
+
+## [2026-09-17] 기록 — 세션 3 시작, 파일 버전 정리
+프로젝트 업로드 시 파일명이 뒤바뀜: 최신본은 `decision_log__4_.md`, `open_questions__3_.md`, `t2_trellis__1_.py`(접미사 없는 파일이 구본). 이 파일부터 다시 `decision_log.md` / `open_questions.md` / `t2_trellis.py`가 기준본 — 프로젝트의 구본·`__N_` 사본은 삭제 권장. `T2_session1_handoff_2026-09-17.md`(#1)는 프로젝트에 없음(내용은 로그로 복원).
+
+## [2026-09-17] D-11 강등(ablation 전용) · D-12 조건부 승인 — 사용자 "Continue"(세션 3 둘째 턴) = 제시한 기본값 채택으로 기록 (reversible)
+**D-11 → ablation.** 이유: (1) F1의 원인은 v0의 등방화 규칙(D-13)이며 $\hat{\mathbf C}$ 없이 고쳐진다(exp_0919 T5/T2: cinit1 vs belief1 paired $p=0.89/0.13/0.22$ at 9/12/15 dB, 둘 다 v0보다 $p<10^{-7}$). (2) 앙상블 공분산이 정보를 주지 않는 prior에서는 D-11 ≡ v0 [예측 → exp_0920에서 확인: $\hat{\mathbf C}=\mathbf I$인 Gaussian-mixture prior, $T_p=2$ 12 dB BLER v0 .817 = D11 .817, 불일치 블록 0]. 지도교수 확인 대기 목록에서 "D-11 정당화 방식" 삭제.
+**D-12 승인(기본값 $\beta=0.7$), 조건:** $T_p<N_t$에서는 반복 $\ge16$. 근거: QPSK $T_p=4$ 6 dB (n=320) BLER .041→.025 (불일치 5:0, $p=0.06$), 3 dB (n=140) .379→.343 (5:0); $T_p=2$ 8회 반복에서는 v0 scalar에 손해(.594→.653, $p=0.003$ at 12 dB), belief/colored 중립; 16회 반복(n=160)에서는 belief 중립(.388/.394), colored 이득(.256→.200, 12:3, $p=0.035$). 교차 시점 $t\approx6\sim10$. BPSK에서 보고된 "$T_p=2$ damping 이득"(exp_0918b)은 QPSK 8회 반복에서는 재현되지 않음.
+
+## [2026-09-17] D-13 (기본값 적용, reversible) — L_H→H 메시지는 **belief 등방화**(VAMP의 LMMSE 단계), site 등방화(v0)는 ablation
+**유도.** v0: 행렬 extrinsic $\mathbf C_q=\mathbf G^{-1}$을 구한 뒤 $\nu^q=\mathrm{tr}(\mathbf C_q)/N$ — EP가 projection하는 대상은 belief이지 site가 아니다. $T_p<N_t$에서 $\mathbf G$ 특이 → $\nu^q\to\nu_{\max}$ → Module H가 등방 prior를 돌려줌(= F1의 정확한 기작; T5: site 형의 $\hat{\mathbf h}$ = 등방 prior LMMSE, $3.69\times10^{-2}$ 동일).
+D-13: $\boldsymbol\Sigma_L=(\mathbf I/\nu^E+\mathbf G)^{-1}$, $\hat{\mathbf h}_L=\boldsymbol\Sigma_L(\hat{\mathbf h}^E/\nu^E+\mathbf b)$, $\alpha_L=\mathrm{tr}(\boldsymbol\Sigma_L)/(N\nu^E)$, $\nu^q=\frac{\alpha_L}{1-\alpha_L}\nu^E$, $\mathbf q=\frac{\hat{\mathbf h}_L-\alpha_L\hat{\mathbf h}^E}{1-\alpha_L}$ [SC-VAMP (2)–(3)를 L_H 쪽에 그대로 적용; 상태 $(\hat{\mathbf h}^E,\nu^E)$는 반복 간 유지, 초기값 I-3]. 옵션 `n_inner`: L_X로 가기 전 L_H↔H를 반복.
+**[정확, Gaussian prior]** 고정점에서 $\mathbf b-\mathbf G\hat{\mathbf h}=(\hat{\mathbf h}-\hat{\mathbf h}^E)/\nu^E$, $\mathbf C^{-1}\hat{\mathbf h}=(\mathbf q-\hat{\mathbf h})/\nu^q$, EP 평균 일치 $(\hat{\mathbf h}-\hat{\mathbf h}^E)/\nu^E=(\mathbf q-\hat{\mathbf h})/\nu^q$ ⇒ $\hat{\mathbf h}=(\mathbf C^{-1}+\mathbf G)^{-1}\mathbf b$ (정확 LMMSE 평균; 근사는 공분산에만). 수치: T5 $T_p=2$ 파일럿만 6 dB, $\|\hat{\mathbf h}-\mathbf h^\star\|^2/\|\mathbf h^\star\|^2$: site $3.7\times10^{-2}$ → belief 1/3/10/30회 $8.0\times10^{-3}$/$2.9\times10^{-3}$/$4.9\times10^{-4}$/$3.6\times10^{-6}$; $T_p=4$는 둘 다 정확. $\rho=0$ sanity 항등식은 임의의 $(\mathbf q,\nu^q)$에서 성립하므로 유지.
+**부수 효과.** Module H 입력 범위가 유계: 첫 패스 $\nu^q\approx1.0\sim1.25$($T_p=2$; v0는 $5\times10^3$) → M2 학습 범위 $\nu\in[\sim10^{-3},\sim2]\times$채널 전력.
+**prior art.** VAMP/EP의 표준 규칙(SC-VAMP (2)–(3), 원문 복사본). 우리 것은 (a) bilinear 수신기의 L_H에서 두 규칙의 차이가 F1의 원인임을 식별, (b) Gaussian 고정점 평균의 정확성 증명·수치 검증, (c) $\hat{\mathbf C}$ fold-in(D-11)과의 비교.
+
+## [2026-09-17] D-14 (기본값 적용, reversible) — H→L site는 denoiser **전체 Jacobian**으로 만든 행렬 site
+$\boldsymbol\Sigma_H=\nu^q\mathbf J$, $\mathbf J=\partial\hat{\mathbf h}^{\rm post}/\partial\mathbf q$ (Wirtinger; 2차 Tweedie $\mathrm{Cov}[\mathbf h|\mathbf q]=\nu^q\mathbf J$, 채널 side의 Lemma 2(c′)), $\boldsymbol\Lambda_E=\boldsymbol\Sigma_H^{-1}-\mathbf I/\nu^q$, $\boldsymbol\eta_E=\boldsymbol\Sigma_H^{-1}\hat{\mathbf h}^{\rm post}-\mathbf q/\nu^q$; L_X·LOO는 $\mathbf P=\boldsymbol\Lambda_E+\mathbf G$, site 벡터 $\boldsymbol\eta_E$. 등방 site $(\hat{\mathbf h}^E,\nu^E)$는 denoiser 입력(D-13) 생성에만 사용. 비용: D-09의 정확 trace와 같은 $2N$ JVP(추가 비용 0). Guard: $\boldsymbol\Lambda_E$ Hermitian화 + 고윳값 clip `lam_min`$=10^{-6}$ (비-log-concave prior에서 $\mathrm{Cov}\not\preceq\nu^q\mathbf I$; GMM에서 $\lambda_{\max}(\mathbf J)=1.86$ 관측).
+**[정확, Gaussian prior]** 임의의 $(\mathbf q,\nu^q)$에서 $\boldsymbol\Lambda_E=\mathbf C^{-1}$, $\boldsymbol\eta_E=\mathbf 0$ ⇒ mode `colored`와 동일 (T6: $\le1.5\times10^{-13}$, $\nu^q=5\times10^3$ 포함). 따라서 Gaussian testbed의 `colored` 곡선 = "등방-노이즈 score + D-14"의 성능이며, Q-07의 "잔여 격차는 colored-noise score로만 닫힘"은 철회.
+**[측정, 비-Gaussian]** exp_0920(GMM, $\hat{\mathbf C}=\mathbf I$): D-13+D-14 = exact-EP 기준(비등방 cavity에서의 정확 tilted 모멘트 = colored-noise denoiser가 줄 값)과 동률 — $T_p=2$ 12 dB .592 vs .592 (8:8), 15 dB .592 vs .608, $T_p=3$ 9 dB .283 vs .267. D-14 단독(site 등방화 유지)은 $T_p=2$에서 무이득(.817): 첫 패스 $\nu^q$가 무정보이기 때문 — D-13이 선행 조건.
+**[VERIFY] prior art.** denoiser Jacobian을 사후 공분산으로 쓰는 것은 diffusion 역문제 문헌에 선행이 있는 것으로 기억(2차 Tweedie 기반 posterior covariance; 출처 미확인 [M]). 우리 것은 이를 bilinear turbo 수신기의 행렬값 EP site로 쓰는 것과 Gaussian 항등식·GMM 기준 대비 측정. 학습 score에서의 품질(비대칭 Jacobian, curl)은 추측 — Q-21.
+
+## [2026-09-17] D-15 (제안, 승인 대기) — L_H는 decoder의 **a-posteriori** soft symbol $(\bar x_{jn},v_{jn})$을 소비(`feedback='posterior'`), L_X는 decoder extrinsic + LOO cavity 유지
+**유도 [스칼라 모형에서 정확].** factor $f(h,x)=\mathcal{CN}(y;hx,\sigma^2)$, cavity $h\sim\mathcal{CN}(m_h,c_h)$, $x\sim\pi$(이산). tilted $\propto\pi(x)\mathcal{CN}(h;m_h,c_h)f$의 $h$-marginal은 $\sum_xw(x)\,\mathcal{CN}(h;\mu_x,s_x)$, $w(x)\propto\pi(x)\,\mathcal{CN}(y;m_hx,\sigma^2+c_h|x|^2)$ — 즉 **$x$의 tilted marginal(= decoder extrinsic × LOO 채널 하의 $y_n$ likelihood ≈ decoder APP)** 로 가중된다. EP의 $f_n\to\mathbf H$ 메시지는 이 tilted 모멘트에서 cavity를 나눈 것. v0의 "extrinsic 되먹임 + form A"는 tilted $x$-marginal 자리에 cavity $\pi$를 넣은 것이어서 $y_n$이 $x_n$에 대해 주는 정보를 버린다(과소 사용). T1의 F2(자기 강화)는 $w$를 LOO가 아닌 채널로 계산할 때의 문제 — `loo=True`가 막는다.
+**근거(exp_0919b, Gaussian testbed, n=160, base = extrinsic+LOO).** BLER base / post_fb / no_loo / post_noloo: $T_p=4$ 3 dB .381/**.269**/.394/.287 (base vs post_fb 20:2, $p=1.2\times10^{-4}$); 6 dB .050/**.025**/.069/.056; $T_p=2$ 12 dB .263/**.150**/.287/.194 (24:6, $p=1.4\times10^{-3}$; post_fb vs post_noloo 0:7, $p=0.016$). exp_0920(GMM): D13x3+14 → +pf $T_p=2$ 12 dB .625→.358 ($p=4\times10^{-9}$), $T_p=3$ 9 dB .292→.158; exactEP .592→.300; Gaussian-$\hat{\mathbf C}$ turbo .842→.475.
+**의미.** "posterior 되먹임 + LOO"는 T1의 구조(코드 보조 재추정 + LOO extrinsic 채널 추정)와 같다 — route (a)의 주 방식으로 승격 제안. 승인 시 exp_0919 T2 표는 `feedback='posterior'`로 다시 만든다.
+
+## [2026-09-17] 기록 — Q-04·Q-04′ 닫힘 (exp_0919b)
+Module D extrinsic은 **moment-domain(EP, project-then-divide) + 블록 평균 $\alpha^D$** 유지. (iii) pmf-domain(divide-then-project; BCJR에서 정확 extrinsic pmf $P(x_n|\mathbf r_{\setminus n})$를 구해 평균·분산 전달, 고전 turbo soft-symbol 되먹임; brute force 대비 $\le1.3\times10^{-15}$)은 정확 cavity임에도 나쁨: $T_p=4$ 3 dB .381→.450 (7:18, $p=0.043$), 6 dB .050→.094 ($p=0.039$), $T_p=2$ 12 dB .263→.344 ($p=0.047$); pilot-only·genie에서도 같은 방향. 2604.19061 Fig. 3의 주장(moment > LLR-domain)이 **정확 decoder에서도** 성립 [측정; 기작은 추측: LMMSE 모듈이 소비하는 것은 Gaussian family 안에서 Onsager 보정된 메시지]. 핸드오프 후보였던 "$r^D=\tau^DL^{\rm ext}/4$"는 방정식 하나에 미지수 둘이라 채택하지 않음. (iv) 심볼별 $\alpha^D$: BLER .425(6 dB)/.769(3 dB)/.444($T_p=2$ 12 dB), clip 도달 31~61% — 기각.
+
+## [2026-09-17] 기록 — 세션 4 시작: 핸드오프 #3 §1.6의 로그 미반영 사항 반영
+1. `n_inner` 기본값 = **1** (belief1 vs belief3 $p=0.60/0.14/0.86$; GMM D13+14 vs D13x3+14 .592 vs .625/.592, .283 vs .292 — 이득 없음; score 평가 1회/반복).
+2. v1 옵션 묶음(`mode='scalar', scal='belief', hsite='matrix', lam_min=1e-6, beta=0.7` ± `feedback='posterior'`)은 Gaussian Kronecker testbed에서 `mode='colored'`와 동일($|\Delta{\rm NMSE}|\le1.4\times10^{-13}$, BER 동일) → Gaussian testbed 실험은 `colored`로 대체.
+3. 스크립트 병합: `exp_0919_tests.py`(T0/T1/T5/T6/T7). **`exp_0919_analysis.py`는 프로젝트에 없음**(핸드오프 #3 §6 표와 불일치; 세션 3 컨테이너와 함께 소실) — exp_0919 raw를 다시 분석할 일이 생기면 재작성. exp_0921은 자체 분석 스크립트 사용.
+4. raw 로그(npz) 미보관 — 핸드오프 #3 §6 명령으로 재생성.
+5. F5 근거: 첫 패스 $\tau^L$의 SNR 무관성(9/12/15 dB: belief1 1.99/1.93/1.89, v0 2.63/2.52/2.49; $T_p=4$는 0.91→0.42). **$T_p=2$ 0 dB는 미실행.**
+6. D-15는 세션 3에서 미응답 → 여전히 **승인 대기**(세션 4 첫 턴에 재질문).
+
+## [2026-09-17] D-16 (사용자 지시, 확정) — 실행 분담: 실험 실행은 사용자, Claude는 코드·출력 사양·분석
+시간·토큰 비용 때문에 **Python 실험은 Claude 컨테이너에서 돌리지 않는다.** Claude는 (i) 스크립트와 (ii) 필요한 출력 사양을 주고, 사용자가 실행해 결과 텍스트(`exp_MMDD_results.txt`)를 전달한다. 코드 기준 위치 = 사용자 git repo(채팅에 연결 예정). Claude 쪽에서 허용되는 실행: `py_compile`, $n\le2$ smoke test(수치는 버림), 폐형식 평가(초 단위). 이에 따라 스크립트는 (a) repo 루트 기준 상대 경로, (b) `--jobs` 멀티프로세스 + chunk 재개, (c) 붙여 넣기 좋은 압축 출력으로 작성. 세션 3 스크립트의 `/home/claude/t2` 하드코딩은 `.`로 치환한 사본을 전달(본문 무변경).
+
+## [2026-09-17] 기록 — `t2_route_a.py` exp_0921 패치 (기본 동작 무변경)
+`RouteA(..., Xp=None, beta_fb=None)`. `Xp`: 파일럿 override($N_t\times T_p$; 기본 DFT 앞 $T_p$열). `beta_fb`: `feedback='posterior'`일 때 L_H로 가는 a-posteriori 모멘트 $(\bar x,v)$의 damping(기본 None = 세션 3 동작). **발견:** D-12의 $\beta$는 extrinsic 쌍 $(r^D,\tau^D)$에만 걸리고 D-15 경로의 $(\bar x,v)$는 damping되지 않는다 → exp_0921 A에 `col_post_b0.7_fbd` 변형 추가(Q-24). 회귀 확인은 사용자가 `python exp_0919_tests.py t0`, `t6`으로(기대값: `exp_0919_results.txt` 앞부분).
+
+## [2026-09-17] 기록 [정확, Gaussian prior] — F5의 폐형식: 첫 패스 = pilot-only LMMSE, 고SNR 잔차는 $\mathbf R_t$의 Schur complement
+form A에서 $\bar{\mathbf x}_n=\mathbf 0$이면 데이터 site는 $\mathbf A_n=\mathbf 0$ → **모든 수신기의 첫 패스 채널 belief = 파일럿 LMMSE.** $\boldsymbol\Sigma=(\mathbf C^{-1}+(\mathbf X_p^*\mathbf X_p^{\rm T})\otimes\mathbf I/\sigma^2)^{-1}$, $\sigma^2\to0$: $\boldsymbol\Sigma\to\mathbf S^{\rm T}\otimes\mathbf R_r$, $\mathbf S=\mathbf R_t-\mathbf R_t\mathbf X_p(\mathbf X_p^H\mathbf R_t\mathbf X_p)^{-1}\mathbf X_p^H\mathbf R_t$, 따라서 $\mathrm{NMSE}_\infty=\mathrm{tr}\,\mathbf S/N_t$ ($\mathbf R_r$·$N_r$ 무관). 첫 패스 L_X 노이즈($\mathbf r=\mathbf 0,\tau=1\Rightarrow\mathbf M=\mathbf I$): $\mathbf R_n=\sigma^2\mathbf I+\mathrm{tr}(\mathbf S)\,\mathbf R_r$ → 간섭 제한 $\mathrm{SIR}_\infty=(1-\mathrm{NMSE}_\infty)/\mathrm{NMSE}_\infty$, **SNR 무관** = F5의 기작. 파일럿이 $\mathbf R_t$의 상위 $T_p$ 고유벡터를 span하면 $\mathrm{NMSE}_\infty=\sum_{k>T_p}\lambda_k/N_t$ = 모든 $T_p$차원 파일럿 부분공간 중 최소(Ky Fan).
+수치(`exp_0921_run.py predict`, 폐형식): $\rho=0.7$ $\lambda=(2.725,.754,.318,.203)$. $\mathrm{NMSE}_\infty$ / $\mathrm{SIR}_\infty$: $T_p=2$ DFT **.168 / 6.9 dB**, eig .130 / 8.2 dB; $T_p=3$ DFT .102 / 9.4 dB, eig **.051 / 12.7 dB**; $\rho=0.9$: $T_p=2$ DFT .056 / 12.2 dB, eig .041 / 13.7 dB; $T_p=3$ eig .015 / 18.1 dB. 12 dB 유한 SNR: $\rho=0.7$ $T_p=2$ DFT .177 — 핸드오프 #3의 측정 \"첫 패스 NMSE≈0.2\"와 정합(측정은 trial별 비의 통계, 폐형식은 기대값의 비 — 엄밀 비교는 exp_0921 출력의 NMSE@1로).
+**우리 것 / prior art:** 상관 채널에서 고유방향 정렬 훈련 신호의 최적성은 prior art [M — 출처 미확인, VERIFY: correlated MIMO training design 문헌]; \"annealed turbo 수신기의 시동 실패(F5)를 첫 패스 Schur 잔차로 설명하고 regime 선택에 쓰는 것\"이 우리 것.
+
+## [2026-09-18] 기록 — exp_0921 A 결과 판독 (사용자 실행, repo `TaeJun1999/T2-Annealed-receiver` `Demo/`, 커밋 c719936; n=320/점, 16 반복)
+**D-15 [측정, 새 시드에서 재현 + $\beta=0.7$·16 반복에서 유지].** `col_ext_b0.7` vs `col_post_b0.7` @16 불일치(ext만 실패 : post만 실패): $T_p=4$ 0/3/6/9 dB 52:1 / 35:5 / 7:1 / 1:0 ($p=10^{-14}$/$10^{-6}$/.07/1); $T_p=2$ 6/9/12/15 dB 87:11 / 70:14 / 51:13 / 34:6 (모두 $p<10^{-5}$). BLER@16: $T_p=4$ 3 dB .284→.191, 6 dB .037→.019; $T_p=2$ .531/.344/.231/.147 → **.294/.169/.113/.059**. D-15는 여전히 사용자 승인 대기이나 근거는 충분.
+**LOO [측정].** posterior 되먹임에서 LOO 제거: 4:23, 2:23, 0:8 ($T_p=4$ 0/3/6 dB), 2:31, 2:15, 1:12, 1:5 ($T_p=2$). 실패 분류에서 no-LOO는 `stuck`(오답 고정점)이 5~30%로 증가(LOO 있으면 0~3%, 0 dB 제외) = 자기 강화(T1 F2)의 직접 증거.
+**Q-24 닫힘 [측정].** posterior 경로 damping(`beta_fb=0.7`)은 해롭다: 0:7, 5:24, 5:21, 3:12, 2:16 ($p\le.035$; $T_p=4$ 3/6 dB는 @8에서만 손해 0:10 → @16 중립) → **`beta_fb=None` 유지.**
+**D-12 × D-15 [측정].** `col_post_b1` vs `_b0.7` @16: 11:4, 11:10, 12:1($p=.003$), 0:0, 15:4($p=.019$), 10:5, 6:4, 10:1($p=.012$) — 손해 없음, 세 점에서 유의한 이득 → $\beta=0.7$ 유지. cyc2(주기-2) 실패 블록은 posterior에서 0.3~5.3%(extrinsic 2.5~10%).
+**D-13/D-14의 재평가 [측정 — 기여 목록에 영향].** posterior 되먹임 하에서는 v0(site 등방화)도 크게 회복: $T_p=2$ @16 `v0_post_b0.7` .328/.247/.144/.119 ≈ `bel_post_b0.7` .347/.225/.150/.119 (paired 미실시 → 분석 스크립트에 쌍 추가). 즉 **D-15가 켜지면 D-13의 @16 이득은 사라짐**(@8에서는 소폭). D-14(행렬 site)는 유지: `bel_post` vs `col_post` 27:10, 34:16, 22:10, 24:5 ($p=.008/.015/.05/.0006$), $T_p=4$는 무차별. 해석[추측]: APP 되먹임은 첫 반복 직후 $\mathbf G$를 full-rank·고정밀로 만들어 site 등방화의 $\nu^q\to\nu_{\max}$ 문제(F1)를 한 반복 만에 벗어남.
+**F5 폐형식 검증 [측정 정합].** NMSE@1(trial별 비의 median) $T_p=2$ 6/12/15 dB .208/.188/.167 vs 폐형식 .198/.177/(∞: .168); $T_p=4$ 6 dB .054 vs .049. $\tau^L$@1: $T_p=2$ 2.00/1.77/1.63/1.57(포화) vs $T_p=4$ 2.06/1.38/.91/.61.
+**F5 재서술.** D-15+$\beta$+16 반복에서 $T_p=2$는 hard floor가 아니라 **완만한 기울기**(3 dB당 BLER 약 1/2; 15 dB .059, 계속 감소). 첫 패스 BLER≈1($\tau^L\ge1.57$)인데도 320 중 100~174 블록을 구조 — 시동에 첫 패스 복호 성공은 불필요.
+**headline 점검.** $T_p=4$: pilot-only(best $\beta$) vs joint BLER@16 0 dB .809/.637, 3 dB .347/.191, 6 dB .062/.019(14:0), 9 dB .003/.003 → BLER 0.1 기준 약 5.2 → 3.8 dB(**≈1.3 dB 이득**, genie ≈1.5 dB). $T_p=2$ DFT: pilot-only는 .48~.82로 실패, joint는 0.1에 ≈12.6 dB — $T_p=4$ pilot-only(5.2 dB)보다 7 dB 나쁨, $K$ 이득은 +8.9% → **$\rho=0.7$·DFT·$T_p=2$는 headline 영역이 아님.** 후보는 폐형식이 가리키는 $T_p=3$(eig) — exp_0921 B로 판정.
+
+## [2026-09-18] 기록 — Q-25(a) paired 확인 (repo 커밋 0f37555의 raw npz에 분석만 실행; 시뮬레이션 아님)
+`v0_post_b0.7` vs `bel_post_b0.7` @16 (v0만 실패 : belief만 실패): $T_p=4$ 3:2, 3:3, 1:1, 0:0; $T_p=2$ 26:32, 38:31, 21:23, 24:24 — **전 점 $p\ge0.47$ → D-15 하에서 D-13의 @16 이득 없음 [측정].** @8도 $p\ge0.06$. `v0_post` vs `col_post`: $T_p=2$ @16 39:28($p=.22$), 46:21(.003), 30:20(.20), 29:10(.003); @8은 52:24, 58:19, 47:17, 44:12(모두 $p\le.002$) → **D-14(행렬 site)의 이득은 주로 수렴 속도(@8), @16에서는 부분적으로만 유지.**
+관찰: BLER이 같은데도 불일치 쌍이 많다(예: 6 dB 26:32 / 320) → $T_p=2$의 실패는 채널 실현만으로 결정되지 않고 궤적에 민감(genie BLER = 0이므로 정보 한계가 아니라 시동 basin 문제) [추측 → Q-20(a)].
+
+## [2026-09-18] 기록 — exp_0921 B 결과 판독 (사용자 실행, 커밋 0e905f7; 4x4, n=160/점, 16 반복, 192코어 서버에서 2.8분)
+운영 메모(D-16 보강): 서버는 사실상 단독 사용 → 이후 명령에 `--jobs`를 지정하지 않는다(기본 = 전체 코어).
+**SNR@BLER 0.1 [측정, 보간], $\rho=0.7$:** $T_p=4$: pilot-only 5.0, joint(`col_post_b0.7`) 4.0, genie 1.8. $T_p=3$: DFT pilot 18.0 / joint 6.8; **eig pilot 8.1 / joint 5.2**. $T_p=2$: DFT joint 12.6(A와 일치), **eig joint 9.2**, pilot-only는 두 파일럿 모두 >18. eig 파일럿 이득: joint 기준 $T_p=3$ 1.6 dB, $T_p=2$ 3.4 dB — 폐형식($\mathrm{SIR}_\infty$ 9.4→12.7, 6.9→8.2 dB)의 방향과 일치.
+**pilot-only의 error floor를 joint가 제거 [측정]:** $T_p=3$ eig, 12/15/18 dB: pilot-only(best $\beta$) BLER .025/.025/.019 vs joint **0/0/0**; $T_p=2$ eig 9/12/15 dB: pilot .53/.40/.29 vs joint .106/.037/.013 (paired 70:2, 58:0, 44:0). 스크립트의 regime check(pilot ≥ .5 & joint ≤ .1)는 "none"이지만 $T_p=2$ eig 9 dB에서 .006 차이로 놓친 것 — 기준이 너무 빡빡했음.
+**goodput 포락선 $K(1-\mathrm{BLER})/T$, $\rho=0.7$ (pilot-only 최선 구성 vs joint 최선 구성):** 0 dB .44 vs 1.04; 3 dB 2.01 vs 2.49; 6 dB 3.05 vs 3.15; 9 dB 3.19 vs 3.32($T_p=3$ eig); 12 dB 3.27 vs 3.37($T_p=2$ eig); 15 dB 3.27 vs 3.46($T_p=2$ eig). 즉 **저SNR에서는 같은 $T_p=4$에서 ≈1 dB, 중·고SNR에서는 파일럿 절감으로 +3~6% goodput.** headline은 "SNR 이득 ~1 dB + floor 제거 + 파일럿 절감 수 %" — 큰 숫자는 아님(정직하게 기록).
+**$\rho=0.9$:** genie 자체가 8.8 dB 필요. $T_p=4$ joint 11.3 vs pilot 11.4(이득 없음, 저SNR에서만 18:1, 13:2), $T_p=3$ eig joint 12.3. → $\rho=0.9$는 headline 영역이 아님(강한 상관 = prior가 이미 채널을 거의 결정, 남는 손실은 다중화 자체).
+**주의 [VERIFY]:** 18 dB 점에서 모든 수신기가 15 dB보다 나쁨($T_p=2$ eig joint .013→.069, pilot .29→.33, $\tau^L$@1도 1.371→1.384) → SNR별 독립 시드의 표본 효과로 판단(수신기 공통). 결정 점은 n 증량으로 확인. 개선안: SNR 간 common random numbers(같은 $H,u,$ perm, 노이즈만 스케일) 옵션 — 미도입.
+
+---
+
+## Experiment log
+
+```
+exp_0915 | 목적: lemma 수치 검증 (BCJR vs brute force, Tweedie/Jacobian 항등식, factor-2, Max-Log, puncturing, 16-QAM 근사 오차)
+설정: (7,5)_8 nu=2 K=10 (N=24) 및 (133,171)_8 nu=6 K=8 (N=28); sigma^2 ∈ {0.05,0.3,1,3,10}; 16-QAM Gray (7,5)_8 K=10, 6 symbols/block, tau ∈ {0.05,0.2,0.5,1,2}, 20 trials
+결과: BCJR=brute force max |tanh(L/2)-E[x|x~]| ≤ 3e-15; score(FD) ≤ 7e-10; Jacobian=Cov/sigma^2 ≤ 1.3e-10; diag=(1-tanh^2)/sigma^2; div=v_post/sigma^2;
+      complex: Lc=4/sigma_c^2 정확, Lc=2/sigma_c^2 오차 0.495 (sigma_c^2=3); Max-Log 오차 최대 0.78; puncturing-as-erasure 정확(전송·천공 심볼 모두);
+      16-QAM symbol-level BCJR 정확(3e-15); bit pipeline NMSE 2e-5(tau=0.2) → 3.5e-2(tau=1) → 2.7e-2(tau=2), 입력측(BICM bit metric) 1.9e-2 / 출력측(product of marginals) 3.2e-2 at tau=1
+시드: 20260915 | 코드: exp_0915_bcjr_score_check.py | 결론/후속: lemma (a)-(d) 수치 통과; Q-02 판단 자료 확보
+```
+
+```
+exp_0916 | 목적: (133,171)_8 nu=6 super-section BCJR 모듈 검증 (16-QAM 주, QPSK/64-QAM 보조), 복소 Tweedie·Wirtinger Jacobian, tilted prior, 비트 파이프라인 ablation, 비용
+설정: K=12 (9 심볼, 4096 codeword) tau ∈ {0.05,0.2,0.5,1,2,5} 4 trials; K=16 (11 심볼, 65536 codeword) tau=1; QPSK K=12; 64-QAM K=12; 비용 K=200
+결과: P_n, x̄_n, v_n, 비트 marginal, tilted prior 모두 brute force와 ≤ 7e-15; 복소 Tweedie ≤ 1.4e-9 (FD); Jacobian=(E[x_n x_j*]-x̄_n x̄_j*)/tau ≤ 4e-10; diag=v_n/tau; div=mean(v)/tau;
+      비트 파이프라인 NMSE: 16-QAM 1.3e-5(tau=0.2)/8.7e-3(0.5)/5.2e-2(1)/2.6e-2(2)/1.3e-2(5), max 0.52, |dv| 0.21 at tau=1; QPSK 1e-30; 64-QAM 2.1e-2(0.5)/1.7e-2(2);
+      wall-clock K=200: super-section 0.62 s vs 비트 BCJR 1.91 s (numpy 루프)
+시드: 20260916 | 코드: t2_trellis.py, exp_0916_superbcjr_133171_qam.py | 결론/후속: Lemma 2 (a')-(d') 수치 통과; D-05 근거; Q-13 [VERIFY] Sionna 라벨링
+```
+
+```
+exp_0917 | 목적: 채널 denoiser Onsager 계수 추정법 비교 (Q-05) + 복소 Fisher 공식 검증
+설정: Gaussian prior CN(0, R_r⊗R_t), rho=0.7, N_r×N_t ∈ {8×4, 8×8, 32×32}, nu ∈ {0.01,0.1,0.3,1}, draws 2000/1000/200
+결과: F1 mean = alpha_exact (공식 검증); std(alpha_hat): F1 0.015–0.13 (8×4), 0.011–0.09 (8×8), 0.013–0.025 (32×32); Hutchinson K=16: 0.017–0.042 (8×4);
+      v_ext 상대오차 (8×4): F1 28–63 %, H16 8–25 % (nu=0.01에서 H 발산); 정확 trace = 2N 방향미분, 분산 0
+시드: 20260917 | 코드: exp_0917_onsager_small_N.py | 결론/후속: D-09 제안; Q-05 절반 닫힘
+```
+
+```
+exp_0918 | 목적: route (a) v0 결합 검증(Gaussian Kronecker prior, 학습 없음): sanity(등방 prior→H extrinsic=prior), 궤적, 기준선, D-10 ablation
+설정: 4x4, T=28, Tp∈{4,2}, BPSK (133,171)_8 nu=6 terminated 1 codeword/block (K=42/46), symbol interleaver, DFT pilots, rho∈{0,0.7}, SNR=1/σ²∈{0,3,6,9,12} dB,
+      8 반복, 80 trials(T2)/60(T3), damping 없음, ε=1e-6, ν_max=1e4; 모드 scalar/colored/pilot_only/genie
+결과: T0 회귀: BitTrellis=bcjr_bits 7e-15; 비트별/심볼별 τ BCJR = brute force ≤2e-15(사후), 정보 LLR ≤7e-14. T1 sanity(ρ=0): ‖Ĥ^E‖=0, |ν^E−1|≤1.3e-14, scalar≡colored ≤7.6e-13.
+      T2 Tp=4 6 dB: NMSE 0.061→0.018(2회 반복 수렴), τ^L 0.95→0.134→0.11 (L_c 4→30→36), ν^q 0.063→0.0116→0.0101, α^H→0.947, ν^E→0.18;
+         BLER scalar 0.03 = colored 0.03 = pilot_only 0.03, genie 0.00 (0 dB: 0.20/0.19/0.28/0.01; 3 dB: 0.06/0.07/0.10/0.00).
+      T2 Tp=2 6 dB: scalar BLER 0.93→0.19 (NMSE 0.264→0.100), colored 0.80→0.14 (0.235→0.085), pilot_only 0.46, genie 0.00; τ^L 3.1→1.0→0.45→0.26→0.20→0.18 (5~6단계 annealing);
+         9 dB: 0.16 (NMSE 0.117) / 0.05 (0.021) / 0.38; 12 dB: 0.06 / 0.05 / 0.29. 비단조 NMSE step: Tp=4 2.5%, Tp=2 13%(scalar), 9%(colored).
+      T3 D-10: form B는 4점 모두 나쁨 — Tp=4 3 dB NMSE 0.040 vs 0.065, BLER 0.05 vs 0.13; Tp=2 3 dB 0.158 vs 0.345, 0.30 vs 0.57.
+      실패 모드: F1 scalar site가 첫 반복에서 prior 등방화 → Tp<Nt에서 느린 시작·정체; F2 α^D가 clip ε에 닿으면 NMSE 주기-2 소진동(~5%); F3 scalar에서 후반 NMSE 점프(Tp=4 6 dB 0.019→0.027, trial 5%; T3 재현);
+                 F4 pilot_only Tp=2에서 일부 스트림 extrinsic precision 0 → τ^L clip. NMSE 평균은 복호 실패 블록의 heavy tail에 민감(median 병행 필요).
+시드: 20260918 | 코드: t2_route_a.py, exp_0918_route_a_gaussian.py, t2_trellis.py(확장) | 결론/후속: 결합 버그 없음(T0/T1); M3 완료 조건 중 "BLER < pilot-only" 충족(0/3 dB, Tp=2 전 구간), "NMSE 단조"는 조건부(Tp=4 97.5% step);
+                 D-10 확정 제안; Q-07 스칼라화 손실 정량화(Tp=2에서 큼) → F1 원인 분리(exp_0918b) 후 D-11(M2 colored-noise 조건화) 판단
+```
+
+```
+exp_0918b | 목적: F1(scalar site 등방화)·F3(후반 NMSE 점프) 원인 분리; damping·ε 효과
+설정: exp_0918과 동일 trial(시드 SEED+106/109), Tp=4 6 dB (T4a/T4c), Tp=2 6·9 dB (T4b); 변형 scalar / cinit1(첫 1회 colored) / colored × β∈{1,0.7}; ε∈{1e-6,1e-3}
+결과: T4a: 점프 trial 2/80 = 처음부터 실패한 블록의 주기-2 cycle(colored도 2/80 동일); 성공 블록 NMSE scalar=colored=0.0116; α^D clip 도달 95% 반복, NMSE 부호 교대 60%(F2).
+      T4c: β=0.7 → 점프 0/80, BLER 0.025→0.000 (수렴 5회); ε 무관.
+      T4b 6 dB BLER: scalar .188 / cinit1 .150 / colored .138 ; β=.7: .163 / .087 / .100 ; 성공 블록 NMSE median 모두 .0093~.0096
+           9 dB BLER: .163 / .075 / .050 ; β=.7: .087 / .037 / .013 ; 성공 블록 NMSE .0047~.0048 ; ν^q 정상값 ≈ σ²/T (9 dB .0052)
+시드: 20260918 | 코드: exp_0918b_f1_isolation.py, t2_route_a.py(init_colored) | 결론/후속: Q-18 닫힘(F3 = 실패 블록 cycle, damping으로 해결); F1 = 시작 문제 → D-11; D-12 damping 기본값; M-1 측정 규약
+```
+
+```
+exp_0919 | 목적: QPSK(Lemma 2 경로)로 route (a) 재확인; SymbolTrellis.bcjr 벡터화; L_H→H 등방화 규칙(site vs belief)·D-11·damping 비교; ν^q 표(Q-16)
+설정: 4x4, T=28, Tp∈{4,2}, QPSK (133,171)_8 nu=6 terminated (K=90/98), rho=0.7, SNR=1/σ²∈{0,3,6,9,12,15} dB, 8 반복, β∈{1,0.7}, n=80(스캔)~320(결정 지점),
+      변형 scalar(v0)/cinit1(D-11)/belief1·belief3(D-13, n_inner)/colored/pilot_only/genie; 같은 점의 모든 변형은 동일 (H,u,perm,Y); 시드 20260919+100+SNR
+결과: T0 벡터화 BCJR = brute force ≤1.6e-15 (QPSK/16-QAM/64-QAM, 심볼별 τ, tilted prior), 정보 LLR ≤1.4e-14, 루프 구현과 ≤7.2e-15; 531→2.3 ms/호출. RouteA.run 0.043 s (BPSK 0.20 s).
+      T1 QPSK sanity(ρ=0): ‖Ĥ^E‖=0, |ν^E−1|≤1.2e-14, scalar≡colored ≤2.1e-13 (β=0.7·init_colored=1에서도). 회귀: 기본 옵션으로 exp_0918b T4c 자릿수까지 재현.
+      T5 (Gaussian 폐형, 파일럿만): site 형 = 등방 prior LMMSE (3.7e-2); belief 형 고정점 평균 = 정확 LMMSE (30회 3.6e-6). T6: 행렬 H-site ≡ colored ≤1.5e-13.
+      T2 Tp=4 BLER(전 변형 동률): 0 dB .875 / 3 dB .379 / 6 dB .041 (β=.7: .025) / 9·12 dB 0; genie .250/.029/.003/0 → genie 대비 ~3 dB 손실.
+      T2 Tp=2 BLER (n=320) scalar/cinit1/belief1/belief3/colored/pilot(n=80): 9 dB .697/.503/.497/.484/.369/.700; 12 dB .594/.388/.431/.400/.263/.537; 15 dB .469/.312/.281/.287/.188/.463.
+      F5(신규): QPSK Tp<Nt는 floor 영역 — v0 scalar ≈ pilot-only(12 dB는 더 나쁨), colored도 15 dB .19, genie 0. 성공 블록 NMSE는 전 변형 동일(9 dB .0050~.0059).
+      Q-16: 성공 블록 ν^q 정상값 = (1.08~1.14)·σ²/T, 전 SNR·Tp 공통 (6 dB .0098, 9 dB .0049, 12 dB .0025, 15 dB .0013); belief 형 첫 패스 ν^q: Tp=2 1.0~1.25, Tp=4 = σ²/N_t.
+코드: t2_trellis.py(벡터화, bcjr_loop 보존), t2_route_a.py(scal/n_inner/hsite/nu_sw), exp_0919_{common,run,analyze,t0,t1,t5,t6}.py | 결과: exp_0919_results_{T0,T1,T2,T5,T6}.txt, exp_0919_raw/*.npz
+결론/후속: 완료 조건 중 "QPSK sanity 재통과" 충족; "BLER < pilot-only"는 v0로는 Tp=2에서 미충족, belief/colored로 충족; "hybrid 초기화 회복률 ≥1/2"는 D-13이 $\hat C$ 없이 충족 → D-11 강등, D-13/D-14.
+```
+
+```
+exp_0919b | 목적: ablation (ii) 채널 되먹임×LOO, (iii) Q-04 decoder extrinsic 도메인, (iv) Q-04′ 심볼별 α^D; D-12 조건(16회 반복)
+설정: exp_0919와 동일 trial(시드 동일), 기본 수신기 = mode colored (Gaussian testbed에서 D-13+D-14와 동일, T6); Tp=4 3·6 dB, Tp=2 12 dB, n=160; iter16: Tp=2 9·12 dB n=160
+결과: T7 단위 검증: 정확 extrinsic pmf = brute force ≤1.3e-15 (QPSK/16-QAM), BPSK L_ext ≤3.1e-15.
+      (ii) BLER base(extrinsic+LOO)/post_fb(+LOO)/no_loo/post_noloo: Tp=4 3 dB .381/.269/.394/.287; 6 dB .050/.025/.069/.056; Tp=2 12 dB .263/.150/.287/.194.
+      (iii) pmf-domain: .450/.094/.344 (base보다 나쁨, p≈0.04 세 점 모두). (iv) per-symbol α^D: .769/.425/.444, clip 31~61%.
+      iter16 BLER t=8→16: belief1 β=1 .431→.388, β=.7 .419→.394 (12 dB); colored β=1 .263→.256, β=.7 .250→.200; 주기-2 실패 블록 1~4%.
+코드: t2_trellis.py(return_ext), t2_route_a.py(dec_ext, decode(ext=True)), exp_0919_run.py(sets abl/iter16), exp_0919_t7_newparts.py, exp_0919b_0920_analyze.py | 결과: exp_0919b_0920_results.txt, exp_0919_results_T7.txt
+결론/후속: D-15 제안(posterior 되먹임+LOO); Q-04·Q-04′ 닫힘; D-12 조건 확정.
+```
+
+```
+exp_0920 | 목적: 학습 없는 **비-Gaussian** testbed — Gaussian-mixture 채널 prior(폐형 score·denoiser·Jacobian)에서 D-11 vs D-13/D-14 vs exact-EP 기준 vs oracle
+설정: 16 성분, C_k = kron(R_t(ψ_a)^T, R_r(ψ_b)), R(ψ)=D(ψ)R_exp(0.7)D(ψ)^H, ψ=2π(k+1/2)/4 → 앙상블 공분산 = I (2.9e-16). 4x4, T=28, QPSK, 8 반복, β=1, n=120, 시드 20260920+100+SNR.
+      수신기: v0 / D11 / D13(n_inner 1,3) / D14 / D13+14 / +pf(D-15) / exactEP(비등방 cavity 정확 tilted 모멘트) / lmmseC(Gaussian Ĉ turbo) / pilot_gmm(GMM-MMSE 파일럿 추정 후 turbo) / pilot_C / genie / oracle(성분 기지)
+결과: T7 GMM denoiser 검증: K=1 ≡ Gaussian 8.9e-14; Tweedie(FD) ≤3.7e-9; J = Cov/ν (FD) ≤1.2e-9; MC MMSE = E tr Cov (0.0273 vs 0.0274); λ_max(J)=1.86(>1, 비-log-concave).
+      Tp=2 12 dB BLER: v0 .817 = D11 .817 (불일치 0) / D13 .658 / D14 .817 / D13+14 .592 = exactEP .592 / lmmseC .842 / pilot_gmm .850 / oracle .517 / genie 0;
+                +pf: D13x3+14 .358 / exactEP .300 / lmmseC .475 / oracle .225.   15 dB 동일 양상(.842/.833/.658/.817/.592/.608; +pf .375/.375/.458/.192).
+      Tp=3 9 dB: v0 .408 = D11 .408 / D13 .342 / D13+14 .283 / exactEP .267 / oracle .208; +pf .158/.108/lmmseC .167/oracle .083. Tp=4 6 dB: 전부 .058~.083, +pf .033 (prior 무관).
+      참고: 성분 상관 0.9(거의 rank-1)에서는 genie도 12 dB BLER .05 — 4-stream 다중화 자체가 불가, testbed로 부적합(20 trials 확인 후 0.7로 변경).
+코드: t2_route_a.py(GaussianPrior, GMMPrior{denoise, denoise_full, ep_site}, steer_corr, exact_prior), exp_0920_gmm.py | 결과: exp_0919b_0920_results.txt, exp_0920_raw/*.npz
+결론/후속: D-11은 2차 모멘트가 밋밋한 prior에서 무효(예측대로); D-13이 선행 조건, D-14는 그 위에서 exact-EP 기준에 도달; 남은 격차는 exactEP_pf vs oracle_pf(Tp=2 15 dB .375 vs .192) = 혼합 사후의 단일 Gaussian projection 손실(Q-23).
+```
+
+```
+exp_0921 | 상태: **A 완료(2026-09-18, n=320, 결과 Demo/exp_0921_results.txt — A 블록이 두 번 append됨, 동일 내용), B(4x4) 완료(2026-09-18, n=160, 커밋 0e905f7, Demo/exp_0921_results_B.txt); 다음: rho=0.7 n=640 증량 + 8x4** | 목적: A = D-15 기준 T2 표, B = Q-20 regime scan(headline 영역 탐색)
+설정: QPSK, (133,171)_8, T=28, Nt=4, 16 반복 기록(@8 = 같은 궤적의 index 7), 시드 20260921+100+SNR, chunk 40, M-1 + paired sign test + 실패 분류(stuck/cyc2/other; BER 궤적 11..16 기준 조작적 정의).
+      A: rho=0.7, 4x4; Tp=4: 0/3/6/9 dB, Tp=2: 6/9/12/15 dB; n=320. 변형 15: colored x {ext,post} x beta{1,.7}, col_post_b0.7_fbd(beta_fb=.7), col_postnoloo_b0.7,
+         v0 x {ext,post} x beta{1,.7}, belief1 x {ext,post} (beta .7), pilot beta{1,.7}, genie.
+      B: rho{.7,.9} x Tp{4,3,2} x 파일럿{dft, eig(=sqrt(Nt) U_{1:Tp}); Tp=4는 dft만} x SNR(rho=.7: 0..18, rho=.9: 6..24, 3 dB 간격); n=160; 이후 --Nr 8.
+         변형 5: col_ext_b0.7, col_post_b0.7, pilot beta{1,.7}, genie. 지표: BLER@8/@16, goodput K(1-BLER)/T, SNR@BLER=0.1, regime check(pilot-only >= .5 & joint <= .1).
+명령: python exp_0921_run.py predict | time | A [--n 320] | B [--n 160] [--Nr 8] ; python exp_0921_analysis.py A|B  -> exp_0921_results.txt
+코드: exp_0921_run.py, exp_0921_analysis.py, t2_route_a.py(exp_0921 패치: Xp, beta_fb) | 결과: (대기)
+```
+
+```
+exp_0921 C | 상태: **코드 전달, 실행 대기** | 목적: Q-25(b) — GMM testbed(exp_0920 prior, 정확 score)에서 D-15가 켜지면 D-13/D-14가 여전히 필요한가
+설정: QPSK 4x4, T=28, DFT 파일럿, rho_c=0.7, beta=0.7, n_inner=1, 16 반복, 시드 20260921+100+SNR, n=320. Tp=4: 3/6/9 dB, Tp=2: 9/12/15 dB.
+      변형 14: {v0, D13, D13+14, exactEP} x {ext, pf}, D14_pf, lmmseC_pf, pilot_gmm, pilot_C, genie, oracle_pf(참 성분의 Gaussian prior).
+      메모(Q-20(d)): 이 testbed는 앙상블 공분산이 정확히 I → 2차 모멘트 기반 "정렬 파일럿"은 DFT와 구별 불가. 정렬 파일럿 실험은 C에 넣지 않음.
+명령: python exp_0921_run.py C ; python exp_0921_analysis.py C -> exp_0921_results_C.txt
+분석 스크립트 보완: regime check 완화([S] pilot>=.3 & joint<=.1, [R] pilot>=.02 & joint<=pilot/5), goodput 포락선 자동 출력, A에 Q-25 쌍 추가.
+```
+

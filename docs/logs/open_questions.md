@@ -1,0 +1,42 @@
+# T2 Open Questions
+
+> 형식: `Q-번호 (상태, Phase): 질문. 담당/근거.` 닫힘은 날짜와 결정 번호. 상태: 열림 / 닫힘 / 보류.
+
+## 닫힘
+- **Q-08 (닫힘 2026-09-17, Phase 0/3):** 2604.19061 §III-A의 chain 일반화가 bilinear를 덮는가? → **아니오.** Module C (eqs. (16)–(17))는 $\mathbf H$ 기지 전제; unknown $\mathbf H$는 $f_n(\mathbf H,\mathbf x_n)$ factor의 bilinear graph로 단일 latent chain이 아님. BiG-AMP Table III (R11)–(R12)형 coupling 또는 EP형 L_H/L_X(route_a_design_v0 §3)가 필요.
+- **Q-02 (닫힘 2026-09-16, Phase 1):** QAM 경로 → **심볼 단위 super-section trellis 주 방식, 비트 marginal 파이프라인은 ablation** (D-05, 사용자 승인). 근거: exp_0915 T7, exp_0916 S1–S5.
+
+- **Q-01 (닫힘 2026-09-15, Phase 1):** factor-2 규약 — $\sigma^2$는 실수 차원당인가 복소 per-entry인가? → **복소 per-entry로 통일, $L_c=2/\sigma^2$(real)$=4/\sigma^2$(complex)$=4E_s/N_0$** (D-01). 근거: exp_0915 T4.
+- **Q-09 (닫힘 2026-09-15, Phase 1):** puncturing/rate matching은 erasure($L_{\rm ch}=0$)로 넣으면 정확성이 유지되는가? → **예, 정확**(전송 심볼과 천공 심볼의 조건부 평균 모두). 이유: puncturing은 codeword의 projection이며, 관측이 없는 좌표의 branch metric을 0으로 두면 mother code에 대한 marginalization과 동일. 근거: exp_0915 T6 ($\le1.4\times10^{-15}$).
+- **Q-10 (닫힘 2026-09-15, Phase 1):** Max-Log-MAP로 lemma가 성립하는가? → **아니오**(오차 최대 0.78 at $\sigma^2=10$). 정확 Log-MAP(정확 log-sum-exp) 필수. [VERIFY] Sionna `ConvDecoder`/`BCJRDecoder`의 알고리즘 옵션(max-log 여부)을 구현 전 확인.
+
+## 열림
+
+- **Q-03 (보류, Phase 1):** tail-biting 부호(LTE-style)가 필요해지면 정확성은 $2^\nu$회 BCJR로 복구(비용 $2^\nu$배); circular BCJR은 근사. 현재는 terminated code 사용(D-03)이므로 보류.
+- **Q-04 (닫힘 2026-09-17, exp_0919b):** decoder extrinsic 도메인 → **moment-domain(EP, project-then-divide) 유지.** pmf-domain(divide-then-project; 정확 extrinsic pmf의 평균·분산, brute force $\le1.3\times10^{-15}$)은 정확 cavity인데도 세 점 모두 나쁨(.381→.450, .050→.094, .263→.344; $p\approx0.04$). 2604.19061 Fig. 3의 주장이 정확 BCJR에서도 성립[측정]. 기작은 추측.
+- **Q-05 (부분 닫힘 2026-09-17, Phase 3):** 채널 denoiser의 Onsager 항 → **정확 autodiff Jacobian trace** (D-09 승인 2026-09-16, exp_0917; Gaussian 폐형에서 exp_0918 T1로 extrinsic 대수까지 검증). 남은 것: 학습 score $s_\theta$가 gradient field가 아닐 때 Fisher 형과 divergence 형의 차이(curl 항)를 score 품질 진단으로 쓸 수 있는가 (추측).
+- **Q-06 (열림, Phase 1/M6):** turbo/LDPC에서 BP soft output과 true $\mathbb E[\mathbf x\mid\tilde{\mathbf x}_t]$의 gap 측정법. brute force는 $N\lesssim30$에서만 가능 → 짧은 LDPC$(32,16)$·짧은 turbo로 직접 비교 + EXIT 기반 예측과 대조. $L_c(t)$의 함수로 gap 곡선(낮음/높음에서 작고 중간에서 큰지).
+- **Q-07 (대부분 닫힘 2026-09-17):** 비등방 $\mathbf C_q$ 처리 → **D-13(belief 등방화) + D-14(전체 Jacobian 행렬 site)**. Gaussian prior에서 D-14 ≡ colored [정확, T6 $\le1.5\times10^{-13}$]이므로 'colored-noise score로만 닫힘'은 철회. 비-Gaussian(GMM, exp_0920)에서 D-13+D-14 = exact-EP 기준(비등방 cavity의 정확 tilted 모멘트)과 동률(.592 vs .592, .283 vs .267). 남은 것: 학습 score에서의 D-14 품질(Q-21).
+- **Q-11 (열림, Phase 1):** 복소 score network 출력 규약. 실수 stacking으로 $\boldsymbol\epsilon$-예측 네트워크를 학습하면 $\nabla_{\mathbb R}\log p=-\boldsymbol\epsilon_\theta/\sigma_{\rm r}$, $\sigma_{\rm r}^2=\sigma^2/2$; 복소 score는 $\tfrac12(\nabla_{\rm r}+j\nabla_{\rm i})$. 코드의 노이즈 생성·학습 손실·Tweedie 호출을 D-01 하나의 규약으로 묶는 단위 테스트(Gaussian sanity) 필요.
+- **Q-12 (열림, Phase 1):** 2604.19061의 Assumption 2(Gaussian pseudo-observation)와 우리 lemma의 가정 A3가 같은 가정임을 논문에서 어떻게 연결할지. 우리 lemma는 이 가정 하에서 decoder module이 "정확"함을 말하고, 근사는 message가 Gaussian이라는 가정 자체에 있음을 명시.
+- **Q-13 (열림, Phase 1, [VERIFY]):** Sionna 상호 검증. (i) `Constellation("qam", m)`의 비트→심볼 라벨링이 38.211 식(D-06)과 같은가; (ii) `ConvEncoder`의 generator 표기(octal, msb 규약)와 `t2_trellis.make_trellis`가 같은 부호를 주는가; (iii) `BCJRDecoder`에 exact Log-MAP 옵션이 있는가(Q-10). 세 항목을 단위 테스트로 고정한 뒤 Sionna 파이프라인으로 이관.
+- **Q-14 (열림, Phase 3):** MIMO stream 배치 제약. 한 codeword를 $N_t$ stream·$T_d$ 심볼로 나눌 때 심볼 그룹($m$ coded bits)이 stream 경계와 정렬되어야 A7이 유지됨. Sionna의 기본 bit interleaver/scrambler를 끄고 symbol interleaver를 쓰는 구성이 필요한지 확인.
+- **Q-04′ (닫힘 2026-09-17, exp_0919b):** 블록 평균 $\alpha^D$. 심볼별 $\alpha^D$는 BLER .43~.77, clip 도달 31~61% — 기각. (정확한 심볼별 대안이 pmf-domain인데 그것도 Q-04에서 기각.)
+- **Q-15 (닫힘 2026-09-17):** form A + LMMSE에서 L_X·L_H extrinsic precision은 구성상 비음[정확]. 심볼별 $\alpha^D>1$ 문제는 Q-04′ 기각으로 소멸. 새 guard는 D-14의 $\boldsymbol\Lambda_E$ 고윳값 clip(`lam_min`$=10^{-6}$; 비-log-concave prior에서 $\lambda_{\max}(\mathbf J)>1$ 실제 발생) — Q-21로 이관.
+- **Q-16 (닫힘 2026-09-17, exp_0919):** $\nu^q$ 정상값 = $(1.08\sim1.14)\,\sigma^2/T$ — 전 SNR(0~15 dB)·$T_p\in\{2,4\}$ 공통(성공 블록 median; 6 dB .0098, 9 dB .0049, 12 dB .0025, 15 dB .0013). 계수는 $\mathrm{tr}[(\mathbf X\mathbf X^H)^{-1}]T/N_t\in[1,\,T/(T-N_t)]$ [근사]. D-13에서 첫 패스 $\nu^q$: $T_p=2$ 1.0~1.25, $T_p=4$ $\sigma^2/N_t$. **M2 학습 범위: $\nu\in[\sim10^{-3},\sim2]\times$채널 전력**(v0의 $\nu_{\max}$ 영역 불필요).
+- **Q-17 (닫힘 2026-09-17):** BPSK improper 손실 → QPSK를 기준 변조로 전환(exp_0919). 주의: BPSK는 $T_p<N_t$ floor(F5)를 가리고 있었다 — BPSK 결과(exp_0918/0918b의 $T_p=2$ 수치, damping 이득)는 결합 검증용으로만 인용.
+- **Q-18 (닫힘 2026-09-16, Phase 3):** [답: 실패 블록의 주기-2 limit cycle, scalar·colored 공통, damping β=0.7로 해결 — exp_0918b T4a/T4c, D-12] F3 — scalar 모드에서 후반 반복의 NMSE 점프(exp_0918 $T_p=4$ 6 dB: 반복 8에서 $0.019\to0.027$, trial 5%; T3 재현 $0.014\to0.031$), colored에서는 없음. 후보: (a) $\alpha^D\to\epsilon$일 때 $\tau^D\approx\epsilon\tau^L$ 점질량 되먹임 + 늦은 복호 오류의 확신 전파, (b) scalar site $(\hat{\mathbf H}^E,\nu^E)$가 관측 정보를 이중으로 넣는 방향. exp_0918b: per-trial, damping $\beta$, $\epsilon$ 변화.
+- **Q-19 (소멸 2026-09-17):** D-11 강등으로 전환 규칙 불필요. `nu_sw` 옵션은 코드에 남김(미실행).- **Q-20 (열림, Phase 3, 높음) — F5: QPSK $T_p<N_t$ floor.** $4\times4$, $\rho=0.7$, $T_p=2$: colored 15 dB BLER .19(+D-15 12 dB .15), genie 0. 원인[근사]: 첫 패스 채널 NMSE≈0.2 → 자기 간섭 제한 SINR → QPSK rate-1/2 decoder가 시동 임계 아래; SNR을 올려도 안 풀림. headline(파일럿 절감) 영역 후보: (a) $T_p=3$, (b) 더 강한 prior($\rho=0.9$ 또는 CDL low-rank; 단 rank-1에 가까우면 4-stream 다중화 자체가 불가 — exp_0920 메모), (c) 반복 16회+damping, (d) 파일럿 방향 설계(prior 주 고유방향 정렬), (e) $8\times4$. exp_0921에서 regime scan.
+- **Q-21 (열림, Phase 2/M2):** D-14를 학습 score에 적용할 때: autodiff Jacobian은 Hermitian·PSD 보장 없음 → Hermitian화 + clip의 영향; 반대칭(curl) 성분 크기를 score 품질 진단으로(Q-05 잔여분과 통합). [VERIFY] 2차 Tweedie posterior covariance의 diffusion 역문제 선행 문헌 확인(출처 미확인 [M]) — 10-01 sweep에 포함.
+- **Q-22 (열림, 포트폴리오):** D-15(posterior 되먹임 + LOO)는 T1의 구조와 같다. T1 프로젝트에 (a) "EP tilted marginal = APP" 유도, (b) exp_0919b (ii) 표를 전달할지, 그리고 T2 논문에서 T1을 어떻게 인용할지(지도교수 확인 목록에 추가).
+- **Q-23 (열림, Phase 3, 낮음):** GMM testbed에서 exactEP_pf vs oracle_pf 격차($T_p=2$ 15 dB .375 vs .192, $p=3\times10^{-6}$) = 다봉 사후를 단일 Gaussian으로 projection하는 손실. 학습 prior에서도 예상됨. 후보: 다중 가설(성분별 병렬 수신 후 evidence 선택), 또는 annealing 초기의 stochastic 재시작. M2 이후.
+- **Q-20 보강 (2026-09-17, 세션 4) [정확]:** F5의 폐형식 — 첫 패스 = pilot-only LMMSE, $\mathrm{NMSE}_\infty=\mathrm{tr}\,\mathbf S/N_t$, $\mathrm{SIR}_\infty=(1-\mathrm{NMSE}_\infty)/\mathrm{NMSE}_\infty$ (decision log 같은 날 기록). $\rho=0.7$: $T_p=2$ DFT 6.9 dB → eig 8.2 dB; $T_p=3$ DFT 9.4 dB → eig 12.7 dB. 예측: headline 영역 후보는 ($\rho=0.7$, $T_p=3$, eig)와 $\rho=0.9$; 단 $\rho=0.9$는 genie의 4-stream 다중화 한계를 함께 봐야 함. 남은 질문: (a) decoder 시동 임계를 $\mathrm{SIR}_\infty$의 함수로 표현할 수 있는가(QPSK rate-1/2, 첫 패스 BLER 0.5 ↔ $\tau^L\approx0.9$), (b) DFT 열 부분집합 선택(현재 {0,1,..}; 열 2는 $\mathbf R_t$의 최소 고유방향과 정렬 → 나쁨)의 영향, (c) $8\times4$. → exp_0921 B.
+- **Q-24 (열림, Phase 3, 중간):** D-12의 $\beta$는 $(r^D,\tau^D)$에만 걸리고 D-15의 되먹임 $(\bar x,v)$는 damping되지 않는다. posterior 경로도 damping해야 하는가(F3 cycle 빈도·BLER)? → exp_0921 A `col_post_b0.7` vs `col_post_b0.7_fbd`.
+- **[VERIFY] 추가 (10-01 sweep):** 상관 MIMO 채널의 고유방향 정렬 훈련 신호 최적성의 출처([M], 미확인).
+- **Q-24 (닫힘 2026-09-18):** posterior 경로 damping은 해롭다(exp_0921 A: 0:7, 5:24, 5:21, 3:12, 2:16) → `beta_fb=None`.
+- **Q-20 갱신 (2026-09-18):** exp_0921 A로 F5는 "floor"에서 "완만한 기울기"로 재서술($T_p=2$ DFT, `col_post_b0.7` @16: .294/.169/.113/.059 at 6/9/12/15 dB; BLER 0.1 ≈ 12.6 dB vs $T_p=4$ pilot-only 5.2 dB). 폐형식 NMSE@1 검증됨. 남은 것 = exp_0921 B($T_p=3$, eig 파일럿, $\rho=0.9$, goodput).
+- **Q-25 (열림, Phase 3, 중간 — 기여 목록):** D-15가 켜지면 D-13(belief 등방화)의 @16 이득이 사라진다(`v0_post` ≈ `bel_post`). (a) paired 확인(분석 스크립트에 쌍 추가됨), (b) GMM testbed에서도 그런가(exp_0920은 v0+posterior를 돌리지 않음 → exp_0921 C에 `v0_pf`, `D13_pf`, `D13+14_pf` 추가), (c) 학습 score에서는 행렬 site 없이 v0+posterior만으로 충분한가 — M2의 Jacobian 요구(D-14) 범위를 좌우.
+- **Q-25(a) 닫힘 (2026-09-18):** `v0_post` vs `bel_post` @16 전 점 $p\ge0.47$ — D-15 하에서 D-13 이득 없음. D-14는 @8에서 유의(52:24~44:12), @16은 부분적. (b) GMM, (c) 학습 score는 열림.
+- **Q-20 갱신 (2026-09-18, exp_0921 B):** headline 영역 = $\rho=0.7$, eig 파일럿, $T_p\in\{3,2\}$: pilot-only의 error floor를 joint가 제거, goodput +3~6%(9~15 dB), 같은 $T_p=4$에서는 ≈1 dB. $\rho=0.9$는 제외. 남은 것: (a) n 증량(18 dB 비단조성이 표본 효과인지), (b) $8\times4$, (c) eig 파일럿의 안테나별 전력 불균등을 ablation으로 명시, (d) GMM testbed에서의 "정렬 파일럿" 대응물(성분별 고유방향이 다름 → 혼합 공분산의 고유방향?).
+- **Q-26 (열림, 낮음):** SNR 간 common random numbers 도입 여부(곡선 평활, 시드 관례 변경 필요).
+
