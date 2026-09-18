@@ -1,0 +1,213 @@
+=== exp_0919b ablations (ii)-(iv) on the default receiver (Gaussian Kronecker testbed, QPSK, rho=0.7, 8 iter, n=160, seeds as exp_0919) ===
+--- Tp=4, SNR=3 dB ---
+  base          n=160 BLER 0.381 [0.310,0.458] | NMSE med 0.0297, OK-cond 0.0191 | rescued 31, lost 0
+  post_fb       n=160 BLER 0.269 [0.206,0.342] | NMSE med 0.0239, OK-cond 0.0188 | rescued 39, lost 0
+  no_loo        n=160 BLER 0.394 [0.321,0.471] | NMSE med 0.0307, OK-cond 0.0192 | rescued 32, lost 0
+  post_noloo    n=160 BLER 0.287 [0.223,0.362] | NMSE med 0.0243, OK-cond 0.0188 | rescued 42, lost 0
+  pmf           n=160 BLER 0.450 [0.375,0.527] | NMSE med 0.0350, OK-cond 0.0188 | rescued 36, lost 0
+  per_sym       n=160 BLER 0.769 [0.698,0.827] | NMSE med 0.1680, OK-cond 0.0183 | rescued 7, lost 2
+  base_b0.7     n=160 BLER 0.344 [0.275,0.420] | NMSE med 0.0264, OK-cond 0.0189 | rescued 41, lost 0
+  pmf_b0.7      n=160 BLER 0.456 [0.381,0.534] | NMSE med 0.0349, OK-cond 0.0188 | rescued 40, lost 0
+  belief1       n=160 BLER 0.394 [0.321,0.471] | NMSE med 0.0297, OK-cond 0.0188 | rescued 32, lost 0
+  belief1_pmf   n=160 BLER 0.456 [0.381,0.534] | NMSE med 0.0350, OK-cond 0.0188 | rescued 36, lost 0
+  pilot         n=160 BLER 0.406 [0.333,0.484] | NMSE med 0.0998, OK-cond 0.0926 | rescued 36, lost 0
+  pilot_pmf     n=160 BLER 0.531 [0.454,0.607] | NMSE med 0.0998, OK-cond 0.0882 | rescued 28, lost 0
+  genie_pmf     n=160 BLER 0.069 [0.039,0.119] | rescued 16, lost 0
+    base vs post_fb: only-base-fails 20, only-post_fb-fails 2, sign test p = 0.00012
+    base vs no_loo: only-base-fails 2, only-no_loo-fails 4, sign test p = 0.69
+    post_fb vs post_noloo: only-post_fb-fails 3, only-post_noloo-fails 6, sign test p = 0.51
+    base vs pmf: only-base-fails 7, only-pmf-fails 18, sign test p = 0.043
+    base vs per_sym: only-base-fails 0, only-per_sym-fails 62, sign test p = 4.3e-19
+    base vs base_b0.7: only-base-fails 8, only-base_b0.7-fails 2, sign test p = 0.11
+    belief1 vs belief1_pmf: only-belief1-fails 6, only-belief1_pmf-fails 16, sign test p = 0.052
+    pilot vs base: only-pilot-fails 10, only-base-fails 6, sign test p = 0.45
+    pilot vs post_fb: only-pilot-fails 23, only-post_fb-fails 1, sign test p = 3e-06
+    per_sym: fraction of symbols with alpha^D clipped (mean over iterations) = 0.310; tau^L clip frac (pmf) = 0.0000
+--- Tp=4, SNR=6 dB ---
+  base          n=160 BLER 0.050 [0.026,0.096] | NMSE med 0.0099, OK-cond 0.0096 | rescued 16, lost 0
+  post_fb       n=160 BLER 0.025 [0.010,0.063] | NMSE med 0.0096, OK-cond 0.0095 | rescued 19, lost 0
+  no_loo        n=160 BLER 0.069 [0.039,0.119] | NMSE med 0.0099, OK-cond 0.0095 | rescued 14, lost 0
+  post_noloo    n=160 BLER 0.056 [0.030,0.103] | NMSE med 0.0098, OK-cond 0.0095 | rescued 13, lost 0
+  pmf           n=160 BLER 0.094 [0.058,0.149] | NMSE med 0.0101, OK-cond 0.0095 | rescued 15, lost 0
+  per_sym       n=160 BLER 0.425 [0.351,0.502] | NMSE med 0.0181, OK-cond 0.0099 | rescued 10, lost 1
+  base_b0.7     n=160 BLER 0.037 [0.017,0.079] | NMSE med 0.0096, OK-cond 0.0096 | rescued 18, lost 0
+  pmf_b0.7      n=160 BLER 0.056 [0.030,0.103] | NMSE med 0.0100, OK-cond 0.0096 | rescued 23, lost 0
+  belief1       n=160 BLER 0.056 [0.030,0.103] | NMSE med 0.0098, OK-cond 0.0095 | rescued 15, lost 0
+  belief1_pmf   n=160 BLER 0.087 [0.053,0.142] | NMSE med 0.0100, OK-cond 0.0095 | rescued 16, lost 0
+  pilot         n=160 BLER 0.081 [0.048,0.134] | NMSE med 0.0532, OK-cond 0.0538 | rescued 17, lost 0
+  pilot_pmf     n=160 BLER 0.106 [0.067,0.164] | NMSE med 0.0532, OK-cond 0.0527 | rescued 16, lost 1
+  genie_pmf     n=160 BLER 0.013 [0.003,0.044] | rescued 0, lost 0
+    base vs post_fb: only-base-fails 4, only-post_fb-fails 0, sign test p = 0.12
+    base vs no_loo: only-base-fails 0, only-no_loo-fails 3, sign test p = 0.25
+    post_fb vs post_noloo: only-post_fb-fails 0, only-post_noloo-fails 5, sign test p = 0.062
+    base vs pmf: only-base-fails 1, only-pmf-fails 8, sign test p = 0.039
+    base vs per_sym: only-base-fails 0, only-per_sym-fails 60, sign test p = 1.7e-18
+    base vs base_b0.7: only-base-fails 2, only-base_b0.7-fails 0, sign test p = 0.5
+    belief1 vs belief1_pmf: only-belief1-fails 2, only-belief1_pmf-fails 7, sign test p = 0.18
+    pilot vs base: only-pilot-fails 6, only-base-fails 1, sign test p = 0.12
+    pilot vs post_fb: only-pilot-fails 10, only-post_fb-fails 1, sign test p = 0.012
+    per_sym: fraction of symbols with alpha^D clipped (mean over iterations) = 0.610; tau^L clip frac (pmf) = 0.0000
+--- Tp=2, SNR=12 dB ---
+  base          n=160 BLER 0.263 [0.200,0.336] | NMSE med 0.0040, OK-cond 0.0029 | rescued 47, lost 0
+  post_fb       n=160 BLER 0.150 [0.103,0.213] | NMSE med 0.0031, OK-cond 0.0027 | rescued 58, lost 0
+  no_loo        n=160 BLER 0.287 [0.223,0.362] | NMSE med 0.0039, OK-cond 0.0027 | rescued 45, lost 0
+  post_noloo    n=160 BLER 0.194 [0.140,0.262] | NMSE med 0.0032, OK-cond 0.0027 | rescued 54, lost 0
+  pmf           n=160 BLER 0.344 [0.275,0.420] | NMSE med 0.0041, OK-cond 0.0027 | rescued 61, lost 0
+  per_sym       n=160 BLER 0.444 [0.369,0.521] | NMSE med 0.0081, OK-cond 0.0027 | rescued 22, lost 0
+  base_b0.7     n=160 BLER 0.250 [0.189,0.322] | NMSE med 0.0039, OK-cond 0.0029 | rescued 56, lost 0
+  pmf_b0.7      n=160 BLER 0.319 [0.252,0.394] | NMSE med 0.0044, OK-cond 0.0030 | rescued 72, lost 0
+  belief1       n=160 BLER 0.431 [0.357,0.509] | NMSE med 0.0063, OK-cond 0.0027 | rescued 56, lost 0
+  belief1_pmf   n=160 BLER 0.544 [0.466,0.619] | NMSE med 0.0760, OK-cond 0.0028 | rescued 60, lost 0
+  pilot         n=160 BLER 0.575 [0.498,0.649] | NMSE med 0.1915, OK-cond 0.1371 | rescued 44, lost 0
+  pilot_pmf     n=160 BLER 0.688 [0.612,0.754] | NMSE med 0.1915, OK-cond 0.1366 | rescued 38, lost 0
+  genie_pmf     n=160 BLER 0.000 [0.000,0.023] | rescued 0, lost 0
+    base vs post_fb: only-base-fails 24, only-post_fb-fails 6, sign test p = 0.0014
+    base vs no_loo: only-base-fails 2, only-no_loo-fails 6, sign test p = 0.29
+    post_fb vs post_noloo: only-post_fb-fails 0, only-post_noloo-fails 7, sign test p = 0.016
+    base vs pmf: only-base-fails 12, only-pmf-fails 25, sign test p = 0.047
+    base vs per_sym: only-base-fails 10, only-per_sym-fails 39, sign test p = 3.8e-05
+    base vs base_b0.7: only-base-fails 5, only-base_b0.7-fails 3, sign test p = 0.73
+    belief1 vs belief1_pmf: only-belief1-fails 9, only-belief1_pmf-fails 27, sign test p = 0.0039
+    pilot vs base: only-pilot-fails 55, only-base-fails 5, sign test p = 1e-11
+    pilot vs post_fb: only-pilot-fails 69, only-post_fb-fails 1, sign test p = 1.2e-19
+    per_sym: fraction of symbols with alpha^D clipped (mean over iterations) = 0.520; tau^L clip frac (pmf) = 0.0000
+
+=== exp_0919b damping x 16 iterations (Tp=2, n=160): BLER at t = 2,4,8,12,16 ===
+--- Tp=2, SNR=9 dB ---
+  scalar_b1.0   0.969 0.787 0.713 0.662 0.644
+  belief1_b1.0  0.856 0.588 0.506 0.487 0.475
+  colored_b1.0  0.700 0.400 0.356 0.344 0.338
+  scalar_b0.7   0.975 0.819 0.756 0.700 0.675
+  belief1_b0.7  0.881 0.600 0.512 0.475 0.450
+  colored_b0.7  0.731 0.463 0.356 0.325 0.300
+    scalar_b1.0 vs scalar_b0.7: only-scalar_b1.0-fails 8, only-scalar_b0.7-fails 13, sign test p = 0.38
+    belief1_b1.0 vs belief1_b0.7: only-belief1_b1.0-fails 13, only-belief1_b0.7-fails 9, sign test p = 0.52
+    colored_b1.0 vs colored_b0.7: only-colored_b1.0-fails 11, only-colored_b0.7-fails 5, sign test p = 0.21
+--- Tp=2, SNR=12 dB ---
+  scalar_b1.0   0.931 0.750 0.606 0.575 0.544
+  belief1_b1.0  0.781 0.512 0.431 0.406 0.388
+  colored_b1.0  0.556 0.312 0.263 0.256 0.256
+  scalar_b0.7   0.963 0.775 0.650 0.600 0.581
+  belief1_b0.7  0.819 0.544 0.419 0.400 0.394
+  colored_b0.7  0.600 0.287 0.250 0.219 0.200
+    scalar_b1.0 vs scalar_b0.7: only-scalar_b1.0-fails 8, only-scalar_b0.7-fails 14, sign test p = 0.29
+    belief1_b1.0 vs belief1_b0.7: only-belief1_b1.0-fails 8, only-belief1_b0.7-fails 9, sign test p = 1
+    colored_b1.0 vs colored_b0.7: only-colored_b1.0-fails 12, only-colored_b0.7-fails 3, sign test p = 0.035
+
+=== exp_0920 Gaussian-mixture testbed (16 components, per-component rho_c=0.7, ensemble covariance = I; QPSK, 8 iter, n=120, seed 20260920+100+SNR) ===
+--- Tp=2, SNR=12 dB ---
+  v0            n=120 BLER 0.817 [0.738,0.876] | NMSE med 1.0222, OK-cond 0.0025 | rescued 19, lost 0
+  D11           n=120 BLER 0.817 [0.738,0.876] | NMSE med 1.0160, OK-cond 0.0025 | rescued 19, lost 0
+  D13           n=120 BLER 0.658 [0.570,0.737] | NMSE med 0.4124, OK-cond 0.0025 | rescued 30, lost 0
+  D13x3         n=120 BLER 0.633 [0.544,0.714] | NMSE med 0.5643, OK-cond 0.0023 | rescued 34, lost 0
+  D14           n=120 BLER 0.817 [0.738,0.876] | NMSE med 1.1488, OK-cond 0.0024 | rescued 17, lost 0
+  D13+14        n=120 BLER 0.592 [0.502,0.675] | NMSE med 0.4614, OK-cond 0.0026 | rescued 28, lost 0
+  D13x3+14      n=120 BLER 0.625 [0.536,0.706] | NMSE med 0.5108, OK-cond 0.0023 | rescued 25, lost 0
+  D13x3+14_pf   n=120 BLER 0.358 [0.278,0.447] | NMSE med 0.0040, OK-cond 0.0027 | rescued 48, lost 0
+  exactEP       n=120 BLER 0.592 [0.502,0.675] | NMSE med 0.3766, OK-cond 0.0026 | rescued 30, lost 0
+  exactEP_pf    n=120 BLER 0.300 [0.225,0.387] | NMSE med 0.0033, OK-cond 0.0025 | rescued 54, lost 0
+  lmmseC        n=120 BLER 0.842 [0.766,0.896] | NMSE med 0.7875, OK-cond 0.0031 | rescued 14, lost 0
+  lmmseC_pf     n=120 BLER 0.475 [0.388,0.564] | NMSE med 0.0154, OK-cond 0.0031 | rescued 53, lost 0
+  pilot_gmm     n=120 BLER 0.850 [0.775,0.903] | NMSE med 0.3427, OK-cond 0.1398 | rescued 11, lost 0
+  pilot_C       n=120 BLER 0.975 [0.929,0.991] | NMSE med 0.4680, OK-cond 0.1673 | rescued 2, lost 0
+  genie         n=120 BLER 0.000 [0.000,0.031] | rescued 0, lost 0
+  oracle        n=120 BLER 0.517 [0.428,0.604] | NMSE med 0.2624, OK-cond 0.0026 | rescued 36, lost 0
+  oracle_pf     n=120 BLER 0.225 [0.159,0.308] | NMSE med 0.0032, OK-cond 0.0026 | rescued 57, lost 0
+    v0 vs D11: only-v0-fails 0, only-D11-fails 0, sign test p = 1
+    v0 vs D13: only-v0-fails 24, only-D13-fails 5, sign test p = 0.00055
+    D13 vs D13+14: only-D13-fails 13, only-D13+14-fails 5, sign test p = 0.096
+    D14 vs D13+14: only-D14-fails 31, only-D13+14-fails 4, sign test p = 3.5e-06
+    D13+14 vs exactEP: only-D13+14-fails 8, only-exactEP-fails 8, sign test p = 1
+    lmmseC vs D13+14: only-lmmseC-fails 34, only-D13+14-fails 4, sign test p = 6e-07
+    D13x3+14 vs D13x3+14_pf: only-D13x3+14-fails 33, only-D13x3+14_pf-fails 1, sign test p = 4.1e-09
+    lmmseC_pf vs D13x3+14_pf: only-lmmseC_pf-fails 25, only-D13x3+14_pf-fails 11, sign test p = 0.029
+    D13x3+14_pf vs exactEP_pf: only-D13x3+14_pf-fails 19, only-exactEP_pf-fails 12, sign test p = 0.28
+    exactEP_pf vs oracle_pf: only-exactEP_pf-fails 12, only-oracle_pf-fails 3, sign test p = 0.035
+    pilot_gmm vs D13+14: only-pilot_gmm-fails 32, only-D13+14-fails 1, sign test p = 7.9e-09
+--- Tp=2, SNR=15 dB ---
+  v0            n=120 BLER 0.842 [0.766,0.896] | NMSE med 1.1214, OK-cond 0.0014 | rescued 15, lost 0
+  D11           n=120 BLER 0.833 [0.757,0.889] | NMSE med 1.0928, OK-cond 0.0014 | rescued 16, lost 0
+  D13           n=120 BLER 0.658 [0.570,0.737] | NMSE med 0.6164, OK-cond 0.0013 | rescued 31, lost 0
+  D13x3         n=120 BLER 0.625 [0.536,0.706] | NMSE med 0.4648, OK-cond 0.0014 | rescued 27, lost 0
+  D14           n=120 BLER 0.817 [0.738,0.876] | NMSE med 1.0169, OK-cond 0.0014 | rescued 18, lost 0
+  D13+14        n=120 BLER 0.592 [0.502,0.675] | NMSE med 0.4751, OK-cond 0.0014 | rescued 24, lost 0
+  D13x3+14      n=120 BLER 0.592 [0.502,0.675] | NMSE med 0.4562, OK-cond 0.0014 | rescued 25, lost 0
+  D13x3+14_pf   n=120 BLER 0.375 [0.294,0.464] | NMSE med 0.0021, OK-cond 0.0014 | rescued 39, lost 0
+  exactEP       n=120 BLER 0.608 [0.519,0.691] | NMSE med 0.4572, OK-cond 0.0014 | rescued 22, lost 0
+  exactEP_pf    n=120 BLER 0.375 [0.294,0.464] | NMSE med 0.0018, OK-cond 0.0012 | rescued 37, lost 0
+  lmmseC        n=120 BLER 0.833 [0.757,0.889] | NMSE med 0.7438, OK-cond 0.0015 | rescued 15, lost 0
+  lmmseC_pf     n=120 BLER 0.458 [0.372,0.547] | NMSE med 0.0041, OK-cond 0.0016 | rescued 59, lost 0
+  pilot_gmm     n=120 BLER 0.858 [0.785,0.910] | NMSE med 0.3664, OK-cond 0.1562 | rescued 10, lost 0
+  pilot_C       n=120 BLER 0.983 [0.941,0.995] | NMSE med 0.4384, OK-cond 0.1754 | rescued 1, lost 0
+  genie         n=120 BLER 0.000 [0.000,0.031] | rescued 0, lost 0
+  oracle        n=120 BLER 0.558 [0.469,0.644] | NMSE med 0.3921, OK-cond 0.0014 | rescued 26, lost 0
+  oracle_pf     n=120 BLER 0.192 [0.131,0.271] | NMSE med 0.0016, OK-cond 0.0014 | rescued 52, lost 0
+    v0 vs D11: only-v0-fails 1, only-D11-fails 0, sign test p = 1
+    v0 vs D13: only-v0-fails 25, only-D13-fails 3, sign test p = 2.7e-05
+    D13 vs D13+14: only-D13-fails 16, only-D13+14-fails 8, sign test p = 0.15
+    D14 vs D13+14: only-D14-fails 32, only-D13+14-fails 5, sign test p = 7.4e-06
+    D13+14 vs exactEP: only-D13+14-fails 8, only-exactEP-fails 10, sign test p = 0.81
+    lmmseC vs D13+14: only-lmmseC-fails 35, only-D13+14-fails 6, sign test p = 4.9e-06
+    D13x3+14 vs D13x3+14_pf: only-D13x3+14-fails 32, only-D13x3+14_pf-fails 6, sign test p = 2.4e-05
+    lmmseC_pf vs D13x3+14_pf: only-lmmseC_pf-fails 27, only-D13x3+14_pf-fails 17, sign test p = 0.17
+    D13x3+14_pf vs exactEP_pf: only-D13x3+14_pf-fails 16, only-exactEP_pf-fails 16, sign test p = 1
+    exactEP_pf vs oracle_pf: only-exactEP_pf-fails 23, only-oracle_pf-fails 1, sign test p = 3e-06
+    pilot_gmm vs D13+14: only-pilot_gmm-fails 33, only-D13+14-fails 1, sign test p = 4.1e-09
+--- Tp=3, SNR=9 dB ---
+  v0            n=120 BLER 0.408 [0.325,0.498] | NMSE med 0.0084, OK-cond 0.0052 | rescued 29, lost 0
+  D11           n=120 BLER 0.408 [0.325,0.498] | NMSE med 0.0084, OK-cond 0.0052 | rescued 29, lost 0
+  D13           n=120 BLER 0.342 [0.263,0.430] | NMSE med 0.0083, OK-cond 0.0052 | rescued 21, lost 0
+  D13x3         n=120 BLER 0.308 [0.233,0.396] | NMSE med 0.0074, OK-cond 0.0053 | rescued 25, lost 0
+  D14           n=120 BLER 0.350 [0.271,0.439] | NMSE med 0.0076, OK-cond 0.0052 | rescued 31, lost 0
+  D13+14        n=120 BLER 0.283 [0.210,0.370] | NMSE med 0.0066, OK-cond 0.0051 | rescued 22, lost 0
+  D13x3+14      n=120 BLER 0.292 [0.218,0.378] | NMSE med 0.0069, OK-cond 0.0052 | rescued 23, lost 0
+  D13x3+14_pf   n=120 BLER 0.158 [0.104,0.234] | NMSE med 0.0056, OK-cond 0.0051 | rescued 29, lost 0
+  exactEP       n=120 BLER 0.267 [0.196,0.352] | NMSE med 0.0066, OK-cond 0.0052 | rescued 24, lost 0
+  exactEP_pf    n=120 BLER 0.108 [0.064,0.177] | NMSE med 0.0054, OK-cond 0.0051 | rescued 29, lost 0
+  lmmseC        n=120 BLER 0.417 [0.332,0.506] | NMSE med 0.0086, OK-cond 0.0054 | rescued 23, lost 0
+  lmmseC_pf     n=120 BLER 0.167 [0.111,0.243] | NMSE med 0.0061, OK-cond 0.0054 | rescued 50, lost 0
+  pilot_gmm     n=120 BLER 0.533 [0.444,0.620] | NMSE med 0.1297, OK-cond 0.0738 | rescued 13, lost 1
+  pilot_C       n=120 BLER 0.675 [0.587,0.752] | NMSE med 0.2476, OK-cond 0.0854 | rescued 12, lost 0
+  genie         n=120 BLER 0.000 [0.000,0.031] | rescued 0, lost 0
+  oracle        n=120 BLER 0.208 [0.145,0.289] | NMSE med 0.0062, OK-cond 0.0052 | rescued 26, lost 0
+  oracle_pf     n=120 BLER 0.083 [0.046,0.147] | NMSE med 0.0052, OK-cond 0.0051 | rescued 22, lost 0
+    v0 vs D11: only-v0-fails 0, only-D11-fails 0, sign test p = 1
+    v0 vs D13: only-v0-fails 13, only-D13-fails 5, sign test p = 0.096
+    D13 vs D13+14: only-D13-fails 15, only-D13+14-fails 8, sign test p = 0.21
+    D14 vs D13+14: only-D14-fails 14, only-D13+14-fails 6, sign test p = 0.12
+    D13+14 vs exactEP: only-D13+14-fails 6, only-exactEP-fails 4, sign test p = 0.75
+    lmmseC vs D13+14: only-lmmseC-fails 22, only-D13+14-fails 6, sign test p = 0.0037
+    D13x3+14 vs D13x3+14_pf: only-D13x3+14-fails 20, only-D13x3+14_pf-fails 4, sign test p = 0.0015
+    lmmseC_pf vs D13x3+14_pf: only-lmmseC_pf-fails 10, only-D13x3+14_pf-fails 9, sign test p = 1
+    D13x3+14_pf vs exactEP_pf: only-D13x3+14_pf-fails 7, only-exactEP_pf-fails 1, sign test p = 0.07
+    exactEP_pf vs oracle_pf: only-exactEP_pf-fails 5, only-oracle_pf-fails 2, sign test p = 0.45
+    pilot_gmm vs D13+14: only-pilot_gmm-fails 33, only-D13+14-fails 3, sign test p = 2.3e-07
+--- Tp=4, SNR=6 dB ---
+  v0            n=120 BLER 0.083 [0.046,0.147] | NMSE med 0.0117, OK-cond 0.0113 | rescued 9, lost 0
+  D11           n=120 BLER 0.067 [0.034,0.126] | NMSE med 0.0117, OK-cond 0.0115 | rescued 7, lost 0
+  D13           n=120 BLER 0.083 [0.046,0.147] | NMSE med 0.0117, OK-cond 0.0114 | rescued 9, lost 0
+  D13x3         n=120 BLER 0.083 [0.046,0.147] | NMSE med 0.0117, OK-cond 0.0114 | rescued 9, lost 0
+  D14           n=120 BLER 0.058 [0.029,0.116] | NMSE med 0.0117, OK-cond 0.0115 | rescued 12, lost 0
+  D13+14        n=120 BLER 0.058 [0.029,0.116] | NMSE med 0.0117, OK-cond 0.0115 | rescued 12, lost 0
+  D13x3+14      n=120 BLER 0.058 [0.029,0.116] | NMSE med 0.0117, OK-cond 0.0115 | rescued 12, lost 0
+  D13x3+14_pf   n=120 BLER 0.033 [0.013,0.083] | NMSE med 0.0116, OK-cond 0.0116 | rescued 14, lost 0
+  exactEP       n=120 BLER 0.058 [0.029,0.116] | NMSE med 0.0117, OK-cond 0.0115 | rescued 12, lost 0
+  exactEP_pf    n=120 BLER 0.033 [0.013,0.083] | NMSE med 0.0116, OK-cond 0.0116 | rescued 14, lost 0
+  lmmseC        n=120 BLER 0.075 [0.040,0.136] | NMSE med 0.0121, OK-cond 0.0107 | rescued 6, lost 0
+  lmmseC_pf     n=120 BLER 0.033 [0.013,0.083] | NMSE med 0.0118, OK-cond 0.0111 | rescued 10, lost 0
+  pilot_gmm     n=120 BLER 0.092 [0.052,0.157] | NMSE med 0.0544, OK-cond 0.0538 | rescued 10, lost 0
+  pilot_C       n=120 BLER 0.100 [0.058,0.167] | NMSE med 0.0621, OK-cond 0.0605 | rescued 8, lost 0
+  genie         n=120 BLER 0.008 [0.001,0.046] | rescued 0, lost 0
+  oracle        n=120 BLER 0.058 [0.029,0.116] | NMSE med 0.0117, OK-cond 0.0115 | rescued 12, lost 0
+  oracle_pf     n=120 BLER 0.033 [0.013,0.083] | NMSE med 0.0116, OK-cond 0.0116 | rescued 14, lost 0
+    v0 vs D11: only-v0-fails 5, only-D11-fails 3, sign test p = 0.73
+    v0 vs D13: only-v0-fails 0, only-D13-fails 0, sign test p = 1
+    D13 vs D13+14: only-D13-fails 3, only-D13+14-fails 0, sign test p = 0.25
+    D14 vs D13+14: only-D14-fails 0, only-D13+14-fails 0, sign test p = 1
+    D13+14 vs exactEP: only-D13+14-fails 0, only-exactEP-fails 0, sign test p = 1
+    lmmseC vs D13+14: only-lmmseC-fails 5, only-D13+14-fails 3, sign test p = 0.73
+    D13x3+14 vs D13x3+14_pf: only-D13x3+14-fails 3, only-D13x3+14_pf-fails 0, sign test p = 0.25
+    lmmseC_pf vs D13x3+14_pf: only-lmmseC_pf-fails 1, only-D13x3+14_pf-fails 1, sign test p = 1
+    D13x3+14_pf vs exactEP_pf: only-D13x3+14_pf-fails 0, only-exactEP_pf-fails 0, sign test p = 1
+    exactEP_pf vs oracle_pf: only-exactEP_pf-fails 0, only-oracle_pf-fails 0, sign test p = 1
+    pilot_gmm vs D13+14: only-pilot_gmm-fails 6, only-D13+14-fails 2, sign test p = 0.29

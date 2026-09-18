@@ -1,0 +1,273 @@
+=== T0 (exp_0919): vectorised SymbolTrellis.bcjr ===
+T0a m=2 K=8 (Ns=14, 256 codewords) vs brute force: max|dP| = 1.55e-15, max|dLu| = 1.42e-14, max|dxbar| = 1.81e-15, max|dv| = 1.55e-15, tilted max|dP| = 8.88e-16; vs bcjr_loop = 1.78e-15
+T0a m=4 K=8 (Ns=7, 256 codewords) vs brute force: max|dP| = 7.77e-16, max|dLu| = 7.11e-15, max|dxbar| = 9.42e-16, max|dv| = 1.78e-15, tilted max|dP| = 8.88e-16; vs bcjr_loop = 7.11e-15
+T0a m=6 K=9 (Ns=5, 512 codewords) vs brute force: max|dP| = 5.55e-16, max|dLu| = 7.11e-15, max|dxbar| = 5.59e-16, max|dv| = 4.44e-16, tilted max|dP| = 5.55e-16; vs bcjr_loop = 7.11e-15
+--- T0b full-length blocks vs bcjr_loop (no brute force possible) ---
+T0b m=2 Ns=96 K=90: max|dP| = 6.88e-15, max rel|dLu| = 0.00e+00; wall-clock/call: vectorised 2.3 ms vs loop 521 ms
+T0b m=2 Ns=104 K=98: max|dP| = 7.22e-15, max rel|dLu| = 0.00e+00; wall-clock/call: vectorised 3.0 ms vs loop 598 ms
+T0b m=4 Ns=48 K=90: max|dP| = 4.11e-15, max rel|dLu| = 6.73e-15; wall-clock/call: vectorised 2.2 ms vs loop 308 ms
+=== T1 (exp_0919) QPSK sanity: rho = 0 -> H extrinsic == prior; scalar == colored ===
+Tp=4: max||hE|| = 0.0e+00, max|nuE-1| = 1.2e-14, max|NMSE_s - NMSE_c| = 1.0e-17, max|tauL_s - tauL_c|/tauL = 0.0e+00, BER_s == BER_c: True
+      NMSE traj (scalar, mean): 0.0648 0.00865 0.00866 0.00866 0.00866 0.00866;  nu_q traj: 0.0628 0.00997 0.00995 0.00995 0.00995 0.00995;  BLER: 0.00 0.00 0.00 0.00 0.00 0.00
+Tp=2: max||hE|| = 0.0e+00, max|nuE-1| = 1.2e-14, max|NMSE_s - NMSE_c| = 2.1e-13, max|tauL_s - tauL_c|/tauL = 1.1e-11, BER_s == BER_c: True
+      NMSE traj (scalar, mean): 0.531 0.826 0.752 0.732 0.741 0.674;  nu_q traj: 5e+03 1.71 0.407 0.388 0.209 0.248;  BLER: 1.00 0.80 0.80 0.70 0.70 0.70
+Tp=2, beta=0.7, init_colored=1: max||hE|| = 0.0e+00, max|nuE-1| = 7.8e-15, max|NMSE_s - NMSE_c| = 5.6e-17
+--- wall-clock per RouteA.run (8 iterations, rho = 0.7, Tp = 4, 6 dB), QPSK vs BPSK ---
+  qpsk  scalar    : 0.043 s/run
+  qpsk  colored   : 0.042 s/run
+  qpsk  pilot_only: 0.031 s/run
+  qpsk  genie     : 0.028 s/run
+  bpsk  scalar    : 0.201 s/run
+  bpsk  colored   : 0.203 s/run
+  bpsk  pilot_only: 0.189 s/run
+  bpsk  genie     : 0.185 s/run
+=== T5 (exp_0919): L_H -> H scalarisation, Gaussian closed form, pilots only, 6 dB, rho = 0.7 ===
+Tp=2: ||h_Lx - h*||^2/||h*||^2 (median over 200 draws; h_Lx = channel mean handed to L_X, h* = exact colored LMMSE)
+   site: 3.69e-02 | b1: 7.97e-03 | b2: 4.05e-03 | b3: 2.87e-03 | b5: 1.69e-03 | b10: 4.89e-04 | b30: 3.55e-06 | lmmse_iso: 3.69e-02
+   nu_q: site 5e+03, belief pass 1 1.13, belief pass 30 (nu_q, nuE) = (0.517, 0.391)
+Tp=4: ||h_Lx - h*||^2/||h*||^2 (median over 200 draws; h_Lx = channel mean handed to L_X, h* = exact colored LMMSE)
+   site: 1.31e-12 | b1: 5.69e-31 | b2: 5.66e-31 | b3: 5.56e-31 | b5: 5.58e-31 | b10: 5.62e-31 | b30: 5.62e-31 | lmmse_iso: 1.15e-02
+   nu_q: site 0.0628, belief pass 1 0.0628, belief pass 30 (nu_q, nuE) = (0.0628, 0.226)
+=== T6 (exp_0919): H -> L matrix site from the full Jacobian vs mode 'colored' (Gaussian prior, rho = 0.7, QPSK, 6 dB, 10 trials, 6 iter) ===
+Tp=4 mat_site  : max|NMSE - NMSE_colored| = 2.7e-14, max rel|tauL - tauL_colored| = 9.7e-12, BER identical: True
+Tp=4 mat_belief: max|NMSE - NMSE_colored| = 9.7e-15, max rel|tauL - tauL_colored| = 1.1e-11, BER identical: True
+Tp=4 scalar    : max|NMSE - NMSE_colored| = 1.1e-01, max rel|tauL - tauL_colored| = 5.2e-01, BER identical: False
+Tp=2 mat_site  : max|NMSE - NMSE_colored| = 9.5e-14, max rel|tauL - tauL_colored| = 1.2e-11, BER identical: True
+Tp=2 mat_belief: max|NMSE - NMSE_colored| = 1.5e-13, max rel|tauL - tauL_colored| = 6.9e-12, BER identical: True
+Tp=2 scalar    : max|NMSE - NMSE_colored| = 7.5e-01, max rel|tauL - tauL_colored| = 1.0e+01, BER identical: False
+=== T7a exact extrinsic pmf vs brute force ===
+  m=2 K=8: max|dP_ext| = 1.33e-15
+  m=4 K=8: max|dP_ext| = 6.94e-16
+  BPSK K=8: max|d r_ext| = 3.11e-15
+=== T7b GMMPrior (closed-form score / denoiser / Jacobian) ===
+  K=1 mixture vs KronGaussianPrior (mean, alpha, J): max err = 8.88e-14
+  steering mixture: K = 16, ||C_hat - I||_max = 2.9e-16, per-component eig(R_exp(0.9)) = [3.527 0.31  0.102 0.061]
+  nu=0.02: Tweedie |m - (q + nu grad)|_max = 1.5e-11; |J - J_FD|_max = 4.8e-10; |alpha - tr(J)/N| = 4.4e-16; min eig(J) = 0.160, max eig(J) = 0.999
+  nu=0.3: Tweedie |m - (q + nu grad)|_max = 1.0e-09; |J - J_FD|_max = 6.2e-10; |alpha - tr(J)/N| = 1.1e-16; min eig(J) = 0.012, max eig(J) = 0.976
+  nu=1.1: Tweedie |m - (q + nu grad)|_max = 3.7e-09; |J - J_FD|_max = 1.2e-09; |alpha - tr(J)/N| = 1.7e-16; min eig(J) = 0.004, max eig(J) = 1.858
+  nu=0.05: Monte-Carlo MSE/N = 0.0273 vs E[tr Cov]/N = 0.0274 (4000 draws); max alpha over draws = 0.719; ensemble-Gaussian (C_hat = I) LMMSE MSE/N = 0.0476
+  nu=1.1: Monte-Carlo MSE/N = 0.2442 vs E[tr Cov]/N = 0.2462 (4000 draws); max alpha over draws = 0.385; ensemble-Gaussian (C_hat = I) LMMSE MSE/N = 0.5238
+
+=== exp_0919 T2 (QPSK, 4x4, T=28, rho=0.7, (133,171)_8, 8 iter; seed 20260919+100+SNR) — M-1 tables ===
+--- Tp=4, SNR=0 dB ---
+  scalar_b1.0   n= 80 BLER t1/t2/t8 = 1.000/0.938/0.875 [0.785,0.931] | NMSE med t8 0.2745, OK-cond 0.0325 | rescued 5, lost 0
+  cinit1_b1.0   n= 80 BLER t1/t2/t8 = 1.000/0.938/0.863 [0.770,0.921] | NMSE med t8 0.2646, OK-cond 0.0311 | rescued 6, lost 0
+  belief1_b1.0  n= 80 BLER t1/t2/t8 = 1.000/0.938/0.875 [0.785,0.931] | NMSE med t8 0.2411, OK-cond 0.0323 | rescued 5, lost 0
+  belief3_b1.0  n= 80 BLER t1/t2/t8 = 1.000/0.938/0.863 [0.770,0.921] | NMSE med t8 0.2541, OK-cond 0.0337 | rescued 6, lost 0
+  colored_b1.0  n= 80 BLER t1/t2/t8 = 1.000/0.938/0.863 [0.770,0.921] | NMSE med t8 0.2790, OK-cond 0.0310 | rescued 6, lost 0
+  pilot_b1.0    n= 80 BLER t1/t2/t8 = 1.000/0.950/0.838 [0.742,0.903] | NMSE med t8 0.1604, OK-cond 0.1018 | rescued 9, lost 0
+  genie_b1.0    n= 80 BLER t1/t2/t8 = 0.787/0.500/0.250 [0.168,0.355] | rescued 20, lost 0
+  scalar_b0.7   n= 80 BLER t1/t2/t8 = 1.000/0.938/0.875 [0.785,0.931] | NMSE med t8 0.2317, OK-cond 0.0288 | rescued 5, lost 0
+  cinit1_b0.7   n= 80 BLER t1/t2/t8 = 1.000/0.938/0.875 [0.785,0.931] | NMSE med t8 0.2356, OK-cond 0.0288 | rescued 5, lost 0
+  belief1_b0.7  n= 80 BLER t1/t2/t8 = 1.000/0.938/0.875 [0.785,0.931] | NMSE med t8 0.2353, OK-cond 0.0289 | rescued 5, lost 0
+  belief3_b0.7  n= 80 BLER t1/t2/t8 = 1.000/0.938/0.875 [0.785,0.931] | NMSE med t8 0.2434, OK-cond 0.0289 | rescued 5, lost 0
+  colored_b0.7  n= 80 BLER t1/t2/t8 = 1.000/0.938/0.838 [0.742,0.903] | NMSE med t8 0.2515, OK-cond 0.0310 | rescued 8, lost 0
+  pilot_b0.7    n= 80 BLER t1/t2/t8 = 1.000/0.950/0.825 [0.727,0.893] | NMSE med t8 0.1604, OK-cond 0.0990 | rescued 10, lost 0
+  genie_b0.7    n= 80 BLER t1/t2/t8 = 0.787/0.525/0.188 [0.117,0.287] | rescued 27, lost 0
+    paired scalar_b1.0 vs scalar_b0.7 (n=80): only-scalar_b1.0-fails 1, only-scalar_b0.7-fails 1, exact sign test p = 1
+    paired scalar_b1.0 vs cinit1_b1.0 (n=80): only-scalar_b1.0-fails 1, only-cinit1_b1.0-fails 0, exact sign test p = 1
+    paired scalar_b1.0 vs belief1_b1.0 (n=80): only-scalar_b1.0-fails 0, only-belief1_b1.0-fails 0, exact sign test p = 1
+    paired cinit1_b1.0 vs belief1_b1.0 (n=80): only-cinit1_b1.0-fails 0, only-belief1_b1.0-fails 1, exact sign test p = 1
+    paired belief1_b1.0 vs belief3_b1.0 (n=80): only-belief1_b1.0-fails 1, only-belief3_b1.0-fails 0, exact sign test p = 1
+    paired belief1_b1.0 vs colored_b1.0 (n=80): only-belief1_b1.0-fails 1, only-colored_b1.0-fails 0, exact sign test p = 1
+    paired colored_b1.0 vs colored_b0.7 (n=80): only-colored_b1.0-fails 2, only-colored_b0.7-fails 0, exact sign test p = 0.5
+    paired pilot_b1.0 vs scalar_b1.0 (n=80): only-pilot_b1.0-fails 1, only-scalar_b1.0-fails 4, exact sign test p = 0.375
+    paired pilot_b1.0 vs belief1_b1.0 (n=80): only-pilot_b1.0-fails 1, only-belief1_b1.0-fails 4, exact sign test p = 0.375
+--- Tp=4, SNR=3 dB ---
+  scalar_b1.0   n=140 BLER t1/t2/t8 = 0.914/0.586/0.379 [0.302,0.461] | NMSE med t8 0.0279, OK-cond 0.0188 | rescued 29, lost 0
+  cinit1_b1.0   n=140 BLER t1/t2/t8 = 0.907/0.571/0.379 [0.302,0.461] | NMSE med t8 0.0279, OK-cond 0.0188 | rescued 27, lost 0
+  belief1_b1.0  n=140 BLER t1/t2/t8 = 0.914/0.586/0.379 [0.302,0.461] | NMSE med t8 0.0279, OK-cond 0.0188 | rescued 29, lost 0
+  belief3_b1.0  n=140 BLER t1/t2/t8 = 0.914/0.586/0.379 [0.302,0.461] | NMSE med t8 0.0279, OK-cond 0.0188 | rescued 29, lost 0
+  colored_b1.0  n=140 BLER t1/t2/t8 = 0.907/0.564/0.364 [0.289,0.447] | NMSE med t8 0.0279, OK-cond 0.0188 | rescued 28, lost 0
+  pilot_b1.0    n=140 BLER t1/t2/t8 = 0.907/0.629/0.400 [0.323,0.483] | NMSE med t8 0.1011, OK-cond 0.0897 | rescued 32, lost 0
+  genie_b1.0    n=140 BLER t1/t2/t8 = 0.429/0.114/0.029 [0.011,0.071] | rescued 12, lost 0
+  scalar_b0.7   n=140 BLER t1/t2/t8 = 0.914/0.593/0.343 [0.269,0.425] | NMSE med t8 0.0262, OK-cond 0.0183 | rescued 35, lost 0
+  cinit1_b0.7   n=140 BLER t1/t2/t8 = 0.907/0.600/0.343 [0.269,0.425] | NMSE med t8 0.0262, OK-cond 0.0183 | rescued 36, lost 0
+  belief1_b0.7  n=140 BLER t1/t2/t8 = 0.914/0.600/0.336 [0.263,0.417] | NMSE med t8 0.0262, OK-cond 0.0188 | rescued 37, lost 0
+  belief3_b0.7  n=140 BLER t1/t2/t8 = 0.914/0.600/0.336 [0.263,0.417] | NMSE med t8 0.0262, OK-cond 0.0188 | rescued 37, lost 0
+  colored_b0.7  n=140 BLER t1/t2/t8 = 0.907/0.593/0.329 [0.256,0.410] | NMSE med t8 0.0255, OK-cond 0.0185 | rescued 37, lost 0
+  pilot_b0.7    n=140 BLER t1/t2/t8 = 0.907/0.650/0.400 [0.323,0.483] | NMSE med t8 0.1011, OK-cond 0.0893 | rescued 35, lost 0
+  genie_b0.7    n=140 BLER t1/t2/t8 = 0.429/0.129/0.029 [0.011,0.071] | rescued 14, lost 0
+    paired scalar_b1.0 vs scalar_b0.7 (n=140): only-scalar_b1.0-fails 5, only-scalar_b0.7-fails 0, exact sign test p = 0.0625
+    paired scalar_b1.0 vs cinit1_b1.0 (n=140): only-scalar_b1.0-fails 0, only-cinit1_b1.0-fails 0, exact sign test p = 1
+    paired scalar_b1.0 vs belief1_b1.0 (n=140): only-scalar_b1.0-fails 0, only-belief1_b1.0-fails 0, exact sign test p = 1
+    paired cinit1_b1.0 vs belief1_b1.0 (n=140): only-cinit1_b1.0-fails 0, only-belief1_b1.0-fails 0, exact sign test p = 1
+    paired belief1_b1.0 vs belief3_b1.0 (n=140): only-belief1_b1.0-fails 0, only-belief3_b1.0-fails 0, exact sign test p = 1
+    paired belief1_b1.0 vs colored_b1.0 (n=140): only-belief1_b1.0-fails 2, only-colored_b1.0-fails 0, exact sign test p = 0.5
+    paired colored_b1.0 vs colored_b0.7 (n=140): only-colored_b1.0-fails 7, only-colored_b0.7-fails 2, exact sign test p = 0.18
+    paired pilot_b1.0 vs scalar_b1.0 (n=140): only-pilot_b1.0-fails 8, only-scalar_b1.0-fails 5, exact sign test p = 0.581
+    paired pilot_b1.0 vs belief1_b1.0 (n=140): only-pilot_b1.0-fails 8, only-belief1_b1.0-fails 5, exact sign test p = 0.581
+--- Tp=4, SNR=6 dB ---
+  scalar_b1.0   n=320 BLER t1/t2/t8 = 0.500/0.138/0.041 [0.024,0.068] | NMSE med t8 0.0098, OK-cond 0.0095 | rescued 31, lost 0
+  cinit1_b1.0   n=320 BLER t1/t2/t8 = 0.500/0.138/0.047 [0.029,0.076] | NMSE med t8 0.0100, OK-cond 0.0096 | rescued 29, lost 0
+  belief1_b1.0  n=320 BLER t1/t2/t8 = 0.500/0.138/0.041 [0.024,0.068] | NMSE med t8 0.0098, OK-cond 0.0095 | rescued 31, lost 0
+  belief3_b1.0  n=320 BLER t1/t2/t8 = 0.500/0.138/0.041 [0.024,0.068] | NMSE med t8 0.0098, OK-cond 0.0095 | rescued 31, lost 0
+  colored_b1.0  n=320 BLER t1/t2/t8 = 0.500/0.138/0.041 [0.024,0.068] | NMSE med t8 0.0100, OK-cond 0.0096 | rescued 31, lost 0
+  pilot_b1.0    n=320 BLER t1/t2/t8 = 0.500/0.169/0.066 [0.043,0.098] | NMSE med t8 0.0525, OK-cond 0.0526 | rescued 33, lost 0
+  genie_b1.0    n=320 BLER t1/t2/t8 = 0.087/0.013/0.003 [0.001,0.017] | rescued 3, lost 0
+  scalar_b0.7   n=320 BLER t1/t2/t8 = 0.500/0.144/0.025 [0.013,0.049] | NMSE med t8 0.0098, OK-cond 0.0096 | rescued 38, lost 0
+  cinit1_b0.7   n=320 BLER t1/t2/t8 = 0.500/0.147/0.025 [0.013,0.049] | NMSE med t8 0.0098, OK-cond 0.0096 | rescued 39, lost 0
+  belief1_b0.7  n=320 BLER t1/t2/t8 = 0.500/0.147/0.025 [0.013,0.049] | NMSE med t8 0.0098, OK-cond 0.0096 | rescued 39, lost 0
+  belief3_b0.7  n=320 BLER t1/t2/t8 = 0.500/0.147/0.025 [0.013,0.049] | NMSE med t8 0.0098, OK-cond 0.0096 | rescued 39, lost 0
+  colored_b0.7  n=320 BLER t1/t2/t8 = 0.500/0.141/0.025 [0.013,0.049] | NMSE med t8 0.0098, OK-cond 0.0096 | rescued 37, lost 0
+  pilot_b0.7    n=320 BLER t1/t2/t8 = 0.500/0.181/0.022 [0.011,0.044] | NMSE med t8 0.0525, OK-cond 0.0526 | rescued 51, lost 0
+  genie_b0.7    n=320 BLER t1/t2/t8 = 0.087/0.013/0.000 [-0.000,0.012] | rescued 4, lost 0
+    paired scalar_b1.0 vs scalar_b0.7 (n=320): only-scalar_b1.0-fails 5, only-scalar_b0.7-fails 0, exact sign test p = 0.0625
+    paired scalar_b1.0 vs cinit1_b1.0 (n=320): only-scalar_b1.0-fails 0, only-cinit1_b1.0-fails 2, exact sign test p = 0.5
+    paired scalar_b1.0 vs belief1_b1.0 (n=320): only-scalar_b1.0-fails 0, only-belief1_b1.0-fails 0, exact sign test p = 1
+    paired cinit1_b1.0 vs belief1_b1.0 (n=320): only-cinit1_b1.0-fails 2, only-belief1_b1.0-fails 0, exact sign test p = 0.5
+    paired belief1_b1.0 vs belief3_b1.0 (n=320): only-belief1_b1.0-fails 0, only-belief3_b1.0-fails 0, exact sign test p = 1
+    paired belief1_b1.0 vs colored_b1.0 (n=320): only-belief1_b1.0-fails 1, only-colored_b1.0-fails 1, exact sign test p = 1
+    paired colored_b1.0 vs colored_b0.7 (n=320): only-colored_b1.0-fails 5, only-colored_b0.7-fails 0, exact sign test p = 0.0625
+    paired pilot_b1.0 vs scalar_b1.0 (n=320): only-pilot_b1.0-fails 9, only-scalar_b1.0-fails 1, exact sign test p = 0.0215
+    paired pilot_b1.0 vs belief1_b1.0 (n=320): only-pilot_b1.0-fails 9, only-belief1_b1.0-fails 1, exact sign test p = 0.0215
+--- Tp=4, SNR=9 dB ---
+  scalar_b1.0   n= 80 BLER t1/t2/t8 = 0.150/0.000/0.000 [-0.000,0.046] | NMSE med t8 0.0050, OK-cond 0.0050 | rescued 0, lost 0
+  cinit1_b1.0   n= 80 BLER t1/t2/t8 = 0.150/0.000/0.000 [-0.000,0.046] | NMSE med t8 0.0050, OK-cond 0.0050 | rescued 0, lost 0
+  belief1_b1.0  n= 80 BLER t1/t2/t8 = 0.150/0.000/0.000 [-0.000,0.046] | NMSE med t8 0.0050, OK-cond 0.0050 | rescued 0, lost 0
+  belief3_b1.0  n= 80 BLER t1/t2/t8 = 0.150/0.000/0.000 [-0.000,0.046] | NMSE med t8 0.0050, OK-cond 0.0050 | rescued 0, lost 0
+  colored_b1.0  n= 80 BLER t1/t2/t8 = 0.150/0.000/0.000 [-0.000,0.046] | NMSE med t8 0.0050, OK-cond 0.0050 | rescued 0, lost 0
+  pilot_b1.0    n= 80 BLER t1/t2/t8 = 0.150/0.025/0.000 [-0.000,0.046] | NMSE med t8 0.0283, OK-cond 0.0283 | rescued 2, lost 0
+  genie_b1.0    n= 80 BLER t1/t2/t8 = 0.000/0.000/0.000 [-0.000,0.046] | rescued 0, lost 0
+  scalar_b0.7   n= 80 BLER t1/t2/t8 = 0.150/0.000/0.000 [-0.000,0.046] | NMSE med t8 0.0050, OK-cond 0.0050 | rescued 0, lost 0
+  cinit1_b0.7   n= 80 BLER t1/t2/t8 = 0.150/0.000/0.000 [-0.000,0.046] | NMSE med t8 0.0050, OK-cond 0.0050 | rescued 0, lost 0
+  belief1_b0.7  n= 80 BLER t1/t2/t8 = 0.150/0.000/0.000 [-0.000,0.046] | NMSE med t8 0.0050, OK-cond 0.0050 | rescued 0, lost 0
+  belief3_b0.7  n= 80 BLER t1/t2/t8 = 0.150/0.000/0.000 [-0.000,0.046] | NMSE med t8 0.0050, OK-cond 0.0050 | rescued 0, lost 0
+  colored_b0.7  n= 80 BLER t1/t2/t8 = 0.150/0.000/0.000 [-0.000,0.046] | NMSE med t8 0.0050, OK-cond 0.0050 | rescued 0, lost 0
+  pilot_b0.7    n= 80 BLER t1/t2/t8 = 0.150/0.000/0.000 [-0.000,0.046] | NMSE med t8 0.0283, OK-cond 0.0283 | rescued 0, lost 0
+  genie_b0.7    n= 80 BLER t1/t2/t8 = 0.000/0.000/0.000 [-0.000,0.046] | rescued 0, lost 0
+--- Tp=4, SNR=12 dB ---
+  scalar_b1.0   n= 80 BLER t1/t2/t8 = 0.013/0.000/0.000 [-0.000,0.046] | NMSE med t8 0.0028, OK-cond 0.0028 | rescued 0, lost 0
+  cinit1_b1.0   n= 80 BLER t1/t2/t8 = 0.013/0.000/0.000 [-0.000,0.046] | NMSE med t8 0.0028, OK-cond 0.0028 | rescued 0, lost 0
+  belief1_b1.0  n= 80 BLER t1/t2/t8 = 0.013/0.000/0.000 [-0.000,0.046] | NMSE med t8 0.0028, OK-cond 0.0028 | rescued 0, lost 0
+  belief3_b1.0  n= 80 BLER t1/t2/t8 = 0.013/0.000/0.000 [-0.000,0.046] | NMSE med t8 0.0028, OK-cond 0.0028 | rescued 0, lost 0
+  colored_b1.0  n= 80 BLER t1/t2/t8 = 0.013/0.000/0.000 [-0.000,0.046] | NMSE med t8 0.0028, OK-cond 0.0028 | rescued 0, lost 0
+  pilot_b1.0    n= 80 BLER t1/t2/t8 = 0.013/0.000/0.000 [-0.000,0.046] | NMSE med t8 0.0149, OK-cond 0.0149 | rescued 0, lost 0
+  genie_b1.0    n= 80 BLER t1/t2/t8 = 0.000/0.000/0.000 [-0.000,0.046] | rescued 0, lost 0
+  scalar_b0.7   n= 80 BLER t1/t2/t8 = 0.013/0.000/0.000 [-0.000,0.046] | NMSE med t8 0.0028, OK-cond 0.0028 | rescued 0, lost 0
+  cinit1_b0.7   n= 80 BLER t1/t2/t8 = 0.013/0.000/0.000 [-0.000,0.046] | NMSE med t8 0.0028, OK-cond 0.0028 | rescued 0, lost 0
+  belief1_b0.7  n= 80 BLER t1/t2/t8 = 0.013/0.000/0.000 [-0.000,0.046] | NMSE med t8 0.0028, OK-cond 0.0028 | rescued 0, lost 0
+  belief3_b0.7  n= 80 BLER t1/t2/t8 = 0.013/0.000/0.000 [-0.000,0.046] | NMSE med t8 0.0028, OK-cond 0.0028 | rescued 0, lost 0
+  colored_b0.7  n= 80 BLER t1/t2/t8 = 0.013/0.000/0.000 [-0.000,0.046] | NMSE med t8 0.0028, OK-cond 0.0028 | rescued 0, lost 0
+  pilot_b0.7    n= 80 BLER t1/t2/t8 = 0.013/0.000/0.000 [-0.000,0.046] | NMSE med t8 0.0149, OK-cond 0.0149 | rescued 0, lost 0
+  genie_b0.7    n= 80 BLER t1/t2/t8 = 0.000/0.000/0.000 [-0.000,0.046] | rescued 0, lost 0
+--- Tp=2, SNR=3 dB ---
+  scalar_b1.0   n= 80 BLER t1/t2/t8 = 1.000/1.000/0.938 [0.862,0.973] | NMSE med t8 0.5490, OK-cond 0.0232 | rescued 5, lost 0
+  cinit1_b1.0   n= 80 BLER t1/t2/t8 = 1.000/0.975/0.863 [0.770,0.921] | NMSE med t8 0.4640, OK-cond 0.0185 | rescued 9, lost 0
+  belief1_b1.0  n= 80 BLER t1/t2/t8 = 1.000/0.975/0.825 [0.727,0.893] | NMSE med t8 0.4484, OK-cond 0.0184 | rescued 12, lost 0
+  belief3_b1.0  n= 80 BLER t1/t2/t8 = 1.000/0.963/0.825 [0.727,0.893] | NMSE med t8 0.4810, OK-cond 0.0237 | rescued 11, lost 0
+  colored_b1.0  n= 80 BLER t1/t2/t8 = 1.000/0.975/0.775 [0.672,0.853] | NMSE med t8 0.4604, OK-cond 0.0184 | rescued 16, lost 0
+  pilot_b1.0    n= 80 BLER t1/t2/t8 = 1.000/0.988/0.950 [0.878,0.980] | NMSE med t8 0.2724, OK-cond 0.0954 | rescued 3, lost 0
+  genie_b1.0    n= 80 BLER t1/t2/t8 = 0.412/0.125/0.050 [0.020,0.122] | rescued 6, lost 0
+  scalar_b0.7   n= 80 BLER t1/t2/t8 = 1.000/1.000/0.938 [0.862,0.973] | NMSE med t8 0.4924, OK-cond 0.0216 | rescued 5, lost 0
+  cinit1_b0.7   n= 80 BLER t1/t2/t8 = 1.000/1.000/0.887 [0.800,0.940] | NMSE med t8 0.4769, OK-cond 0.0193 | rescued 9, lost 0
+  belief1_b0.7  n= 80 BLER t1/t2/t8 = 1.000/1.000/0.875 [0.785,0.931] | NMSE med t8 0.4859, OK-cond 0.0165 | rescued 10, lost 0
+  belief3_b0.7  n= 80 BLER t1/t2/t8 = 1.000/0.975/0.850 [0.756,0.912] | NMSE med t8 0.5020, OK-cond 0.0193 | rescued 10, lost 0
+  colored_b0.7  n= 80 BLER t1/t2/t8 = 1.000/0.988/0.787 [0.686,0.863] | NMSE med t8 0.4790, OK-cond 0.0162 | rescued 16, lost 0
+  pilot_b0.7    n= 80 BLER t1/t2/t8 = 1.000/0.988/0.950 [0.878,0.980] | NMSE med t8 0.2724, OK-cond 0.0954 | rescued 3, lost 0
+  genie_b0.7    n= 80 BLER t1/t2/t8 = 0.412/0.125/0.025 [0.007,0.087] | rescued 8, lost 0
+    paired scalar_b1.0 vs scalar_b0.7 (n=80): only-scalar_b1.0-fails 2, only-scalar_b0.7-fails 2, exact sign test p = 1
+    paired scalar_b1.0 vs cinit1_b1.0 (n=80): only-scalar_b1.0-fails 7, only-cinit1_b1.0-fails 1, exact sign test p = 0.0703
+    paired scalar_b1.0 vs belief1_b1.0 (n=80): only-scalar_b1.0-fails 9, only-belief1_b1.0-fails 0, exact sign test p = 0.00391
+    paired cinit1_b1.0 vs belief1_b1.0 (n=80): only-cinit1_b1.0-fails 3, only-belief1_b1.0-fails 0, exact sign test p = 0.25
+    paired belief1_b1.0 vs belief3_b1.0 (n=80): only-belief1_b1.0-fails 3, only-belief3_b1.0-fails 3, exact sign test p = 1
+    paired belief1_b1.0 vs colored_b1.0 (n=80): only-belief1_b1.0-fails 8, only-colored_b1.0-fails 4, exact sign test p = 0.388
+    paired colored_b1.0 vs colored_b0.7 (n=80): only-colored_b1.0-fails 1, only-colored_b0.7-fails 2, exact sign test p = 1
+    paired pilot_b1.0 vs scalar_b1.0 (n=80): only-pilot_b1.0-fails 4, only-scalar_b1.0-fails 3, exact sign test p = 1
+    paired pilot_b1.0 vs belief1_b1.0 (n=80): only-pilot_b1.0-fails 11, only-belief1_b1.0-fails 1, exact sign test p = 0.00635
+--- Tp=2, SNR=6 dB ---
+  scalar_b1.0   n= 80 BLER t1/t2/t8 = 1.000/0.988/0.713 [0.605,0.800] | NMSE med t8 0.4448, OK-cond 0.0092 | rescued 22, lost 0
+  cinit1_b1.0   n= 80 BLER t1/t2/t8 = 0.988/0.900/0.688 [0.579,0.778] | NMSE med t8 0.2916, OK-cond 0.0092 | rescued 17, lost 0
+  belief1_b1.0  n= 80 BLER t1/t2/t8 = 1.000/0.875/0.575 [0.466,0.677] | NMSE med t8 0.2356, OK-cond 0.0089 | rescued 24, lost 0
+  belief3_b1.0  n= 80 BLER t1/t2/t8 = 1.000/0.863/0.600 [0.490,0.700] | NMSE med t8 0.2537, OK-cond 0.0093 | rescued 21, lost 0
+  colored_b1.0  n= 80 BLER t1/t2/t8 = 0.988/0.825/0.537 [0.429,0.643] | NMSE med t8 0.2011, OK-cond 0.0093 | rescued 23, lost 0
+  pilot_b1.0    n= 80 BLER t1/t2/t8 = 0.988/0.925/0.738 [0.632,0.821] | NMSE med t8 0.1897, OK-cond 0.1607 | rescued 15, lost 0
+  genie_b1.0    n= 80 BLER t1/t2/t8 = 0.100/0.013/0.013 [0.002,0.067] | rescued 0, lost 0
+  scalar_b0.7   n= 80 BLER t1/t2/t8 = 1.000/0.988/0.775 [0.672,0.853] | NMSE med t8 0.4733, OK-cond 0.0092 | rescued 17, lost 0
+  cinit1_b0.7   n= 80 BLER t1/t2/t8 = 0.988/0.925/0.688 [0.579,0.778] | NMSE med t8 0.3220, OK-cond 0.0092 | rescued 19, lost 0
+  belief1_b0.7  n= 80 BLER t1/t2/t8 = 1.000/0.912/0.575 [0.466,0.677] | NMSE med t8 0.2618, OK-cond 0.0091 | rescued 27, lost 0
+  belief3_b0.7  n= 80 BLER t1/t2/t8 = 1.000/0.887/0.588 [0.478,0.689] | NMSE med t8 0.2807, OK-cond 0.0092 | rescued 24, lost 0
+  colored_b0.7  n= 80 BLER t1/t2/t8 = 0.988/0.850/0.500 [0.393,0.607] | NMSE med t8 0.1290, OK-cond 0.0099 | rescued 28, lost 0
+  pilot_b0.7    n= 80 BLER t1/t2/t8 = 0.988/0.950/0.738 [0.632,0.821] | NMSE med t8 0.1897, OK-cond 0.1607 | rescued 17, lost 0
+  genie_b0.7    n= 80 BLER t1/t2/t8 = 0.100/0.013/0.000 [-0.000,0.046] | rescued 1, lost 0
+    paired scalar_b1.0 vs scalar_b0.7 (n=80): only-scalar_b1.0-fails 1, only-scalar_b0.7-fails 6, exact sign test p = 0.125
+    paired scalar_b1.0 vs cinit1_b1.0 (n=80): only-scalar_b1.0-fails 9, only-cinit1_b1.0-fails 7, exact sign test p = 0.804
+    paired scalar_b1.0 vs belief1_b1.0 (n=80): only-scalar_b1.0-fails 14, only-belief1_b1.0-fails 3, exact sign test p = 0.0127
+    paired cinit1_b1.0 vs belief1_b1.0 (n=80): only-cinit1_b1.0-fails 14, only-belief1_b1.0-fails 5, exact sign test p = 0.0636
+    paired belief1_b1.0 vs belief3_b1.0 (n=80): only-belief1_b1.0-fails 5, only-belief3_b1.0-fails 7, exact sign test p = 0.774
+    paired belief1_b1.0 vs colored_b1.0 (n=80): only-belief1_b1.0-fails 11, only-colored_b1.0-fails 8, exact sign test p = 0.648
+    paired colored_b1.0 vs colored_b0.7 (n=80): only-colored_b1.0-fails 4, only-colored_b0.7-fails 1, exact sign test p = 0.375
+    paired pilot_b1.0 vs scalar_b1.0 (n=80): only-pilot_b1.0-fails 12, only-scalar_b1.0-fails 10, exact sign test p = 0.832
+    paired pilot_b1.0 vs belief1_b1.0 (n=80): only-pilot_b1.0-fails 17, only-belief1_b1.0-fails 4, exact sign test p = 0.0072
+--- Tp=2, SNR=9 dB ---
+  scalar_b1.0   n=320 BLER t1/t2/t8 = 1.000/0.981/0.697 [0.644,0.745] | NMSE med t8 0.3463, OK-cond 0.0059 | rescued 91, lost 0
+  cinit1_b1.0   n=320 BLER t1/t2/t8 = 0.991/0.794/0.503 [0.449,0.558] | NMSE med t8 0.1072, OK-cond 0.0053 | rescued 93, lost 0
+  belief1_b1.0  n=320 BLER t1/t2/t8 = 0.997/0.844/0.497 [0.442,0.551] | NMSE med t8 0.0546, OK-cond 0.0054 | rescued 111, lost 0
+  belief3_b1.0  n=320 BLER t1/t2/t8 = 0.994/0.797/0.484 [0.430,0.539] | NMSE med t8 0.0151, OK-cond 0.0052 | rescued 100, lost 0
+  colored_b1.0  n=320 BLER t1/t2/t8 = 0.991/0.691/0.369 [0.318,0.423] | NMSE med t8 0.0081, OK-cond 0.0050 | rescued 103, lost 0
+  pilot_b1.0    n= 80 BLER t1/t2/t8 = 0.975/0.887/0.700 [0.592,0.789] | NMSE med t8 0.1934, OK-cond 0.1669 | rescued 15, lost 0
+  genie_b1.0    n= 80 BLER t1/t2/t8 = 0.013/0.000/0.000 [-0.000,0.046] | rescued 0, lost 0
+  scalar_b0.7   n=320 BLER t1/t2/t8 = 1.000/0.984/0.747 [0.696,0.791] | NMSE med t8 0.3560, OK-cond 0.0062 | rescued 76, lost 0
+  cinit1_b0.7   n=320 BLER t1/t2/t8 = 0.991/0.853/0.534 [0.480,0.588] | NMSE med t8 0.1599, OK-cond 0.0054 | rescued 102, lost 0
+  belief1_b0.7  n=320 BLER t1/t2/t8 = 0.997/0.884/0.503 [0.449,0.558] | NMSE med t8 0.1153, OK-cond 0.0055 | rescued 122, lost 0
+  belief3_b0.7  n=320 BLER t1/t2/t8 = 0.994/0.838/0.494 [0.439,0.548] | NMSE med t8 0.0601, OK-cond 0.0052 | rescued 110, lost 0
+  colored_b0.7  n=320 BLER t1/t2/t8 = 0.991/0.725/0.362 [0.312,0.417] | NMSE med t8 0.0082, OK-cond 0.0051 | rescued 116, lost 0
+  pilot_b0.7    n= 80 BLER t1/t2/t8 = 0.975/0.900/0.675 [0.566,0.768] | NMSE med t8 0.1934, OK-cond 0.1737 | rescued 18, lost 0
+  genie_b0.7    n= 80 BLER t1/t2/t8 = 0.013/0.000/0.000 [-0.000,0.046] | rescued 0, lost 0
+    paired scalar_b1.0 vs scalar_b0.7 (n=320): only-scalar_b1.0-fails 8, only-scalar_b0.7-fails 24, exact sign test p = 0.007
+    paired scalar_b1.0 vs cinit1_b1.0 (n=320): only-scalar_b1.0-fails 76, only-cinit1_b1.0-fails 14, exact sign test p = 1.78e-11
+    paired scalar_b1.0 vs belief1_b1.0 (n=320): only-scalar_b1.0-fails 74, only-belief1_b1.0-fails 10, exact sign test p = 3.29e-13
+    paired cinit1_b1.0 vs belief1_b1.0 (n=320): only-cinit1_b1.0-fails 28, only-belief1_b1.0-fails 26, exact sign test p = 0.892
+    paired belief1_b1.0 vs belief3_b1.0 (n=320): only-belief1_b1.0-fails 18, only-belief3_b1.0-fails 14, exact sign test p = 0.597
+    paired belief1_b1.0 vs colored_b1.0 (n=320): only-belief1_b1.0-fails 57, only-colored_b1.0-fails 16, exact sign test p = 1.53e-06
+    paired colored_b1.0 vs colored_b0.7 (n=320): only-colored_b1.0-fails 10, only-colored_b0.7-fails 8, exact sign test p = 0.815
+    paired pilot_b1.0 vs scalar_b1.0 (n=80): only-pilot_b1.0-fails 13, only-scalar_b1.0-fails 11, exact sign test p = 0.839
+    paired pilot_b1.0 vs belief1_b1.0 (n=80): only-pilot_b1.0-fails 24, only-belief1_b1.0-fails 6, exact sign test p = 0.00143
+--- Tp=2, SNR=12 dB ---
+  scalar_b1.0   n=320 BLER t1/t2/t8 = 1.000/0.947/0.594 [0.539,0.646] | NMSE med t8 0.2466, OK-cond 0.0026 | rescued 113, lost 0
+  cinit1_b1.0   n=320 BLER t1/t2/t8 = 0.994/0.703/0.388 [0.336,0.442] | NMSE med t8 0.0043, OK-cond 0.0025 | rescued 101, lost 0
+  belief1_b1.0  n=320 BLER t1/t2/t8 = 1.000/0.787/0.431 [0.378,0.486] | NMSE med t8 0.0052, OK-cond 0.0025 | rescued 114, lost 0
+  belief3_b1.0  n=320 BLER t1/t2/t8 = 1.000/0.725/0.400 [0.348,0.455] | NMSE med t8 0.0044, OK-cond 0.0025 | rescued 104, lost 0
+  colored_b1.0  n=320 BLER t1/t2/t8 = 0.994/0.578/0.263 [0.217,0.313] | NMSE med t8 0.0036, OK-cond 0.0027 | rescued 101, lost 0
+  pilot_b1.0    n= 80 BLER t1/t2/t8 = 0.988/0.838/0.537 [0.429,0.643] | NMSE med t8 0.1754, OK-cond 0.1376 | rescued 24, lost 0
+  genie_b1.0    n= 80 BLER t1/t2/t8 = 0.000/0.000/0.000 [-0.000,0.046] | rescued 0, lost 0
+  scalar_b0.7   n=320 BLER t1/t2/t8 = 1.000/0.969/0.653 [0.599,0.703] | NMSE med t8 0.3168, OK-cond 0.0032 | rescued 101, lost 0
+  cinit1_b0.7   n=320 BLER t1/t2/t8 = 0.994/0.772/0.416 [0.363,0.470] | NMSE med t8 0.0051, OK-cond 0.0026 | rescued 114, lost 0
+  belief1_b0.7  n=320 BLER t1/t2/t8 = 1.000/0.831/0.403 [0.351,0.458] | NMSE med t8 0.0051, OK-cond 0.0026 | rescued 137, lost 0
+  belief3_b0.7  n=320 BLER t1/t2/t8 = 1.000/0.766/0.384 [0.333,0.439] | NMSE med t8 0.0046, OK-cond 0.0026 | rescued 122, lost 0
+  colored_b0.7  n=320 BLER t1/t2/t8 = 0.994/0.625/0.247 [0.203,0.297] | NMSE med t8 0.0035, OK-cond 0.0027 | rescued 121, lost 0
+  pilot_b0.7    n= 80 BLER t1/t2/t8 = 0.988/0.875/0.537 [0.429,0.643] | NMSE med t8 0.1754, OK-cond 0.1366 | rescued 27, lost 0
+  genie_b0.7    n= 80 BLER t1/t2/t8 = 0.000/0.000/0.000 [-0.000,0.046] | rescued 0, lost 0
+    paired scalar_b1.0 vs scalar_b0.7 (n=320): only-scalar_b1.0-fails 10, only-scalar_b0.7-fails 29, exact sign test p = 0.00338
+    paired scalar_b1.0 vs cinit1_b1.0 (n=320): only-scalar_b1.0-fails 80, only-cinit1_b1.0-fails 14, exact sign test p = 2.12e-12
+    paired scalar_b1.0 vs belief1_b1.0 (n=320): only-scalar_b1.0-fails 68, only-belief1_b1.0-fails 16, exact sign test p = 8.54e-09
+    paired cinit1_b1.0 vs belief1_b1.0 (n=320): only-cinit1_b1.0-fails 29, only-belief1_b1.0-fails 43, exact sign test p = 0.125
+    paired belief1_b1.0 vs belief3_b1.0 (n=320): only-belief1_b1.0-fails 24, only-belief3_b1.0-fails 14, exact sign test p = 0.143
+    paired belief1_b1.0 vs colored_b1.0 (n=320): only-belief1_b1.0-fails 63, only-colored_b1.0-fails 9, exact sign test p = 4.18e-11
+    paired colored_b1.0 vs colored_b0.7 (n=320): only-colored_b1.0-fails 11, only-colored_b0.7-fails 6, exact sign test p = 0.332
+    paired pilot_b1.0 vs scalar_b1.0 (n=80): only-pilot_b1.0-fails 10, only-scalar_b1.0-fails 18, exact sign test p = 0.185
+    paired pilot_b1.0 vs belief1_b1.0 (n=80): only-pilot_b1.0-fails 18, only-belief1_b1.0-fails 9, exact sign test p = 0.122
+--- Tp=2, SNR=15 dB ---
+  scalar_b1.0   n=320 BLER t1/t2/t8 = 1.000/0.906/0.469 [0.415,0.523] | NMSE med t8 0.0172, OK-cond 0.0014 | rescued 140, lost 0
+  cinit1_b1.0   n=320 BLER t1/t2/t8 = 0.978/0.625/0.312 [0.264,0.365] | NMSE med t8 0.0019, OK-cond 0.0014 | rescued 100, lost 0
+  belief1_b1.0  n=320 BLER t1/t2/t8 = 1.000/0.688/0.281 [0.235,0.333] | NMSE med t8 0.0018, OK-cond 0.0013 | rescued 130, lost 0
+  belief3_b1.0  n=320 BLER t1/t2/t8 = 1.000/0.641/0.287 [0.241,0.339] | NMSE med t8 0.0018, OK-cond 0.0014 | rescued 113, lost 0
+  colored_b1.0  n=320 BLER t1/t2/t8 = 0.978/0.491/0.188 [0.149,0.234] | NMSE med t8 0.0016, OK-cond 0.0014 | rescued 97, lost 0
+  pilot_b1.0    n= 80 BLER t1/t2/t8 = 0.975/0.787/0.463 [0.357,0.571] | NMSE med t8 0.1561, OK-cond 0.1264 | rescued 26, lost 0
+  genie_b1.0    n= 80 BLER t1/t2/t8 = 0.000/0.000/0.000 [-0.000,0.046] | rescued 0, lost 0
+  scalar_b0.7   n=320 BLER t1/t2/t8 = 1.000/0.925/0.519 [0.464,0.573] | NMSE med t8 0.1457, OK-cond 0.0017 | rescued 130, lost 0
+  cinit1_b0.7   n=320 BLER t1/t2/t8 = 0.978/0.694/0.322 [0.273,0.375] | NMSE med t8 0.0021, OK-cond 0.0014 | rescued 119, lost 0
+  belief1_b0.7  n=320 BLER t1/t2/t8 = 1.000/0.756/0.303 [0.255,0.356] | NMSE med t8 0.0020, OK-cond 0.0014 | rescued 145, lost 0
+  belief3_b0.7  n=320 BLER t1/t2/t8 = 1.000/0.672/0.294 [0.247,0.346] | NMSE med t8 0.0019, OK-cond 0.0014 | rescued 121, lost 0
+  colored_b0.7  n=320 BLER t1/t2/t8 = 0.978/0.506/0.163 [0.126,0.207] | NMSE med t8 0.0016, OK-cond 0.0014 | rescued 110, lost 0
+  pilot_b0.7    n= 80 BLER t1/t2/t8 = 0.975/0.850/0.450 [0.346,0.559] | NMSE med t8 0.1561, OK-cond 0.1262 | rescued 32, lost 0
+  genie_b0.7    n= 80 BLER t1/t2/t8 = 0.000/0.000/0.000 [-0.000,0.046] | rescued 0, lost 0
+    paired scalar_b1.0 vs scalar_b0.7 (n=320): only-scalar_b1.0-fails 15, only-scalar_b0.7-fails 31, exact sign test p = 0.0259
+    paired scalar_b1.0 vs cinit1_b1.0 (n=320): only-scalar_b1.0-fails 68, only-cinit1_b1.0-fails 18, exact sign test p = 5.29e-08
+    paired scalar_b1.0 vs belief1_b1.0 (n=320): only-scalar_b1.0-fails 71, only-belief1_b1.0-fails 11, exact sign test p = 6.81e-12
+    paired cinit1_b1.0 vs belief1_b1.0 (n=320): only-cinit1_b1.0-fails 32, only-belief1_b1.0-fails 22, exact sign test p = 0.22
+    paired belief1_b1.0 vs belief3_b1.0 (n=320): only-belief1_b1.0-fails 14, only-belief3_b1.0-fails 16, exact sign test p = 0.856
+    paired belief1_b1.0 vs colored_b1.0 (n=320): only-belief1_b1.0-fails 45, only-colored_b1.0-fails 15, exact sign test p = 0.000135
+    paired colored_b1.0 vs colored_b0.7 (n=320): only-colored_b1.0-fails 14, only-colored_b0.7-fails 6, exact sign test p = 0.115
+    paired pilot_b1.0 vs scalar_b1.0 (n=80): only-pilot_b1.0-fails 17, only-scalar_b1.0-fails 12, exact sign test p = 0.458
+    paired pilot_b1.0 vs belief1_b1.0 (n=80): only-pilot_b1.0-fails 21, only-belief1_b1.0-fails 3, exact sign test p = 0.000277

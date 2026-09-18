@@ -1,0 +1,26 @@
+
+[main 16-QAM] code ('133', '171')_8 nu=6, 2^4-QAM, K=12: 9 symbols/block, 4096 codewords, branches/section = 64x4 = 256
+   tau   max|dP|  max|dxbar|   max|dv|   bitmarg   Tweedie       Jac  diag=v/tau       div    tilted  pipe NMSE  pipe max  pipe|dv|
+  0.05   7.5e-49     0.0e+00   0.0e+00   8.3e-49   8.4e-12   0.0e+00     0.0e+00   0.0e+00   1.1e-48    0.0e+00     0.000     0.000
+  0.20   8.9e-16     1.3e-15   1.8e-15   8.9e-16   6.6e-11   3.7e-10     3.7e-10   8.2e-11   1.2e-15    1.3e-05     0.019     0.001
+  0.50   1.6e-15     2.0e-15   3.1e-15   1.4e-15   7.3e-11   1.1e-10     1.1e-10   3.6e-11   2.0e-15    8.7e-03     0.326     0.052
+  1.00   2.1e-15     2.2e-15   2.4e-15   2.1e-15   1.7e-10   1.0e-10     9.4e-11   1.7e-11   1.6e-15    5.2e-02     0.520     0.206
+  2.00   1.0e-15     1.4e-15   8.9e-16   1.0e-15   2.3e-10   8.0e-11     3.5e-11   6.0e-12   8.9e-16    2.6e-02     0.346     0.103
+  5.00   8.9e-16     1.3e-15   1.6e-15   1.2e-15   1.4e-09   9.6e-11     3.5e-11   6.3e-12   8.9e-16    1.3e-02     0.330     0.066
+
+[K=16 16-QAM (65536 codewords)] code ('133', '171')_8 nu=6, 2^4-QAM, K=16: 11 symbols/block, 65536 codewords, branches/section = 64x4 = 256
+   tau   max|dP|  max|dxbar|   max|dv|   bitmarg    tilted  pipe NMSE  pipe max  pipe|dv|
+  1.00   4.9e-15     6.6e-15   6.2e-15   4.6e-15   4.9e-15    2.9e-02     0.370     0.095
+
+[QPSK] code ('133', '171')_8 nu=6, 2^2-QAM, K=12: 18 symbols/block, 4096 codewords, branches/section = 64x2 = 128
+   tau   max|dP|  max|dxbar|   max|dv|   bitmarg   Tweedie       Jac  diag=v/tau       div    tilted  pipe NMSE  pipe max  pipe|dv|
+  0.50   2.8e-15     2.7e-15   2.7e-15   2.8e-15   1.6e-10   1.2e-10     1.1e-10   1.5e-11   2.3e-15    1.4e-30     0.000     0.000
+  2.00   2.7e-15     2.7e-15   2.2e-15   2.8e-15   4.6e-10   1.5e-10     1.0e-10   1.1e-11   3.4e-15    9.0e-31     0.000     0.000
+
+[64-QAM] code ('133', '171')_8 nu=6, 2^6-QAM, K=12: 6 symbols/block, 4096 codewords, branches/section = 64x8 = 512
+   tau   max|dP|  max|dxbar|   max|dv|   bitmarg   Tweedie       Jac  diag=v/tau       div    tilted  pipe NMSE  pipe max  pipe|dv|
+  0.50   1.1e-15     1.0e-15   4.4e-16   1.1e-15   2.6e-11   5.2e-11     5.2e-11   7.0e-12   6.7e-16    2.1e-02     0.261     0.138
+  2.00   5.0e-16     5.2e-16   5.6e-16   6.7e-16   2.3e-10   4.2e-11     4.2e-11   1.0e-11   3.9e-16    1.7e-02     0.179     0.117
+
+[cost] K=200, 103 16-QAM symbols: super-section BCJR 0.62s (256 branch metrics/symbol) vs bit-level BCJR 1.91s (256 branch metrics/symbol); numpy loops, no vectorization
+[cost] branch metrics per symbol, rate-1/2 code, 2^nu states: QPSK 2^nu*2 vs 2^nu*2 ; 16-QAM 2^nu*4 vs 2^nu*4 ; 64-QAM 2^nu*8 vs 2^nu*6 ; 256-QAM 2^nu*16 vs 2^nu*8   (super-section vs bit-level)

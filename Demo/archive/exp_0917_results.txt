@@ -1,0 +1,22 @@
+
+N_r x N_t = 8x4 (N=32), rho=0.7, 2000 draws
+    nu   alpha |  F1 mean  F1 std | FB=8 std |  H1 std  H4 std  H16 std |  v_ext rel.err: F1      H4     H16
+ 0.010  0.9426 |   0.9423  0.0146 |   0.0050 |  0.1655  0.0825   0.0420 |              0.282  40.591  25.542
+ 0.100  0.6985 |   0.7006  0.0678 |   0.0258 |  0.1287  0.0632   0.0322 |              0.357   0.447   0.163
+ 0.300  0.5100 |   0.5075  0.0988 |   0.0354 |  0.1027  0.0506   0.0246 |              0.415   0.221   0.100
+ 1.000  0.3082 |   0.3062  0.1281 |   0.0472 |  0.0707  0.0350   0.0174 |              0.631   0.168   0.082
+EX: exact trace needs 2N real directional derivatives (2N = 64 ) or one autodiff Jacobian trace; std = 0.
+
+N_r x N_t = 8x8 (N=64), rho=0.7, 1000 draws
+    nu   alpha |  F1 mean  F1 std | FB=8 std |  H1 std  H4 std  H16 std |  v_ext rel.err: F1      H4     H16
+ 0.010  0.9376 |   0.9374  0.0111 |   0.0038 |  0.1182  0.0574   0.0289 |              0.201  14.847   9.081
+ 0.100  0.6822 |   0.6800  0.0496 |   0.0183 |  0.0903  0.0449   0.0218 |              0.235   0.231   0.103
+ 0.300  0.4932 |   0.4943  0.0754 |   0.0255 |  0.0714  0.0369   0.0175 |              0.318   0.156   0.070
+ 1.000  0.2961 |   0.3000  0.0904 |   0.0319 |  0.0468  0.0244   0.0125 |              0.452   0.119   0.060
+EX: exact trace needs 2N real directional derivatives (2N = 128 ) or one autodiff Jacobian trace; std = 0.
+
+N_r x N_t = 32x32 (N=1024), rho=0.7, 200 draws
+    nu   alpha |  F1 mean  F1 std | FB=8 std |  H1 std  H4 std  H16 std |  v_ext rel.err: F1      H4     H16
+ 0.100  0.6575 |   0.6572  0.0127 |   0.0039 |  0.0196  0.0105   0.0059 |              0.057   0.047   0.026
+ 1.000  0.2785 |   0.2789  0.0254 |   0.0071 |  0.0112  0.0056   0.0028 |              0.126   0.028   0.014
+EX: exact trace needs 2N real directional derivatives (2N = 2048 ) or one autodiff Jacobian trace; std = 0.

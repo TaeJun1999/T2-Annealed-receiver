@@ -1,0 +1,37 @@
+[Gaussian sanity] E[x|xt]=s2/(s2+sig2) xt -> Jacobian 0.636364; Var/sig2 = 0.636364
+
+[real BPSK] code ('7', '5')_8, nu=2, K=10: N=24 coded bits, 1024 codewords
+ sigma^2  max|tanh-E|    score(FD)      Jac(FD)  diag vs BCJR  div vs v/s2  MaxLog err
+   0.050     0.00e+00     1.93e-10     2.50e-68      0.00e+00     0.00e+00    0.00e+00
+   0.300     6.66e-16     2.08e-10     8.52e-11      7.86e-11     1.74e-11    2.23e-07
+   1.000     2.83e-15     4.34e-10     1.27e-10      1.01e-10     1.11e-11    4.81e-02
+   3.000     1.55e-15     4.61e-10     1.02e-10      6.88e-11     9.66e-12    5.83e-01
+  10.000     9.99e-16     6.38e-10     9.48e-11      5.75e-11     6.52e-12    7.78e-01
+
+[real BPSK] code ('133', '171')_8, nu=6, K=8: N=28 coded bits, 256 codewords
+ sigma^2  max|tanh-E|    score(FD)      Jac(FD)  diag vs BCJR  div vs v/s2  MaxLog err
+   0.050     0.00e+00     2.36e-10    1.20e-146      0.00e+00     0.00e+00    0.00e+00
+   0.300     0.00e+00     2.76e-10     5.39e-19      0.00e+00     0.00e+00    0.00e+00
+   1.000     2.33e-15     5.55e-10     9.01e-11      7.51e-11     7.33e-12    7.42e-02
+   3.000     1.28e-15     4.43e-10     8.86e-11      6.32e-11     8.92e-12    3.37e-01
+  10.000     1.61e-15     6.89e-10     7.62e-11      6.03e-11     5.10e-12    5.82e-01
+
+[complex embedding] noise CN(0, sigma_c^2) per entry; BPSK on real axis
+sigma_c^2  Lc=4/s2 err  Lc=2/s2 err  cplx Tweedie
+    0.300     0.00e+00     0.00e+00      8.68e-11
+    1.000     2.55e-15     1.17e-03      6.46e-10
+    3.000     1.89e-15     4.95e-01      1.65e-09
+
+[puncturing] 21/28 bits transmitted; punctured positions get L_ch = 0
+ sigma^2  tx symbols err  punct. symbols err
+   0.300        8.88e-16            8.88e-16
+   1.000        1.33e-15            9.99e-16
+   3.000        1.33e-15            1.39e-15
+
+[16-QAM Gray, no interleaver] code ('7', '5')_8, nu=2, K=10: 6 symbols/block, 20 trials
+   tau  symbol-BCJR err  bit-pipeline NMSE   max|dx|  |dv| mean  input-side NMSE  output-side NMSE
+  0.05         0.00e+00           1.21e-29     0.000      0.000         6.34e-29          0.00e+00
+  0.20         2.05e-15           1.97e-05     0.039      0.002         8.14e-06          2.82e-05
+  0.50         1.89e-15           2.13e-02     0.492      0.088         1.29e-02          1.47e-02
+  1.00         2.99e-15           3.53e-02     0.492      0.112         1.92e-02          3.23e-02
+  2.00         1.75e-15           2.72e-02     0.447      0.095         1.42e-02          3.25e-02
