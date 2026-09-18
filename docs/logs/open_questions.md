@@ -125,3 +125,46 @@
   특히 literal 우세·b* 유의차 미검출 조합을 K3 불성립만으로 중단 처리하지 말 것.
   이번에는 코드·기준·결과 파일을 변경하지 않았으며 기계 출력과 수동 판독을 병기함.
   후속 점검은 사전 등록 기준을 변경하지 않는 범위에서 수행.
+
+- **Q-32 갱신 (2026-09-18, 세션 7 판독 ④, workspace GPT) [측정]:**
+  근거 커밋 310f2ae. H,S의 SNR@0.1은 full-K32 6.65, score 3.30,
+  b* 3.09, exactEP-true 2.81, lmmseC_pf 5.44 dB.
+  full-K32 -> score 이득 +3.35 dB, 90% CI [+1.79,+4.51], censored 출력 0%.
+  ③의 score 3/3점 승리와 같은 방향. ②·③ 판정은 변경하지 않음.
+  SNR@0.1 비교를 K2/K3 부호검정 대신 사용하지 않으며 Q-32 열림 유지.
+
+- **Q-35 갱신 (2026-09-18, 세션 7 판독 ④) [측정]:**
+  H,S에서 b*의 score 대비 점추정 이득은 약 0.21 dB이나
+  이 쌍의 직접 paired bootstrap CI는 §3에 출력되지 않음.
+  다른 CI를 빼서 대체하지 않음. ③의 pooled 71 불일치 쌍과
+  차이 미검출 해석을 유지하며 동등성 또는 유의패배로 쓰지 않음.
+  R8 적용 유지. Q-35(c) 최소 확인 없이 score 분기 중단을 결론하지 않음.
+
+- **Q-37 갱신 (2026-09-18, 세션 7 판독 ④) [측정]:**
+  H,U/P의 §3 주요 gain 여섯 개씩은 모두 n/a(양쪽 >15)임을 확인.
+  Gaussian 대비 비Gaussian 경로의 target-BLER SNR 이득,
+  score-full-K32 및 score-b*의 SNR 차이를 현 격자로 정량화할 수 없음.
+  기존 H,U/P 격자 확장 계획은 판독 종료 후 실행으로 유지.
+  R,U/P에서도 주요 gain 모두 n/a이나 기존 실행 범위를 자동 확대하지 않음;
+  R셀의 후속 필요는 Q-39에서 별도 확인.
+
+- **Q-39 (열림, Phase 3, 중간 — SNR@0.1 불확실성 보고) [측정 + 정확: 코드 대조]:**
+  R,S의 §3 여섯 gain은 censored replicate 출력이 각각
+  58/40/29/48/49/15%이다(순서: Gaussian->exactEP, Gaussian->b*,
+  Gaussian->score, b*->exactEP, score->exactEP, full-K32->score).
+  gain()은 양쪽 격자 내 교차에 성공한 replicate만 남겨
+  np.nanpercentile([5,95])로 CI를 계산하므로 조건부 분위수로 읽어야 한다.
+  확인할 것: (a) R셀 격자 경계/미도달과 censoring을 함께 다루는 보고 및
+  필요한 격자 범위, (b) H,S의 score-b* 직접 paired bootstrap CI.
+  후속 계산·설계는 ②~⑥ 판독 종료 후에 검토한다.
+  이번에는 새 합격 임계값, 코드 수정, 새 데이터 또는 재표집 결과를 도입하지 않음.
+
+- **Q-40 (열림, Phase 2/M2, 높음 — 실행 필요) [측정, 세션 7 판독 ④]:** `Hscore-kron`
+  arm 부재. §3의 2x2 요인 설계에서 prior는 실제로 3종(true / 적합 full-K32 / 적합 kron)
+  이고 kron 행의 one-shot 칸만 비어 있다. 이 때문에 "좋은 적합 prior를 one-shot score
+  인터페이스로 쓰면 b*(exact mixture site)를 따라가는가"에 답할 수 없다. M2의 실제
+  수신기는 학습 prior + score이므로 진행·중단 판단에 직접 걸린다. 조치: 판독 종료 후
+  Q-37의 격자 확장과 함께 `Hscore-kron`(RouteAClip + Hgmm-kron 적합, clip="eta",
+  one-shot) arm을 추가해 같은 격자에서 실행한다. kron 적합 NPZ가 이미 있으므로
+  추가 EM은 불필요. 사전 등록 기준(D-19+R1~R8)은 변경하지 않으며, 이 arm은
+  K1~K3 판정에 사용하지 않고 M2 설계 판단에만 쓴다.

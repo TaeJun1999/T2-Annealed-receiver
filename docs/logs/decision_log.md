@@ -653,3 +653,146 @@ P/U는 점당 150~200쌍. 따라서 R6/R7 하한 충족을 "검정력이 충분�
 
 Q-38의 코드 수정은 Q-37과 같은 원칙으로 ②~⑥ 판독 종료 후에 한다.
 판독 도중 기계 보조도구를 바꾸지 않는다. 기준·결과 파일 변경 없음.
+
+## [2026-09-18] 기록 [측정 + 정확: 코드 대조] — 세션 7 판독 ④: SNR@0.1 및 bootstrap CI (workspace: GPT)
+
+근거 커밋: 310f2ae7748f0c1fcd4f6f81adbe93d1edd3ffda.
+시작 전 "세션 7 판독 ③ 보정" 확인.
+기준은 D-19 + R1~R8, 변경 없음.
+자료: Demo/exp_0925_results.txt §3(1935~2151행),
+Demo/exp_0925_analysis.py의 snr_at/gain 정의.
+결과 파일 blob SHA: 7abdf78d2ffb0fb1da5f83b83816f81eedf28517.
+새 실험·raw 재집계·bootstrap 재실행 없음. §4 및 ⑤~⑥ 미착수.
+
+[지표]
+SNR@0.1은 최초 하향 교차점의 log-linear 보간값(근사).
+gain x->y = SNR_x - SNR_y; 양수이면 y에 유리.
+Bootstrap B=2000, seed=20260925, 각 SNR에서 두 arm에 같은 trial index 적용.
+censored 비율은 원문 정수 퍼센트 반올림 출력이며 0%도 그 정밀도의 값이다.
+격자 경계 표시는 점추정으로 대체하지 않음.
+아래 CI 수치는 원문 출력이며 반올림된 SNR끼리 다시 빼서 바꾸지 않음.
+
+[측정: 결정 셀 H,S의 전 arm SNR@0.1, dB]
+8x4, T=16, Tp=2, eig pilots, @16, 실험 seed=20260925.
+격자 -3/0/3/6/9/12/15 dB, 7점 모두 n=640(16 chunk x 40 trial).
+
+| arm | SNR@0.1 [dB] |
+|---|---:|
+| lmmseC_pf | 5.44 |
+| Hgmm-K16 | 7.03 |
+| Hgmm-K32 | 6.65 |
+| Hgmm-K64 | 6.89 |
+| Hgmm-kron (b*, K32) | 3.09 |
+| Hscore-exact | 3.30 |
+| exactEP-true | 2.81 |
+| Hscore-K32 | 6.18 |
+| Hgmm-K32-mp | 6.80 |
+| Hscore-exact-mp | 3.00 |
+| exactEP-true-mp | 3.00 |
+| pilot_C | n/a; 原출력 >15 |
+| pilot_Hgmm-K32 | n/a; 原출력 >15 |
+| genie | n/a; 原출력 <=-3 |
+| oracle_pf | 2.73 |
+
+[측정: H,S의 gain / 90% paired bootstrap CI / censored]
+- lmmseC_pf -> exactEP-true: +2.63 / [+1.60,+3.66] / 0%.
+- lmmseC_pf -> b*: +2.35 / [+1.34,+3.41] / 0%.
+- lmmseC_pf -> Hscore-exact: +2.14 / [+1.23,+3.30] / 0%.
+- b* -> exactEP-true: +0.28 / [-0.17,+0.77] / 0%.
+- Hscore-exact -> exactEP-true: +0.49 / [-0.08,+0.96] / 0%.
+- Hgmm-K32 -> Hscore-exact: +3.35 / [+1.79,+4.51] / 0%.
+
+Hscore-exact -> b*는 반올림된 점추정상 약 +0.21 dB이지만
+직접 paired bootstrap CI와 censored 비율은 §3에 없음.
+다른 CI의 끝점을 빼서 대신 만들지 않음.
+
+[측정: H4 내부 비교]
+다음은 gain [90% CI], 단위 dB. 18개 모두 censored 출력 0%.
+교차-Tp goodput 비교가 아님.
+
+| 비교 | S | P | U |
+|---|---|---|---|
+| lmmseC_pf -> exactEP-true | +0.06 [-0.21,+0.33] | +0.83 [+0.56,+1.09] | +0.95 [+0.66,+1.18] |
+| lmmseC_pf -> b* | +0.06 [-0.24,+0.36] | +0.71 [+0.41,+0.98] | +0.96 [+0.69,+1.19] |
+| lmmseC_pf -> Hscore-exact | +0.16 [-0.13,+0.43] | +0.80 [+0.52,+1.07] | +1.01 [+0.73,+1.23] |
+| b* -> exactEP-true | -0.00 [-0.13,+0.12] | +0.12 [-0.03,+0.29] | -0.01 [-0.16,+0.13] |
+| Hscore-exact -> exactEP-true | -0.10 [-0.22,+0.02] | +0.03 [-0.00,+0.09] | -0.06 [-0.15,+0.03] |
+| Hgmm-K32 -> Hscore-exact | +0.04 [-0.18,+0.24] | -0.11 [-0.30,+0.08] | +0.18 [+0.00,+0.39] |
+
++0.00/-0.00는 원문 반올림 표기를 보존하며 정확한 0 경계 여부를 단정하지 않음.
+
+[측정: R,S의 비영 censoring 전 항목]
+4x4, T=28, Tp=2, 격자 9/12/15 dB, 각 점 n=640.
+SNR@0.1: lmmseC_pf 14.04, Hgmm-K32 10.63,
+b* 9.64, Hscore-exact 9.84, exactEP-true 9.14 dB.
+gain / 출력된 90% CI / censored:
+- lmmseC_pf -> exactEP-true: +4.90 / [+2.38,+5.39] / 58%.
+- lmmseC_pf -> b*: +4.40 / [+2.24,+5.22] / 40%.
+- lmmseC_pf -> Hscore-exact: +4.21 / [+2.33,+5.08] / 29%.
+- b* -> exactEP-true: +0.50 / [-0.32,+0.81] / 48%.
+- Hscore-exact -> exactEP-true: +0.69 / [-0.40,+0.92] / 49%.
+- Hgmm-K32 -> Hscore-exact: +0.79 / [-0.06,+1.90] / 15%.
+
+[정확: CI 해석의 한계]
+gain()은 재표집한 양쪽 교차점이 모두 격자 내에서 얻어질 때만
+유한 이득을 저장하고 나머지는 NaN으로 처리한다.
+CI는 np.nanpercentile(g,[5,95])이므로 유효 replicate만의 분위수이다.
+R,S의 15~58% censoring을 누락하거나 전체 bootstrap의 무조건적
+90% 구간으로 해석하지 않음. 새 censoring 합격 임계값을 추가하지 않음.
+직접 score-b* CI 미출력과 함께 후속 확인 Q-39.
+
+[측정: n/a]
+H,P와 H,U에서 oracle_pf/genie를 제외한 모든 arm은 target 미도달(>15).
+oracle_pf는 각각 10.23/10.67 dB, genie는 <=-3.
+R,P와 R,U에서는 genie(<=9)를 제외한 모든 arm이 target 미도달(>15), oracle 포함.
+따라서 H/R의 P/U 네 조합은 위와 같은 여섯 주요 gain 모두 n/a이며 CI도 없음.
+n/a에 0 또는 15 dB를 대입하거나 censored를 0%/100%로 채우지 않음.
+H4의 P/U는 nongenie arm의 교차점이 얻어졌으므로 prior만으로 n/a를 일반화하지 않음.
+H,S의 pilot 두 arm 역시 target 미도달로 정확한 joint 대비 dB 간격/CI는 산출 불가.
+
+[③과의 정합성 및 범위]
+H,S에서 full-K32 대비 score 이득 +3.35 dB와 양의 CI는
+③의 score 3/3점 유의 승리와 같은 방향이다. 방향 역전 없음.
+b* 대비 약 0.21 dB 점추정 열세는 유의패배 또는 동등성의 근거가 아니다.
+③ 보정의 불일치 쌍 [31,29,11], pooled 71쌍과 차이 미검출 해석을 유지.
+MIN_DISC=6은 충분한 검정력이 아님.
+R8 유지: b* 대비 점추정 열세를 score 분기 중단으로 서술하지 않음.
+SNR 이득/CI로 사전 등록된 K2/K3 부호검정을 대체하지 않음.
+②·③ 판정 유지. M2 진행·score 중단·R1b·goodput 종합 판정 없음.
+Q-37 격자 확장과 Q-38 코드 수정은 판독 종료 후로 유지.
+이번 턴은 ④에서 중지.
+
+## [2026-09-18] 기록 [측정 + 정확: 코드 대조] — 세션 7 판독 ④ 보정: 2x2 요인표와 빠진 arm (workspace: Claude, 검증)
+
+판독 ④의 수치를 §3 원문과 대조: SNR@0.1 15개, H,S의 gain/CI 6개,
+H4의 18개, R,S의 censoring 6개 모두 일치. 비영 censoring은 파일 전체에서
+정확히 그 6건뿐이며 모두 R,S에 속한다(0%가 26건).
+gain()의 np.nanpercentile([5,95]) 조건부 분위수 지적도 코드 70행에서 확인.
+
+보강 1: Hscore-K32는 진단 arm이며 exp_0925_run.py 22행이 설계를 명시한다 —
+"fitted prior through the one-shot interface: 2x2 factorial
+prior{true,fit} x interface{exact site, one-shot}".
+H,S의 네 칸 [dB]:
+  참 prior     : exact site 2.81 / one-shot 3.30
+  적합 full-K32: exact site 6.65 / one-shot 6.18
+  적합 kron(b*): exact site 3.09 / one-shot 없음
+
+보강 2 [측정]: prior 품질이 interface 종류를 압도한다.
+full-K32 -> kron 교체는 6.65 -> 3.09으로 3.56 dB를 움직이는 반면,
+exact site 대 one-shot 차이는 어느 행에서도 0.5 dB 이내다.
+이는 판독 ①의 fit 결과(S에서 full-K32의 kl_test 1.369, kron 0.198)와 대응한다.
+
+보강 3 [측정]: one-shot 페널티의 부호가 prior 품질에 따라 뒤집힌다.
+참 prior에서는 exact site가 0.49 dB 유리하고(+0.49, CI [-0.08,+0.96]),
+적합 full-K32에서는 one-shot이 0.47 dB 유리하다(6.65 대 6.18, 점추정).
+후자의 직접 CI는 출력되지 않았다. Q-30(b)의 "one-shot이 더 강건한가"에
+직접 걸리는 관찰이므로 기록한다. 이 비교는 사전 등록 기준이 아니며
+K1~K3 판정에 사용하지 않는다.
+
+보강 4: Hscore-kron arm이 존재하지 않는다. 2x2라고 적혀 있으나 실제 prior는
+3종이고 kron 행의 one-shot 칸이 비어 있다. K1~K3는 (c)를 참 prior 상한으로
+쓰므로 kill test 자체에는 영향이 없다. 다만 M2에서 만들 수신기는 학습 prior +
+score이므로 "좋은 적합 prior를 one-shot 경로로 쓰면 b*를 따라가는가"는
+현재 자료로 답할 수 없다. 후속 실행 Q-40.
+
+②~④ 판정 변경 없음. ⑤~⑥ 미착수.
