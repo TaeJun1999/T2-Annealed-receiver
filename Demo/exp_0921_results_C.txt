@@ -1,0 +1,193 @@
+============================== exp_0921 C — GMM testbed (exp_0920 prior, exact score), Q-25(b); beta=0.7, 16 it, seed 20260921+100+SNR ==============================
+
+--- Tp=4 SNR=3 dB (4x4, rho_c=0.7, dft)
+  v0_ext               n=320  BLER@1/@2/@8/@16 = 0.906 0.619 0.325 0.291 [0.244,0.343]  BER@16=1.16e-01  NMSE med@1/@16=0.0942/0.0244 ok=0.0188  resc/lost(2->16)=105/0  tauL@1=1.391  fail% stuck/cyc2/other=0.0/4.1/25.0
+  v0_pf                n=320  BLER@1/@2/@8/@16 = 0.906 0.584 0.209 0.178 [0.140,0.224]  BER@16=6.44e-02  NMSE med@1/@16=0.0942/0.0223 ok=0.0190  resc/lost(2->16)=130/0  tauL@1=1.391  fail% stuck/cyc2/other=5.0/0.6/12.2
+  D13_ext              n=320  BLER@1/@2/@8/@16 = 0.906 0.619 0.322 0.291 [0.244,0.343]  BER@16=1.20e-01  NMSE med@1/@16=0.0942/0.0248 ok=0.0188  resc/lost(2->16)=105/0  tauL@1=1.391  fail% stuck/cyc2/other=0.0/3.4/25.6
+  D13_pf               n=320  BLER@1/@2/@8/@16 = 0.906 0.588 0.209 0.191 [0.151,0.237]  BER@16=7.24e-02  NMSE med@1/@16=0.0942/0.0226 ok=0.0192  resc/lost(2->16)=127/0  tauL@1=1.391  fail% stuck/cyc2/other=5.3/1.2/12.5
+  D14_pf               n=320  BLER@1/@2/@8/@16 = 0.912 0.588 0.234 0.197 [0.157,0.244]  BER@16=7.77e-02  NMSE med@1/@16=0.0943/0.0228 ok=0.0191  resc/lost(2->16)=125/0  tauL@1=1.393  fail% stuck/cyc2/other=5.6/1.6/12.5
+  D13+14_ext           n=320  BLER@1/@2/@8/@16 = 0.912 0.622 0.319 0.284 [0.238,0.336]  BER@16=1.13e-01  NMSE med@1/@16=0.0943/0.0242 ok=0.0185  resc/lost(2->16)=108/0  tauL@1=1.393  fail% stuck/cyc2/other=0.3/4.1/24.1
+  D13+14_pf            n=320  BLER@1/@2/@8/@16 = 0.912 0.588 0.234 0.200 [0.160,0.247]  BER@16=7.82e-02  NMSE med@1/@16=0.0943/0.0230 ok=0.0190  resc/lost(2->16)=124/0  tauL@1=1.393  fail% stuck/cyc2/other=5.3/0.9/13.8
+  exactEP_ext          n=320  BLER@1/@2/@8/@16 = 0.912 0.622 0.319 0.278 [0.232,0.330]  BER@16=1.14e-01  NMSE med@1/@16=0.0943/0.0244 ok=0.0187  resc/lost(2->16)=110/0  tauL@1=1.393  fail% stuck/cyc2/other=0.0/1.6/26.2
+  exactEP_pf           n=320  BLER@1/@2/@8/@16 = 0.912 0.588 0.234 0.200 [0.160,0.247]  BER@16=7.83e-02  NMSE med@1/@16=0.0943/0.0228 ok=0.0190  resc/lost(2->16)=124/0  tauL@1=1.393  fail% stuck/cyc2/other=5.3/0.9/13.8
+  lmmseC_pf            n=320  BLER@1/@2/@8/@16 = 0.906 0.634 0.281 0.250 [0.206,0.300]  BER@16=9.43e-02  NMSE med@1/@16=0.1225/0.0261 ok=0.0209  resc/lost(2->16)=123/0  tauL@1=1.062  fail% stuck/cyc2/other=2.5/3.4/19.1
+  pilot_gmm            n=320  BLER@1/@2/@8/@16 = 0.912 0.672 0.391 0.356 [0.306,0.410]  BER@16=1.17e-01  NMSE med@1/@16=0.0943/0.0943 ok=0.0837  resc/lost(2->16)=102/1  tauL@1=1.393  fail% stuck/cyc2/other=13.8/0.6/21.2
+  pilot_C              n=320  BLER@1/@2/@8/@16 = 0.906 0.725 0.481 0.441 [0.387,0.495]  BER@16=1.56e-01  NMSE med@1/@16=0.1225/0.1225 ok=0.1087  resc/lost(2->16)=91/0  tauL@1=1.062  fail% stuck/cyc2/other=10.6/3.1/30.3
+  genie                n=320  BLER@1/@2/@8/@16 = 0.447 0.097 0.034 0.034 [0.019,0.060]  BER@16=7.15e-03  NMSE med@1/@16=nan/nan ok=nan  resc/lost(2->16)=20/0  tauL@1=0.851  fail% stuck/cyc2/other=0.3/1.2/1.9
+  oracle_pf            n=320  BLER@1/@2/@8/@16 = 0.909 0.581 0.231 0.191 [0.151,0.237]  BER@16=7.44e-02  NMSE med@1/@16=0.0933/0.0226 ok=0.0191  resc/lost(2->16)=125/0  tauL@1=1.389  fail% stuck/cyc2/other=4.4/0.3/14.4
+    paired v0_ext vs v0_pf: @16 only-first-fails 41, only-second-fails 5, p=4.4e-08   (@8: 41:4, p=9.3e-09)
+    paired D13_ext vs D13_pf: @16 only-first-fails 38, only-second-fails 6, p=9.4e-07   (@8: 40:4, p=1.7e-08)
+    paired D13+14_ext vs D13+14_pf: @16 only-first-fails 36, only-second-fails 9, p=6.6e-05   (@8: 34:7, p=2.5e-05)
+    paired exactEP_ext vs exactEP_pf: @16 only-first-fails 33, only-second-fails 8, p=0.00011   (@8: 34:7, p=2.5e-05)
+    paired v0_pf vs D13_pf: @16 only-first-fails 1, only-second-fails 5, p=0.22   (@8: 1:1, p=1)
+    paired v0_pf vs D14_pf: @16 only-first-fails 4, only-second-fails 10, p=0.18   (@8: 1:9, p=0.021)
+    paired v0_pf vs D13+14_pf: @16 only-first-fails 4, only-second-fails 11, p=0.12   (@8: 1:9, p=0.021)
+    paired D13_pf vs D13+14_pf: @16 only-first-fails 5, only-second-fails 8, p=0.58   (@8: 0:8, p=0.0078)
+    paired D14_pf vs D13+14_pf: @16 only-first-fails 0, only-second-fails 1, p=1   (@8: 0:0, p=1)
+    paired D13+14_pf vs exactEP_pf: @16 only-first-fails 0, only-second-fails 0, p=1   (@8: 0:0, p=1)
+    paired exactEP_pf vs oracle_pf: @16 only-first-fails 3, only-second-fails 0, p=0.25   (@8: 2:1, p=1)
+    paired lmmseC_pf vs v0_pf: @16 only-first-fails 30, only-second-fails 7, p=0.00019   (@8: 28:5, p=6.6e-05)
+    paired lmmseC_pf vs D13+14_pf: @16 only-first-fails 23, only-second-fails 7, p=0.0052   (@8: 21:6, p=0.0059)
+    paired pilot_gmm vs v0_pf: @16 only-first-fails 59, only-second-fails 2, p=1.6e-15   (@8: 58:0, p=6.9e-18)
+    paired pilot_gmm vs D13+14_pf: @16 only-first-fails 53, only-second-fails 3, p=8.1e-13   (@8: 50:0, p=1.8e-15)
+    paired pilot_C vs pilot_gmm: @16 only-first-fails 36, only-second-fails 9, p=6.6e-05   (@8: 36:7, p=9e-06)
+
+--- Tp=4 SNR=6 dB (4x4, rho_c=0.7, dft)
+  v0_ext               n=320  BLER@1/@2/@8/@16 = 0.456 0.138 0.047 0.047 [0.029,0.076]  BER@16=1.75e-02  NMSE med@1/@16=0.0509/0.0102 ok=0.0098  resc/lost(2->16)=29/0  tauL@1=0.914  fail% stuck/cyc2/other=0.3/0.3/4.1
+  v0_pf                n=320  BLER@1/@2/@8/@16 = 0.456 0.134 0.028 0.022 [0.011,0.044]  BER@16=9.17e-03  NMSE med@1/@16=0.0509/0.0101 ok=0.0100  resc/lost(2->16)=36/0  tauL@1=0.914  fail% stuck/cyc2/other=0.3/0.0/1.9
+  D13_ext              n=320  BLER@1/@2/@8/@16 = 0.456 0.138 0.047 0.044 [0.026,0.072]  BER@16=1.70e-02  NMSE med@1/@16=0.0509/0.0102 ok=0.0098  resc/lost(2->16)=30/0  tauL@1=0.914  fail% stuck/cyc2/other=0.3/0.3/3.8
+  D13_pf               n=320  BLER@1/@2/@8/@16 = 0.456 0.134 0.028 0.022 [0.011,0.044]  BER@16=8.68e-03  NMSE med@1/@16=0.0509/0.0102 ok=0.0100  resc/lost(2->16)=36/0  tauL@1=0.914  fail% stuck/cyc2/other=0.6/0.0/1.6
+  D14_pf               n=320  BLER@1/@2/@8/@16 = 0.447 0.134 0.031 0.025 [0.013,0.049]  BER@16=9.17e-03  NMSE med@1/@16=0.0509/0.0102 ok=0.0100  resc/lost(2->16)=35/0  tauL@1=0.907  fail% stuck/cyc2/other=0.6/0.0/1.9
+  D13+14_ext           n=320  BLER@1/@2/@8/@16 = 0.447 0.141 0.047 0.041 [0.024,0.068]  BER@16=1.60e-02  NMSE med@1/@16=0.0509/0.0102 ok=0.0098  resc/lost(2->16)=32/0  tauL@1=0.907  fail% stuck/cyc2/other=0.3/0.3/3.4
+  D13+14_pf            n=320  BLER@1/@2/@8/@16 = 0.447 0.134 0.031 0.028 [0.015,0.053]  BER@16=1.01e-02  NMSE med@1/@16=0.0509/0.0102 ok=0.0099  resc/lost(2->16)=34/0  tauL@1=0.907  fail% stuck/cyc2/other=0.9/0.0/1.9
+  exactEP_ext          n=320  BLER@1/@2/@8/@16 = 0.447 0.141 0.047 0.041 [0.024,0.068]  BER@16=1.67e-02  NMSE med@1/@16=0.0509/0.0102 ok=0.0099  resc/lost(2->16)=32/0  tauL@1=0.907  fail% stuck/cyc2/other=0.3/0.3/3.4
+  exactEP_pf           n=320  BLER@1/@2/@8/@16 = 0.447 0.134 0.031 0.028 [0.015,0.053]  BER@16=1.05e-02  NMSE med@1/@16=0.0509/0.0102 ok=0.0099  resc/lost(2->16)=34/0  tauL@1=0.907  fail% stuck/cyc2/other=0.6/0.3/1.9
+  lmmseC_pf            n=320  BLER@1/@2/@8/@16 = 0.478 0.150 0.041 0.031 [0.017,0.057]  BER@16=1.02e-02  NMSE med@1/@16=0.0613/0.0105 ok=0.0102  resc/lost(2->16)=38/0  tauL@1=0.734  fail% stuck/cyc2/other=0.6/0.3/2.2
+  pilot_gmm            n=320  BLER@1/@2/@8/@16 = 0.447 0.169 0.047 0.041 [0.024,0.068]  BER@16=1.26e-02  NMSE med@1/@16=0.0509/0.0509 ok=0.0508  resc/lost(2->16)=41/0  tauL@1=0.907  fail% stuck/cyc2/other=0.9/0.0/3.1
+  pilot_C              n=320  BLER@1/@2/@8/@16 = 0.478 0.175 0.066 0.056 [0.036,0.087]  BER@16=1.93e-02  NMSE med@1/@16=0.0613/0.0613 ok=0.0586  resc/lost(2->16)=38/0  tauL@1=0.734  fail% stuck/cyc2/other=0.9/0.3/4.4
+  genie                n=320  BLER@1/@2/@8/@16 = 0.131 0.016 0.006 0.003 [0.001,0.017]  BER@16=2.43e-04  NMSE med@1/@16=nan/nan ok=nan  resc/lost(2->16)=4/0  tauL@1=0.574  fail% stuck/cyc2/other=0.0/0.3/0.0
+  oracle_pf            n=320  BLER@1/@2/@8/@16 = 0.441 0.138 0.031 0.028 [0.015,0.053]  BER@16=9.83e-03  NMSE med@1/@16=0.0509/0.0102 ok=0.0099  resc/lost(2->16)=35/0  tauL@1=0.901  fail% stuck/cyc2/other=0.9/0.0/1.9
+    paired v0_ext vs v0_pf: @16 only-first-fails 9, only-second-fails 1, p=0.021   (@8: 8:2, p=0.11)
+    paired D13_ext vs D13_pf: @16 only-first-fails 8, only-second-fails 1, p=0.039   (@8: 8:2, p=0.11)
+    paired D13+14_ext vs D13+14_pf: @16 only-first-fails 6, only-second-fails 2, p=0.29   (@8: 7:2, p=0.18)
+    paired exactEP_ext vs exactEP_pf: @16 only-first-fails 6, only-second-fails 2, p=0.29   (@8: 7:2, p=0.18)
+    paired v0_pf vs D13_pf: @16 only-first-fails 0, only-second-fails 0, p=1   (@8: 0:0, p=1)
+    paired v0_pf vs D14_pf: @16 only-first-fails 0, only-second-fails 1, p=1   (@8: 0:1, p=1)
+    paired v0_pf vs D13+14_pf: @16 only-first-fails 0, only-second-fails 2, p=0.5   (@8: 0:1, p=1)
+    paired D13_pf vs D13+14_pf: @16 only-first-fails 0, only-second-fails 2, p=0.5   (@8: 0:1, p=1)
+    paired D14_pf vs D13+14_pf: @16 only-first-fails 0, only-second-fails 1, p=1   (@8: 0:0, p=1)
+    paired D13+14_pf vs exactEP_pf: @16 only-first-fails 0, only-second-fails 0, p=1   (@8: 0:0, p=1)
+    paired exactEP_pf vs oracle_pf: @16 only-first-fails 0, only-second-fails 0, p=1   (@8: 0:0, p=1)
+    paired lmmseC_pf vs v0_pf: @16 only-first-fails 4, only-second-fails 1, p=0.38   (@8: 5:1, p=0.22)
+    paired lmmseC_pf vs D13+14_pf: @16 only-first-fails 3, only-second-fails 2, p=1   (@8: 4:1, p=0.38)
+    paired pilot_gmm vs v0_pf: @16 only-first-fails 8, only-second-fails 2, p=0.11   (@8: 8:2, p=0.11)
+    paired pilot_gmm vs D13+14_pf: @16 only-first-fails 6, only-second-fails 2, p=0.29   (@8: 7:2, p=0.18)
+    paired pilot_C vs pilot_gmm: @16 only-first-fails 7, only-second-fails 2, p=0.18   (@8: 8:2, p=0.11)
+
+--- Tp=4 SNR=9 dB (4x4, rho_c=0.7, dft)
+  v0_ext               n=320  BLER@1/@2/@8/@16 = 0.156 0.003 0.003 0.003 [0.001,0.017]  BER@16=1.39e-03  NMSE med@1/@16=0.0304/0.0054 ok=0.0053  resc/lost(2->16)=0/0  tauL@1=0.626  fail% stuck/cyc2/other=0.0/0.0/0.3
+  v0_pf                n=320  BLER@1/@2/@8/@16 = 0.156 0.003 0.003 0.003 [0.001,0.017]  BER@16=7.29e-04  NMSE med@1/@16=0.0304/0.0054 ok=0.0053  resc/lost(2->16)=0/0  tauL@1=0.626  fail% stuck/cyc2/other=0.0/0.3/0.0
+  D13_ext              n=320  BLER@1/@2/@8/@16 = 0.156 0.003 0.003 0.003 [0.001,0.017]  BER@16=1.49e-03  NMSE med@1/@16=0.0304/0.0054 ok=0.0053  resc/lost(2->16)=0/0  tauL@1=0.626  fail% stuck/cyc2/other=0.0/0.0/0.3
+  D13_pf               n=320  BLER@1/@2/@8/@16 = 0.156 0.003 0.003 0.003 [0.001,0.017]  BER@16=7.29e-04  NMSE med@1/@16=0.0304/0.0054 ok=0.0053  resc/lost(2->16)=0/0  tauL@1=0.626  fail% stuck/cyc2/other=0.0/0.3/0.0
+  D14_pf               n=320  BLER@1/@2/@8/@16 = 0.156 0.003 0.003 0.003 [0.001,0.017]  BER@16=6.25e-04  NMSE med@1/@16=0.0304/0.0054 ok=0.0053  resc/lost(2->16)=0/0  tauL@1=0.620  fail% stuck/cyc2/other=0.0/0.3/0.0
+  D13+14_ext           n=320  BLER@1/@2/@8/@16 = 0.156 0.003 0.003 0.003 [0.001,0.017]  BER@16=7.29e-04  NMSE med@1/@16=0.0304/0.0054 ok=0.0053  resc/lost(2->16)=0/0  tauL@1=0.620  fail% stuck/cyc2/other=0.0/0.3/0.0
+  D13+14_pf            n=320  BLER@1/@2/@8/@16 = 0.156 0.003 0.003 0.003 [0.001,0.017]  BER@16=6.25e-04  NMSE med@1/@16=0.0304/0.0054 ok=0.0053  resc/lost(2->16)=0/0  tauL@1=0.620  fail% stuck/cyc2/other=0.0/0.3/0.0
+  exactEP_ext          n=320  BLER@1/@2/@8/@16 = 0.156 0.003 0.003 0.003 [0.001,0.017]  BER@16=7.29e-04  NMSE med@1/@16=0.0304/0.0054 ok=0.0053  resc/lost(2->16)=0/0  tauL@1=0.620  fail% stuck/cyc2/other=0.0/0.3/0.0
+  exactEP_pf           n=320  BLER@1/@2/@8/@16 = 0.156 0.003 0.003 0.003 [0.001,0.017]  BER@16=6.25e-04  NMSE med@1/@16=0.0304/0.0054 ok=0.0053  resc/lost(2->16)=0/0  tauL@1=0.620  fail% stuck/cyc2/other=0.0/0.3/0.0
+  lmmseC_pf            n=320  BLER@1/@2/@8/@16 = 0.153 0.013 0.003 0.003 [0.001,0.017]  BER@16=1.18e-03  NMSE med@1/@16=0.0349/0.0056 ok=0.0056  resc/lost(2->16)=3/0  tauL@1=0.534  fail% stuck/cyc2/other=0.0/0.0/0.3
+  pilot_gmm            n=320  BLER@1/@2/@8/@16 = 0.156 0.013 0.003 0.003 [0.001,0.017]  BER@16=7.29e-04  NMSE med@1/@16=0.0304/0.0304 ok=0.0304  resc/lost(2->16)=3/0  tauL@1=0.620  fail% stuck/cyc2/other=0.0/0.0/0.3
+  pilot_C              n=320  BLER@1/@2/@8/@16 = 0.153 0.025 0.003 0.003 [0.001,0.017]  BER@16=1.04e-03  NMSE med@1/@16=0.0349/0.0349 ok=0.0349  resc/lost(2->16)=7/0  tauL@1=0.534  fail% stuck/cyc2/other=0.0/0.0/0.3
+  genie                n=320  BLER@1/@2/@8/@16 = 0.019 0.000 0.000 0.000 [-0.000,0.012]  BER@16=0.00e+00  NMSE med@1/@16=nan/nan ok=nan  resc/lost(2->16)=0/0  tauL@1=0.394  fail% stuck/cyc2/other=0.0/0.0/0.0
+  oracle_pf            n=320  BLER@1/@2/@8/@16 = 0.156 0.003 0.003 0.003 [0.001,0.017]  BER@16=6.25e-04  NMSE med@1/@16=0.0304/0.0054 ok=0.0053  resc/lost(2->16)=0/0  tauL@1=0.621  fail% stuck/cyc2/other=0.0/0.3/0.0
+    paired v0_ext vs v0_pf: @16 only-first-fails 0, only-second-fails 0, p=1   (@8: 0:0, p=1)
+    paired D13_ext vs D13_pf: @16 only-first-fails 0, only-second-fails 0, p=1   (@8: 0:0, p=1)
+    paired D13+14_ext vs D13+14_pf: @16 only-first-fails 0, only-second-fails 0, p=1   (@8: 0:0, p=1)
+    paired exactEP_ext vs exactEP_pf: @16 only-first-fails 0, only-second-fails 0, p=1   (@8: 0:0, p=1)
+    paired v0_pf vs D13_pf: @16 only-first-fails 0, only-second-fails 0, p=1   (@8: 0:0, p=1)
+    paired v0_pf vs D14_pf: @16 only-first-fails 0, only-second-fails 0, p=1   (@8: 0:0, p=1)
+    paired v0_pf vs D13+14_pf: @16 only-first-fails 0, only-second-fails 0, p=1   (@8: 0:0, p=1)
+    paired D13_pf vs D13+14_pf: @16 only-first-fails 0, only-second-fails 0, p=1   (@8: 0:0, p=1)
+    paired D14_pf vs D13+14_pf: @16 only-first-fails 0, only-second-fails 0, p=1   (@8: 0:0, p=1)
+    paired D13+14_pf vs exactEP_pf: @16 only-first-fails 0, only-second-fails 0, p=1   (@8: 0:0, p=1)
+    paired exactEP_pf vs oracle_pf: @16 only-first-fails 0, only-second-fails 0, p=1   (@8: 0:0, p=1)
+    paired lmmseC_pf vs v0_pf: @16 only-first-fails 0, only-second-fails 0, p=1   (@8: 0:0, p=1)
+    paired lmmseC_pf vs D13+14_pf: @16 only-first-fails 0, only-second-fails 0, p=1   (@8: 0:0, p=1)
+    paired pilot_gmm vs v0_pf: @16 only-first-fails 0, only-second-fails 0, p=1   (@8: 0:0, p=1)
+    paired pilot_gmm vs D13+14_pf: @16 only-first-fails 0, only-second-fails 0, p=1   (@8: 0:0, p=1)
+    paired pilot_C vs pilot_gmm: @16 only-first-fails 0, only-second-fails 0, p=1   (@8: 0:0, p=1)
+
+--- Tp=2 SNR=9 dB (4x4, rho_c=0.7, dft)
+  v0_ext               n=320  BLER@1/@2/@8/@16 = 1.000 0.988 0.887 0.856 [0.814,0.890]  BER@16=4.02e-01  NMSE med@1/@16=0.5072/0.9654 ok=0.0047  resc/lost(2->16)=42/0  tauL@1=3.518  fail% stuck/cyc2/other=0.0/17.8/67.8
+  v0_pf                n=320  BLER@1/@2/@8/@16 = 1.000 0.975 0.506 0.450 [0.396,0.505]  BER@16=2.11e-01  NMSE med@1/@16=0.5072/0.0109 ok=0.0054  resc/lost(2->16)=168/0  tauL@1=3.518  fail% stuck/cyc2/other=0.0/8.8/36.2
+  D13_ext              n=320  BLER@1/@2/@8/@16 = 1.000 0.963 0.741 0.694 [0.641,0.742]  BER@16=3.29e-01  NMSE med@1/@16=0.4579/0.7204 ok=0.0054  resc/lost(2->16)=86/0  tauL@1=2.683  fail% stuck/cyc2/other=0.0/12.5/56.9
+  D13_pf               n=320  BLER@1/@2/@8/@16 = 1.000 0.925 0.447 0.406 [0.354,0.461]  BER@16=2.00e-01  NMSE med@1/@16=0.4579/0.0086 ok=0.0052  resc/lost(2->16)=166/0  tauL@1=2.683  fail% stuck/cyc2/other=0.6/7.2/32.8
+  D14_pf               n=320  BLER@1/@2/@8/@16 = 1.000 0.966 0.537 0.456 [0.403,0.511]  BER@16=2.19e-01  NMSE med@1/@16=0.5072/0.0112 ok=0.0050  resc/lost(2->16)=163/0  tauL@1=3.518  fail% stuck/cyc2/other=0.6/5.0/40.0
+  D13+14_ext           n=320  BLER@1/@2/@8/@16 = 1.000 0.919 0.681 0.619 [0.564,0.670]  BER@16=2.94e-01  NMSE med@1/@16=0.4312/0.7181 ok=0.0054  resc/lost(2->16)=96/0  tauL@1=2.405  fail% stuck/cyc2/other=0.3/12.2/49.4
+  D13+14_pf            n=320  BLER@1/@2/@8/@16 = 1.000 0.828 0.419 0.381 [0.330,0.436]  BER@16=1.85e-01  NMSE med@1/@16=0.4312/0.0081 ok=0.0051  resc/lost(2->16)=143/0  tauL@1=2.405  fail% stuck/cyc2/other=0.3/5.3/32.5
+  exactEP_ext          n=320  BLER@1/@2/@8/@16 = 1.000 0.919 0.697 0.656 [0.603,0.706]  BER@16=3.03e-01  NMSE med@1/@16=0.3749/0.6445 ok=0.0050  resc/lost(2->16)=84/0  tauL@1=2.728  fail% stuck/cyc2/other=0.0/19.4/46.2
+  exactEP_pf           n=320  BLER@1/@2/@8/@16 = 1.000 0.803 0.362 0.319 [0.270,0.372]  BER@16=1.53e-01  NMSE med@1/@16=0.3749/0.0066 ok=0.0049  resc/lost(2->16)=155/0  tauL@1=2.728  fail% stuck/cyc2/other=0.9/2.8/28.1
+  lmmseC_pf            n=320  BLER@1/@2/@8/@16 = 1.000 0.978 0.572 0.525 [0.470,0.579]  BER@16=2.54e-01  NMSE med@1/@16=0.5072/0.2790 ok=0.0055  resc/lost(2->16)=145/0  tauL@1=3.519  fail% stuck/cyc2/other=0.6/7.8/44.1
+  pilot_gmm            n=320  BLER@1/@2/@8/@16 = 1.000 0.975 0.887 0.869 [0.827,0.901]  BER@16=3.83e-01  NMSE med@1/@16=0.3749/0.3749 ok=0.1379  resc/lost(2->16)=34/0  tauL@1=2.728  fail% stuck/cyc2/other=44.7/0.6/41.6
+  pilot_C              n=320  BLER@1/@2/@8/@16 = 1.000 0.997 0.984 0.981 [0.960,0.991]  BER@16=4.42e-01  NMSE med@1/@16=0.5072/0.5072 ok=0.1203  resc/lost(2->16)=5/0  tauL@1=3.519  fail% stuck/cyc2/other=43.1/0.0/55.0
+  genie                n=320  BLER@1/@2/@8/@16 = 0.022 0.000 0.000 0.000 [-0.000,0.012]  BER@16=0.00e+00  NMSE med@1/@16=nan/nan ok=nan  resc/lost(2->16)=0/0  tauL@1=0.402  fail% stuck/cyc2/other=0.0/0.0/0.0
+  oracle_pf            n=320  BLER@1/@2/@8/@16 = 1.000 0.775 0.266 0.231 [0.188,0.280]  BER@16=1.10e-01  NMSE med@1/@16=0.3387/0.0062 ok=0.0050  resc/lost(2->16)=174/0  tauL@1=2.507  fail% stuck/cyc2/other=0.0/2.5/20.6
+    paired v0_ext vs v0_pf: @16 only-first-fails 136, only-second-fails 6, p=3.8e-33   (@8: 127:5, p=1.2e-31)
+    paired D13_ext vs D13_pf: @16 only-first-fails 106, only-second-fails 14, p=1.2e-18   (@8: 106:12, p=5.8e-20)
+    paired D13+14_ext vs D13+14_pf: @16 only-first-fails 86, only-second-fails 10, p=3.2e-16   (@8: 89:5, p=5.9e-21)
+    paired exactEP_ext vs exactEP_pf: @16 only-first-fails 115, only-second-fails 7, p=2.7e-26   (@8: 111:4, p=3.5e-28)
+    paired v0_pf vs D13_pf: @16 only-first-fails 48, only-second-fails 34, p=0.15   (@8: 52:33, p=0.05)
+    paired v0_pf vs D14_pf: @16 only-first-fails 24, only-second-fails 26, p=0.89   (@8: 21:31, p=0.21)
+    paired v0_pf vs D13+14_pf: @16 only-first-fails 56, only-second-fails 34, p=0.026   (@8: 62:34, p=0.0056)
+    paired D13_pf vs D13+14_pf: @16 only-first-fails 23, only-second-fails 15, p=0.26   (@8: 28:19, p=0.24)
+    paired D14_pf vs D13+14_pf: @16 only-first-fails 55, only-second-fails 31, p=0.013   (@8: 64:26, p=7.7e-05)
+    paired D13+14_pf vs exactEP_pf: @16 only-first-fails 53, only-second-fails 33, p=0.04   (@8: 50:32, p=0.06)
+    paired exactEP_pf vs oracle_pf: @16 only-first-fails 36, only-second-fails 8, p=2.5e-05   (@8: 40:9, p=9.3e-06)
+    paired lmmseC_pf vs v0_pf: @16 only-first-fails 39, only-second-fails 15, p=0.0015   (@8: 38:17, p=0.0065)
+    paired lmmseC_pf vs D13+14_pf: @16 only-first-fails 74, only-second-fails 28, p=5.9e-06   (@8: 78:29, p=2.4e-06)
+    paired pilot_gmm vs v0_pf: @16 only-first-fails 137, only-second-fails 3, p=6.6e-37   (@8: 123:1, p=1.2e-35)
+    paired pilot_gmm vs D13+14_pf: @16 only-first-fails 156, only-second-fails 0, p=2.2e-47   (@8: 150:0, p=1.4e-45)
+    paired pilot_C vs pilot_gmm: @16 only-first-fails 36, only-second-fails 0, p=2.9e-11   (@8: 31:0, p=9.3e-10)
+
+--- Tp=2 SNR=12 dB (4x4, rho_c=0.7, dft)
+  v0_ext               n=320  BLER@1/@2/@8/@16 = 1.000 0.994 0.847 0.819 [0.773,0.857]  BER@16=3.80e-01  NMSE med@1/@16=0.4946/0.8570 ok=0.0025  resc/lost(2->16)=56/0  tauL@1=3.481  fail% stuck/cyc2/other=0.6/14.7/66.6
+  v0_pf                n=320  BLER@1/@2/@8/@16 = 1.000 0.963 0.494 0.438 [0.384,0.492]  BER@16=2.09e-01  NMSE med@1/@16=0.4946/0.0050 ok=0.0026  resc/lost(2->16)=168/0  tauL@1=3.481  fail% stuck/cyc2/other=1.2/7.2/35.3
+  D13_ext              n=320  BLER@1/@2/@8/@16 = 0.997 0.928 0.666 0.588 [0.533,0.640]  BER@16=2.74e-01  NMSE med@1/@16=0.4689/0.5260 ok=0.0027  resc/lost(2->16)=109/0  tauL@1=2.612  fail% stuck/cyc2/other=0.0/12.8/45.9
+  D13_pf               n=320  BLER@1/@2/@8/@16 = 0.997 0.872 0.419 0.397 [0.345,0.451]  BER@16=1.93e-01  NMSE med@1/@16=0.4689/0.0043 ok=0.0025  resc/lost(2->16)=152/0  tauL@1=2.612  fail% stuck/cyc2/other=0.6/7.5/31.6
+  D14_pf               n=320  BLER@1/@2/@8/@16 = 1.000 0.941 0.475 0.428 [0.375,0.483]  BER@16=2.08e-01  NMSE med@1/@16=0.4946/0.0049 ok=0.0025  resc/lost(2->16)=164/0  tauL@1=3.481  fail% stuck/cyc2/other=0.3/4.7/37.8
+  D13+14_ext           n=320  BLER@1/@2/@8/@16 = 0.994 0.841 0.597 0.544 [0.489,0.597]  BER@16=2.58e-01  NMSE med@1/@16=0.4198/0.4213 ok=0.0025  resc/lost(2->16)=95/0  tauL@1=2.317  fail% stuck/cyc2/other=0.3/14.1/40.0
+  D13+14_pf            n=320  BLER@1/@2/@8/@16 = 0.994 0.725 0.372 0.344 [0.294,0.397]  BER@16=1.70e-01  NMSE med@1/@16=0.4198/0.0038 ok=0.0025  resc/lost(2->16)=122/0  tauL@1=2.317  fail% stuck/cyc2/other=0.9/5.6/27.8
+  exactEP_ext          n=320  BLER@1/@2/@8/@16 = 0.997 0.847 0.603 0.559 [0.505,0.613]  BER@16=2.58e-01  NMSE med@1/@16=0.3593/0.3401 ok=0.0025  resc/lost(2->16)=92/0  tauL@1=2.645  fail% stuck/cyc2/other=0.0/10.3/45.6
+  exactEP_pf           n=320  BLER@1/@2/@8/@16 = 0.997 0.719 0.284 0.263 [0.217,0.313]  BER@16=1.29e-01  NMSE med@1/@16=0.3593/0.0031 ok=0.0025  resc/lost(2->16)=146/0  tauL@1=2.645  fail% stuck/cyc2/other=0.3/2.5/23.4
+  lmmseC_pf            n=320  BLER@1/@2/@8/@16 = 1.000 0.947 0.541 0.494 [0.439,0.548]  BER@16=2.38e-01  NMSE med@1/@16=0.4946/0.0068 ok=0.0027  resc/lost(2->16)=145/0  tauL@1=3.482  fail% stuck/cyc2/other=0.3/6.6/42.5
+  pilot_gmm            n=320  BLER@1/@2/@8/@16 = 0.997 0.941 0.841 0.841 [0.797,0.877]  BER@16=3.64e-01  NMSE med@1/@16=0.3593/0.3593 ok=0.1188  resc/lost(2->16)=32/0  tauL@1=2.645  fail% stuck/cyc2/other=35.9/1.6/46.6
+  pilot_C              n=320  BLER@1/@2/@8/@16 = 1.000 0.997 0.963 0.956 [0.928,0.974]  BER@16=4.33e-01  NMSE med@1/@16=0.4946/0.4946 ok=0.1353  resc/lost(2->16)=13/0  tauL@1=3.482  fail% stuck/cyc2/other=40.0/0.3/55.3
+  genie                n=320  BLER@1/@2/@8/@16 = 0.000 0.000 0.000 0.000 [-0.000,0.012]  BER@16=0.00e+00  NMSE med@1/@16=nan/nan ok=nan  resc/lost(2->16)=0/0  tauL@1=0.260  fail% stuck/cyc2/other=0.0/0.0/0.0
+  oracle_pf            n=320  BLER@1/@2/@8/@16 = 0.994 0.653 0.184 0.156 [0.121,0.200]  BER@16=7.73e-02  NMSE med@1/@16=0.3203/0.0028 ok=0.0025  resc/lost(2->16)=159/0  tauL@1=2.375  fail% stuck/cyc2/other=0.3/1.2/14.1
+    paired v0_ext vs v0_pf: @16 only-first-fails 136, only-second-fails 14, p=2.8e-26   (@8: 124:11, p=2.3e-25)
+    paired D13_ext vs D13_pf: @16 only-first-fails 87, only-second-fails 26, p=7.1e-09   (@8: 95:16, p=7.5e-15)
+    paired D13+14_ext vs D13+14_pf: @16 only-first-fails 80, only-second-fails 16, p=2.1e-11   (@8: 81:9, p=1.3e-15)
+    paired exactEP_ext vs exactEP_pf: @16 only-first-fails 106, only-second-fails 11, p=1.2e-20   (@8: 112:10, p=5.7e-23)
+    paired v0_pf vs D13_pf: @16 only-first-fails 39, only-second-fails 26, p=0.14   (@8: 48:24, p=0.0063)
+    paired v0_pf vs D14_pf: @16 only-first-fails 26, only-second-fails 23, p=0.78   (@8: 27:21, p=0.47)
+    paired v0_pf vs D13+14_pf: @16 only-first-fails 47, only-second-fails 17, p=0.00023   (@8: 56:17, p=5.3e-06)
+    paired D13_pf vs D13+14_pf: @16 only-first-fails 24, only-second-fails 7, p=0.0033   (@8: 24:9, p=0.014)
+    paired D14_pf vs D13+14_pf: @16 only-first-fails 55, only-second-fails 28, p=0.004   (@8: 54:21, p=0.00018)
+    paired D13+14_pf vs exactEP_pf: @16 only-first-fails 61, only-second-fails 35, p=0.01   (@8: 61:33, p=0.0051)
+    paired exactEP_pf vs oracle_pf: @16 only-first-fails 42, only-second-fails 8, p=1.2e-06   (@8: 39:7, p=1.8e-06)
+    paired lmmseC_pf vs v0_pf: @16 only-first-fails 29, only-second-fails 11, p=0.0064   (@8: 23:8, p=0.011)
+    paired lmmseC_pf vs D13+14_pf: @16 only-first-fails 61, only-second-fails 13, p=1.4e-08   (@8: 68:14, p=1.1e-09)
+    paired pilot_gmm vs v0_pf: @16 only-first-fails 132, only-second-fails 3, p=1.9e-35   (@8: 114:3, p=3.2e-30)
+    paired pilot_gmm vs D13+14_pf: @16 only-first-fails 159, only-second-fails 0, p=2.7e-48   (@8: 150:0, p=1.4e-45)
+    paired pilot_C vs pilot_gmm: @16 only-first-fails 38, only-second-fails 1, p=1.5e-10   (@8: 40:1, p=3.8e-11)
+
+--- Tp=2 SNR=15 dB (4x4, rho_c=0.7, dft)
+  v0_ext               n=320  BLER@1/@2/@8/@16 = 1.000 0.984 0.803 0.741 [0.690,0.786]  BER@16=3.48e-01  NMSE med@1/@16=0.5302/0.8124 ok=0.0015  resc/lost(2->16)=78/0  tauL@1=3.667  fail% stuck/cyc2/other=0.0/17.8/56.2
+  v0_pf                n=320  BLER@1/@2/@8/@16 = 1.000 0.938 0.447 0.406 [0.354,0.461]  BER@16=1.95e-01  NMSE med@1/@16=0.5302/0.0025 ok=0.0015  resc/lost(2->16)=170/0  tauL@1=3.667  fail% stuck/cyc2/other=0.9/5.6/34.1
+  D13_ext              n=320  BLER@1/@2/@8/@16 = 0.997 0.912 0.584 0.534 [0.480,0.588]  BER@16=2.51e-01  NMSE med@1/@16=0.4813/0.3182 ok=0.0015  resc/lost(2->16)=121/0  tauL@1=2.692  fail% stuck/cyc2/other=0.0/11.6/41.9
+  D13_pf               n=320  BLER@1/@2/@8/@16 = 0.997 0.847 0.394 0.378 [0.327,0.432]  BER@16=1.85e-01  NMSE med@1/@16=0.4813/0.0024 ok=0.0014  resc/lost(2->16)=150/0  tauL@1=2.692  fail% stuck/cyc2/other=1.9/5.0/30.9
+  D14_pf               n=320  BLER@1/@2/@8/@16 = 1.000 0.944 0.456 0.406 [0.354,0.461]  BER@16=1.99e-01  NMSE med@1/@16=0.5302/0.0025 ok=0.0015  resc/lost(2->16)=172/0  tauL@1=3.668  fail% stuck/cyc2/other=0.9/6.6/33.1
+  D13+14_ext           n=320  BLER@1/@2/@8/@16 = 0.991 0.809 0.531 0.491 [0.436,0.545]  BER@16=2.30e-01  NMSE med@1/@16=0.4437/0.0056 ok=0.0015  resc/lost(2->16)=102/0  tauL@1=2.329  fail% stuck/cyc2/other=0.3/8.8/40.0
+  D13+14_pf            n=320  BLER@1/@2/@8/@16 = 0.991 0.700 0.369 0.362 [0.312,0.417]  BER@16=1.76e-01  NMSE med@1/@16=0.4437/0.0022 ok=0.0014  resc/lost(2->16)=108/0  tauL@1=2.329  fail% stuck/cyc2/other=0.3/7.2/28.7
+  exactEP_ext          n=320  BLER@1/@2/@8/@16 = 0.988 0.816 0.566 0.537 [0.483,0.591]  BER@16=2.52e-01  NMSE med@1/@16=0.4056/0.3276 ok=0.0014  resc/lost(2->16)=89/0  tauL@1=2.649  fail% stuck/cyc2/other=0.6/9.7/43.4
+  exactEP_pf           n=320  BLER@1/@2/@8/@16 = 0.988 0.713 0.275 0.244 [0.200,0.294]  BER@16=1.20e-01  NMSE med@1/@16=0.4056/0.0017 ok=0.0014  resc/lost(2->16)=150/0  tauL@1=2.649  fail% stuck/cyc2/other=0.6/1.6/22.2
+  lmmseC_pf            n=320  BLER@1/@2/@8/@16 = 1.000 0.931 0.469 0.431 [0.378,0.486]  BER@16=2.10e-01  NMSE med@1/@16=0.5302/0.0027 ok=0.0015  resc/lost(2->16)=160/0  tauL@1=3.669  fail% stuck/cyc2/other=0.9/6.2/35.9
+  pilot_gmm            n=320  BLER@1/@2/@8/@16 = 0.988 0.919 0.831 0.809 [0.763,0.849]  BER@16=3.52e-01  NMSE med@1/@16=0.4056/0.4056 ok=0.1517  resc/lost(2->16)=35/0  tauL@1=2.649  fail% stuck/cyc2/other=30.9/0.6/49.4
+  pilot_C              n=320  BLER@1/@2/@8/@16 = 1.000 0.997 0.966 0.966 [0.940,0.981]  BER@16=4.43e-01  NMSE med@1/@16=0.5302/0.5302 ok=0.1256  resc/lost(2->16)=10/0  tauL@1=3.669  fail% stuck/cyc2/other=33.1/0.9/62.5
+  genie                n=320  BLER@1/@2/@8/@16 = 0.000 0.000 0.000 0.000 [-0.000,0.012]  BER@16=0.00e+00  NMSE med@1/@16=nan/nan ok=nan  resc/lost(2->16)=0/0  tauL@1=0.159  fail% stuck/cyc2/other=0.0/0.0/0.0
+  oracle_pf            n=320  BLER@1/@2/@8/@16 = 0.984 0.613 0.153 0.147 [0.112,0.190]  BER@16=7.08e-02  NMSE med@1/@16=0.3477/0.0016 ok=0.0014  resc/lost(2->16)=149/0  tauL@1=2.414  fail% stuck/cyc2/other=0.0/1.6/13.1
+    paired v0_ext vs v0_pf: @16 only-first-fails 123, only-second-fails 16, p=1.2e-21   (@8: 125:11, p=1.2e-25)
+    paired D13_ext vs D13_pf: @16 only-first-fails 80, only-second-fails 30, p=2e-06   (@8: 83:22, p=1.6e-09)
+    paired D13+14_ext vs D13+14_pf: @16 only-first-fails 67, only-second-fails 26, p=2.5e-05   (@8: 73:21, p=6.7e-08)
+    paired exactEP_ext vs exactEP_pf: @16 only-first-fails 108, only-second-fails 14, p=3.7e-19   (@8: 105:12, p=1e-19)
+    paired v0_pf vs D13_pf: @16 only-first-fails 41, only-second-fails 32, p=0.35   (@8: 46:29, p=0.064)
+    paired v0_pf vs D14_pf: @16 only-first-fails 26, only-second-fails 26, p=1   (@8: 28:31, p=0.79)
+    paired v0_pf vs D13+14_pf: @16 only-first-fails 44, only-second-fails 30, p=0.13   (@8: 53:28, p=0.0073)
+    paired D13_pf vs D13+14_pf: @16 only-first-fails 19, only-second-fails 14, p=0.49   (@8: 21:13, p=0.23)
+    paired D14_pf vs D13+14_pf: @16 only-first-fails 53, only-second-fails 39, p=0.17   (@8: 64:36, p=0.0066)
+    paired D13+14_pf vs exactEP_pf: @16 only-first-fails 73, only-second-fails 35, p=0.00033   (@8: 69:39, p=0.005)
+    paired exactEP_pf vs oracle_pf: @16 only-first-fails 43, only-second-fails 12, p=3.3e-05   (@8: 45:6, p=1.8e-08)
+    paired lmmseC_pf vs v0_pf: @16 only-first-fails 21, only-second-fails 13, p=0.23   (@8: 22:15, p=0.32)
+    paired lmmseC_pf vs D13+14_pf: @16 only-first-fails 52, only-second-fails 30, p=0.02   (@8: 60:28, p=0.00085)
+    paired pilot_gmm vs v0_pf: @16 only-first-fails 134, only-second-fails 5, p=1.2e-33   (@8: 129:6, p=3.6e-31)
+    paired pilot_gmm vs D13+14_pf: @16 only-first-fails 143, only-second-fails 0, p=1.8e-43   (@8: 148:0, p=5.6e-45)
+    paired pilot_C vs pilot_gmm: @16 only-first-fails 51, only-second-fails 1, p=2.4e-14   (@8: 44:1, p=2.6e-12)
