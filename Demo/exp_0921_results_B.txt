@@ -1,6 +1,81 @@
 ============================== exp_0921 B — Q-20 regime scan (Gaussian Kronecker, QPSK, 16 it, seed 20260921+100+SNR) ==============================
 
---- 4x4 rho=0.7 Tp=4 pilots=dft  (K=90, n per SNR: [640, 640, 640, 640, 640, 640, 640])
+--- 4x4 T=16 rho=0.7 Tp=4 pilots=dft  (K=42, n per SNR: [640, 640, 640, 640, 640, 640, 640])
+  SNR [dB]                       0      3      6      9     12     15     18
+  BLER@8  col_ext_b0.7       0.700  0.255  0.055  0.006  0.000  0.000  0.000
+  BLER@16 col_ext_b0.7       0.688  0.231  0.047  0.005  0.000  0.000  0.000
+  BLER@8  col_post_b0.7      0.619  0.217  0.044  0.006  0.000  0.000  0.000
+  BLER@16 col_post_b0.7      0.577  0.189  0.031  0.005  0.000  0.000  0.000
+  BLER@16 pilot_b1           0.684  0.255  0.072  0.011  0.003  0.000  0.000
+  BLER@16 pilot_b0.7         0.695  0.250  0.047  0.014  0.000  0.000  0.000
+  BLER@16 genie_b1           0.167  0.042  0.011  0.002  0.000  0.000  0.000
+  NMSEok@16 col_ext_b0.7    0.0507 0.0322 0.0172 0.0090 0.0048 0.0025 0.0013
+  NMSEok@16 col_post_b0.7   0.0541 0.0331 0.0172 0.0090 0.0048 0.0025 0.0013
+  tauL@1    col_post_b0.7    2.088  1.370  0.919  0.616  0.408  0.280  0.165
+  paired pilot_b0.7 vs col_post_b0.7 (first:second, p): 82:6 4e-18  49:10 3e-07  13:3 0.02  6:0 0.03  0:0 1  0:0 1  0:0 1
+  paired col_ext_b0.7 vs col_post_b0.7 (first:second, p): 78:7 3e-16  45:18 0.0009  14:4 0.03  1:1 1  0:0 1  0:0 1  0:0 1
+
+--- 4x4 T=16 rho=0.7 Tp=3 pilots=dft  (K=46, n per SNR: [640, 640, 640, 640, 640, 640, 640])
+  SNR [dB]                       0      3      6      9     12     15     18
+  BLER@8  col_ext_b0.7       0.898  0.533  0.223  0.092  0.058  0.039  0.031
+  BLER@16 col_ext_b0.7       0.887  0.512  0.211  0.087  0.056  0.036  0.027
+  BLER@8  col_post_b0.7      0.789  0.386  0.141  0.045  0.028  0.030  0.013
+  BLER@16 col_post_b0.7      0.747  0.342  0.120  0.033  0.025  0.027  0.009
+  BLER@16 pilot_b1           0.908  0.669  0.359  0.233  0.158  0.153  0.098
+  BLER@16 pilot_b0.7         0.908  0.650  0.350  0.212  0.131  0.123  0.064
+  BLER@16 genie_b1           0.197  0.041  0.006  0.000  0.000  0.000  0.000
+  NMSEok@16 col_ext_b0.7    0.0460 0.0326 0.0181 0.0097 0.0053 0.0025 0.0013
+  NMSEok@16 col_post_b0.7   0.0518 0.0343 0.0182 0.0097 0.0052 0.0024 0.0013
+  tauL@1    col_post_b0.7    2.674  1.941  1.504  1.235  1.070  0.949  0.892
+  paired pilot_b0.7 vs col_post_b0.7 (first:second, p): 104:1 5e-30  201:4 3e-54  147:0 1e-44  116:1 1e-33  70:2 1e-18  64:2 6e-17  36:1 6e-10
+  paired col_ext_b0.7 vs col_post_b0.7 (first:second, p): 94:4 2e-23  130:21 2e-20  69:11 2e-11  44:9 1e-06  26:6 0.0005  17:11 0.3  13:2 0.007
+
+--- 4x4 T=16 rho=0.7 Tp=3 pilots=eig  (K=46, n per SNR: [640, 640, 640, 640, 640, 640, 640])
+  SNR [dB]                       0      3      6      9     12     15     18
+  BLER@8  col_ext_b0.7       0.844  0.422  0.131  0.037  0.011  0.011  0.013
+  BLER@16 col_ext_b0.7       0.830  0.405  0.120  0.033  0.005  0.011  0.013
+  BLER@8  col_post_b0.7      0.722  0.291  0.083  0.019  0.005  0.005  0.008
+  BLER@16 col_post_b0.7      0.689  0.259  0.067  0.016  0.005  0.005  0.008
+  BLER@16 pilot_b1           0.845  0.464  0.184  0.081  0.037  0.023  0.025
+  BLER@16 pilot_b0.7         0.842  0.455  0.177  0.064  0.028  0.014  0.016
+  BLER@16 genie_b1           0.197  0.041  0.006  0.000  0.000  0.000  0.000
+  NMSEok@16 col_ext_b0.7    0.0448 0.0300 0.0177 0.0099 0.0051 0.0024 0.0013
+  NMSEok@16 col_post_b0.7   0.0489 0.0316 0.0179 0.0099 0.0051 0.0024 0.0013
+  tauL@1    col_post_b0.7    2.298  1.625  1.190  0.954  0.767  0.659  0.601
+  paired pilot_b0.7 vs col_post_b0.7 (first:second, p): 102:4 1e-25  131:6 1e-31  74:4 1e-17  32:1 8e-09  17:2 0.0007  7:1 0.07  8:3 0.2
+  paired col_ext_b0.7 vs col_post_b0.7 (first:second, p): 97:7 2e-21  100:7 3e-22  41:7 6e-07  13:2 0.007  1:1 1  4:0 0.1  5:2 0.5
+
+--- 4x4 T=16 rho=0.7 Tp=2 pilots=dft  (K=50, n per SNR: [640, 640, 640, 640, 640, 640, 640])
+  SNR [dB]                       0      3      6      9     12     15     18
+  BLER@8  col_ext_b0.7       0.928  0.752  0.452  0.312  0.261  0.170  0.141
+  BLER@16 col_ext_b0.7       0.922  0.736  0.430  0.297  0.234  0.159  0.122
+  BLER@8  col_post_b0.7      0.841  0.562  0.322  0.166  0.133  0.094  0.081
+  BLER@16 col_post_b0.7      0.798  0.517  0.289  0.147  0.119  0.083  0.069
+  BLER@16 pilot_b1           0.950  0.883  0.689  0.594  0.492  0.402  0.375
+  BLER@16 pilot_b0.7         0.952  0.889  0.677  0.578  0.478  0.369  0.347
+  BLER@16 genie_b1           0.200  0.031  0.005  0.002  0.000  0.000  0.000
+  NMSEok@16 col_ext_b0.7    0.0454 0.0301 0.0174 0.0100 0.0051 0.0026 0.0013
+  NMSEok@16 col_post_b0.7   0.0459 0.0305 0.0182 0.0098 0.0050 0.0026 0.0013
+  tauL@1    col_post_b0.7    2.990  2.452  1.990  1.775  1.632  1.543  1.525
+  paired pilot_b0.7 vs col_post_b0.7 (first:second, p): 103:5 7e-25  239:1 3e-70  254:6 4e-67  278:2 4e-80  236:6 8e-62  183:0 2e-55  180:2 5e-51
+  paired col_ext_b0.7 vs col_post_b0.7 (first:second, p): 87:8 7e-18  151:11 1e-32  116:26 9e-15  115:19 6e-18  102:28 4e-11  67:18 8e-08  51:17 4e-05
+
+--- 4x4 T=16 rho=0.7 Tp=2 pilots=eig  (K=50, n per SNR: [640, 640, 640, 640, 640, 640, 640])
+  SNR [dB]                       0      3      6      9     12     15     18
+  BLER@8  col_ext_b0.7       0.908  0.695  0.475  0.336  0.234  0.189  0.156
+  BLER@16 col_ext_b0.7       0.906  0.683  0.455  0.312  0.216  0.164  0.138
+  BLER@8  col_post_b0.7      0.817  0.516  0.289  0.136  0.086  0.066  0.036
+  BLER@16 col_post_b0.7      0.784  0.464  0.253  0.114  0.075  0.062  0.030
+  BLER@16 pilot_b1           0.928  0.778  0.594  0.478  0.372  0.295  0.250
+  BLER@16 pilot_b0.7         0.928  0.773  0.572  0.441  0.322  0.259  0.217
+  BLER@16 genie_b1           0.200  0.031  0.005  0.002  0.000  0.000  0.000
+  NMSEok@16 col_ext_b0.7    0.0440 0.0310 0.0180 0.0095 0.0050 0.0026 0.0013
+  NMSEok@16 col_post_b0.7   0.0447 0.0317 0.0185 0.0095 0.0050 0.0026 0.0013
+  tauL@1    col_post_b0.7    2.708  2.150  1.765  1.586  1.455  1.391  1.385
+  paired pilot_b0.7 vs col_post_b0.7 (first:second, p): 92:0 4e-28  204:6 1e-52  208:4 3e-56  211:2 3e-60  160:2 5e-45  131:5 9e-33  120:0 2e-36
+  paired col_ext_b0.7 vs col_post_b0.7 (first:second, p): 81:3 1e-20  155:15 2e-30  150:21 3e-25  142:15 4e-27  105:15 8e-18  79:14 4e-12  75:6 3e-16
+
+--- 4x4 T=28 rho=0.7 Tp=4 pilots=dft  (K=90, n per SNR: [640, 640, 640, 640, 640, 640, 640])
   SNR [dB]                       0      3      6      9     12     15     18
   BLER@8  col_ext_b0.7       0.831  0.325  0.037  0.005  0.000  0.000  0.000
   BLER@16 col_ext_b0.7       0.808  0.283  0.033  0.005  0.000  0.000  0.000
@@ -15,7 +90,7 @@
   paired pilot_b0.7 vs col_post_b0.7 (first:second, p): 126:2 5e-35  113:5 1e-27  20:0 2e-06  0:0 1  0:0 1  0:0 1  0:0 1
   paired col_ext_b0.7 vs col_post_b0.7 (first:second, p): 113:5 1e-27  74:13 2e-11  12:1 0.003  2:0 0.5  0:0 1  0:0 1  0:0 1
 
---- 4x4 rho=0.7 Tp=3 pilots=dft  (K=94, n per SNR: [640, 640, 640, 640, 640, 640, 640])
+--- 4x4 T=28 rho=0.7 Tp=3 pilots=dft  (K=94, n per SNR: [640, 640, 640, 640, 640, 640, 640])
   SNR [dB]                       0      3      6      9     12     15     18
   BLER@8  col_ext_b0.7       0.955  0.641  0.294  0.095  0.042  0.016  0.027
   BLER@16 col_ext_b0.7       0.947  0.611  0.273  0.084  0.037  0.013  0.022
@@ -30,7 +105,7 @@
   paired pilot_b0.7 vs col_post_b0.7 (first:second, p): 109:1 2e-31  259:4 3e-71  225:0 4e-68  126:1 2e-36  87:0 1e-26  58:0 7e-18  63:0 2e-19
   paired col_ext_b0.7 vs col_post_b0.7 (first:second, p): 93:4 5e-23  172:17 2e-33  107:12 3e-20  42:10 9e-06  14:6 0.1  4:4 1  11:1 0.006
 
---- 4x4 rho=0.7 Tp=3 pilots=eig  (K=94, n per SNR: [640, 640, 640, 640, 640, 640, 640])
+--- 4x4 T=28 rho=0.7 Tp=3 pilots=eig  (K=94, n per SNR: [640, 640, 640, 640, 640, 640, 640])
   SNR [dB]                       0      3      6      9     12     15     18
   BLER@8  col_ext_b0.7       0.914  0.506  0.172  0.047  0.014  0.005  0.005
   BLER@16 col_ext_b0.7       0.902  0.477  0.159  0.041  0.009  0.005  0.005
@@ -45,7 +120,7 @@
   paired pilot_b0.7 vs col_post_b0.7 (first:second, p): 116:2 4e-32  177:7 1e-43  117:2 2e-32  44:2 3e-11  14:3 0.01  6:2 0.3  7:1 0.07
   paired col_ext_b0.7 vs col_post_b0.7 (first:second, p): 98:1 3e-28  131:8 9e-30  73:3 2e-18  22:2 4e-05  3:1 0.6  1:1 1  3:1 0.6
 
---- 4x4 rho=0.7 Tp=2 pilots=dft  (K=98, n per SNR: [640, 640, 640, 640, 640, 640, 640])
+--- 4x4 T=28 rho=0.7 Tp=2 pilots=dft  (K=98, n per SNR: [640, 640, 640, 640, 640, 640, 640])
   SNR [dB]                       0      3      6      9     12     15     18
   BLER@8  col_ext_b0.7       0.975  0.834  0.581  0.370  0.248  0.175  0.142
   BLER@16 col_ext_b0.7       0.973  0.814  0.553  0.342  0.237  0.153  0.113
@@ -60,7 +135,7 @@
   paired pilot_b0.7 vs col_post_b0.7 (first:second, p): 77:0 1e-23  257:1 1e-75  322:1 4e-95  329:0 2e-99  262:1 4e-77  266:1 2e-78  235:1 4e-69
   paired col_ext_b0.7 vs col_post_b0.7 (first:second, p): 69:2 2e-18  186:10 4e-43  182:23 7e-32  146:30 2e-19  104:20 7e-15  63:21 5e-06  50:31 0.04
 
---- 4x4 rho=0.7 Tp=2 pilots=eig  (K=98, n per SNR: [640, 640, 640, 640, 640, 640, 640])
+--- 4x4 T=28 rho=0.7 Tp=2 pilots=eig  (K=98, n per SNR: [640, 640, 640, 640, 640, 640, 640])
   SNR [dB]                       0      3      6      9     12     15     18
   BLER@8  col_ext_b0.7       0.970  0.817  0.569  0.412  0.275  0.239  0.216
   BLER@16 col_ext_b0.7       0.970  0.798  0.523  0.395  0.248  0.214  0.194
@@ -75,7 +150,7 @@
   paired pilot_b0.7 vs col_post_b0.7 (first:second, p): 90:1 7e-26  276:1 2e-81  313:2 1e-90  261:4 7e-72  213:1 2e-62  177:1 9e-52  163:0 2e-49
   paired col_ext_b0.7 vs col_post_b0.7 (first:second, p): 89:0 3e-27  243:8 2e-61  228:20 7e-46  200:17 8e-41  136:10 2e-29  118:7 4e-27  106:5 1e-25
 
---- 4x4 rho=0.9 Tp=4 pilots=dft  (K=90, n per SNR: [160, 160, 160, 160, 160, 160, 160])
+--- 4x4 T=28 rho=0.9 Tp=4 pilots=dft  (K=90, n per SNR: [160, 160, 160, 160, 160, 160, 160])
   SNR [dB]                       6      9     12     15     18     21     24
   BLER@8  col_ext_b0.7       0.750  0.431  0.113  0.006  0.000  0.000  0.000
   BLER@16 col_ext_b0.7       0.731  0.394  0.087  0.006  0.000  0.000  0.000
@@ -90,7 +165,7 @@
   paired pilot_b0.7 vs col_post_b0.7 (first:second, p): 18:1 8e-05  13:2 0.007  2:2 1  2:0 0.5  1:0 1  0:0 1  0:0 1
   paired col_ext_b0.7 vs col_post_b0.7 (first:second, p): 19:3 0.0009  12:4 0.08  4:1 0.4  0:0 1  0:0 1  0:0 1  0:0 1
 
---- 4x4 rho=0.9 Tp=3 pilots=dft  (K=94, n per SNR: [160, 160, 160, 160, 160, 160, 160])
+--- 4x4 T=28 rho=0.9 Tp=3 pilots=dft  (K=94, n per SNR: [160, 160, 160, 160, 160, 160, 160])
   SNR [dB]                       6      9     12     15     18     21     24
   BLER@8  col_ext_b0.7       0.925  0.625  0.425  0.306  0.081  0.069  0.019
   BLER@16 col_ext_b0.7       0.919  0.606  0.394  0.281  0.081  0.062  0.019
@@ -105,7 +180,7 @@
   paired pilot_b0.7 vs col_post_b0.7 (first:second, p): 20:0 2e-06  37:1 3e-10  44:1 3e-12  26:0 3e-08  19:0 4e-06  12:0 0.0005  9:0 0.004
   paired col_ext_b0.7 vs col_post_b0.7 (first:second, p): 22:2 4e-05  33:6 1e-05  34:4 6e-07  33:1 4e-09  9:0 0.004  10:1 0.01  3:0 0.2
 
---- 4x4 rho=0.9 Tp=3 pilots=eig  (K=94, n per SNR: [160, 160, 160, 160, 160, 160, 160])
+--- 4x4 T=28 rho=0.9 Tp=3 pilots=eig  (K=94, n per SNR: [160, 160, 160, 160, 160, 160, 160])
   SNR [dB]                       6      9     12     15     18     21     24
   BLER@8  col_ext_b0.7       0.831  0.544  0.237  0.119  0.025  0.006  0.006
   BLER@16 col_ext_b0.7       0.781  0.519  0.219  0.106  0.025  0.006  0.006
@@ -120,7 +195,7 @@
   paired pilot_b0.7 vs col_post_b0.7 (first:second, p): 17:0 2e-05  28:3 5e-06  21:2 7e-05  12:1 0.003  6:0 0.03  1:0 1  1:1 1
   paired col_ext_b0.7 vs col_post_b0.7 (first:second, p): 19:2 0.0002  29:3 3e-06  17:0 2e-05  12:0 0.0005  3:0 0.2  1:1 1  1:1 1
 
---- 4x4 rho=0.9 Tp=2 pilots=dft  (K=98, n per SNR: [160, 160, 160, 160, 160, 160, 160])
+--- 4x4 T=28 rho=0.9 Tp=2 pilots=dft  (K=98, n per SNR: [160, 160, 160, 160, 160, 160, 160])
   SNR [dB]                       6      9     12     15     18     21     24
   BLER@8  col_ext_b0.7       0.938  0.838  0.650  0.425  0.394  0.269  0.269
   BLER@16 col_ext_b0.7       0.925  0.787  0.613  0.394  0.381  0.250  0.244
@@ -135,7 +210,7 @@
   paired pilot_b0.7 vs col_post_b0.7 (first:second, p): 17:0 2e-05  38:0 7e-12  52:2 2e-13  54:0 1e-16  47:1 3e-13  34:2 2e-08  36:1 6e-10
   paired col_ext_b0.7 vs col_post_b0.7 (first:second, p): 19:2 0.0002  33:3 2e-07  45:5 4e-09  42:4 5e-09  37:2 3e-09  29:4 1e-05  27:2 2e-06
 
---- 4x4 rho=0.9 Tp=2 pilots=eig  (K=98, n per SNR: [160, 160, 160, 160, 160, 160, 160])
+--- 4x4 T=28 rho=0.9 Tp=2 pilots=eig  (K=98, n per SNR: [160, 160, 160, 160, 160, 160, 160])
   SNR [dB]                       6      9     12     15     18     21     24
   BLER@8  col_ext_b0.7       0.912  0.844  0.637  0.456  0.425  0.281  0.219
   BLER@16 col_ext_b0.7       0.900  0.831  0.594  0.444  0.406  0.269  0.206
@@ -150,7 +225,157 @@
   paired pilot_b0.7 vs col_post_b0.7 (first:second, p): 22:2 4e-05  33:1 4e-09  45:0 6e-14  37:2 3e-09  34:0 1e-10  23:2 2e-05  17:0 2e-05
   paired col_ext_b0.7 vs col_post_b0.7 (first:second, p): 24:1 2e-06  49:4 7e-11  48:5 7e-10  45:1 1e-12  47:2 4e-12  36:1 6e-10  29:3 3e-06
 
---- 8x4 rho=0.7 Tp=4 pilots=dft  (K=90, n per SNR: [320, 320, 320, 320, 320, 320, 320])
+--- 8x4 T=12 rho=0.7 Tp=4 pilots=dft  (K=26, n per SNR: [640, 640, 640, 640, 640, 640, 640])
+  SNR [dB]                       0      3      6      9     12     15     18
+  BLER@8  col_ext_b0.7       0.089  0.008  0.002  0.000  0.000  0.000  0.000
+  BLER@16 col_ext_b0.7       0.084  0.006  0.000  0.000  0.000  0.000  0.000
+  BLER@8  col_post_b0.7      0.072  0.005  0.002  0.000  0.000  0.000  0.000
+  BLER@16 col_post_b0.7      0.066  0.005  0.000  0.000  0.000  0.000  0.000
+  BLER@16 pilot_b1           0.102  0.020  0.000  0.000  0.000  0.000  0.000
+  BLER@16 pilot_b0.7         0.086  0.011  0.000  0.000  0.000  0.000  0.000
+  BLER@16 genie_b1           0.000  0.000  0.000  0.000  0.000  0.000  0.000
+  NMSEok@16 col_ext_b0.7    0.0711 0.0418 0.0225 0.0121 0.0065 0.0033 0.0017
+  NMSEok@16 col_post_b0.7   0.0716 0.0418 0.0225 0.0121 0.0065 0.0033 0.0017
+  tauL@1    col_post_b0.7    1.072  0.655  0.368  0.206  0.110  0.057  0.030
+  paired pilot_b0.7 vs col_post_b0.7 (first:second, p): 21:8 0.02  4:0 0.1  0:0 1  0:0 1  0:0 1  0:0 1  0:0 1
+  paired col_ext_b0.7 vs col_post_b0.7 (first:second, p): 16:4 0.01  1:0 1  0:0 1  0:0 1  0:0 1  0:0 1  0:0 1
+
+--- 8x4 T=12 rho=0.7 Tp=3 pilots=dft  (K=30, n per SNR: [640, 640, 640, 640, 640, 640, 640])
+  SNR [dB]                       0      3      6      9     12     15     18
+  BLER@8  col_ext_b0.7       0.252  0.081  0.022  0.006  0.008  0.003  0.006
+  BLER@16 col_ext_b0.7       0.241  0.073  0.019  0.005  0.008  0.003  0.005
+  BLER@8  col_post_b0.7      0.178  0.058  0.022  0.006  0.009  0.002  0.006
+  BLER@16 col_post_b0.7      0.136  0.047  0.016  0.006  0.006  0.002  0.006
+  BLER@16 pilot_b1           0.372  0.159  0.067  0.025  0.020  0.014  0.028
+  BLER@16 pilot_b0.7         0.355  0.142  0.055  0.016  0.013  0.006  0.013
+  BLER@16 genie_b1           0.005  0.000  0.000  0.000  0.000  0.000  0.000
+  NMSEok@16 col_ext_b0.7    0.0718 0.0436 0.0249 0.0129 0.0066 0.0035 0.0018
+  NMSEok@16 col_post_b0.7   0.0723 0.0432 0.0249 0.0129 0.0066 0.0035 0.0018
+  tauL@1    col_post_b0.7    1.604  1.189  0.921  0.742  0.652  0.587  0.553
+  paired pilot_b0.7 vs col_post_b0.7 (first:second, p): 143:3 1e-38  65:4 3e-15  28:3 5e-06  7:1 0.07  4:0 0.1  4:1 0.4  6:2 0.3
+  paired col_ext_b0.7 vs col_post_b0.7 (first:second, p): 78:11 1e-13  27:10 0.008  6:4 0.8  2:3 1  3:2 1  1:0 1  2:3 1
+
+--- 8x4 T=12 rho=0.7 Tp=3 pilots=eig  (K=30, n per SNR: [640, 640, 640, 640, 640, 640, 640])
+  SNR [dB]                       0      3      6      9     12     15     18
+  BLER@8  col_ext_b0.7       0.169  0.037  0.006  0.005  0.002  0.002  0.000
+  BLER@16 col_ext_b0.7       0.161  0.036  0.005  0.005  0.002  0.000  0.000
+  BLER@8  col_post_b0.7      0.113  0.022  0.008  0.003  0.002  0.002  0.000
+  BLER@16 col_post_b0.7      0.092  0.019  0.006  0.002  0.002  0.000  0.000
+  BLER@16 pilot_b1           0.222  0.053  0.022  0.008  0.008  0.003  0.002
+  BLER@16 pilot_b0.7         0.197  0.036  0.013  0.006  0.000  0.003  0.000
+  BLER@16 genie_b1           0.005  0.000  0.000  0.000  0.000  0.000  0.000
+  NMSEok@16 col_ext_b0.7    0.0683 0.0414 0.0237 0.0124 0.0065 0.0035 0.0018
+  NMSEok@16 col_post_b0.7   0.0692 0.0411 0.0238 0.0124 0.0065 0.0035 0.0018
+  tauL@1    col_post_b0.7    1.331  0.936  0.687  0.547  0.463  0.419  0.390
+  paired pilot_b0.7 vs col_post_b0.7 (first:second, p): 74:7 3e-15  13:2 0.007  6:2 0.3  3:0 0.2  0:1 1  2:0 0.5  0:0 1
+  paired col_ext_b0.7 vs col_post_b0.7 (first:second, p): 52:8 5e-09  12:1 0.003  1:2 1  2:0 0.5  0:0 1  0:0 1  0:0 1
+
+--- 8x4 T=12 rho=0.7 Tp=2 pilots=dft  (K=34, n per SNR: [640, 640, 640, 640, 640, 640, 640])
+  SNR [dB]                       0      3      6      9     12     15     18
+  BLER@8  col_ext_b0.7       0.503  0.256  0.120  0.073  0.039  0.048  0.039
+  BLER@16 col_ext_b0.7       0.473  0.231  0.108  0.072  0.037  0.036  0.034
+  BLER@8  col_post_b0.7      0.356  0.180  0.072  0.045  0.030  0.031  0.019
+  BLER@16 col_post_b0.7      0.298  0.148  0.059  0.034  0.025  0.030  0.013
+  BLER@16 pilot_b1           0.670  0.459  0.225  0.188  0.169  0.172  0.152
+  BLER@16 pilot_b0.7         0.669  0.438  0.214  0.173  0.128  0.128  0.098
+  BLER@16 genie_b1           0.008  0.000  0.000  0.000  0.000  0.000  0.000
+  NMSEok@16 col_ext_b0.7    0.0693 0.0441 0.0241 0.0132 0.0071 0.0035 0.0018
+  NMSEok@16 col_post_b0.7   0.0693 0.0434 0.0241 0.0132 0.0070 0.0035 0.0018
+  tauL@1    col_post_b0.7    2.073  1.712  1.477  1.357  1.284  1.240  1.223
+  paired pilot_b0.7 vs col_post_b0.7 (first:second, p): 243:6 7e-64  192:7 6e-48  107:8 3e-23  91:2 9e-25  68:2 4e-18  67:4 9e-16  57:2 6e-15
+  paired col_ext_b0.7 vs col_post_b0.7 (first:second, p): 136:24 3e-20  81:28 4e-07  48:17 0.0002  33:9 0.0003  17:9 0.2  16:12 0.6  17:3 0.003
+
+--- 8x4 T=12 rho=0.7 Tp=2 pilots=eig  (K=34, n per SNR: [640, 640, 640, 640, 640, 640, 640])
+  SNR [dB]                       0      3      6      9     12     15     18
+  BLER@8  col_ext_b0.7       0.412  0.250  0.114  0.070  0.064  0.062  0.045
+  BLER@16 col_ext_b0.7       0.395  0.234  0.098  0.067  0.055  0.050  0.037
+  BLER@8  col_post_b0.7      0.286  0.117  0.052  0.025  0.027  0.017  0.017
+  BLER@16 col_post_b0.7      0.244  0.095  0.048  0.022  0.023  0.016  0.016
+  BLER@16 pilot_b1           0.536  0.330  0.183  0.128  0.127  0.108  0.102
+  BLER@16 pilot_b0.7         0.516  0.316  0.159  0.095  0.086  0.073  0.062
+  BLER@16 genie_b1           0.008  0.000  0.000  0.000  0.000  0.000  0.000
+  NMSEok@16 col_ext_b0.7    0.0695 0.0421 0.0242 0.0135 0.0070 0.0037 0.0018
+  NMSEok@16 col_post_b0.7   0.0708 0.0420 0.0239 0.0135 0.0070 0.0036 0.0018
+  tauL@1    col_post_b0.7    1.825  1.523  1.349  1.257  1.203  1.169  1.155
+  paired pilot_b0.7 vs col_post_b0.7 (first:second, p): 186:12 3e-41  145:4 6e-38  81:10 6e-15  49:2 1e-12  50:10 2e-07  41:4 9e-09  33:3 2e-07
+  paired col_ext_b0.7 vs col_post_b0.7 (first:second, p): 122:25 2e-16  100:11 4e-19  46:14 4e-05  33:4 1e-06  27:7 0.0008  24:2 1e-05  18:4 0.004
+
+--- 8x4 T=16 rho=0.7 Tp=4 pilots=dft  (K=42, n per SNR: [640, 640, 640, 640, 640, 640, 640])
+  SNR [dB]                       0      3      6      9     12     15     18
+  BLER@8  col_ext_b0.7       0.105  0.009  0.000  0.000  0.000  0.000  0.000
+  BLER@16 col_ext_b0.7       0.094  0.008  0.000  0.000  0.000  0.000  0.000
+  BLER@8  col_post_b0.7      0.070  0.009  0.000  0.000  0.000  0.000  0.000
+  BLER@16 col_post_b0.7      0.059  0.009  0.000  0.000  0.000  0.000  0.000
+  BLER@16 pilot_b1           0.130  0.014  0.000  0.000  0.000  0.000  0.000
+  BLER@16 pilot_b0.7         0.109  0.008  0.000  0.000  0.000  0.000  0.000
+  BLER@16 genie_b1           0.003  0.002  0.000  0.000  0.000  0.000  0.000
+  NMSEok@16 col_ext_b0.7    0.0562 0.0319 0.0172 0.0092 0.0047 0.0024 0.0012
+  NMSEok@16 col_post_b0.7   0.0568 0.0319 0.0172 0.0092 0.0047 0.0024 0.0012
+  tauL@1    col_post_b0.7    1.066  0.645  0.378  0.206  0.112  0.056  0.029
+  paired pilot_b0.7 vs col_post_b0.7 (first:second, p): 38:6 9e-07  1:2 1  0:0 1  0:0 1  0:0 1  0:0 1  0:0 1
+  paired col_ext_b0.7 vs col_post_b0.7 (first:second, p): 24:2 1e-05  0:1 1  0:0 1  0:0 1  0:0 1  0:0 1  0:0 1
+
+--- 8x4 T=16 rho=0.7 Tp=3 pilots=dft  (K=46, n per SNR: [640, 640, 640, 640, 640, 640, 640])
+  SNR [dB]                       0      3      6      9     12     15     18
+  BLER@8  col_ext_b0.7       0.289  0.078  0.027  0.006  0.009  0.002  0.003
+  BLER@16 col_ext_b0.7       0.277  0.072  0.023  0.006  0.009  0.000  0.003
+  BLER@8  col_post_b0.7      0.180  0.039  0.014  0.005  0.003  0.003  0.002
+  BLER@16 col_post_b0.7      0.159  0.030  0.009  0.003  0.003  0.002  0.000
+  BLER@16 pilot_b1           0.467  0.184  0.091  0.036  0.037  0.025  0.019
+  BLER@16 pilot_b0.7         0.453  0.166  0.070  0.022  0.013  0.017  0.003
+  BLER@16 genie_b1           0.002  0.000  0.000  0.000  0.000  0.000  0.000
+  NMSEok@16 col_ext_b0.7    0.0578 0.0322 0.0178 0.0093 0.0049 0.0025 0.0013
+  NMSEok@16 col_post_b0.7   0.0567 0.0325 0.0177 0.0093 0.0049 0.0025 0.0012
+  tauL@1    col_post_b0.7    1.607  1.188  0.914  0.750  0.649  0.593  0.553
+  paired pilot_b0.7 vs col_post_b0.7 (first:second, p): 191:3 1e-52  89:2 3e-24  40:1 4e-11  13:1 0.002  6:0 0.03  10:0 0.002  2:0 0.5
+  paired col_ext_b0.7 vs col_post_b0.7 (first:second, p): 89:14 2e-14  32:5 7e-06  13:4 0.05  4:2 0.7  5:1 0.2  0:1 1  2:0 0.5
+
+--- 8x4 T=16 rho=0.7 Tp=3 pilots=eig  (K=46, n per SNR: [640, 640, 640, 640, 640, 640, 640])
+  SNR [dB]                       0      3      6      9     12     15     18
+  BLER@8  col_ext_b0.7       0.200  0.037  0.003  0.002  0.000  0.000  0.000
+  BLER@16 col_ext_b0.7       0.180  0.031  0.003  0.002  0.000  0.000  0.000
+  BLER@8  col_post_b0.7      0.119  0.017  0.002  0.002  0.000  0.000  0.000
+  BLER@16 col_post_b0.7      0.087  0.017  0.002  0.002  0.000  0.000  0.000
+  BLER@16 pilot_b1           0.252  0.070  0.019  0.005  0.005  0.005  0.003
+  BLER@16 pilot_b0.7         0.234  0.053  0.014  0.003  0.000  0.002  0.000
+  BLER@16 genie_b1           0.002  0.000  0.000  0.000  0.000  0.000  0.000
+  NMSEok@16 col_ext_b0.7    0.0563 0.0313 0.0176 0.0091 0.0049 0.0025 0.0012
+  NMSEok@16 col_post_b0.7   0.0566 0.0313 0.0176 0.0091 0.0049 0.0025 0.0012
+  tauL@1    col_post_b0.7    1.300  0.944  0.694  0.547  0.462  0.418  0.393
+  paired pilot_b0.7 vs col_post_b0.7 (first:second, p): 101:7 2e-22  26:3 2e-05  9:1 0.02  1:0 1  0:0 1  1:0 1  0:0 1
+  paired col_ext_b0.7 vs col_post_b0.7 (first:second, p): 69:10 6e-12  13:4 0.05  2:1 1  0:0 1  0:0 1  0:0 1  0:0 1
+
+--- 8x4 T=16 rho=0.7 Tp=2 pilots=dft  (K=50, n per SNR: [640, 640, 640, 640, 640, 640, 640])
+  SNR [dB]                       0      3      6      9     12     15     18
+  BLER@8  col_ext_b0.7       0.550  0.270  0.108  0.086  0.056  0.030  0.037
+  BLER@16 col_ext_b0.7       0.523  0.244  0.092  0.073  0.050  0.027  0.030
+  BLER@8  col_post_b0.7      0.381  0.138  0.059  0.031  0.031  0.036  0.025
+  BLER@16 col_post_b0.7      0.342  0.117  0.055  0.028  0.028  0.033  0.023
+  BLER@16 pilot_b1           0.748  0.495  0.334  0.241  0.200  0.183  0.161
+  BLER@16 pilot_b0.7         0.739  0.470  0.295  0.198  0.155  0.144  0.123
+  BLER@16 genie_b1           0.000  0.000  0.000  0.000  0.000  0.000  0.000
+  NMSEok@16 col_ext_b0.7    0.0519 0.0309 0.0187 0.0094 0.0049 0.0026 0.0013
+  NMSEok@16 col_post_b0.7   0.0542 0.0306 0.0183 0.0094 0.0049 0.0026 0.0013
+  tauL@1    col_post_b0.7    2.054  1.696  1.503  1.341  1.286  1.243  1.221
+  paired pilot_b0.7 vs col_post_b0.7 (first:second, p): 258:4 5e-71  229:3 6e-64  155:1 3e-45  110:1 9e-32  85:4 8e-21  74:3 1e-18  68:4 5e-16
+  paired col_ext_b0.7 vs col_post_b0.7 (first:second, p): 143:27 3e-20  100:19 2e-14  39:15 0.001  38:9 2e-05  27:13 0.04  8:12 0.5  15:11 0.6
+
+--- 8x4 T=16 rho=0.7 Tp=2 pilots=eig  (K=50, n per SNR: [640, 640, 640, 640, 640, 640, 640])
+  SNR [dB]                       0      3      6      9     12     15     18
+  BLER@8  col_ext_b0.7       0.522  0.261  0.122  0.073  0.055  0.048  0.039
+  BLER@16 col_ext_b0.7       0.487  0.231  0.116  0.069  0.048  0.047  0.036
+  BLER@8  col_post_b0.7      0.284  0.087  0.039  0.031  0.014  0.022  0.014
+  BLER@16 col_post_b0.7      0.252  0.073  0.030  0.030  0.014  0.020  0.011
+  BLER@16 pilot_b1           0.633  0.350  0.217  0.161  0.139  0.130  0.102
+  BLER@16 pilot_b0.7         0.608  0.327  0.186  0.123  0.087  0.087  0.056
+  BLER@16 genie_b1           0.000  0.000  0.000  0.000  0.000  0.000  0.000
+  NMSEok@16 col_ext_b0.7    0.0527 0.0307 0.0181 0.0095 0.0050 0.0026 0.0013
+  NMSEok@16 col_post_b0.7   0.0545 0.0305 0.0181 0.0093 0.0050 0.0026 0.0013
+  tauL@1    col_post_b0.7    1.842  1.534  1.354  1.253  1.199  1.174  1.154
+  paired pilot_b0.7 vs col_post_b0.7 (first:second, p): 235:7 3e-60  167:5 4e-43  104:4 3e-26  66:6 7e-14  50:3 6e-12  47:4 2e-10  31:2 1e-07
+  paired col_ext_b0.7 vs col_post_b0.7 (first:second, p): 159:8 1e-37  108:7 2e-24  57:2 6e-15  36:11 0.0003  25:3 3e-05  25:8 0.005  19:3 0.0009
+
+--- 8x4 T=28 rho=0.7 Tp=4 pilots=dft  (K=90, n per SNR: [320, 320, 320, 320, 320, 320, 320])
   SNR [dB]                       0      3      6      9     12     15     18
   BLER@8  col_ext_b0.7       0.072  0.006  0.000  0.000  0.000  0.000  0.000
   BLER@16 col_ext_b0.7       0.066  0.003  0.000  0.000  0.000  0.000  0.000
@@ -165,7 +390,7 @@
   paired pilot_b0.7 vs col_post_b0.7 (first:second, p): 29:1 6e-08  2:0 0.5  0:0 1  0:0 1  0:0 1  0:0 1  0:0 1
   paired col_ext_b0.7 vs col_post_b0.7 (first:second, p): 12:2 0.01  1:0 1  0:0 1  0:0 1  0:0 1  0:0 1  0:0 1
 
---- 8x4 rho=0.7 Tp=3 pilots=dft  (K=94, n per SNR: [320, 320, 320, 320, 320, 320, 320])
+--- 8x4 T=28 rho=0.7 Tp=3 pilots=dft  (K=94, n per SNR: [320, 320, 320, 320, 320, 320, 320])
   SNR [dB]                       0      3      6      9     12     15     18
   BLER@8  col_ext_b0.7       0.416  0.066  0.003  0.006  0.003  0.003  0.000
   BLER@16 col_ext_b0.7       0.362  0.050  0.003  0.006  0.003  0.003  0.000
@@ -180,7 +405,7 @@
   paired pilot_b0.7 vs col_post_b0.7 (first:second, p): 152:0 4e-46  60:0 2e-18  14:0 0.0001  6:0 0.03  1:0 1  5:0 0.06  1:0 1
   paired col_ext_b0.7 vs col_post_b0.7 (first:second, p): 73:6 1e-15  11:4 0.1  1:2 1  2:0 0.5  0:0 1  1:0 1  0:1 1
 
---- 8x4 rho=0.7 Tp=3 pilots=eig  (K=94, n per SNR: [320, 320, 320, 320, 320, 320, 320])
+--- 8x4 T=28 rho=0.7 Tp=3 pilots=eig  (K=94, n per SNR: [320, 320, 320, 320, 320, 320, 320])
   SNR [dB]                       0      3      6      9     12     15     18
   BLER@8  col_ext_b0.7       0.278  0.028  0.003  0.003  0.000  0.000  0.000
   BLER@16 col_ext_b0.7       0.244  0.028  0.003  0.003  0.000  0.000  0.000
@@ -195,7 +420,7 @@
   paired pilot_b0.7 vs col_post_b0.7 (first:second, p): 74:0 1e-22  15:0 6e-05  2:0 0.5  2:0 0.5  0:0 1  0:0 1  0:0 1
   paired col_ext_b0.7 vs col_post_b0.7 (first:second, p): 42:3 9e-10  8:0 0.008  1:0 1  1:0 1  0:0 1  0:0 1  0:0 1
 
---- 8x4 rho=0.7 Tp=2 pilots=dft  (K=98, n per SNR: [320, 320, 320, 320, 320, 320, 320])
+--- 8x4 T=28 rho=0.7 Tp=2 pilots=dft  (K=98, n per SNR: [320, 320, 320, 320, 320, 320, 320])
   SNR [dB]                       0      3      6      9     12     15     18
   BLER@8  col_ext_b0.7       0.613  0.294  0.150  0.028  0.025  0.016  0.031
   BLER@16 col_ext_b0.7       0.588  0.275  0.131  0.028  0.019  0.016  0.025
@@ -210,7 +435,7 @@
   paired pilot_b0.7 vs col_post_b0.7 (first:second, p): 189:1 2e-55  149:2 8e-42  106:1 1e-30  62:1 1e-17  52:1 1e-14  44:1 3e-12  29:2 5e-07
   paired col_ext_b0.7 vs col_post_b0.7 (first:second, p): 107:7 4e-24  60:12 8e-09  35:4 3e-07  6:2 0.3  6:4 0.8  5:3 0.7  6:4 0.8
 
---- 8x4 rho=0.7 Tp=2 pilots=eig  (K=98, n per SNR: [320, 320, 320, 320, 320, 320, 320])
+--- 8x4 T=28 rho=0.7 Tp=2 pilots=eig  (K=98, n per SNR: [320, 320, 320, 320, 320, 320, 320])
   SNR [dB]                       0      3      6      9     12     15     18
   BLER@8  col_ext_b0.7       0.672  0.416  0.206  0.106  0.097  0.044  0.041
   BLER@16 col_ext_b0.7       0.609  0.353  0.191  0.097  0.094  0.041  0.037
@@ -226,7 +451,50 @@
   paired col_ext_b0.7 vs col_post_b0.7 (first:second, p): 135:8 7e-31  88:2 7e-24  49:3 1e-11  27:0 1e-08  29:2 5e-07  12:0 0.0005  12:0 0.0005
 
 --- summary: SNR [dB] at BLER@16 = 0.1 (log-linear interpolation; '>x' = not reached) and goodput K(1-BLER)/T [bit per channel use of the 4-antenna block]
-  4x4 rho=0.7
+  4x4 T=16 rho=0.7   (goodput upper bounds K/T: Tp=4: 2.625, Tp=3: 2.875, Tp=2: 3.125)
+    Tp=4 dft pilot_b1        SNR@0.1 =    5.2   goodput: 0dB:0.83 3dB:1.96 6dB:2.44 9dB:2.60 12dB:2.62 15dB:2.62 18dB:2.62
+    Tp=4 dft pilot_b0.7      SNR@0.1 =    4.6   goodput: 0dB:0.80 3dB:1.97 6dB:2.50 9dB:2.59 12dB:2.62 15dB:2.62 18dB:2.62
+    Tp=4 dft col_ext_b0.7    SNR@0.1 =    4.6   goodput: 0dB:0.82 3dB:2.02 6dB:2.50 9dB:2.61 12dB:2.62 15dB:2.62 18dB:2.62
+    Tp=4 dft col_post_b0.7   SNR@0.1 =    4.1   goodput: 0dB:1.11 3dB:2.13 6dB:2.54 9dB:2.61 12dB:2.62 15dB:2.62 18dB:2.62
+    Tp=4 dft genie_b1        SNR@0.1 =    1.1   goodput: 0dB:2.19 3dB:2.51 6dB:2.60 9dB:2.62 12dB:2.62 15dB:2.62 18dB:2.62
+    Tp=3 dft pilot_b1        SNR@0.1 =   17.9   goodput: 0dB:0.27 3dB:0.95 6dB:1.84 9dB:2.21 12dB:2.42 15dB:2.43 18dB:2.59
+    Tp=3 dft pilot_b0.7      SNR@0.1 =   16.0   goodput: 0dB:0.27 3dB:1.01 6dB:1.87 9dB:2.26 12dB:2.50 15dB:2.52 18dB:2.69
+    Tp=3 dft col_ext_b0.7    SNR@0.1 =    8.5   goodput: 0dB:0.32 3dB:1.40 6dB:2.27 9dB:2.62 12dB:2.71 15dB:2.77 18dB:2.80
+    Tp=3 dft col_post_b0.7   SNR@0.1 =    6.4   goodput: 0dB:0.73 3dB:1.89 6dB:2.53 9dB:2.78 12dB:2.80 15dB:2.80 18dB:2.85
+    Tp=3 dft genie_b1        SNR@0.1 =    1.3   goodput: 0dB:2.31 3dB:2.76 6dB:2.86 9dB:2.88 12dB:2.88 15dB:2.88 18dB:2.88
+    Tp=3 eig pilot_b1        SNR@0.1 =    8.2   goodput: 0dB:0.44 3dB:1.54 6dB:2.34 9dB:2.64 12dB:2.77 15dB:2.81 18dB:2.80
+    Tp=3 eig pilot_b0.7      SNR@0.1 =    7.7   goodput: 0dB:0.45 3dB:1.57 6dB:2.37 9dB:2.69 12dB:2.79 15dB:2.83 18dB:2.83
+    Tp=3 eig col_ext_b0.7    SNR@0.1 =    6.4   goodput: 0dB:0.49 3dB:1.71 6dB:2.53 9dB:2.78 12dB:2.86 15dB:2.84 18dB:2.84
+    Tp=3 eig col_post_b0.7   SNR@0.1 =    5.1   goodput: 0dB:0.89 3dB:2.13 6dB:2.68 9dB:2.83 12dB:2.86 15dB:2.86 18dB:2.85
+    Tp=3 eig genie_b1        SNR@0.1 =    1.3   goodput: 0dB:2.31 3dB:2.76 6dB:2.86 9dB:2.88 12dB:2.88 15dB:2.88 18dB:2.88
+    Tp=2 dft pilot_b1        SNR@0.1 =    >18   goodput: 0dB:0.16 3dB:0.37 6dB:0.97 9dB:1.27 12dB:1.59 15dB:1.87 18dB:1.95
+    Tp=2 dft pilot_b0.7      SNR@0.1 =    >18   goodput: 0dB:0.15 3dB:0.35 6dB:1.01 9dB:1.32 12dB:1.63 15dB:1.97 18dB:2.04
+    Tp=2 dft col_ext_b0.7    SNR@0.1 =    >18   goodput: 0dB:0.24 3dB:0.83 6dB:1.78 9dB:2.20 12dB:2.39 15dB:2.63 18dB:2.74
+    Tp=2 dft col_post_b0.7   SNR@0.1 =   13.4   goodput: 0dB:0.63 3dB:1.51 6dB:2.22 9dB:2.67 12dB:2.75 15dB:2.87 18dB:2.91
+    Tp=2 dft genie_b1        SNR@0.1 =    1.1   goodput: 0dB:2.50 3dB:3.03 6dB:3.11 9dB:3.12 12dB:3.12 15dB:3.12 18dB:3.12
+    Tp=2 eig pilot_b1        SNR@0.1 =    >18   goodput: 0dB:0.22 3dB:0.69 6dB:1.27 9dB:1.63 12dB:1.96 15dB:2.20 18dB:2.34
+    Tp=2 eig pilot_b0.7      SNR@0.1 =    >18   goodput: 0dB:0.22 3dB:0.71 6dB:1.34 9dB:1.75 12dB:2.12 15dB:2.31 18dB:2.45
+    Tp=2 eig col_ext_b0.7    SNR@0.1 =    >18   goodput: 0dB:0.29 3dB:0.99 6dB:1.70 9dB:2.15 12dB:2.45 15dB:2.61 18dB:2.70
+    Tp=2 eig col_post_b0.7   SNR@0.1 =    9.9   goodput: 0dB:0.67 3dB:1.67 6dB:2.33 9dB:2.77 12dB:2.89 15dB:2.93 18dB:3.03
+    Tp=2 eig genie_b1        SNR@0.1 =    1.1   goodput: 0dB:2.50 3dB:3.03 6dB:3.11 9dB:3.12 12dB:3.12 15dB:3.12 18dB:3.12
+    regime check (same Tp, pilots, SNR; pilot = best-of-beta BLER@16, joint = col_post_b0.7):  [S] pilot >= 0.3 & joint <= 0.1   [R] pilot >= 0.02 & joint <= pilot/5
+      [R ] Tp=3 dft 9 dB: pilot 0.212 vs joint 0.033
+      [R ] Tp=3 dft 12 dB: pilot 0.131 vs joint 0.025
+      [R ] Tp=3 dft 18 dB: pilot 0.064 vs joint 0.009
+      [R ] Tp=3 eig 12 dB: pilot 0.028 vs joint 0.005
+      [S ] Tp=2 dft 15 dB: pilot 0.369 vs joint 0.083
+      [SR] Tp=2 dft 18 dB: pilot 0.347 vs joint 0.069
+      [S ] Tp=2 eig 12 dB: pilot 0.322 vs joint 0.075
+      [R ] Tp=2 eig 18 dB: pilot 0.217 vs joint 0.030
+    goodput envelope (best configuration per SNR):  pilot-only (best Tp, pilots, beta)  vs  joint col_post_b0.7 (best Tp, pilots)
+         0 dB: pilot 0.829 (Tp4dft ) joint 1.112 (Tp4dft ) gain +34.2%
+         3 dB: pilot 1.969 (Tp4dft ) joint 2.129 (Tp3eig ) gain +8.2%
+         6 dB: pilot 2.502 (Tp4dft ) joint 2.682 (Tp3eig ) gain +7.2%
+         9 dB: pilot 2.691 (Tp3eig ) joint 2.830 (Tp3eig ) gain +5.2%
+        12 dB: pilot 2.794 (Tp3eig ) joint 2.891 (Tp2eig ) gain +3.5%
+        15 dB: pilot 2.835 (Tp3eig ) joint 2.930 (Tp2eig ) gain +3.4%
+        18 dB: pilot 2.830 (Tp3eig ) joint 3.032 (Tp2eig ) gain +7.1%
+  4x4 T=28 rho=0.7   (goodput upper bounds K/T: Tp=4: 3.214, Tp=3: 3.357, Tp=2: 3.500)
     Tp=4 dft pilot_b1        SNR@0.1 =    5.3   goodput: 0dB:0.54 3dB:2.02 6dB:3.00 9dB:3.17 12dB:3.21 15dB:3.21 18dB:3.21
     Tp=4 dft pilot_b0.7      SNR@0.1 =    4.9   goodput: 0dB:0.54 3dB:2.07 6dB:3.06 9dB:3.21 12dB:3.21 15dB:3.21 18dB:3.21
     Tp=4 dft col_ext_b0.7    SNR@0.1 =    4.4   goodput: 0dB:0.62 3dB:2.31 6dB:3.11 9dB:3.20 12dB:3.21 15dB:3.21 18dB:3.21
@@ -271,7 +539,7 @@
         12 dB: pilot 3.278 (Tp3eig ) joint 3.336 (Tp3eig ) gain +1.8%
         15 dB: pilot 3.320 (Tp3eig ) joint 3.358 (Tp2eig ) gain +1.1%
         18 dB: pilot 3.320 (Tp3eig ) joint 3.374 (Tp2eig ) gain +1.6%
-  4x4 rho=0.9
+  4x4 T=28 rho=0.9   (goodput upper bounds K/T: Tp=4: 3.214, Tp=3: 3.357, Tp=2: 3.500)
     Tp=4 dft pilot_b1        SNR@0.1 =   12.4   goodput: 6dB:0.80 9dB:1.83 12dB:2.83 15dB:3.09 18dB:3.21 21dB:3.21 24dB:3.21
     Tp=4 dft pilot_b0.7      SNR@0.1 =   11.4   goodput: 6dB:0.84 9dB:1.89 12dB:2.99 15dB:3.15 18dB:3.19 21dB:3.21 24dB:3.21
     Tp=4 dft col_ext_b0.7    SNR@0.1 =   11.7   goodput: 6dB:0.86 9dB:1.95 12dB:2.93 15dB:3.19 18dB:3.21 21dB:3.21 24dB:3.21
@@ -311,7 +579,92 @@
         18 dB: pilot 3.214 (Tp4dft ) joint 3.336 (Tp3eig ) gain +3.8%
         21 dB: pilot 3.315 (Tp3eig ) joint 3.336 (Tp3dft ) gain +0.6%
         24 dB: pilot 3.336 (Tp3eig ) joint 3.357 (Tp3dft ) gain +0.6%
-  8x4 rho=0.7
+  8x4 T=12 rho=0.7   (goodput upper bounds K/T: Tp=4: 2.167, Tp=3: 2.500, Tp=2: 2.833)
+    Tp=4 dft pilot_b1        SNR@0.1 =    0.0   goodput: 0dB:1.95 3dB:2.12 6dB:2.17 9dB:2.17 12dB:2.17 15dB:2.17 18dB:2.17
+    Tp=4 dft pilot_b0.7      SNR@0.1 =    <=0   goodput: 0dB:1.98 3dB:2.14 6dB:2.17 9dB:2.17 12dB:2.17 15dB:2.17 18dB:2.17
+    Tp=4 dft col_ext_b0.7    SNR@0.1 =    <=0   goodput: 0dB:1.98 3dB:2.15 6dB:2.17 9dB:2.17 12dB:2.17 15dB:2.17 18dB:2.17
+    Tp=4 dft col_post_b0.7   SNR@0.1 =    <=0   goodput: 0dB:2.02 3dB:2.16 6dB:2.17 9dB:2.17 12dB:2.17 15dB:2.17 18dB:2.17
+    Tp=4 dft genie_b1        SNR@0.1 =    <=0   goodput: 0dB:2.17 3dB:2.17 6dB:2.17 9dB:2.17 12dB:2.17 15dB:2.17 18dB:2.17
+    Tp=3 dft pilot_b1        SNR@0.1 =    4.6   goodput: 0dB:1.57 3dB:2.10 6dB:2.33 9dB:2.44 12dB:2.45 15dB:2.46 18dB:2.43
+    Tp=3 dft pilot_b0.7      SNR@0.1 =    4.1   goodput: 0dB:1.61 3dB:2.14 6dB:2.36 9dB:2.46 12dB:2.47 15dB:2.48 18dB:2.47
+    Tp=3 dft col_ext_b0.7    SNR@0.1 =    2.2   goodput: 0dB:1.90 3dB:2.32 6dB:2.45 9dB:2.49 12dB:2.48 15dB:2.49 18dB:2.49
+    Tp=3 dft col_post_b0.7   SNR@0.1 =    0.9   goodput: 0dB:2.16 3dB:2.38 6dB:2.46 9dB:2.48 12dB:2.48 15dB:2.50 18dB:2.48
+    Tp=3 dft genie_b1        SNR@0.1 =    <=0   goodput: 0dB:2.49 3dB:2.50 6dB:2.50 9dB:2.50 12dB:2.50 15dB:2.50 18dB:2.50
+    Tp=3 eig pilot_b1        SNR@0.1 =    1.7   goodput: 0dB:1.95 3dB:2.37 6dB:2.45 9dB:2.48 12dB:2.48 15dB:2.49 18dB:2.50
+    Tp=3 eig pilot_b0.7      SNR@0.1 =    1.2   goodput: 0dB:2.01 3dB:2.41 6dB:2.47 9dB:2.48 12dB:2.50 15dB:2.49 18dB:2.50
+    Tp=3 eig col_ext_b0.7    SNR@0.1 =    1.0   goodput: 0dB:2.10 3dB:2.41 6dB:2.49 9dB:2.49 12dB:2.50 15dB:2.50 18dB:2.50
+    Tp=3 eig col_post_b0.7   SNR@0.1 =    <=0   goodput: 0dB:2.27 3dB:2.45 6dB:2.48 9dB:2.50 12dB:2.50 15dB:2.50 18dB:2.50
+    Tp=3 eig genie_b1        SNR@0.1 =    <=0   goodput: 0dB:2.49 3dB:2.50 6dB:2.50 9dB:2.50 12dB:2.50 15dB:2.50 18dB:2.50
+    Tp=2 dft pilot_b1        SNR@0.1 =    >18   goodput: 0dB:0.93 3dB:1.53 6dB:2.20 9dB:2.30 12dB:2.36 15dB:2.35 18dB:2.40
+    Tp=2 dft pilot_b0.7      SNR@0.1 =   17.8   goodput: 0dB:0.94 3dB:1.59 6dB:2.23 9dB:2.34 12dB:2.47 15dB:2.47 18dB:2.55
+    Tp=2 dft col_ext_b0.7    SNR@0.1 =    6.6   goodput: 0dB:1.49 3dB:2.18 6dB:2.53 9dB:2.63 12dB:2.73 15dB:2.73 18dB:2.74
+    Tp=2 dft col_post_b0.7   SNR@0.1 =    4.3   goodput: 0dB:1.99 3dB:2.41 6dB:2.67 9dB:2.74 12dB:2.76 15dB:2.75 18dB:2.80
+    Tp=2 dft genie_b1        SNR@0.1 =    <=0   goodput: 0dB:2.81 3dB:2.83 6dB:2.83 9dB:2.83 12dB:2.83 15dB:2.83 18dB:2.83
+    Tp=2 eig pilot_b1        SNR@0.1 =    >18   goodput: 0dB:1.31 3dB:1.90 6dB:2.32 9dB:2.47 12dB:2.47 15dB:2.53 18dB:2.55
+    Tp=2 eig pilot_b0.7      SNR@0.1 =    8.7   goodput: 0dB:1.37 3dB:1.94 6dB:2.38 9dB:2.56 12dB:2.59 15dB:2.63 18dB:2.66
+    Tp=2 eig col_ext_b0.7    SNR@0.1 =    5.9   goodput: 0dB:1.71 3dB:2.17 6dB:2.55 9dB:2.64 12dB:2.68 15dB:2.69 18dB:2.73
+    Tp=2 eig col_post_b0.7   SNR@0.1 =    2.8   goodput: 0dB:2.14 3dB:2.56 6dB:2.70 9dB:2.77 12dB:2.77 15dB:2.79 18dB:2.79
+    Tp=2 eig genie_b1        SNR@0.1 =    <=0   goodput: 0dB:2.81 3dB:2.83 6dB:2.83 9dB:2.83 12dB:2.83 15dB:2.83 18dB:2.83
+    regime check (same Tp, pilots, SNR; pilot = best-of-beta BLER@16, joint = col_post_b0.7):  [S] pilot >= 0.3 & joint <= 0.1   [R] pilot >= 0.02 & joint <= pilot/5
+      [R ] Tp=2 dft 9 dB: pilot 0.173 vs joint 0.034
+      [R ] Tp=2 dft 12 dB: pilot 0.128 vs joint 0.025
+      [R ] Tp=2 dft 18 dB: pilot 0.098 vs joint 0.013
+      [S ] Tp=2 eig 3 dB: pilot 0.316 vs joint 0.095
+    goodput envelope (best configuration per SNR):  pilot-only (best Tp, pilots, beta)  vs  joint col_post_b0.7 (best Tp, pilots)
+         0 dB: pilot 2.008 (Tp3eig ) joint 2.270 (Tp3eig ) gain +13.0%
+         3 dB: pilot 2.410 (Tp3eig ) joint 2.563 (Tp2eig ) gain +6.4%
+         6 dB: pilot 2.469 (Tp3eig ) joint 2.696 (Tp2eig ) gain +9.2%
+         9 dB: pilot 2.563 (Tp2eig ) joint 2.771 (Tp2eig ) gain +8.1%
+        12 dB: pilot 2.590 (Tp2eig ) joint 2.767 (Tp2eig ) gain +6.8%
+        15 dB: pilot 2.625 (Tp2eig ) joint 2.789 (Tp2eig ) gain +6.2%
+        18 dB: pilot 2.656 (Tp2eig ) joint 2.798 (Tp2dft ) gain +5.3%
+  8x4 T=16 rho=0.7   (goodput upper bounds K/T: Tp=4: 2.625, Tp=3: 2.875, Tp=2: 3.125)
+    Tp=4 dft pilot_b1        SNR@0.1 =    0.4   goodput: 0dB:2.28 3dB:2.59 6dB:2.62 9dB:2.62 12dB:2.62 15dB:2.62 18dB:2.62
+    Tp=4 dft pilot_b0.7      SNR@0.1 =    0.1   goodput: 0dB:2.34 3dB:2.60 6dB:2.62 9dB:2.62 12dB:2.62 15dB:2.62 18dB:2.62
+    Tp=4 dft col_ext_b0.7    SNR@0.1 =    <=0   goodput: 0dB:2.38 3dB:2.60 6dB:2.62 9dB:2.62 12dB:2.62 15dB:2.62 18dB:2.62
+    Tp=4 dft col_post_b0.7   SNR@0.1 =    <=0   goodput: 0dB:2.47 3dB:2.60 6dB:2.62 9dB:2.62 12dB:2.62 15dB:2.62 18dB:2.62
+    Tp=4 dft genie_b1        SNR@0.1 =    <=0   goodput: 0dB:2.62 3dB:2.62 6dB:2.62 9dB:2.62 12dB:2.62 15dB:2.62 18dB:2.62
+    Tp=3 dft pilot_b1        SNR@0.1 =    5.6   goodput: 0dB:1.53 3dB:2.34 6dB:2.61 9dB:2.77 12dB:2.77 15dB:2.80 18dB:2.82
+    Tp=3 dft pilot_b0.7      SNR@0.1 =    4.8   goodput: 0dB:1.57 3dB:2.40 6dB:2.67 9dB:2.81 12dB:2.84 15dB:2.83 18dB:2.87
+    Tp=3 dft col_ext_b0.7    SNR@0.1 =    2.3   goodput: 0dB:2.08 3dB:2.67 6dB:2.81 9dB:2.86 12dB:2.85 15dB:2.88 18dB:2.87
+    Tp=3 dft col_post_b0.7   SNR@0.1 =    0.8   goodput: 0dB:2.42 3dB:2.79 6dB:2.85 9dB:2.87 12dB:2.87 15dB:2.87 18dB:2.88
+    Tp=3 dft genie_b1        SNR@0.1 =    <=0   goodput: 0dB:2.87 3dB:2.88 6dB:2.88 9dB:2.88 12dB:2.88 15dB:2.88 18dB:2.88
+    Tp=3 eig pilot_b1        SNR@0.1 =    2.2   goodput: 0dB:2.15 3dB:2.67 6dB:2.82 9dB:2.86 12dB:2.86 15dB:2.86 18dB:2.87
+    Tp=3 eig pilot_b0.7      SNR@0.1 =    1.7   goodput: 0dB:2.20 3dB:2.72 6dB:2.83 9dB:2.87 12dB:2.88 15dB:2.87 18dB:2.88
+    Tp=3 eig col_ext_b0.7    SNR@0.1 =    1.0   goodput: 0dB:2.36 3dB:2.79 6dB:2.87 9dB:2.87 12dB:2.88 15dB:2.88 18dB:2.88
+    Tp=3 eig col_post_b0.7   SNR@0.1 =    <=0   goodput: 0dB:2.62 3dB:2.83 6dB:2.87 9dB:2.87 12dB:2.88 15dB:2.88 18dB:2.88
+    Tp=3 eig genie_b1        SNR@0.1 =    <=0   goodput: 0dB:2.87 3dB:2.88 6dB:2.88 9dB:2.88 12dB:2.88 15dB:2.88 18dB:2.88
+    Tp=2 dft pilot_b1        SNR@0.1 =    >18   goodput: 0dB:0.79 3dB:1.58 6dB:2.08 9dB:2.37 12dB:2.50 15dB:2.55 18dB:2.62
+    Tp=2 dft pilot_b0.7      SNR@0.1 =    >18   goodput: 0dB:0.82 3dB:1.66 6dB:2.20 9dB:2.50 12dB:2.64 15dB:2.68 18dB:2.74
+    Tp=2 dft col_ext_b0.7    SNR@0.1 =    5.7   goodput: 0dB:1.49 3dB:2.36 6dB:2.84 9dB:2.90 12dB:2.97 15dB:3.04 18dB:3.03
+    Tp=2 dft col_post_b0.7   SNR@0.1 =    3.6   goodput: 0dB:2.06 3dB:2.76 6dB:2.95 9dB:3.04 12dB:3.04 15dB:3.02 18dB:3.05
+    Tp=2 dft genie_b1        SNR@0.1 =    <=0   goodput: 0dB:3.12 3dB:3.12 6dB:3.12 9dB:3.12 12dB:3.12 15dB:3.12 18dB:3.12
+    Tp=2 eig pilot_b1        SNR@0.1 =    >18   goodput: 0dB:1.15 3dB:2.03 6dB:2.45 9dB:2.62 12dB:2.69 15dB:2.72 18dB:2.81
+    Tp=2 eig pilot_b0.7      SNR@0.1 =   10.8   goodput: 0dB:1.23 3dB:2.10 6dB:2.54 9dB:2.74 12dB:2.85 15dB:2.85 18dB:2.95
+    Tp=2 eig col_ext_b0.7    SNR@0.1 =    6.8   goodput: 0dB:1.60 3dB:2.40 6dB:2.76 9dB:2.91 12dB:2.97 15dB:2.98 18dB:3.01
+    Tp=2 eig col_post_b0.7   SNR@0.1 =    2.2   goodput: 0dB:2.34 3dB:2.90 6dB:3.03 9dB:3.03 12dB:3.08 15dB:3.06 18dB:3.09
+    Tp=2 eig genie_b1        SNR@0.1 =    <=0   goodput: 0dB:3.12 3dB:3.12 6dB:3.12 9dB:3.12 12dB:3.12 15dB:3.12 18dB:3.12
+    regime check (same Tp, pilots, SNR; pilot = best-of-beta BLER@16, joint = col_post_b0.7):  [S] pilot >= 0.3 & joint <= 0.1   [R] pilot >= 0.02 & joint <= pilot/5
+      [R ] Tp=3 dft 3 dB: pilot 0.166 vs joint 0.030
+      [R ] Tp=3 dft 6 dB: pilot 0.070 vs joint 0.009
+      [R ] Tp=3 dft 9 dB: pilot 0.022 vs joint 0.003
+      [R ] Tp=2 dft 6 dB: pilot 0.295 vs joint 0.055
+      [R ] Tp=2 dft 9 dB: pilot 0.198 vs joint 0.028
+      [R ] Tp=2 dft 12 dB: pilot 0.155 vs joint 0.028
+      [R ] Tp=2 dft 18 dB: pilot 0.123 vs joint 0.023
+      [S ] Tp=2 eig 3 dB: pilot 0.327 vs joint 0.073
+      [R ] Tp=2 eig 6 dB: pilot 0.186 vs joint 0.030
+      [R ] Tp=2 eig 12 dB: pilot 0.087 vs joint 0.014
+      [R ] Tp=2 eig 18 dB: pilot 0.056 vs joint 0.011
+    goodput envelope (best configuration per SNR):  pilot-only (best Tp, pilots, beta)  vs  joint col_post_b0.7 (best Tp, pilots)
+         0 dB: pilot 2.338 (Tp4dft ) joint 2.623 (Tp3eig ) gain +12.2%
+         3 dB: pilot 2.722 (Tp3eig ) joint 2.896 (Tp2eig ) gain +6.4%
+         6 dB: pilot 2.835 (Tp3eig ) joint 3.032 (Tp2eig ) gain +7.0%
+         9 dB: pilot 2.866 (Tp3eig ) joint 3.037 (Tp2dft ) gain +6.0%
+        12 dB: pilot 2.875 (Tp3eig ) joint 3.081 (Tp2eig ) gain +7.2%
+        15 dB: pilot 2.871 (Tp3eig ) joint 3.062 (Tp2eig ) gain +6.7%
+        18 dB: pilot 2.949 (Tp2eig ) joint 3.091 (Tp2eig ) gain +4.8%
+  8x4 T=28 rho=0.7   (goodput upper bounds K/T: Tp=4: 3.214, Tp=3: 3.357, Tp=2: 3.500)
     Tp=4 dft pilot_b1        SNR@0.1 =    0.2   goodput: 0dB:2.80 3dB:3.19 6dB:3.21 9dB:3.21 12dB:3.21 15dB:3.21 18dB:3.21
     Tp=4 dft pilot_b0.7      SNR@0.1 =    0.2   goodput: 0dB:2.82 3dB:3.19 6dB:3.21 9dB:3.21 12dB:3.21 15dB:3.21 18dB:3.21
     Tp=4 dft col_ext_b0.7    SNR@0.1 =    <=0   goodput: 0dB:3.00 3dB:3.20 6dB:3.21 9dB:3.21 12dB:3.21 15dB:3.21 18dB:3.21
