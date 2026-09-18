@@ -1,0 +1,52 @@
+T1/T2 — batched vs parent (exp_0920 16-component prior)
+  [PASS] 4x4 tilted moments (w, m, Cov) vs loop reference: 2.43e-12 (tol 1e-10)
+  [PASS] 4x4 ep_site vs parent, belief level (mean, Sigma): 2.41e-10 (tol 1e-07)
+  [PASS] 4x4 clip='mean': belief mean == m, same Lambda: 5.31e-14 (tol 1e-08)
+      legacy clip='eta': |mu - m|^2/|m|^2 over the 8 (G,b,lam_min) cases = [0.    0.    0.044 0.044 0.    0.    0.    0.   ]   counters n_clip/n_site = 4/8
+  [PASS] 4x4 denoise_full / denoise: 4.65e-14 (tol 1e-12)
+  [PASS] 4x4 log_pdf: 1.42e-14 (tol 1e-10)
+  [PASS] 8x4 tilted moments (w, m, Cov) vs loop reference: 5.61e-12 (tol 1e-10)
+  [PASS] 8x4 ep_site vs parent, belief level (mean, Sigma): 9.86e-10 (tol 1e-07)
+  [PASS] 8x4 clip='mean': belief mean == m, same Lambda: 7.86e-14 (tol 1e-08)
+      legacy clip='eta': |mu - m|^2/|m|^2 over the 8 (G,b,lam_min) cases = [0.037 0.037 0.086 0.086 0.    0.    0.    0.   ]   counters n_clip/n_site = 6/8
+  [PASS] 8x4 denoise_full / denoise: 4.44e-14 (tol 1e-12)
+  [PASS] 8x4 log_pdf: 1.42e-14 (tol 1e-10)
+T3 — EM
+  [PASS] monotone log-likelihood, floor=0 (largest decrease): 8.88e-16 (tol 1e-09)
+  [PASS] sum_k pi_k C_k == sample covariance, floor=0: 8.95e-16 (tol 1e-12)
+    recovery: weights true [0.5 0.3 0.2] fit [0.503 0.297 0.2  ]  iterations 21  reseeds 0
+  [PASS] validation KL gap  E_true[log p_true - log p_fit]  (n_val = 5000; pass = small): 8.08e-04 (tol 5e-03)
+T3k/T3s — Kronecker M-step, shrinkage, early stopping
+  [PASS] K=1 kron: |C_fit - kron(T0, R0)|max (n = 40000; pass = O(1/sqrt n)): 8.20e-03 (tol 3e-02)
+  [PASS] K=1 kron: train LL(true) - LL(fit) <= 0 (MLE property): 0.00e+00 (tol 1e-09)
+  [PASS] K=1: LL(full) >= LL(kron) >= LL(true)  (nested models): 0.00e+00 (tol 1e-09)
+  [PASS] K=3 kron: monotone log-likelihood (largest decrease): 1.78e-15 (tol 1e-09)
+  [PASS] K=3 kron: validation KL gap: 2.89e-03 (tol 5e-03)
+  [PASS] kappa -> inf: every C_k == Chat: 3.14e-16 (tol 1e-06)
+  [PASS] early stopping returns the best-validation iterate: 0.00e+00 (tol 0e+00)
+  [PASS] ... and its parameters reproduce that validation LL: 2.04e-14 (tol 1e-09)
+      (over-fit demo: best val at it 5 of 23, val LL -3.079 vs last -3.272)
+T4 — prior definitions (Kg = 32)
+  [PASS] U 4x4: prior.C == kron(R_t,ens^T, R_r,ens)   [K=1024, build 0.1 s]: 4.20e-16 (tol 1e-12)
+  [PASS] U 4x4: ensemble covariance == I: 4.51e-16 (tol 1e-12)
+      eig R_t,ens = [1. 1. 1. 1.]   eig R_r,ens = [1. 1. 1. 1.]   min eig C_k = 0.0412
+  [PASS] S 4x4: prior.C == kron(R_t,ens^T, R_r,ens)   [K=1024, build 0.0 s]: 2.00e-15 (tol 1e-12)
+      eig R_t,ens = [2.123 1.185 0.456 0.236]   eig R_r,ens = [2.123 1.185 0.456 0.236]   min eig C_k = 0.0412
+  [PASS] P 4x4: prior.C == kron(R_t,ens^T, R_r,ens)   [K=1024, build 0.0 s]: 4.20e-16 (tol 1e-12)
+      eig R_t,ens = [1. 1. 1. 1.]   eig R_r,ens = [1.083 1.053 0.994 0.87 ]   min eig C_k = 0.0412
+  [PASS] S 4x4: component index k = a_t*Kg + a_r: 5.55e-17 (tol 1e-13)
+  [PASS] U 8x4: prior.C == kron(R_t,ens^T, R_r,ens)   [K=1024, build 0.2 s]: 4.20e-16 (tol 1e-12)
+  [PASS] U 8x4: ensemble covariance == I: 4.51e-16 (tol 1e-12)
+      eig R_t,ens = [1. 1. 1. 1.]   eig R_r,ens = [1. 1. 1. 1. 1. 1. 1. 1.]   min eig C_k = 0.0371
+  [PASS] S 8x4: prior.C == kron(R_t,ens^T, R_r,ens)   [K=1024, build 0.2 s]: 2.00e-15 (tol 1e-12)
+      eig R_t,ens = [2.123 1.185 0.456 0.236]   eig R_r,ens = [2.358 2.07  1.487 0.854 0.478 0.312 0.237 0.204]   min eig C_k = 0.0371
+  [PASS] P 8x4: prior.C == kron(R_t,ens^T, R_r,ens)   [K=1024, build 0.2 s]: 4.20e-16 (tol 1e-12)
+      eig R_t,ens = [1. 1. 1. 1.]   eig R_r,ens = [1.114 1.108 1.055 1.032 0.999 0.987 0.971 0.735]   min eig C_k = 0.0371
+  [PASS] S 8x4: component index k = a_t*Kg + a_r: 1.14e-16 (tol 1e-13)
+T5 — sample_vecs second moments (Monte Carlo, n = 40000; loose)
+  [PASS] |sample cov - prior.C|max: 1.16e-02 (tol 5e-02)
+  [PASS] parent .sample still works (shape, last_k): 0.00e+00 (tol 0e+00)
+T6 — RouteAClip vs RouteA (one trial, 4x4, T=28, Tp=2, 12 dB, exp_0920 prior, D13+14_pf path; smoke only)
+  [PASS] clip='eta' logs identical to RouteA (max |diff| over nmse, ber, nu_q, tauL): 0.00e+00 (tol 0e+00)
+      clips (eta arm) 2/8, (mean arm) 2/8;  clip='mean' run finite: True
+ALL PASS

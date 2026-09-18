@@ -1,0 +1,13 @@
+prior U: psi_t, psi_r ~ U[0, 2pi)  (grid midpoints)  -> ensemble covariance = I exactly (second moments carry NO information)
+  4x4: eig R_t,ens [1. 1. 1. 1.]   eig R_r,ens [1. 1. 1. 1.]   eff.rank(C_ens) = 16.0/16
+  8x4: eig R_t,ens [1. 1. 1. 1.]   eig R_r,ens [1. 1. 1. 1. 1. 1. 1. 1.]   eff.rank(C_ens) = 32.0/32
+  pilots dft (Tp=2): captured transmit power 0.500,  second-moment first pass NMSE_inf = 0.500   <- used
+prior S: psi_t, psi_r ~ U[-pi/3, pi/3]  (D-19 literal: +-60 deg in the ELECTRICAL angle = +-19.5 deg physical for a lambda/2 ULA) -> informative ensemble covariance on both sides
+  4x4: eig R_t,ens [2.123 1.185 0.456 0.236]   eig R_r,ens [2.123 1.185 0.456 0.236]   eff.rank(C_ens) = 6.7/16
+  8x4: eig R_t,ens [2.123 1.185 0.456 0.236]   eig R_r,ens [2.358 2.07  1.487 0.854 0.478 0.312 0.237 0.204]   eff.rank(C_ens) = 12.6/32
+  pilots dft (Tp=2): captured transmit power 0.717,  second-moment first pass NMSE_inf = 0.233
+  pilots eig (Tp=2): captured transmit power 0.827,  second-moment first pass NMSE_inf = 0.173   <- used
+prior P: psi_t ~ U[0, 2pi),  psi_r = pi sin(theta), theta ~ U[-60 deg, 60 deg]  (lambda/2 ULA, standard 120-deg sector at the receiver) -> ensemble covariance nearly white
+  4x4: eig R_t,ens [1. 1. 1. 1.]   eig R_r,ens [1.083 1.053 0.994 0.87 ]   eff.rank(C_ens) = 15.9/16
+  8x4: eig R_t,ens [1. 1. 1. 1.]   eig R_r,ens [1.114 1.108 1.055 1.032 0.999 0.987 0.971 0.735]   eff.rank(C_ens) = 31.6/32
+  pilots dft (Tp=2): captured transmit power 0.500,  second-moment first pass NMSE_inf = 0.500   <- used
