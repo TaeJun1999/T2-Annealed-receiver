@@ -4,6 +4,8 @@
   python exp_0921_run.py predict                  closed-form first-pass (pilot-only LMMSE) NMSE and interference-limited SIR per config  (< 1 s)
   python exp_0921_run.py time  [--Nr 8]           seconds per RouteA.run for every variant (3 trials)                                   (~10 s)
   python exp_0921_run.py A     [--n 320]          set A: D-15 baseline table, rho = 0.7, 4x4;  Tp=4: 0,3,6,9 dB;  Tp=2: 6,9,12,15 dB
+  python exp_0921_run.py C     [--n 320]          set C: GMM testbed (exp_0920 prior, exact score), Q-25(b): is D-13 / D-14 still needed once D-15 is on?
+                                                  Tp=4: 3,6,9 dB;  Tp=2: 9,12,15 dB;  --rho = per-component correlation (default 0.7), DFT pilots
   python exp_0921_run.py B     [--n 160]          set B: Q-20 regime scan, Tp x rho x pilot{dft,eig} x SNR;  options --Nr 8 --rho .. --tp .. --snr ..
   common options: --jobs J (default: all cores), --chunk 40
 
@@ -15,7 +17,7 @@ import os
 for _v in ("OMP_NUM_THREADS", "OPENBLAS_NUM_THREADS", "MKL_NUM_THREADS"): os.environ.setdefault(_v, "1")   # one BLAS thread per worker
 import sys, time, argparse, inspect, numpy as np
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
-from t2_route_a import KronGaussianPrior, QAMCode, RouteA, exp_corr, dft_pilots
+from t2_route_a import KronGaussianPrior, GaussianPrior, GMMPrior, steer_corr, QAMCode, RouteA, exp_corr, dft_pilots
 assert "beta_fb" in inspect.signature(RouteA.__init__).parameters, "t2_route_a.py is not the exp_0921 version (needs Xp / beta_fb kwargs)"
 GENS, NU, SEED, T, NT, N_ITER = ("133", "171"), 6, 20260921, 28, 4, 16
 RAW = os.path.join(HERE, "exp_0921_raw")
@@ -41,6 +43,21 @@ SETS = {
     "pilot_b0.7":         dict(mode="pilot_only", beta=0.7),
     "genie_b1":           dict(mode="genie"),
   },
+  "C": {   # GMM prior, all with beta = 0.7, n_inner = 1, 16 iterations. *_ext: extrinsic feedback to L_H, *_pf: a-posteriori feedback (D-15)
+    "v0_ext":      dict(mode="scalar", beta=0.7),
+    "v0_pf":       dict(mode="scalar", beta=0.7, **_fb),
+    "D13_ext":     dict(mode="scalar", scal="belief", beta=0.7),
+    "D13_pf":      dict(mode="scalar", scal="belief", beta=0.7, **_fb),
+    "D14_pf":      dict(mode="scalar", hsite="matrix", lam_min=1e-6, beta=0.7, **_fb),
+    "D13+14_ext":  dict(mode="scalar", scal="belief", hsite="matrix", lam_min=1e-6, beta=0.7),
+    "D13+14_pf":   dict(mode="scalar", scal="belief", hsite="matrix", lam_min=1e-6, beta=0.7, **_fb),      # v1 candidate
+    "exactEP_ext": dict(mode="colored", exact_prior=True, lam_min=1e-6, beta=0.7),
+    "exactEP_pf":  dict(mode="colored", exact_prior=True, lam_min=1e-6, beta=0.7, **_fb),                  # reference: exact mixture EP site
+    "lmmseC_pf":   dict(mode="colored", beta=0.7, **_fb),                                                  # second-moment method (ensemble C_hat = I)
+    "pilot_gmm":   dict(mode="pilot_only", exact_prior=True, lam_min=1e-6, beta=0.7),
+    "pilot_C":     dict(mode="pilot_only", beta=0.7),
+    "genie":       dict(mode="genie"),
+  },                # + "oracle_pf": colored + posterior with the TRUE component's Gaussian prior (added in run_task)
   "B": {
     "col_ext_b0.7":       dict(mode="colored", beta=0.7),
     "col_post_b0.7":      dict(mode="colored", beta=0.7, **_fb),
@@ -60,6 +77,12 @@ def make_pilots(kind, Tp, rho):
     return np.sqrt(NT) * U[:, :Tp].astype(complex)
 
 
+def make_prior(sname, Nr, rho):
+    if sname != "C": return KronGaussianPrior(Nr, NT, rho)
+    psis = 2 * np.pi * (np.arange(4) + 0.5) / 4               # exp_0920 prior: 16 equiprobable directional components, ensemble covariance = I
+    return GMMPrior(Nr, NT, [np.kron(steer_corr(NT, rho, pt).T, steer_corr(Nr, rho, pr)) for pt in psis for pr in psis])
+
+
 def fname(sname, Nr, rho, Tp, pil, snr, skip, n):
     return os.path.join(RAW, f"{sname}_Nr{Nr}_rho{rho}_Tp{Tp}_{pil}_snr{int(snr)}_skip{skip}_n{n}.npz")
 
@@ -69,19 +92,23 @@ def run_task(task):
     out = fname(*task)
     if os.path.exists(out): return f"exists  {os.path.basename(out)}"
     t0 = time.time()
-    prior = KronGaussianPrior(Nr, NT, rho); code = QAMCode(GENS, NU, 2, NT * (T - Tp)); sigma2 = 10 ** (-snr / 10)
+    prior = make_prior(sname, Nr, rho); code = QAMCode(GENS, NU, 2, NT * (T - Tp)); sigma2 = 10 ** (-snr / 10)
     Xp = make_pilots(pil, Tp, rho)
+    oracle = [RouteA(Nr, NT, T, Tp, sigma2, GaussianPrior(Nr, NT, C), code, Xp=Xp, mode="colored", beta=0.7, **_fb) for C in prior.covs] if sname == "C" else None
     rxs = {k: RouteA(Nr, NT, T, Tp, sigma2, prior, code, Xp=Xp, **c) for k, c in SETS[sname].items()}
-    first = next(iter(rxs.values())); logs = {k: [] for k in rxs}
+    first = next(iter(rxs.values())); logs = {k: [] for k in rxs}; comp = []
+    if oracle: logs["oracle_pf"] = []
     rng = np.random.default_rng(SEED + 100 + int(snr))
     for tr in range(skip + n):
         H = prior.sample(rng); u = rng.integers(0, 2, code.K); perm = rng.permutation(code.Ns)
         X, Y = first.transmit(u, perm, H, rng)
         if tr < skip: continue
         for k, rx in rxs.items(): logs[k].append(rx.run(Y, H, u, perm, N_ITER))
+        if oracle: comp.append(prior.last_k); logs["oracle_pf"].append(oracle[prior.last_k].run(Y, H, u, perm, N_ITER))
     flat = {f"{k}|{key}": np.array([l[key] for l in L]) for k, L in logs.items() for key in KEYS}
+    if oracle: flat["comp"] = np.array(comp)
     np.savez_compressed(out, **flat)
-    bl = " ".join(f"{k}={np.mean([l['blk_err'][-1] for l in L]):.2f}" for k, L in logs.items() if k in ("col_post_b0.7", "pilot_b0.7", "genie_b1"))
+    bl = " ".join(f"{k}={np.mean([l['blk_err'][-1] for l in L]):.2f}" for k, L in logs.items() if k in ("col_post_b0.7", "pilot_b0.7", "genie_b1", "v0_pf", "D13+14_pf", "pilot_gmm", "genie"))
     return f"done    {os.path.basename(out)}  ({time.time() - t0:.0f} s)  BLER16: {bl}"
 
 
@@ -91,6 +118,10 @@ def tasks_for(points, n, chunk):
 
 def grid_A():
     return [("A", 4, 0.7, Tp, "dft", float(s)) for Tp, snrs in ((4, (0, 3, 6, 9)), (2, (6, 9, 12, 15))) for s in snrs]
+
+
+def grid_C(rho):
+    return [("C", 4, rho, Tp, "dft", float(s)) for Tp, snrs in ((4, (3, 6, 9)), (2, (9, 12, 15))) for s in snrs]
 
 
 def grid_B(Nr, rhos, tps, snrs):
@@ -128,10 +159,10 @@ def predict():
 
 
 def timing(Nr):
-    prior = KronGaussianPrior(Nr, NT, 0.7); Tp, snr = 2, 12.0
+    Tp, snr = 2, 12.0
     code = QAMCode(GENS, NU, 2, NT * (T - Tp)); rng = np.random.default_rng(1)
-    for sname in ("A", "B"):
-        tot = 0.0
+    for sname in ("A", "B", "C"):
+        prior = make_prior(sname, Nr, 0.7); tot = 0.0
         for k, c in SETS[sname].items():
             rx = RouteA(Nr, NT, T, Tp, 10 ** (-snr / 10), prior, code, **c); t0 = time.time()
             for _ in range(3):
@@ -142,16 +173,16 @@ def timing(Nr):
 
 
 if __name__ == "__main__":
-    ap = argparse.ArgumentParser(); ap.add_argument("cmd", choices=["predict", "time", "A", "B"])
+    ap = argparse.ArgumentParser(); ap.add_argument("cmd", choices=["predict", "time", "A", "B", "C"])
     ap.add_argument("--n", type=int, default=None); ap.add_argument("--jobs", type=int, default=os.cpu_count()); ap.add_argument("--chunk", type=int, default=40)
-    ap.add_argument("--Nr", type=int, default=4); ap.add_argument("--rho", type=float, nargs="+", default=[0.7, 0.9])
+    ap.add_argument("--Nr", type=int, default=4); ap.add_argument("--rho", type=float, nargs="+", default=None)
     ap.add_argument("--tp", type=int, nargs="+", default=[4, 3, 2]); ap.add_argument("--snr", type=float, nargs="+", default=None)
     a = ap.parse_args()
     if a.cmd == "predict": predict(); sys.exit()
     if a.cmd == "time": timing(a.Nr); sys.exit()
     os.makedirs(RAW, exist_ok=True)
-    n = a.n or (320 if a.cmd == "A" else 160)
-    pts = grid_A() if a.cmd == "A" else grid_B(a.Nr, a.rho, a.tp, a.snr)
+    n = a.n or (160 if a.cmd == "B" else 320)
+    pts = grid_A() if a.cmd == "A" else grid_C((a.rho or [0.7])[0]) if a.cmd == "C" else grid_B(a.Nr, a.rho or [0.7, 0.9], a.tp, a.snr)
     tasks = tasks_for(pts, n, a.chunk)
     tasks.sort(key=lambda t: t[6])                                       # all points get their first chunk early -> usable partial results
     print(f"[{a.cmd}] {len(pts)} points x n={n} -> {len(tasks)} tasks on {a.jobs} workers", flush=True); t0 = time.time()

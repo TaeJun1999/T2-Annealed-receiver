@@ -1,4 +1,4 @@
-"""exp_0921 analysis (measurement convention M-1).  usage: python exp_0921_analysis.py [A|B|all]   -> stdout + exp_0921_results_{which}.txt (overwritten per run)
+"""exp_0921 analysis (measurement convention M-1).  usage: python exp_0921_analysis.py [A|B|C|all]   -> stdout + exp_0921_results_<A|B|all>.txt (overwritten)
 Reads exp_0921_raw/*.npz, concatenates the chunks of each point in skip order (warns if the chunk sequence has holes).
 Iteration indices: '@8' = trajectory index 7, '@16' = index 15 (same run).
 Failure classes of blocks that fail at @16, from the BER trajectory of iterations 11..16 (operational definition, exp_0921):
@@ -9,7 +9,7 @@ from math import comb, sqrt
 import numpy as np
 HERE = os.path.dirname(os.path.abspath(__file__)); RAW = os.path.join(HERE, "exp_0921_raw")
 T, NT = 28, 4
-PAT = re.compile(r"(A|B)_Nr(\d+)_rho([\d.]+)_Tp(\d+)_(dft|eig)_snr(-?\d+)_skip(\d+)_n(\d+)\.npz$")
+PAT = re.compile(r"(A|B|C)_Nr(\d+)_rho([\d.]+)_Tp(\d+)_(dft|eig)_snr(-?\d+)_skip(\d+)_n(\d+)\.npz$")
 _out = []
 
 
@@ -29,6 +29,7 @@ def load(sname):
         if not ok: P(f"  WARNING {key}: chunk sequence has holes/overlaps: {[(s, n) for s, n, _ in chunks]}")
         zs = [np.load(f) for _, _, f in chunks]; d = {}
         for k in zs[0].files:
+            if "|" not in k: continue
             v, q = k.split("|"); d.setdefault(v, {})[q] = np.concatenate([z[k] for z in zs])
         data[key] = d
     return data
@@ -71,7 +72,8 @@ def row(name, v):
 
 PAIRS_A = [("col_ext_b1", "col_post_b1"), ("col_ext_b0.7", "col_post_b0.7"), ("col_post_b1", "col_post_b0.7"), ("col_post_b0.7", "col_post_b0.7_fbd"),
            ("col_post_b0.7", "col_postnoloo_b0.7"), ("v0_ext_b1", "v0_post_b1"), ("v0_ext_b0.7", "v0_post_b0.7"), ("bel_ext_b0.7", "bel_post_b0.7"),
-           ("bel_post_b0.7", "col_post_b0.7"), ("pilot_b1", "pilot_b0.7"), ("pilot_b0.7", "col_ext_b0.7"), ("pilot_b0.7", "col_post_b0.7")]
+           ("bel_post_b0.7", "col_post_b0.7"), ("v0_post_b0.7", "bel_post_b0.7"), ("v0_post_b0.7", "col_post_b0.7"),
+           ("pilot_b1", "pilot_b0.7"), ("pilot_b0.7", "col_ext_b0.7"), ("pilot_b0.7", "col_post_b0.7")]
 
 
 def analyse_A():
@@ -81,6 +83,24 @@ def analyse_A():
         P(f"\n--- Tp={Tp} SNR={snr} dB ({Nr}x{NT}, rho={rho}, {pil})")
         for name, v in d.items(): P(row(name, v))
         for x, y in PAIRS_A:
+            if x in d and y in d:
+                a8, b8, p8 = paired(d, x, y, 7); a, b, p = paired(d, x, y)
+                P(f"    paired {x} vs {y}: @16 only-first-fails {a}, only-second-fails {b}, p={p:.2g}   (@8: {a8}:{b8}, p={p8:.2g})")
+
+
+PAIRS_C = [("v0_ext", "v0_pf"), ("D13_ext", "D13_pf"), ("D13+14_ext", "D13+14_pf"), ("exactEP_ext", "exactEP_pf"),
+           ("v0_pf", "D13_pf"), ("v0_pf", "D14_pf"), ("v0_pf", "D13+14_pf"), ("D13_pf", "D13+14_pf"), ("D14_pf", "D13+14_pf"),
+           ("D13+14_pf", "exactEP_pf"), ("exactEP_pf", "oracle_pf"), ("lmmseC_pf", "v0_pf"), ("lmmseC_pf", "D13+14_pf"),
+           ("pilot_gmm", "v0_pf"), ("pilot_gmm", "D13+14_pf"), ("pilot_C", "pilot_gmm")]
+
+
+def analyse_C():
+    data = load("C"); P("=" * 30, "exp_0921 C — GMM testbed (exp_0920 prior, exact score), Q-25(b); beta=0.7, 16 it, seed 20260921+100+SNR", "=" * 30)
+    for key in sorted(data, key=lambda k: (k[1], -k[2], k[4])):
+        Nr, rho, Tp, pil, snr = key; d = data[key]
+        P(f"\n--- Tp={Tp} SNR={snr} dB ({Nr}x{NT}, rho_c={rho}, {pil})")
+        for name, v in d.items(): P(row(name, v))
+        for x, y in PAIRS_C:
             if x in d and y in d:
                 a8, b8, p8 = paired(d, x, y, 7); a, b, p = paired(d, x, y)
                 P(f"    paired {x} vs {y}: @16 only-first-fails {a}, only-second-fails {b}, p={p:.2g}   (@8: {a8}:{b8}, p={p8:.2g})")
@@ -120,18 +140,32 @@ def analyse_B():
                 if cfg + (name,) not in summary: continue
                 snrs, bl, n, K = summary[cfg + (name,)]
                 P(f"    Tp={cfg[2]} {cfg[3]} {name:<15} SNR@0.1 = {snr_at(snrs, bl, n):>6}   goodput: " + " ".join(f"{s:.0f}dB:{K * (1 - b) / T:.2f}" for s, b in zip(snrs, bl)))
-        P("    regime check (same Tp, pilots, SNR): pilot-only fails (best-of-beta BLER >= 0.5) while col_post_b0.7 BLER <= 0.1:")
+        P("    regime check (same Tp, pilots, SNR; pilot = best-of-beta BLER@16, joint = col_post_b0.7):  [S] pilot >= 0.3 & joint <= 0.1   [R] pilot >= 0.02 & joint <= pilot/5")
         hit = False
         for cfg in [c for c in cfgs if c[:2] == (Nr, rho)]:
             if cfg + ("col_post_b0.7",) not in summary: continue
             snrs, bj, _, _ = summary[cfg + ("col_post_b0.7",)]; bp = np.minimum(summary[cfg + ("pilot_b1",)][1], summary[cfg + ("pilot_b0.7",)][1])
-            for s, a, b in zip(snrs, bp, bj):
-                if a >= 0.5 and b <= 0.1: P(f"      Tp={cfg[2]} {cfg[3]} {s:.0f} dB: pilot {a:.3f} vs joint {b:.3f}"); hit = True
+            for sv, x, y in zip(snrs, bp, bj):
+                tag = ("S" if x >= 0.3 and y <= 0.1 else "") + ("R" if x >= 0.02 and y <= x / 5 else "")
+                if tag: P(f"      [{tag:<2}] Tp={cfg[2]} {cfg[3]} {sv:.0f} dB: pilot {x:.3f} vs joint {y:.3f}"); hit = True
         if not hit: P("      none")
+        P("    goodput envelope (best configuration per SNR):  pilot-only (best Tp, pilots, beta)  vs  joint col_post_b0.7 (best Tp, pilots)")
+        env = {}
+        for cfg in [c for c in cfgs if c[:2] == (Nr, rho)]:
+            for name in ("pilot_b1", "pilot_b0.7", "col_post_b0.7"):
+                if cfg + (name,) not in summary: continue
+                snrs, bl, _, K = summary[cfg + (name,)]; side = "joint" if name.startswith("col") else "pilot"
+                for sv, x in zip(snrs, bl):
+                    g = K * (1 - x) / T
+                    if g > env.get((sv, side), (-1, ""))[0]: env[(sv, side)] = (g, f"Tp{cfg[2]}{cfg[3]}")
+        for sv in sorted({k[0] for k in env}):
+            (gp, lp), (gj, lj) = env[(sv, "pilot")], env[(sv, "joint")]
+            P(f"      {sv:>4.0f} dB: pilot {gp:.3f} ({lp:<7}) joint {gj:.3f} ({lj:<7}) gain {100 * (gj / max(gp, 1e-9) - 1):+.1f}%")
 
 
 if __name__ == "__main__":
     which = sys.argv[1] if len(sys.argv) > 1 else "all"
     if which in ("A", "all"): analyse_A()
     if which in ("B", "all"): analyse_B()
-    with open(os.path.join(HERE, f"exp_0921_results_{which}.txt"), "w") as f: f.write("\n".join(_out) + "\n")
+    if which in ("C", "all"): analyse_C()
+    with open(os.path.join(HERE, f"exp_0921_results_{which}.txt"), "w") as f: f.write("\n".join(_out) + "\n")   # overwrite (was: append -> duplicates)
