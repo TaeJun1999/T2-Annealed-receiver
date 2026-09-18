@@ -512,3 +512,43 @@ Q-35(b)가 가설로 적어둔 구조 일치 편향이 실현된 상태가 되�
   baseline이므로 진짜 패배로 기록한다.
 
 R1~R7 변경 없음. K1/K2/K3 판정 없음. 상세 수치: Demo/exp_0925_fit_table.md.
+
+## [2026-09-18] 기록 [측정] — 세션 7 판독 ②: K1 미발동 (workspace: GPT)
+
+근거 커밋: dc44ef5. 판독 전 D-19 보정 R8과
+Demo/exp_0925_fit_table.md 확인. 기준은 D-19 + R1~R8이며 변경 없음.
+
+판독 범위: Demo/exp_0925_results.txt §5의 K1 결정 셀(H, prior S).
+§3에서는 해당 셀의 n·SNR 격자와 비교 arm 두 행만 보조 확인.
+설정: 8x4, T=16, Tp=2, prior S, eig pilots, @16.
+SNR 격자: -3/0/3/6/9/12/15 dB, 총 7점.
+각 점 n=640(16 chunk x 40 trial); §3의 n per SNR도 7점 모두 640.
+실험 seed=20260925.
+
+[측정; log-linear 보간]
+SNR@BLER 0.1: (a) lmmseC_pf 5.44 dB, (d) exactEP-true 2.81 dB.
+이득(a-d): +2.63 dB.
+90% paired bootstrap CI: [+1.60, +3.66] dB.
+Bootstrap B=2000, seed=20260925; censored replicates 0%(출력값).
+기존 출력과 코드의 판독이며 새 실험·bootstrap 재실행 없음.
+
+[측정; 같은 K1 블록의 맥락 수치, 판정하지 않음]
+achievable with b*: +2.35 dB [90% CI +1.34, +3.41; censored 0%].
+(d) 오라클과의 차이 0.28 dB. K2/K3 판정은 판독 ③에서 하며 여기서는 기록만 한다.
+scope branch 기계 출력 존재: prior P의 교차-Tp 포락선 이득 >=5%가 연속 1점
+(요구 3점). 판독은 ⑤로 미룸.
+[context] (H, prior U)와 (H, prior P)는 (a)·(d) 모두 15 dB에서 BLER 0.1
+미도달로 K1 n/a — 기계 출력이 "extend the SNR grid"를 지시. 격자 확장은
+Q-37로 등록하고 ②~⑥ 판독 종료 후에 실행한다(판독 중 새 데이터 투입 금지).
+
+[정확: 규칙 적용]
+K1 기계 출력은 NOT fired, 판독 결과도 미발동.
+CI 하한 1.60 dB > 0.5 dB이므로 K1 발동 조건에 해당하지 않고,
+R5의 경계 횡단에 따른 미결 조건에도 해당하지 않음.
+기계 출력과 판독의 불일치 없음.
+현재 K1의 R5 판정을 위한 n 증량은 요구하지 않음.
+
+범위: K1에 따른 중단 조건의 미성립만 확인.
+학습 score의 실효성·M2 진행·전체 kill test 통과를 뜻하지 않음.
+R1b는 ⑤에서 확인할 항목으로 남김. ③~⑥ 미착수.
+다른 판정 및 중단·범위 한정의 종합 결론 없음.
