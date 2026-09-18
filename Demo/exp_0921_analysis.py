@@ -4,12 +4,12 @@ Iteration indices: '@8' = trajectory index 7, '@16' = index 15 (same run).
 Failure classes of blocks that fail at @16, from the BER trajectory of iterations 11..16 (operational definition, exp_0921):
   stuck = BER constant over the last 4 iterations (wrong fixed point);  cyc2 = the last 5 BER increments are non-zero with alternating sign
   (period-2 limit cycle, F3);  other = neither (still drifting / irregular)."""
-import os, re, sys, glob
+import os, re, sys, glob, warnings
 from math import comb, sqrt
 import numpy as np
 HERE = os.path.dirname(os.path.abspath(__file__)); RAW = os.path.join(HERE, "exp_0921_raw")
-T, NT = 28, 4
-PAT = re.compile(r"(A|B|C)_Nr(\d+)_rho([\d.]+)_Tp(\d+)_(dft|eig)_snr(-?\d+)_skip(\d+)_n(\d+)\.npz$")
+NT = 4
+PAT = re.compile(r"(A|B|C)_Nr(\d+)(?:_T(\d+))?_rho([\d.]+)_Tp(\d+)_(dft|eig)_snr(-?\d+)_skip(\d+)_n(\d+)\.npz$")
 _out = []
 
 
@@ -21,7 +21,7 @@ def load(sname):
     pts = {}
     for f in glob.glob(os.path.join(RAW, f"{sname}_*.npz")):
         m = PAT.search(os.path.basename(f))
-        if m: pts.setdefault((int(m[2]), float(m[3]), int(m[4]), m[5], int(m[6])), []).append((int(m[7]), int(m[8]), f))
+        if m: pts.setdefault(((int(m[2]), int(m[3] or 28)), float(m[4]), int(m[5]), m[6], int(m[7])), []).append((int(m[8]), int(m[9]), f))   # key[0] = (Nr, T)
     data = {}
     for key, chunks in pts.items():
         chunks.sort(); pos = 0; ok = True
@@ -61,6 +61,11 @@ def fail_classes(v):
 
 
 def row(name, v):
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", RuntimeWarning); return _row(name, v)                          # genie: NMSE is all-NaN by construction
+
+
+def _row(name, v):
     be, nm = v["blk_err"], v["nmse"]; n = len(be); ok = be[:, -1] == 0; lo, hi = wilson(int(be[:, -1].sum()), n)
     st, cy, ot = fail_classes(v)
     nm_ok = np.median(nm[ok, -1]) if ok.any() and np.isfinite(nm[ok, -1]).any() else np.nan
@@ -79,8 +84,8 @@ PAIRS_A = [("col_ext_b1", "col_post_b1"), ("col_ext_b0.7", "col_post_b0.7"), ("c
 def analyse_A():
     data = load("A"); P("=" * 30, "exp_0921 A — D-15 baseline table (Gaussian Kronecker rho=0.7, 4x4, QPSK, seed 20260921+100+SNR)", "=" * 30)
     for key in sorted(data, key=lambda k: (-k[2], k[4])):
-        Nr, rho, Tp, pil, snr = key; d = data[key]
-        P(f"\n--- Tp={Tp} SNR={snr} dB ({Nr}x{NT}, rho={rho}, {pil})")
+        (Nr, T), rho, Tp, pil, snr = key; d = data[key]
+        P(f"\n--- Tp={Tp} SNR={snr} dB ({Nr}x{NT}, T={T}, rho={rho}, {pil})")
         for name, v in d.items(): P(row(name, v))
         for x, y in PAIRS_A:
             if x in d and y in d:
@@ -97,8 +102,8 @@ PAIRS_C = [("v0_ext", "v0_pf"), ("D13_ext", "D13_pf"), ("D13+14_ext", "D13+14_pf
 def analyse_C():
     data = load("C"); P("=" * 30, "exp_0921 C — GMM testbed (exp_0920 prior, exact score), Q-25(b); beta=0.7, 16 it, seed 20260921+100+SNR", "=" * 30)
     for key in sorted(data, key=lambda k: (k[1], -k[2], k[4])):
-        Nr, rho, Tp, pil, snr = key; d = data[key]
-        P(f"\n--- Tp={Tp} SNR={snr} dB ({Nr}x{NT}, rho_c={rho}, {pil})")
+        (Nr, T), rho, Tp, pil, snr = key; d = data[key]
+        P(f"\n--- Tp={Tp} SNR={snr} dB ({Nr}x{NT}, T={T}, rho_c={rho}, {pil})")
         for name, v in d.items(): P(row(name, v))
         for x, y in PAIRS_C:
             if x in d and y in d:
@@ -118,9 +123,9 @@ def analyse_B():
     data = load("B"); P("=" * 30, "exp_0921 B — Q-20 regime scan (Gaussian Kronecker, QPSK, 16 it, seed 20260921+100+SNR)", "=" * 30)
     cfgs = sorted({k[:4] for k in data}, key=lambda c: (c[0], c[1], -c[2], c[3])); summary = {}
     for cfg in cfgs:
-        Nr, rho, Tp, pil = cfg; snrs = sorted(k[4] for k in data if k[:4] == cfg); K = NT * (T - Tp) - 6
+        (Nr, T), rho, Tp, pil = cfg; snrs = sorted(k[4] for k in data if k[:4] == cfg); K = NT * (T - Tp) - 6
         ns = [len(next(iter(data[cfg + (s,)].values()))["blk_err"]) for s in snrs]
-        P(f"\n--- {Nr}x{NT} rho={rho} Tp={Tp} pilots={pil}  (K={K}, n per SNR: {ns})")
+        P(f"\n--- {Nr}x{NT} T={T} rho={rho} Tp={Tp} pilots={pil}  (K={K}, n per SNR: {ns})")
         P(f"  {'SNR [dB]':<26}" + " ".join(f"{s:>6.0f}" for s in snrs))
         for name in data[cfg + (snrs[0],)]:
             for tag, it in (("@8", 7), ("@16", -1)):
@@ -133,16 +138,16 @@ def analyse_B():
         for x, y in (("pilot_b0.7", "col_post_b0.7"), ("col_ext_b0.7", "col_post_b0.7")):
             P(f"  paired {x} vs {y} (first:second, p): " + "  ".join("{}:{} {:.1g}".format(*paired(data[cfg + (s,)], x, y)) for s in snrs))
     P("\n--- summary: SNR [dB] at BLER@16 = 0.1 (log-linear interpolation; '>x' = not reached) and goodput K(1-BLER)/T [bit per channel use of the 4-antenna block]")
-    for (Nr, rho) in sorted({c[:2] for c in cfgs}):
-        P(f"  {Nr}x{NT} rho={rho}")
-        for cfg in [c for c in cfgs if c[:2] == (Nr, rho)]:
+    for ((Nr, T), rho) in sorted({c[:2] for c in cfgs}):
+        P(f"  {Nr}x{NT} T={T} rho={rho}   (goodput upper bounds K/T: " + ", ".join(f"Tp={tp}: {(NT * (T - tp) - 6) / T:.3f}" for tp in (4, 3, 2)) + ")")
+        for cfg in [c for c in cfgs if c[:2] == ((Nr, T), rho)]:
             for name in ("pilot_b1", "pilot_b0.7", "col_ext_b0.7", "col_post_b0.7", "genie_b1"):
                 if cfg + (name,) not in summary: continue
                 snrs, bl, n, K = summary[cfg + (name,)]
                 P(f"    Tp={cfg[2]} {cfg[3]} {name:<15} SNR@0.1 = {snr_at(snrs, bl, n):>6}   goodput: " + " ".join(f"{s:.0f}dB:{K * (1 - b) / T:.2f}" for s, b in zip(snrs, bl)))
         P("    regime check (same Tp, pilots, SNR; pilot = best-of-beta BLER@16, joint = col_post_b0.7):  [S] pilot >= 0.3 & joint <= 0.1   [R] pilot >= 0.02 & joint <= pilot/5")
         hit = False
-        for cfg in [c for c in cfgs if c[:2] == (Nr, rho)]:
+        for cfg in [c for c in cfgs if c[:2] == ((Nr, T), rho)]:
             if cfg + ("col_post_b0.7",) not in summary: continue
             snrs, bj, _, _ = summary[cfg + ("col_post_b0.7",)]; bp = np.minimum(summary[cfg + ("pilot_b1",)][1], summary[cfg + ("pilot_b0.7",)][1])
             for sv, x, y in zip(snrs, bp, bj):
@@ -151,7 +156,7 @@ def analyse_B():
         if not hit: P("      none")
         P("    goodput envelope (best configuration per SNR):  pilot-only (best Tp, pilots, beta)  vs  joint col_post_b0.7 (best Tp, pilots)")
         env = {}
-        for cfg in [c for c in cfgs if c[:2] == (Nr, rho)]:
+        for cfg in [c for c in cfgs if c[:2] == ((Nr, T), rho)]:
             for name in ("pilot_b1", "pilot_b0.7", "col_post_b0.7"):
                 if cfg + (name,) not in summary: continue
                 snrs, bl, _, K = summary[cfg + (name,)]; side = "joint" if name.startswith("col") else "pilot"

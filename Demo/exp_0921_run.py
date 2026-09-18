@@ -7,7 +7,7 @@
   python exp_0921_run.py C     [--n 320]          set C: GMM testbed (exp_0920 prior, exact score), Q-25(b): is D-13 / D-14 still needed once D-15 is on?
                                                   Tp=4: 3,6,9 dB;  Tp=2: 9,12,15 dB;  --rho = per-component correlation (default 0.7), DFT pilots
   python exp_0921_run.py B     [--n 160]          set B: Q-20 regime scan, Tp x rho x pilot{dft,eig} x SNR;  options --Nr 8 --rho .. --tp .. --snr ..
-  common options: --jobs J (default: all cores), --chunk 40
+  common options: --T 28 (block length; files of T != 28 carry a _T<T> tag, K = Nt (T - Tp) - 6), --jobs J (default: all cores), --chunk 40
 
 Reproducibility: trials of a point come from ONE rng stream seeded SEED + 100 + int(snr) (SEED = 20260921); a task = (point, skip, chunk) regenerates
 the skipped trials, so chunks concatenate into one sequence and every variant at a point sees the same (H, u, perm, Y). Points that differ only in the
@@ -83,12 +83,12 @@ def make_prior(sname, Nr, rho):
     return GMMPrior(Nr, NT, [np.kron(steer_corr(NT, rho, pt).T, steer_corr(Nr, rho, pr)) for pt in psis for pr in psis])
 
 
-def fname(sname, Nr, rho, Tp, pil, snr, skip, n):
-    return os.path.join(RAW, f"{sname}_Nr{Nr}_rho{rho}_Tp{Tp}_{pil}_snr{int(snr)}_skip{skip}_n{n}.npz")
+def fname(sname, Nr, rho, Tp, pil, snr, T, skip, n):
+    return os.path.join(RAW, f"{sname}_Nr{Nr}{'' if T == 28 else f'_T{T}'}_rho{rho}_Tp{Tp}_{pil}_snr{int(snr)}_skip{skip}_n{n}.npz")
 
 
 def run_task(task):
-    sname, Nr, rho, Tp, pil, snr, skip, n = task
+    sname, Nr, rho, Tp, pil, snr, T, skip, n = task
     out = fname(*task)
     if os.path.exists(out): return f"exists  {os.path.basename(out)}"
     t0 = time.time()
@@ -116,21 +116,21 @@ def tasks_for(points, n, chunk):
     return [p + (s, min(chunk, n - s)) for p in points for s in range(0, n, chunk)]
 
 
-def grid_A():
-    return [("A", 4, 0.7, Tp, "dft", float(s)) for Tp, snrs in ((4, (0, 3, 6, 9)), (2, (6, 9, 12, 15))) for s in snrs]
+def grid_A(T):
+    return [("A", 4, 0.7, Tp, "dft", float(s), T) for Tp, snrs in ((4, (0, 3, 6, 9)), (2, (6, 9, 12, 15))) for s in snrs]
 
 
-def grid_C(rho):
-    return [("C", 4, rho, Tp, "dft", float(s)) for Tp, snrs in ((4, (3, 6, 9)), (2, (9, 12, 15))) for s in snrs]
+def grid_C(rho, T):
+    return [("C", 4, rho, Tp, "dft", float(s), T) for Tp, snrs in ((4, (3, 6, 9)), (2, (9, 12, 15))) for s in snrs]
 
 
-def grid_B(Nr, rhos, tps, snrs):
+def grid_B(Nr, rhos, tps, snrs, T):
     pts = []
     for rho in rhos:
         ss = snrs if snrs else (range(0, 19, 3) if rho <= 0.75 else range(6, 25, 3))
         for Tp in tps:
             for pil in (("dft",) if Tp == NT else ("dft", "eig")):       # Tp = Nt: sqrt(Nt) U is a scaled unitary like DFT -> same LMMSE error, skip
-                pts += [("B", Nr, rho, Tp, pil, float(s)) for s in ss]
+                pts += [("B", Nr, rho, Tp, pil, float(s), T) for s in ss]
     return pts
 
 
@@ -158,7 +158,7 @@ def predict():
     print("finite-SNR columns: Nr = 4, R_r = R_exp(rho). NMSE_inf does not depend on R_r or Nr.")
 
 
-def timing(Nr):
+def timing(Nr, T):
     Tp, snr = 2, 12.0
     code = QAMCode(GENS, NU, 2, NT * (T - Tp)); rng = np.random.default_rng(1)
     for sname in ("A", "B", "C"):
@@ -175,17 +175,17 @@ def timing(Nr):
 if __name__ == "__main__":
     ap = argparse.ArgumentParser(); ap.add_argument("cmd", choices=["predict", "time", "A", "B", "C"])
     ap.add_argument("--n", type=int, default=None); ap.add_argument("--jobs", type=int, default=os.cpu_count()); ap.add_argument("--chunk", type=int, default=40)
-    ap.add_argument("--Nr", type=int, default=4); ap.add_argument("--rho", type=float, nargs="+", default=None)
+    ap.add_argument("--Nr", type=int, default=4); ap.add_argument("--T", type=int, default=T); ap.add_argument("--rho", type=float, nargs="+", default=None)
     ap.add_argument("--tp", type=int, nargs="+", default=[4, 3, 2]); ap.add_argument("--snr", type=float, nargs="+", default=None)
     a = ap.parse_args()
     if a.cmd == "predict": predict(); sys.exit()
-    if a.cmd == "time": timing(a.Nr); sys.exit()
+    if a.cmd == "time": timing(a.Nr, a.T); sys.exit()
     os.makedirs(RAW, exist_ok=True)
     n = a.n or (160 if a.cmd == "B" else 320)
-    pts = grid_A() if a.cmd == "A" else grid_C((a.rho or [0.7])[0]) if a.cmd == "C" else grid_B(a.Nr, a.rho or [0.7, 0.9], a.tp, a.snr)
+    pts = grid_A(a.T) if a.cmd == "A" else grid_C((a.rho or [0.7])[0], a.T) if a.cmd == "C" else grid_B(a.Nr, a.rho or [0.7, 0.9], a.tp, a.snr, a.T)
     tasks = tasks_for(pts, n, a.chunk)
-    tasks.sort(key=lambda t: t[6])                                       # all points get their first chunk early -> usable partial results
-    print(f"[{a.cmd}] {len(pts)} points x n={n} -> {len(tasks)} tasks on {a.jobs} workers", flush=True); t0 = time.time()
+    tasks.sort(key=lambda t: t[7])                                       # all points get their first chunk early -> usable partial results
+    print(f"[{a.cmd}] T={a.T}: {len(pts)} points x n={n} -> {len(tasks)} tasks on {a.jobs} workers", flush=True); t0 = time.time()
     if a.jobs <= 1:
         for i, t in enumerate(tasks): print(f"{i + 1}/{len(tasks)} {run_task(t)}", flush=True)
     else:
