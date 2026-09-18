@@ -130,3 +130,88 @@ def site_from_moments(m, Cov, G, b, lam_min=1e-6):
     if clipped:
         Lam = (U * np.maximum(ev, lam_min)) @ U.conj().T
     return Lam, Ci @ m - b, clipped
+
+
+# ============================================================================= R-A v2 (exp_0924): fresh-noise posterior diffusion + exact handover
+# exp_0923 verdict: the v1 bridge (replacement-type clamping to a forward-noised observation path) is biased and converges slowly in (L, K).
+# v2 bridge [approx; exact for a Gaussian prior at any step size]: z^l = h + n_l, n_l ~ CN(0, nu_l I) FRESH noise, y independent of n_l given h. Ancestral step
+#     z^{l+1} | z^l, y  ~  CN( a z^l + (1-a) m_+ ,  nu_{l+1} (1-a) I + (1-a)^2 S_+ ),   a = nu_{l+1}/nu_l,   (m_+, S_+) ~= moments of p(h | z^l, y)
+#   'X'  exact mixture p(h | z^l, y) (GMM only; isolates the discretisation error)
+#   'J'  p(h | z^l) ~= CN(D, nu J) (2nd-order Tweedie) times the exact Gaussian likelihood:  S_+ = (I + Sig G)^-1 Sig,  m_+ = (I + Sig G)^-1 (D + Sig b),  Sig = nu J
+#        = the D-14 operation at every step; same approximation family as moment-matching posterior sampling (arXiv:2405.13712 Sec. 4.2 [V: excerpt])
+#   'S'  Sig = nu c_J I,  c_J = cbar / (cbar + nu)  (no Jacobian; exact for an isotropic Gaussian prior of variance cbar)
+# Handover [exact for clamped / null coordinates]: at nu_L = 1/g_max the null-space coordinates of the fresh-noise sample have exactly the pi'_{nu_L} marginal
+#   (e_u is not part of the observation noise), clamped coordinates are set to ups; weak coordinates are repaired by K_fin exact-target corrector steps.
+def gmm_post_cov(gmmb, Z, nu):
+    """per-chain D (M,N) and Cov[h | z_i] = nu J(z_i, nu) (M,N,N)."""
+    w, gain, Zp = gmmb._post(Z, nu); mk = np.einsum("kij,mkj->mki", gmmb.U, gain * Zp); D = np.einsum("mk,mki->mi", w, mk)
+    Sk = nu * np.einsum("kij,kj,klj->kil", gmmb.U, gain, gmmb.U.conj())
+    Cov = np.einsum("mk,kil->mil", w, Sk) + np.einsum("mk,mki,mkl->mil", w, mk, mk.conj()) - D[:, :, None] * D.conj()[:, None, :]
+    return D, 0.5 * (Cov + Cov.conj().transpose(0, 2, 1))
+
+
+class PostDenoiser:
+    """(m_+, S_+)(Z, nu) for the three bridges; G, b fixed per call site. kind in {'X','J','S'}."""
+
+    def __init__(self, kind, prior, gmmb, G, b, cache=None):
+        self.kind, self.prior, self.gb, self.G, self.b = kind, prior, gmmb, G, b; self.N = len(b); self.cache = {} if cache is None else cache; self.n_jac = 0
+
+    def __call__(self, Z, nu):
+        N = self.N; I = np.eye(N); M = len(Z)
+        if self.kind == "X":
+            key = ("X", float(nu))
+            if key not in self.cache:                                                       # depends on (G, nu) only -> shared by all trials of a cell
+                if not hasattr(self.prior, "covinv"): self.prior.covinv = [np.linalg.inv(C) for C in self.prior.covs]
+                Sk = np.array([np.linalg.inv(Ci + self.G + I / nu) for Ci in self.prior.covinv])
+                ld = np.array([-np.linalg.slogdet(I + C @ (self.G + I / nu))[1] for C in self.prior.covs])
+                self.cache[key] = (Sk, ld)
+            Sk, ld = self.cache[key]; beta = self.b[None, :] + Z / nu
+            mk = np.einsum("kij,mj->mki", Sk, beta); lw = np.log(self.prior.pi) + ld + np.einsum("mj,mkj->mk", beta.conj(), mk).real
+            w = np.exp(lw - logsumexp(lw, 1, keepdims=True)); m = np.einsum("mk,mki->mi", w, mk)
+            S = np.einsum("mk,kil->mil", w, Sk) + np.einsum("mk,mki,mkl->mil", w, mk, mk.conj()) - m[:, :, None] * m.conj()[:, None, :]
+            return m, 0.5 * (S + S.conj().transpose(0, 2, 1))
+        if self.kind == "J":
+            D, Sig = gmm_post_cov(self.gb, Z, nu); self.n_jac += 1
+            A = np.linalg.inv(I[None] + Sig @ self.G[None]); S = A @ Sig
+            m = np.einsum("mij,mj->mi", A, D + np.einsum("mij,j->mi", Sig, self.b))
+            return m, 0.5 * (S + S.conj().transpose(0, 2, 1))
+        D = self.gb.denoise(Z, nu); s = nu * self.prior.cbar / (self.prior.cbar + nu)       # 'S'
+        S = np.linalg.inv(I / s + self.G); S = 0.5 * (S + S.conj().T)
+        return (D / s + self.b[None, :]) @ S.T, S
+
+
+def _corrector(denoise, Zt, V, ups, nu, cl, r, K, delta, rng):
+    """K per-coordinate preconditioned ULA steps on the exact level-nu noise-split target (clamped coordinates held at their current values)."""
+    free = ~cl; eps = np.where(free, delta / (1.0 / nu + 1.0 / r), 0.0); hold = Zt[:, cl].copy(); M, N = Zt.shape
+    for _ in range(K):
+        if not free.any(): break
+        Z = Zt @ V.T; S = ((denoise(Z, nu) - Z) / nu) @ V.conj()
+        Zt = Zt + eps * (S - np.where(np.isfinite(r), (Zt - ups) / r, 0.0)) + np.sqrt(2 * eps) * _cn(rng, (M, N))
+        Zt[:, cl] = hold
+    return Zt
+
+
+def ra2_sample(postden, denoise, G, b, M, L, rng, nu1=10.0, K_fin=0, delta=0.3, cbar=1.0):
+    """v2: L-level ancestral posterior diffusion nu_1 -> nu_L = 1/g_max with postden(Z, nu) -> (m_+, S_+), exact handover, K_fin corrector steps.
+    Returns Z (M,N) ~ pi'_{nu_L} (approx), nu_L, number of denoiser calls per chain."""
+    g, V, obs, ups = _split(G, b); N = len(g); nuL = 1.0 / g.max(); I = np.eye(N)
+    nus = np.geomspace(max(nu1, 2 * nuL), nuL, max(L, 2)); nfe = 0
+    S0 = np.linalg.inv(I / cbar + G); S0 = 0.5 * (S0 + S0.conj().T); m0 = S0 @ b                                   # start: ensemble-covariance Gaussian posterior, noised to nu_1
+    Z = m0[None, :] + _cn(rng, (M, N)) @ np.linalg.cholesky(S0).T + np.sqrt(nus[0]) * _cn(rng, (M, N))
+    for l in range(len(nus) - 1):
+        nu, nn = nus[l], nus[l + 1]; a = nn / nu; mp, Sp = postden(Z, nu); nfe += 1
+        Cst = nn * (1 - a) * I + (1 - a) ** 2 * Sp                                                                 # (N,N) or (M,N,N)
+        Lc = np.linalg.cholesky(Cst); E = _cn(rng, (M, N))
+        Z = a * Z + (1 - a) * mp + (np.einsum("mij,mj->mi", Lc, E) if Lc.ndim == 3 else E @ Lc.T)
+    cl = obs & (g * nuL >= 1.0 - 1e-9); ginv = np.where(obs, 1.0 / np.where(obs, g, 1.0), np.inf); r = np.where(obs & ~cl, ginv - nuL, np.inf)
+    Zt = Z @ V.conj(); Zt[:, cl] = ups[cl]                                                                         # handover to the noise-split target
+    if K_fin > 0 and (~cl).any():
+        Zt = _corrector(denoise, Zt, V, ups, nuL, cl, r, K_fin, delta, rng); nfe += K_fin
+    return Zt @ V.T, nuL, nfe
+
+
+def corrector_from(denoise, Z, G, b, K, rng, delta=0.3):
+    """diagnostic: K exact-target corrector steps at nu_L starting from given states Z (e.g. perfect-sampler draws)."""
+    g, V, obs, ups = _split(G, b); nuL = 1.0 / g.max(); cl = obs & (g * nuL >= 1.0 - 1e-9)
+    ginv = np.where(obs, 1.0 / np.where(obs, g, 1.0), np.inf); r = np.where(obs & ~cl, ginv - nuL, np.inf)
+    return _corrector(denoise, Z @ V.conj(), V, ups, nuL, cl, r, K, delta, rng) @ V.T
