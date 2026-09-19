@@ -1,0 +1,34 @@
+# date        : 2026-09-20 00:40:56 KST
+# git commit  : e1b3fe2
+# versions    : python 3.12.14  numpy 2.5.2  scipy 1.18.1  torch 2.14.0+cu130 (cuda_available=True)
+# device      : CPU (192 cores) | dtype: complex128 / float64 | deterministic: yes (fixed seeds, no GPU in the receiver)
+# testbed     : D1 (A1 gate: baselines only)
+# seed rule   : default_rng([20260926, TBID[testbed], PID[prior], Nr, T, Tp, int(snr)+100])  (trials of a point = ONE stream)
+# code        : rate-1/2 conv (133,171)_8 nu=6 terminated, QPSK, outer iterations = 16 for EVERY arm
+# Demo/ hashes: t2_route_a.py=95a5408901ec125c  t2_trellis.py=31cd0ee9c68e972b  t2_gmm.py=d064e58c7510c769
+# gate A1 = conf/00_GOAL.md §3: tests B, S, C must all PASS before the our-model assembly starts.
+
+id    | verdict     | residual      | criterion               | description
+----------------------------------------------------------------------------------------------------------------------------------
+B1    | PASS        |     0.000e+00 | <= 1e-14                | damping beta=1 reproduces undamped Table III
+B2    | PASS        |     2.436e-12 | <= 1e-10                | AWGN closed form (71)-(72) == numerical (R5)-(R8)
+B3    | PASS        |     7.277e-14 | <= 1e-6                 | genie-symbol fixed point == LS (NMSE 1.289e-09 vs 1.289e-09)
+B4    | PASS        |     2.557e-15 | <= 1e-12                | complex core on real input == real reference core (relative; iter-1 residual 2.9e-16; imag part stays exactly 0)
+B5    | PASS        |     1.000e+00 | > 1e-3                  | the Onsager term of (R4) is actually wired in
+B6    | PASS        |     2.073e-13 | <= 1e-12 and all > 0    | (R7) == 1/(nu^p+sigma2) > 0 everywhere; the PRINTED eq (95) is < 0 at all 2000 points (True) -> would diverge. float64 cancellation of the (R7) spelling: 6.0e-10 rel -> production uses eq (72)
+S1    | PASS        |     0.000e+00 | <= 1e-14                | Module A is constant (3 modules collapse to 2)
+S2    | PASS        |     1.867e-15 | <= 1e-12                | Module C closed-form alpha^C == direct inverse, in (0,1)
+S3    | PASS        |     8.290e-15 | <= 1e-10                | Gaussian p_X fixed point == exact joint Gaussian posterior
+S4    | N/A         |     8.200e-01 | exactly 0 (unreachable) | R4-llr vs R1-turbo: structurally different receivers (see DECISIONS); measured max|dBER|
+S4b   | PASS        |     2.220e-16 | <= 1e-12                | mode='llr' forwards exactly L_app - L_in
+S5    | RECORD      |     6.250e-01 | record only             | alpha^C clipped 10/16, alpha^B clipped 14/16; clip rate rises after iter 1 in 67% of iters
+S6    | PASS        |     5.116e-13 | <= 1e-12                | LLR <-> pseudo-observation round trip (complex factor 2)
+S7    | RECORD      |     0.000e+00 | record only             | R4-scvamp n=64 @9dB: BLER@16 = 0.453, BLER@20 = 0.453 (config unchanged)
+C1    | PASS        |     0.000e+00 | 0 mismatching arms      | 8 arms smoke-run; key/shape signature identical to RouteA
+C2    | PASS        |     0.000e+00 | exactly 0               | two runs of every arm are bitwise identical
+C3    | PASS        |     0.000e+00 | 0 changed files         | Demo/ locked files unchanged: t2_route_a.py=95a5408901ec125c, t2_trellis.py=31cd0ee9c68e972b, t2_gmm.py=d064e58c7510c769
+C4    | PASS        |     0.000e+00 | 1 distinct (H,Y) hash per trial | every arm sees the same channel/noise realisation inside a cell
+C5    | PASS        |     0.000e+00 | 0 missing/empty fields  | explicit config dump complete for 8 arms
+C6    | PASS        |     1.000e+00 | present                 | result header carries device / dtype / determinism
+----------------------------------------------------------------------------------------------------------------------------------
+PASS 17/17, FAILED: []   (N/A: ['S4'], RECORD: ['S5', 'S7'])
