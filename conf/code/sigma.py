@@ -63,9 +63,12 @@ def build_grid(res, n_grid=N_GRID, pct=PCT):
     return nu, fin, lo, hi
 
 
-def write(testbed, res, prior, out=None):
+def write(testbed, res, prior, out=None, tag=""):
+    """tag != "" routes BOTH the .txt and the .npz to tagged paths, so a smoke run can never overwrite the
+    FROZEN A4 grid that every GA-GD gate and every score arm reads (04_SPEC §3)."""
+    sfx = f"_{tag}" if tag else ""
     out = out or os.path.join(C.CONF, "results",
-                              "sigma_grid.txt" if testbed == "D1" else f"sigma_grid_{testbed}.txt")
+                              f"sigma_grid{sfx}.txt" if testbed == "D1" else f"sigma_grid_{testbed}{sfx}.txt")
     nu, fin, lo, hi = build_grid(res)
     sig = np.sqrt(nu / 2.0)
     cells = sorted({k[0] for k in res})
@@ -97,7 +100,7 @@ def write(testbed, res, prior, out=None):
         for i, (a, b) in enumerate(zip(nu, sig)):
             f.write(f"  {i:<4} {a:.6e}  {b:.6e}\n")
         f.write("\nThis grid is FROZEN from here on (04_SPEC §3).  Training, the GA-GD gates and GB' all use it.\n")
-    np.savez(os.path.join(C.CONF, "results", f"sigma_grid_{testbed}.npz"),
+    np.savez(os.path.join(C.CONF, "results", f"sigma_grid_{testbed}{sfx}.npz"),
              nu=nu, sigma=sig, lo=lo, hi=hi, samples=fin[:200000])
     return nu, sig, out
 
