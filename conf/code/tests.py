@@ -597,3 +597,165 @@ def test_L2():
 
 
 L_TESTS = [test_L1, test_L2]
+
+
+# ============================================================================= D -- diffusion training evidence (A5)
+# conf/07_SPEC_tests.md section D.  These do NOT judge the score model -- GA-GD do that.  They judge whether
+# TRAINING ACTUALLY HAPPENED, which is what makes "no rung reached the gates" an admissible conclusion rather
+# than an excuse (conf/00_GOAL.md §4 item 3, conf/01_RULES.md §5).
+import glob
+import os
+import re
+
+LADDER_ROW = re.compile(
+    r"^\[(?P<ts>[^\]]+)\]\s*(?P<rung>L\d)\s*\|\s*a(?P<att>\d+)\s*\|(?P<cfg>[^|]*)\|"
+    r"\s*train\s*(?P<tr>[^/]+)/\s*val\s*(?P<va>[^|]*)\|(?P<gates>.*?)\|\s*(?P<verdict>[A-Z/-]+)\s*\|(?P<note>.*)$")
+
+
+def _ladder_rows(path=None):
+    path = path or os.path.join(C.CONF, "LADDER.md")
+    if not os.path.exists(path):
+        return []
+    out = []
+    for line in open(path):
+        m = LADDER_ROW.match(line.strip())
+        if m:
+            out.append(m.groupdict())
+    return out
+
+
+def test_D0():
+    """The sigma_t grid was MEASURED, not chosen: sigma_grid.txt exists and carries its basis distribution."""
+    p = os.path.join(C.CONF, "results", "sigma_grid.txt")
+    if not os.path.exists(p):
+        return rec("D0", False, np.inf, "file exists", "conf/results/sigma_grid.txt absent -- A4 not run")
+    t = open(p).read()
+    need = ("empirical distribution of nu_q", "CHOSEN GRID", "percentile", "per cell x SNR")
+    miss = [k for k in need if k not in t]
+    npz = os.path.join(C.CONF, "results", "sigma_grid_D1.npz")
+    n = int(np.load(npz)["nu"].size) if os.path.exists(npz) else 0
+    return rec("D0", not miss and n >= 10, len(miss), "0 missing sections, >= 10 points",
+               f"sigma_grid.txt present with the measured basis distribution; {n} grid points"
+               + (f"; MISSING {miss}" if miss else ""))
+
+
+def test_D1t():
+    """Train/validation split identical across EVERY ladder attempt (split_hash compared, not assumed)."""
+    rows = _ladder_rows()
+    hs = sorted({m.group(1) for r in rows for m in [re.search(r"split ([0-9a-f]{8,})", r["note"])] if m})
+    import score
+    live = score.training_split("D1", "S", 8, 4)[2]
+    ok = len(hs) <= 1 and (not hs or hs[0] == live)
+    return rec("D1t", ok, len(hs) if len(hs) != 1 else 0, "exactly 1 distinct split hash",
+               f"{len(rows)} ladder rows, split hashes {hs or '[]'}; live training_split hash {live}")
+
+
+def test_D2t():
+    """The diffusion saw the SAME N_train samples the GMM fit received (element-wise, not just the same count)."""
+    import arms
+    import score
+    X = arms.training_set("D1", "S", 8, 4)
+    Xtr, Xva, h, _ = score.training_split("D1", "S", 8, 4)
+    n = len(Xtr) + len(Xva)
+    pack = np.concatenate([Xtr, Xva], 0) if Xva.ndim == Xtr.ndim else Xtr
+    same_n = (n == len(X) == C.N_TRAIN)
+    # the split is a permutation of the one dataset: compare multisets by sorted flat magnitude+phase
+    a = np.sort_complex(np.asarray(X).reshape(-1))
+    b = np.sort_complex(np.asarray(pack).reshape(-1))
+    d = float(np.max(np.abs(a - b))) if a.shape == b.shape else np.inf
+    return rec("D2t", same_n and d <= 1e-12, d, "same N_train and identical samples",
+               f"GMM training set n={len(X)}; diffusion train {len(Xtr)} + val {len(Xva)} = {n} "
+               f"(N_train={C.N_TRAIN}); max element difference {d:.1e}")
+
+
+def test_D3t():
+    """Every attempt that ran is in LADDER.md: one row per checkpoint, ABORTED rows included."""
+    rows = _ladder_rows()
+    cks = sorted(glob.glob(os.path.join(C.CONF, "ckpt", "*_D1.pt")))
+    keys_log = {(r["rung"], int(r["att"])) for r in rows}
+    keys_ck = set()
+    for p in cks:
+        m = re.search(r"(L\d)_a(\d+)_D1\.pt$", os.path.basename(p))
+        if m:
+            keys_ck.add((m.group(1), int(m.group(2))))
+    missing = sorted(keys_ck - keys_log)
+    return rec("D3t", not missing, len(missing), "0 checkpoints without a ladder row",
+               f"{len(rows)} ladder rows, {len(cks)} checkpoints; every checkpoint has a row"
+               + (f"; MISSING {missing}" if missing else ""))
+
+
+def test_D4t():
+    """TRAINING REALLY HAPPENED: the L1, L2, L3 checkpoints exist, load, and run a forward pass.
+    conf/00_GOAL.md §4 item 3 names this test as the evidence."""
+    import score
+    import torch
+    need = ("L1", "L2", "L3")
+    got, sizes, errs = [], [], []
+    for r in need:
+        hit = sorted(glob.glob(os.path.join(C.CONF, "ckpt", f"{r}_a*_D1.pt")))
+        if not hit:
+            errs.append(f"{r}: no checkpoint")
+            continue
+        p = hit[0]
+        try:
+            st = torch.load(p, map_location="cpu", weights_only=False)
+            m = score.make_model(r, st["hp"], 8, 4)
+            m.load_state_dict(st["model"])
+            m.eval()
+            x = torch.zeros(2, 2 * 8 * 4, dtype=torch.get_default_dtype())
+            s = torch.full((2,), 0.1, dtype=torch.get_default_dtype())
+            with torch.no_grad():
+                y = m.score_real(x, s) if hasattr(m, "score_real") else m.score(x, s)
+            assert y.shape == x.shape, f"{r}: forward shape {tuple(y.shape)} != {tuple(x.shape)}"
+            got.append(r)
+            sizes.append(f"{r}={os.path.getsize(p) / 1e6:.1f}MB")
+        except Exception as ex:
+            errs.append(f"{r}: {type(ex).__name__}: {ex}")
+    return rec("D4t", len(got) == 3, 3 - len(got), "L1, L2, L3 load + forward",
+               f"loaded and ran {got}; {' '.join(sizes)}" + (f"; ERRORS {errs}" if errs else ""))
+
+
+def test_D5t():
+    """device, per-epoch wall-clock and total wall-clock are on record (LADDER row AND the training log)."""
+    rows = _ladder_rows()
+    bad = [f"{r['rung']}a{r['att']}" for r in rows
+           if not (re.search(r"device \S", r["note"]) and re.search(r"s/ep", r["note"])
+                   and re.search(r"\d+ ep", r["note"]))]
+    logs = sorted(glob.glob(os.path.join(C.CONF, "logs", "train_L*_D1.log")))
+    nolog = []
+    for p in logs:
+        t = open(p).read()
+        # the header line is "# DEVICE : cuda | ..." and each epoch line carries its own wall-clock
+        has_dev = re.search(r"device\s*:", t, re.I)
+        has_ep = re.search(r"epoch\s+\d+\s*\|.*\|\s*[\d.]+\s*s", t)
+        if not (has_dev and has_ep):
+            nolog.append(os.path.basename(p) + ("(no device)" if not has_dev else "(no per-epoch time)"))
+    try:
+        import torch
+        avail = torch.cuda.is_available()
+    except Exception:
+        avail = "n/a"
+    return rec("D5t", not bad and not nolog and bool(rows), len(bad) + len(nolog),
+               "every row has device / s-per-epoch / epochs",
+               f"torch.cuda.is_available()={avail}; {len(rows)} ladder rows, {len(logs)} training logs"
+               + (f"; ROWS MISSING FIELDS {bad}" if bad else "") + (f"; LOGS MISSING FIELDS {nolog}" if nolog else ""))
+
+
+def test_D6t():
+    """Every attempt was TRAINED ENOUGH to count: early-stopped on validation loss, or >= 200 epochs.
+    Anything less is ABORTED and must not be counted as one of the 3 attempts (01_RULES §5)."""
+    rows = _ladder_rows()
+    short = []
+    for r in rows:
+        m = re.search(r"(\d+) ep", r["note"])
+        ep = int(m.group(1)) if m else 0
+        stopped = "stop: patience" in r["note"] or "patience" in r["note"]
+        if not (stopped or ep >= 200) and "ABORTED" not in r["verdict"]:
+            short.append(f"{r['rung']}a{r['att']}({ep} ep)")
+    aborted = [f"{r['rung']}a{r['att']}" for r in rows if "ABORTED" in r["verdict"]]
+    return rec("D6t", not short and bool(rows), len(short), "every non-ABORTED row >= 200 ep or early-stopped",
+               f"{len(rows)} rows; ABORTED (not counted as attempts): {aborted or 'none'}"
+               + (f"; UNDER-TRAINED BUT COUNTED {short}" if short else ""))
+
+
+D_TESTS = [test_D0, test_D1t, test_D2t, test_D3t, test_D4t, test_D5t, test_D6t]
