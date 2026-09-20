@@ -54,7 +54,7 @@ def route_a(Nr, Nt, T, Tp, sigma2, prior, code, Xp, moduleH, clip=None, **over):
 # ----------------------------------------------------------------------------- GMM fits
 D1_FITS = os.path.join(DEMO, "exp_0925_fits")            # reused verbatim (see DECISIONS)
 D2_FITS = os.path.join(C.CONF, "results", "gmm_fits_D2")
-D1_KS, D2_KS = (16, 32, 64), (16, 32, 64, 128)
+D1_KS, D2_KS = (16, 32, 64), (16, 32, 64, 128, 256)   # 256: kron only, b* hit the grid edge (DECISIONS)
 
 
 def fit_path(testbed, prior, Nr, fam, K, ntrain=N_TRAIN):
