@@ -1,0 +1,100 @@
+########## 1. score.py selftests (M5 / rungs / gates) ##########
+   4x4 nu=5.000e-02 sigma_t= 0.15811 | max|m-m_np| 1.49e-15 | max|J-J_np| 8.75e-14 | |alpha-alpha_np| 7.88e-15 | |tweedie-native| 8.95e-16
+   4x4 nu=1.250e+00 sigma_t= 0.79057 | max|m-m_np| 4.22e-15 | max|J-J_np| 6.44e-15 | |alpha-alpha_np| 9.99e-16 | |tweedie-native| 1.09e-15
+   8x4 nu=2.170e-03 sigma_t= 0.03294 | max|m-m_np| 1.07e-15 | max|J-J_np| 1.47e-12 | |alpha-alpha_np| 1.94e-13 | |tweedie-native| 1.07e-15
+   8x4 nu=5.000e-02 sigma_t= 0.15811 | max|m-m_np| 3.56e-15 | max|J-J_np| 2.78e-13 | |alpha-alpha_np| 2.59e-14 | |tweedie-native| 1.24e-15
+   8x4 nu=1.250e+00 sigma_t= 0.79057 | max|m-m_np| 4.44e-15 | max|J-J_np| 5.32e-15 | |alpha-alpha_np| 4.44e-16 | |tweedie-native| 1.93e-15
+[selftest_M5] worst: m 4.44e-15  J 2.02e-12  alpha 6.01e-13  tweedie-vs-native 1.93e-15   -> PASS
+[selftest_rungs] rung | params | loss | GA (tweedie vs native) | tr(J)/N | Jacobian shape
+   L1  mlp/ve /pixel |   658240 | 1.0015e+00 |  0.00e+00 | +1.0000 | (4, 32, 32)
+   L2  mlp/vp /pixel |   658240 | 1.0015e+00 |  0.00e+00 | +1.0000 | (4, 32, 32)
+   L3  mlp/ve /angle |   658240 | 1.0015e+00 |  0.00e+00 | +1.0000 | (4, 32, 32)
+   L4 conv/ve /pixel |   310210 | 1.0015e+00 |  0.00e+00 | +1.0000 | (4, 32, 32)
+   L5  mlp/rf /pixel |   658240 | 2.0585e+00 |  5.83e-17 | +0.9091 | (4, 32, 32)
+   L6  vae/vae/pixel |   308833 | 2.6981e+00 |  1.35e-16 | +0.9313 | (4, 32, 32)
+[selftest_rungs] worst Tweedie-vs-native over the six rungs: 1.35e-16 -> PASS
+[selftest_gates] exact score as the 'model'  (8x4, n_eval=32, n_jac=2)
+   GA 2.69e-15  GB +2.220e-16  GC 1.099e-13  GD 1.251e-12 (full J)  GD_trace 1.658e-13 (reported)  max J_rel_fro 1.25e-12  passed=True
+   note: GA is identically zero by construction for this model family; it guards score-path vs x0-path inconsistency only, and PASS therefore rests on GB/GC/GD.
+[selftest_gates] -> PASS  (gates must read ~0 for the exact score)
+
+SELFTEST M5 PASS | RUNGS PASS | GATES PASS
+rc=0
+
+########## 2. full pre-registered test suite (B/S/C/M/L) ##########
+id    | verdict     | residual      | criterion               | description
+----------------------------------------------------------------------------------------------------------------------------------
+B1    | PASS        |     0.000e+00 | <= 1e-14                | damping beta=1 reproduces undamped Table III
+B2    | PASS        |     2.436e-12 | <= 1e-10                | AWGN closed form (71)-(72) == numerical (R5)-(R8)
+B3    | PASS        |     7.277e-14 | <= 1e-6                 | genie-symbol fixed point == LS (NMSE 1.289e-09 vs 1.289e-09)
+B4    | PASS        |     2.557e-15 | <= 1e-12                | complex core on real input == real reference core (relative; iter-1 residual 2.9e-16; imag part stays exactly 0)
+B5    | PASS        |     1.000e+00 | > 1e-3                  | the Onsager term of (R4) is actually wired in
+B6    | PASS        |     2.073e-13 | <= 1e-12 and all > 0    | (R7) == 1/(nu^p+sigma2) > 0 everywhere; the PRINTED eq (95) is < 0 at all 2000 points (True) -> would diverge. float64 cancellation of the (R7) spelling: 6.0e-10 rel -> production uses eq (72)
+S1    | PASS        |     0.000e+00 | <= 1e-14                | Module A is constant (3 modules collapse to 2)
+S2    | PASS        |     1.867e-15 | <= 1e-12                | Module C closed-form alpha^C == direct inverse, in (0,1)
+S3    | PASS        |     8.290e-15 | <= 1e-10                | Gaussian p_X fixed point == exact joint Gaussian posterior
+S4    | N/A         |     8.200e-01 | exactly 0 (unreachable) | R4-llr vs R1-turbo: structurally different receivers (see DECISIONS); measured max|dBER|
+S4b   | PASS        |     2.220e-16 | <= 1e-12                | mode='llr' forwards exactly L_app - L_in
+S5    | RECORD      |     6.250e-01 | record only             | alpha^C clipped 10/16, alpha^B clipped 14/16; clip rate rises after iter 1 in 67% of iters
+S6    | PASS        |     5.116e-13 | <= 1e-12                | LLR <-> pseudo-observation round trip (complex factor 2)
+S7    | RECORD      |     0.000e+00 | record only             | R4-scvamp n=64 @9dB: BLER@16 = 0.453, BLER@20 = 0.453 (config unchanged)
+C1    | PASS        |     0.000e+00 | 0 mismatching arms      | 8 arms smoke-run; key/shape signature identical to RouteA
+C2    | PASS        |     0.000e+00 | exactly 0               | two runs of every arm are bitwise identical
+C3    | PASS        |     0.000e+00 | 0 changed files         | Demo/ locked files unchanged: t2_route_a.py=95a5408901ec125c, t2_trellis.py=31cd0ee9c68e972b, t2_gmm.py=d064e58c7510c769
+C4    | PASS        |     0.000e+00 | 1 distinct (H,Y) hash per trial | every arm sees the same channel/noise realisation inside a cell
+C5    | PASS        |     0.000e+00 | 0 missing/empty fields  | explicit config dump complete for 8 arms
+C6    | PASS        |     1.000e+00 | present                 | result header carries device / dtype / determinism
+M1    | PASS        |     0.000e+00 | exactly 0               | assembler M-ours-gmm32 == Demo/exp_0925 'Hgmm-K32' (b* = kron, legacy b* = Hgmm-kron)
+M1b   | PASS        |     0.000e+00 | exactly 0               | assembler M-ours-score == Demo/exp_0925 'Hscore-exact'
+M2    | PASS        |     0.000e+00 | exactly 0               | M-ours-G (Module H -> Gaussian) == R2-ours-G: the headline gap is Module H's alone
+M2b   | PASS        |     1.283e-13 | <= 1e-10                | K=1 mixture-EP site reduces to the Gaussian arm (ep_site path)
+M3    | PASS        |     4.283e-16 | <= 1e-12                | sum_k pi_k C_k == sample covariance for floor=0,kappa=0 (reseeds 0); shipped K=32 fit (floor 1e-4, kappa 64) deviates by 1.21e-02 rel -- by design
+M4    | PASS        |     0.000e+00 | 0 mismatching arms      | config dump of 4 M-ours arms matches 03_SPEC §1.1
+L1    | PASS        |     6.890e-15 | tanh <= 1e-14 and FD <= 1e-9 | (133,171)_8: max|tanh(L/2) - E[x|x~]| = 2.33e-15, max Tweedie FD error = 6.89e-10 (recorded in 03_SPEC §6: 2.3e-15 / 6.9e-10)
+L2    | PASS        |     2.550e-15 | Lc=4 <= 1e-12 and Lc=2 > 1e-3 | L_c = 4/sigma_c^2 error 2.55e-15 (exact); L_c = 2/sigma_c^2 error up to 4.95e-01 (wrong)
+----------------------------------------------------------------------------------------------------------------------------------
+PASS 25/25, FAILED: []   (N/A: ['S4'], RECORD: ['S5', 'S7'])
+
+########## 3. d2 testbed T2a-T2e, prior S2 cell C1 ##########
+id    | verdict     | residual      | criterion               | description
+----------------------------------------------------------------------------------------------------------------------------------
+T2a   | PASS        |     6.735e-05 | rel err <= 1e-3         | E||H||_F^2 = 31.997845 vs Nr*Nt = 32 over n=100000; analytic C_ens=kron(Rt^T,Rr) vs MC: max|dC|/cbar = 7.265e-03 = 2.3 MC s.e., ||dC||_F/||C||_F = 1.659e-02 (per-entry MC s.e. ~ 3.2e-03). The closed form AGREES with samples it was never fitted to.
+T2b   | RECORD      |     3.877e+00 | erank(Rt) < 0.9*Nt ?    | erank(Rt) = 3.8770/4 (0.969), erank(Rr) = 7.3500/8 (0.919), erank(C_ens) = 28.4958/32 (0.890); DECISION: pilots = DFT (transmit side near-white, eigen-alignment is meaningless); Rt eigenvalues = [1.2103, 1.0857, 0.9776, 0.7264]. THE DECISION IS TAKEN ON Rt, because the pilots span the TRANSMIT side (Y = H Xp); erank(C_ens) is reported but does NOT decide. The full-covariance reading (erank(C_ens) = 28.4958 < 0.9*32 = 28.8000) would have said eigen-aligned (informative) -- IT DIFFERS from the decision in force. Knife edge: Rt is 0.969 of full and C_ens is 0.890, on opposite sides of 0.9. The choice is recorded here so it is auditable, not invisible.
+T2c   | RECORD      |     4.663e-01 | vs 1-Tp/Nt = 0.5000     | NMSE_inf(Tp=2): eig = 0.426014, dft = 0.466271; 1-Tp/Nt = 0.5000; pilots IN USE = dft (T2b decision) -> |NMSE_inf - (1-Tp/Nt)| = 0.0337, judged against the vacuity cutoff T2C_VACUOUS_GAP = 0.05 (conf-side constant, not present in 05_SPEC). CONSEQUENCE: close to 1-Tp/Nt, so same-Tp (upper bound)-(lower bound) comparisons are VACUOUS -- the reading must be CROSS-Tp goodput (cells C1 vs C2).
+T2d   | PASS        |    -2.486e-01 | max CI_hi - 2 < 0       | 8 angle sets x 20000 phase draws, 99.9% bootstrap CI (1000 resamples over realisations). Gaussian value = 2 EXACTLY. L=3: meas 1.6152 (CI 1.6140,1.6164) pred 1.6144 | L=4: meas 1.6771 (CI 1.6745,1.6796) pred 1.6784 | L=4: meas 1.6783 (CI 1.6757,1.6808) pred 1.6784 | L=7: meas 1.7411 (CI 1.7377,1.7452) pred 1.7398 | L=8: meas 1.7446 (CI 1.7414,1.7477) pred 1.7459 | L=8: meas 1.7474 (CI 1.7430,1.7514) pred 1.7459 | L=4: meas 1.6781 (CI 1.6751,1.6815) pred 1.6784 | L=4: meas 1.6789 (CI 1.6746,1.6838) pred 1.6784  -> every CI excludes 2; worst CI_hi - 2 = -0.2486. Conditional Gaussianity is broken. HOW MANY INDEPENDENT CONDITIONS: the ratio is 2 - sum_l p_l^2, i.e. L-DETERMINED and ANGLE-INVARIANT, so the evidence is indexed by L, not by the angle sets. 8 angle sets exercised 4 DISTINCT L values {3, 4, 7, 8} out of the 6 in Unif{3..8}; NOT EXERCISED: L = {5, 6}. Spread of the measured ratio WITHIN one L (repeated angle sets) = 0.0027 vs ACROSS L = 0.1322, confirming the angle-invariance.
+T2dm  | PASS        |     1.434e-03 | |meas - pred| <= 1e-2   | T2d MECHANISM: measured fourth-moment ratio vs the analytic 2 - sum_l |u_l|^4/(sum_l |u_l|^2)^2 = 2 - sum_l p_l^2 (unit-norm steering => |u_l|^2 = p_l). max |meas - pred| = 1.434e-03 -- the deviation is the deterministic power profile, not a sampling artefact.
+T2e   | RECORD      |     6.842e+00 | record only             | participating paths L ~ Unif{3..8}, E[L] = 5.50; 2D-DFT angular energy concentration over 32 bins: top-1 = 0.3022, top-2 = 0.4758, top-4 = 0.6726, top-8 = 0.8426; effective #bins (1/sum f_b^2) = 6.842/32 (0.214 of the aperture)
+----------------------------------------------------------------------------------------------------------------------------------
+PASS 3/3, FAILED: []   (N/A: [], RECORD: ['T2b', 'T2c', 'T2e'])
+
+########## 4. runner --help ##########
+usage: runner.py [-h] [--testbed {D1,D2}]
+                 [--cell {C1,C2,C3,C4} [{C1,C2,C3,C4} ...]]
+                 [--snr SNR [SNR ...]] [--prior {U,S,P,U2,S2}] [--n N]
+                 [--chunk CHUNK] [--arm ARM [ARM ...]] [--iters ITERS]
+                 [--beta BETA] [--tin TIN] [--seed SEED] [--ntrain NTRAIN]
+                 [--restarts RESTARTS] [--fit-iters FIT_ITERS]
+                 [--device DEVICE] [--dtype DTYPE] [--rung RUNG]
+                 [--attempt ATTEMPT] [--ckpt CKPT] [--tag TAG]
+                 [--force-regrid]
+                 {tests,smoke,run,lemma,sigma,train,gate,testbed,fit,analysis}
+
+conf/code/runner.py -- the single entry point for every stage of the conference run (conf/06_SPEC_runner.md §4).
+
+  python runner.py tests    --testbed D1                     07_SPEC: B/S/C + M + L (+ D/T once their artefacts exist)
+  python runner.py smoke    --testbed D1 --cell C1           n = 2, every arm of that testbed, numbers discarded
+  python runner.py run      --testbed D1 --n 640 --chunk 40  the real grid -> conf/raw/*.npz   (finished chunks skipped)
+  python runner.py lemma                                     A3  -> conf/results/lemma.txt + conf/figs/F2_lemma.png
+  python runner.py sigma    --testbed D1                     A4/B3 -> conf/results/sigma_grid[_D2].txt
+  python runner.py train    --rung L1 --attempt 1            A5/B3 -> conf/ckpt/ + a row in conf/LADDER.md
+  python runner.py gate     --testbed D1 --rung L1           A5  -> conf/results/gate_D1.txt   (D2: GB' -> gate_D2.txt)
+  python runner.py testbed                                   B1  -> conf/results/testbed_D2.txt (T2a..T2e)
+  python runner.py fit      --testbed D2                     B2  -> conf/results/gmm_fits_D2/*.npz + gmm_fit_D2.txt
+  python runner.py analysis --testbed D1                     08_SPEC tables
+
+positional arguments:
+  {tests,smoke,run,lemma,sigma,train,gate,testbed,fit,analysis}
+
+options:
+  -h, --help            show this help message and exit
+  --testbed {D1,D2}     D1 = grid GMM (instrument), D2 = sparse specular

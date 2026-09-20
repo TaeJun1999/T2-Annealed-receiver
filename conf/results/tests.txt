@@ -1,12 +1,13 @@
-# date        : 2026-09-20 11:16:12 KST
-# git commit  : 7e57160
+# date        : 2026-09-20 12:44:43 KST
+# git commit  : 29993f3
 # versions    : python 3.12.14  numpy 2.5.2  scipy 1.18.1  torch 2.14.0+cu130 (cuda_available=True)
 # device      : CPU (192 cores) | dtype: complex128 / float64 | deterministic: yes (fixed seeds, no GPU in the receiver)
-# testbed     : D1 (gates A1+A2+A3)
+# testbed     : D1 (gates A1+A2+A3; modules integrated)
 # seed rule   : default_rng([20260926, TBID[testbed], PID[prior], Nr, T, Tp, int(snr)+100])  (trials of a point = ONE stream)
 # code        : rate-1/2 conv (133,171)_8 nu=6 terminated, QPSK, outer iterations = 16 for EVERY arm
 # Demo/ hashes: t2_route_a.py=95a5408901ec125c  t2_trellis.py=31cd0ee9c68e972b  t2_gmm.py=d064e58c7510c769
-# B/S/C = A1 (baselines), M = A2 (our model assembly), L = A3 (F2 lemma).
+# B/S/C = A1 baselines, M = A2 our model, L = A3 F2 lemma.
+# D-tests (D0..D6t) run after A5; T-tests (T2a..T2e) are recorded in conf/results/testbed_D2.txt at B1.
 
 id    | verdict     | residual      | criterion               | description
 ----------------------------------------------------------------------------------------------------------------------------------
