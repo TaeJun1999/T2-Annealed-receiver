@@ -20,34 +20,38 @@
 
 ---
 
-갱신 시각 : 2026-09-20 00:50 KST
-경과 시간 : 28분
-현재 phase : **A1/A2/A3 게이트 통과 -> A4 (sigma_t 격자 측정) 시작**
+갱신 시각 : 2026-09-20 11:35 KST
+경과 시간 : 1시간 13분
+현재 phase : **A1~A4 게이트 통과 -> A5 (score 사다리) 준비 중**
 
 ## 완료
 - P0 지침 통독, 자원 측정, 폴더 생성.
-- **A1 baseline 구현 + 게이트 통과** : `conf/code/bigamp.py` (R3 = BiG-AMP Table III + BCJR),
-  `conf/code/scvamp.py` (R4 = 3-module SC-VAMP형). 테스트 B1~B6, S1~S7, C1~C6 **전부 PASS**.
-  - 식 (95) 부호 오타는 따르지 않음. B6 가 확장정밀도로 잠금 (인쇄된 (95)는 2000점 전부 음수 -> 발산).
-  - S4 는 지침 내부 불일치라 `N/A-BY-CONSTRUCTION` (측정 격차 기록) + 대체 테스트 S4b 추가.
-- **A2 우리 모델 조립 + 게이트 통과** : `conf/code/arms.py`. M1 0.0 / **M2 0.0** / M1b 0.0 / M2b 1.3e-13
-  / M3 4.3e-16 / M4 0 불일치. M2 가 exactly 0 이므로 우리 모델 arm 은 정상 진행.
-- **A3 F2 lemma 재현 + 게이트 통과** : `Demo/archive/exp_0915_bcjr_score_check.py` 를 **수정 없이** 실행.
-  L1 max|tanh-E| = 2.33e-15 (<=1e-14), Tweedie FD = 6.89e-10 (<=1e-9). L2 재현 (Lc=4 정확, Lc=2 오차 0.495).
-  `conf/results/lemma.txt`, `conf/figs/F2_lemma.png`.
+- **A1 baseline (게이트 통과)** : `bigamp.py` (R3 = BiG-AMP Table III + BCJR), `scvamp.py` (R4).
+  테스트 B1~B6, S1~S7, C1~C6 전부 PASS. 식 (95) 부호 오타는 따르지 않음(B6 가 확장정밀도로 잠금).
+  S4 는 지침 내부 불일치라 N/A-BY-CONSTRUCTION + 대체 테스트 S4b.
+- **A2 우리 모델 조립 (게이트 통과)** : `arms.py`. **M1 = 0.0, M2 = 0.0** (+ M1b 0.0, M2b 1.3e-13,
+  M3 4.3e-16, M4 0). M2 가 exactly 0 이므로 우리 모델 arm 전체 정상 진행.
+- **A3 F2 lemma (게이트 통과)** : archive 스크립트 무수정 실행. L1 = 2.33e-15 / 6.89e-10, L2 재현.
+  `results/lemma.txt`, `figs/F2_lemma.png`.
+- **A4 sigma_t 격자 (게이트 통과)** : `results/sigma_grid.txt`. nu_q 14336 표본(C1·C2 x 7 SNR x 64 trial
+  x 16 반복), 1-99 퍼센타일 [2.17e-3, 1.25] 을 덮는 20점 로그 등간격. sigma_t in [3.29e-2, 7.91e-1].
+  **이후 변경하지 않는다.**
 
 ## 진행 중
-- A4 : sigma_t 격자를 **측정해서** 확정 (04_SPEC §3).
+- 남은 모듈 4개를 멀티에이전트로 동시 작성 + 적대적 검증 중 (orchestrator 가 게이트는 직접 실행):
+  `score.py` (사다리 L1~L6 + 학습 + GA~GD), `d2.py` (sparse specular + T2a~T2e),
+  `analysis.py` (표 A/B/C/D), `runner.py` (CLI).
 
 ## 남은 것 / 예상
-- A4 sigma_t 격자 -> A5 score 사다리 L1~L6 (게이트 GA~GD) -> A6 D1 전 arm 실행
-- B1~B4 (D2 검증 -> GMM 재적합 -> score 재학습 -> headline)
+- A5 score 사다리 L1->L6 (칸당 최대 3회, 게이트 GA~GD) — GPU 학습
+- A6 D1 전 arm 실행 (C1/C2/C3/C4 x n=640)
+- B1 D2 검증 (T2d 가 관문) -> B2 GMM 재적합 -> B3 sigma 재측정 + score 재학습 -> B4 headline
 
 ## BLOCKED
 - 없음
 
 ## DECISIONS 누적
-- 11건 (`conf/DECISIONS.md`)
+- 13건 (`conf/DECISIONS.md`)
 
 ## 마지막 커밋
-- (이 커밋)
+- de46d6e
