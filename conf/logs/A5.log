@@ -1153,3 +1153,142 @@ passing attempts on record for D1: none
 [train] L6 a2 D1/S 8x4 -> /home/HTJ/t2/conf/ckpt/L6_a2_D1.pt
 [train] /home/HTJ/t2/conf/LADDER.md += [2026-09-20 14:08 KST] L6 | a2 | vae vae/pixel w256 d3 lr0.0003 ema0.9995 (308833 par) | train -1.649e-01 / val -9.371e-02 | GA - | GB - | GC - | GD - | UNGATED | 313 ep (stop: patience), 43 s, 0.14 s/ep, device cuda:0 NVIDIA RTX PRO 6000 Blackwell Server Edition, ckpt /home/HTJ/t2/conf/ckpt/L6_a2_D1.pt (5.3 MB), split 98d6225d67f9c15a
 [train] verdict stays UNGATED until `runner.py gate --testbed D1` measures GA-GD.
+# date        : 2026-09-20 14:08:15 KST
+# git commit  : 0bbab29
+# versions    : python 3.12.14  numpy 2.5.2  scipy 1.18.1  torch 2.14.0+cu130 (cuda_available=True)
+# device      : CPU (192 cores) | dtype: complex128 / float64 | deterministic: yes (fixed seeds, no GPU in the receiver)
+# testbed     : D1
+# seed rule   : default_rng([20260926, TBID[testbed], PID[prior], Nr, T, Tp, int(snr)+100])  (trials of a point = ONE stream)
+# code        : rate-1/2 conv (133,171)_8 nu=6 terminated, QPSK, outer iterations = 16 for EVERY arm
+# Demo/ hashes: t2_route_a.py=95a5408901ec125c  t2_trellis.py=31cd0ee9c68e972b  t2_gmm.py=d064e58c7510c769
+# content     : conf/04_SPEC_diffusion.md §5 -- the pre-registered quality gates GA-GD, on every ladder checkpoint
+# checkpoints : 1 found under /home/HTJ/t2/conf/ckpt (filter: rung=L6 attempt=2)
+# device      : cuda for the gate only; the receiver stays CPU/complex128 for every arm
+# judgement   : the ladder is judged by THESE numbers and never by a BLER (01_RULES §5).
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+# CIRCULAR TESTBED -- true prior is defined as a grid GMM; the GMM arm is correctly specified.
+# No claim about learned priors can be made from this table.
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+GA -- STRUCTURAL ZERO.  READ THIS BEFORE READING ANY GA NUMBER BELOW.
+--------------------------------------------------------------------------------------------------------------
+GA is identically zero by construction for this model family; it guards score-path vs x0-path inconsistency only, and PASS therefore rests on GB/GC/GD.
+--------------------------------------------------------------------------------------------------------------
+
+GD -- the FULL Wirtinger matrix (relative Frobenius error of J), tolerance 0.20 unchanged.
+     GD_trace (relative error of tr(J)/N) is reported beside it and is NOT the gate.
+     conf/DECISIONS.md 2026-09-20 12:35; fixed before any checkpoint was gated.
+
+=== L6 attempt 2   /home/HTJ/t2/conf/ckpt/L6_a2_D1.pt
+    hp          {'arch': 'vae', 'param': 'vae', 'domain': 'pixel', 'width': 256, 'depth': 3, 'emb': 0, 'latent': 16, 'n_mix': 512, 'lr': 0.0003, 'ema': 0.9995, 'batch': 256}
+    evaluated on n_eval=512 held-out samples (common.train_rng stream 10), n_jac=64, 8x4, prior S
+    GA          1.51845e-15   <= 1e-06      PASS
+    GB          5.13259e-01   <= 0.05       FAIL
+    GC          1.03348e+00   <= 0.15       FAIL
+    GD          7.15027e-01   <= 0.2        FAIL
+    GD_trace    1.19544e-01   relative error of tr(J)/N -- REPORTED, NOT the gate
+    VERDICT   FAIL   (PASS = GA and GB and GC and GD, 04_SPEC §5)
+
+    per sigma grid point (the grid is the FROZEN A4 measurement; GD = full-matrix J_rel_fro)
+      k            nu         sigma            GA            GB            GC            GD      GD_trace      herm_res      nmse_hat     nmse_star     alpha_hat    alpha_star  n_jac
+      0   2.16952e-03   3.29357e-02   4.75089e-16   1.51093e-02   1.03348e+00   1.75471e-02   7.46328e-03   2.19814e-17   2.27878e-03   2.24486e-03   9.94005e-01   9.86642e-01     64
+      1   3.03160e-03   3.89333e-02   5.06276e-16   2.07413e-02   1.03299e+00   2.42775e-02   1.02968e-02   3.87529e-17   3.18560e-03   3.12087e-03   9.91660e-01   9.81553e-01     64
+      2   4.23623e-03   4.60230e-02   6.39328e-16   2.84205e-02   1.03232e+00   3.34561e-02   1.41307e-02   5.69339e-17   4.45374e-03   4.33066e-03   9.88410e-01   9.74638e-01     64
+      3   5.91953e-03   5.44037e-02   5.86653e-16   3.88224e-02   1.03133e+00   4.58011e-02   1.92398e-02   5.58921e-17   6.22732e-03   5.99459e-03   9.83904e-01   9.65331e-01     64
+      4   8.27170e-03   6.43106e-02   5.29019e-16   5.27921e-02   1.02989e+00   6.20083e-02   2.58911e-02   1.07170e-16   8.70782e-03   8.27117e-03   9.77638e-01   9.52965e-01     64
+      5   1.15585e-02   7.60215e-02   5.26580e-16   7.13323e-02   1.02780e+00   8.27160e-02   3.42969e-02   1.39133e-16   1.21762e-02   1.13655e-02   9.68927e-01   9.36797e-01     64
+      6   1.61514e-02   8.98649e-02   4.42435e-16   9.55171e-02   1.02457e+00   1.08817e-01   4.46044e-02   2.13405e-16   1.70215e-02   1.55374e-02   9.56940e-01   9.16078e-01     64
+      7   2.25693e-02   1.06229e-01   5.54696e-16   1.26360e-01   1.01924e+00   1.41348e-01   5.68071e-02   2.45292e-16   2.37764e-02   2.11091e-02   9.40712e-01   8.90146e-01     64
+      8   3.15374e-02   1.25573e-01   7.03369e-16   1.64752e-01   1.01062e+00   1.80795e-01   7.05450e-02   3.15545e-16   3.31605e-02   2.84700e-02   9.19114e-01   8.58548e-01     64
+      9   4.40690e-02   1.48440e-01   6.51417e-16   2.11404e-01   9.97603e-01   2.27593e-01   8.50297e-02   4.31337e-16   4.61300e-02   3.80797e-02   8.90977e-01   8.21155e-01     64
+     10   6.15801e-02   1.75471e-01   7.40134e-16   2.66229e-01   9.79291e-01   2.81825e-01   9.90177e-02   7.68778e-16   6.39046e-02   5.04684e-02   8.55276e-01   7.78219e-01     64
+     11   8.60495e-02   2.07424e-01   5.68100e-16   3.26821e-01   9.53133e-01   3.43066e-01   1.10995e-01   8.12664e-16   8.78822e-02   6.62352e-02   8.11434e-01   7.30367e-01     64
+     12   1.20242e-01   2.45196e-01   7.31195e-16   3.89113e-01   9.15938e-01   4.16539e-01   1.19544e-01   1.16345e-15   1.19523e-01   8.60429e-02   7.59619e-01   6.78507e-01     64
+     13   1.68021e-01   2.89846e-01   7.01397e-16   4.47763e-01   8.66430e-01   4.83840e-01   1.18447e-01   1.64303e-15   1.60121e-01   1.10599e-01   6.97550e-01   6.23677e-01     64
+     14   2.34785e-01   3.42626e-01   8.12067e-16   4.91020e-01   8.03702e-01   5.51835e-01   1.08933e-01   2.91111e-15   2.09652e-01   1.40610e-01   6.28673e-01   5.66917e-01     64
+     15   3.28079e-01   4.05018e-01   9.10924e-16   5.13259e-01   7.28475e-01   6.54056e-01   1.11413e-01   3.95913e-15   2.67426e-01   1.76722e-01   5.59073e-01   5.09394e-01     64
+     16   4.58444e-01   4.78771e-01   1.00987e-15   5.09114e-01   6.44429e-01   6.93921e-01   1.15828e-01   4.16331e-15   3.31085e-01   2.19390e-01   4.81745e-01   4.52477e-01     64
+     17   6.40610e-01   5.65955e-01   1.21573e-15   4.75565e-01   5.53570e-01   7.02557e-01   1.13841e-01   5.12365e-15   3.96753e-01   2.68882e-01   4.05337e-01   3.97227e-01     64
+     18   8.95162e-01   6.69015e-01   1.42831e-15   4.19241e-01   4.61363e-01   7.09162e-01   1.06710e-01   6.46599e-15   4.61759e-01   3.25356e-01   3.38654e-01   3.44481e-01     64
+     19   1.25086e+00   7.90842e-01   1.51845e-15   3.46372e-01   3.72281e-01   7.15027e-01   9.49374e-02   7.17211e-15   5.22668e-01   3.88205e-01   2.82799e-01   2.94638e-01     64
+
+
+[gate] D1: 1 checkpoint(s) -> /home/HTJ/t2/conf/results/gate_D1.txt
+--- gate verdict check ---
+passing attempts on record for D1: none
+--- L6 attempt 2 did not clear the gates; next attempt ---
+
+################ L6 attempt 3 | 2026-09-20 14:10:20 ################
+[train] L6 a3 D1/S 8x4 | cuda:0 NVIDIA RTX PRO 6000 Blackwell Server Edition | 1667169 params | resume from epoch 0 | log /home/HTJ/t2/conf/logs/train_L6_a3_D1.log
+[train] L6 a3: 200 epochs, stopped_by=patience, aborted=False, best val -6.163746e-02 @ 107, 40.6 s (0.203 s/epoch)
+[train] L6 a3 D1/S 8x4 -> /home/HTJ/t2/conf/ckpt/L6_a3_D1.pt
+[train] /home/HTJ/t2/conf/LADDER.md += [2026-09-20 14:11 KST] L6 | a3 | vae vae/pixel w512 d4 lr0.001 ema0.999 (1667169 par) | train -5.502e-01 / val -6.164e-02 | GA - | GB - | GC - | GD - | UNGATED | 200 ep (stop: patience), 41 s, 0.20 s/ep, device cuda:0 NVIDIA RTX PRO 6000 Blackwell Server Edition, ckpt /home/HTJ/t2/conf/ckpt/L6_a3_D1.pt (27.0 MB), split 98d6225d67f9c15a
+[train] verdict stays UNGATED until `runner.py gate --testbed D1` measures GA-GD.
+# date        : 2026-09-20 14:11:05 KST
+# git commit  : f1c0aff
+# versions    : python 3.12.14  numpy 2.5.2  scipy 1.18.1  torch 2.14.0+cu130 (cuda_available=True)
+# device      : CPU (192 cores) | dtype: complex128 / float64 | deterministic: yes (fixed seeds, no GPU in the receiver)
+# testbed     : D1
+# seed rule   : default_rng([20260926, TBID[testbed], PID[prior], Nr, T, Tp, int(snr)+100])  (trials of a point = ONE stream)
+# code        : rate-1/2 conv (133,171)_8 nu=6 terminated, QPSK, outer iterations = 16 for EVERY arm
+# Demo/ hashes: t2_route_a.py=95a5408901ec125c  t2_trellis.py=31cd0ee9c68e972b  t2_gmm.py=d064e58c7510c769
+# content     : conf/04_SPEC_diffusion.md §5 -- the pre-registered quality gates GA-GD, on every ladder checkpoint
+# checkpoints : 1 found under /home/HTJ/t2/conf/ckpt (filter: rung=L6 attempt=3)
+# device      : cuda for the gate only; the receiver stays CPU/complex128 for every arm
+# judgement   : the ladder is judged by THESE numbers and never by a BLER (01_RULES §5).
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+# CIRCULAR TESTBED -- true prior is defined as a grid GMM; the GMM arm is correctly specified.
+# No claim about learned priors can be made from this table.
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+GA -- STRUCTURAL ZERO.  READ THIS BEFORE READING ANY GA NUMBER BELOW.
+--------------------------------------------------------------------------------------------------------------
+GA is identically zero by construction for this model family; it guards score-path vs x0-path inconsistency only, and PASS therefore rests on GB/GC/GD.
+--------------------------------------------------------------------------------------------------------------
+
+GD -- the FULL Wirtinger matrix (relative Frobenius error of J), tolerance 0.20 unchanged.
+     GD_trace (relative error of tr(J)/N) is reported beside it and is NOT the gate.
+     conf/DECISIONS.md 2026-09-20 12:35; fixed before any checkpoint was gated.
+
+=== L6 attempt 3   /home/HTJ/t2/conf/ckpt/L6_a3_D1.pt
+    hp          {'arch': 'vae', 'param': 'vae', 'domain': 'pixel', 'width': 512, 'depth': 4, 'emb': 0, 'latent': 16, 'n_mix': 512, 'lr': 0.001, 'ema': 0.999, 'batch': 256}
+    evaluated on n_eval=512 held-out samples (common.train_rng stream 10), n_jac=64, 8x4, prior S
+    GA          1.65188e-15   <= 1e-06      PASS
+    GB          1.19815e+00   <= 0.05       FAIL
+    GC          1.93856e+00   <= 0.15       FAIL
+    GD          1.01962e+00   <= 0.2        FAIL
+    GD_trace    3.06216e-01   relative error of tr(J)/N -- REPORTED, NOT the gate
+    VERDICT   FAIL   (PASS = GA and GB and GC and GD, 04_SPEC §5)
+
+    per sigma grid point (the grid is the FROZEN A4 measurement; GD = full-matrix J_rel_fro)
+      k            nu         sigma            GA            GB            GC            GD      GD_trace      herm_res      nmse_hat     nmse_star     alpha_hat    alpha_star  n_jac
+      0   2.16952e-03   3.29357e-02   3.96708e-16   5.14250e-02   1.93856e+00   2.25249e-02   2.41882e-03   7.13750e-17   2.36030e-03   2.24486e-03   9.87562e-01   9.86642e-01     64
+      1   3.03160e-03   3.89333e-02   4.20207e-16   7.10204e-02   1.93669e+00   3.11908e-02   3.42730e-03   1.01368e-16   3.34252e-03   3.12087e-03   9.82698e-01   9.81553e-01     64
+      2   4.23623e-03   4.60230e-02   4.74407e-16   9.78416e-02   1.93431e+00   4.29874e-02   4.85241e-03   1.57438e-16   4.75438e-03   4.33066e-03   9.75981e-01   9.74638e-01     64
+      3   5.91953e-03   5.44037e-02   3.97846e-16   1.34252e-01   1.93108e+00   5.89425e-02   6.85025e-03   2.10001e-16   6.79938e-03   5.99459e-03   9.66761e-01   9.65331e-01     64
+      4   8.27170e-03   6.43106e-02   4.30669e-16   1.83044e-01   1.92583e+00   8.04599e-02   9.76089e-03   2.74737e-16   9.78515e-03   8.27117e-03   9.54227e-01   9.52965e-01     64
+      5   1.15585e-02   7.60215e-02   3.92726e-16   2.47422e-01   1.91700e+00   1.09609e-01   1.41264e-02   8.53246e-16   1.41775e-02   1.13655e-02   9.37450e-01   9.36797e-01     64
+      6   1.61514e-02   8.98649e-02   3.97326e-16   3.31136e-01   1.90423e+00   1.49376e-01   2.07018e-02   6.87234e-16   2.06824e-02   1.55374e-02   9.15479e-01   9.16078e-01     64
+      7   2.25693e-02   1.06229e-01   4.46774e-16   4.37105e-01   1.88614e+00   2.02290e-01   3.04536e-02   1.23576e-15   3.03360e-02   2.11091e-02   8.87079e-01   8.90146e-01     64
+      8   3.15374e-02   1.25573e-01   3.88296e-16   5.64053e-01   1.85525e+00   2.65739e-01   4.29862e-02   1.10269e-15   4.45286e-02   2.84700e-02   8.50341e-01   8.58548e-01     64
+      9   4.40690e-02   1.48440e-01   6.49114e-16   7.10036e-01   1.80734e+00   3.48383e-01   6.04001e-02   1.32939e-15   6.51177e-02   3.80797e-02   8.05572e-01   8.21155e-01     64
+     10   6.15801e-02   1.75471e-01   5.47087e-16   8.66715e-01   1.74305e+00   4.82870e-01   9.18495e-02   2.03199e-15   9.42102e-02   5.04684e-02   7.56983e-01   7.78219e-01     64
+     11   8.60495e-02   2.07424e-01   6.15890e-16   1.01259e+00   1.65491e+00   6.00397e-01   1.21985e-01   2.76606e-15   1.33304e-01   6.62352e-02   6.96967e-01   7.30367e-01     64
+     12   1.20242e-01   2.45196e-01   6.76325e-16   1.11937e+00   1.53516e+00   6.81856e-01   1.38128e-01   4.73278e-15   1.82357e-01   8.60429e-02   6.25568e-01   6.78507e-01     64
+     13   1.68021e-01   2.89846e-01   7.15724e-16   1.18391e+00   1.39296e+00   8.74554e-01   1.75317e-01   5.99100e-15   2.41539e-01   1.10599e-01   5.64785e-01   6.23677e-01     64
+     14   2.34785e-01   3.42626e-01   7.75000e-16   1.19815e+00   1.24429e+00   9.53328e-01   2.19333e-01   5.78658e-15   3.09081e-01   1.40610e-01   4.89482e-01   5.66917e-01     64
+     15   3.28079e-01   4.05018e-01   1.16434e-15   1.13711e+00   1.07995e+00   9.18559e-01   2.57008e-01   6.67146e-15   3.77674e-01   1.76722e-01   4.02064e-01   5.09394e-01     64
+     16   4.58444e-01   4.78771e-01   1.18768e-15   1.01785e+00   9.11090e-01   9.34405e-01   2.87892e-01   1.22512e-14   4.42696e-01   2.19390e-01   3.34688e-01   4.52477e-01     64
+     17   6.40610e-01   5.65955e-01   1.62007e-15   8.70003e-01   7.51906e-01   9.81202e-01   3.06216e-01   1.52061e-14   5.02810e-01   2.68882e-01   2.85835e-01   3.97227e-01     64
+     18   8.95162e-01   6.69015e-01   1.21322e-15   7.11270e-01   6.06443e-01   1.01962e+00   2.96635e-01   1.36024e-14   5.56772e-01   3.25356e-01   2.47016e-01   3.44481e-01     64
+     19   1.25086e+00   7.90842e-01   1.65188e-15   5.53204e-01   4.76126e-01   9.72716e-01   2.96286e-01   1.13766e-14   6.02961e-01   3.88205e-01   2.07787e-01   2.94638e-01     64
+
+
+[gate] D1: 1 checkpoint(s) -> /home/HTJ/t2/conf/results/gate_D1.txt
+--- gate verdict check ---
+passing attempts on record for D1: none
+--- L6 attempt 3 did not clear the gates; next attempt ---
+=== L6 exhausted its 3 attempts -> next rung ===
+=== every rung exhausted without clearing the gates.
+    04_SPEC §4: this is reported as a FINDING, not a failure, and the gates are NOT lowered. ===
+A5_EXIT=1

@@ -175,7 +175,15 @@ def _selftest():
                 o = net(x, ls)
                 assert o.shape == x.shape, (o.shape, x.shape)                       # 1. shape
                 assert torch.count_nonzero(o) == 0, float(o.abs().max())            # 2. zero-init
-                assert torch.equal(o, net(x, ls))                                   # 3. determinism
+                # 3. determinism -- checked on a NON-zero net: at init every output is identically 0, so
+                #    comparing two zero tensors cannot fail and proves nothing.
+                with torch.no_grad():
+                    net.out.weight.normal_(0.0, 0.1); net.out.bias.normal_(0.0, 0.1)
+                o2 = net(x, ls)
+                assert o2.shape == x.shape and torch.count_nonzero(o2) > 0
+                assert torch.equal(o2, net(x, ls))
+                with torch.no_grad():                                               # restore the zero-init
+                    nn.init.zeros_(net.out.weight); nn.init.zeros_(net.out.bias)
             # layout round-trip: tokenise/de-tokenise is the identity on the raw vector
             y = torch.randn(7, 2, Nr, Nt)
             assert torch.equal(net._grid(net._tokens(y)), y)
@@ -185,15 +193,22 @@ def _selftest():
                   f"params={sum(p.numel() for p in net.parameters())}")
 
         # 4. trainability: 200 full-batch Adam steps on a FIXED synthetic denoising task (predict eps from
-        #    x0 + s*eps, x0 drawn through a random correlation A so there is structure to learn).  The
-        #    threshold is 30%; this is a smoke test that gradients flow through adaLN-Zero, not a benchmark.
+        #    x0 + s*eps, x0 drawn through a random correlation A so there is structure to learn).
+        #    sigma is drawn LOG-UNIFORMLY over [0.1, 3] rather than held at 1: with a single sigma the whole
+        #    adaLN-Zero conditioning path is never differentiated over its input, and the 30% bar is then
+        #    cleared by the one-parameter model eps_hat = a*x (measured: 50.2% reduction), i.e. by nothing
+        #    but the output linear leaving its zero-init.  So the 30% bar is KEPT (it is the pre-registered
+        #    one) and a second bar is added: beat the best global scalar shrinkage a*x by >= 20%.  Measured
+        #    l1/base -- DiT depth 4: 0.65 (8x4) / 0.24 (4x4);  depth 0: 0.95 / 0.92;  a bare zero-init
+        #    Linear(dim,dim) that ignores logsig: 0.89 / 0.93.  Still a smoke test, not a benchmark.
         g = torch.Generator().manual_seed(1)
         A = torch.randn(dim, dim, generator=g) / math.sqrt(dim)
         x0 = torch.randn(512, dim, generator=g) @ A.T
         x0 = x0 / x0.pow(2).mean().sqrt()
         eps = torch.randn(512, dim, generator=g)
-        s = torch.full((512,), 1.0)
+        s = torch.exp(torch.rand(512, generator=g) * (math.log(3.0) - math.log(0.1)) + math.log(0.1))
         xt, ls = x0 + s.unsqueeze(-1) * eps, torch.log(s)
+        base = float(((xt * eps).sum() / (xt * xt).sum() * xt - eps).pow(2).mean())   # best global a*x
         net = DiT(Nr, Nt, 64, 4, 128)
         opt = torch.optim.Adam(net.parameters(), lr=2e-3)
         l0 = None
@@ -203,8 +218,10 @@ def _selftest():
             l0 = float(loss.detach()) if l0 is None else l0
         with torch.no_grad():
             l1 = float((net(xt, ls) - eps).pow(2).mean())
-        print(f"  ({Nr}x{Nt}) train: loss {l0:.4f} -> {l1:.4f}  ({100 * (1 - l1 / l0):.1f}% reduction)")
+        print(f"  ({Nr}x{Nt}) train: loss {l0:.4f} -> {l1:.4f}  ({100 * (1 - l1 / l0):.1f}% reduction); "
+              f"best global scalar a*x = {base:.4f}, l1/base = {l1 / base:.3f}")
         assert l1 <= 0.7 * l0, (l0, l1)
+        assert l1 <= 0.8 * base, (l1, base)   # must beat a conditioning-blind scalar shrinkage
     print("arch_dit selftest OK")
 
 
