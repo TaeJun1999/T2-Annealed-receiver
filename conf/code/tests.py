@@ -612,6 +612,12 @@ LADDER_ROW = re.compile(
     r"\s*train\s*(?P<tr>[^/]+)/\s*val\s*(?P<va>[^|]*)\|(?P<gates>.*?)\|\s*(?P<verdict>[A-Z/-]+)\s*\|(?P<note>.*)$")
 
 
+def _is_gate_row(r):
+    """A gate row records GA-GD for an already-trained attempt; it has no epochs, device or wall-clock
+    because nothing was trained when it was written.  Only TRAIN rows are training evidence."""
+    return "GATED from" in r.get("note", "")
+
+
 def _ladder_rows(path=None):
     path = path or os.path.join(C.CONF, "LADDER.md")
     if not os.path.exists(path):
@@ -717,7 +723,7 @@ def test_D4t():
 
 def test_D5t():
     """device, per-epoch wall-clock and total wall-clock are on record (LADDER row AND the training log)."""
-    rows = _ladder_rows()
+    rows = [r for r in _ladder_rows() if not _is_gate_row(r)]      # gate rows carry no training fields
     bad = [f"{r['rung']}a{r['att']}" for r in rows
            if not (re.search(r"device \S", r["note"]) and re.search(r"s/ep", r["note"])
                    and re.search(r"\d+ ep", r["note"]))]
@@ -736,15 +742,16 @@ def test_D5t():
     except Exception:
         avail = "n/a"
     return rec("D5t", not bad and not nolog and bool(rows), len(bad) + len(nolog),
-               "every row has device / s-per-epoch / epochs",
-               f"torch.cuda.is_available()={avail}; {len(rows)} ladder rows, {len(logs)} training logs"
+               "every TRAIN row has device / s-per-epoch / epochs",
+               f"torch.cuda.is_available()={avail}; {len(rows)} train rows "
+               f"({len(_ladder_rows()) - len(rows)} gate rows excluded), {len(logs)} training logs"
                + (f"; ROWS MISSING FIELDS {bad}" if bad else "") + (f"; LOGS MISSING FIELDS {nolog}" if nolog else ""))
 
 
 def test_D6t():
     """Every attempt was TRAINED ENOUGH to count: early-stopped on validation loss, or >= 200 epochs.
     Anything less is ABORTED and must not be counted as one of the 3 attempts (01_RULES §5)."""
-    rows = _ladder_rows()
+    rows = [r for r in _ladder_rows() if not _is_gate_row(r)]      # gate rows are not training attempts
     short = []
     for r in rows:
         m = re.search(r"(\d+) ep", r["note"])
@@ -753,8 +760,9 @@ def test_D6t():
         if not (stopped or ep >= 200) and "ABORTED" not in r["verdict"]:
             short.append(f"{r['rung']}a{r['att']}({ep} ep)")
     aborted = [f"{r['rung']}a{r['att']}" for r in rows if "ABORTED" in r["verdict"]]
-    return rec("D6t", not short and bool(rows), len(short), "every non-ABORTED row >= 200 ep or early-stopped",
-               f"{len(rows)} rows; ABORTED (not counted as attempts): {aborted or 'none'}"
+    return rec("D6t", not short and bool(rows), len(short),
+               "every non-ABORTED TRAIN row >= 200 ep or early-stopped",
+               f"{len(rows)} train rows; ABORTED (not counted as attempts): {aborted or 'none'}"
                + (f"; UNDER-TRAINED BUT COUNTED {short}" if short else ""))
 
 
