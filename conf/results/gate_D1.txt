@@ -1,0 +1,59 @@
+# date        : 2026-09-20 12:49:58 KST
+# git commit  : 4382767
+# versions    : python 3.12.14  numpy 2.5.2  scipy 1.18.1  torch 2.14.0+cu130 (cuda_available=True)
+# device      : CPU (192 cores) | dtype: complex128 / float64 | deterministic: yes (fixed seeds, no GPU in the receiver)
+# testbed     : D1
+# seed rule   : default_rng([20260926, TBID[testbed], PID[prior], Nr, T, Tp, int(snr)+100])  (trials of a point = ONE stream)
+# code        : rate-1/2 conv (133,171)_8 nu=6 terminated, QPSK, outer iterations = 16 for EVERY arm
+# Demo/ hashes: t2_route_a.py=95a5408901ec125c  t2_trellis.py=31cd0ee9c68e972b  t2_gmm.py=d064e58c7510c769
+# content     : conf/04_SPEC_diffusion.md §5 -- the pre-registered quality gates GA-GD, on every ladder checkpoint
+# checkpoints : 1 found under /home/HTJ/t2/conf/ckpt (filter: rung=L1 attempt=1)
+# device      : cuda for the gate only; the receiver stays CPU/complex128 for every arm
+# judgement   : the ladder is judged by THESE numbers and never by a BLER (01_RULES §5).
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+# CIRCULAR TESTBED -- true prior is defined as a grid GMM; the GMM arm is correctly specified.
+# No claim about learned priors can be made from this table.
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+GA -- STRUCTURAL ZERO.  READ THIS BEFORE READING ANY GA NUMBER BELOW.
+--------------------------------------------------------------------------------------------------------------
+GA is identically zero by construction for this model family; it guards score-path vs x0-path inconsistency only, and PASS therefore rests on GB/GC/GD.
+--------------------------------------------------------------------------------------------------------------
+
+GD -- the FULL Wirtinger matrix (relative Frobenius error of J), tolerance 0.20 unchanged.
+     GD_trace (relative error of tr(J)/N) is reported beside it and is NOT the gate.
+     conf/DECISIONS.md 2026-09-20 12:35; fixed before any checkpoint was gated.
+
+=== L1 attempt 1   /home/HTJ/t2/conf/ckpt/L1_a1_D1.pt
+    hp          {'arch': 'mlp', 'param': 've', 'domain': 'pixel', 'width': 256, 'depth': 4, 'emb': 128, 'lr': 0.0002, 'ema': 0.999, 'batch': 256}
+    evaluated on n_eval=512 held-out samples (common.train_rng stream 10), n_jac=64, 8x4, prior S
+    GA          1.98985e-16   <= 1e-06      PASS
+    GB          1.41688e-01   <= 0.05       FAIL
+    GC          7.44130e-01   <= 0.15       FAIL
+    GD          4.66622e-01   <= 0.2        FAIL
+    GD_trace    1.58853e-01   relative error of tr(J)/N -- REPORTED, NOT the gate
+    VERDICT   FAIL   (PASS = GA and GB and GC and GD, 04_SPEC §5)
+
+    per sigma grid point (the grid is the FROZEN A4 measurement; GD = full-matrix J_rel_fro)
+      k            nu         sigma            GA            GB            GC            GD      GD_trace      herm_res      nmse_hat     nmse_star     alpha_hat    alpha_star  n_jac
+      0   2.16952e-03   3.29357e-02   5.20534e-17   7.18419e-03   7.44130e-01   8.45746e-03   5.20508e-04   9.11331e-04   2.26099e-03   2.24486e-03   9.87151e-01   9.86642e-01     64
+      1   3.03160e-03   3.89333e-02   5.37410e-17   7.50751e-03   6.55955e-01   1.24334e-02   3.28954e-03   1.15262e-03   3.14430e-03   3.12087e-03   9.84782e-01   9.81553e-01     64
+      2   4.23623e-03   4.60230e-02   4.96774e-17   9.29307e-03   6.22110e-01   1.76320e-02   5.90768e-03   1.50762e-03   4.37090e-03   4.33066e-03   9.80396e-01   9.74638e-01     64
+      3   5.91953e-03   5.44037e-02   5.68914e-17   1.17285e-02   5.99923e-01   2.47149e-02   9.55211e-03   2.11987e-03   6.06490e-03   5.99459e-03   9.74552e-01   9.65331e-01     64
+      4   8.27170e-03   6.43106e-02   6.07222e-17   1.52392e-02   5.84823e-01   3.37751e-02   1.39683e-02   2.76492e-03   8.39721e-03   8.27117e-03   9.66276e-01   9.52965e-01     64
+      5   1.15585e-02   7.60215e-02   6.46936e-17   2.01104e-02   5.73496e-01   4.51512e-02   1.91545e-02   3.54777e-03   1.15940e-02   1.13655e-02   9.54741e-01   9.36797e-01     64
+      6   1.61514e-02   8.98649e-02   6.64647e-17   2.61681e-02   5.60890e-01   5.99030e-02   2.63429e-02   4.47452e-03   1.59440e-02   1.55374e-02   9.40211e-01   9.16078e-01     64
+      7   2.25693e-02   1.06229e-01   6.75244e-17   3.41415e-02   5.48492e-01   7.74091e-02   3.39457e-02   5.16523e-03   2.18298e-02   2.11091e-02   9.20363e-01   8.90146e-01     64
+      8   3.15374e-02   1.25573e-01   8.53256e-17   4.36067e-02   5.33323e-01   9.86991e-02   4.34618e-02   6.23135e-03   2.97115e-02   2.84700e-02   8.95862e-01   8.58548e-01     64
+      9   4.40690e-02   1.48440e-01   6.74800e-17   5.49218e-02   5.16387e-01   1.23743e-01   5.48985e-02   8.57325e-03   4.01711e-02   3.80797e-02   8.66235e-01   8.21155e-01     64
+     10   6.15801e-02   1.75471e-01   6.81789e-17   6.74961e-02   4.96882e-01   1.51363e-01   6.64048e-02   1.12162e-02   5.38748e-02   5.04684e-02   8.29896e-01   7.78219e-01     64
+     11   8.60495e-02   2.07424e-01   9.31976e-17   8.04798e-02   4.74475e-01   1.82147e-01   7.99146e-02   1.39230e-02   7.15657e-02   6.62352e-02   7.88734e-01   7.30367e-01     64
+     12   1.20242e-01   2.45196e-01   7.92575e-17   9.35470e-02   4.49688e-01   2.15192e-01   9.46023e-02   1.71253e-02   9.40919e-02   8.60429e-02   7.42696e-01   6.78507e-01     64
+     13   1.68021e-01   2.89846e-01   1.01356e-16   1.06020e-01   4.22988e-01   2.49989e-01   1.10435e-01   2.21023e-02   1.22325e-01   1.10599e-01   6.92553e-01   6.23677e-01     64
+     14   2.34785e-01   3.42626e-01   8.84907e-17   1.16169e-01   3.93532e-01   2.84270e-01   1.24555e-01   2.62168e-02   1.56944e-01   1.40610e-01   6.37529e-01   5.66917e-01     64
+     15   3.28079e-01   4.05018e-01   1.13335e-16   1.23754e-01   3.62119e-01   3.17625e-01   1.35880e-01   3.36629e-02   1.98592e-01   1.76722e-01   5.78611e-01   5.09394e-01     64
+     16   4.58444e-01   4.78771e-01   1.10347e-16   1.28776e-01   3.29344e-01   3.51301e-01   1.47642e-01   4.05052e-02   2.47642e-01   2.19390e-01   5.19281e-01   4.52477e-01     64
+     17   6.40610e-01   5.65955e-01   1.60677e-16   1.31749e-01   2.95515e-01   3.83983e-01   1.55947e-01   5.33412e-02   3.04307e-01   2.68882e-01   4.59173e-01   3.97227e-01     64
+     18   8.95162e-01   6.69015e-01   1.67129e-16   1.32763e-01   2.63629e-01   4.18464e-01   1.58853e-01   7.68247e-02   3.68552e-01   3.25356e-01   3.99203e-01   3.44481e-01     64
+     19   1.25086e+00   7.90842e-01   1.98985e-16   1.41688e-01   2.42093e-01   4.66622e-01   1.30721e-01   9.42980e-02   4.43209e-01   3.88205e-01   3.33153e-01   2.94638e-01     64
+

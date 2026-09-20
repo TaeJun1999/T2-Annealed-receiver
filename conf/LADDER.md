@@ -8,3 +8,4 @@
 
 ---
 
+[2026-09-20 12:49 KST] L1 | a1 | mlp ve/pixel w256 d4 lr0.0002 ema0.999 (658240 par) | train 7.763e-01 / val 7.690e-01 | GA - | GB - | GC - | GD - | UNGATED | 249 ep (stop: patience), 80 s, 0.32 s/ep, device cuda:0 NVIDIA RTX PRO 6000 Blackwell Server Edition, ckpt /home/HTJ/t2/conf/ckpt/L1_a1_D1.pt (10.6 MB), split 98d6225d67f9c15a

@@ -20,57 +20,43 @@
 
 ---
 
-갱신 시각 : 2026-09-20 12:45 KST
-경과 시간 : 2시간 23분
-현재 phase : **A1~A4 게이트 통과. 잔여 모듈 4개 작성·적대적 검증 완료 -> 지적사항 수정 중 -> A5 진입**
+갱신 시각 : 2026-09-20 12:57 KST
+경과 시간 : 2시간 35분
+현재 phase : **A5 (score 사다리) 실행 중** — tmux 세션 `A5`, GPU 0, 로그 `conf/logs/A5.log`
 
-## 사용자가 먼저 볼 것 — 사전 등록 게이트 2건을 확정했다 (어떤 체크포인트도 게이트에 걸리기 전에)
+## 완료 (게이트 통과)
+- A1 baseline (B/S/C) · A2 우리 모델 (**M1 = 0.0, M2 = 0.0**) · A3 F2 lemma · A4 sigma 격자.
+- 잔여 모듈 4종(score/d2/analysis/runner) 작성 + 적대적 검증 + 지적사항 수정 + 통합.
+- **사전 등록 테스트 25/25 PASS** (모듈 통합 후에도 M1/M2 exactly 0 유지).
+- score.py 자체검증 3종 통과:
+  - `selftest_M5`: 정확 GMM denoiser 대비 Wirtinger J 2.0e-12, alpha 6.0e-13 -> 복소 규약 전 구간 확인
+  - `selftest_gates`: 정확 score 를 모델처럼 넣으면 GA~GD ~ 0 -> **게이트 코드가 공허하지 않음**
+- **D2 testbed 검증 예비 실행: T2d PASS (결정적)**. 4차 모멘트비 측정 1.615~1.747 vs Gaussian 2,
+  99.9% CI 8개 전부 2 를 배제, 최악 CI_hi-2 = -0.249. **T2dm 이 메커니즘까지 확인**: 해석해
+  `2 - sum_l p_l^2` 와 측정치가 1.4e-3 이내. -> 조건부 Gaussian 파괴가 수치로 증명됨. Stage B 진행 가능.
+  (T2a 6.7e-5, T2b DFT 파일럿 결정 + knife edge 기록, T2c 같은-Tp 비교는 vacuous -> 교차-Tp goodput 으로 읽어야 함)
+- run -> analysis 파이프라인 전 구간 검증 (태그 실행 후 산출물 삭제).
 
-1. **GA 는 이 모델 계열에서 구조적으로 0 이다.** 직접 대수 검증함:
-   ve 는 `x+s^2(-eps/s)=x-s*eps`=native, vp 는 `sqrt(abar)/sqrt(1-abar)=1/sigma` 라 score 가 `-eps/sigma`
-   로 환원, rf 는 `(1-t)^2/t=1/(sigma(1+sigma))` 라 `x+s^2*score=x(1-t)-t*v`=native.
-   세 경우 모두 **단일 네트워크 출력의 재배열**이라 두 경로가 항등이다.
-   -> 기준 1e-6 은 그대로 두되, "GA PASS 는 학습된 모델의 변환이 검증됐다는 뜻이 아니다. PASS 는 사실상
-   GB·GC·GD 에 달려 있다"를 gate_D1.txt·LADDER.md 에 명시한다. GA 를 물게 하려고 별도 x0 head 를
-   새로 만드는 것은 게이트에 측정거리를 주려고 모델을 바꾸는 것이라 하지 않는다.
-2. **GD 를 tr(J)/N 이 아니라 J 전체의 상대 Frobenius 오차로 확정했다** (기준 0.20 유지, tr 오차는
-   GD_trace 로 병기). D-14 가 실제로 소비하는 것은 `SigH=nu*J` 의 역행렬, 즉 행렬 전체다. 두 해석이
-   가능할 때 01_RULES §1 은 "우리 주장에 불리한 쪽"을 택하라고 했고 전체 행렬 쪽이 통과하기 더 어렵다.
-   (실측: 5-epoch 체크포인트의 비-Hermitian 잔차 7.5e-2 — tr 만 맞고 J 가 틀릴 여지가 실재한다.)
+## 진행 중 — A5 사다리
+- L1 a1: 249 epoch, patience 조기종료, 80 s (0.32 s/ep), cuda:0, ckpt 10.6 MB. 게이트 측정 중.
+- 사전 smoke 로 잰 L1(256 ep) 게이트: GB +14.1% / GC 0.742 / GD 0.466 (기준 5% / 0.15 / 0.20) -> 여유 없이 FAIL.
+  GC 는 작은 sigma 에서, GB·GD 는 큰 sigma 에서 나빠진다.
+- **GD 재정의가 실제로 물린다**: 같은 체크포인트에서 GD_trace 0.159 (통과했을 값) vs GD(J 전체) 0.466 (FAIL).
 
-**이 두 결정으로 사다리 전 칸이 게이트를 못 넘을 가능성이 올라갔다.** 04_SPEC §4 가 그 경우를
-"실패가 아니라 findings" 로 규정해 두었으므로 그대로 진행한다. 게이트를 낮추지 않는다.
-
-## 완료
-- A1 baseline (B/S/C 17/17) · A2 우리 모델 (**M1 = 0.0, M2 = 0.0**) · A3 F2 lemma (L1/L2) · A4 sigma 격자.
-- 잔여 모듈 4개 작성 + 적대적 검증 완료: `score.py`(사다리 L1~L6 + 학습 + GA~GD), `d2.py`(sparse
-  specular + T2a~T2e), `analysis.py`(표 A/B/C/D), `runner.py`(CLI).
-  검증에서 나온 치명/중대 결함은 전부 재현 증거와 함께 잡혔다. 주요 건:
-  - score.py: `gates_D1` 이 device=cuda 에서 예외 -> 그 예외가 삼켜져 **L3 의 사전 등록 게이트 선택이
-    실제로는 한 번도 실행되지 않고 조용히 L1 로 되돌아가고 있었다** (수정됨).
-  - score.py: 재개(resume) 시 학습 네트워크·검증 네트워크·기록된 hp 가 서로 다른 구성이 될 수 있었다
-    (MLP 는 파라미터화가 달라도 state_dict 가 그대로 로드된다) (수정됨).
-  - score.py: 게이트 집계가 builtin `max` 라 **NaN 격자점이 조용히 사라져** 부분 발산 모델이 PASS 할
-    수 있었다 -> `np.max` 로 NaN 전파 (수정됨).
-  - analysis.py: chunk 마다 키 집합이 달라지면 KeyError 로 분석 전체가 죽었다 (수정됨).
-  - analysis.py: arm 이 예외를 던진 블록이 모든 sign test 에서 **조용히 빠지고** 있었다 -> 블록 오류로
-    세고 NOTE 출력 (수정됨, 보수적 방향).
-  - analysis.py: R6-exactEP(참 prior oracle, EM 안 돌림)에 GMM EM 시간이 **날조되어** 찍히고 있었다 (수정됨).
-  - runner.py <-> score.py **API 불일치로 `train`/`gate` 가 전부 죽어 있었고 M-ours-dscore 가 어느
-    testbed 에서도 생성되지 않고 있었다** (수정 중).
-
-## 진행 중
-- 위 검증 지적사항 수정 (4개 파일 동시). 수정 후 **게이트는 orchestrator 가 직접 재실행**한다.
+## 관찰 (결과로 보고할 것, 고치지 않음)
+- **R4-llr 이 period-2 한계순환으로 발산**한다 (예비 n=8 9dB: cyc2 87.5%, NMSE@16 = 2.05 > 첫 반복 0.10).
+  같은 조건의 R4-scvamp(Onsager)는 안정(BLER 0.25). 원문이 보고한 "Onsager vs LLR 차감" 격차가 우리
+  설정에서 훨씬 크게 나타나는 것. damping 을 넣어 고치지 않는다 (DECISIONS).
+- R3-bigamp 가 9 dB 에서 BLER 0.875 — Table III 의 구조적 i.i.d. prior 한계가 Tp=2 상관 채널에서 크게 작용.
 
 ## 남은 것
-- A5 score 사다리 L1->L6 (칸당 최대 3회, 첫 통과 칸에서 정지) — GPU 학습
-- A6 D1 전 arm 실행 -> B1 D2 검증(T2d 가 관문) -> B2 GMM 재적합 -> B3 재학습 -> B4 headline
+- A5 완주 -> A6 D1 전 arm (C1~C4, n=640) -> B1 T2 정식 기록 -> B2 GMM 재적합 -> B3 재측정·재학습 -> B4 headline
 
 ## BLOCKED
 - 없음
 
 ## DECISIONS 누적
-- 17건 (`conf/DECISIONS.md`)
+- 18건 (`conf/DECISIONS.md`)
 
 ## 마지막 커밋
-- de46d6e
+- (이 커밋)
