@@ -268,7 +268,7 @@ def run_task(task):
 
     flat = {f"{k}|{q}": np.array([l[q] for l in L]) for k, L in logs.items() for q in C.KEYS_RAW}
     for k, L in logs.items():
-        for q in ("diverged", "stop_hits"):
+        for q in ("diverged", "stop_hits", "beta_used"):   # beta_used: 01_RULES §4 requires the damping actually used to be recorded
             # NOT `q in L[0]`: the substitute dict of a trial whose arm RAISED carries only KEYS_LOG, so
             # keying off trial 0 either raises KeyError (trial 0 fine, a later one raised -> the whole
             # CHUNK dies, defeating the try/except above) or drops the flag for the entire arm (trial 0
@@ -554,6 +554,18 @@ def _block_D1(score, ckpt, Nr, Nt, prior, a):
         L.append(f"    {int(d.get('k', -1)):>3} "
                  + " ".join(f"{float(d.get(c, float('nan'))):13.5e}" for c in GATE_COLS)
                  + f" {int(d.get('n_jac', 0)):>6}")
+    # 04_SPEC §4's ladder row carries GA|GB|GC|GD, but the row written at TRAIN time cannot: nothing has
+    # measured them yet.  So the gate appends its own row (LADDER.md is append-only -- the UNGATED row is
+    # never rewritten).  This is what makes the ladder log self-contained evidence.
+    try:
+        score.ladder_append(dict(G, rung=G.get("rung"), attempt=G.get("attempt"),
+                                 GD_trace=gdt, verdict="PASS" if all(ok.values()) else "FAIL",
+                                 note=f"GATED from {os.path.basename(str(ckpt))}; GD = full-matrix J_rel_fro "
+                                      f"(GD_trace {gdt:.4g} reported, not gated); "
+                                      f"n_eval={G.get('n_eval','?')} n_jac={G.get('n_jac','?')}"),
+                            path=tagged(LADDER))
+    except Exception as ex:                       # a logging failure must never lose the measured numbers
+        L.append(f"    [warn] could not append the gate row to LADDER.md: {type(ex).__name__}: {ex}")
     return L + [""]
 
 

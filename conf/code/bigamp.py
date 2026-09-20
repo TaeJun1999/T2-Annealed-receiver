@@ -26,6 +26,27 @@ from common import (BETA, EPS_CLIP, N_ITER, T_IN, VAR_FLOOR, KEYS_LOG, bit_llrs_
 
 NU_CAP = 1e12                    # variance cap implied by flooring the reciprocals' denominators
 
+# --- divergence detection and the PRE-REGISTERED damping fallback (conf/01_RULES.md §4) ----------------
+# BiG-AMP on this bilinear problem has a runaway mode that `isfinite` does NOT catch: once the decoder
+# becomes fully confident, nu^x -> 0 on the data columns, the (R15)(R16) update loses its variance
+# regularisation, |H_hat| grows geometrically (~x4 per iteration) and nu^r collapses, which makes the
+# decoder MORE confident -- a positive feedback loop.  nu^p stays bounded throughout (the PRODUCT H X
+# remains consistent; it is the bilinear scale that runs away), so nothing becomes non-finite within 16
+# iterations -- measured NMSE reaches 1e57 while every array is still finite.
+# 01_RULES §4 pre-registers the remedy: "BiG-AMP damping beta = 0.7 (our convention). If it diverges,
+# lower it 0.5 -> 0.3 and RECORD THE VALUE USED in the results table."  The trigger is NUMERICAL
+# DIVERGENCE, measured on the channel NMSE -- never BLER (01_RULES §5).
+DIVERGE_NMSE = 10.0              # see below; frozen BEFORE the production run, never tuned on BLER
+BETA_FALLBACK = (0.7, 0.5, 0.3)  # pre-registered ladder; the value actually used is logged per trial
+#
+# Why NMSE > 10 is the line:  H_hat = 0 is the trivial estimator and scores NMSE = 1 exactly, so NMSE > 1
+# already means the estimate carries negative information.  We take one further order of magnitude so that
+# a merely BAD trial (low SNR, Tp = 2, an i.i.d. prior that cannot represent the correlation) is not called
+# divergence, while the runaway -- which reaches 1e24 within 16 iterations -- always is.  The alternative
+# readings were 1 (too aggressive: ordinary low-SNR trials trip it) and 1e3 (too lax: a measured trial at
+# NMSE 695 is divergent by any reading and was being missed).  Frozen before the production run.
+# The fraction of trials with NMSE > 1 is reported separately as a diagnostic, so nothing is hidden.
+
 
 def _T(A):
     return np.swapaxes(A, -1, -2)
@@ -174,6 +195,18 @@ class R3BiGAMP:
         return X, H @ X + W
 
     def run(self, Y, H, u, perm, n_iter=N_ITER):
+        """Try the pre-registered damping ladder 0.7 -> 0.5 -> 0.3 and return the FIRST run that does not
+        diverge (01_RULES §4).  The beta actually used is logged per trial as `beta_used`, so the results
+        table can report it.  The decision looks only at the channel NMSE, never at BLER."""
+        betas = BETA_FALLBACK[BETA_FALLBACK.index(self.beta):] if self.beta in BETA_FALLBACK else (self.beta,)
+        out = None
+        for b in betas:
+            out = self._run_one(Y, H, u, perm, n_iter, b)
+            if not out["diverged"][0]:
+                break
+        return out
+
+    def _run_one(self, Y, H, u, perm, n_iter, beta):
         Nr, Nt, Tp, Td = self.Nr, self.Nt, self.Tp, self.Td
         s2, code, st_tr = self.sigma2, self.code, self.code.st
         h_norm2 = float(np.sum(np.abs(H) ** 2))
@@ -194,14 +227,22 @@ class R3BiGAMP:
             return (np.hstack([self.Xp, code_to_grid(xg, perm, Nt, Td)]),
                     np.hstack([np.zeros((Nt, Tp)), code_to_grid(vg, perm, Nt, Td)]))
 
+        frozen = None                                                          # last valid per-iteration record
         for t in range(n_iter):
             for _ in range(self.t_in):
                 if st.diverged:
                     n_div += 1
                     break
-                st, out = bigamp_iter(st, Y, s2, self.beta, self.tau_h, x_prior)
+                st, out = bigamp_iter(st, Y, s2, beta, self.tau_h, x_prior)
                 if out is not None:
                     last = (out[0][:, Tp:], out[1][:, Tp:])
+            nmse_now = float(np.sum(np.abs(st.Hh - H) ** 2) / h_norm2)
+            if not np.isfinite(nmse_now) or nmse_now > DIVERGE_NMSE:
+                st.diverged = True                                             # classify, never silently zero
+            if st.diverged and frozen is not None:
+                for k, v in frozen.items():                                    # hold the LAST VALID iterate
+                    log[k].append(v)
+                continue
             r_code = grid_to_code(last[0], perm)
             tau_code = np.maximum(grid_to_code(last[1], perm), VAR_FLOOR)
             # AMP's r_hat is already the cavity (extrinsic) observation: the decoder gets NO a-priori here,
@@ -224,10 +265,12 @@ class R3BiGAMP:
             log["hE_norm"].append(float(np.linalg.norm(st.Hh)))
             log["tauL_clip_frac"].append(float(np.mean(grid_to_code(last[1], perm) <= VAR_FLOOR)))
             log["alphaD_clip"].append(0.0)
+            frozen = {k: log[k][-1] for k in log}
 
         out = {k: np.array(v) for k, v in log.items()}
         out["diverged"] = np.full(n_iter, float(st.diverged))
         out["stop_hits"] = np.full(n_iter, float(st.stop_hits))
+        out["beta_used"] = np.full(n_iter, float(beta))
         return out
 
 
