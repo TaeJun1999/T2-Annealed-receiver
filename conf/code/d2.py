@@ -293,8 +293,20 @@ def tests_T2(prior, Nr, Nt, Tp, n=100000, n_sets=8, n_phase=20000, n_boot=1000):
     # the prediction is 2 - sum_l p_l^2, i.e. the deficit is set by the power-delay profile.
     rng_d = C.train_rng("D2", prior, Nr, 91)
     rows, ok_all = [], True
-    for _ in range(n_sets):
-        Hs, ang = gen.sample_angles(rng_d, n_phase)
+    # STRATIFIED over L: the predicted ratio is 2 - sum_l p_l^2, i.e. L-determined and angle-invariant, so
+    # leaving the L coverage to chance would test some L values twice and others never.  We force one angle
+    # set per L in {L_MIN..L_MAX} and then draw the remaining sets freely, which both covers the support and
+    # keeps repeated-L sets for the within-L spread the report quotes.
+    forced = list(range(L_MIN, L_MAX + 1))
+    for i in range(max(n_sets, len(forced))):
+        Lf = forced[i] if i < len(forced) else None
+        if Lf is None:
+            Hs, ang = gen.sample_angles(rng_d, n_phase)
+        else:
+            ang0 = (gen.lo + (gen.hi - gen.lo) * rng_d.random(Lf),
+                    gen.lo + (gen.hi - gen.lo) * rng_d.random(Lf),
+                    _P[Lf - L_MIN, :Lf].copy())
+            Hs, ang = gen.sample_angles(rng_d, n_phase, angles=ang0)
         p = ang[2]
         pred = 2.0 - float(np.sum(p ** 2) / np.sum(p) ** 2)
         a2 = (Hs.real ** 2 + Hs.imag ** 2).reshape(n_phase, -1)                # per-realisation |h|^2
