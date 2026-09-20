@@ -44,7 +44,10 @@ def route_a(Nr, Nt, T, Tp, sigma2, prior, code, Xp, moduleH, clip=None, **over):
     cls = RouteA if clip is None else RouteAClip
     kw = dict(cfg) if clip is None else dict(cfg, clip=clip)
     rx = cls(Nr, Nt, T, Tp, sigma2, prior, code, **kw)
-    rx.cfg_dump = dict(cfg, module_H=moduleH, clip=clip or "n/a", class_=cls.__name__)
+    # The site clip rule lives on RouteAClip for the score arms and on the GMM prior object (.view("eta"))
+    # for the mixture-EP arms; record the EFFECTIVE rule either way (test M4).
+    rx.cfg_dump = dict(cfg, module_H=moduleH, class_=cls.__name__,
+                       clip=(clip if clip is not None else getattr(prior, "clip", "n/a")))
     return rx
 
 
@@ -115,3 +118,54 @@ def build_baseline_arms(testbed, prior, Nr, Nt, T, Tp, sigma2, code, Xp, ntrain=
         cfgs[k] = dict(v.cfg_dump)                       # every arm carries a complete, explicit dump (test C5)
         cfgs[k]["arm"] = k
     return arms, cfgs, Cs, fits
+
+
+# ----------------------------------------------------------------------------- our model (conf/03_SPEC_ourmodel.md)
+# M-ours-* differs from R2-ours-G in MODULE H AND NOTHING ELSE.  Test M2 is the proof of that sentence and is
+# the single most important test in this experiment (03_SPEC §4).
+def module_h_priors(testbed, prior, Nr, Nt, ntrain=N_TRAIN, true_prior=None):
+    fits, llv, bstar, kron_K = gmm_selection(testbed, prior, Nr, ntrain)
+    Ks = sorted({K for fam, K in fits if fam == "full"})
+    gm = {K: GMMPriorB(Nr, Nt, fits[("full", K)]["covs"], fits[("full", K)]["pi"]) for K in Ks}
+    out = {f"gmm{K}": gm[K] for K in Ks}
+    if kron_K is not None:
+        out["kron"] = GMMPriorB(Nr, Nt, fits[("kron", kron_K)]["covs"], fits[("kron", kron_K)]["pi"])
+    return out, fits, llv, bstar, kron_K
+
+
+def build_our_arms(testbed, prior, Nr, Nt, T, Tp, sigma2, code, Xp, ntrain=N_TRAIN,
+                   true_prior=None, score_prior=None, with_G=False):
+    """M-ours-gmm32 / M-ours-bstar / M-ours-score (D1 only) / M-ours-dscore / M-ours-G (test M2 only)."""
+    hp, fits, llv, bstar, kron_K = module_h_priors(testbed, prior, Nr, Nt, ntrain)
+    Cs = GaussianPrior(Nr, Nt, fits[("full", 32)]["Chat"])
+    a = (Nr, Nt, T, Tp, sigma2)
+    arms, cfgs = {}, {}
+
+    arms["M-ours-gmm32"] = route_a(*a, hp["gmm32"].view("eta"), code, Xp, "gmm_site")
+    arms["M-ours-bstar"] = route_a(*a, hp[bstar].view("eta"), code, Xp, "gmm_site")
+    if testbed == "D1" and true_prior is not None:
+        arms["M-ours-score"] = route_a(*a, true_prior, code, Xp, "score", clip="eta")
+    if score_prior is not None:
+        arms["M-ours-dscore"] = route_a(*a, score_prior, code, Xp, "score", clip="eta")
+    if with_G:
+        arms["M-ours-G"] = route_a(*a, Cs, code, Xp, "gaussian")
+
+    meta = dict(bstar=bstar, kron_K=(kron_K if kron_K is not None else -1),
+                **{f"ll_val|{k}": v for k, v in llv.items()})
+    for k, v in arms.items():
+        cfgs[k] = dict(v.cfg_dump)
+        cfgs[k]["arm"] = k
+        cfgs[k]["moduleH_object"] = type(v.prior).__name__ + (f" K={v.prior.K}" if hasattr(v.prior, "K") else "")
+    return arms, cfgs, meta, hp, fits
+
+
+# conf/03_SPEC_ourmodel.md §1.1, verbatim -- test M4 compares the dump against this field by field.
+SPEC_TABLE_11 = {
+    "feedback": "posterior",     # channel estimator consumes the decoder A-POSTERIORI (x_bar, v)   [D-15]
+    "loo": True,                 # detector output = extrinsic + leave-one-out                      [D-15]
+    "beta_fb": None,             # NO damping on the posterior feedback path                        [D-15, Q-24 closed]
+    "beta": 0.7,                 # damping                                                          [v1]
+    "n_inner": 1,                # inner L_H <-> H repetitions                                      [v1]
+    "iters": 16,                 # outer iterations, all arms
+    "clip": "eta",               # site clip rule: existing default, unchanged                      [Q-34 open -> do not touch]
+}

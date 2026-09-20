@@ -456,3 +456,144 @@ def run(which=BSC):
         except Exception as ex:                                   # a crashing test is a FAIL, never a skip
             rec(f.__name__.replace("test_", ""), False, np.inf, "no exception", f"EXCEPTION {type(ex).__name__}: {ex}")
     return list(RES)
+
+
+# ============================================================================= M -- our model (03_SPEC §4)
+def _our(e, with_G=True, score_prior=None):
+    return A.build_our_arms("D1", "S", e["Nr"], e["Nt"], e["T"], e["Tp"], e["sigma2"], e["code"], e["Xp"],
+                            true_prior=e["gen"].prior, with_G=with_G, score_prior=score_prior)
+
+
+def _maxdiff(a, b):
+    m = 0.0
+    for q in C.KEYS_LOG:
+        x, y = np.asarray(a[q], float), np.asarray(b[q], float)
+        d = np.abs(x - y)
+        d = d[np.isfinite(d)]
+        if d.size:
+            m = max(m, float(d.max()))
+    return m
+
+
+def _legacy_0925(e):
+    """The EXISTING exp_0925 arms, built by exp_0925_run.make_arms itself (Demo/ is imported, not copied)."""
+    import exp_0925_run as L
+    c = dict(Nr=e["Nr"], T=e["T"], Tp=e["Tp"])
+    true, arms, pil, v1, meta = L.make_arms("S", c["Nr"], c["T"], c["Tp"], e["sigma2"], e["code"], N_TRAIN)
+    return true, arms, pil, meta
+
+
+def test_M1():
+    """The assembler's M-ours-gmm32 must reproduce the EXISTING exp_0925 'Hgmm-K32' arm bit for bit."""
+    e = _cell(snr=9.0)
+    H, u, perm, X, Y = _trial(e)
+    true, legacy, pil, meta = _legacy_0925(e)
+    assert pil == e["pil"], f"pilot type differs: {pil} vs {e['pil']}"
+    arms, cfgs, m2, hp, fits = _our(e)
+    d = _maxdiff(arms["M-ours-gmm32"].run(Y, H, u, perm, N_ITER), legacy["Hgmm-K32"].run(Y, H, u, perm, N_ITER))
+    return rec("M1", d == 0.0, d, "exactly 0",
+               f"assembler M-ours-gmm32 == Demo/exp_0925 'Hgmm-K32' (b* = {m2['bstar']}, legacy b* = {meta['bstar']})")
+
+
+def test_M1b():
+    """ADDED: the same identity for the oracle score arm (M-ours-score == exp_0925 'Hscore-exact')."""
+    e = _cell(snr=9.0)
+    H, u, perm, X, Y = _trial(e)
+    true, legacy, pil, meta = _legacy_0925(e)
+    arms, *_ = _our(e)
+    d = _maxdiff(arms["M-ours-score"].run(Y, H, u, perm, N_ITER), legacy["Hscore-exact"].run(Y, H, u, perm, N_ITER))
+    return rec("M1b", d == 0.0, d, "exactly 0", "assembler M-ours-score == Demo/exp_0925 'Hscore-exact'")
+
+
+def test_M2():
+    """*** THE test.  Turn Module H back into a Gaussian (sample covariance) and the assembler must
+    reproduce R2-ours-G exactly -- i.e. the ONLY difference between R2 and M-ours-* is Module H."""
+    e = _cell(snr=9.0)
+    H, u, perm, X, Y = _trial(e)
+    base, *_ = A.build_baseline_arms("D1", "S", e["Nr"], e["Nt"], e["T"], e["Tp"], e["sigma2"], e["code"], e["Xp"],
+                                     true_prior=e["gen"].prior)
+    arms, *_ = _our(e)
+    d = _maxdiff(arms["M-ours-G"].run(Y, H, u, perm, N_ITER), base["R2-ours-G"].run(Y, H, u, perm, N_ITER))
+    return rec("M2", d == 0.0, d, "exactly 0",
+               "M-ours-G (Module H -> Gaussian) == R2-ours-G: the headline gap is Module H's alone")
+
+
+def test_M2b():
+    """ADDED: the same statement through the MIXTURE code path -- a K=1 GMM prior driving the exact
+    mixture-EP site must also reduce to R2-ours-G.  This exercises ep_site(), which M2 bypasses."""
+    e = _cell(snr=9.0)
+    H, u, perm, X, Y = _trial(e)
+    base, _, Cs, fits = A.build_baseline_arms("D1", "S", e["Nr"], e["Nt"], e["T"], e["Tp"], e["sigma2"], e["code"], e["Xp"])
+    g1 = C.GMMPriorB(e["Nr"], e["Nt"], np.asarray(fits[("full", 32)]["Chat"])[None], np.array([1.0]))
+    rx = A.route_a(e["Nr"], e["Nt"], e["T"], e["Tp"], e["sigma2"], g1.view("eta"), e["code"], e["Xp"], "gmm_site")
+    d = _maxdiff(rx.run(Y, H, u, perm, N_ITER), base["R2-ours-G"].run(Y, H, u, perm, N_ITER))
+    return rec("M2b", d <= 1e-10, d, "<= 1e-10", "K=1 mixture-EP site reduces to the Gaussian arm (ep_site path)")
+
+
+def test_M3():
+    """EM identity  sum_k pi_k C_k = sample covariance.  Exact only for floor = 0 and kappa = 0 (t2_gmm
+    docstring), so it is tested there; the deviation of the SHIPPED fits (floor 1e-4, MAP shrinkage) is
+    measured and reported, not hidden."""
+    from t2_gmm import fit_gmm_em
+    e = _cell()
+    X = e["gen"].sample_vecs(C.train_rng("D1", "S", e["Nr"], 7), 2000)
+    Chat = X.T @ X.conj() / len(X)
+    f = fit_gmm_em(X, 8, np.random.default_rng(31), n_iter=12, floor=0.0, kappa=0.0)
+    S = np.einsum("k,kij->ij", f["pi"], f["covs"])
+    err = float(np.max(np.abs(S - Chat)) / np.max(np.abs(Chat)))
+    _, fits, llv, bstar, kron_K = A.module_h_priors("D1", "S", e["Nr"], e["Nt"])
+    z = fits[("full", 32)]
+    Sd = np.einsum("k,kij->ij", z["pi"], z["covs"])
+    dev = float(np.max(np.abs(Sd - z["Chat"])) / np.max(np.abs(z["Chat"])))
+    ok = err <= 1e-12 and f["n_reseed"] == 0
+    return rec("M3", ok, err, "<= 1e-12",
+               f"sum_k pi_k C_k == sample covariance for floor=0,kappa=0 (reseeds {f['n_reseed']}); "
+               f"shipped K=32 fit (floor 1e-4, kappa {int(z['kappa'])}) deviates by {dev:.2e} rel -- by design")
+
+
+def test_M4():
+    """The dumped config must agree with the conf/03_SPEC_ourmodel.md §1.1 table field by field."""
+    e = _cell()
+    arms, cfgs, *_ = _our(e)
+    bad = {}
+    for k, c in cfgs.items():
+        for q, want in A.SPEC_TABLE_11.items():
+            got = N_ITER if q == "iters" else c.get(q, "<missing>")
+            if q == "clip" and c.get("module_H") == "gaussian":
+                continue                                       # the Gaussian arm has no site clip
+            if got != want:
+                bad.setdefault(k, []).append(f"{q}: {got!r} != {want!r}")
+    return rec("M4", not bad, len(bad), "0 mismatching arms",
+               f"config dump of {len(cfgs)} M-ours arms matches 03_SPEC §1.1" + (f"; {bad}" if bad else ""))
+
+
+M_TESTS = [test_M1, test_M1b, test_M2, test_M2b, test_M3, test_M4]
+
+
+# ============================================================================= L -- lemma reproduction (A3)
+def test_L1():
+    """Re-running Demo/archive/exp_0915_bcjr_score_check.py UNMODIFIED reproduces the recorded magnitudes
+    for (133,171)_8:  max|tanh - E| <= 1e-14  and  Tweedie finite-difference error <= 1e-9."""
+    import lemma as LM
+    import os
+    txt = open(os.path.join(C.CONF, "logs", "lemma.log")).read()
+    t, tw, lc4, lc2, rows, crows = LM.parse(txt)
+    ok = t <= 1e-14 and tw <= 1e-9
+    return rec("L1", ok, max(t, tw / 1e5), "tanh <= 1e-14 and FD <= 1e-9",
+               f"(133,171)_8: max|tanh(L/2) - E[x|x~]| = {t:.2e}, max Tweedie FD error = {tw:.2e} "
+               f"(recorded in 03_SPEC §6: 2.3e-15 / 6.9e-10)")
+
+
+def test_L2():
+    """Complex convention: L_c = 4/sigma_c^2 is exact and 2/sigma_c^2 is wrong -- the guard for every
+    complex implementation in conf/ (02_SPEC §0)."""
+    import lemma as LM
+    import os
+    txt = open(os.path.join(C.CONF, "logs", "lemma.log")).read()
+    t, tw, lc4, lc2, rows, crows = LM.parse(txt)
+    ok = lc4 <= 1e-12 and lc2 > 1e-3
+    return rec("L2", ok, lc4, "Lc=4 <= 1e-12 and Lc=2 > 1e-3",
+               f"L_c = 4/sigma_c^2 error {lc4:.2e} (exact); L_c = 2/sigma_c^2 error up to {lc2:.2e} (wrong)")
+
+
+L_TESTS = [test_L1, test_L2]

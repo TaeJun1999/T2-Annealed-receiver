@@ -20,34 +20,34 @@
 
 ---
 
-갱신 시각 : 2026-09-20 00:35 KST
-경과 시간 : 13분
-현재 phase : **P0 (읽기·설정) 완료 -> P1 (A1 baseline R3/R4 구현) 시작**
+갱신 시각 : 2026-09-20 00:50 KST
+경과 시간 : 28분
+현재 phase : **A1/A2/A3 게이트 통과 -> A4 (sigma_t 격자 측정) 시작**
 
 ## 완료
-- conf/ 지침 10개 전부 통독 (README, 00~09).
-- `Demo/t2_route_a.py`, `t2_trellis.py`, `t2_gmm.py`, `exp_0925_run.py`, `exp_0925_analysis.py`,
-  `exp_0921_run.py`, `exp_0921_analysis.py`, `archive/exp_0915_bcjr_score_check.py`, `CLAUDE.md` 통독.
-  - `exp_0915_bcjr_score_check.py` 는 `Demo/` 가 아니라 **`Demo/archive/`** 에 있다 (지침의 경로와 다름; repo 가 정본).
-- `nvidia-smi` 측정, 환경 확인, `conf/{code,results,raw,logs,figs,ckpt}` 생성.
+- P0 지침 통독, 자원 측정, 폴더 생성.
+- **A1 baseline 구현 + 게이트 통과** : `conf/code/bigamp.py` (R3 = BiG-AMP Table III + BCJR),
+  `conf/code/scvamp.py` (R4 = 3-module SC-VAMP형). 테스트 B1~B6, S1~S7, C1~C6 **전부 PASS**.
+  - 식 (95) 부호 오타는 따르지 않음. B6 가 확장정밀도로 잠금 (인쇄된 (95)는 2000점 전부 음수 -> 발산).
+  - S4 는 지침 내부 불일치라 `N/A-BY-CONSTRUCTION` (측정 격차 기록) + 대체 테스트 S4b 추가.
+- **A2 우리 모델 조립 + 게이트 통과** : `conf/code/arms.py`. M1 0.0 / **M2 0.0** / M1b 0.0 / M2b 1.3e-13
+  / M3 4.3e-16 / M4 0 불일치. M2 가 exactly 0 이므로 우리 모델 arm 은 정상 진행.
+- **A3 F2 lemma 재현 + 게이트 통과** : `Demo/archive/exp_0915_bcjr_score_check.py` 를 **수정 없이** 실행.
+  L1 max|tanh-E| = 2.33e-15 (<=1e-14), Tweedie FD = 6.89e-10 (<=1e-9). L2 재현 (Lc=4 정확, Lc=2 오차 0.495).
+  `conf/results/lemma.txt`, `conf/figs/F2_lemma.png`.
 
 ## 진행 중
-- P1: `conf/code/common.py` (testbed/pilot/code/seed/헤더), `bigamp.py` (R3), `scvamp.py` (R4) 구현.
+- A4 : sigma_t 격자를 **측정해서** 확정 (04_SPEC §3).
 
 ## 남은 것 / 예상
-- P1 A1 baseline + 테스트 B/S/C
-- P2 A2 우리 모델 조립 + 테스트 M1~M4
-- P3 A3 F2 lemma (L1/L2)
-- P4 A4 sigma_t 격자 측정
-- P5 A5 score 사다리 L1->L6 (게이트 GA~GD)
-- P6 A6 D1 전 arm 실행
-- P7 B1~B4 (D2 검증 -> GMM 재적합 -> score 재학습 -> headline)
+- A4 sigma_t 격자 -> A5 score 사다리 L1~L6 (게이트 GA~GD) -> A6 D1 전 arm 실행
+- B1~B4 (D2 검증 -> GMM 재적합 -> score 재학습 -> headline)
 
 ## BLOCKED
 - 없음
 
 ## DECISIONS 누적
-- 6건 (`conf/DECISIONS.md`)
+- 11건 (`conf/DECISIONS.md`)
 
 ## 마지막 커밋
 - (이 커밋)
