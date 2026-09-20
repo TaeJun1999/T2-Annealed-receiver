@@ -30,8 +30,14 @@ WHAT THIS ADDS OVER score.py::_UNet (the plain U-Net already in the ladder)
      [deliberately skipped] BigGAN-style up/down sampling INSIDE the residual block.  At this size the whole
      network contains 1-2 down-samplings of a 4-wide axis; moving the resample into the residual branch
      changes only which of two 3x3 convolutions carries the stride, adds parameters, and cannot pay for
-     itself on 9000 training samples.  Down/up stay as a strided conv / nearest-upsample + conv, i.e.
-     IDENTICAL to score.py::_UNet, so items 1-3 above are the only difference between the two U-Nets.
+     itself on 9000 training samples.  Down-sampling is a strided 3x3 conv, IDENTICAL to score.py::_UNet.
+     [CONFOUND -- read before calling this a one-axis ablation] Up-sampling is NOT identical.  ADM (and this
+     file) up-sample with nearest-interpolate + a 3x3 conv; score.py::_UNet uses ConvTranspose2d(k=2, s=2).
+     That is a FOURTH difference on top of items 1-3, and it is not free: of the +208,832 parameters at
+     width 32 / 8x4, attention accounts for 99,840, adaGN for 57,792 and the up-sampler swap for 51,200
+     (24.5%).  Either read L4u-vs-ADM as 'the ADM recipe as published' (this file), or make it a clean
+     three-item ablation by swapping self.upc back to ConvTranspose2d -- the orchestrator decides, and
+     whichever is chosen must be stated in LADDER.md.  Do not claim the axis is only items 1-3.
 
 SIZING FOR THIS PROBLEM (not image diffusion)
   x is 2*Nr*Nt reals -- 64 for the 8x4 headline cell, 32 for 4x4 -- and the data budget is FIXED at
@@ -40,7 +46,8 @@ SIZING FOR THIS PROBLEM (not image diffusion)
       8x4 -> 4x2 -> 2x1        4x4 -> 2x2 -> 1x1
   Prefer the narrow configurations at this data budget.  Measured against score.py::_UNet at depth 4
   (8x4; the 4x4 counts are identical because n_down = 2 either way and conv weights do not see extent):
-      width 32:  _UNet 1,058,914   ADMUNet 1,267,746      (+19.7%: adaGN doubles the emb Linear, +2 attn)
+      width 32:  _UNet 1,058,914   ADMUNet 1,267,746      (+19.7% = 99,840 attn + 57,792 adaGN
+                                                           + 51,200 up-sampler swap -- see CONFOUND above)
       width 48:  _UNet 2,366,354   ADMUNet 2,834,738
       width 64:  _UNet 4,192,450   ADMUNet 5,023,810
   score.py's ATTEMPT_HP already drops L4u attempt 2 to width 32 for exactly this reason (9000 samples);
@@ -52,9 +59,11 @@ LAYOUT (copied verbatim from score.py::_Conv.forward -- get this wrong and every
   vmaps over a batch axis); the leading dims are flattened into the conv batch axis and restored on exit,
   because nn.Conv2d takes exactly one batch dim.
 
-  padding_mode follows _Conv / _UNet: 'circular' in the ANGLE domain (DFT bins wrap), 'zeros' in pixel --
-  EXCEPT on a feature map with a spatial extent of 1, where torch requires pad < dim and circular padding
-  is impossible; those scales fall back to 'zeros' (2x1 and 1x1 bottlenecks).
+  padding_mode follows _Conv / _UNet: 'circular' in the ANGLE domain (DFT bins wrap), 'zeros' in pixel, at
+  EVERY scale.  (An earlier revision fell back to 'zeros' on maps of spatial extent 1, believing torch
+  forbids pad >= dim for circular padding.  It does not: nn.Conv2d(3, padding=1, padding_mode='circular')
+  runs on 1x1 and 2x1 inputs under torch 2.14, and so does score.py::_UNet's own angle-domain bottleneck.
+  The fallback only added a fifth silent difference from _UNet, so it is gone.)
 """
 import math
 import os
@@ -139,8 +148,7 @@ class ADMUNet(nn.Module):
         chs = [width * (2 ** min(i, 2)) for i in range(n_down + 1)]
         shapes = [(Nr >> i, Nt >> i) for i in range(n_down + 1)]
         per = max(1, depth // max(n_down + 1, 1))                  # residual blocks per scale
-        # circular padding needs pad < dim; a spatial extent of 1 (2x1, 1x1) cannot wrap.
-        pmode = ["circular" if (circular and min(s) >= 2) else "zeros" for s in shapes]
+        pmode = ["circular" if circular else "zeros"] * len(shapes)   # every scale, same as _UNet
         self.attn_scales = [f"{h}x{w}" for (h, w) in shapes if h * w <= attn_at]
         use_attn = [h * w <= attn_at for (h, w) in shapes]
 
@@ -203,9 +211,10 @@ def _selftest(Nr, Nt, width=32, depth=4, emb=128, B=32, K=3, steps=200, seed=0):
           f"attention at {m.attn_scales} (of {[f'{Nr>>i}x{Nt>>i}' for i in range(len(m.enc) + 1)]})")
     m.eval()
 
-    # 1. shape, for lead = (B,) and lead = (B, K)
-    for lead in [(B,), (B, K)]:
-        x, ls = torch.randn(*lead, dim), torch.randn(*lead)
+    # 1. shape, for lead = (B,), lead = (B, K), and lead = () -- the last is what the D-14 gate's
+    #    torch.func.jacrev path calls the model with (see score.py::_UNet.forward's own comment).
+    for lead in [(B,), (B, K), ()]:
+        x, ls = torch.randn(*lead, dim), torch.randn(lead)   # randn(()) is a 0-dim scalar; randn() is an error
         y = m(x, ls)
         assert y.shape == x.shape, (y.shape, x.shape)
         # 2. zero-init

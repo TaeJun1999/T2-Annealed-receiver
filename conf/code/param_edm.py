@@ -195,10 +195,20 @@ def _mk_raw(Nr, Nt, arch="mlp", width=256, depth=4, emb=128, domain="pixel", see
 
 
 def selftest(verbose=True):
+    """Runs the whole battery.  Wrapper only: it restores the process-global autograd flag that the body
+    toggles, so importing this module and calling selftest() inside a larger harness (score.py's __main__
+    runs three self-tests back to back in one process) cannot leave grad disabled for whatever runs next."""
+    g0 = torch.is_grad_enabled()
+    try:
+        return _selftest_impl(verbose)
+    finally:
+        torch.set_grad_enabled(g0)
+
+
+def _selftest_impl(verbose=True):
     import score
     P = print if verbose else (lambda *a, **k: None)
-    torch.set_printoptions(precision=10)
-    torch.set_grad_enabled(False)          # re-enabled for the trainability block only
+    torch.set_grad_enabled(False)          # re-enabled for the trainability block only; restored by selftest()
     ok = lambda name, cond, extra="": (P(f"  [{'ok' if cond else 'FAIL'}] {name}{'  ' + extra if extra else ''}"),
                                        (_ for _ in ()).throw(AssertionError(name)) if not cond else None)[0]
 

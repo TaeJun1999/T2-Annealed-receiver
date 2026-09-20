@@ -44,6 +44,7 @@ THE CONVENTIONS (fixed by the project; implemented here, not re-derived)
   Receiver dtype is complex128 / float64 (01_RULES §9.3); training is float32 on GPU (§9.5).
 """
 import hashlib
+import zlib
 import math
 import os
 import re
@@ -86,7 +87,8 @@ GATE_TOL = dict(GA=1e-6, GB=0.05, GC=0.15, GD=0.20)          # 04_SPEC §5, froz
 GA_NOTE = ("GA is identically zero by construction for this model family; it guards score-path vs x0-path "
            "inconsistency only, and PASS therefore rests on GB/GC/GD.")
 
-RUNGS = ("L1", "L2", "L3", "L4", "L4u", "L5", "L6")   # L4u = the U-Net variant of L4 (04_SPEC §4)
+RUNGS = ("L1", "L2", "L3", "L4", "L4u", "L5", "L6",
+         "L7", "L8", "L9", "L10")   # L4u/L7..L10 = user-directed extensions (DECISIONS)
 
 
 # ----------------------------------------------------------------------------- hyper-parameters (04_SPEC §4)
@@ -108,6 +110,16 @@ DEFAULT_HP = {
                 batch=256),
     "L6": dict(arch="vae",  param="vae", domain="pixel", width=256, depth=3, emb=0, latent=16, n_mix=512,
                lr=1e-3, ema=0.999, batch=256),
+    # ---- extension rungs (user-directed, conf/DECISIONS.md 2026-09-20 14:15).  Gates are UNCHANGED.
+    # Each pins param/domain to L4's resolved values so exactly ONE axis differs from L4 a1.
+    "L7": dict(arch="conv", param="edm", domain="pixel", width=64, depth=4, emb=128, lr=2e-4, ema=0.999,
+               batch=256),                                    # EDM preconditioning, L4's architecture
+    "L8": dict(arch="dit",  param="vp",  domain="pixel", width=128, depth=4, emb=128, lr=2e-4, ema=0.999,
+               batch=256, patch=1, heads=4),                  # DiT, adaLN-Zero
+    "L9": dict(arch="uvit", param="vp",  domain="pixel", width=128, depth=5, emb=128, lr=2e-4, ema=0.999,
+               batch=256, patch=1, heads=4),                  # U-ViT, long skips (depth ODD on purpose)
+    "L10": dict(arch="adm", param="vp",  domain="pixel", width=64, depth=4, emb=128, lr=2e-4, ema=0.999,
+                batch=256, heads=4, attn_at=8),               # ADM, adaGN + coarse-scale attention
 }
 # The <= 3 attempts per rung.  ONLY lr / width / depth / EMA may move (04_SPEC §4); the axis the rung is
 # supposed to test (parameterisation, domain, architecture) is never touched by a retry.
@@ -123,8 +135,19 @@ ATTEMPT_HP = {
     ("L4u", 3): dict(width=96, depth=6, lr=3e-4),
     ("L5", 2): dict(lr=1e-3, ema=0.9995),   ("L5", 3): dict(width=512, depth=6, lr=3e-4),
     ("L6", 2): dict(lr=3e-4, ema=0.9995),   ("L6", 3): dict(width=512, depth=4, lr=1e-3),
+    ("L7", 2): dict(lr=1e-3, ema=0.9995),   ("L7", 3): dict(width=96, depth=6, lr=3e-4),
+    ("L8", 2): dict(lr=1e-3, ema=0.9995),   ("L8", 3): dict(width=64, depth=6, lr=3e-4),
+    ("L9", 2): dict(lr=1e-3, ema=0.9995),   ("L9", 3): dict(width=64, depth=7, lr=3e-4),
+    ("L10", 2): dict(lr=1e-3, ema=0.9995),  ("L10", 3): dict(width=32, depth=6, lr=3e-4),
 }
 MAX_ATTEMPTS = 3
+
+
+def _rung_ix(rung):
+    """Stable integer for a rung label.  Ladder rungs keep their positional index (so their seeds are
+    unchanged); anything else -- e.g. a hyper-parameter search passing its own label -- gets a stable
+    hash instead of a ValueError."""
+    return RUNGS.index(rung) if rung in RUNGS else 1000 + zlib.crc32(rung.encode()) % 1000
 
 
 def hp_for(rung, attempt):
@@ -341,7 +364,7 @@ class ScoreModel(nn.Module):
 
     def __init__(self, net, param, Nr, Nt, M=None):
         super().__init__()
-        assert param in ("ve", "vp", "rf")
+        assert param in ("ve", "vp", "rf", "edm")
         self.net, self.param, self.Nr, self.Nt, self.N = net, param, Nr, Nt, Nr * Nt
         # M is a CONSTANT, not a parameter: non-persistent (never in the state_dict) and carried at the
         # module's current dtype -- float32 while training, float64 in the receiver (01_RULES §9.5 / §9.3).
@@ -374,7 +397,14 @@ class ScoreModel(nn.Module):
         z = (1.0 - t).unsqueeze(-1) * x
         return t, z, self.raw(z, torch.log(sigma))
 
+    def _edm(self):
+        import param_edm
+        return param_edm, getattr(self, "sigma_data", param_edm.SIGMA_DATA_DEFAULT)
+
     def score_real(self, x, sigma):
+        if self.param == "edm":
+            P, sd = self._edm()
+            return P.edm_score(self.raw, x, sigma, sd)
         if self.param == "ve":
             eps = self.raw(x, torch.log(sigma))
             return -eps / sigma.unsqueeze(-1)                                     # s = -eps_hat/sigma
@@ -389,6 +419,9 @@ class ScoreModel(nn.Module):
 
     def denoise_real(self, x, sigma):
         """The NATIVE denoiser head -- deliberately NOT  x + sigma^2 * score_real  (gate GA compares them)."""
+        if self.param == "edm":
+            P, sd = self._edm()
+            return P.edm_denoise(self.raw, x, sigma, sd)
         if self.param == "ve":
             return x - sigma.unsqueeze(-1) * self.raw(x, torch.log(sigma))        # VE x0-head
         if self.param == "vp":
@@ -400,6 +433,9 @@ class ScoreModel(nn.Module):
     def loss(self, x0, sigma, eps):
         """04_SPEC §4.  L1: E|| sigma s_theta + eps ||^2 = E||eps_hat - eps||^2 in the eps-parameterisation."""
         s = sigma.unsqueeze(-1)
+        if self.param == "edm":
+            P, sd = self._edm()
+            return P.edm_loss(self.raw, x0, sigma, eps, sd)
         if self.param == "ve":
             return ((self.raw(x0 + s * eps, torch.log(sigma)) - eps) ** 2).mean()
         if self.param == "vp":
@@ -506,8 +542,9 @@ def make_model(rung, hp, Nr, Nt):
     """rung + (resolved) hyper-parameters -> torch.nn.Module.  Pure: 'auto' fields must already be resolved
     by resolve_hp(), so a checkpoint can always rebuild its own model from the hp it stored."""
     dim = 2 * Nr * Nt
-    assert hp.get("param") in ("ve", "vp", "rf", "vae"), f"unresolved hp['param'] = {hp.get('param')!r}"
-    assert hp.get("arch") in ("mlp", "conv", "unet", "vae"), f"unresolved hp['arch'] = {hp.get('arch')!r}"
+    assert hp.get("param") in ("ve", "vp", "rf", "edm", "vae"), f"unresolved hp['param'] = {hp.get('param')!r}"
+    assert hp.get("arch") in ("mlp", "conv", "unet", "dit", "uvit", "adm", "vae"), \
+        f"unresolved hp['arch'] = {hp.get('arch')!r}"
     if hp["arch"] == "vae":
         return VAEModel(dim, hp["width"], hp["depth"], hp["latent"], hp["n_mix"])
     ang = hp["domain"] == "angle"
@@ -515,6 +552,21 @@ def make_model(rung, hp, Nr, Nt):
         net = _Conv(Nr, Nt, hp["width"], hp["depth"], hp["emb"], circular=ang)
     elif hp["arch"] == "unet":
         net = _UNet(Nr, Nt, hp["width"], hp["depth"], hp["emb"], circular=ang)
+    elif hp["arch"] in ("dit", "uvit", "adm"):
+        # lazy import: arch_*.py do `import score` at module level, so a top-level from-import here
+        # would be circular (noted by the arch_dit reviewer).
+        if hp["arch"] == "dit":
+            import arch_dit
+            net = arch_dit.DiT(Nr, Nt, hp["width"], hp["depth"], hp["emb"], circular=ang,
+                               patch=hp.get("patch", 1), heads=hp.get("heads", 4))
+        elif hp["arch"] == "uvit":
+            import arch_uvit
+            net = arch_uvit.UViT(Nr, Nt, hp["width"], hp["depth"], hp["emb"], circular=ang,
+                                 patch=hp.get("patch", 1), heads=hp.get("heads", 4))
+        else:
+            import arch_adm
+            net = arch_adm.ADMUNet(Nr, Nt, hp["width"], hp["depth"], hp["emb"], circular=ang,
+                                   heads=hp.get("heads", 4), attn_at=hp.get("attn_at", 8))
     else:
         net = _MLP(dim, hp["width"], hp["depth"], hp["emb"])
     return ScoreModel(net, hp["param"], Nr, Nt, M=dft_domain_matrix(Nr, Nt) if ang else None)
@@ -668,7 +720,9 @@ def train(rung, attempt, testbed, prior, Nr, Nt, device="cuda", hp=None, resume=
     model = make_model(rung, hp, Nr, Nt).to(dev)
     opt = torch.optim.Adam(model.parameters(), lr=hp["lr"])
     ema = _EMA(model, hp["ema"])
-    g = torch.Generator(device="cpu").manual_seed(SEED_TRAIN + RUNGS.index(rung) * 17 + attempt)
+    # _rung_ix: RUNGS.index for a ladder rung, so every existing rung keeps its EXACT seed; a stable hash
+    # for anything else, so a search driver can pass its own rung label without colliding or crashing.
+    g = torch.Generator(device="cpu").manual_seed(SEED_TRAIN + _rung_ix(rung) * 17 + attempt)
     ep0, best, best_ep, hist = 0, np.inf, -1, []
     if st is not None:
         model.load_state_dict(st["model"]); opt.load_state_dict(st["opt"])
@@ -860,7 +914,7 @@ def _passing_attempts(testbed):
                 m, n = re.search(r"\b(L[1-6])\b", fld[0]), re.search(r"\ba?([1-3])\b", fld[1])
                 if m and n:
                     out.append((m.group(1), int(n.group(1))))
-    return sorted(set(out), key=lambda t: (RUNGS.index(t[0]), t[1]))
+    return sorted(set(out), key=lambda t: (_rung_ix(t[0]), t[1]))
 
 
 def load_prior(testbed, prior, Nr, Nt, rung=None, attempt=None, ckpt=None, device="cpu"):
@@ -943,7 +997,7 @@ def _gate_batch(model, X, sig, n_jac, chunk=64):
     return torch.cat(nat), torch.cat(tw), torch.diagonal(J, dim1=-2, dim2=-1).sum(-1).real / max(J.shape[-1], 1), J
 
 
-def gates_D1(ckpt, Nr, Nt, prior="S", n_eval=512, device="cpu", n_jac=64, verbose=False):
+def gates_D1(ckpt, Nr, Nt, prior="S", n_eval=512, device="cpu", n_jac=64, verbose=False, stream=10):
     """The four pre-registered quality gates of 04_SPEC §5, on HELD-OUT D1 samples (common.train_rng stream 10)
     and on the FROZEN measured sigma grid.  D1 is the instrument: its true prior IS a GMMPriorB, so the exact
     score, denoiser and Jacobian are closed form.
@@ -967,7 +1021,9 @@ def gates_D1(ckpt, Nr, Nt, prior="S", n_eval=512, device="cpu", n_jac=64, verbos
     P = gen.prior                                            # GMMPriorB: exact score / denoiser / Jacobian
     N = Nr * Nt
     _, _, nu_grid, sig_grid = _sigma_range("D1")
-    rng = C.train_rng("D1", prior, Nr, 10)                   # held-out stream (never trained on)
+    # stream 10 = the held-out draw the REPORTED gate uses.  An HPO search must pass a different stream
+    # (11) and the winner is then re-gated on 10, so hundreds of trials cannot overfit the reported number.
+    rng = C.train_rng("D1", prior, Nr, stream)                # held-out stream (never trained on)
     H = gen.sample_vecs(rng, n_eval)
     nrng = np.random.default_rng(SEED_GATE)                  # same (h, eps) for EVERY rung -> paired comparison
     E = (nrng.standard_normal((n_eval, N)) + 1j * nrng.standard_normal((n_eval, N))) / np.sqrt(2)
