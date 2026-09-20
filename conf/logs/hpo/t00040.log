@@ -1,0 +1,27 @@
+
+# ===== 2026-09-20 15:37:44 KST  HPO attempt 40  testbed D1 prior S  Nr=8 Nt=4
+# DEVICE      : cuda | cuda_available=True | NVIDIA RTX PRO 6000 Blackwell Server Edition | torch 2.14.0+cu130 | train dtype float32 (01_RULES §9.5)
+# data        : n_train=9000 n_val=1000 split_hash=98d6225d67f9c15a E||H||_F^2/(NrNt)=1.000268 (04_SPEC §2)
+# sigma grid  : MEASURED, 20 points, log-uniform draw over [3.2936e-02, 7.9084e-01]
+# hp          : {'arch': 'dit', 'param': 'edm', 'domain': 'pixel', 'lr': 0.002714117809508292, 'ema': 0.9999, 'batch': 256, 'emb': 128, 'width': 64, 'depth': 6, 'heads': 8, 'patch': 1}  params=471234
+# stopping    : patience 15 on val loss, never before 0 epochs, max 600 (01_RULES §5)
+epoch    1 | train 9.998627e-01 | val 9.906774e-01 |   1.422 s | best 9.906774e-01 @1 *
+epoch    2 | train 9.885848e-01 | val 9.906741e-01 |   1.414 s | best 9.906741e-01 @2 *
+epoch    3 | train 9.885578e-01 | val 9.906694e-01 |   1.428 s | best 9.906694e-01 @3 *
+epoch    4 | train 9.890587e-01 | val 9.906667e-01 |   1.426 s | best 9.906667e-01 @4 *
+epoch    5 | train 9.819418e-01 | val 9.906672e-01 |   1.421 s | best 9.906667e-01 @4
+epoch    6 | train 9.811204e-01 | val 9.906738e-01 |   1.444 s | best 9.906667e-01 @4
+epoch    7 | train 9.862366e-01 | val 9.906845e-01 |   1.400 s | best 9.906667e-01 @4
+epoch    8 | train 9.800002e-01 | val 9.906999e-01 |   1.431 s | best 9.906667e-01 @4
+epoch    9 | train 9.762861e-01 | val 9.907190e-01 |   1.384 s | best 9.906667e-01 @4
+epoch   10 | train 9.736665e-01 | val 9.907456e-01 |   1.369 s | best 9.906667e-01 @4
+epoch   11 | train 9.674122e-01 | val 9.907799e-01 |   1.368 s | best 9.906667e-01 @4
+epoch   12 | train 9.626289e-01 | val 9.908214e-01 |   1.368 s | best 9.906667e-01 @4
+epoch   13 | train 9.531055e-01 | val 9.908729e-01 |   1.368 s | best 9.906667e-01 @4
+epoch   14 | train 9.450853e-01 | val 9.909349e-01 |   1.368 s | best 9.906667e-01 @4
+epoch   15 | train 9.428638e-01 | val 9.910101e-01 |   1.368 s | best 9.906667e-01 @4
+epoch   16 | train 9.274967e-01 | val 9.911033e-01 |   1.368 s | best 9.906667e-01 @4
+epoch   17 | train 9.046569e-01 | val 9.912227e-01 |   1.369 s | best 9.906667e-01 @4
+epoch   18 | train 8.941855e-01 | val 9.913701e-01 |   1.283 s | best 9.906667e-01 @4
+epoch   19 | train 8.867924e-01 | val 9.915441e-01 |   1.357 s | best 9.906667e-01 @4
+# done        : 19 epochs, stopped_by=patience, aborted=False, best val 9.906667e-01 @ epoch 4, wall 27.7 s, 1.459 s/epoch

@@ -1,0 +1,90 @@
+
+# ===== 2026-09-21 05:42:51 KST  HPO attempt 8  testbed D1 prior S  Nr=8 Nt=4
+# DEVICE      : cuda | cuda_available=True | NVIDIA RTX PRO 6000 Blackwell Server Edition | torch 2.14.0+cu130 | train dtype float32 (01_RULES §9.5)
+# data        : n_train=9000 n_val=1000 split_hash=98d6225d67f9c15a E||H||_F^2/(NrNt)=1.000268 (04_SPEC §2)
+# sigma grid  : MEASURED, 20 points, log-uniform draw over [3.2936e-02, 7.9084e-01]
+# hp          : {'arch': 'uvit', 'param': 'vp', 'domain': 'pixel', 'lr': 0.0020579379494208116, 'ema': 0.999, 'batch': 128, 'emb': 64, 'width': 128, 'depth': 7, 'heads': 2, 'patch': 1}  params=1516584
+# stopping    : patience 15 on val loss, never before 0 epochs, max 600 (01_RULES §5)
+epoch    1 | train 8.892846e-01 | val 9.874649e-01 |   3.274 s | best 9.874649e-01 @1 *
+epoch    2 | train 7.952818e-01 | val 9.718103e-01 |   2.686 s | best 9.718103e-01 @2 *
+epoch    3 | train 7.939990e-01 | val 9.485272e-01 |   2.778 s | best 9.485272e-01 @3 *
+epoch    4 | train 7.942666e-01 | val 9.318468e-01 |   2.661 s | best 9.318468e-01 @4 *
+epoch    5 | train 7.949209e-01 | val 9.165944e-01 |   2.640 s | best 9.165944e-01 @5 *
+epoch    6 | train 7.975249e-01 | val 9.023944e-01 |   2.646 s | best 9.023944e-01 @6 *
+epoch    7 | train 7.905447e-01 | val 8.894857e-01 |   2.640 s | best 8.894857e-01 @7 *
+epoch    8 | train 7.915119e-01 | val 8.774282e-01 |   2.651 s | best 8.774282e-01 @8 *
+epoch    9 | train 7.913854e-01 | val 8.665252e-01 |   2.645 s | best 8.665252e-01 @9 *
+epoch   10 | train 7.933802e-01 | val 8.568822e-01 |   2.654 s | best 8.568822e-01 @10 *
+epoch   11 | train 7.955927e-01 | val 8.480451e-01 |   2.645 s | best 8.480451e-01 @11 *
+epoch   12 | train 7.918287e-01 | val 8.400789e-01 |   2.653 s | best 8.400789e-01 @12 *
+epoch   13 | train 7.957627e-01 | val 8.330675e-01 |   2.642 s | best 8.330675e-01 @13 *
+epoch   14 | train 7.946091e-01 | val 8.269421e-01 |   2.643 s | best 8.269421e-01 @14 *
+epoch   15 | train 7.949315e-01 | val 8.210349e-01 |   2.642 s | best 8.210349e-01 @15 *
+epoch   16 | train 7.934839e-01 | val 8.157519e-01 |   2.632 s | best 8.157519e-01 @16 *
+epoch   17 | train 7.939138e-01 | val 8.109356e-01 |   2.637 s | best 8.109356e-01 @17 *
+epoch   18 | train 7.926183e-01 | val 8.066671e-01 |   2.630 s | best 8.066671e-01 @18 *
+epoch   19 | train 7.928630e-01 | val 8.029488e-01 |   2.638 s | best 8.029488e-01 @19 *
+epoch   20 | train 7.925099e-01 | val 7.997028e-01 |   2.574 s | best 7.997028e-01 @20 *
+epoch   21 | train 7.943225e-01 | val 7.967162e-01 |   2.269 s | best 7.967162e-01 @21 *
+epoch   22 | train 7.892789e-01 | val 7.941164e-01 |   2.339 s | best 7.941164e-01 @22 *
+epoch   23 | train 7.924083e-01 | val 7.918007e-01 |   2.339 s | best 7.918007e-01 @23 *
+epoch   24 | train 7.874299e-01 | val 7.898688e-01 |   2.338 s | best 7.898688e-01 @24 *
+epoch   25 | train 7.918771e-01 | val 7.881573e-01 |   2.337 s | best 7.881573e-01 @25 *
+epoch   26 | train 7.903515e-01 | val 7.866585e-01 |   2.319 s | best 7.866585e-01 @26 *
+epoch   27 | train 7.887163e-01 | val 7.853079e-01 |   2.347 s | best 7.853079e-01 @27 *
+epoch   28 | train 7.913886e-01 | val 7.841251e-01 |   2.351 s | best 7.841251e-01 @28 *
+epoch   29 | train 7.924948e-01 | val 7.832759e-01 |   2.316 s | best 7.832759e-01 @29 *
+epoch   30 | train 7.936861e-01 | val 7.822493e-01 |   2.342 s | best 7.822493e-01 @30 *
+epoch   31 | train 7.924080e-01 | val 7.814311e-01 |   2.316 s | best 7.814311e-01 @31 *
+epoch   32 | train 7.934994e-01 | val 7.806724e-01 |   2.334 s | best 7.806724e-01 @32 *
+epoch   33 | train 7.880840e-01 | val 7.800957e-01 |   2.342 s | best 7.800957e-01 @33 *
+epoch   34 | train 7.901899e-01 | val 7.796004e-01 |   2.306 s | best 7.796004e-01 @34 *
+epoch   35 | train 7.908010e-01 | val 7.791628e-01 |   2.321 s | best 7.791628e-01 @35 *
+epoch   36 | train 7.886878e-01 | val 7.787899e-01 |   2.317 s | best 7.787899e-01 @36 *
+epoch   37 | train 7.917382e-01 | val 7.784919e-01 |   2.324 s | best 7.784919e-01 @37 *
+epoch   38 | train 7.904015e-01 | val 7.782190e-01 |   2.351 s | best 7.782190e-01 @38 *
+epoch   39 | train 7.885890e-01 | val 7.779959e-01 |   2.341 s | best 7.779959e-01 @39 *
+epoch   40 | train 7.954032e-01 | val 7.778130e-01 |   2.355 s | best 7.778130e-01 @40 *
+epoch   41 | train 7.899293e-01 | val 7.775981e-01 |   2.322 s | best 7.775981e-01 @41 *
+epoch   42 | train 7.946610e-01 | val 7.774765e-01 |   2.315 s | best 7.774765e-01 @42 *
+epoch   43 | train 7.924844e-01 | val 7.773342e-01 |   2.334 s | best 7.773342e-01 @43 *
+epoch   44 | train 7.907836e-01 | val 7.772067e-01 |   2.324 s | best 7.772067e-01 @44 *
+epoch   45 | train 7.929023e-01 | val 7.771043e-01 |   2.320 s | best 7.771043e-01 @45 *
+epoch   46 | train 7.887217e-01 | val 7.770299e-01 |   2.337 s | best 7.770299e-01 @46 *
+epoch   47 | train 7.919186e-01 | val 7.769557e-01 |   2.309 s | best 7.769557e-01 @47 *
+epoch   48 | train 7.963495e-01 | val 7.768847e-01 |   2.783 s | best 7.768847e-01 @48 *
+epoch   49 | train 7.902032e-01 | val 7.768193e-01 |   2.752 s | best 7.768193e-01 @49 *
+epoch   50 | train 7.874446e-01 | val 7.767571e-01 |   2.757 s | best 7.767571e-01 @50 *
+epoch   51 | train 7.917189e-01 | val 7.767118e-01 |   2.760 s | best 7.767118e-01 @51 *
+epoch   52 | train 7.859150e-01 | val 7.766806e-01 |   2.752 s | best 7.766806e-01 @52 *
+epoch   53 | train 7.933689e-01 | val 7.766529e-01 |   2.757 s | best 7.766529e-01 @53 *
+epoch   54 | train 7.885099e-01 | val 7.766362e-01 |   2.756 s | best 7.766362e-01 @54 *
+epoch   55 | train 7.830564e-01 | val 7.766014e-01 |   2.750 s | best 7.766014e-01 @55 *
+epoch   56 | train 7.940103e-01 | val 7.765784e-01 |   2.756 s | best 7.765784e-01 @56 *
+epoch   57 | train 7.918055e-01 | val 7.765474e-01 |   2.755 s | best 7.765474e-01 @57 *
+epoch   58 | train 7.935203e-01 | val 7.765219e-01 |   2.687 s | best 7.765219e-01 @58 *
+epoch   59 | train 7.919285e-01 | val 7.765118e-01 |   2.738 s | best 7.765118e-01 @59 *
+epoch   60 | train 7.892999e-01 | val 7.764843e-01 |   2.737 s | best 7.764843e-01 @60 *
+epoch   61 | train 7.950669e-01 | val 7.764576e-01 |   2.741 s | best 7.764576e-01 @61 *
+epoch   62 | train 7.928008e-01 | val 7.764475e-01 |   2.737 s | best 7.764475e-01 @62 *
+epoch   63 | train 7.865066e-01 | val 7.764318e-01 |   2.734 s | best 7.764318e-01 @63 *
+epoch   64 | train 7.926632e-01 | val 7.764406e-01 |   2.736 s | best 7.764318e-01 @63
+epoch   65 | train 7.908477e-01 | val 7.764224e-01 |   2.727 s | best 7.764224e-01 @65 *
+epoch   66 | train 7.904135e-01 | val 7.764036e-01 |   2.734 s | best 7.764036e-01 @66 *
+epoch   67 | train 7.926174e-01 | val 7.763683e-01 |   2.688 s | best 7.763683e-01 @67 *
+epoch   68 | train 7.912749e-01 | val 7.764495e-01 |   2.726 s | best 7.763683e-01 @67
+epoch   69 | train 7.896608e-01 | val 7.767007e-01 |   2.729 s | best 7.763683e-01 @67
+epoch   70 | train 7.910863e-01 | val 7.767792e-01 |   2.577 s | best 7.763683e-01 @67
+epoch   71 | train 7.901191e-01 | val 7.768235e-01 |   2.741 s | best 7.763683e-01 @67
+epoch   72 | train 7.896641e-01 | val 7.769156e-01 |   2.741 s | best 7.763683e-01 @67
+epoch   73 | train 7.901121e-01 | val 7.770305e-01 |   2.688 s | best 7.763683e-01 @67
+epoch   74 | train 8.041522e-01 | val 7.777786e-01 |   2.622 s | best 7.763683e-01 @67
+epoch   75 | train 7.973987e-01 | val 7.799336e-01 |   2.647 s | best 7.763683e-01 @67
+epoch   76 | train 7.945635e-01 | val 7.833255e-01 |   2.619 s | best 7.763683e-01 @67
+epoch   77 | train 7.909389e-01 | val 7.877621e-01 |   2.619 s | best 7.763683e-01 @67
+epoch   78 | train 7.935507e-01 | val 7.906641e-01 |   2.619 s | best 7.763683e-01 @67
+epoch   79 | train 7.940997e-01 | val 7.912202e-01 |   2.625 s | best 7.763683e-01 @67
+epoch   80 | train 7.917039e-01 | val 7.897567e-01 |   2.619 s | best 7.763683e-01 @67
+epoch   81 | train 7.911041e-01 | val 7.889765e-01 |   2.614 s | best 7.763683e-01 @67
+epoch   82 | train 7.938715e-01 | val 7.881156e-01 |   2.623 s | best 7.763683e-01 @67
+# done        : 82 epochs, stopped_by=patience, aborted=False, best val 7.763683e-01 @ epoch 67, wall 220.3 s, 2.687 s/epoch

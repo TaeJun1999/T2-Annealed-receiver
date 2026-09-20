@@ -1,0 +1,93 @@
+
+# ===== 2026-09-21 03:25:37 KST  HPO attempt 712  testbed D1 prior S  Nr=8 Nt=4
+# DEVICE      : cuda | cuda_available=True | NVIDIA RTX PRO 6000 Blackwell Server Edition | torch 2.14.0+cu130 | train dtype float32 (01_RULES §9.5)
+# data        : n_train=9000 n_val=1000 split_hash=98d6225d67f9c15a E||H||_F^2/(NrNt)=1.000268 (04_SPEC §2)
+# sigma grid  : MEASURED, 20 points, log-uniform draw over [3.2936e-02, 7.9084e-01]
+# hp          : {'arch': 'unet', 'param': 've', 'domain': 'pixel', 'lr': 0.0039248956928416515, 'ema': 0.99, 'batch': 128, 'emb': 256, 'width': 48, 'depth': 7}  params=2862962
+# stopping    : patience 15 on val loss, never before 0 epochs, max 600 (01_RULES §5)
+epoch    1 | train 8.036735e-01 | val 8.306978e-01 |   2.667 s | best 8.306978e-01 @1 *
+epoch    2 | train 7.722036e-01 | val 7.750434e-01 |   2.656 s | best 7.750434e-01 @2 *
+epoch    3 | train 7.631568e-01 | val 7.539207e-01 |   2.641 s | best 7.539207e-01 @3 *
+epoch    4 | train 7.593579e-01 | val 7.454879e-01 |   2.523 s | best 7.454879e-01 @4 *
+epoch    5 | train 7.608040e-01 | val 7.410873e-01 |   2.635 s | best 7.410873e-01 @5 *
+epoch    6 | train 7.557839e-01 | val 7.383388e-01 |   2.629 s | best 7.383388e-01 @6 *
+epoch    7 | train 7.529360e-01 | val 7.366399e-01 |   2.638 s | best 7.366399e-01 @7 *
+epoch    8 | train 7.567000e-01 | val 7.353909e-01 |   2.631 s | best 7.353909e-01 @8 *
+epoch    9 | train 7.551819e-01 | val 7.343903e-01 |   2.633 s | best 7.343903e-01 @9 *
+epoch   10 | train 7.424573e-01 | val 7.337580e-01 |   2.638 s | best 7.337580e-01 @10 *
+epoch   11 | train 7.516878e-01 | val 7.331392e-01 |   2.557 s | best 7.331392e-01 @11 *
+epoch   12 | train 7.557882e-01 | val 7.326768e-01 |   2.633 s | best 7.326768e-01 @12 *
+epoch   13 | train 7.507543e-01 | val 7.320549e-01 |   2.619 s | best 7.320549e-01 @13 *
+epoch   14 | train 7.472556e-01 | val 7.315658e-01 |   2.631 s | best 7.315658e-01 @14 *
+epoch   15 | train 7.508532e-01 | val 7.314790e-01 |   2.697 s | best 7.314790e-01 @15 *
+epoch   16 | train 7.434475e-01 | val 7.311438e-01 |   2.746 s | best 7.311438e-01 @16 *
+epoch   17 | train 7.462350e-01 | val 7.309840e-01 |   2.798 s | best 7.309840e-01 @17 *
+epoch   18 | train 7.506326e-01 | val 7.309152e-01 |   2.743 s | best 7.309152e-01 @18 *
+epoch   19 | train 7.522499e-01 | val 7.307634e-01 |   2.797 s | best 7.307634e-01 @19 *
+epoch   20 | train 7.512368e-01 | val 7.306451e-01 |   2.775 s | best 7.306451e-01 @20 *
+epoch   21 | train 7.488924e-01 | val 7.303608e-01 |   2.803 s | best 7.303608e-01 @21 *
+epoch   22 | train 7.447542e-01 | val 7.301496e-01 |   2.795 s | best 7.301496e-01 @22 *
+epoch   23 | train 7.488370e-01 | val 7.303723e-01 |   2.722 s | best 7.301496e-01 @22
+epoch   24 | train 7.459720e-01 | val 7.299236e-01 |   2.773 s | best 7.299236e-01 @24 *
+epoch   25 | train 7.472321e-01 | val 7.297154e-01 |   2.736 s | best 7.297154e-01 @25 *
+epoch   26 | train 7.464951e-01 | val 7.296578e-01 |   2.693 s | best 7.296578e-01 @26 *
+epoch   27 | train 7.434643e-01 | val 7.297268e-01 |   2.782 s | best 7.296578e-01 @26
+epoch   28 | train 7.464075e-01 | val 7.295179e-01 |   2.728 s | best 7.295179e-01 @28 *
+epoch   29 | train 7.483929e-01 | val 7.294343e-01 |   2.727 s | best 7.294343e-01 @29 *
+epoch   30 | train 7.452092e-01 | val 7.294120e-01 |   2.728 s | best 7.294120e-01 @30 *
+epoch   31 | train 7.454834e-01 | val 7.292715e-01 |   2.745 s | best 7.292715e-01 @31 *
+epoch   32 | train 7.466781e-01 | val 7.293760e-01 |   2.773 s | best 7.292715e-01 @31
+epoch   33 | train 7.477299e-01 | val 7.294199e-01 |   2.740 s | best 7.292715e-01 @31
+epoch   34 | train 7.500915e-01 | val 7.294211e-01 |   2.776 s | best 7.292715e-01 @31
+epoch   35 | train 7.480424e-01 | val 7.294723e-01 |   2.775 s | best 7.292715e-01 @31
+epoch   36 | train 7.441953e-01 | val 7.293026e-01 |   2.731 s | best 7.292715e-01 @31
+epoch   37 | train 7.451636e-01 | val 7.291591e-01 |   2.783 s | best 7.291591e-01 @37 *
+epoch   38 | train 7.396784e-01 | val 7.291008e-01 |   2.730 s | best 7.291008e-01 @38 *
+epoch   39 | train 7.476054e-01 | val 7.289826e-01 |   2.771 s | best 7.289826e-01 @39 *
+epoch   40 | train 7.470728e-01 | val 7.288778e-01 |   2.731 s | best 7.288778e-01 @40 *
+epoch   41 | train 7.439610e-01 | val 7.287564e-01 |   2.731 s | best 7.287564e-01 @41 *
+epoch   42 | train 7.454826e-01 | val 7.286532e-01 |   2.781 s | best 7.286532e-01 @42 *
+epoch   43 | train 7.439380e-01 | val 7.286452e-01 |   2.772 s | best 7.286452e-01 @43 *
+epoch   44 | train 7.412162e-01 | val 7.285957e-01 |   2.723 s | best 7.285957e-01 @44 *
+epoch   45 | train 7.427340e-01 | val 7.286512e-01 |   2.781 s | best 7.285957e-01 @44
+epoch   46 | train 7.428531e-01 | val 7.285487e-01 |   2.772 s | best 7.285487e-01 @46 *
+epoch   47 | train 7.471635e-01 | val 7.285410e-01 |   2.725 s | best 7.285410e-01 @47 *
+epoch   48 | train 7.487985e-01 | val 7.285402e-01 |   2.729 s | best 7.285402e-01 @48 *
+epoch   49 | train 7.461406e-01 | val 7.286306e-01 |   2.720 s | best 7.285402e-01 @48
+epoch   50 | train 7.452291e-01 | val 7.287106e-01 |   2.730 s | best 7.285402e-01 @48
+epoch   51 | train 7.422102e-01 | val 7.288042e-01 |   2.781 s | best 7.285402e-01 @48
+epoch   52 | train 7.486819e-01 | val 7.288138e-01 |   2.730 s | best 7.285402e-01 @48
+epoch   53 | train 7.413643e-01 | val 7.288127e-01 |   2.742 s | best 7.285402e-01 @48
+epoch   54 | train 7.471300e-01 | val 7.288958e-01 |   2.726 s | best 7.285402e-01 @48
+epoch   55 | train 7.450527e-01 | val 7.286924e-01 |   2.773 s | best 7.285402e-01 @48
+epoch   56 | train 7.455820e-01 | val 7.284943e-01 |   2.727 s | best 7.284943e-01 @56 *
+epoch   57 | train 7.423114e-01 | val 7.284347e-01 |   2.729 s | best 7.284347e-01 @57 *
+epoch   58 | train 7.392664e-01 | val 7.285545e-01 |   2.713 s | best 7.284347e-01 @57
+epoch   59 | train 7.474565e-01 | val 7.286081e-01 |   2.254 s | best 7.284347e-01 @57
+epoch   60 | train 7.402485e-01 | val 7.285280e-01 |   2.673 s | best 7.284347e-01 @57
+epoch   61 | train 7.463604e-01 | val 7.285727e-01 |   2.602 s | best 7.284347e-01 @57
+epoch   62 | train 7.431830e-01 | val 7.286216e-01 |   2.656 s | best 7.284347e-01 @57
+epoch   63 | train 7.404907e-01 | val 7.286605e-01 |   2.590 s | best 7.284347e-01 @57
+epoch   64 | train 7.484483e-01 | val 7.285398e-01 |   2.635 s | best 7.284347e-01 @57
+epoch   65 | train 7.431358e-01 | val 7.284692e-01 |   2.641 s | best 7.284347e-01 @57
+epoch   66 | train 7.436400e-01 | val 7.285423e-01 |   2.645 s | best 7.284347e-01 @57
+epoch   67 | train 7.403234e-01 | val 7.285058e-01 |   2.584 s | best 7.284347e-01 @57
+epoch   68 | train 7.435951e-01 | val 7.284777e-01 |   2.640 s | best 7.284347e-01 @57
+epoch   69 | train 7.419826e-01 | val 7.285671e-01 |   2.584 s | best 7.284347e-01 @57
+epoch   70 | train 7.467793e-01 | val 7.284053e-01 |   2.580 s | best 7.284053e-01 @70 *
+epoch   71 | train 7.490592e-01 | val 7.284796e-01 |   2.637 s | best 7.284053e-01 @70
+epoch   72 | train 7.466128e-01 | val 7.285722e-01 |   2.564 s | best 7.284053e-01 @70
+epoch   73 | train 7.468378e-01 | val 7.285899e-01 |   2.628 s | best 7.284053e-01 @70
+epoch   74 | train 7.419285e-01 | val 7.284617e-01 |   2.683 s | best 7.284053e-01 @70
+epoch   75 | train 7.424845e-01 | val 7.285403e-01 |   2.662 s | best 7.284053e-01 @70
+epoch   76 | train 7.415229e-01 | val 7.286161e-01 |   2.451 s | best 7.284053e-01 @70
+epoch   77 | train 7.387617e-01 | val 7.286407e-01 |   2.670 s | best 7.284053e-01 @70
+epoch   78 | train 7.447069e-01 | val 7.286947e-01 |   2.662 s | best 7.284053e-01 @70
+epoch   79 | train 7.418081e-01 | val 7.286489e-01 |   2.746 s | best 7.284053e-01 @70
+epoch   80 | train 7.426006e-01 | val 7.286673e-01 |   1.034 s | best 7.284053e-01 @70
+epoch   81 | train 7.425997e-01 | val 7.284573e-01 |   0.986 s | best 7.284053e-01 @70
+epoch   82 | train 7.403583e-01 | val 7.284070e-01 |   0.970 s | best 7.284053e-01 @70
+epoch   83 | train 7.449243e-01 | val 7.284645e-01 |   0.938 s | best 7.284053e-01 @70
+epoch   84 | train 7.416579e-01 | val 7.284993e-01 |   1.001 s | best 7.284053e-01 @70
+epoch   85 | train 7.382358e-01 | val 7.286627e-01 |   0.960 s | best 7.284053e-01 @70
+# done        : 85 epochs, stopped_by=patience, aborted=False, best val 7.284053e-01 @ epoch 70, wall 229.3 s, 2.698 s/epoch

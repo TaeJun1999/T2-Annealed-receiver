@@ -45,6 +45,7 @@ import score                  # noqa: E402
 STORAGE = "sqlite:///" + os.path.join(C.CONF, "results", "hpo_D1.db")
 STUDY = "conf_score_D1_8x4"
 TRIALS_CSV = os.path.join(C.CONF, "results", "hpo_trials.csv")
+STRAT_CSV = os.path.join(C.CONF, "results", "hpo_strat_trials.csv")
 CKPT_DIR = os.path.join(C.CONF, "ckpt_hpo")
 LOG_DIR = os.path.join(C.CONF, "logs", "hpo")
 
@@ -59,10 +60,13 @@ F_MAX_EPOCH, F_PATIENCE, F_MIN_EPOCH = 3000, 20, 200
 F_NEVAL, F_NJAC = 512, 64
 
 
-def suggest(t):
+ARCHS = ["mlp", "conv", "unet", "dit", "uvit", "adm"]
+
+
+def suggest(t, fix_arch=None):
     """The design space.  Architecture and parameterisation are the axes the ladder could only sample at
     n=3; everything else is the usual continuous nuisance."""
-    arch = t.suggest_categorical("arch", ["mlp", "conv", "unet", "dit", "uvit", "adm"])
+    arch = fix_arch if fix_arch else t.suggest_categorical("arch", ARCHS)
     param = t.suggest_categorical("param", ["ve", "vp", "edm"])
     domain = t.suggest_categorical("domain", ["pixel", "angle"])
     hp = dict(arch=arch, param=param, domain=domain,
@@ -87,7 +91,7 @@ def suggest(t):
     return hp
 
 
-def _row(trial_no, hp, res, G, gs, sec, err=""):
+def _row(trial_no, hp, res, G, gs, sec, err="", path=None):
     r = dict(trial=trial_no, gate_score=gs, sec=round(sec, 1), err=err,
              **{k: hp.get(k) for k in ("arch", "param", "domain", "width", "depth", "lr", "ema",
                                        "batch", "emb", "heads", "patch")})
@@ -95,8 +99,9 @@ def _row(trial_no, hp, res, G, gs, sec, err=""):
              val_loss=(res or {}).get("val_loss"), stopped_by=(res or {}).get("stopped_by"))
     for g in ("GA", "GB", "GC", "GD", "GD_trace"):
         r[g] = (G or {}).get(g)
-    new = not os.path.exists(TRIALS_CSV)
-    with open(TRIALS_CSV, "a", newline="") as f:
+    path = path or TRIALS_CSV
+    new = not os.path.exists(path)
+    with open(path, "a", newline="") as f:
         w = csv.DictWriter(f, fieldnames=list(r))
         if new:
             w.writeheader()
@@ -104,12 +109,13 @@ def _row(trial_no, hp, res, G, gs, sec, err=""):
     return r
 
 
-def objective(trial, device):
+def objective(trial, device, fix_arch=None, csv_path=None):
     os.makedirs(CKPT_DIR, exist_ok=True)
     os.makedirs(LOG_DIR, exist_ok=True)
-    hp = suggest(trial)
-    ck = os.path.join(CKPT_DIR, f"t{trial.number:05d}.pt")
-    lg = os.path.join(LOG_DIR, f"t{trial.number:05d}.log")
+    hp = suggest(trial, fix_arch)
+    tag = f"{fix_arch}_" if fix_arch else ""
+    ck = os.path.join(CKPT_DIR, f"{tag}t{trial.number:05d}.pt")
+    lg = os.path.join(LOG_DIR, f"{tag}t{trial.number:05d}.log")
     t0 = time.time()
     try:
         res = score.train("HPO", trial.number, TESTBED, PRIOR, NR, NT, device=device, hp=hp, resume=False,
@@ -118,7 +124,7 @@ def objective(trial, device):
         G = score.gates_D1(ck, NR, NT, prior=PRIOR, n_eval=S_NEVAL, device=device, n_jac=S_NJAC,
                            stream=SEARCH_STREAM)
         gs = score.gate_score(G)
-        _row(trial.number, hp, res, G, gs, time.time() - t0)
+        _row(trial.number, hp, res, G, gs, time.time() - t0, path=csv_path)
         for k in ("GA", "GB", "GC", "GD", "GD_trace"):
             trial.set_user_attr(k, float(G[k]))
         trial.set_user_attr("params", int(res["params"]))
@@ -128,7 +134,7 @@ def objective(trial, device):
         return gs
     except Exception as ex:                                   # a crashing config is a FINDING, not a gap
         _row(trial.number, hp, None, None, float("inf"), time.time() - t0,
-             err=f"{type(ex).__name__}: {ex}".replace("\n", " ")[:300])
+             err=f"{type(ex).__name__}: {ex}".replace("\n", " ")[:300], path=csv_path)
         if os.environ.get("HPO_TRACE"):
             traceback.print_exc()
         return float("inf")
@@ -145,6 +151,68 @@ def cmd_search(a):
                              sampler=optuna.samplers.TPESampler(seed=C.SEED + (a.gpu or 0), n_startup_trials=24))
     st.optimize(lambda t: objective(t, dev), n_trials=a.trials, catch=())
     print(f"[hpo] worker gpu={a.gpu} finished {a.trials} trials; study has {len(st.trials)}", flush=True)
+
+
+def cmd_strat(a):
+    """CONTROLLED architecture comparison: EQUAL trials per architecture, RANDOM sampling.
+
+    The TPE search answers "what is the best configuration I can find", and it deliberately spends its
+    budget where things look good -- after 720 trials it had given dit/adm ~270 trials each and unet 47.
+    A "best per architecture" read off that is confounded by how many chances each architecture got.
+    This command fixes the architecture, draws the REST of the space uniformly at random, and gives every
+    architecture the SAME number of trials, so best-of-n and the quantiles are comparable across rows.
+    Same objective, same frozen gates, same data budget, same search stream (11)."""
+    import optuna
+    optuna.logging.set_verbosity(optuna.logging.WARNING)
+    dev = "cuda" if a.gpu is not None else "cpu"
+    if a.gpu is not None:
+        os.environ["CUDA_VISIBLE_DEVICES"] = str(a.gpu)
+    st = optuna.create_study(study_name=f"conf_strat_{a.arch}", storage=STORAGE, direction="minimize",
+                             load_if_exists=True,
+                             sampler=optuna.samplers.RandomSampler(seed=C.SEED + ARCHS.index(a.arch)))
+    st.optimize(lambda t: objective(t, dev, fix_arch=a.arch, csv_path=STRAT_CSV), n_trials=a.trials, catch=())
+    print(f"[strat] {a.arch}: {len(st.trials)} trials done", flush=True)
+
+
+def cmd_stratreport(a):
+    """Equal-n is enforced HERE, not by hoping every worker stops at the same count: trials are ordered by
+    their (per-architecture) trial number and the FIRST n_eq of each architecture are used, n_eq = the
+    smallest per-architecture count.  The sampler is uniform-random, so trial order is independent of
+    quality and truncating to a common prefix is unbiased.  Extra trials beyond n_eq are kept in the CSV
+    and reported as surplus, never silently folded into a best-of-n."""
+    import collections
+    rows = [r for r in csv.DictReader(open(STRAT_CSV))
+            if r["gate_score"] and np.isfinite(float(r["gate_score"]))]
+    order = collections.defaultdict(list)
+    for r in rows:
+        order[r["arch"]].append((int(r["trial"]), float(r["gate_score"])))
+    raw_n = {k: len(v) for k, v in order.items()}
+    n_eq = a.neq or (min(raw_n.values()) if raw_n else 0)
+    by = {k: [g for _, g in sorted(v)[:n_eq]] for k, v in order.items()}
+    out = os.path.join(C.CONF, "results", "hpo_strat_D1.txt")
+    L = [C.header("D1", extra=[
+        "content     : CONTROLLED architecture comparison -- EQUAL trials per architecture, RANDOM sampling.",
+        "why         : the TPE study (hpo_D1.txt) allocates its budget adaptively, so its per-architecture",
+        "              'best' is confounded by trial count.  This table is the comparable one.",
+        "objective   : the pre-registered gate score, minimised.  Never BLER.  Search stream 11.",
+    ]), C.D1_WARNING, "",
+        f"  equal-n comparison: the first {n_eq} trials of each architecture "
+        f"(collected: {dict(sorted(raw_n.items()))})", "",
+        f"  {'arch':<6} {'n':>4} {'best':>8} {'p25':>8} {'median':>8} {'worst':>8}", "  " + "-" * 50]
+    for k, v in sorted(by.items(), key=lambda kv: min(kv[1])):
+        v = np.array(v)
+        L.append(f"  {k:<6} {len(v):>4} {v.min():>8.3f} {np.percentile(v, 25):>8.3f} "
+                 f"{np.median(v):>8.3f} {v.max():>8.3f}")
+    ns = {k: len(v) for k, v in by.items()}
+    if len(set(ns.values())) > 1 or n_eq == 0:
+        L += ["", f"  WARNING: equal-n truncation failed {ns} -- best-of-n is NOT comparable."]
+    if len(by) < len(ARCHS):
+        L += ["", f"  WARNING: only {sorted(by)} present; {sorted(set(ARCHS) - set(by))} have no completed trials."]
+    txt = "\n".join(L) + "\n"
+    with open(out, "w") as f:
+        f.write(txt)
+    print(txt)
+    print(f"[strat] -> {out}")
 
 
 def _fmt(v, f="{:.4g}"):
@@ -206,6 +274,8 @@ def cmd_final(a):
     st = optuna.load_study(study_name=STUDY, storage=STORAGE)
     done = sorted([t for t in st.trials if t.value is not None and np.isfinite(t.value)],
                   key=lambda t: t.value)[:a.top]
+    if a.rank is not None:                       # one rank per process -> parallel across GPUs, no file clash
+        done = [done[a.rank]] if a.rank < len(done) else []
     dev = "cuda" if a.gpu is not None else "cpu"
     if a.gpu is not None:
         os.environ["CUDA_VISIBLE_DEVICES"] = str(a.gpu)
@@ -224,7 +294,8 @@ def cmd_final(a):
         rows.append((t.number, hp, res, G, score.gate_score(G)))
         print(f"[final] trial {t.number}: search gate_score {t.value:.3f} -> REPORTED {score.gate_score(G):.3f} "
               f"| GB {G['GB']:.4g} GC {G['GC']:.4g} GD {G['GD']:.4g} | passed={G['passed']}", flush=True)
-    out = os.path.join(C.CONF, "results", "hpo_final_D1.txt")
+    out = os.path.join(C.CONF, "results",
+                       f"hpo_final_r{a.rank}.txt" if a.rank is not None else "hpo_final_D1.txt")
     with open(out, "w") as f:
         f.write(C.header("D1", extra=[
             "content     : HPO winners RETRAINED at the full ladder budget and RE-GATED on the REPORTED "
@@ -257,10 +328,14 @@ def _hp_from_params(p):
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("cmd", choices=["search", "report", "final"])
+    ap.add_argument("cmd", choices=["search", "report", "final", "strat", "stratreport"])
     ap.add_argument("--trials", type=int, default=50)
     ap.add_argument("--gpu", type=int, default=None)
     ap.add_argument("--top", type=int, default=25)
+    ap.add_argument("--arch", default=None, choices=ARCHS)
+    ap.add_argument("--neq", type=int, default=None, help="stratreport: trials per architecture (default: min)")
+    ap.add_argument("--rank", type=int, default=None, help="final: process ONLY the k-th best trial (parallel)")
     a = ap.parse_args()
     os.makedirs(os.path.join(C.CONF, "results"), exist_ok=True)
-    {"search": cmd_search, "report": cmd_report, "final": cmd_final}[a.cmd](a)
+    {"search": cmd_search, "report": cmd_report, "final": cmd_final,
+     "strat": cmd_strat, "stratreport": cmd_stratreport}[a.cmd](a)
