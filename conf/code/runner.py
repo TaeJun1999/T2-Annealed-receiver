@@ -187,8 +187,11 @@ def build_point(testbed, cell, prior, snr, ntrain=C.N_TRAIN, beta=C.BETA, t_in=C
 
     D1: R0 R1 R2 R3 R4-scvamp R4-llr R5-genie R6-exactEP + M-ours-{gmm32,bstar,score,dscore}
     D2: the same MINUS R6-exactEP and M-ours-score -- there is no exact prior score there (06_SPEC §1).
-    The score arms exist only for the 8x4 cells C1/C2, which is what the score network is trained for;
-    on the 4x4 cells they are reported as NO_SCORE instead of being silently omitted."""
+
+    M-ours-score is the ORACLE arm: the EXACT score of the true prior, in closed form from GMMPriorB.
+    It needs NO trained network, so it exists on EVERY D1 cell including the 4x4 ones.
+    Only M-ours-dscore is tied to the array size, because its network input is 2*Nr*Nt and the ladder was
+    trained for 8x4 (conf/DECISIONS.md); on 4x4 it is reported as NO_SCORE, never silently omitted."""
     c = C.CELLS[cell]
     Nr, Nt, T, Tp = c["Nr"], c["Nt"], c["T"], c["Tp"]
     sigma2 = 10 ** (-snr / 10)
@@ -204,9 +207,9 @@ def build_point(testbed, cell, prior, snr, ntrain=C.N_TRAIN, beta=C.BETA, t_in=C
         cfgs["R3-bigamp"] = dict(arms["R3-bigamp"].cfg_dump, arm="R3-bigamp")
 
     sp, why = (score_prior(testbed, prior, Nr, Nt, ckpt) if Nr == 8
-               else (None, "ABSENT -- " + NO_SCORE))
-    our, ocfg, meta, hp, _ = A.build_our_arms(*a, ntrain=ntrain,
-                                              true_prior=(true if Nr == 8 else None), score_prior=sp)
+               else (None, "ABSENT -- M-ours-dscore only: " + NO_SCORE))
+    # `true` (not `true if Nr == 8`): the oracle score arm is closed-form and array-size independent.
+    our, ocfg, meta, hp, _ = A.build_our_arms(*a, ntrain=ntrain, true_prior=true, score_prior=sp)
     arms.update(our)
     cfgs.update(ocfg)
     # An arm that is not built must leave a trace with the REASON, or the analysis sees a missing row and
@@ -304,7 +307,7 @@ def cmd_run(a):
         A.load_fits(testbed, p, C.CELLS[cell]["Nr"], a.ntrain)
     for cell in cells:
         if C.CELLS[cell]["Nr"] != 8:
-            print(f"[run] {cell}: M-ours-score / M-ours-dscore -> {NO_SCORE}", flush=True)
+            print(f"[run] {cell}: M-ours-dscore -> {NO_SCORE}  (M-ours-score is the closed-form ORACLE and DOES run here)", flush=True)
     _, why = score_prior(testbed, prior, 8, C.NT, a.ckpt)
     print(f"[run] M-ours-dscore: {why}", flush=True)
     if why.startswith("ABSENT"):
@@ -345,7 +348,7 @@ def cmd_smoke(a):
               f"({P['Nr']}x{P['Nt']}, T={P['T']}, Tp={P['Tp']}): {len(P['arms'])} arms "
               f"{sorted(P['arms'])}  build {time.time() - t0:.1f} s", flush=True)
         if P["Nr"] != 8:
-            print(f"[smoke] {cell}: M-ours-score / M-ours-dscore -> {NO_SCORE}", flush=True)
+            print(f"[smoke] {cell}: M-ours-dscore -> {NO_SCORE}  (M-ours-score is the closed-form ORACLE and DOES run here)", flush=True)
         else:
             print(f"[smoke] {cell}: M-ours-dscore: {P['dscore']}", flush=True)
         rng = C.trial_rng(testbed, prior, P["Nr"], P["T"], P["Tp"], snr)
