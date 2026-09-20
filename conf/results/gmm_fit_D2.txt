@@ -1,12 +1,12 @@
-# date        : 2026-09-20 13:40:57 KST
-# git commit  : 66c493e
+# date        : 2026-09-20 14:04:27 KST
+# git commit  : 0bbab29
 # versions    : python 3.12.14  numpy 2.5.2  scipy 1.18.1  torch 2.14.0+cu130 (cuda_available=True)
 # device      : CPU (192 cores) | dtype: complex128 / float64 | deterministic: yes (fixed seeds, no GPU in the receiver)
 # testbed     : D2
 # seed rule   : default_rng([20260926, TBID[testbed], PID[prior], Nr, T, Tp, int(snr)+100])  (trials of a point = ONE stream)
 # code        : rate-1/2 conv (133,171)_8 nu=6 terminated, QPSK, outer iterations = 16 for EVERY arm
 # Demo/ hashes: t2_route_a.py=95a5408901ec125c  t2_trellis.py=31cd0ee9c68e972b  t2_gmm.py=d064e58c7510c769
-# content     : conf/05_SPEC_testbed_D2.md §4 -- GMM re-fit on D2 (prior S2), K (16, 32, 64, 128) x {full, kron} x kappa (0, 16, 64, 256) x restarts, ntrain 10000, n_val = n_test = 5000
+# content     : conf/05_SPEC_testbed_D2.md §4 -- GMM re-fit on D2 (prior S2), K (16, 32, 64, 128, 256) x {full, kron} x kappa (0, 16, 64, 256) x restarts, ntrain 10000, n_val = n_test = 5000
 # selection   : VALIDATION log-likelihood only.  BLER is never consulted (01_RULES §5).
 # D1 fits     : /home/HTJ/t2/Demo/exp_0925_fits (prior S, K (16, 32, 64)) -- reused verbatim, see DECISIONS
 # ====================================================================================================
@@ -19,11 +19,13 @@ Nr = 4 x Nt = 4
   full    32      0    -23.934    -25.354    1.421    -25.346    8.374       0      4.6
   full    64      0    -22.261    -25.140    2.880    -25.093    8.627       0      5.4
   full   128      0    -21.174    -26.825    5.651    -26.704    7.017       0      6.1
+  full   256     16    -26.269    -28.036    1.767    -27.950    5.771    3935      4.2
   kron    16      0    -27.615    -27.776    0.161    -27.600    6.121       0      2.2
   kron    32      0    -26.027    -26.419    0.392    -26.246    7.475       0      5.3
   kron    64      0    -24.666    -25.386    0.720    -25.215    8.506       0     11.1
   kron   128      0    -23.442    -24.709    1.268    -24.482    9.239       0     19.1
-  b* (validation log-likelihood) = kron K=128   ll_val -24.709
+  kron   256      0    -22.154    -24.207    2.053    -24.058    9.663       0     32.0
+  b* (validation log-likelihood) = kron K=256   ll_val -24.207
 
   degradation relative to D1 (05_SPEC §4)
   Absolute log-likelihoods of two DIFFERENT distributions are not comparable, so the
@@ -34,10 +36,12 @@ Nr = 4 x Nt = 4
   full    32     8.374     3.245     5.129     1.421     0.270     0.321
   full    64     8.627     3.239     5.388     2.880     0.321     0.327
   full   128     7.017       nan       nan     5.651       nan       nan
+  full   256     5.771       nan       nan     1.767       nan       nan
   kron    16     6.121     3.504     2.617     0.161     0.096     0.062
   kron    32     7.475     3.511     3.963     0.392     0.128     0.055
   kron    64     8.506     3.500     5.006     0.720     0.174     0.067
   kron   128     9.239       nan       nan     1.268       nan       nan
+  kron   256     9.663       nan       nan     2.053       nan       nan
   KL(D1) = KL(true || fit) on the D1 test set [nat/sample]; D2 has no closed-form true
   density, so no KL column exists there (05_SPEC §3).
 
@@ -47,11 +51,13 @@ Nr = 8 x Nt = 4
   full    32      0    -32.768    -37.921    5.154    -37.272   28.355       0      8.1
   full    64      0    -30.647    -40.448    9.801    -39.997   25.630       0      9.4
   full   128      0    -32.167    -50.113   17.946    -49.492   16.135     103      8.3
+  full   256      0    -33.390    -47.350   13.960    -46.941   18.685    2802      6.9
   kron    16      0    -38.958    -39.574    0.617    -38.927   26.699       0      3.8
   kron    32      0    -32.368    -33.556    1.188    -32.878   32.749       0      8.7
   kron    64      0    -26.935    -29.015    2.080    -28.518   37.109       0     21.4
   kron   128      0    -22.557    -26.116    3.559    -25.820   39.807       0     58.1
-  b* (validation log-likelihood) = kron K=128   ll_val -26.116
+  kron   256      0    -18.080    -23.936    5.856    -23.666   41.961       0     48.4
+  b* (validation log-likelihood) = kron K=256   ll_val -23.936
 
   degradation relative to D1 (05_SPEC §4)
   Absolute log-likelihoods of two DIFFERENT distributions are not comparable, so the
@@ -62,10 +68,12 @@ Nr = 8 x Nt = 4
   full    32    28.355     8.106    20.248     5.154     1.517     1.369
   full    64    25.630     8.121    17.509     9.801     1.587     1.355
   full   128    16.135       nan       nan    17.946       nan       nan
+  full   256    18.685       nan       nan    13.960       nan       nan
   kron    16    26.699     9.233    17.466     0.617     0.082     0.242
   kron    32    32.749     9.277    23.471     1.188     0.261     0.198
   kron    64    37.109     9.188    27.920     2.080     0.497     0.287
   kron   128    39.807       nan       nan     3.559       nan       nan
+  kron   256    41.961       nan       nan     5.856       nan       nan
   KL(D1) = KL(true || fit) on the D1 test set [nat/sample]; D2 has no closed-form true
   density, so no KL column exists there (05_SPEC §3).
 

@@ -1,0 +1,172 @@
+Traceback (most recent call last):
+  File "/home/HTJ/t2/conf/code/runner.py", line 905, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/home/HTJ/t2/conf/code/runner.py", line 901, in main
+    return CMDS[a.cmd](a) or 0
+           ^^^^^^^^^^^^^^
+  File "/home/HTJ/t2/conf/code/runner.py", line 633, in cmd_gate
+    L += blk(score, p, Nr, Nt, prior, a)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/HTJ/t2/conf/code/runner.py", line 537, in _block_D1
+    G = score.gates_D1(ckpt, Nr, Nt, prior=prior, device=a.device)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/HTJ/t2/conf/code/score.py", line 977, in gates_D1
+    nat, tw, alpha, J = _gate_batch(model, Xq, float(sg), n_jac)
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/HTJ/t2/conf/code/score.py", line 934, in _gate_batch
+    J.append(wirtinger(jac_batch(lambda v, u: tweedie_real(model, v, u), x, s)))
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/HTJ/t2/conf/code/score.py", line 539, in jac_batch
+    return torch.func.vmap(torch.func.jacrev(f, argnums=0))(X, S)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/HTJ/miniforge3/envs/torch/lib/python3.12/site-packages/torch/_functorch/apis.py", line 246, in wrapped
+    return vmap_impl(
+           ^^^^^^^^^^
+  File "/home/HTJ/miniforge3/envs/torch/lib/python3.12/site-packages/torch/_functorch/vmap.py", line 316, in vmap_impl
+    return _flat_vmap(
+           ^^^^^^^^^^^
+  File "/home/HTJ/miniforge3/envs/torch/lib/python3.12/site-packages/torch/_functorch/vmap.py", line 507, in _flat_vmap
+    batched_outputs = func(*batched_inputs, **kwargs)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/HTJ/miniforge3/envs/torch/lib/python3.12/site-packages/torch/_functorch/eager_transforms.py", line 646, in wrapper_fn
+    vjp_out = _vjp_with_argnums(func, *args, argnums=argnums, has_aux=has_aux)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/HTJ/miniforge3/envs/torch/lib/python3.12/site-packages/torch/_functorch/vmap.py", line 56, in fn
+    return f(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^
+  File "/home/HTJ/miniforge3/envs/torch/lib/python3.12/site-packages/torch/_functorch/eager_transforms.py", line 415, in _vjp_with_argnums
+    primals_out = func(*primals)
+                  ^^^^^^^^^^^^^^
+  File "/home/HTJ/t2/conf/code/score.py", line 934, in <lambda>
+    J.append(wirtinger(jac_batch(lambda v, u: tweedie_real(model, v, u), x, s)))
+                                              ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/HTJ/t2/conf/code/score.py", line 525, in tweedie_real
+    return x + (sigma ** 2).unsqueeze(-1) * model.score_real(x, sigma)
+                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/HTJ/t2/conf/code/score.py", line 376, in score_real
+    abar, sa, sb, eps = self._vp(x, sigma)
+                        ^^^^^^^^^^^^^^^^^^
+  File "/home/HTJ/t2/conf/code/score.py", line 364, in _vp
+    return abar, sa, torch.sqrt(1.0 - abar), self.raw(sa.unsqueeze(-1) * x, torch.log(sigma))
+                                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/HTJ/t2/conf/code/score.py", line 355, in raw
+    return self.net(x, logsig)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/home/HTJ/miniforge3/envs/torch/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1783, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/HTJ/miniforge3/envs/torch/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1794, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/HTJ/t2/conf/code/score.py", line 298, in forward
+    h = b(h, t)
+        ^^^^^^^
+  File "/home/HTJ/miniforge3/envs/torch/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1783, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/HTJ/miniforge3/envs/torch/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1794, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/HTJ/t2/conf/code/score.py", line 241, in forward
+    h = self.c1(F.silu(self.n1(x)))
+                       ^^^^^^^^^^
+  File "/home/HTJ/miniforge3/envs/torch/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1783, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/HTJ/miniforge3/envs/torch/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1794, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/HTJ/miniforge3/envs/torch/lib/python3.12/site-packages/torch/nn/modules/normalization.py", line 334, in forward
+    return F.group_norm(input, self.num_groups, self.weight, self.bias, self.eps)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/HTJ/miniforge3/envs/torch/lib/python3.12/site-packages/torch/nn/functional.py", line 3048, in group_norm
+    return torch.group_norm(
+           ^^^^^^^^^^^^^^^^^
+RuntimeError: Expected weight to be a vector of size equal to the number of channels in input, but got weight of shape [64] and input of shape [64, 8, 4]
+Traceback (most recent call last):
+  File "/home/HTJ/t2/conf/code/runner.py", line 905, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/home/HTJ/t2/conf/code/runner.py", line 901, in main
+    return CMDS[a.cmd](a) or 0
+           ^^^^^^^^^^^^^^
+  File "/home/HTJ/t2/conf/code/runner.py", line 633, in cmd_gate
+    L += blk(score, p, Nr, Nt, prior, a)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/HTJ/t2/conf/code/runner.py", line 537, in _block_D1
+    G = score.gates_D1(ckpt, Nr, Nt, prior=prior, device=a.device)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/HTJ/t2/conf/code/score.py", line 977, in gates_D1
+    nat, tw, alpha, J = _gate_batch(model, Xq, float(sg), n_jac)
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/HTJ/t2/conf/code/score.py", line 934, in _gate_batch
+    J.append(wirtinger(jac_batch(lambda v, u: tweedie_real(model, v, u), x, s)))
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/HTJ/t2/conf/code/score.py", line 539, in jac_batch
+    return torch.func.vmap(torch.func.jacrev(f, argnums=0))(X, S)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/HTJ/miniforge3/envs/torch/lib/python3.12/site-packages/torch/_functorch/apis.py", line 246, in wrapped
+    return vmap_impl(
+           ^^^^^^^^^^
+  File "/home/HTJ/miniforge3/envs/torch/lib/python3.12/site-packages/torch/_functorch/vmap.py", line 316, in vmap_impl
+    return _flat_vmap(
+           ^^^^^^^^^^^
+  File "/home/HTJ/miniforge3/envs/torch/lib/python3.12/site-packages/torch/_functorch/vmap.py", line 507, in _flat_vmap
+    batched_outputs = func(*batched_inputs, **kwargs)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/HTJ/miniforge3/envs/torch/lib/python3.12/site-packages/torch/_functorch/eager_transforms.py", line 646, in wrapper_fn
+    vjp_out = _vjp_with_argnums(func, *args, argnums=argnums, has_aux=has_aux)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/HTJ/miniforge3/envs/torch/lib/python3.12/site-packages/torch/_functorch/vmap.py", line 56, in fn
+    return f(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^
+  File "/home/HTJ/miniforge3/envs/torch/lib/python3.12/site-packages/torch/_functorch/eager_transforms.py", line 415, in _vjp_with_argnums
+    primals_out = func(*primals)
+                  ^^^^^^^^^^^^^^
+  File "/home/HTJ/t2/conf/code/score.py", line 934, in <lambda>
+    J.append(wirtinger(jac_batch(lambda v, u: tweedie_real(model, v, u), x, s)))
+                                              ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/HTJ/t2/conf/code/score.py", line 525, in tweedie_real
+    return x + (sigma ** 2).unsqueeze(-1) * model.score_real(x, sigma)
+                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/HTJ/t2/conf/code/score.py", line 376, in score_real
+    abar, sa, sb, eps = self._vp(x, sigma)
+                        ^^^^^^^^^^^^^^^^^^
+  File "/home/HTJ/t2/conf/code/score.py", line 364, in _vp
+    return abar, sa, torch.sqrt(1.0 - abar), self.raw(sa.unsqueeze(-1) * x, torch.log(sigma))
+                                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/HTJ/t2/conf/code/score.py", line 355, in raw
+    return self.net(x, logsig)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/home/HTJ/miniforge3/envs/torch/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1783, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/HTJ/miniforge3/envs/torch/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1794, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/HTJ/t2/conf/code/score.py", line 298, in forward
+    h = b(h, t)
+        ^^^^^^^
+  File "/home/HTJ/miniforge3/envs/torch/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1783, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/HTJ/miniforge3/envs/torch/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1794, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/HTJ/t2/conf/code/score.py", line 241, in forward
+    h = self.c1(F.silu(self.n1(x)))
+                       ^^^^^^^^^^
+  File "/home/HTJ/miniforge3/envs/torch/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1783, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/HTJ/miniforge3/envs/torch/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1794, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/HTJ/miniforge3/envs/torch/lib/python3.12/site-packages/torch/nn/modules/normalization.py", line 334, in forward
+    return F.group_norm(input, self.num_groups, self.weight, self.bias, self.eps)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/HTJ/miniforge3/envs/torch/lib/python3.12/site-packages/torch/nn/functional.py", line 3048, in group_norm
+    return torch.group_norm(
+           ^^^^^^^^^^^^^^^^^
+RuntimeError: Expected weight to be a vector of size equal to the number of channels in input, but got weight of shape [32] and input of shape [32, 8, 4]

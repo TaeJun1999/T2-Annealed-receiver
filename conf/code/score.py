@@ -52,6 +52,7 @@ import time
 import numpy as np
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 
 import common as C
 import arms as A
@@ -85,7 +86,7 @@ GATE_TOL = dict(GA=1e-6, GB=0.05, GC=0.15, GD=0.20)          # 04_SPEC §5, froz
 GA_NOTE = ("GA is identically zero by construction for this model family; it guards score-path vs x0-path "
            "inconsistency only, and PASS therefore rests on GB/GC/GD.")
 
-RUNGS = ("L1", "L2", "L3", "L4", "L5", "L6")
+RUNGS = ("L1", "L2", "L3", "L4", "L4u", "L5", "L6")   # L4u = the U-Net variant of L4 (04_SPEC §4)
 
 
 # ----------------------------------------------------------------------------- hyper-parameters (04_SPEC §4)
@@ -100,6 +101,11 @@ DEFAULT_HP = {
     # L5 = flow matching on "the configuration that won at L3/L4" (04_SPEC §4), so BOTH the architecture and
     # the domain are inherited from the gate-score winner; 'rf' is the one axis L5 is there to vary.
     "L5": dict(arch="auto", param="rf", domain="auto", base="auto", width=256, depth=4, emb=128, lr=2e-4, ema=0.999, batch=256),
+    # L4u: 04_SPEC §4 names TWO architectures for L4, "2D conv / 소형 U-Net".  L4 ran the flat conv stack;
+    # L4u runs the U-Net.  param/domain are PINNED to L4's resolved values (vp / pixel) rather than 'auto',
+    # so the ONLY difference from L4 is the architecture and the comparison is a clean one-axis ablation.
+    "L4u": dict(arch="unet", param="vp", domain="pixel", width=64, depth=4, emb=128, lr=2e-4, ema=0.999,
+                batch=256),
     "L6": dict(arch="vae",  param="vae", domain="pixel", width=256, depth=3, emb=0, latent=16, n_mix=512,
                lr=1e-3, ema=0.999, batch=256),
 }
@@ -110,6 +116,11 @@ ATTEMPT_HP = {
     ("L2", 2): dict(lr=1e-3, ema=0.9995),   ("L2", 3): dict(width=512, depth=6, lr=3e-4),
     ("L3", 2): dict(lr=1e-3, ema=0.9995),   ("L3", 3): dict(width=512, depth=6, lr=3e-4),
     ("L4", 2): dict(lr=1e-3, ema=0.9995),   ("L4", 3): dict(width=96, depth=6, lr=3e-4),
+    # L4u a2 goes DOWN in width, not just in lr: at the same `width` the U-Net carries ~13x the parameters
+    # of L4's flat stack (4.19M vs 310k) because of the channel doubling per scale, and 9000 training
+    # samples is the budget.  a3 mirrors L4 a3 so the two architectures are compared on the same schedule.
+    ("L4u", 2): dict(width=32, lr=1e-3, ema=0.9995),
+    ("L4u", 3): dict(width=96, depth=6, lr=3e-4),
     ("L5", 2): dict(lr=1e-3, ema=0.9995),   ("L5", 3): dict(width=512, depth=6, lr=3e-4),
     ("L6", 2): dict(lr=3e-4, ema=0.9995),   ("L6", 3): dict(width=512, depth=4, lr=1e-3),
 }
@@ -206,6 +217,102 @@ class _Conv(nn.Module):
         for b in self.blocks:
             h = h + b(h)
         return self.out(h).transpose(-1, -2).reshape(*lead, 2 * self.Nr * self.Nt)
+
+
+def _gn(c):
+    """GroupNorm with the largest group count that divides c (<= 8)."""
+    g = 8
+    while c % g:
+        g //= 2
+    return nn.GroupNorm(g, c)
+
+
+class _ResBlk(nn.Module):
+    """Pre-norm residual block with the log-sigma embedding injected between the two convolutions."""
+
+    def __init__(self, cin, cout, tdim, pm):
+        super().__init__()
+        self.n1, self.c1 = _gn(cin), nn.Conv2d(cin, cout, 3, padding=1, padding_mode=pm)
+        self.emb = nn.Linear(tdim, cout)
+        self.n2, self.c2 = _gn(cout), nn.Conv2d(cout, cout, 3, padding=1, padding_mode=pm)
+        self.skip = nn.Conv2d(cin, cout, 1) if cin != cout else nn.Identity()
+
+    def forward(self, x, t):
+        h = self.c1(F.silu(self.n1(x)))
+        h = h + self.emb(t).reshape(*t.shape[:-1], -1, 1, 1)
+        h = self.c2(F.silu(self.n2(h)))
+        return h + self.skip(x)
+
+
+class _UNet(nn.Module):
+    """Small 2D U-Net over the (Nr, Nt) array grid -- the SECOND architecture 04_SPEC §4 names for L4
+    ("2D conv / 소형 U-Net").  The flat stack _Conv implements the first; this implements the second, so the
+    two can be compared under the same frozen gates with the architecture as the only difference.
+
+    The objection _Conv's docstring raises is real -- Nt = 4, so a deep U-Net would shrink the transmit axis
+    to nothing -- and it is handled by CHOOSING the number of scales from the grid rather than fixing it:
+        n_down = min(2, floor(log2(min(Nr, Nt))))
+    which gives 8x4 -> 4x2 -> 2x1 for the headline cell and 4x4 -> 2x2 -> 1x1 for the 4x4 cells.  Two
+    down-samplings is what a 4-wide axis supports; the bottleneck still carries a full feature vector per
+    position.  Skip connections concatenate the encoder map at each scale, which is the part a flat stack
+    cannot emulate: it lets the fine scale keep array-element detail while the coarse scale carries the
+    aperture-wide correlation that the Kronecker structure of this prior actually lives in.
+
+    padding_mode follows _Conv: 'circular' in the ANGLE domain (DFT bins wrap), 'zeros' in pixel."""
+
+    def __init__(self, Nr, Nt, width, depth, emb, circular):
+        super().__init__()
+        self.Nr, self.Nt = Nr, Nt
+        pm = "circular" if circular else "zeros"
+        self.temb = _TimeEmb(emb)
+        tdim = 4 * width
+        self.tproj = nn.Sequential(nn.Linear(self.temb.dim, tdim), nn.SiLU(), nn.Linear(tdim, tdim))
+        n_down = min(2, int(math.log2(min(Nr, Nt))))
+        chs = [width * (2 ** min(i, 2)) for i in range(n_down + 1)]
+        per = max(1, depth // max(n_down + 1, 1))               # residual blocks per scale
+        self.inp = nn.Conv2d(2, chs[0], 3, padding=1, padding_mode=pm)
+        self.enc, self.down = nn.ModuleList(), nn.ModuleList()
+        for i in range(n_down):
+            self.enc.append(nn.ModuleList(_ResBlk(chs[i], chs[i], tdim, pm) for _ in range(per)))
+            self.down.append(nn.Conv2d(chs[i], chs[i + 1], 3, stride=2, padding=1, padding_mode=pm))
+        self.mid = nn.ModuleList(_ResBlk(chs[-1], chs[-1], tdim, pm) for _ in range(max(2, per)))
+        self.up, self.dec = nn.ModuleList(), nn.ModuleList()
+        for i in reversed(range(n_down)):
+            self.up.append(nn.ConvTranspose2d(chs[i + 1], chs[i], 2, stride=2))
+            self.dec.append(nn.ModuleList([_ResBlk(2 * chs[i], chs[i], tdim, pm)]
+                                          + [_ResBlk(chs[i], chs[i], tdim, pm) for _ in range(per - 1)]))
+        self.outn = _gn(chs[0])
+        self.out = nn.Conv2d(chs[0], 2, 3, padding=1, padding_mode=pm)
+        nn.init.zeros_(self.out.weight)
+        nn.init.zeros_(self.out.bias)
+
+    def forward(self, x, logsig):
+        lead = x.shape[:-1]
+        # identical layout to _Conv: column-major vec h[i + Nr*j] = H[i,j]
+        y = x.reshape(*lead, 2, self.Nt, self.Nr).transpose(-1, -2)
+        # FLATTEN every leading dim into ONE batch axis before the normalised blocks.  _Conv can skip this
+        # because Conv2d accepts an unbatched (C, H, W); GroupNorm CANNOT -- with a 3-D input it reads dim 0
+        # as the batch and dim 1 as the channels.  The gate's Jacobian path calls the model with lead = ()
+        # (torch.func.jacrev on a single sample), so without this the whole gate stage dies.
+        y = y.reshape(-1, 2, self.Nr, self.Nt)
+        t = self.tproj(self.temb(logsig)).reshape(y.shape[0], -1)
+        h = self.inp(y)
+        skips = []
+        for blks, dn in zip(self.enc, self.down):
+            for b in blks:
+                h = b(h, t)
+            skips.append(h)
+            h = dn(h)
+        for b in self.mid:
+            h = b(h, t)
+        for u, blks in zip(self.up, self.dec):
+            h = u(h)
+            h = torch.cat([h, skips.pop()], dim=-3)
+            for b in blks:
+                h = b(h, t)
+        h = self.out(F.silu(self.outn(h)))
+        h = h.reshape(*lead, 2, self.Nr, self.Nt)
+        return h.transpose(-1, -2).reshape(*lead, 2 * self.Nr * self.Nt)
 
 
 def dft_domain_matrix(Nr, Nt):
@@ -400,12 +507,14 @@ def make_model(rung, hp, Nr, Nt):
     by resolve_hp(), so a checkpoint can always rebuild its own model from the hp it stored."""
     dim = 2 * Nr * Nt
     assert hp.get("param") in ("ve", "vp", "rf", "vae"), f"unresolved hp['param'] = {hp.get('param')!r}"
-    assert hp.get("arch") in ("mlp", "conv", "vae"), f"unresolved hp['arch'] = {hp.get('arch')!r}"
+    assert hp.get("arch") in ("mlp", "conv", "unet", "vae"), f"unresolved hp['arch'] = {hp.get('arch')!r}"
     if hp["arch"] == "vae":
         return VAEModel(dim, hp["width"], hp["depth"], hp["latent"], hp["n_mix"])
     ang = hp["domain"] == "angle"
     if hp["arch"] == "conv":
         net = _Conv(Nr, Nt, hp["width"], hp["depth"], hp["emb"], circular=ang)
+    elif hp["arch"] == "unet":
+        net = _UNet(Nr, Nt, hp["width"], hp["depth"], hp["emb"], circular=ang)
     else:
         net = _MLP(dim, hp["width"], hp["depth"], hp["emb"])
     return ScoreModel(net, hp["param"], Nr, Nt, M=dft_domain_matrix(Nr, Nt) if ang else None)
