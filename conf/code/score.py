@@ -729,9 +729,17 @@ def resolve_hp(rung, attempt, testbed, Nr, Nt, prior=None, device="cpu", n_eval=
     return out, dict(gate_scores=sc, base=base, note="chosen BY GATE SCORE (04_SPEC §4), never by BLER")
 
 
+# 10_SPEC_stageC §3d -- frozen training-divergence criterion and fallback ladder.
+# Registered BEFORE any fallback attempt was run; the trigger is numerical (the validation
+# loss series), never a gate value and never a BLER.  Never tuned.
+DIVERGE_TRAIN_MULT, DIVERGE_TRAIN_EPOCHS = 3.0, 5
+GRAD_CLIP_LADDER = (0.0, 1.0, 1.0)          # attempt 1, 2, 3;  attempt 3 also uses lr/3
+LR_DIV_LADDER    = (1.0, 1.0, 3.0)          # divisor applied to the frozen lr
+
+
 def train(rung, attempt, testbed, prior, Nr, Nt, device="cuda", hp=None, resume=True,
           max_epochs=3000, patience=20, min_epochs=200, log_path=None, ckpt=None, verbose=True,
-          ntrain=C.N_TRAIN, jac_reg=0.0):
+          ntrain=C.N_TRAIN, jac_reg=0.0, grad_clip=0.0):
     """One ladder attempt, exactly under the regime of 04_SPEC §2 / 01_RULES §5.
 
     Stopping: validation loss with no improvement for `patience` epochs, but never before `min_epochs`.
@@ -826,13 +834,14 @@ def train(rung, attempt, testbed, prior, Nr, Nt, device="cuda", hp=None, resume=
             return float(vm.loss(va, v_sig, v_eps))
 
     vm = make_model(rung, hp, Nr, Nt).to(dev)
-    stopped, aborted, ep = "max_epochs", False, ep0
+    stopped, aborted, ep, ndiv = "max_epochs", False, ep0, 0
     try:
         for ep in range(ep0 + 1, max_epochs + 1):
             te = time.time()
             model.train()
             idx = torch.randperm(len(tr), generator=g).to(dev)
-            tot = nb = rtot = 0.0
+            tot = nb = rtot = gsum = gmax = 0.0
+            nstep = 0
             for i in range(0, len(tr), hp["batch"]):
                 b = tr[idx[i:i + hp["batch"]]]
                 s = torch.exp(torch.rand(len(b), generator=g) * (math.log(smax) - math.log(smin))
@@ -846,8 +855,13 @@ def train(rung, attempt, testbed, prior, Nr, Nt, device="cuda", hp=None, resume=
                     r = jac_asym_hutch(model, b + s.unsqueeze(-1) * e, s, v)
                     loss = dsm + jac_reg * r
                     rtot += float(r.detach()) * len(b)
-                opt.zero_grad(set_to_none=True); loss.backward(); opt.step(); ema.update(model)
-                tot += float(dsm.detach()) * len(b); nb += len(b)
+                opt.zero_grad(set_to_none=True); loss.backward()
+                if grad_clip:          # 10_SPEC_stageC §3d fallback.  OFF (0.0) by default, so a V0 run
+                    gn = float(torch.nn.utils.clip_grad_norm_(   # is bit-identical to before this change.
+                        model.parameters(), grad_clip))
+                    gsum += gn; gmax = gn if gn > gmax else gmax
+                opt.step(); ema.update(model)
+                tot += float(dsm.detach()) * len(b); nb += len(b); nstep += 1
             trl, vl, dt = tot / nb, val_loss(), time.time() - te
             hist.append((ep, trl, vl))
             imp = vl < best - 1e-12
@@ -855,13 +869,23 @@ def train(rung, attempt, testbed, prior, Nr, Nt, device="cuda", hp=None, resume=
                 best, best_ep = vl, ep
             lg.write(f"epoch {ep:>4} | train {trl:.6e} | val {vl:.6e} | {dt:7.3f} s | "
                      f"best {best:.6e} @{best_ep}{' *' if imp else ''}"
-                     + (f" | asym_reg {rtot / nb:.6e}" if jac_reg else "") + "\n")
+                     + (f" | asym_reg {rtot / nb:.6e}" if jac_reg else "")
+                     + (f" | gnorm mean {gsum / max(nstep, 1):.3e} max {gmax:.3e}" if grad_clip else "")
+                     + "\n")
             torch.save(dict(epoch=ep, model=model.state_dict(), ema=ema.shadow, opt=opt.state_dict(),
                             best_val=best, best_epoch=best_ep, rng=g.get_state(), hist=hist, hp=hp,
                             rung=rung, attempt=attempt, testbed=testbed, prior=prior, Nr=Nr, Nt=Nt,
                             split_hash=split_hash, wall_sec=time.time() - t_start,
-                            jac_reg=jac_reg, rng_jac=(gj.get_state() if gj is not None else None),
+                            jac_reg=jac_reg, grad_clip=grad_clip,
+                            rng_jac=(gj.get_state() if gj is not None else None),
                             device=dname), cpath)
+            # 10_SPEC_stageC §3d DIVERGE_TRAIN: val above 3x best for 5 consecutive epochs.  This
+            # OVERRIDES min_epochs on purpose -- carrying a blown-up run to epoch 200 buys no
+            # information.  A DIVERGED run is a COMPLETED attempt (it consumes a slot), not ABORTED.
+            ndiv = ndiv + 1 if vl > DIVERGE_TRAIN_MULT * best else 0
+            if ndiv >= DIVERGE_TRAIN_EPOCHS:
+                stopped = "diverged"
+                break
             if ep >= min_epochs and ep - best_ep >= patience:
                 stopped = "patience"
                 break
@@ -1001,7 +1025,8 @@ def _passing_attempts(testbed):
     return sorted(set(out), key=lambda t: (_rung_ix(t[0]), t[1]))
 
 
-def load_prior(testbed, prior, Nr, Nt, rung=None, attempt=None, ckpt=None, device="cpu", psd_project=False):
+def load_prior(testbed, prior, Nr, Nt, rung=None, attempt=None, ckpt=None, device="cpu", psd_project=False,
+               ntrain=None):
     """Module H for M-ours-dscore: the gate-passing checkpoint wrapped as a ScorePrior.
     ckpt given -> use it.  Otherwise pick the checkpoint recorded as PASSING in
     conf/results/gate_<testbed>.txt / the ladder state, or (rung, attempt) if given.
@@ -1035,7 +1060,10 @@ def load_prior(testbed, prior, Nr, Nt, rung=None, attempt=None, ckpt=None, devic
         else:
             why = (f"explicit ckpt {ckpt} -- caller override, NOT verified against the gate record here "
                    f"(recorded PASS rows: {ok or 'none'})")
-        Chat = A.load_fits(testbed, prior, Nr)[("full", 32)]["Chat"]
+        # ntrain=None keeps arms.load_fits' own default (N_TRAIN) -- byte-identical to the previous call.
+        # Stage C passes the run's --ntrain so that Chat comes from the SAME channel set the GMM arms were
+        # fitted on (10_SPEC A3, equal budget); with N'=1.6e5 fits the default would find no file at all.
+        Chat = A.load_fits(testbed, prior, Nr, *( () if ntrain is None else (ntrain,) ))[("full", 32)]["Chat"]
         sp = ScorePrior(ckpt, Nr, Nt, Chat, device=device, psd_project=psd_project)
         last_reason = why
         return sp

@@ -41,8 +41,10 @@ Raw file (the contract conf/code/analysis.py is written against):
 FAILED, DIVERGED AND NON-CONVERGED BLOCKS ARE NEVER DROPPED (01_RULES §5); they are flagged, never removed.
 """
 import argparse
+import glob
 import multiprocessing as mp
 import os
+import re
 import sys
 import time
 
@@ -125,10 +127,11 @@ def stats_obj(rx):
     return p if (getattr(rx, "exact_prior", False) and hasattr(p, "reset_stats")) else None
 
 
-def score_prior(testbed, prior, Nr, Nt, ckpt=None):
+def score_prior(testbed, prior, Nr, Nt, ckpt=None, psd_project=False, ntrain=None):
     """Module H of M-ours-dscore.  score.py is authoritative; its signature is
 
-        score.load_prior(testbed, prior, Nr, Nt, rung=None, attempt=None, ckpt=None, device="cpu")
+        score.load_prior(testbed, prior, Nr, Nt, rung=None, attempt=None, ckpt=None, device="cpu",
+                         psd_project=False, ntrain=None)
             -> a ScorePrior, or None when no GATE-PASSING checkpoint exists.
 
     device is always "cpu": the receiver is CPU/complex128 for EVERY arm (01_RULES §9.3).  rung/attempt are
@@ -146,7 +149,10 @@ def score_prior(testbed, prior, Nr, Nt, ckpt=None):
         return None, ("ABSENT -- score.load_prior does not exist; the 06_SPEC §1 contract "
                       "(M-ours-dscore = the gate-passing checkpoint) cannot be honoured")
     try:
-        p = fn(testbed, prior, Nr, Nt, rung=None, attempt=None, ckpt=ckpt, device="cpu")
+        kw = dict(psd_project=True) if psd_project else {}      # Stage C V1 / (F1); default path unchanged
+        if ntrain is not None and ntrain != C.N_TRAIN:
+            kw["ntrain"] = ntrain          # equal budget: Chat from the SAME fits the GMM arms use (10_SPEC A3)
+        p = fn(testbed, prior, Nr, Nt, rung=None, attempt=None, ckpt=ckpt, device="cpu", **kw)
     except Exception as ex:
         return None, f"ABSENT -- score.load_prior raised ({type(ex).__name__}: {ex})"
     why = str(getattr(score, "last_reason", "") or "")          # score.py's own account of the decision
@@ -182,7 +188,78 @@ def fit_cost_meta(testbed, fits):
     return out
 
 
-def build_point(testbed, cell, prior, snr, ntrain=C.N_TRAIN, beta=C.BETA, t_in=C.T_IN, ckpt=None):
+# ----------------------------------------------------------------------------- per-arm training budget (10_SPEC A3)
+# "학습 prior 의 예산을 N' 로 올리면 GMM 도 같은 N' 로 재적합한다" -- and while that re-fit is still running,
+# a table can hold arms at DIFFERENT budgets.  10_SPEC A3 therefore requires the budget of every arm to be
+# readable in the header, so a not-equal-budget comparison cannot be mistaken for an equal-budget one.
+BUDGET_NOTE = ("training budget (N_train, channel samples) of EVERY arm -- 10_SPEC A3.  The GMM arms and the "
+               "learned arms are only equal-budget when their N_train below are EQUAL; read the numbers, not "
+               "the arm names.  The GMM re-fit at N'=1.6e5 may not have finished when this table was written.")
+GMM_BUDGET_ARMS = ("R0-pilot", "R1-turbo", "R2-ours-G", "R4-scvamp", "R4-llr", "M-ours-G",
+                   "M-ours-gmm32", "M-ours-bstar", "M-ours-bstar-scalar")
+EXACT_BUDGET_ARMS = ("M-ours-score", "R6-exactEP")
+
+
+def gate_verdict(ckpt):
+    """The RECORDED gate verdict of a checkpoint, quoted verbatim from conf/results/gate_*.txt and
+    conf/LADDER*.md.  Nothing is re-measured and no threshold is touched here: this only surfaces what the
+    gate stage already wrote, so a table row naming a learned arm also names its gate row (10_SPEC §5).
+    A checkpoint no gate file mentions is reported as UNVERIFIED -- never as silently fine."""
+    base = os.path.basename(str(ckpt or ""))
+    if not base:
+        return "n/a (no checkpoint)"
+    hits = []
+    for p in sorted(glob.glob(os.path.join(C.CONF, "results", "gate_*.txt"))
+                    + glob.glob(os.path.join(C.CONF, "LADDER*.md"))):
+        try:
+            with open(p, errors="replace") as f:
+                for line in f:
+                    # DIVERGED is in the list because 10_SPEC §3d makes it a COMPLETED attempt with
+                    # a recorded verdict (LADDER_C.md already carries three).  Without it a diverged
+                    # checkpoint reads back as "NO GATE RECORD ... UNVERIFIED", i.e. as an unknown
+                    # rather than as the known-bad thing the ladder already says it is.
+                    if base in line and re.search(r"\b(PASS|FAIL|ABORTED|DIVERGED)\b", line):
+                        hits.append(f"[{os.path.basename(p)}] " + " ".join(line.split())[:220])
+        except OSError:
+            continue
+    return " || ".join(hits[:3]) if hits else (
+        f"NO GATE RECORD mentions {base} -- UNVERIFIED here.  (GA-GD are measurable on D1 only, 10_SPEC §5: "
+        f"a D2 re-train is qualified by its D1 sibling's gate row, which this string cannot prove.)")
+
+
+def learned_budget(sp, ckpt):
+    """N_train of a LEARNED arm, taken from the checkpoint's own 'rung' tag (score.train writes e.g.
+    'D2SX10000' / 'SX160000'), plus the checkpoint path and its recorded gate verdict.  When the tag
+    carries no sample count the string says UNKNOWN -- it never guesses a budget."""
+    st = getattr(sp, "st", None) or {}
+    rung = str(st.get("rung", "?"))
+    m = re.search(r"(\d{3,})", rung)
+    n = m.group(1) if m else f"UNKNOWN (checkpoint rung tag {rung!r} carries no sample count)"
+    p = str(getattr(sp, "ckpt", None) or ckpt or "?")
+    return f"N_train={n}  rung={rung}  ckpt={p}  gate: {gate_verdict(p)}"
+
+
+def budget_meta(arm_names, ntrain, learned):
+    """meta|budget|<arm> for every arm at this point (analysis.py prints them in the table header)."""
+    out = {"budget_note": BUDGET_NOTE}
+    for k in arm_names:
+        if k in learned:
+            out[f"budget|{k}"] = learned[k]
+        elif k in GMM_BUDGET_ARMS:
+            out[f"budget|{k}"] = f"N_train={ntrain} -- the ONE channel set (GMM EM fit / its sample covariance Chat)"
+        elif k in EXACT_BUDGET_ARMS:
+            out[f"budget|{k}"] = "N_train=n/a -- EXACT / TRUE prior, fits nothing (oracle)"
+        elif k == "R3-bigamp":
+            out[f"budget|{k}"] = "N_train=0 -- i.i.d. CN(0,1/Nr) prior, fits nothing"
+        elif k == "R5-genie":
+            out[f"budget|{k}"] = "N_train=n/a -- genie: the true H is given"
+        else:
+            out[f"budget|{k}"] = f"N_train={ntrain} -- unclassified arm, quoting the point's channel-set size"
+    return out
+
+
+def build_point(testbed, cell, prior, snr, ntrain=C.N_TRAIN, beta=C.BETA, t_in=C.T_IN, ckpt=None,
+                stagec_ckpt=None):
     """Every arm of `testbed` at one (cell, prior, SNR) point, all sharing one pilot matrix (06_SPEC §2).
 
     D1: R0 R1 R2 R3 R4-scvamp R4-llr R5-genie R6-exactEP + M-ours-{gmm32,bstar,score,dscore}
@@ -206,23 +283,51 @@ def build_point(testbed, cell, prior, snr, ntrain=C.N_TRAIN, beta=C.BETA, t_in=C
         arms["R3-bigamp"] = A.R3BiGAMP(Nr, Nt, T, Tp, sigma2, code, Xp, beta=beta, t_in=t_in)
         cfgs["R3-bigamp"] = dict(arms["R3-bigamp"].cfg_dump, arm="R3-bigamp")
 
-    sp, why = (score_prior(testbed, prior, Nr, Nt, ckpt) if Nr == 8
+    sp, why = (score_prior(testbed, prior, Nr, Nt, ckpt, ntrain=ntrain) if Nr == 8
                else (None, "ABSENT -- M-ours-dscore only: " + NO_SCORE))
+    # Stage C (10_SPEC §3b/§3c).  STRICTLY OPT-IN: with stagec_ckpt=None nothing below is built and the arm
+    # set of this point is exactly the pre-registered one.  --stagec-ckpt is a SEPARATE flag from --ckpt, so
+    # turning Stage C on never changes what M-ours-dscore is (its pre-registered judgement stays untouched).
+    spc = spc1 = None
+    sc_why = "not requested (--stagec-ckpt not given) -- arm set is the pre-registered one"
+    if stagec_ckpt:
+        if Nr != 8:
+            sc_why = "ABSENT -- M-ours-dscore-C-* only: " + NO_SCORE
+        else:
+            spc, sc_why = score_prior(testbed, prior, Nr, Nt, stagec_ckpt, ntrain=ntrain)
+            spc1, w1 = score_prior(testbed, prior, Nr, Nt, stagec_ckpt, psd_project=True, ntrain=ntrain)
+            sc_why += " | V1 (psd_project=True): " + w1
     # `true` (not `true if Nr == 8`): the oracle score arm is closed-form and array-size independent.
-    our, ocfg, meta, hp, _ = A.build_our_arms(*a, ntrain=ntrain, true_prior=true, score_prior=sp)
+    our, ocfg, meta, hp, _ = A.build_our_arms(*a, ntrain=ntrain, true_prior=true, score_prior=sp,
+                                              score_prior_c=spc, score_prior_v1=spc1,
+                                              bstar_scalar=bool(stagec_ckpt))
     arms.update(our)
     cfgs.update(ocfg)
     # An arm that is not built must leave a trace with the REASON, or the analysis sees a missing row and
     # cannot tell "not built" from "dropped" (01_RULES §6, 06_SPEC §1).
     meta["dscore_status"] = why
+    meta["stagec_status"] = sc_why
+    meta["ntrain"] = float(ntrain)
     meta.update(fit_cost_meta(testbed, fits))
+    if stagec_ckpt:
+        meta["stagec_ckpt"] = str(stagec_ckpt)
+        meta["stagec_gate"] = gate_verdict(stagec_ckpt)
+    learned = {}
     if sp is not None:
-        st = getattr(sp, "st", None) or {}
         meta["dscore_ckpt"] = str(getattr(sp, "ckpt", None) or ckpt or "?")
-        if "wall_sec" in st:            # score.train's wall-clock = the TRAINING cost of M-ours-dscore
-            meta["fit_sec|M-ours-dscore"] = float(st["wall_sec"])
+        learned["M-ours-dscore"] = learned_budget(sp, ckpt)
+    for k, o, cp in (("M-ours-dscore-C-V0", spc, stagec_ckpt), ("M-ours-dscore-C-V4", spc, stagec_ckpt),
+                     ("M-ours-dscore-C-V1", spc1, stagec_ckpt)):
+        if o is not None:
+            learned[k] = learned_budget(o, cp)
+    for k, o in (("M-ours-dscore", sp), ("M-ours-dscore-C-V0", spc), ("M-ours-dscore-C-V4", spc),
+                 ("M-ours-dscore-C-V1", spc1)):
+        st = getattr(o, "st", None) or {}
+        if "wall_sec" in st:            # score.train's wall-clock = the TRAINING cost of the learned arm
+            meta[f"fit_sec|{k}"] = float(st["wall_sec"])
+    meta.update(budget_meta(arms, ntrain, learned))
     return dict(arms=arms, cfgs=cfgs, meta=meta, gen=gen, code=code, pil=pil, Xp=Xp, fits=fits,
-                Nr=Nr, Nt=Nt, T=T, Tp=Tp, sigma2=sigma2, dscore=why)
+                Nr=Nr, Nt=Nt, T=T, Tp=Tp, sigma2=sigma2, dscore=why, stagec=sc_why)
 
 
 # ----------------------------------------------------------------------------- run: the real grid
@@ -230,14 +335,14 @@ def run_task(task):
     """One (point, skip, chunk).  The trials that a previous chunk consumed are REGENERATED from the same
     common.trial_rng stream and then dropped, so chunks concatenate and every arm at a point sees the same
     (H, u, perm, Y) -- paired inside a cell (01_RULES §5, test C4)."""
-    testbed, cell, prior, snr, skip, n, ntrain, beta, t_in, iters, arm_sel, ckpt = task
+    testbed, cell, prior, snr, skip, n, ntrain, beta, t_in, iters, arm_sel, ckpt, stagec_ckpt = task
     c = C.CELLS[cell]
     pil = C.make_pilots(testbed, prior, c["Nt"], c["Tp"], c["Nr"])[0]   # cheap; the build is not
     out = raw_file(testbed, cell, prior, pil, snr, skip, n)
     if os.path.exists(out):
         return f"exists  {os.path.basename(out)}"                      # FINISHED CHUNKS ARE SKIPPED
     t0 = time.time()
-    P = build_point(testbed, cell, prior, snr, ntrain, beta, t_in, ckpt)
+    P = build_point(testbed, cell, prior, snr, ntrain, beta, t_in, ckpt, stagec_ckpt)
     code, gen = P["code"], P["gen"]
     first = P["arms"]["R5-genie"]                       # transmit() is arm-independent; use one object
     arms = {k: v for k, v in P["arms"].items() if (not arm_sel or k in arm_sel)}
@@ -308,14 +413,18 @@ def cmd_run(a):
     for cell in cells:
         if C.CELLS[cell]["Nr"] != 8:
             print(f"[run] {cell}: M-ours-dscore -> {NO_SCORE}  (M-ours-score is the closed-form ORACLE and DOES run here)", flush=True)
-    _, why = score_prior(testbed, prior, 8, C.NT, a.ckpt)
+    _, why = score_prior(testbed, prior, 8, C.NT, a.ckpt, ntrain=a.ntrain)
     print(f"[run] M-ours-dscore: {why}", flush=True)
     if why.startswith("ABSENT"):
         print("[run] M-ours-dscore is NOT in this run.  The reason is written to every raw file as "
               "'meta|dscore_status', so analysis.py reports its slot as BLOCKED / FAILED-VERIFICATION "
               "instead of quietly printing a table without it (01_RULES §6).", flush=True)
 
-    tasks = [pt + (s, min(a.chunk, a.n - s), a.ntrain, a.beta, a.tin, a.iters, a.arm, a.ckpt)
+    if a.stagec_ckpt:
+        print(f"[run] Stage C arms ON (10_SPEC §3b/§3c): M-ours-dscore-C-{{V0,V1,V4}} + the mandatory GMM "
+              f"control M-ours-bstar-scalar, from {a.stagec_ckpt}", flush=True)
+        print(f"[run] Stage C gate record: {gate_verdict(a.stagec_ckpt)}", flush=True)
+    tasks = [pt + (s, min(a.chunk, a.n - s), a.ntrain, a.beta, a.tin, a.iters, a.arm, a.ckpt, a.stagec_ckpt)
              for pt in pts for s in range(0, a.n, a.chunk)]
     tasks = [(testbed,) + t for t in tasks]
     tasks.sort(key=lambda t: (t[4], -C.CELLS[t[1]]["Nr"]))   # first chunks of every point early; 8x4 first
@@ -343,7 +452,8 @@ def cmd_smoke(a):
     for cell in (a.cell or ["C1"]):
         snr = float((a.snr or [C.CELLS[cell]["snrs"][-1]])[0])
         t0 = time.time()
-        P = build_point(testbed, cell, prior, snr, a.ntrain, a.beta, a.tin, a.ckpt)
+        P = build_point(testbed, cell, prior, snr, a.ntrain, a.beta, a.tin, a.ckpt, a.stagec_ckpt)
+        print(f"[smoke] {cell}: Stage C: {P['stagec']}", flush=True)
         print(f"[smoke] {testbed} {cell} prior={prior} snr={snr:g} pilots={P['pil']} "
               f"({P['Nr']}x{P['Nt']}, T={P['T']}, Tp={P['Tp']}): {len(P['arms'])} arms "
               f"{sorted(P['arms'])}  build {time.time() - t0:.1f} s", flush=True)
@@ -864,6 +974,12 @@ def main(argv=None):
     ap.add_argument("--attempt", type=int, default=None, help="attempt inside a rung (max 3); train: default 1, "
                                                              "gate: default = every attempt present")
     ap.add_argument("--ckpt", default=None, help="explicit checkpoint path for train/gate/run")
+    ap.add_argument("--stagec-ckpt", default=None,
+                    help="Stage C (10_SPEC §3b/§3c), run/smoke: ADD M-ours-dscore-C-V0 (D-14 matrix site), "
+                         "-C-V1 (psd_project=True), -C-V4 (hsite=scalar, scal=belief) built from THIS "
+                         "checkpoint, plus the mandatory GMM control M-ours-bstar-scalar.  OPT-IN: without "
+                         "it the arm set is exactly the pre-registered one, and --ckpt / M-ours-dscore are "
+                         "untouched either way.  Requires --tag (Stage C writes raw_C/, tables_D2_C.txt).")
     ap.add_argument("--tag", default="", help="route EVERY output (raw/, ckpt/, LADDER, gates, sigma grid, "
                                               "tests, lemma, D2 fits) to suffixed paths")
     ap.add_argument("--force-regrid", action="store_true",
@@ -889,11 +1005,23 @@ def main(argv=None):
                                      ("beta", a.beta != C.BETA), ("tin", a.tin != C.T_IN),
                                      ("arm", a.arm is not None), ("ntrain", a.ntrain != C.N_TRAIN),
                                      ("restarts", a.restarts != RESTARTS),
-                                     ("fit-iters", a.fit_iters != FIT_ITERS)) if v]
+                                     ("fit-iters", a.fit_iters != FIT_ITERS),
+                                     # --stagec-ckpt ADDS arms to the point, so it changes the frozen arm
+                                     # set: it may never write the pre-registered raw/ or tables_D2.txt.
+                                     ("stagec-ckpt", a.stagec_ckpt is not None)) if v]
     if changed and a.cmd in ("run", "fit") and not a.tag:
         sys.exit(f"refusing to write the pre-registered output with {', '.join(changed)} -- pass --tag X "
                  "(01_RULES §5: the configuration is frozen before the run and not changed afterwards, and "
                  "the diffusion arm gets no more data or budget than the GMM arm)")
+    if a.stagec_ckpt:
+        # 10_SPEC A5: the confirmatory BLER runs ONCE.  score.load_prior reports a bad path as "ABSENT"
+        # and the run would then quietly produce a table with V0/V1/V4 missing -- and there is no second
+        # run to notice it in.  Resolve the path against conf/ and refuse a missing file here instead.
+        p = a.stagec_ckpt if os.path.exists(a.stagec_ckpt) else os.path.join(C.CONF, a.stagec_ckpt)
+        if not os.path.isfile(p):
+            sys.exit(f"--stagec-ckpt {a.stagec_ckpt}: no such file (tried it as given and under {C.CONF}). "
+                     "Refusing: the Stage C score arms would be silently ABSENT from the whole run.")
+        a.stagec_ckpt = os.path.abspath(p)
     _init(a.tag)
     for d in ("results", "raw", "logs", "figs", "ckpt"):
         os.makedirs(os.path.join(C.CONF, d), exist_ok=True)

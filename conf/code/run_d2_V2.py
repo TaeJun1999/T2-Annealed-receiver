@@ -43,15 +43,24 @@ a = ap.parse_args()
 
 tag = f"V2_N{a.ntrain}_a{a.attempt}"
 ck = os.path.join(C.CONF, "ckpt", f"d2sx_{tag}.pt")
-lg = os.path.join(C.CONF, "logs", f"train_V2_D2_N{a.ntrain}.log")
+lg = os.path.join(C.CONF, "logs", f"train_V2_D2_N{a.ntrain}_a{a.attempt}.log")
 print(f"[V2] ntrain={a.ntrain} attempt={a.attempt} device={a.device} "
       f"CUDA_VISIBLE_DEVICES={os.environ.get('CUDA_VISIBLE_DEVICES', '<unset>')}", flush=True)
 print(f"[V2] hp = {HP}", flush=True)
 print(f"[V2] ckpt {ck}\n[V2] log  {lg}", flush=True)
 
+
+# 10_SPEC_stageC §3d fallback ladder, keyed on the attempt number.  attempt 1 = frozen recipe;
+# 2 = + global grad-norm clip 1.0;  3 = + clip 1.0 and lr/3.  The numbers live in score.py and
+# are NOT searched here.  Applying them is automatic so no one can pick a rung by hand.
+_i = min(max(a.attempt, 1), 3) - 1
+GRAD_CLIP = score.GRAD_CLIP_LADDER[_i]
+HP["lr"] = HP["lr"] / score.LR_DIV_LADDER[_i]
+print(f"[fallback §3d] attempt={a.attempt} grad_clip={GRAD_CLIP} lr={HP['lr']:.6e}", flush=True)
+
 res = score.train(f"D2V2{a.ntrain}", a.attempt, "D2", PRIOR, NR, NT, device=a.device, hp=HP, resume=True,
                   ntrain=a.ntrain, max_epochs=a.max_epochs, patience=20, min_epochs=200,
-                  log_path=lg, ckpt=ck, verbose=True)
+                  log_path=lg, ckpt=ck, verbose=True, grad_clip=GRAD_CLIP)
 print(f"[V2] trained {res['epochs']} ep, best val {res['val_loss']:.6e}, {res['wall_sec']:.0f} s "
       f"({res['sec_per_epoch']:.2f} s/ep), stopped_by={res['stopped_by']}, aborted={res['aborted']}",
       flush=True)

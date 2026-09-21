@@ -67,6 +67,28 @@ ARMS = {
            "M-ours-gmm32", "M-ours-bstar", "M-ours-dscore", "R5-genie"),
 }
 M_ARMS = ("M-ours-gmm32", "M-ours-bstar", "M-ours-score", "M-ours-dscore")
+
+# Stage C (10_SPEC §3b / §3c).  These arms exist only in a run launched with --stagec-ckpt, so they are NOT
+# part of ARMS: _pool() appends them and _present() then keeps only the ones actually in the raw files.  A
+# pre-registered run therefore produces a byte-identical table -- none of these names can appear in it.
+STAGEC_ARMS = ("M-ours-dscore-C-V0", "M-ours-dscore-C-V1", "M-ours-dscore-C-V4", "M-ours-bstar-scalar")
+STAGEC_NOTES = {
+    "M-ours-dscore-C-V0": "Stage C V0 (PRIMARY) -- learned prior at N', D-14 MATRIX site, pre-registered score wiring, unchanged",
+    "M-ours-dscore-C-V1": "Stage C V1 -- V0 + (F1) symmetric-PSD projection of the D-14 site (ScorePrior(psd_project=True))",
+    "M-ours-dscore-C-V4": "Stage C V4 -- D-14 matrix site REPLACED by the D-13 belief scalarisation (hsite=scalar, scal=belief); "
+                          "POST-HOC registered, observed in the H4 diagnostic BEFORE registration (10_SPEC §3c)",
+    "M-ours-bstar-scalar": "Stage C CONTROL (10_SPEC §3c, MANDATORY) -- the b* GMM through V4's EXACT wiring: if scalarisation "
+                           "also helps the GMM, the gain belongs to the SITE, not to the learned prior",
+}
+
+
+def _pool(testbed):
+    """Arm order of the tables: the pre-registered set with the Stage C arms slotted in just above the
+    bound arm (R6-exactEP / R5-genie), which stays last."""
+    p = list(ARMS[testbed])
+    return p[:-1] + list(STAGEC_ARMS) + p[-1:]
+
+
 PILOT1 = "R0-pilot@1"          # alias injected by load_raw: R0-pilot read at iteration index 0
 REF = "R2-ours-G"              # the "our model" baseline; table A quotes every gain against it
 
@@ -170,7 +192,7 @@ def _present(data, cell, prior, testbed):
     one point cannot be paired or interpolated across the grid, so it is listed as absent instead of
     being silently averaged over a shorter grid (01_RULES §6: its slot stays FAILED-VERIFICATION)."""
     ss = _points(data, cell, prior)
-    return [a for a in ARMS[testbed] if all(a in data[(cell, prior, s)] for s in ss)]
+    return [a for a in _pool(testbed) if all(a in data[(cell, prior, s)] for s in ss)]
 
 
 def _rows(present):
@@ -239,6 +261,11 @@ def table_A(data, meta, testbed, out):
         Nr, T, Tp = cfg.get("Nr", "?"), cfg.get("T", "?"), cfg.get("Tp", "?")
         K = NT * (T - Tp) - 6 if isinstance(T, int) else "?"
         pres = _present(data, cell, prior, testbed)
+        # Arm-label column width.  16 is the PRE-REGISTERED width and stays 16 for every pre-registered
+        # arm set (longest label "M-ours-dscore" / "pilot_C (@16)" = 13), so tables_D1/D2.txt regenerate
+        # byte-identically; only the 18-19 char Stage C names widen it, instead of running 2-3 columns
+        # ragged and mis-aligning every number under the SNR headers.
+        W = max(16, max((len(x) for x in list(pres) + [l for _, _, l in _rows(pres)]), default=0))
         if not pres:
             _p(out, f"\n--- cell {cell}  prior {prior}: no arm of the {testbed} set is present at every SNR point -> no table")
             continue
@@ -246,12 +273,16 @@ def table_A(data, meta, testbed, out):
         m = meta.get((cell, prior), {})
         _p(out, f"\n--- cell {cell} ({Nr}x{NT}, T={T}, Tp={Tp}, K={K})  prior {prior}  testbed {testbed}"
                 f"   n per SNR: {ns}   b* = {m.get('bstar', 'n/a')}")
-        missing = [a for a in ARMS[testbed] if a not in pres]
+        # Once a run ASKED for Stage C (meta|stagec_ckpt is present) a Stage C arm that is not in the raw
+        # files is an absence that must be traced, not an arm that was never requested (01_RULES §6).  In a
+        # pre-registered run the key is absent and this list is exactly ARMS[testbed], as before.
+        want = list(ARMS[testbed]) + (list(STAGEC_ARMS) if "stagec_ckpt" in m else [])
+        missing = [a for a in want if a not in pres]
         if missing:
             _p(out, f"  arms absent from the raw files (see 01_RULES §6 -- BLOCKED / FAILED-VERIFICATION): {missing}")
-        _p(out, f"  {'arm':<16}" + "".join(("SNR %+.0f dB" % s).center(37) for s in snrs))
+        _p(out, f"  {'arm':<{W}}" + "".join(("SNR %+.0f dB" % s).center(37) for s in snrs))
         for arm, it, lab in _rows(pres):
-            _p(out, f"  {lab:<16}" + "".join(f"{_cellfield(data[(cell, prior, s)][arm], it, ns[i]):^37}"
+            _p(out, f"  {lab:<{W}}" + "".join(f"{_cellfield(data[(cell, prior, s)][arm], it, ns[i]):^37}"
                                              for i, s in enumerate(snrs)))
 
         # -- per-point detail rows, exp_0921_analysis.row verbatim (full BLER trajectory + fail classes)
@@ -269,7 +300,7 @@ def table_A(data, meta, testbed, out):
         _p(out, f"  SIGN CONVENTION (spelled out the same way as table B, so it cannot be read inverted): the number is")
         _p(out, f"  SNR@0.1(this arm) MINUS SNR@0.1({REF}).  + dB = this arm needs MORE SNR than {REF} to reach")
         _p(out, f"  BLER 0.1;  - dB = it needs LESS.")
-        _p(out, f"    {'arm':<16} {'SNR@0.1':>8}   SNR@0.1 gap (this arm minus {REF})")
+        _p(out, f"    {'arm':<{W}} {'SNR@0.1':>8}   SNR@0.1 gap (this arm minus {REF})")
         for arm, it, lab in _rows(pres):
             gk = _gkey(arm, it)
             bl = [data[(cell, prior, s)][gk]["blk_err"][:, -1].mean() for s in snrs]
@@ -278,7 +309,7 @@ def table_A(data, meta, testbed, out):
                 g = "-- (reference)" if gk == REF else "n/a (needs >= 2 SNR points)"
             else:
                 g = gain(data, cell, prior, snrs, gk, REF)["text"]
-            _p(out, f"    {lab:<16} {at:>8}   {g}")
+            _p(out, f"    {lab:<{W}} {at:>8}   {g}")
 
         # -- failure classes.  exp_0921 fail_classes splits the @16 failures into stuck / cyc2 / other;
         #    'diverged' is the arm's OWN flag and is reported beside them (it is not carved out of them).
@@ -302,7 +333,7 @@ def table_A(data, meta, testbed, out):
         # -- clip firing rates
         _p(out, "\n  clip firing rates, mean over trials x iterations "
                 "(tauL = variance-floor clip of the detector site, alphaD = alpha^D clip to [eps, 1-eps]):")
-        _p(out, f"    {'arm':<16}" + "".join(f"{('%+.0f dB' % s):>18}" for s in snrs))
+        _p(out, f"    {'arm':<{W}}" + "".join(f"{('%+.0f dB' % s):>18}" for s in snrs))
         for a in pres:
             cells_ = []
             for s in snrs:
@@ -310,11 +341,11 @@ def table_A(data, meta, testbed, out):
                 t = float(np.mean(v["tauL_clip_frac"])) if "tauL_clip_frac" in v else np.nan
                 al = float(np.mean(v["alphaD_clip"])) if "alphaD_clip" in v else np.nan
                 cells_.append(f"{t:8.4f}/{al:<8.4f}")
-            _p(out, f"    {a:<16}" + "".join(f"{c:>18}" for c in cells_))
+            _p(out, f"    {a:<{W}}" + "".join(f"{c:>18}" for c in cells_))
 
         # -- 08_SPEC §5: a mean over a subset is only printed NEXT TO the mean over everything
         _p(out, "\n  NMSE_H@16 median, WITH and WITHOUT the failed blocks (08_SPEC §5: both versions, never only one):")
-        _p(out, f"    {'arm':<16}" + "".join(f"{('%+.0f dB' % s):>24}" for s in snrs) + "     [all blocks / success-only]")
+        _p(out, f"    {'arm':<{W}}" + "".join(f"{('%+.0f dB' % s):>24}" for s in snrs) + "     [all blocks / success-only]")
         for a in pres:
             cells_ = []
             for s in snrs:
@@ -323,12 +354,12 @@ def table_A(data, meta, testbed, out):
                 allm = np.nanmedian(v["nmse"][:, -1]) if np.isfinite(v["nmse"][:, -1]).any() else np.nan
                 okm = np.nanmedian(v["nmse"][ok, -1]) if (ok.any() and np.isfinite(v["nmse"][ok, -1]).any()) else np.nan
                 cells_.append(f"{allm:.3e}/{okm:.3e}")
-            _p(out, f"    {a:<16}" + "".join(f"{c:>24}" for c in cells_))
+            _p(out, f"    {a:<{W}}" + "".join(f"{c:>24}" for c in cells_))
 
         # -- fit / training cost, never blank
         _p(out, "\n  fit / training cost (GMM EM wall-clock, seconds; 01_RULES §5 -- not hidden, 'n/a' where there is no fit):")
         for a in pres:
-            _p(out, f"    {a:<16} {fit_cost(m, a)} s")
+            _p(out, f"    {a:<{W}} {fit_cost(m, a)} s")
     return "\n".join(out)
 
 
@@ -352,6 +383,12 @@ def pair_list(testbed, present):
     P += [(REF, "R4-scvamp", REF), ("R4-llr", "R4-scvamp", "R4-llr"), (REF, "R3-bigamp", REF)]
     top = "R6-exactEP" if testbed == "D1" else "R5-genie"          # headroom: D1 = exact EP, D2 = genie only
     P += [(a, top, top) for a in M_ARMS]
+    # Stage C, pre-registered in 10_SPEC §6 (comparisons 1-3) and §3c ("1차 비교").  Same anchoring rule:
+    # the BASELINE member of the pair fixes the decision SNRs.  Filtered out below when the arms are absent,
+    # so a pre-registered run's table B is unchanged.
+    P += [(REF, a, REF) for a in STAGEC_ARMS]
+    P += [("M-ours-bstar", a, "M-ours-bstar") for a in STAGEC_ARMS]   # incl. the site-effect control pair
+    P += [(a, top, top) for a in STAGEC_ARMS]
     return [(x, y, z) for x, y, z in P if x in present and y in present]
 
 
@@ -531,6 +568,28 @@ def _head(testbed, data, meta):
         "fit/training cost (GMM EM wall-clock) is a column of table A and is never left blank.",
         "aggregates KEEP failed and diverged blocks; where a subset mean is printed, the full-set mean is beside it.",
     ]
+    seen_arms = {k[7:] for m in meta.values() for k in m if k.startswith("budget|")}
+    stagec = [a for a in STAGEC_ARMS if a in seen_arms]
+    if stagec:
+        extra.append("Stage C arms present in this run (10_SPEC §3b / §3c) -- the pre-registered Stage A/B verdicts are")
+        extra.append("UNCHANGED by this file and M-ours-dscore stays BLOCKED in the pre-registered table:")
+        extra += [f"  {a:<20}: {STAGEC_NOTES[a]}" for a in stagec]
+    # 10_SPEC A3: the training budget of EVERY arm, printed, because the GMM re-fit at N'=1.6e5 may not be
+    # finished and then some comparisons below are NOT equal-budget and must be readable as such.
+    bud, note = {}, ""
+    for m in meta.values():
+        note = str(m.get("budget_note", note))
+        for k, v in m.items():
+            if k.startswith("budget|"):
+                bud.setdefault(k[7:], set()).add(str(v))
+    if bud:
+        extra += ["", note, "per-arm training budget (arms absent from the raw files are simply not listed):"]
+        for a in _pool(testbed):
+            for v in sorted(bud.get(a, ())):
+                extra.append(f"  {a:<20}: {v}")
+        for k in ("dscore_ckpt", "dscore_status", "stagec_ckpt", "stagec_gate", "stagec_status"):
+            for v in sorted({str(m[k]) for m in meta.values() if k in m}):
+                extra.append(f"  {k:<20}: {v}")
     for cell, prior in _groups(data):
         snrs = _points(data, cell, prior)
         c = CELLS.get(cell, {})

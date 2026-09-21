@@ -134,11 +134,22 @@ def module_h_priors(testbed, prior, Nr, Nt, ntrain=N_TRAIN, true_prior=None):
 
 
 def build_our_arms(testbed, prior, Nr, Nt, T, Tp, sigma2, code, Xp, ntrain=N_TRAIN,
-                   true_prior=None, score_prior=None, with_G=False, score_prior_v1=None):
+                   true_prior=None, score_prior=None, with_G=False, score_prior_v1=None,
+                   score_prior_c=None, bstar_scalar=False):
     """M-ours-gmm32 / M-ours-bstar / M-ours-score (D1 only) / M-ours-dscore / M-ours-G (test M2 only).
 
     score_prior_v1: a SECOND score.ScorePrior built with psd_project=True (Stage C V1, spec 10 §3b / (F1)).
-    It becomes the separate arm M-ours-dscore-C-V1; every other arm, M-ours-dscore included, is untouched."""
+    It becomes the separate arm M-ours-dscore-C-V1; every other arm, M-ours-dscore included, is untouched.
+
+    Stage C, OPT-IN (spec 10 §3b / §3c).  Every argument below defaults to "not built", so a caller that
+    does not ask for Stage C gets exactly the pre-registered arm set, bit for bit:
+      score_prior_c : the gate-passing Stage C checkpoint -> M-ours-dscore-C-V0 (D-14 MATRIX site, the
+                      pre-registered score wiring) and M-ours-dscore-C-V4 (D-14 REPLACED by the D-13
+                      belief scalarisation).  ONE ScorePrior drives both, exactly as code/diag_ep_site.py
+                      drives its dscore|scorew and dscore|belsc cells from one object.
+      bstar_scalar  : M-ours-bstar-scalar, the b* GMM through V4's wiring.  §3c makes this arm MANDATORY
+                      in the same run as V4: if scalarisation also helps the GMM, the gain belongs to the
+                      site, not to the learned prior."""
     hp, fits, llv, bstar, kron_K = module_h_priors(testbed, prior, Nr, Nt, ntrain)
     Cs = GaussianPrior(Nr, Nt, fits[("full", 32)]["Chat"])
     a = (Nr, Nt, T, Tp, sigma2)
@@ -152,6 +163,16 @@ def build_our_arms(testbed, prior, Nr, Nt, T, Tp, sigma2, code, Xp, ntrain=N_TRA
         arms["M-ours-dscore"] = route_a(*a, score_prior, code, Xp, "score", clip="eta")
     if score_prior_v1 is not None:
         arms["M-ours-dscore-C-V1"] = route_a(*a, score_prior_v1, code, Xp, "score", clip="eta")
+    # --- Stage C.  The three route_a() calls below are LIFTED VERBATIM from code/diag_ep_site.py, so the
+    # production arms and the diagnostic cells that measured the mechanism are provably one configuration:
+    #   diag  dscore|scorew = route_a(..., sp, "score", clip="eta")                   -> V0
+    #   diag  dscore|belsc  = route_a(..., sp, "score", clip="eta", hsite="scalar")   -> V4
+    #   diag  gmmB|belsc    = the same on hp[bstar] (raw prior, NOT .view("eta"))     -> M-ours-bstar-scalar
+    if score_prior_c is not None:
+        arms["M-ours-dscore-C-V0"] = route_a(*a, score_prior_c, code, Xp, "score", clip="eta")
+        arms["M-ours-dscore-C-V4"] = route_a(*a, score_prior_c, code, Xp, "score", clip="eta", hsite="scalar")
+    if bstar_scalar:
+        arms["M-ours-bstar-scalar"] = route_a(*a, hp[bstar], code, Xp, "score", clip="eta", hsite="scalar")
     if with_G:
         arms["M-ours-G"] = route_a(*a, Cs, code, Xp, "gaussian")
 

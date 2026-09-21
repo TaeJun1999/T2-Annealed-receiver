@@ -36,11 +36,16 @@ LAM = 1.0                                                              # §3b: F
 ap = argparse.ArgumentParser()
 ap.add_argument("--tag", default="C", help="routes the ladder log: LADDER_<tag>.md")
 ap.add_argument("--ntrain", type=int, default=NTRAIN)
+ap.add_argument("--attempt", type=int, default=1)
 ap.add_argument("--device", default="cuda")
 a = ap.parse_args()
 
-ck = os.path.join(C.CONF, "ckpt", f"d2sx_V3_N{a.ntrain}_a{ATTEMPT}.pt")
-lg = os.path.join(C.CONF, "logs", f"train_V3_D2_N{a.ntrain}.log")
+# NOTE: the rung/attempt handed to score.train stay at V0's (RUNG, ATTEMPT) so the DATA STREAM is
+# identical to V0's -- that is what makes V3 a controlled one-factor change.  The CHECKPOINT path
+# must still carry the fallback attempt number (§3d), otherwise attempt 2 would resume from the
+# diverged attempt-1 state instead of starting clean.
+ck = os.path.join(C.CONF, "ckpt", f"d2sx_V3_N{a.ntrain}_a{a.attempt}.pt")
+lg = os.path.join(C.CONF, "logs", f"train_V3_D2_N{a.ntrain}_a{a.attempt}.log")
 ladder = os.path.join(C.CONF, f"LADDER_{a.tag}.md" if a.tag else "LADDER.md")
 
 with open(lg, "a", buffering=1) as f:
@@ -51,9 +56,18 @@ with open(lg, "a", buffering=1) as f:
             f"  started {time.strftime('%Y-%m-%d %H:%M:%S %Z')}\n")
 
 print(f"[V3] ntrain={a.ntrain} lambda={LAM} ckpt={ck} log={lg} ladder={ladder}", flush=True)
+
+# 10_SPEC_stageC §3d fallback ladder, keyed on the attempt number.  attempt 1 = frozen recipe;
+# 2 = + global grad-norm clip 1.0;  3 = + clip 1.0 and lr/3.  The numbers live in score.py and
+# are NOT searched here.  Applying them is automatic so no one can pick a rung by hand.
+_i = min(max(a.attempt, 1), 3) - 1
+GRAD_CLIP = score.GRAD_CLIP_LADDER[_i]
+HP["lr"] = HP["lr"] / score.LR_DIV_LADDER[_i]
+print(f"[fallback §3d] attempt={a.attempt} grad_clip={GRAD_CLIP} lr={HP['lr']:.6e}", flush=True)
+
 res = score.train(RUNG, ATTEMPT, "D2", PRIOR, NR, NT, device=a.device, hp=HP, resume=True,
                   ntrain=a.ntrain, max_epochs=3000, patience=20, min_epochs=200, log_path=lg,
-                  ckpt=ck, verbose=True, jac_reg=LAM)
+                  ckpt=ck, verbose=True, jac_reg=LAM, grad_clip=GRAD_CLIP)
 print(f"[V3] trained {res['epochs']} ep, val {res['val_loss']:.6e}, {res['wall_sec']:.0f}s -> {ck}",
       flush=True)
 
