@@ -54,6 +54,10 @@ CELLS = {                                     # 06_SPEC_runner.md §3, priority 
     "C2": dict(Nr=8, Nt=4, T=16, Tp=4, snrs=(-3, 0, 3, 6, 9, 12, 15)),   # cross-Tp goodput
     "C3": dict(Nr=4, Nt=4, T=28, Tp=2, snrs=(9, 12, 15)),                # sanity
     "C4": dict(Nr=4, Nt=4, T=28, Tp=4, snrs=(3, 6, 9)),                  # sanity
+    # C5 fills the pilot-budget REGIME curve between C1 (Tp=2, first pass uninformative -> no prior can
+    # work, diagnosed by T2c) and C2 (Tp=4, prior works).  Same array/block as C1/C2 so Tp is the ONLY
+    # axis that moves.  Added after T2c's pre-registered diagnosis fired, not after seeing a BLER.
+    "C5": dict(Nr=8, Nt=4, T=16, Tp=3, snrs=(-3, 0, 3, 6, 9, 12, 15)),
 }
 # SNR grids are exp_0925_run.CELLS verbatim: H/H4 (8x4, T=16) -> -3..15 dB, R (4x4, T=28, Tp=2) -> 9/12/15.
 # C4 (4x4, Tp=4) has no exp_0925 counterpart -> 01_RULES §4 fallback "Tp=4 -> 0,3,6,9 dB" shifted onto the

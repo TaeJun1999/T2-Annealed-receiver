@@ -678,7 +678,8 @@ def resolve_hp(rung, attempt, testbed, Nr, Nt, prior=None, device="cpu", n_eval=
 
 
 def train(rung, attempt, testbed, prior, Nr, Nt, device="cuda", hp=None, resume=True,
-          max_epochs=3000, patience=20, min_epochs=200, log_path=None, ckpt=None, verbose=True):
+          max_epochs=3000, patience=20, min_epochs=200, log_path=None, ckpt=None, verbose=True,
+          ntrain=C.N_TRAIN):
     """One ladder attempt, exactly under the regime of 04_SPEC §2 / 01_RULES §5.
 
     Stopping: validation loss with no improvement for `patience` epochs, but never before `min_epochs`.
@@ -705,7 +706,9 @@ def train(rung, attempt, testbed, prior, Nr, Nt, device="cuda", hp=None, resume=
         hp, sel = resolve_hp(rung, attempt, testbed, Nr, Nt, prior,
                              device="cuda" if dev.type == "cuda" else "cpu")
 
-    Xtr, Xva, split_hash, pw = training_split(testbed, prior, Nr, Nt)
+    # ntrain defaults to the 1e4 budget every ladder arm gets (01_RULES §5).  It is a parameter ONLY so the
+    # report-only sample-complexity curve can vary it; no arm is ever built at a different budget.
+    Xtr, Xva, split_hash, pw = training_split(testbed, prior, Nr, Nt, ntrain)
     smin, smax, nu_grid, sig_grid = _sigma_range(testbed)
     dim = 2 * Nr * Nt
     tr = torch.as_tensor(np_pack(Xtr), dtype=torch.float32, device=dev)
