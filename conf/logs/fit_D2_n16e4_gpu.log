@@ -1,0 +1,59 @@
+[gpu-fit] 2026-09-22 05:00:36 KST start -- 4 configs the CPU run has not completed, expensive first
+
+=== equivalence test: code/gmm_em_gpu.py vs Demo/t2_gmm.py::fit_gmm_em (READ-ONLY), N'=160000, same seed ===
+A. GPU re-fit vs the CPU line printed in logs/fit_D2_n16e4.log (same task tuple, same seed)
+config                             iters     best@     reseeds       ll_train (log 3dp / gpu)         ll_val (log 3dp / gpu)    CPU s    GPU s       x
+Nr4 full K=16  kap=64  r=0     131/131     90/90       0/0            -27.346 /    -27.345790        -27.324 /    -27.323801      551        6     94x  MATCH
+Nr4 full K=64  kap=256 r=1      86/86      80/80    1230/1230         -27.183 /    -27.182980        -27.262 /    -27.261975     1459       10    154x  MATCH
+Nr4 kron K=16  kap=0   r=2     131/131     90/90       0/0            -27.718 /    -27.717825        -27.795 /    -27.794892     2780       98     29x  MATCH
+Nr4 kron K=256 kap=0   r=2     231/231    190/190      0/0            -22.879 /    -22.878627        -23.197 /    -23.196654    40009     2886     14x  MATCH
+Nr8 full K=512 kap=0   r=2     421/421    380/380      0/0            -11.193 /    -11.192596        -16.316 /    -16.315902    45951      642     72x  MATCH
+Nr8 kron K=256 kap=0   r=2     171/171    130/130      0/0            -17.818 /    -17.818396        -18.417 /    -18.416598    49105     2696     18x  MATCH
+
+B. full parameter-level comparison, CPU re-run (single-thread, as the pipeline runs it) vs GPU
+A /tmp/claude-1005/-home-HTJ-t2-Demo/1edf5ffd-1138-43ae-823b-23d3c5e8c17d/scratchpad/eq/cpu_Nr4_full16_k64_r0.npz
+B /tmp/claude-1005/-home-HTJ-t2-Demo/1edf5ffd-1138-43ae-823b-23d3c5e8c17d/scratchpad/eq/gpu_Nr4_full16_k64_r0.npz
+  n_iter        131    131   MATCH
+  it_best        90     90   MATCH
+  n_reseed        0      0   MATCH
+  ll_train       -27.345789793285     -27.345789793285   rel 1.169e-15
+  ll_val         -27.323801250930     -27.323801250930   rel 9.102e-16
+  ll_test        -27.339543921322     -27.339543921322   rel 1.040e-15
+  pi         max|dA| / max|A| = 1.292e-13    max elementwise rel = 1.292e-13
+  covs       max|dA| / max|A| = 5.236e-14    max elementwise rel = 4.104e-12
+  Chat       max|dA| / max|A| = 1.883e-15    max elementwise rel = 1.227e-14
+  ll traj    len 131/131  max rel over common prefix 2.029e-15  (at it 13)
+  sec        117.3 / 5.9  -> speedup 20.0x
+A /tmp/claude-1005/-home-HTJ-t2-Demo/1edf5ffd-1138-43ae-823b-23d3c5e8c17d/scratchpad/eq/cpu_Nr4_full64_k256_r1.npz
+B /tmp/claude-1005/-home-HTJ-t2-Demo/1edf5ffd-1138-43ae-823b-23d3c5e8c17d/scratchpad/eq/gpu_Nr4_full64_k256_r1.npz
+  n_iter         86     86   MATCH
+  it_best        80     80   MATCH
+  n_reseed     1230   1230   MATCH
+  ll_train       -27.182979608842     -27.182979608842   rel 5.881e-15
+  ll_val         -27.261975087224     -27.261975087223   rel 4.561e-15
+  ll_test        -27.194622848259     -27.194622848259   rel 6.401e-15
+  pi         max|dA| / max|A| = 6.005e-13    max elementwise rel = 4.891e-12
+  covs       max|dA| / max|A| = 7.930e-13    max elementwise rel = 8.061e-11
+  Chat       max|dA| / max|A| = 1.883e-15    max elementwise rel = 1.227e-14
+  ll traj    len 86/86  max rel over common prefix 1.006e-14  (at it 58)
+  sec        708.7 / 9.5  -> speedup 74.6x
+A /tmp/claude-1005/-home-HTJ-t2-Demo/1edf5ffd-1138-43ae-823b-23d3c5e8c17d/scratchpad/eq/cpu_Nr4_kron16_k0_r2.npz
+B /tmp/claude-1005/-home-HTJ-t2-Demo/1edf5ffd-1138-43ae-823b-23d3c5e8c17d/scratchpad/eq/gpu_Nr4_kron16_k0_r2.npz
+  n_iter        131    131   MATCH
+  it_best        90     90   MATCH
+  n_reseed        0      0   MATCH
+  ll_train       -27.717824598839     -27.717824598839   rel 5.127e-16
+  ll_val         -27.794891610328     -27.794891610328   rel 5.113e-16
+  ll_test        -27.627693186952     -27.627693186952   rel 1.672e-15
+  pi         max|dA| / max|A| = 3.232e-13    max elementwise rel = 3.300e-13
+  covs       max|dA| / max|A| = 1.834e-13    max elementwise rel = 3.886e-12
+  Chat       max|dA| / max|A| = 1.883e-15    max elementwise rel = 1.227e-14
+  ll traj    len 131/131  max rel over common prefix 1.243e-14  (at it 28)
+  sec        1521.1 / 97.5  -> speedup 15.6x
+
+tolerance: EXACT on n_iter / it_best / n_reseed (these prove the two codes took the same path);
+           ll_val, ll_train relative <= 1e-12 (smallest ll_val margin that decides the kappa/restart
+           selection in this grid is ~1e-3 nat, i.e. ~3e-5 relative -- 7 orders of margin);
+           pi, covs relative <= 1e-10.  Bitwise identity is impossible: cuBLAS and OpenBLAS reduce
+           in different orders.  Observed: ll 5e-16..6e-15, pi 1e-13..5e-12, covs 4e-12..8e-11.
+  ('S2', 8, 4, 'full', 512, 0, 0): iters 500 best@480 reseeds 0 ll_train -11.208 ll_val -16.383 (754 s)
