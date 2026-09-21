@@ -7,17 +7,31 @@ linear region below 1e-3, so negative eigenvalues and the near-zero bulk are bot
 truncated and no curve is smoothed.
 (a) D1: learned score, the TRUE prior (t2_gmm.angle_grid_prior, 32x32 = 1024 components, closed form),
     and the fitted GMM (b* = kron, K = 32, N = 1e4).  n_neg = 0 for all three at all four sigma.
-(b) D2: learned score at N = 1.6e5 and the fitted 512-component Kronecker GMM.  The learned spectrum
-    crosses zero at every sigma but the largest; mean n_neg out of 64 is annotated (10.4 / 17.0 /
-    14.1 / 0.7).  At N = 1e4 the same counts are 8.0 / 10.6 / 11.2 / 7.8.
+(b) D2: learned score at N = 1.6e5, at the FINAL checkpoint of that run, and the fitted 512-component
+    Kronecker GMM.  The learned spectrum crosses zero at all four sigma; mean n_neg out of 64 is
+    annotated (6.7 / 19.8 / 13.5 / 0.7, exactly as the log prints them).  At sigma = 0.092 the 25th
+    percentile itself is negative (-0.0104), so the drawn bar starts below the zero line: more than a
+    quarter of the 64 eigenvalues are below zero there.  At N = 1e4 the same counts are
+    8.0 / 10.6 / 11.2 / 7.8, so 16x the data moves them 8.0->6.7, 10.6->19.8, 11.2->13.5, 7.8->0.7 --
+    worse at two of the four sigma.  "More data does not fix it" is the weak reading; the measured
+    direction is not favourable.
 
-SOURCE.  logs/jacspec_D1_true.log (panel a), logs/jacspec_D2_N160000.log (panel b), with
-logs/jacspec_D2_N10000.log for the N = 1e4 counts quoted above; the table is transcribed in
-results/jac_spectrum.txt (ADDENDUM 2026-09-21 21:55 for D1).  n = 48 per grid point.
+SOURCE.  logs/jacspec_D1_true.log (panel a), logs/jacspec_D2_final.log (panel b), with
+logs/jacspec_D2_N10000.log for the N = 1e4 counts quoted above; both tables are transcribed in
+results/jac_spectrum.txt (ADDENDUM 2026-09-21 21:55 for D1, ADDENDUM 2026-09-21 23:50 for D2).
+n = 48 per grid point.
+
+WHICH D2 CHECKPOINT, AND WHY NOT THE EARLIER ONE.  Panel (b) is measured on ckpt/d2sx_N160000_a1.pt,
+the permanent checkpoint at which that run stopped (patience, 1784 epochs, best val 3.519379e-01 at
+epoch 1764).  It is NOT the epoch-240 snapshot of logs/jacspec_D2_N160000.log: that measurement was
+taken against a session-scoped temp-directory file, which the 18:20 audit flagged as irreproducible
+and which the 23:50 re-measurement supersedes.  Reproduce this panel with
+  OMP_NUM_THREADS=2 python code/jac_spectrum.py --testbed D2 --ckpt ckpt/d2sx_N160000_a1.pt --n 48
 
 GATE STATUS.  (a) uses ckpt/sx_N160000_D1.pt, which PASSES all four pre-registered gates
-(results/samplecx_D1.txt: GB 0.0027, GC 0.0999, GD 0.0718).  (b) uses the N = 1.6e5 epoch-240 snapshot
-of the D2 run, which is NOT gate-verified -- a DIAGNOSTIC PROBE on an UN-GATED checkpoint.  The D2
+(results/samplecx_D1.txt: GB 0.0027, GC 0.0999, GD 0.0718).  (b) uses the final N = 1.6e5 D2 checkpoint,
+which is NOT gate-verified and cannot be: D2 has no true score, so the GA-GD gates are D1-only
+(04_SPEC Sec.5, LADDER_C.md).  It is a DIAGNOSTIC PROBE on an UN-GATED checkpoint.  The D2
 panel licenses no arm claim; 10_SPEC_stageC Sec.3c governs what may.
 
 CAVEAT the picture cannot carry on its own.  The fitted GMM is NOT ground truth on D2 -- D2 has no

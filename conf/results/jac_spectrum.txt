@@ -161,3 +161,38 @@ THREE THINGS THIS CHANGES OR SHARPENS.
 STILL NOT ESTABLISHED.  D2 has no closed-form prior, so "the learned near-zero spectrum is closer to
 the truth than the fitted mixture's" remains unproven.  The two ground-truth-free diagnostics (GB',
 Hyvarinen) both favour the learned model on D2, which makes it plausible, not proven.
+
+====================================================================================================
+ADDENDUM 2026-09-22 00:15 -- THE MECHANISM, SHARPENED.  ASYMMETRY IS NOT THE DISCRIMINANT.
+====================================================================================================
+Drawing F8 forced a number into the open that the earlier framing had passed over: **the learned
+field is non-conservative on D1 too.**  logs/jacpsd_D1_N160000.log, same model that passes the gate:
+
+  sigma      0.033      0.090      0.245      0.669
+  D1 asym    1.88e-3    1.08e-2    3.74e-2    8.39e-2     f(lmin<0) = 0.000 at all 20 grid points
+  D2 asym    1.8e-1     2.6e-1     2.6e-1     1.6e-1      f(lmin<0) = 1.000 for sigma <= 0.2
+
+At the top of the grid D1's asymmetry is 0.084 against D2's 0.16-0.28 -- a factor of about 3, the
+SAME ORDER OF MAGNITUDE -- yet D1 never produces a single negative eigenvalue and D2 produces 7-20
+of 64.  So "denoising score matching yields a non-conservative field" is TRUE but is NOT what
+separates the two testbeds.  It is a property of the estimator on both.
+
+WHAT SEPARATES THEM IS MARGIN.  The true Jacobian's spectrum on D1 sits away from zero
+(lmin 0.938 -> 0.025 across the grid; 25th percentile 0.980 -> 0.116), so a perturbation of that size
+cannot change a sign.  On D2 the spectrum crowds zero -- the manifold structure puts 26 to 41 of the
+64 eigenvalues below 0.1 (co-dimension 40..55) -- so the same perturbation flips 7 to 20 of them.
+
+  It is not that the learned score is worse on D2.  It is that D2's geometry leaves no margin, and
+  the estimator error is roughly the same size on both.
+
+This also explains the sigma dependence WITHIN D2 without a second mechanism: f(lmin<0) falls from
+1.000 to 0.36 as sigma goes past 0.2 because smoothing by a larger noise level lifts the true
+spectrum off zero, restoring margin.  It is the same statement read along sigma instead of across
+testbeds.
+
+CONSEQUENCE FOR THE CLAIM.  The usable form is about the PRIOR's geometry, not about the learner:
+a learned score can be plugged into an EP matrix site when the target density's posterior covariance
+is bounded away from singular at the noise levels the receiver visits, and cannot when it is not.
+That is checkable before any training -- from the generative model's intrinsic dimension -- and it is
+checkable after training WITHOUT ground truth, by counting f(lmin(Herm J) < 0) on held-out samples.
+Neither check is in GA-GD.

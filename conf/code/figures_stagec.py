@@ -16,7 +16,7 @@ Every number is READ from the files below; nothing here recomputes, resamples or
   results/jac_spectrum.txt            F7 provenance (the ADDENDUM's D1 table is the log below)
   logs/jacspec_D1_true.log            F7 left   (learned / TRUE 1024-comp grid GMM / fitted GMM K=32)
   logs/jacspec_D2_N10000.log          F7 right, F8 context
-  logs/jacspec_D2_N160000.log         F7 right  (epoch-240 snapshot)
+  logs/jacspec_D2_final.log           F7 right  (ckpt/d2sx_N160000_a1.pt, 1784 ep., REPRODUCIBLE)
   logs/jacpsd_N{10000_a1,40000_a1,160000,160000_late}.log   F8, F9 top
   logs/jacpsd_D1_N160000.log          F8 contrast (gate-passing D1 checkpoint)
   logs/diag_sigma_coverage.log        F9  the measured sigma_t(SNR) link, n=12
@@ -193,12 +193,15 @@ def fig7():
     eigenvalues.  Drawn as a whisker (lmin..lmax) with a bar on the 25th-percentile..median body, so the
     reader sees the WHOLE spectrum's position relative to zero, not one order statistic."""
     d1 = jacspec("D1_true")
-    d2a = jacspec("D2_N160000")
+    d2a = jacspec("D2_final")        # ckpt/d2sx_N160000_a1.pt -- permanent ckpt, 1784 ep. (patience).
+    #  NOT jacspec_D2_N160000.log: that one was measured on /tmp/.../d2sx_N160000_snap.pt, a
+    #  session-scoped temp-dir snapshot the 18:20 audit flagged as irreproducible and which the
+    #  23:50 re-measurement supersedes (results/jac_spectrum.txt ADDENDUM 2026-09-21 23:50).
     L = [("learned  N=1.6e5 (gate-PASS)", "tab:purple", d1["diffusion"]),
          ("TRUE prior: grid GMM, 1024 comp.", "k", d1["TRUE-prior(grid GMM, 1024 comp)"]),
          ("fitted GMM  b*=kron, K=32, N=1e4", "tab:orange", d1["FITTED-GMM(b*=kron,K=32,N=10000)"])]
-    R = [("learned  N=1.6e5, ep.240 (UN-GATED)", "tab:purple", d2a["diffusion"]),
-         ("fitted GMM  b*=kron, K=512", "tab:orange", d2a["GMM-exact(b*=kron,K=512)"])]
+    R = [("learned  N=1.6e5, final 1784 ep. (UN-GATED)", "tab:purple", d2a["diffusion"]),
+         ("fitted GMM  b*=kron, K=512", "tab:orange", d2a["FITTED-GMM(b*=kron,K=512,N=10000)"])]
 
     fig, axes = plt.subplots(1, 2, figsize=(7.8, 3.7), sharey=True)
     for ax, sets, ttl in zip(axes, (L, R),
@@ -214,18 +217,25 @@ def fig7():
         ax.axhline(0.0, color="tab:red", lw=1.1)
         ax.set_xscale("log")
         ax.set_yscale("symlog", linthresh=1e-3, linscale=0.55)
-        ax.set_ylim(-1.0, 8.0)
-        ax.set_xlim(0.022, 1.35)
+        # headroom both ends: lmax reaches 5.90 (at top=8 it collided with the n_neg row and the
+        # upper whisker caps were lost) and lmin reaches -0.45, so the legend needs empty space
+        # BELOW the data -- at bottom=-1 it was sitting on top of the negative whiskers.
+        # The symlog linear band (+-1e-3, linscale 0.55) keeps its size, so widening the limits costs
+        # no resolution where it matters.  It buys two things the earlier limits (-1, 8) lost:
+        # lmax reaches 5.90 and its whisker caps were hidden under the n_neg row, and lmin reaches
+        # -0.45 and its caps were hidden under the legend.  Both ends are now clear of both.
+        ax.set_ylim(-30.0, 30.0)
+        ax.set_xlim(0.018, 1.75)   # room for the leftmost n_neg label, which was clipped at 0.022
         ax.set_xlabel(r"noise level $\sigma$ of the frozen grid")
         ax.set_title(ttl, fontsize=8.6)
         ax.legend(loc="lower left", fontsize=6.8, frameon=True, framealpha=0.9, edgecolor="none")
     axes[1].legend(loc="lower right", fontsize=6.8, frameon=True, framealpha=0.9, edgecolor="none")
     axes[0].set_ylabel(r"eigenvalues of $\mathrm{sym}(J_r)$" "\n" r"(n=48 samples $\times$ 64 each)")
-    axes[0].text(0.024, 4e-4, "zero", fontsize=6.6, color="tab:red")
-    axes[0].text(0.40, 0.36, r"$n_{\rm neg}=0$ for all three models" "\n" r"at all four $\sigma$",
+    axes[0].text(0.0195, 4e-4, "zero", fontsize=6.6, color="tab:red")
+    axes[0].text(0.40, 0.29, r"$n_{\rm neg}=0$ for all three models" "\n" r"at all four $\sigma$",
                  transform=axes[0].transAxes, fontsize=7.2, color="0.25")
 
-    dl, dg = d2a["diffusion"], d2a["GMM-exact(b*=kron,K=512)"]
+    dl, dg = d2a["diffusion"], d2a["FITTED-GMM(b*=kron,K=512,N=10000)"]
     blend = blended_transform_factory(axes[1].transData, axes[1].transAxes)
     for i, s in enumerate(dl["sigma"]):
         axes[1].text(s * 10 ** -0.105, 0.965, f"$n_{{\\rm neg}}$ {dl['nneg_mean'][i]:.1f}",
@@ -237,10 +247,12 @@ def fig7():
                "eigenvalues at that $\\sigma$.  y is symlog (linear below $10^{-3}$): the sign change and the "
                "near-zero bulk are both on the page, nothing is clipped.\n"
                "On D2 at N=1e4 the same $n_{\\rm neg}$ counts are 8.0 / 10.6 / 11.2 / 7.8 "
-               "(logs/jacspec_D2_N10000.log) -- the same picture at 1/16 of the data.  The fitted GMM "
-               "on D2 stays POSITIVE but falls to $7.6\\times10^{-5}$ (per-point values beside its lower "
-               "whisker, rounded to one significant figure): it "
-               "is near the PSD boundary, not on it.")
+               "(logs/jacspec_D2_N10000.log): 16x the data moves them 8.0$\\to$6.7, 10.6$\\to$19.8, "
+               "11.2$\\to$13.5, 7.8$\\to$0.7 -- worse at two of four $\\sigma$, not merely no better.\n"
+               "At $\\sigma=0.092$ the learned 25th percentile is $-0.0104$: over a quarter of the 64 "
+               "eigenvalues are below zero, which is why that bar starts under the red line.  The fitted "
+               "GMM on D2 stays POSITIVE but falls to $7.6\\times10^{-5}$ (per-point values beside its "
+               "lower whisker, rounded to one significant figure): near the PSD boundary, not on it.")
     fig.suptitle("The EP matrix site (D-14) inverts $\\nu\\,\\mathrm{Herm}(J)$ and therefore needs $J$ "
                  "PSD.  It is, on D1.  It is not, on D2.", fontsize=9, y=1.03)
     return _save(fig, "F7_jacspectrum_D1_D2", f"""
@@ -253,17 +265,31 @@ linear region below 1e-3, so negative eigenvalues and the near-zero bulk are bot
 truncated and no curve is smoothed.
 (a) D1: learned score, the TRUE prior (t2_gmm.angle_grid_prior, 32x32 = 1024 components, closed form),
     and the fitted GMM (b* = kron, K = 32, N = 1e4).  n_neg = 0 for all three at all four sigma.
-(b) D2: learned score at N = 1.6e5 and the fitted 512-component Kronecker GMM.  The learned spectrum
-    crosses zero at every sigma but the largest; mean n_neg out of 64 is annotated (10.3 / 17.0 /
-    14.1 / 0.7, exactly as the log prints them).  At N = 1e4 the same counts are 8.0 / 10.6 / 11.2 / 7.8.
+(b) D2: learned score at N = 1.6e5, at the FINAL checkpoint of that run, and the fitted 512-component
+    Kronecker GMM.  The learned spectrum crosses zero at all four sigma; mean n_neg out of 64 is
+    annotated (6.7 / 19.8 / 13.5 / 0.7, exactly as the log prints them).  At sigma = 0.092 the 25th
+    percentile itself is negative (-0.0104), so the drawn bar starts below the zero line: more than a
+    quarter of the 64 eigenvalues are below zero there.  At N = 1e4 the same counts are
+    8.0 / 10.6 / 11.2 / 7.8, so 16x the data moves them 8.0->6.7, 10.6->19.8, 11.2->13.5, 7.8->0.7 --
+    worse at two of the four sigma.  "More data does not fix it" is the weak reading; the measured
+    direction is not favourable.
 
-SOURCE.  logs/jacspec_D1_true.log (panel a), logs/jacspec_D2_N160000.log (panel b), with
-logs/jacspec_D2_N10000.log for the N = 1e4 counts quoted above; the table is transcribed in
-results/jac_spectrum.txt (ADDENDUM 2026-09-21 21:55 for D1).  n = 48 per grid point.
+SOURCE.  logs/jacspec_D1_true.log (panel a), logs/jacspec_D2_final.log (panel b), with
+logs/jacspec_D2_N10000.log for the N = 1e4 counts quoted above; both tables are transcribed in
+results/jac_spectrum.txt (ADDENDUM 2026-09-21 21:55 for D1, ADDENDUM 2026-09-21 23:50 for D2).
+n = 48 per grid point.
+
+WHICH D2 CHECKPOINT, AND WHY NOT THE EARLIER ONE.  Panel (b) is measured on ckpt/d2sx_N160000_a1.pt,
+the permanent checkpoint at which that run stopped (patience, 1784 epochs, best val 3.519379e-01 at
+epoch 1764).  It is NOT the epoch-240 snapshot of logs/jacspec_D2_N160000.log: that measurement was
+taken against a session-scoped temp-directory file, which the 18:20 audit flagged as irreproducible
+and which the 23:50 re-measurement supersedes.  Reproduce this panel with
+  OMP_NUM_THREADS=2 python code/jac_spectrum.py --testbed D2 --ckpt ckpt/d2sx_N160000_a1.pt --n 48
 
 GATE STATUS.  (a) uses ckpt/sx_N160000_D1.pt, which PASSES all four pre-registered gates
-(results/samplecx_D1.txt: GB 0.0027, GC 0.0999, GD 0.0718).  (b) uses the N = 1.6e5 epoch-240 snapshot
-of the D2 run, which is NOT gate-verified -- a DIAGNOSTIC PROBE on an UN-GATED checkpoint.  The D2
+(results/samplecx_D1.txt: GB 0.0027, GC 0.0999, GD 0.0718).  (b) uses the final N = 1.6e5 D2 checkpoint,
+which is NOT gate-verified and cannot be: D2 has no true score, so the GA-GD gates are D1-only
+(04_SPEC Sec.5, LADDER_C.md).  It is a DIAGNOSTIC PROBE on an UN-GATED checkpoint.  The D2
 panel licenses no arm claim; 10_SPEC_stageC Sec.3c governs what may.
 
 CAVEAT the picture cannot carry on its own.  The fitted GMM is NOT ground truth on D2 -- D2 has no
@@ -278,12 +304,18 @@ is wrong, only that the two models disagree about the local geometry.
 
 def fig8():
     """f(lmin(Jr)<0) and asym(Jr) over the whole 20-point sigma grid, one line per training budget."""
+    # The reproducible 20-point re-measurement on the permanent ckpt/d2sx_N160000_a1.pt was still
+    # being written when this was first drawn.  Read its state now instead of quoting a stale count:
+    # a partial curve is not plotted, but the caption says how far it has got and what it says there.
+    fin = jacpsd("D2_final")["diffusion"]
+    fin_txt = (f"{len(fin['sigma'])} of 20 grid points written at draw time, and on those it reads "
+               f"f = {', '.join(f'{v:.3f}' for v in fin['f_neg_r'])}")
     runs = [("D2 learned  N=1e4   (200 ep.)", "tab:blue", "o", "-", jacpsd("N10000_a1")["diffusion"]),
             ("D2 learned  N=4e4   (200 ep.)", "tab:green", "s", "-", jacpsd("N40000_a1")["diffusion"]),
             ("D2 learned  N=1.6e5 (ep. 240)", "tab:purple", "^", "-", jacpsd("N160000")["diffusion"]),
             ("D2 learned  N=1.6e5 (later snap.)", "tab:pink", "v", "--",
              jacpsd("N160000_late")["diffusion"]),
-            ("D2 fitted GMM  b*=kron, K=512 (exact score OF the fit)", "tab:orange", "D", ":",
+            ("D2 fitted GMM  b*=kron, K=512", "tab:orange", "D", ":",
              jacpsd("N10000_a1")["GMM-exact(b*=kron,K=512)"]),
             ("D1 learned  N=1.6e5 (gate-PASS)", "tab:red", "*", "-.",
              jacpsd("D1_N160000")["diffusion"])]
@@ -302,7 +334,8 @@ def fig8():
     axes[0].set_ylabel(r"$f(\lambda_{\min}(J_r) < 0)$" "\n" "over n=128 held-out samples")
     axes[0].axhline(0.0, color="0.4", lw=0.8, ls=(0, (1, 3)))
     axes[0].text(0.30, 0.055, "PSD at every sample", fontsize=6.8, color="0.35")
-    axes[0].legend(loc="lower left", fontsize=6.5, frameon=True, framealpha=0.9, edgecolor="none")
+    axes[0].legend(loc="lower left", bbox_to_anchor=(0.012, 0.13), fontsize=6.5, frameon=True,
+                   framealpha=0.9, edgecolor="none")   # clear of the two curves that sit AT f = 0
     axes[1].set_ylabel(r"$\mathrm{asym}(J_r)=\|J_r-J_r^{\!\top}\|\,/\,\|J_r\|$")
     axes[1].set_xlabel(r"noise level $\sigma$  (the frozen 20-point grid)")
     axes[1].set_ylim(1e-17, 6.0)
@@ -335,19 +368,28 @@ already vanished, and it is drawn rather than smoothed over.  What no budget cha
 pinned near 1 across the whole damaged band.  The fitted GMM sits at f = 0 and at machine-precision
 asymmetry -- but it is a FIT selected by validation log-likelihood, NOT ground truth: D2 has no
 closed-form prior (05_SPEC Sec.3), and a full-rank mixture is symmetric PSD for free.  It is a sanity
-reference for the measurement, not a target the learned model failed to reach.  D1's learned model, SAME architecture, SAME recipe, SAME budget, sits at f = 0 too.  The
-one thing that differs between the D1 and D2 learned curves is the data distribution.
+reference for the measurement, not a target the learned model failed to reach.  D1's learned model --
+SAME architecture, SAME recipe, SAME budget -- sits at f = 0 too.  The one thing that differs between
+the D1 and D2 learned curves is the data distribution.
 
 SOURCE.  logs/jacpsd_N10000_a1.log, jacpsd_N40000_a1.log, jacpsd_N160000.log, jacpsd_N160000_late.log,
-jacpsd_D1_N160000.log.  The GMM reference is the GMM-exact(b*=kron,K=512) block of the N=1e4 log; it is
-identical in all four D2 logs because the fit is the same object.
+jacpsd_D1_N160000.log.  The GMM reference is the block those logs head "GMM-exact(b*=kron,K=512)" in
+the N=1e4 log; it is identical in all four D2 logs because the fit is the same object.  That heading
+means the EXACT SCORE OF A FITTED mixture, not an exact prior -- the newer logs spell it
+"FITTED-GMM(b*=kron,K=512,N=10000)", and this figure uses the newer wording.
 
-EPOCH LABELS.  The N = 1.6e5 pair is the epoch-240 snapshot (logs/jacpsd_N160000.log, ckpt
-d2sx_N160000_snap.pt) and a later snapshot of the SAME run (logs/jacpsd_N160000_late.log, ckpt
-d2sx_N160000_late.pt).  The only record of the later snapshot's epoch is STATUS.md line 489, which
-names the best-val checkpoint at epoch 816 when the probe was launched; the figure therefore says
-"later snap." rather than a number this file can verify.  The run's own final best was epoch 1764
-(logs/train_d2sx_N160000_a1.log).
+EPOCH LABELS, AND A PROVENANCE LIMIT THE PANEL CANNOT SHOW.  The two N = 1.6e5 curves are the
+epoch-240 snapshot (logs/jacpsd_N160000.log) and a later snapshot of the SAME run
+(logs/jacpsd_N160000_late.log).  BOTH were measured against session-scoped TEMP-DIRECTORY checkpoint
+files (/tmp/.../d2sx_N160000_snap.pt and _late.pt), which the 18:20 audit flagged as IRREPRODUCIBLE:
+the checkpoints no longer exist, so these two rows can be read but not re-run.  The only record of the
+later snapshot's epoch is STATUS.md line 489, naming the best-val checkpoint at epoch 816 when the
+probe was launched, which is why the figure says "later snap." rather than a number.  The run has
+since finished (patience, 1784 epochs) onto the permanent ckpt/d2sx_N160000_a1.pt, and the
+reproducible re-measurement on it is what F7(b) draws.  The matching 20-point jacpsd re-measurement
+(logs/jacpsd_D2_final.log) was still running when this figure was drawn, so it is NOT plotted here
+rather than plotted as a partial curve: """ + fin_txt + """, i.e. on top of the curves that ARE drawn.
+Redraw this figure once that log reaches 20 rows.
 
 GATE STATUS.  All four D2 curves are DIAGNOSTIC PROBES on UN-GATED checkpoints: ckpt/d2sx_N10000_a1.pt
 fails the pre-registered gates (GC 0.224 vs 0.15) and the two N = 1.6e5 snapshots are not gate-verified.

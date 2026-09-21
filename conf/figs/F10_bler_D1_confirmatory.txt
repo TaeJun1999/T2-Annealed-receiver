@@ -27,6 +27,11 @@ WHAT IS MARKED.
       M-ours-bstar-scalar -> R6-exactEP   decision SNRs [-3, 0] dB
   cell C1: none
   - Red rings: points where the (F3) divergence guard, DIVERGE_NMSE = 10.0, fired in ALL 2560 trials.
+    That is C1 / -3 dB only, for V0 (drawn at BLER 1.000) and V4 (at 0.945); the two rings overlap
+    because those values are 0.02 of a decade apart.  V1 is 2560/2560 there too but is not plotted.
+    NOT RINGED, and said here because the all-2560 ring rule would otherwise hide it: the guard also
+    fired at C1 / +3 dB for V0, in 11 of 2560 trials (rate 0.004, worst NMSE 3.6e5).  Those four rows
+    are the whole of results/guard_D1_C.txt; the other eleven arms never fired anywhere in this run.
   - Cell C1 at -3 dB is the failure it looks like.  M-ours-dscore-C-V0 is at BLER 1.000 with the guard
     firing 2560/2560 and a worst NMSE of 4.5e18; V1 (not plotted, identical to V0 elsewhere) is at
     0.996 with 2560/2560 and 1.7e20; V4 is at 0.945 with 2560/2560 and 1.4e84, and 3 of its 2560 blocks

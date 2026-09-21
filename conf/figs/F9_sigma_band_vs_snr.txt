@@ -2,9 +2,11 @@ F9.  The sigma band where the D-14 site is damaged, and the SNR band where the r
 
 PLOTTED.
 (a) shift_med, the median shift the PSD repair has to apply to the D-14 site, over the frozen 20-point
-    sigma grid, for the learned score at N = 1e4 and for the exact 512-component Kronecker GMM (log-log;
-    the GMM's exact zeros at the four smallest sigma are floored to 1e-7 so a log axis can show them,
-    which is stated here rather than hidden).  The shaded band is sigma where shift_med is within a
+    sigma grid, for the learned score at N = 1e4 and for the FITTED 512-component Kronecker GMM
+    (log-log; the GMM's exact zeros at the SIX smallest sigma -- k = 0..5, sigma 0.0331 to 0.0776 --
+    are floored to 1e-7 so a log axis can show them, which is stated here rather than hidden).  The
+    GMM is a fit selected by validation log-likelihood, NOT ground truth: D2 has no closed-form prior
+    (05_SPEC Sec.3).  The shaded band is sigma where shift_med is within a
     factor 2 of its maximum -- a rule applied in the code, not a band drawn by eye.
 (b) fraction of trials whose channel-estimate NMSE exceeds 1 after 16 iterations (NMSE > 1 = worse than
     h_hat = 0), against SNR, for the four interventional arms of the settling experiment: the site as
@@ -15,8 +17,11 @@ THE CORRESPONDENCE, AND ITS LIMIT.  The two panels' x axes are different physica
 figure does NOT map one onto the other.  The only link drawn is the ruler on top of (a): the median
 sigma_t that Module H is actually queried with at each SNR, measured in a separate and much smaller
 diagnostic (logs/diag_sigma_coverage.log, n = 12 trials per point, same cell, same checkpoint), with the
-grey bars giving its inter-quartile span.  Read together: +6 dB lands inside the shaded band, and +6 dB
-is where (b) peaks.  +12 dB was not measured in the sigma_t diagnostic and therefore has no tick.
+grey bars giving the FULL min..max of the 12 x 16 = 192 queried sigma_t -- that is what the log prints,
+it is NOT an inter-quartile range, and it is therefore the widest possible reading of the spread.  Read together: +6 dB lands inside the shaded band, and +6 dB
+is where (b)'s eta arm peaks.  (The magnitude-floored arm abs1e-2 peaks at 0 dB, not +6; the marked peak is
+the arm that runs the site as specified.)  +12 dB was not measured in the sigma_t diagnostic and
+therefore has no tick.
 n = 12 is small; this is a consistency check, not a fitted relationship.
 
 SOURCE.  (a) logs/jacpsd_N10000_a1.log, n = 128 held-out samples per grid point.  (b)

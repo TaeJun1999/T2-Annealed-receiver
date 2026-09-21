@@ -6,22 +6,38 @@ Jacobian has a negative eigenvalue.  Bottom (log scale): asym(J_r), the relative
 Both are required of a true posterior-mean denoiser, for which J_r = Cov(h|q)/sigma^2 is symmetric PSD.
 n = 128 held-out samples per grid point for every curve.
 
-THE MESSAGE.  The three D2 learned curves lie on top of each other: N = 1e4 -> 4e4 -> 1.6e5 is a 16x
-increase in data and changes neither quantity, and the later epoch snapshot at N = 1.6e5 (~3.4x the
-epochs of the 240-epoch one) changes neither.  The exact GMM sits at f = 0 and at machine-precision
-asymmetry.  D1's learned model, SAME architecture, SAME recipe, SAME budget, sits at f = 0 too.  The
-one thing that differs between the D1 and D2 learned curves is the data distribution.
+THE MESSAGE, WITH ITS RANGE.  Over sigma <= 0.26 -- which contains the whole band F9 measures the
+site to be damaged in -- the four D2 learned curves lie on top of each other at f = 0.95 to 1.00:
+N = 1e4 -> 4e4 -> 1.6e5 is a 16x increase in data and moves neither quantity, and the later epoch
+snapshot at N = 1.6e5 changes neither.  They do NOT coincide at large sigma, and the panel shows it:
+at sigma = 0.713 the four read 0.711 / 0.203 / 0.422 / 0.359 and at sigma = 0.845 they read 0.594 /
+0.633 / 0.359 / 0.570.  That spread is not ordered by budget, it is at the sigma where the damage has
+already vanished, and it is drawn rather than smoothed over.  What no budget changes is that f is
+pinned near 1 across the whole damaged band.  The fitted GMM sits at f = 0 and at machine-precision
+asymmetry -- but it is a FIT selected by validation log-likelihood, NOT ground truth: D2 has no
+closed-form prior (05_SPEC Sec.3), and a full-rank mixture is symmetric PSD for free.  It is a sanity
+reference for the measurement, not a target the learned model failed to reach.  D1's learned model --
+SAME architecture, SAME recipe, SAME budget -- sits at f = 0 too.  The one thing that differs between
+the D1 and D2 learned curves is the data distribution.
 
 SOURCE.  logs/jacpsd_N10000_a1.log, jacpsd_N40000_a1.log, jacpsd_N160000.log, jacpsd_N160000_late.log,
-jacpsd_D1_N160000.log.  The GMM reference is the GMM-exact(b*=kron,K=512) block of the N=1e4 log; it is
-identical in all four D2 logs because the fit is the same object.
+jacpsd_D1_N160000.log.  The GMM reference is the block those logs head "GMM-exact(b*=kron,K=512)" in
+the N=1e4 log; it is identical in all four D2 logs because the fit is the same object.  That heading
+means the EXACT SCORE OF A FITTED mixture, not an exact prior -- the newer logs spell it
+"FITTED-GMM(b*=kron,K=512,N=10000)", and this figure uses the newer wording.
 
-EPOCH LABELS.  The N = 1.6e5 pair is the epoch-240 snapshot (logs/jacpsd_N160000.log, ckpt
-d2sx_N160000_snap.pt) and a later snapshot of the SAME run (logs/jacpsd_N160000_late.log, ckpt
-d2sx_N160000_late.pt).  The only record of the later snapshot's epoch is STATUS.md line 489, which
-names the best-val checkpoint at epoch 816 when the probe was launched; the figure therefore says
-"later snap." rather than a number this file can verify.  The run's own final best was epoch 1764
-(logs/train_d2sx_N160000_a1.log).
+EPOCH LABELS, AND A PROVENANCE LIMIT THE PANEL CANNOT SHOW.  The two N = 1.6e5 curves are the
+epoch-240 snapshot (logs/jacpsd_N160000.log) and a later snapshot of the SAME run
+(logs/jacpsd_N160000_late.log).  BOTH were measured against session-scoped TEMP-DIRECTORY checkpoint
+files (/tmp/.../d2sx_N160000_snap.pt and _late.pt), which the 18:20 audit flagged as IRREPRODUCIBLE:
+the checkpoints no longer exist, so these two rows can be read but not re-run.  The only record of the
+later snapshot's epoch is STATUS.md line 489, naming the best-val checkpoint at epoch 816 when the
+probe was launched, which is why the figure says "later snap." rather than a number.  The run has
+since finished (patience, 1784 epochs) onto the permanent ckpt/d2sx_N160000_a1.pt, and the
+reproducible re-measurement on it is what F7(b) draws.  The matching 20-point jacpsd re-measurement
+(logs/jacpsd_D2_final.log) was still running when this figure was drawn, so it is NOT plotted here
+rather than plotted as a partial curve: 7 of 20 grid points written at draw time, and on those it reads f = 0.992, 1.000, 1.000, 1.000, 1.000, 1.000, 1.000, i.e. on top of the curves that ARE drawn.
+Redraw this figure once that log reaches 20 rows.
 
 GATE STATUS.  All four D2 curves are DIAGNOSTIC PROBES on UN-GATED checkpoints: ckpt/d2sx_N10000_a1.pt
 fails the pre-registered gates (GC 0.224 vs 0.15) and the two N = 1.6e5 snapshots are not gate-verified.
