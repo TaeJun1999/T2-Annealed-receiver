@@ -1,7 +1,29 @@
-Traceback (most recent call last):
-  File "/home/HTJ/t2/conf/code/jac_spectrum.py", line 80, in <module>
-    main(p.parse_args())
-  File "/home/HTJ/t2/conf/code/jac_spectrum.py", line 43, in main
-    fam, K = bstar
-    ^^^^^^
-ValueError: too many values to unpack (expected 2)
+# date        : 2026-09-21 16:52:26 KST
+# git commit  : 77ac40c
+# versions    : python 3.12.14  numpy 2.5.2  scipy 1.18.1  torch 2.14.0+cu130 (cuda_available=True)
+# device      : CPU (192 cores) | dtype: complex128 / float64 | deterministic: yes (fixed seeds, no GPU in the receiver)
+# testbed     : D1
+# seed rule   : default_rng([20260926, TBID[testbed], PID[prior], Nr, T, Tp, int(snr)+100])  (trials of a point = ONE stream)
+# code        : rate-1/2 conv (133,171)_8 nu=6 terminated, QPSK, outer iterations = 16 for EVERY arm
+# Demo/ hashes: t2_route_a.py=95a5408901ec125c  t2_trellis.py=31cd0ee9c68e972b  t2_gmm.py=d064e58c7510c769
+# content     : eigenvalue SPECTRUM of sym(Jr), not just its minimum.  ckpt = ckpt/sx_N160000_D1.pt
+# n           : 48 held-out samples per grid point, 2N = 64 eigenvalues each
+# hypothesis  : D2's support is a union of 3L-dim manifolds (L~U{3..8}) in R^64, so the TRUE J
+#               has 40..55 eigenvalues AT the PSD boundary; estimation error flips ~half of them.
+#               D1's grid-GMM prior has full support, so its true J has no near-zero eigenvalue.
+
+=== diffusion ===
+  k       sigma | n_neg mean n_neg med n_neg p90 |  n<0.01   n<0.1 |       lmin   l[0.25]     lmed     lmax
+  0  3.2936e-02 |       0.00       0.0       0.0 |    0.00    0.00 |  9.407e-01 9.789e-01 9.931e-01 1.012e+00
+  6  8.9865e-02 |       0.00       0.0       0.0 |    0.00    0.00 |  6.765e-01 8.664e-01 9.541e-01 1.073e+00
+ 12  2.4520e-01 |       0.00       0.0       0.0 |    0.00    0.00 |  2.232e-01 4.702e-01 7.378e-01 1.190e+00
+ 18  6.6901e-01 |       0.00       0.0       0.0 |    0.00   13.71 |  3.081e-02 1.184e-01 2.963e-01 1.317e+00
+
+=== GMM-exact(b*=kron,K=32) ===
+  k       sigma | n_neg mean n_neg med n_neg p90 |  n<0.01   n<0.1 |       lmin   l[0.25]     lmed     lmax
+  0  3.2936e-02 |       0.00       0.0       0.0 |    0.00    0.00 |  9.209e-01 9.797e-01 9.935e-01 1.051e+00
+  6  8.9865e-02 |       0.00       0.0       0.0 |    0.00    0.00 |  6.195e-01 8.666e-01 9.532e-01 1.219e+00
+ 12  2.4520e-01 |       0.00       0.0       0.0 |    0.00    0.00 |  2.142e-01 4.714e-01 7.362e-01 1.406e+00
+ 18  6.6901e-01 |       0.00       0.0       0.0 |    0.00   13.67 |  3.920e-02 1.172e-01 2.970e-01 1.290e+00
+
+co-dimension of the D2 support: 2*Nr*Nt - 3L = 64 - {9..24} = {40..55}

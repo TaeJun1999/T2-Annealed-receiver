@@ -1,0 +1,72 @@
+# date        : 2026-09-21 16:55:12 KST
+# git commit  : 77ac40c
+# versions    : python 3.12.14  numpy 2.5.2  scipy 1.18.1  torch 2.14.0+cu130 (cuda_available=True)
+# device      : CPU (192 cores) | dtype: complex128 / float64 | deterministic: yes (fixed seeds, no GPU in the receiver)
+# testbed     : D2
+# seed rule   : default_rng([20260926, TBID[testbed], PID[prior], Nr, T, Tp, int(snr)+100])  (trials of a point = ONE stream)
+# code        : rate-1/2 conv (133,171)_8 nu=6 terminated, QPSK, outer iterations = 16 for EVERY arm
+# Demo/ hashes: t2_route_a.py=95a5408901ec125c  t2_trellis.py=31cd0ee9c68e972b  t2_gmm.py=d064e58c7510c769
+# content     : eigenvalue SPECTRUM of sym(J) for the learned score vs the exact/fitted GMM, on both
+#               testbeds and two training budgets.  n=48 held-out samples per grid point, 64 eigen-
+#               values each.  Logs: logs/jacspec_{D2_N10000,D2_N160000,D1_N160000}.log
+# why         : lmin alone cannot separate 'the model is wrong' from 'the truth sits on the PSD
+#               boundary'.  The full spectrum can.
+# code        : conf/code/jac_spectrum.py (new).  Nothing retrained, nothing tuned, no threshold moved.
+
+                    |         k=0  sigma .033        |         k=6  sigma .092        |         k=12 sigma .256        |         k=18 sigma .713
+model               |   n_neg   n<0.1   25%tl   lmin |   n_neg   n<0.1   25%tl   lmin |   n_neg   n<0.1   25%tl   lmin |   n_neg   n<0.1   25%tl   lmin
+-------------------------------------------------------------------------------------------------------------------------------------------------------
+D1 N=1.6e5  learned |     0.0     0.0   0.979  +0.94 |     0.0     0.0   0.866  +0.68 |     0.0     0.0   0.470  +0.22 |     0.0     0.0   0.118 +0.031
+D1 N=1.6e5  EXACT   |     0.0     0.0   0.980  +0.92 |     0.0     0.0   0.867  +0.62 |     0.0     0.0   0.471  +0.21 |     0.0     0.0   0.117 +0.039
+D2 N=1e4    learned |     8.0     9.3   0.069  -0.20 |    10.6    12.4   0.028  -0.25 |    11.2    13.7   0.018  -0.27 |     7.8    10.9   0.022  -0.12
+D2 N=1.6e5  learned |    10.3    12.5   0.028  -0.20 |    17.0    19.8  -0.003  -0.28 |    14.1    17.6   0.005  -0.63 |     0.7     1.6   0.051 -0.045
+D2 both     FITTED  |     0.0     0.1   0.948 +4e-03 |     0.0     2.5   0.665 +6e-04 |     0.0     4.5   0.203 +8e-05 |     0.0     0.6   0.092 +5e-03
+
+  n_neg = number of eigenvalues < 0 out of 64;  n<0.1 = number below 0.1;  25%tl = 25th percentile.
+  D1's "EXACT" row is the TRUE prior (D1's prior IS a grid GMM, so the closed form is ground truth).
+  D2's "FITTED" row is NOT ground truth -- it is a 512-component Kronecker GMM fitted to D2, i.e. a
+  smooth mis-specified approximation.  D2 has no closed-form true score (05_SPEC §3).
+
+READING
+
+1.  ON D1 THE LEARNED JACOBIAN IS RIGHT.  Its spectrum matches the exact one to three significant
+    figures at every grid point (0.979/0.980, 0.866/0.867, 0.470/0.471, 0.118/0.117; lmin 0.94/0.92,
+    0.68/0.62, 0.22/0.21, 0.031/0.039).  n_neg = 0 everywhere.  So the estimation procedure -- the
+    architecture, the training objective, the Tweedie/Wirtinger conversion, the autodiff path -- is
+    NOT the problem.  Given a smooth full-support target it recovers the second-order structure.
+    This is the measurement behind the D1 BLER result: V0 == V1 (the PSD projection never fires) and
+    the learned arm ties the exact-score oracle and the exact-EP bound.
+
+2.  ON D2 IT IS NOT, AND MORE DATA MAKES IT WORSE.  n_neg goes 8.0 -> 10.3 (k=0) and 10.6 -> 17.0
+    (k=6) when the budget is raised 16x; the 25th percentile falls to -0.003.  The learned spectrum
+    crowds, and crosses, the PSD boundary.
+
+3.  THE FITTED GMM IS NOT A REFERENCE HERE.  Its 25th percentile is 0.948 at k=0 where the learned
+    model's is 0.028.  A mixture with full-rank component covariances cannot represent a density
+    supported near a low-dimensional set, so its Jacobian stays near the identity and is trivially
+    PSD.  Its PSD-ness is therefore NOT evidence that the learned model is wrong: the two models
+    disagree about the local geometry, and on D2 we have no closed form to adjudicate.
+    What we do have: two ground-truth-free diagnostics (GB' denoising, Hyvarinen score matching)
+    both put the learned model CLOSER to the truth than the fitted GMM on D2.  That makes it
+    plausible -- NOT proven -- that the near-zero spectrum is fidelity rather than noise.
+
+4.  THE sigma DEPENDENCE EXPLAINS THE SNR SHAPE that the divergence diagnosis left open.
+    On D2 the damage peaks at sigma ~ 0.09-0.26 (n_neg 14-17) and essentially VANISHES at
+    sigma = 0.71 (n_neg 0.7, n<0.1 1.6).  The receiver's nu shrinks as SNR rises, so the operating
+    point walks INTO the bad band as SNR increases -- which is the observed BLER shape
+    (worst at 0..+3 dB, better at -3 dB where nu is large).  The settling experiment
+    (code/diag_psd_cf.py, all seven SNRs) tests this prediction directly.
+
+5.  CAVEAT on V1's identity claim.  selftest_M6 asserted the PSD projection is the identity on the
+    exact prior because its lmin sits 780x above LAM_MIN=1e-6.  Measured over the full sigma grid
+    that margin is smaller: the fitted GMM's lmin reaches 7.6e-5 at k=12, i.e. 76x.  The identity
+    still holds, with two orders of margin rather than three.  Recorded so the claim is not quoted
+    at the stronger figure.
+
+WHAT THIS DOES NOT ESTABLISH
+  - It does not prove D2's true Jacobian is near-singular.  The manifold argument (D2's support is a
+    union of 3L-dimensional sets, L~U{3..8}, i.e. 9..24 dimensions in R^64) is a PREDICTION from the
+    generative model, and the measured n_neg of 8-17 is far below the 20-27 that argument suggested.
+    The argument is consistent with the direction of the effect and wrong about its size.
+  - It does not identify which of the 64 directions are tangent and which are normal; that would
+    need the true tangent space, which the D2 generator can supply but this measurement did not use.
