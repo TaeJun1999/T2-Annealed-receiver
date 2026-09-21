@@ -14,7 +14,7 @@
 # code        : conf/code/jac_spectrum.py (new).  Nothing retrained, nothing tuned, no threshold moved.
 
                     |         k=0  sigma .033        |         k=6  sigma .092        |         k=12 sigma .256        |         k=18 sigma .713
-model               |   n_neg   n<0.1   25%tl   lmin |   n_neg   n<0.1   25%tl   lmin |   n_neg   n<0.1   25%tl   lmin |   n_neg   n<0.1   25%tl   lmin
+model               |   n_neg  n<0.01   25%tl   lmin |   n_neg  n<0.01   25%tl   lmin |   n_neg  n<0.01   25%tl   lmin |   n_neg  n<0.01   25%tl   lmin
 -------------------------------------------------------------------------------------------------------------------------------------------------------
 D1 N=1.6e5  learned |     0.0     0.0   0.979  +0.94 |     0.0     0.0   0.866  +0.68 |     0.0     0.0   0.470  +0.22 |     0.0     0.0   0.118 +0.031
 D1 N=1.6e5  EXACT   |     0.0     0.0   0.980  +0.92 |     0.0     0.0   0.867  +0.62 |     0.0     0.0   0.471  +0.21 |     0.0     0.0   0.117 +0.039
@@ -22,8 +22,15 @@ D2 N=1e4    learned |     8.0     9.3   0.069  -0.20 |    10.6    12.4   0.028  
 D2 N=1.6e5  learned |    10.3    12.5   0.028  -0.20 |    17.0    19.8  -0.003  -0.28 |    14.1    17.6   0.005  -0.63 |     0.7     1.6   0.051 -0.045
 D2 both     FITTED  |     0.0     0.1   0.948 +4e-03 |     0.0     2.5   0.665 +6e-04 |     0.0     4.5   0.203 +8e-05 |     0.0     0.6   0.092 +5e-03
 
-  n_neg = number of eigenvalues < 0 out of 64;  n<0.1 = number below 0.1;  25%tl = 25th percentile.
-  D1's "EXACT" row is the TRUE prior (D1's prior IS a grid GMM, so the closed form is ground truth).
+  n_neg = number of eigenvalues < 0 out of 64;  n<0.01 = number below 0.01;  25%tl = 25th percentile.
+  [CORRECTED 18:40 after audit: this column was labelled n<0.1 but holds the logs' n<0.01
+   column in every row.  The n<0.1 counts are much larger -- e.g. D2 N=1.6e5 k=18 is 38.08
+   of 64, not 1.6.  READING 4 below is corrected accordingly.]
+  D1's reference row is NOT the true prior.  [CORRECTED 18:40 after audit.]  jac_spectrum.py
+  selects it with arms.gmm_selection(), which returns an EM FIT on N_TRAIN=10000 -- the logs
+  label it GMM-exact(b*=kron,K=32), i.e. the exact score OF a fitted K=32 Kronecker mixture.
+  D1's TRUE prior is angle_grid_prior(...), a 32x32 = 1024-component grid mixture, and it was
+  NOT used here.  A re-measurement against the true prior is outstanding.
   D2's "FITTED" row is NOT ground truth -- it is a 512-component Kronecker GMM fitted to D2, i.e. a
   smooth mis-specified approximation.  D2 has no closed-form true score (05_SPEC §3).
 

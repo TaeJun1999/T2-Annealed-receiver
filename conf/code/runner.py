@@ -51,6 +51,7 @@ import time
 import common as C                          # FIRST: common.py sets OMP/OPENBLAS/MKL_NUM_THREADS=1, and the
 import numpy as np                          # BLAS reads those only at ITS import, which common.py triggers
 import arms as A
+import bigamp                               # (F3) reuses its pre-registered DIVERGE_NMSE, not a new constant
 
 TAG = ""                                   # set by _init in the parent AND in every worker
 N_VAL = 5000                               # validation / test set size, exp_0925 convention [exact]
@@ -386,6 +387,20 @@ def run_task(task):
                 flat[f"{k}|{q}"] = np.array([l[q] if q in l else np.full(iters, np.nan) for l in L])
         if any(failed[k]):
             flat[f"{k}|failed"] = np.array(failed[k])
+        # ---- (F3) Module H divergence guard, 10_SPEC_stageC §3.  Registered UNCONDITIONALLY there and
+        # not implemented until the 2026-09-21 18:20 audit found it missing.  R3 already had this guard
+        # (code/bigamp.py DIVERGE_NMSE = 10.0); the RouteA / Module-H path had none, so a run whose
+        # channel estimate ran away was filed under the catch-all "other" failure class and nothing in
+        # the table said the guard was ABSENT rather than never triggered.
+        # The SAME constant 10.0 is reused, not re-chosen (§3: "동일 상수 10.0 을 그대로 재사용한다").
+        # This is DETECTION AND CLASSIFICATION ONLY -- it changes no arm's trajectory, so every number
+        # already recorded stays valid and arms stay comparable.  A trial is flagged if the channel-
+        # estimate NMSE exceeds 10.0, or goes non-finite, at ANY of the 16 iterations.
+        nm = flat.get(f"{k}|nmse")
+        if nm is not None and nm.size:
+            with np.errstate(invalid="ignore"):
+                bad = ~np.isfinite(nm) | (nm > bigamp.DIVERGE_NMSE)
+            flat[f"{k}|guardH"] = bad.any(axis=1).astype(float)      # per trial, 1.0 = guard fired
     flat.update({f"{k}|clip": np.array(v) for k, v in clip.items()})
     if comp:
         flat["comp"] = np.array(comp)                   # D1 only: the true mixture component per trial

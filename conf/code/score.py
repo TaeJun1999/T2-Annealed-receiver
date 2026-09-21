@@ -882,7 +882,11 @@ def train(rung, attempt, testbed, prior, Nr, Nt, device="cuda", hp=None, resume=
             # 10_SPEC_stageC §3d DIVERGE_TRAIN: val above 3x best for 5 consecutive epochs.  This
             # OVERRIDES min_epochs on purpose -- carrying a blown-up run to epoch 200 buys no
             # information.  A DIVERGED run is a COMPLETED attempt (it consumes a slot), not ABORTED.
-            ndiv = ndiv + 1 if vl > DIVERGE_TRAIN_MULT * best else 0
+            # NaN must COUNT as divergence.  `nan > x` is False, so the naive comparison silently
+            # disables the guard exactly when it is most needed (audit 2026-09-21 18:20: V2 D2 a2 ran
+            # 105 NaN epochs undetected).  math.isnan first, then the ratio test.
+            bad = (vl != vl) or (vl > DIVERGE_TRAIN_MULT * best)
+            ndiv = ndiv + 1 if bad else 0
             if ndiv >= DIVERGE_TRAIN_EPOCHS:
                 stopped = "diverged"
                 break
