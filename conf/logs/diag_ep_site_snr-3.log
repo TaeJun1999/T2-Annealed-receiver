@@ -1,0 +1,22 @@
+# date        : 2026-09-21 13:55:26 KST
+# git commit  : 85f6339
+# versions    : python 3.12.14  numpy 2.5.2  scipy 1.18.1  torch 2.14.0+cu130 (cuda_available=True)
+# device      : CPU (192 cores) | dtype: complex128 / float64 | deterministic: yes (fixed seeds, no GPU in the receiver)
+# testbed     : D2
+# seed rule   : default_rng([20260926, TBID[testbed], PID[prior], Nr, T, Tp, int(snr)+100])  (trials of a point = ONE stream)
+# code        : rate-1/2 conv (133,171)_8 nu=6 terminated, QPSK, outer iterations = 16 for EVERY arm
+# Demo/ hashes: t2_route_a.py=95a5408901ec125c  t2_trellis.py=31cd0ee9c68e972b  t2_gmm.py=d064e58c7510c769
+# DIAGNOSTIC ep-site-integration: Module-H denoiser x EP-site wiring factorial (H4). No retraining, no tuning.
+# saved /home/HTJ/t2/conf/results/diag/ep-site-integration_D2_C2_snr-3_n128.npz   (708 s)
+# b* = kron  pilots = dft  ckpt = /home/HTJ/t2/conf/ckpt/d2sx_N10000_a1.pt
+
+--- SNR -3 dB, n=128 ---
+arm (denoiser|wiring)   BLER@1  BLER@2  BLER@16   BER@16  NMSE med@1  NMSE med@16  NMSE mean@16  frac NMSE>1  nuE@16 med  clip%  clipshift  raised
+gmmB|epsite              0.766   0.531    0.320    0.113      0.2275       0.1081        0.1310        0.000   1.190e+00   75.8  5.241e-03       0
+dscore|scorew            0.758   0.797    0.852    0.395      0.2317       0.2773       14.8835        0.273   1.758e-01   98.9  6.957e+03       0
+gmmB|scorew              0.766   0.523    0.297    0.104      0.2275       0.1062        0.1265        0.000   2.758e-01   82.6  5.326e-03       0
+gmmB|belsc               0.766   0.539    0.312    0.110      0.2258       0.1108        0.1299        0.000   2.764e-01    0.0  0.000e+00       0
+gmmB|sitesc              0.766   0.539    0.328    0.113      0.2258       0.1140        0.1349        0.000   2.678e-01    0.0  0.000e+00       0
+dscore|belsc             0.625   0.383    0.203    0.069      0.1636       0.0605        0.0794        0.000   8.553e-02    0.0  0.000e+00       0
+dscore|sitesc            0.625   0.375    0.203    0.075      0.1636       0.0622        0.0872        0.000   9.729e-02    0.0  0.000e+00       0
+gauss|sitesc             0.758   0.602    0.344    0.128      0.3202       0.1469        0.1832        0.000   9.994e-01    nan        nan       0
