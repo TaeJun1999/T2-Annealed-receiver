@@ -1,0 +1,57 @@
+# Receiver-side evidence, read from the PRE-REGISTERED supplementary run's own raw npz (conf/raw_supp/).
+# Nothing re-run, nothing re-tuned.  D2 / C2 (8x4, T=16, Tp=4) / prior S2 / 16 iterations / n=640 trials per SNR.
+# '<arm>|clip' is recorded by runner.run_task as (n_clip/n_site, shift/n_clip) per trial, where
+#   n_site  = D-14 matrix sites built (RouteAClip._matrix_site, Demo/t2_gmm.py:112)
+#   n_clip  = sites whose Lam = (nu J)^-1 - I/nu had an eigenvalue < LAM_MIN = 1e-6 and was floored
+#   shift   = ||mu - hH||^2 / ||hH||^2 with mu = (Lam_clipped + I/nu)^-1 (eta + q/nu)   (t2_gmm.py:120)
+#             i.e. how far the CLIPPED site's belief mean lands from the denoiser output it should equal.
+# NOTE: M-ours-gmm32 / M-ours-bstar clip a DIFFERENT site (GMMPriorB.ep_site, t2_gmm.py:60) -- the
+#       clip FRACTIONS are not directly comparable; the SHIFT magnitudes are (same definition).
+
+checkpoint under test: ckpt/d2sx_N10000_a1.pt
+
+arm               SNR  ntrials  clip_frac_mean  clip_frac_min    shift_mean     shift_max
+M-ours-dscore      -3      640          0.9904         0.3750    4.2823e+03    1.0420e+06
+M-ours-dscore       0      640          0.9979         0.4375    1.0049e+04    4.2185e+06
+M-ours-dscore       3      640          1.0000         1.0000    1.9851e+04    7.4320e+06
+M-ours-dscore       6      640          1.0000         1.0000    1.1068e+05    5.4816e+07
+M-ours-dscore       9      640          1.0000         1.0000    3.3718e+03    6.2073e+05
+M-ours-dscore      12      640          1.0000         1.0000    1.6103e+03    6.0298e+05
+M-ours-dscore      15      640          1.0000         1.0000    7.7442e+03    4.8858e+06
+M-ours-bstar       -3      640          0.7368         0.0000    5.4539e-03    6.5432e-02
+M-ours-bstar        0      640          0.6824         0.0000    3.8726e-03    6.0064e-02
+M-ours-bstar        3      640          0.6281         0.0000    2.3461e-03    2.7640e-02
+M-ours-bstar        6      640          0.5479         0.0000    1.0756e-03    1.6959e-02
+M-ours-bstar        9      640          0.4810         0.0000    5.4804e-04    1.4204e-02
+M-ours-bstar       12      640          0.4514         0.0000    2.8832e-04    6.5499e-03
+M-ours-bstar       15      640          0.4427         0.0000    1.3790e-04    7.1359e-03
+M-ours-gmm32       -3      640          0.5721         0.0000    3.3567e-03    3.0821e-02
+M-ours-gmm32        0      640          0.5114         0.0000    2.2495e-03    1.8783e-02
+M-ours-gmm32        3      640          0.4153         0.0000    1.1494e-03    2.2675e-02
+M-ours-gmm32        6      640          0.3771         0.0000    6.5432e-04    1.1109e-02
+M-ours-gmm32        9      640          0.3384         0.0000    2.4089e-04    5.2443e-03
+M-ours-gmm32       12      640          0.3059         0.0000    1.0830e-04    2.7558e-03
+M-ours-gmm32       15      640          0.3000         0.0000    7.1208e-05    2.6303e-03
+
+per-iteration NMSE of the channel estimate (median over 640 trials, and the 90th percentile)
+  snr  -3 dscore med :   0.223    1.435    0.504    0.318    0.275    0.251    0.235    0.227    0.225    0.215    0.210    0.216    0.225    0.237    0.261    0.265
+  snr  -3 dscore p90 :1.23e+01 9.34e+01 4.72e+01 1.94e+01 2.11e+01 1.52e+01 1.95e+01 1.79e+01 1.11e+01 9.89e+00 7.04e+00 9.77e+00 7.81e+00 1.40e+01 1.99e+01 1.90e+01
+  snr  -3 bstar  med :   0.236    0.153    0.121    0.114    0.110    0.108    0.106    0.106    0.106    0.106    0.105    0.105    0.105    0.105    0.105    0.104
+  snr   0 dscore med :   0.933    1.551    1.545    1.255    1.151    1.135    1.163    1.051    0.870    0.637    0.485    0.347    0.430    0.680    0.627    0.903
+  snr   0 dscore p90 :9.26e+01 7.66e+01 6.59e+01 5.17e+01 4.17e+01 5.20e+01 5.22e+01 5.09e+01 6.46e+01 6.87e+01 4.09e+01 4.23e+01 3.66e+01 4.36e+01 3.01e+01 4.63e+01
+  snr   0 bstar  med :   0.145    0.066    0.056    0.055    0.054    0.054    0.054    0.054    0.054    0.054    0.054    0.054    0.054    0.054    0.053    0.053
+  snr   3 dscore med :   2.202    1.403    1.402    1.204    1.600    1.521    1.358    1.485    1.319    1.113    0.916    0.919    0.849    0.837    0.966    0.963
+  snr   3 dscore p90 :1.01e+02 3.21e+01 3.85e+01 3.20e+01 5.53e+01 5.94e+01 4.09e+01 3.89e+01 5.31e+01 5.08e+01 2.42e+01 4.28e+01 3.18e+01 3.73e+01 3.92e+01 3.29e+01
+  snr   3 bstar  med :   0.083    0.031    0.029    0.029    0.029    0.029    0.029    0.029    0.029    0.029    0.029    0.029    0.029    0.029    0.029    0.029
+  snr   6 dscore med :   5.097    0.748    0.936    1.154    1.113    1.365    1.562    1.497    1.640    1.232    1.199    1.099    1.058    1.005    1.105    1.114
+  snr   6 dscore p90 :1.05e+02 1.10e+01 2.21e+01 4.34e+01 4.70e+01 4.93e+01 5.46e+01 6.57e+01 6.01e+01 4.10e+01 3.59e+01 3.07e+01 2.76e+01 3.44e+01 4.00e+01 3.59e+01
+  snr   6 bstar  med :   0.046    0.016    0.016    0.016    0.016    0.016    0.016    0.016    0.016    0.016    0.016    0.016    0.016    0.016    0.016    0.016
+  snr   9 dscore med :   2.913    0.537    0.584    0.762    0.678    0.726    0.688    0.662    0.694    0.662    0.627    0.578    0.579    0.590    0.555    0.549
+  snr   9 dscore p90 :4.96e+01 8.04e+00 1.07e+01 1.87e+01 1.68e+01 1.96e+01 1.70e+01 1.54e+01 2.06e+01 1.73e+01 1.24e+01 9.73e+00 1.54e+01 1.03e+01 1.01e+01 1.12e+01
+  snr   9 bstar  med :   0.025    0.008    0.008    0.008    0.008    0.008    0.008    0.008    0.008    0.008    0.008    0.008    0.008    0.008    0.008    0.008
+  snr  12 dscore med :   1.845    0.349    0.342    0.366    0.357    0.365    0.378    0.371    0.394    0.381    0.368    0.347    0.374    0.352    0.330    0.324
+  snr  12 dscore p90 :3.57e+01 4.23e+00 5.47e+00 7.47e+00 8.19e+00 9.97e+00 8.83e+00 8.61e+00 1.09e+01 6.59e+00 5.97e+00 5.63e+00 3.53e+00 5.04e+00 3.57e+00 4.20e+00
+  snr  12 bstar  med :   0.013    0.004    0.004    0.004    0.004    0.004    0.004    0.004    0.004    0.004    0.004    0.004    0.004    0.004    0.004    0.004
+  snr  15 dscore med :   1.135    0.238    0.206    0.181    0.142    0.149    0.142    0.134    0.122    0.123    0.129    0.137    0.120    0.111    0.112    0.104
+  snr  15 dscore p90 :2.49e+01 1.24e+00 2.87e+00 2.98e+00 2.82e+00 2.60e+00 2.03e+00 2.19e+00 2.23e+00 1.38e+00 1.68e+00 1.13e+00 1.00e+00 1.11e+00 1.05e+00 8.90e-01
+  snr  15 bstar  med :   0.007    0.002    0.002    0.002    0.002    0.002    0.002    0.002    0.002    0.002    0.002    0.002    0.002    0.002    0.002    0.002

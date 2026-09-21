@@ -1,4 +1,4 @@
-# STATUS — conf 실험 (최종)
+# STATUS — conf 실험 (Stage A/B 완료 · Stage C 진행 중)
 
 ## 세션 설정
 - 모델 : **Opus 5 (1M context)** (`claude-opus-5[1m]`). effort/thinking 은 세션 내부에서 확인·변경 불가한
@@ -103,3 +103,69 @@ D2 C1(Tp=2)에서 이득이 없는 것은 T2c 가 사전에 진단한 대로 **�
 `results/` : tables_D1.txt, tables_D2.txt, gate_D1.txt, gate_D2.txt, samplecx_D1.txt, hpo_D1.txt,
 hpo_strat_D1.txt, testbed_D2.txt, gmm_fit_D2.txt, lemma.txt, sigma_grid.txt, sigma_grid_D2.txt,
 tests.txt, ckpt_inventory.txt / `figs/F2_lemma.png` / `LADDER.md` (82행) / `raw/` (1056)
+
+---
+
+# Stage C — 학습 prior 예산 교정 재시도 (2026-09-21 14:00 KST 개시, 진행 중)
+
+사전 등록: `10_SPEC_stageC.md` (커밋 bce4e62, **결과 관측 전**에 커밋됨).
+**Stage A/B 판정은 전부 동결.** `tables_D1/D2.txt`, `gate_D1.txt`, `LADDER.md` 불변이며
+`M-ours-dscore` 는 본 표에서 BLOCKED 유지. Stage C 산출물은 전부 별도 파일(`*_C.*`, `LADDER_C.md`).
+
+## C0 — 왜 재시도하는가 (전부 Stage C 착수 이전에 측정된 사실)
+
+`results/samplecx_D1.txt` / `samplecx.csv` — 게이트 vs 훈련 표본 수:
+
+| N_train | GA | GB (≤0.05) | GC (≤0.15) | GD (≤0.20) | gate_score | 판정 |
+|---|---|---|---|---|---|---|
+| 2,500 | 1.5e-15 | 0.0552 | 0.785 | 0.324 | 5.24 | FAIL |
+| **10,000** (등록 예산) | 1.1e-15 | **0.0117 ✅** | 0.243 ❌ | **0.1608 ✅** | 1.62 | FAIL |
+| 40,000 | 1.0e-15 | 0.0045 ✅ | 0.167 ❌ | 0.1010 ✅ | 1.11 | FAIL |
+| **160,000** | 9.9e-16 | **0.0027 ✅** | **0.0999 ✅** | **0.0718 ✅** | **0.666** | **PASS** |
+
+등록 예산에서 이미 **GA·GB·GD 통과**, 놓친 것은 GC 하나(배율 1.62). GC ~ N^(-0.474) (R² 0.934),
+임계 통과가 4e4(FAIL)–1.6e5(PASS) 사이에서 **실측으로** 괄호됨. 즉 등록된 부정 결과는
+"방법 부적합"이 아니라 **"예산 부족"**이다.
+
+## C1 — 붕괴 메커니즘 진단 (완료분)
+
+보조 BLER 실행(`tables_D2_supp.txt`)에서 N=1e4 모델은 BLER 0.31~0.90 으로 붕괴했고
+**NMSE 가 SNR 상승과 함께 1 을 넘었다**(6 dB 에서 1.11) — 부정확이 아니라 **발산**.
+
+원인 확정 (`results/diag/jacobian-psd_*`), D2 σ 격자 k=6, n=256:
+
+| 모델 | site 공분산 indefinite | belief 평균 이탈 shift(중앙값) |
+|---|---|---|
+| **diffusion (N=1e4)** | **255 / 256** | **1.87** (p90 59.4, max 1.5e6) |
+| GMM-exact (kron K=512) | **0 / 256** | 3.5e-4 (max 9.3e-3) |
+
+수신기 실측 (`jacobian-psd_receiver_clip_C2.txt`, raw_supp 640 trial/SNR):
+
+| arm | 클리핑 비율 | shift 평균 | shift 최대 |
+|---|---|---|---|
+| **M-ours-dscore** | **0.99 ~ 1.00** | **4.3e3 ~ 1.1e5** | **5.5e7** |
+| M-ours-bstar | 0.44 ~ 0.74 | 1.4e-4 ~ 5.5e-3 | 6.5e-2 |
+| M-ours-gmm32 | 0.30 ~ 0.57 | 7.1e-5 ~ 3.4e-3 | 3.1e-2 |
+
+**메커니즘**: 참 posterior-mean 디노이저는 J = Cov(h|q)/σ² 이므로 대칭 PSD 가 강제되지만
+신경망 야코비안은 그렇지 않다 → D-14 행렬 site 가 부정부호 → LAM_MIN 바닥치기 →
+site 의 평균 η 와 정밀도 Λ 가 상호 모순 → belief 평균이 6~8 자릿수 이탈 → 루프 발산.
+
+**이것이 GB′(posterior 평균)와 Hyvarinen(score)이 둘 다 학습 prior 우세를 보고하면서도
+BLER 이 붕괴한 이유다. 깨진 것은 평균도 score 도 아니고 오직 미분이며, 그것이 GD 가 재는 양이다.**
+GD 는 등록 예산에서 0.161 (통과) 이었으나 D2 에서의 유효성은 D1 게이트가 보증하지 않는다 — §C3 참조.
+
+## C2/C3 — 진행 중
+
+| 작업 | 상태 |
+|---|---|
+| D1 N=1.6e5 게이트 정식 기록 → `gate_D1_C.txt`, `LADDER_C.md` | 실행 중 |
+| D2 score N=1.6e5 학습 (dit/vp/angle, HPO 최적 구성 그대로) | 실행 중 (epoch 259, val 3.678e-1) |
+| GMM D2 N=1.6e5 재적합 (동일 예산, K≤512, 180 EM) | 실행 중 (~6h 예상) |
+| GMM D2 N=4e4 재적합 | 167/180 |
+
+## 미해결 / 다음
+
+- N=1.6e5 모델(GD 0.072)의 야코비안도 부정부호인가? **이것이 Stage C 의 분기점.**
+  아니면 예산만으로 해결, 맞으면 사전 등록된 수정 (F1) 대칭 PSD 투영을 적용한다.
+- (F1)(F2)(F3) 적용 여부는 `10_SPEC_stageC.md` §3 의 사전 정당화에 따르며 BLER 을 보고 정하지 않는다.

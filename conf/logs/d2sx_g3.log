@@ -1,1 +1,13 @@
 [d2sx] ntrain=40000 attempt=1 gmm_ntrain=40000 n_eval=4096
+[d2sx] trained 1051 ep, val 3.69764e-01, 3982s
+Traceback (most recent call last):
+  File "/home/HTJ/t2/conf/code/run_d2_sx.py", line 38, in <module>
+    fits, llv, bstar, kron_K = A.gmm_selection("D2", PRIOR, NR, gmm_n)
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/HTJ/t2/conf/code/arms.py", line 87, in gmm_selection
+    fits = load_fits(testbed, prior, Nr, ntrain)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/HTJ/t2/conf/code/arms.py", line 75, in load_fits
+    raise FileNotFoundError(f"no GMM fits for {testbed}/{prior}/Nr={Nr} -- run `runner.py fit --testbed {testbed}`")
+FileNotFoundError: no GMM fits for D2/S2/Nr=8 -- run `runner.py fit --testbed D2`
+EXIT=1
