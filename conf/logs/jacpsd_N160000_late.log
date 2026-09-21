@@ -1,0 +1,8 @@
+# H1: Jacobian validity as a covariance.  ckpt = /tmp/claude-1005/-home-HTJ-t2-Demo/1edf5ffd-1138-43ae-823b-23d3c5e8c17d/scratchpad/d2sx_N160000_late.pt   n = 128 held-out D2 samples/point
+# Jr = real Jacobian of tweedie_real (what score.jac_batch returns); J = wirtinger(Jr) (what
+# ScorePrior hands RouteAClip._matrix_site, after Hermitian symmetrisation).
+# TRUE posterior-mean denoiser => Jr symmetric PSD, and nu*Herm(J) = Cov(h|q) >= 0.
+
+=== diffusion ===
+  k      sigma         nu |   asym(Jr)   lmin(Jr)  lmax(Jr)    f<0 |   herm(J)    lmin(J)  lmax(J)    f<0    f>1 |  clipfrac  shift_med  shift_max
+  0 3.3062e-02 2.1862e-03 |  1.964e-01 -1.528e-01     1.471  1.000 |  7.71e-02 -6.362e-02    1.125  0.883  0.719 |     1.000  1.005e+00  3.160e+03
