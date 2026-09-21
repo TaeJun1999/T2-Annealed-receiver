@@ -1,0 +1,94 @@
+# 11 — 선행연구 조사: 디노이저 야코비안 (2026-09-22 07:30)
+
+> `09_PRIOR_ART_NOTE.md` 는 **수신기 논문 두 편만** 확인했고 야코비안·score 문헌은 손대지 않았다.
+> 이 파일이 그 공백을 메운다. 4각도 병렬 조사 + 심판이 **SCOOPED/ADJACENT 판정 인용을 전부 직접
+> 원문 확인**했다. 09번 파일은 사용자 소유이므로 수정하지 않고 이 파일을 새로 만든다.
+
+## 결론 먼저 — 다섯 주장의 판정
+
+| # | 주장 | 판정 | 결정한 논문 |
+|---|---|---|---|
+| 1 | DSM 은 score 값만 구속하고 미분은 구속 안 함, 학습 장은 비보존적 | **알려짐** | Reehorst–Schniter TCI 2019 (7년 전), Terris CVPR 2024 |
+| 2a | 학습 야코비안이 부정부호 (참 posterior-mean 은 구성상 PSD) | **선점됨** | **JAPS, arXiv:2511.18471, TMLR 2026** |
+| 2b | EP 행렬 site → 유효하지 않은 가우시안 → NMSE>1, BLER 0.9 | **새로움** | 선례 없음 |
+| 3 | **비대칭이 아니라 여유(margin)가 판별자다** | **새로움 — 논문의 척추** | 양쪽 절반은 출판, 다리는 없음 |
+| 4 | 데이터 16배·epoch 7.4배로도 불변 | **새로움 (실측)** | Khelifa 2606.06179 가 이유를 선험적으로 예측 |
+| 5 | 수리 4종 | **(a)(b)(c) 알려짐, (d) 는 반대 결과가 출판됨, 순위만 새로움** | Cai 2512.14435, Cohen NeurIPS 2021, Chao ICML 2023 |
+
+## 특히 아픈 것 셋
+
+**(1) JAPS (Hen·Tirer·Giryes·Abu-Hussein, TMLR 2026, arXiv:2511.18471) — §3.2 직접 확인.**
+> "Since J_t ∝ Cov[x_0|x_t] for the MMSE denoiser, it is expected that an approximated Jacobian will
+> at least be symmetric and Positive Semi-Definite (PSD)" … "Figure 2 shows that the minimal eigenvalue
+> of a trained denoiser is negative, indicating it is not PSD, and that it significantly deviates from
+> symmetry."
+
+**같은 전제, 같은 두 진단(대칭부의 λmin, 상대 Frobenius 비대칭), 합성 GMM testbed D=32 K=8** —
+사실상 우리 D1 이다. 10개월 먼저다. 우리가 "기전 발견" 으로 쓰려던 것이 이미 출판돼 있다.
+
+**(2) Terris et al. CVPR 2024, Table 1 직접 확인.** 동일 정규화의 relative symmetry error 를
+DnCNN 0.014/0.022, DRUNet 0.030, SwinIR 0.604, SCUNet 0.954 로 보고한다.
+**우리 두 대역(2e-3~8e-2, 0.18~0.28)이 전부 이 범위 안에 있다.** 우리 측정을 새로운 것으로
+제시할 수 없다. 덤으로 **다섯 번째 수리법(등변성/군 평균, 대칭오차를 약 4배 감소)**을 제공하며
+리뷰어가 반드시 묻는다.
+
+**(3) Chao et al. ICML 2023 (QCSBM) 이 우리 수리 (d) 와 정면 충돌한다.** 우리는 "야코비안 비대칭
+페널티가 학습을 막는다" 고 보고했는데, 이들은 **같은 페널티를 Hutchinson 으로 추정해 CIFAR-10/100·
+ImageNet·SVHN 에서 작동**시켰다. 맨 부정 결과로 쓰면 부채다.
+
+## 그러나 — (3) 이 오히려 척추를 세운다
+
+우리의 (d) 실패와 Chao 의 (d) 성공은 **주장 3(여유)으로 설명된다**: 그들의 prior 는 여유가 있고
+우리 D2 는 스펙트럼이 0 에 몰려 있어, 퇴화 스펙트럼 근처에서 skew 페널티가 데이터 항과 싸운다.
+**같은 처방이 기하에 따라 갈린다** 는 것이 곧 주장 3 의 증거다. λ 스윕을 돌려 이 설명을 검정하면
+부채가 자산이 된다.
+
+## 살아남는 기여 넷
+
+1. **여유(margin) 기준 (주장 3)** — 비대칭 크기가 아니라 **0 으로부터의 스펙트럼 거리**가 파손을
+   예측한다. 미청구 영역이고, 우리의 (d) 실패와 Chao 의 (d) 성공을 동시에 설명한다. **척추.**
+   양쪽 절반은 출판돼 있다 (Stanczuk ICML 2024·Ventura ICLR 2025: 참 score 야코비안의 스펙트럼이
+   다양체 근처에서 0 에 몰린다 / Mohan ICLR 2020: 학습 디노이저도 그렇다 / Horvat–Pfister ICLR 2024:
+   비보존성은 선택적으로 해롭다). **다리를 놓은 사람이 없다.**
+2. **수신기 수준 파손 사슬 (주장 2b)** — 학습 score → 부정부호 Hermitian site → 유효하지 않은
+   가우시안 → NMSE>1, BLER 0.9. 어느 도메인에도 선례 없음. 프레이밍은 "야코비안이 망가졌다" 가
+   아니라 **"이 분야는 조용히 그 행렬을 만든 적이 없고, 실제로 필요한 알고리즘에서 무슨 일이
+   일어나는지가 여기 있다"** 여야 한다.
+3. **스케일링 null (주장 4)** — 유일한 측정이며 Khelifa 가 독립적으로 이유를 예측한다.
+   "놀라운 발견" 이 아니라 **"독립적으로 예측된 null 의 확인"** 으로 쓰는 편이 강하다.
+4. **수신기에서 잰 수리법 순위** — 기법 넷은 전부 알려졌지만 EP 루프에서 BLER 로 순위를 매긴 적은 없다.
+
+## 쓸 수 없게 된 주장
+
+- 야코비안 비대칭의 최초 측정 (Reehorst–Schniter 2019, Terris 2024)
+- 학습 야코비안이 부정부호라는 최초 관측 (JAPS 2026)
+- "비보존성은 결함이다" — Khelifa 가 **생성에는 구조적으로 무해**함을 증명했다.
+  유일하게 방어 가능한 틀: **샘플링에는 무해하고 그래서 아무도 몰랐으며, 미분을 소비하는 쪽에서만 치명적이다**
+- "학습 채널 prior 가 부호화 성능을 개선한다" (Arvinte–Tamir TWC 2023 이 이미 보고)
+
+## 무선 축도 좁아졌다
+
+`09_PRIOR_ART_NOTE` 가 기록한 축 "미지 채널 + bilinear 결합 + 학습된 채널 prior" 는 **생성 prior
+문헌을 확인한 적이 없었다.** 확인 결과:
+- **Cai et al. (JADCE, 메시지 패싱 안의 score 기반 생성 채널 prior, MIMO-OFDM)** — 세 다리 중 둘
+- **Bhattacharya et al. (SIC + diffusion, 미지 채널 + 결합 검출 + 학습 score 채널 prior)** — 역시 둘
+- **Wadayama–Takahashi, SC-VAMP with Fisher-Information Onsager (arXiv:2601.07095, 2026-01)** —
+  `09_PRIOR_ART_NOTE` 가 본 논문의 **후속작**이며 "Jacobian-free" 를 명시적으로 내세운다.
+  **리뷰어가 반드시 묻는다: 왜 Cov = ν·Herm(J) 를 만드는가, 9개월 전에 스칼라 Fisher 경로가 나왔는데.**
+
+## 즉시 해야 할 일
+
+1. **GMM arm 의 정체성 확인** — Koller·Fesl·Utschick 의 GMM CME 계열을 **이름으로 인용**하거나,
+   우리 arm 이 그것과 무엇이 다른지 밝혀야 한다. 안 그러면 "약한 baseline" 으로 읽힌다. (baseline
+   무결성 위험이지 신규성 위험이 아니다.)
+2. **수리 (d) 의 λ 스윕** — Chao et al. 과의 충돌을 주장 3 으로 설명하려면 필요하다.
+   §3b 의 λ=1.0 고정은 **V3 를 arm 으로 만들기 위한 튜닝을 막는 규칙**이고, 여기서 하려는 것은
+   "왜 실패했는가" 의 진단이므로 별도 실험·별도 보고로 한다.
+3. **등변성 수리(Terris)** 를 수리 목록에 추가하거나, 왜 다루지 않았는지 명시.
+4. **Fesl et al. AISTATS 2025 (arXiv:2403.02957)** 가 주장 2 의 전제를 긴장시킨다 — 학습된 DM
+   디노이저가 MSE 최적 CME 로 수렴한다고 논한다. 우리 측정(부정부호)과 어떻게 양립하는지 써야 한다.
+
+## 조사 방법 기록
+4각도(RED/PnP · AMP·VAMP·EP · score 2차 성질 · 무선 응용) 병렬 + 심판 1. 심판이 SCOOPED 및
+ADJACENT 판정 인용을 전부 원문 확인했고 arXiv id 오류 3건을 정정했다. 전체 산출물은 워크플로우
+`wf_a895b3b8-346` 의 journal.jsonl 에 있다.
