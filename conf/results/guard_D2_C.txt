@@ -1,0 +1,85 @@
+# date        : 2026-09-22 00:22:12 KST
+# git commit  : f6062a0
+# versions    : python 3.12.14  numpy 2.5.2  scipy 1.18.1  torch 2.14.0+cu130 (cuda_available=True)
+# device      : CPU (192 cores) | dtype: complex128 / float64 | deterministic: yes (fixed seeds, no GPU in the receiver)
+# testbed     : D2
+# seed rule   : default_rng([20260926, TBID[testbed], PID[prior], Nr, T, Tp, int(snr)+100])  (trials of a point = ONE stream)
+# code        : rate-1/2 conv (133,171)_8 nu=6 terminated, QPSK, outer iterations = 16 for EVERY arm
+# Demo/ hashes: t2_route_a.py=95a5408901ec125c  t2_trellis.py=31cd0ee9c68e972b  t2_gmm.py=d064e58c7510c769
+# content     : (F3) Module H divergence guard firings, DIVERGE_NMSE = 10.0 (reused from code/bigamp.py, NOT re-chosen)
+# raw         : raw_C
+# rule        : a trial fires the guard if NMSE > 10.0 or non-finite at ANY of the 16 iterations.
+# status      : DETECTION AND CLASSIFICATION ONLY -- no arm's trajectory is altered, so every
+#               number recorded before this guard existed remains valid.
+# read-only   : the raw files are not rewritten.
+
+cell    SNR arm                        fired     of    rate  worst NMSE seen
+------------------------------------------------------------------------------
+C1       -3 M-ours-bstar                   2   2560   0.001  11.12
+C1       -3 M-ours-dscore-C-V0          2560   2560   1.000  7.406e+21
+C1       -3 M-ours-dscore-C-V1          2560   2560   1.000  3.518e+24
+C1       -3 M-ours-dscore-C-V4          2560   2560   1.000  6.72e+35
+C1       -3 M-ours-dscore-C-V4b         2560   2560   1.000  1.125e+21
+C1       +0 M-ours-bstar                   2   2560   0.001  11.81
+C1       +0 M-ours-dscore-C-V0          2432   2560   0.950  1.713e+14
+C1       +0 M-ours-dscore-C-V1             1   2560   0.000  12.41
+C1       +0 M-ours-dscore-C-V4b         2560   2560   1.000  8.922e+20
+C1       +3 M-ours-dscore-C-V0          2480   2560   0.969  6.162e+14
+C1       +3 M-ours-dscore-C-V1            49   2560   0.019  4624
+C1       +3 M-ours-dscore-C-V4b         2560   2560   1.000  9.968e+20
+C1       +6 M-ours-bstar                   2   2560   0.001  10.67
+C1       +6 M-ours-dscore-C-V0          2511   2560   0.981  2.069e+16
+C1       +6 M-ours-dscore-C-V1           203   2560   0.079  2262
+C1       +6 M-ours-dscore-C-V4b         2560   2560   1.000  1.06e+21
+C1       +9 M-ours-bstar                   3   2560   0.001  60.48
+C1       +9 M-ours-bstar-scalar            2   2560   0.001  8261
+C1       +9 M-ours-dscore-C-V0          2446   2560   0.955  8.96e+14
+C1       +9 M-ours-dscore-C-V1           365   2560   0.143  7732
+C1       +9 M-ours-dscore-C-V4b         2560   2560   1.000  9.583e+20
+C1      +12 M-ours-bstar                   2   2560   0.001  11.14
+C1      +12 M-ours-bstar-scalar            6   2560   0.002  1.775e+04
+C1      +12 M-ours-dscore-C-V0          2337   2560   0.913  1.341e+17
+C1      +12 M-ours-dscore-C-V1           445   2560   0.174  3053
+C1      +12 M-ours-dscore-C-V4b         2560   2560   1.000  9.407e+20
+C1      +15 M-ours-bstar                   3   2560   0.001  19.03
+C1      +15 M-ours-bstar-scalar            5   2560   0.002  1.38e+04
+C1      +15 M-ours-dscore-C-V0          2011   2560   0.786  1.07e+16
+C1      +15 M-ours-dscore-C-V1           458   2560   0.179  1.814e+04
+C1      +15 M-ours-dscore-C-V4b         2560   2560   1.000  1.037e+21
+C2       -3 M-ours-dscore-C-V0          1355   2560   0.529  2.942e+09
+C2       +0 M-ours-dscore-C-V0          2034   2560   0.795  5.322e+07
+C2       +3 M-ours-dscore-C-V0          2347   2560   0.917  5.253e+08
+C2       +6 M-ours-dscore-C-V0          2385   2560   0.932  2.588e+10
+C2       +9 M-ours-dscore-C-V0          2352   2560   0.919  1.197e+10
+C2      +12 M-ours-dscore-C-V0          2186   2560   0.854  1.982e+08
+C2      +15 M-ours-dscore-C-V0          1682   2560   0.657  3.735e+08
+C5       -3 M-ours-dscore-C-V0          1595   2560   0.623  1.372e+11
+C5       -3 M-ours-dscore-C-V4b         2560   2560   1.000  1.12e+21
+C5       +0 M-ours-dscore-C-V0          2076   2560   0.811  9.109e+10
+C5       +0 M-ours-dscore-C-V4b         2560   2560   1.000  9.599e+20
+C5       +3 M-ours-dscore-C-V0          2310   2560   0.902  1.081e+09
+C5       +3 M-ours-dscore-C-V1            13   2560   0.005  378
+C5       +3 M-ours-dscore-C-V4b         2560   2560   1.000  9.229e+20
+C5       +6 M-ours-bstar                   1   2560   0.000  11.08
+C5       +6 M-ours-bstar-scalar            1   2560   0.000  6.509e+04
+C5       +6 M-ours-dscore-C-V0          2367   2560   0.925  4.918e+11
+C5       +6 M-ours-dscore-C-V1            26   2560   0.010  114.9
+C5       +6 M-ours-dscore-C-V4b         2560   2560   1.000  1.352e+21
+C5       +9 M-ours-bstar-scalar            1   2560   0.000  3392
+C5       +9 M-ours-dscore-C-V0          2385   2560   0.932  1.547e+11
+C5       +9 M-ours-dscore-C-V1            55   2560   0.021  612.5
+C5       +9 M-ours-dscore-C-V4b         2560   2560   1.000  9.47e+20
+C5      +12 M-ours-bstar-scalar            2   2560   0.001  9.803e+06
+C5      +12 M-ours-dscore-C-V0          2135   2560   0.834  7.463e+12
+C5      +12 M-ours-dscore-C-V1            79   2560   0.031  3002
+C5      +12 M-ours-dscore-C-V4b         2560   2560   1.000  1.031e+21
+C5      +15 M-ours-bstar                   2   2560   0.001  28.53
+C5      +15 M-ours-bstar-scalar            4   2560   0.002  2.316e+09
+C5      +15 M-ours-dscore-C-V0          1608   2560   0.628  1.887e+13
+C5      +15 M-ours-dscore-C-V1            87   2560   0.034  4838
+C5      +15 M-ours-dscore-C-V4b         2560   2560   1.000  1.047e+21
+C5      +15 M-ours-gmm32                   1   2560   0.000  11.88
+C5      +15 R3-bigamp                      1   2560   0.000  13.09
+
+arms that NEVER fired the guard anywhere in this raw set (5): R0-pilot, R1-turbo, R2-ours-G, R4-llr, R4-scvamp
+not applicable -- no channel estimate, so no Module H path (1): R5-genie

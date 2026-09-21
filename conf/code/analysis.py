@@ -78,6 +78,9 @@ STAGEC_NOTES = {
     "M-ours-dscore-C-V1": "Stage C V1 -- V0 + (F1) symmetric-PSD projection of the D-14 site (ScorePrior(psd_project=True))",
     "M-ours-dscore-C-V4": "Stage C V4 -- D-14 matrix site REPLACED by the D-13 belief scalarisation (hsite=scalar, scal=belief); "
                           "POST-HOC registered, observed in the H4 diagnostic BEFORE registration (10_SPEC §3c)",
+    "M-ours-dscore-C-V4b": "Stage C V4b -- as V4 but scal=site instead of scal=belief (10_SPEC §3c, "
+                           "\"\uB3D9\uC77C\uD558\uB418 scal=site. \uBD80\uC218 \uBCF4\uACE0\uC6A9\"); registered with V4, wired only on 2026-09-21 after an "
+                           "audit found it had been dropped",
     "M-ours-bstar-scalar": "Stage C CONTROL (10_SPEC §3c, MANDATORY) -- the b* GMM through V4's EXACT wiring: if scalarisation "
                            "also helps the GMM, the gain belongs to the SITE, not to the learned prior",
 }
