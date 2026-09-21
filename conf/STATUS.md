@@ -534,7 +534,7 @@ val 7.77. `asym_reg` 는 5.6e-2 → 2.6e-2 로 **줄고 있으므로 정칙화 �
 ## D1 확증 **n=2560** 최종 (2026-09-21 21:30 KST) — 사전 등록 n 요건 충족본
 
 `results/tables_D1_C.txt` (raw_C 1344), `results/guard_D1_C.txt`. n=640 중간본을 먼저 보았음을 명시한다
-(DECISIONS 17:55). 아래가 보고용 본 결과이며 전 비교가 사전 등록 power guard 를 통과(POWERED)했다.
+(DECISIONS 17:55). 아래가 보고용 본 결과다. **power guard: `tables_D1_C.txt` 는 11쌍을 UNDECIDED 로 판정했고 전부 C2 에 있다** (`M-ours-bstar → V0/V1/V4`, `→ M-ours-bstar-scalar` 포함). 아래 인용한 **C1·C5 비교는 POWERED** 이고 **C2 의 학습 arm 대 GMM 진술은 검정 근거가 없다.** (2026-09-22 01:00 감사 정정: 이전 판은 "전 비교가 POWERED" 라고 적었고 그것은 거짓이었다.)
 
 **앵커 `R2-ours-G` 기준 — 학습 prior 가 3개 셀 전부에서 유의**
 
