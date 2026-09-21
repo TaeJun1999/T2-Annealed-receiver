@@ -77,3 +77,43 @@ WHAT THIS DOES NOT ESTABLISH
     The argument is consistent with the direction of the effect and wrong about its size.
   - It does not identify which of the 64 directions are tangent and which are normal; that would
     need the true tangent space, which the D2 generator can supply but this measurement did not use.
+
+====================================================================================================
+ADDENDUM 2026-09-21 21:55 -- D1 MEASURED AGAINST THE **TRUE** PRIOR
+====================================================================================================
+The retracted claim above ("matches the exact one to three significant figures") failed because the
+reference was an EM FIT, not ground truth.  D1's true prior is available in closed form -- it is the
+grid mixture the testbed is DEFINED by, t2_gmm.angle_grid_prior(S, 8, 4, rho_c=0.7, KG=32), 32x32 =
+1024 components.  The measurement was repeated with BOTH references present (logs/jacspec_D1_true.log,
+n=48 held-out samples per grid point, 64 eigenvalues each).
+
+  model                      k=0 s=.0329        k=6 s=.0899        k=12 s=.2452       k=18 s=.6690
+  -------------------------------------------------------------------------------------------------
+  learned  lmin / 25%tl / lmax   .9407/.9789/1.012  .6765/.8664/1.073  .2232/.4702/1.190  .0308/.1184/1.317
+  TRUE     lmin / 25%tl / lmax   .9450/.9798/1.019  .6978/.8670/1.096  .2369/.4699/1.162  .0403/.1163/1.350
+  FITTED   lmin / 25%tl / lmax   .9209/.9797/1.051  .6195/.8666/1.219  .2142/.4714/1.406  .0392/.1172/1.290
+
+  n_neg = 0 for ALL THREE at ALL FOUR grid points.  The learned Jacobian is PSD on D1, as is the truth.
+
+RELATIVE ERROR AGAINST THE TRUE PRIOR (%), learned vs fitted:
+
+  quantity   sigma .0329      .0899       .2452       .6690      learned closer at
+  ----------------------------------------------------------------------------------
+  lmin       0.46 / 2.55   3.05 /11.22   5.78 / 9.58  23.47/ 2.63    3 of 4 (5.6x, 3.7x, 1.7x)
+  25%tile    0.09 / 0.01   0.07 / 0.05   0.06 / 0.32   1.81/ 0.77    1 of 4 (both < 2% throughout)
+  lmax       0.69 / 3.14   2.10 /11.22   2.41 /21.00   2.44/ 4.44    **4 of 4** (1.8x .. 8.7x)
+
+WHAT THIS SUPPORTS, IN PLACE OF THE RETRACTED CLAIM.
+On D1 the learned score's Jacobian is PSD everywhere, and it tracks the TRUE Jacobian about as well as
+the fitted mixture does on the bulk of the spectrum (25th percentile: both inside 2% at every point),
+and BETTER on the extremes -- lmax at all four sigma, lmin at the three smaller sigma.  The fitted
+mixture is closer on lmin only at the largest sigma (0.669), where the learned model is 23% low.
+The extremes are what RouteAClip._matrix_site consumes: it inverts nu*Herm(J), so the smallest and
+largest eigenvalues set the site's conditioning and its sign validity.
+
+WHAT IT DOES NOT SUPPORT.
+  - It is four grid points and n=48.  It is not a claim about the whole grid.
+  - "Better than the fitted GMM on D1" does not transfer to D2, where the same learned model's
+    Jacobian is indefinite at essentially every point and no closed-form truth exists to compare against.
+  - It says nothing about the receiver.  The D1 BLER result (tables_D1_C.txt) is the separate evidence,
+    and it includes a total collapse of every learned arm at C1 Tp=2, -3 dB.
