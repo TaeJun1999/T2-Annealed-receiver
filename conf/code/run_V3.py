@@ -71,7 +71,10 @@ res = score.train(RUNG, ATTEMPT, "D2", PRIOR, NR, NT, device=a.device, hp=HP, re
 print(f"[V3] trained {res['epochs']} ep, val {res['val_loss']:.6e}, {res['wall_sec']:.0f}s -> {ck}",
       flush=True)
 
-res["verdict"] = "ABORTED" if res.get("aborted") else "UNGATED"
+# §3d: a run the DIVERGE_TRAIN criterion stopped must say so in the ladder.  It is a COMPLETED
+# attempt (it consumes a slot), so it is neither ABORTED nor a plain UNGATED result.
+res["verdict"] = ("ABORTED" if res.get("aborted") else
+                  "DIVERGED" if res.get("stopped_by") == "diverged" else "UNGATED")
 res["config"] = (f"V3 lambda={LAM} | dit vp/angle w64 d6 h8 p1 emb256 lr{HP['lr']} ema{HP['ema']} "
                  f"({res['params']} par)")
 res["note"] = (f"Stage C V3 (§3b): V0 recipe + lambda={LAM} * E_v||(J-J^T)v||^2, J = d tweedie_real/dx, "

@@ -65,7 +65,10 @@ print(f"[V2] trained {res['epochs']} ep, best val {res['val_loss']:.6e}, {res['w
       f"({res['sec_per_epoch']:.2f} s/ep), stopped_by={res['stopped_by']}, aborted={res['aborted']}",
       flush=True)
 
-res["verdict"] = "ABORTED" if res.get("aborted") else "UNGATED"
+# §3d: a run the DIVERGE_TRAIN criterion stopped must say so in the ladder.  It is a COMPLETED
+# attempt (it consumes a slot), so it is neither ABORTED nor a plain UNGATED result.
+res["verdict"] = ("ABORTED" if res.get("aborted") else
+                  "DIVERGED" if res.get("stopped_by") == "diverged" else "UNGATED")
 res["note"] = (f"Stage C V2 (energy head, s = -grad_x E): {res['epochs']} ep (stop: {res['stopped_by']}), "
                f"{res['wall_sec']:.0f} s, {res['sec_per_epoch']:.2f} s/ep, device {res['device']}, "
                f"N_train={a.ntrain}, ckpt {ck}, split {res['split_hash']}  || UNGATED: GA-GD are measured "
