@@ -117,6 +117,32 @@ tests.txt, ckpt_inventory.txt / `figs/F2_lemma.png` / `LADDER.md` (82행) / `raw
 > **이 절은 2026-09-21 18:20 의 적대적 감사(5인 + 심판, 실제 결함 29건, BLOCKER 3건) 결과로
 > 전면 재작성됐다.** 이전 판은 과대주장이었다. 무엇이 어떻게 틀렸는지는 아래 "감사 정정" 에 있다.
 
+## 인용 규칙 — 이 파일을 인용하기 전에 읽을 것 (2026-09-22 03:20)
+
+오늘 감사가 확정한 결함 44건(15+29) 중 **압도적 다수가 한 가지 원인**이다:
+**소스 파일에 있던 캐비엇이 이 요약으로 옮겨지면서 떨어졌다.** 산출물(결과 파일·그림 캡션)은
+세 번 다 정확했고 틀린 것은 요약이었다. 그래서 규칙을 못박는다.
+
+**이 파일의 수치는 편의용 복사본이다. 논문에 쓸 때는 아래 정본에서 직접 읽는다.**
+
+| 무엇 | 정본 | 이 파일이 놓쳤던 것 |
+|---|---|---|
+| D2 확증 BLER·짝지음 검정 | `results/tables_D2_C.txt` | UNDECIDED 8쌍, p값 5개 |
+| D1 확증 BLER·짝지음 검정 | `results/tables_D1_C.txt` | UNDECIDED 11쌍 |
+| 발산 가드 발동률 | `results/guard_D{1,2}_C.txt` | 비율 3개가 한 방향으로 틀림 |
+| 야코비안 스펙트럼 | `results/jac_spectrum.txt` | 기준선이 참 prior 가 아님, n<0.1 열 라벨 |
+| 게이트 값 | `results/gate_D1_C.txt`, `LADDER_C.md` | GA 가 구조적 0 |
+| 학습 시행 전부 | `LADDER_C.md` (append-only) | DIVERGED 행 |
+| arm 별 학습 예산 | 각 표의 머리말 `meta|budget` | 동일예산 여부 |
+| 그림이 그린 것 | `figs/F*.txt` (캡션) | — (캡션이 요약보다 정확했다) |
+
+**수치를 이 파일에서 옮길 때 반드시 함께 옮겨야 하는 것**: (i) n, (ii) 어느 testbed·셀·SNR,
+(iii) 체크포인트가 게이트를 통과했는지, (iv) 비교가 동일 예산인지, (v) power guard 판정
+(POWERED / UNDECIDED). 다섯 중 하나라도 빠지면 그 수치는 인용 불가다.
+
+**특히**: `figs/F11_bler_D2_confirmatory.txt` 의 캡션은 이 파일의 D2 절보다 먼저, 더 정확하게
+UNDECIDED·예산 비대칭·`unclassified arm` 문제를 전부 적고 있었다. 그림 캡션을 먼저 읽는 편이 낫다.
+
 ## 한 줄 (범위를 붙여서)
 
 **D2 (주장 testbed) 에서, 사전 등록된 D-14 행렬 site 로는 학습 prior 가 수신기를 고전 터보보다
