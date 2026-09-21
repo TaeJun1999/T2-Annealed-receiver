@@ -1,0 +1,71 @@
+# date        : 2026-09-21 17:19:14 KST
+# git commit  : c15daa1
+# versions    : python 3.12.14  numpy 2.5.2  scipy 1.18.1  torch 2.14.0+cu130 (cuda_available=True)
+# device      : CPU (192 cores) | dtype: complex128 / float64 | deterministic: yes (fixed seeds, no GPU in the receiver)
+# testbed     : D2
+# seed rule   : default_rng([20260926, TBID[testbed], PID[prior], Nr, T, Tp, int(snr)+100])  (trials of a point = ONE stream)
+# code        : rate-1/2 conv (133,171)_8 nu=6 terminated, QPSK, outer iterations = 16 for EVERY arm
+# Demo/ hashes: t2_route_a.py=95a5408901ec125c  t2_trellis.py=31cd0ee9c68e972b  t2_gmm.py=d064e58c7510c769
+# content     : the pre-registered SETTLING experiment (results/diag/SUMMARY.md gap section) --
+#               the interventional counterfactuals at ALL SEVEN SNRs of cell C2, n=256 PAIRED
+#               trials each, so the non-monotonic BLER(SNR) shape can be checked against the
+#               sigma-band the spectrum measurement predicts (results/jac_spectrum.txt).
+# code        : conf/code/diag_psd_cf.py.  Only --snrs changed; nothing retuned, nothing retrained.
+# !! STATUS   : DIAGNOSTIC PROBES, NOT ARMS.  Every row uses ckpt/d2sx_N10000_a1.pt, which FAILED
+# !!            the pre-registered gates (GC 0.224 vs 0.15).  These numbers may NOT enter any
+# !!            result table and do NOT license a claim.  The confirmatory run is 10_SPEC §6/§6c
+# !!            with the GATE-PASSING N'=1.6e5 checkpoint, at n>=2560, run once.
+
+BLER after 16 iterations, D2 cell C2 (8x4, T=16, Tp=4), n = 256 paired trials per SNR
+-------------------------------------------------------------------------------------------------
+arm                        -3 dB    0 dB   +3 dB   +6 dB   +9 dB  +12 dB  +15 dB   what it changes
+-------------------------------------------------------------------------------------------------
+gauss|sitesc  (= R2-ours-G) 0.375   0.117   0.027   0.027   0.008   0.012   0.004   Gaussian prior
+gmmB|epsite   (= M-ours-b*) 0.324   0.094   0.020   0.012   0.000   0.016   0.000   exact mixture-EP site
+dscore|eta    (= the arm)   0.824   0.902   0.895   0.777   0.664   0.500   0.332   nothing (D-14 as spec'd)
+dscore|abs1e-2              0.793   0.875   0.773   0.613   0.422   0.238   0.098   |eig| floored, SIGN KEPT
+dscore|psd1e-2              0.176   0.043   0.012   0.004   0.004   0.000   0.000   eig clipped into [1e-2,1]
+dscore|mean                 0.184   0.039   0.004   0.004   0.004   0.000   0.000   clip='mean' not 'eta'
+dscore|belsc                0.168   0.039   0.016   0.008   0.000   0.000   0.000   D-14 dropped, scalar site
+
+fraction of trials with channel-estimate NMSE > 1 after 16 iterations  (NMSE > 1 = worse than h_hat = 0)
+-------------------------------------------------------------------------------------------------
+dscore|eta                  0.332   0.488   0.492   0.523   0.344   0.242   0.082
+dscore|abs1e-2              0.273   0.398   0.371   0.301   0.160   0.082   0.023
+dscore|psd1e-2              0.000   0.000   0.000   0.000   0.000   0.000   0.000
+dscore|belsc                0.000   0.000   0.000   0.000   0.000   0.000   0.000
+
+READING
+
+1.  THE sigma-BAND PREDICTION HOLDS.  results/jac_spectrum.txt measured the damage to peak at
+    sigma ~ 0.09-0.26 and to vanish by sigma = 0.71.  The receiver's nu shrinks as SNR rises, so the
+    operating point should walk into the bad band and out the other side.  The divergence rate does
+    exactly that: 0.332 -> 0.488 -> 0.492 -> 0.523 (peak at +6 dB) -> 0.344 -> 0.242 -> 0.082.
+    At -3 dB nu is large and the site is still usable; at +15 dB the pilot-only estimate is already
+    accurate enough that a broken prior update cannot drag it far, and the beta = 0.7 damping caps
+    the excursion.  This closes the gap the divergence diagnosis recorded as unexplained.
+
+2.  IT IS THE SIGN, AT EVERY SNR.  dscore|abs1e-2 floors the eigenvalue MAGNITUDE at 1e-2 while
+    KEEPING the sign: it stays broken everywhere (0.098-0.875, NMSE>1 in 2-40% of trials).  Fixing
+    the conditioning does not help; fixing the sign does.
+
+3.  EVERY REPAIR REMOVES THE DIVERGENCE COMPLETELY.  fraction NMSE>1 = 0.000 at all seven SNRs for
+    both the PSD projection and the scalar site.  Not reduced -- zero.
+
+4.  THE REPAIRED LEARNED PRIOR BEATS THE FITTED GMM AT EVERY SNR:
+      -3 dB  0.168-0.184 vs 0.324   (~1.9x)
+       0 dB  0.039-0.043 vs 0.094   (~2.3x)
+      +3 dB  0.004-0.016 vs 0.020
+      and 0.000-0.008 vs 0.000-0.016 above that, where the cell saturates.
+    It also beats the Gaussian arm everywhere.  The three repairs agree with each other to within
+    their own Monte-Carlo error, which is what one expects if they are removing the same defect.
+
+WHAT THIS IS NOT
+  - Not an arm result.  The checkpoint here FAILED the pre-registered gates; 10_SPEC_stageC §3c
+    requires the confirmatory run to use a gate-passing checkpoint at n >= 2560, once.
+  - Not equal-budget against the GMM in the strict sense: the learned model saw N=1e4, the same
+    budget the GMM fit received, so this particular comparison IS equal-budget -- but the
+    confirmatory run will use N'=1.6e5 and therefore needs the matching GMM re-fit (A3), which is
+    still running.
+  - Not a significance test.  These are marginal rates on paired trials; the pre-registered paired
+    sign test with the 3-decision-point rule is what will decide the claim.
