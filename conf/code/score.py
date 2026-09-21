@@ -591,10 +591,53 @@ def wirtinger(Jr):
     return 0.5 * torch.complex(a + d, c - b)
 
 
+def project_psd(J, lam_min=C.LAM_MIN):
+    """(F1) Project a complex Wirtinger Jacobian onto the constraint set the TRUE posterior-mean denoiser
+    is guaranteed to satisfy, and onto nothing else.  Under real Gaussian noise of std sigma,
+    J = dm/dq = Cov(h|q)/nu, so J is Hermitian and PSD -- necessarily.  A network's Jacobian is not.
+
+    Hermitian part, then the eigenvalues of that Hermitian part floored at lam_min (= common.LAM_MIN,
+    the constant RouteAClip already floors Lambda with; no new constant is introduced).
+    lmax is NOT touched: the exact GMM denoiser genuinely has lmax(J) > 1 on a large fraction of D2 test
+    points, so clamping the top of the spectrum would impose a bias the true prior does not have.
+    When no eigenvalue is below the floor the Hermitian part is returned untouched -- so on a denoiser
+    whose Jacobian is already Hermitian PSD (the exact GMM) this is the identity to machine precision,
+    not merely to eigendecomposition round-off (selftest_M6, step 1)."""
+    H = 0.5 * (J + J.conj().T)
+    w, V = np.linalg.eigh(H)
+    if w.min() >= lam_min:
+        return H
+    return (V * np.maximum(w, lam_min)) @ V.conj().T
+
+
 def jac_batch(f, X, S):
     """Batched real Jacobian of f(x, sigma) over the leading sample axis (reverse mode; 2N VJPs per sample,
     vectorised).  2N = 64 for the 8x4 cell, so this is a single small batched backward."""
     return torch.func.vmap(torch.func.jacrev(f, argnums=0))(X, S)
+
+
+def jac_asym_hutch(model, x, sigma, v):
+    """V3 (10_SPEC_stageC §3b): Hutchinson estimate of  R = E_v || (J - J^T) v ||^2  for
+    J = d tweedie_real / dx, the REAL Jacobian of the DENOISER.
+
+    WHICH JACOBIAN, AND WHY THE DENOISER AND NOT THE SCORE.  m = x + sigma^2 s, so J = I + sigma^2 J_s and
+    J - J^T = sigma^2 (J_s - J_s^T): the two differ by the identity (which is symmetric and drops out) and
+    by the factor sigma^2, i.e. penalising the denoiser is the SAME constraint with a sigma^4 weight.  The
+    denoiser is the object the receiver actually differentiates -- ScorePrior.denoise_full returns
+    wirtinger(d tweedie_real/dx) and RouteAClip._matrix_site inverts nu times its Hermitian part -- and it
+    is the matrix code/jacobian_psd.py reports asym(Jr) for.  So the regularised quantity, the diagnosed
+    quantity and the consumed quantity are the same object.
+
+    Jv is a jvp (the double-backward trick: JTu = J^T u is linear in u, so d(v.JTu)/du = J v) and J^T v is
+    the vjp that same call already produced -- TWO backward passes, the full Jacobian is never formed.
+    E_v||(J-J^T)v||^2 = ||J-J^T||_F^2 for v with unit isotropic covariance (Rademacher here, lower variance
+    than Gaussian at the same cost); selftest_V3.py checks that against score.jac_batch."""
+    x = x.detach().requires_grad_(True)
+    m = tweedie_real(model, x, sigma)
+    u = v.detach().clone().requires_grad_(True)
+    JTv = torch.autograd.grad(m, x, grad_outputs=u, create_graph=True)[0]       # J^T u, evaluated at u = v
+    Jv = torch.autograd.grad(JTv, u, grad_outputs=v, create_graph=True)[0]      # d(v . J^T u)/du = J v
+    return ((Jv - JTv) ** 2).sum(-1).mean()
 
 
 # ----------------------------------------------------------------------------- training data (04_SPEC §2)
@@ -679,13 +722,20 @@ def resolve_hp(rung, attempt, testbed, Nr, Nt, prior=None, device="cpu", n_eval=
 
 def train(rung, attempt, testbed, prior, Nr, Nt, device="cuda", hp=None, resume=True,
           max_epochs=3000, patience=20, min_epochs=200, log_path=None, ckpt=None, verbose=True,
-          ntrain=C.N_TRAIN):
+          ntrain=C.N_TRAIN, jac_reg=0.0):
     """One ladder attempt, exactly under the regime of 04_SPEC §2 / 01_RULES §5.
 
     Stopping: validation loss with no improvement for `patience` epochs, but never before `min_epochs`.
     A run that ends any other way is aborted=True: it must be logged to LADDER.md as ABORTED and does NOT
     count as one of the three attempts of the rung.
-    Checkpoints every epoch (epoch / model / EMA / optimizer / best_val / RNG state) and resumes from them."""
+    Checkpoints every epoch (epoch / model / EMA / optimizer / best_val / RNG state) and resumes from them.
+
+    jac_reg (V3, 10_SPEC_stageC §3b) is OPT-IN and defaults to 0.0, in which case NOTHING below changes:
+    the loss object handed to backward() is the same object, no extra number is drawn from the training
+    generator `g`, and the log line is byte-identical.  When it is > 0 the loss becomes
+    DSM + jac_reg * jac_asym_hutch(...), the probe v is drawn from a SEPARATE generator `gj` so that the
+    (x0, sigma, eps) stream stays bit-identical to the jac_reg=0 run of the same rung/attempt, and the
+    EARLY-STOPPING criterion is left alone: val_loss() is the pure DSM validation loss, as in V0."""
     t_start = time.time()
     dev = torch.device(device if (device != "cuda" or torch.cuda.is_available()) else "cpu")
     base_hp = hp
@@ -726,11 +776,16 @@ def train(rung, attempt, testbed, prior, Nr, Nt, device="cuda", hp=None, resume=
     # _rung_ix: RUNGS.index for a ladder rung, so every existing rung keeps its EXACT seed; a stable hash
     # for anything else, so a search driver can pass its own rung label without colliding or crashing.
     g = torch.Generator(device="cpu").manual_seed(SEED_TRAIN + _rung_ix(rung) * 17 + attempt)
+    # separate stream for the Hutchinson probes: the data order of a jac_reg run must match jac_reg=0.
+    gj = (torch.Generator(device="cpu").manual_seed(SEED_TRAIN + _rung_ix(rung) * 17 + attempt + 7919)
+          if jac_reg else None)
     ep0, best, best_ep, hist = 0, np.inf, -1, []
     if st is not None:
         model.load_state_dict(st["model"]); opt.load_state_dict(st["opt"])
         ema.shadow = {k: v.to(dev) for k, v in st["ema"].items()}
         g.set_state(st["rng"].cpu() if torch.is_tensor(st["rng"]) else st["rng"])
+        if gj is not None and st.get("rng_jac") is not None:
+            gj.set_state(st["rng_jac"].cpu() if torch.is_tensor(st["rng_jac"]) else st["rng_jac"])
         ep0, best, best_ep, hist = st["epoch"], st["best_val"], st["best_epoch"], st["hist"]
 
     lg = open(lpath, "a", buffering=1)
@@ -745,6 +800,10 @@ def train(rung, attempt, testbed, prior, Nr, Nt, device="cuda", hp=None, resume=
     lg.write(f"# hp          : {hp}  params={n_params(model)}" + (f"  base-selection {sel}" if sel else "") + "\n")
     lg.write(f"# stopping    : patience {patience} on val loss, never before {min_epochs} epochs, "
              f"max {max_epochs} (01_RULES §5)\n")
+    if jac_reg:
+        lg.write(f"# jac_reg     : V3, loss += {jac_reg} * E_v||(J-J^T)v||^2, J = d tweedie_real/dx, "
+                 f"1 Rademacher probe/sample, lambda FIXED (10_SPEC_stageC §3b, never tuned). "
+                 f"val loss / early stopping unchanged (pure DSM).\n")
     dname = (f"{dev}:{torch.cuda.current_device()} {torch.cuda.get_device_name(dev)}" if dev.type == "cuda"
              else f"{dev} ({os.cpu_count()} cores)")
     if verbose:
@@ -764,26 +823,35 @@ def train(rung, attempt, testbed, prior, Nr, Nt, device="cuda", hp=None, resume=
             te = time.time()
             model.train()
             idx = torch.randperm(len(tr), generator=g).to(dev)
-            tot = nb = 0.0
+            tot = nb = rtot = 0.0
             for i in range(0, len(tr), hp["batch"]):
                 b = tr[idx[i:i + hp["batch"]]]
                 s = torch.exp(torch.rand(len(b), generator=g) * (math.log(smax) - math.log(smin))
                               + math.log(smin)).to(dev)
                 e = torch.randn(len(b), dim, generator=g).to(dev)
-                loss = model.loss(b, s, e)
+                dsm = model.loss(b, s, e)
+                loss = dsm
+                if jac_reg:
+                    v = (2.0 * torch.randint(0, 2, (len(b), dim), generator=gj,
+                                             dtype=torch.float32) - 1.0).to(dev)
+                    r = jac_asym_hutch(model, b + s.unsqueeze(-1) * e, s, v)
+                    loss = dsm + jac_reg * r
+                    rtot += float(r.detach()) * len(b)
                 opt.zero_grad(set_to_none=True); loss.backward(); opt.step(); ema.update(model)
-                tot += float(loss.detach()) * len(b); nb += len(b)
+                tot += float(dsm.detach()) * len(b); nb += len(b)
             trl, vl, dt = tot / nb, val_loss(), time.time() - te
             hist.append((ep, trl, vl))
             imp = vl < best - 1e-12
             if imp:
                 best, best_ep = vl, ep
             lg.write(f"epoch {ep:>4} | train {trl:.6e} | val {vl:.6e} | {dt:7.3f} s | "
-                     f"best {best:.6e} @{best_ep}{' *' if imp else ''}\n")
+                     f"best {best:.6e} @{best_ep}{' *' if imp else ''}"
+                     + (f" | asym_reg {rtot / nb:.6e}" if jac_reg else "") + "\n")
             torch.save(dict(epoch=ep, model=model.state_dict(), ema=ema.shadow, opt=opt.state_dict(),
                             best_val=best, best_epoch=best_ep, rng=g.get_state(), hist=hist, hp=hp,
                             rung=rung, attempt=attempt, testbed=testbed, prior=prior, Nr=Nr, Nt=Nt,
                             split_hash=split_hash, wall_sec=time.time() - t_start,
+                            jac_reg=jac_reg, rng_jac=(gj.get_state() if gj is not None else None),
                             device=dname), cpath)
             if ep >= min_epochs and ep - best_ep >= patience:
                 stopped = "patience"
@@ -803,7 +871,7 @@ def train(rung, attempt, testbed, prior, Nr, Nt, device="cuda", hp=None, resume=
                 train_loss=(hist[-1][1] if hist else float("nan")), wall_sec=wall, device=dname,
                 sec_per_epoch=wall / max(ep - ep0, 1), stopped_by=stopped, n_train=len(tr), n_val=len(va),
                 split_hash=split_hash, hp=hp, aborted=aborted, params=n_params(model), log=lpath,
-                selection=sel, given_hp=base_hp is not None)
+                selection=sel, given_hp=base_hp is not None, jac_reg=jac_reg)
 
 
 # ----------------------------------------------------------------------------- receiver adapter (04_SPEC §1)
@@ -835,7 +903,8 @@ class ScorePrior:
     covers the 1-99 percentile of the queries by construction, so a few percent is expected.  We do NOT clamp:
     clamping would silently return the denoiser of a different noise level."""
 
-    def __init__(self, ckpt, Nr, Nt, Chat, device="cpu"):
+    def __init__(self, ckpt, Nr, Nt, Chat, device="cpu", psd_project=False):
+        self.psd_project = bool(psd_project)       # (F1) / Stage C V1 -- OFF by default: V0 is unchanged
         if device == "cpu":
             torch.set_num_threads(1)               # one worker process = one thread (common.py sets the BLAS env)
         self.model, self.st = load_model(ckpt, Nr, Nt, device=device)
@@ -875,9 +944,12 @@ class ScorePrior:
         SigH = nu * J
         self.herm_res = max(self.herm_res, float(np.max(np.abs(SigH - SigH.conj().T))
                                                  / max(np.max(np.abs(SigH)), 1e-300)))
-        J = 0.5 * (J + J.conj().T)                # nu*J must be Hermitian for RouteAClip._matrix_site; the
-        self._cache = (key, (m, J))               # receiver symmetrises anyway, so this changes nothing there
-        return m, J                               # and leaves alpha = tr(J).real/N untouched.
+        # nu*J must be Hermitian for RouteAClip._matrix_site; the receiver symmetrises anyway, so the
+        # Hermitian part changes nothing there and leaves alpha = tr(J).real/N untouched.
+        # psd_project=True additionally floors the eigenvalues (F1); it is a DIFFERENT arm, never the default.
+        J = project_psd(J) if self.psd_project else 0.5 * (J + J.conj().T)
+        self._cache = (key, (m, J))
+        return m, J
 
     def denoise(self, q, nu):
         m, J = self._eval(q, nu)
@@ -920,7 +992,7 @@ def _passing_attempts(testbed):
     return sorted(set(out), key=lambda t: (_rung_ix(t[0]), t[1]))
 
 
-def load_prior(testbed, prior, Nr, Nt, rung=None, attempt=None, ckpt=None, device="cpu"):
+def load_prior(testbed, prior, Nr, Nt, rung=None, attempt=None, ckpt=None, device="cpu", psd_project=False):
     """Module H for M-ours-dscore: the gate-passing checkpoint wrapped as a ScorePrior.
     ckpt given -> use it.  Otherwise pick the checkpoint recorded as PASSING in
     conf/results/gate_<testbed>.txt / the ladder state, or (rung, attempt) if given.
@@ -955,7 +1027,7 @@ def load_prior(testbed, prior, Nr, Nt, rung=None, attempt=None, ckpt=None, devic
             why = (f"explicit ckpt {ckpt} -- caller override, NOT verified against the gate record here "
                    f"(recorded PASS rows: {ok or 'none'})")
         Chat = A.load_fits(testbed, prior, Nr)[("full", 32)]["Chat"]
-        sp = ScorePrior(ckpt, Nr, Nt, Chat, device=device)
+        sp = ScorePrior(ckpt, Nr, Nt, Chat, device=device, psd_project=psd_project)
         last_reason = why
         return sp
     except Exception as ex:

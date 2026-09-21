@@ -134,8 +134,11 @@ def module_h_priors(testbed, prior, Nr, Nt, ntrain=N_TRAIN, true_prior=None):
 
 
 def build_our_arms(testbed, prior, Nr, Nt, T, Tp, sigma2, code, Xp, ntrain=N_TRAIN,
-                   true_prior=None, score_prior=None, with_G=False):
-    """M-ours-gmm32 / M-ours-bstar / M-ours-score (D1 only) / M-ours-dscore / M-ours-G (test M2 only)."""
+                   true_prior=None, score_prior=None, with_G=False, score_prior_v1=None):
+    """M-ours-gmm32 / M-ours-bstar / M-ours-score (D1 only) / M-ours-dscore / M-ours-G (test M2 only).
+
+    score_prior_v1: a SECOND score.ScorePrior built with psd_project=True (Stage C V1, spec 10 §3b / (F1)).
+    It becomes the separate arm M-ours-dscore-C-V1; every other arm, M-ours-dscore included, is untouched."""
     hp, fits, llv, bstar, kron_K = module_h_priors(testbed, prior, Nr, Nt, ntrain)
     Cs = GaussianPrior(Nr, Nt, fits[("full", 32)]["Chat"])
     a = (Nr, Nt, T, Tp, sigma2)
@@ -147,6 +150,8 @@ def build_our_arms(testbed, prior, Nr, Nt, T, Tp, sigma2, code, Xp, ntrain=N_TRA
         arms["M-ours-score"] = route_a(*a, true_prior, code, Xp, "score", clip="eta")
     if score_prior is not None:
         arms["M-ours-dscore"] = route_a(*a, score_prior, code, Xp, "score", clip="eta")
+    if score_prior_v1 is not None:
+        arms["M-ours-dscore-C-V1"] = route_a(*a, score_prior_v1, code, Xp, "score", clip="eta")
     if with_G:
         arms["M-ours-G"] = route_a(*a, Cs, code, Xp, "gaussian")
 

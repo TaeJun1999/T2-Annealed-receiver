@@ -17,8 +17,11 @@ NR, NT = 8, 4
 N = NR * NT
 
 
-def jac_stats(model, Xq, sg, nu, chunk=32):
-    """-> dict of per-sample arrays for the real Jacobian Jr and the complex Wirtinger J."""
+def jac_stats(model, Xq, sg, nu, chunk=32, project=None):
+    """-> dict of per-sample arrays for the real Jacobian Jr and the complex Wirtinger J.
+
+    project: optional callable applied to each Hermitian part Hc BEFORE the eigen/site statistics --
+    score.project_psd for the Stage C V1 (F1) measurement.  None (default) = the original diagnostic."""
     R = dict(asym_r=[], lmin_r=[], lmax_r=[], herm_c=[], lmin_c=[], lmax_c=[], cond_c=[],
              shift=[], eta_ratio=[], nclip=[])
     I = np.eye(N)
@@ -35,6 +38,8 @@ def jac_stats(model, Xq, sg, nu, chunk=32):
         R["lmin_r"].append(er[:, 0].numpy()); R["lmax_r"].append(er[:, -1].numpy())
         Jc = score.wirtinger(Jr).numpy()                                              # (b,N,N) complex
         Hc = 0.5 * (Jc + Jc.conj().transpose(0, 2, 1))                                # what ScorePrior returns
+        if project is not None:                                                       # (F1): what ScorePrior
+            Hc = np.stack([project(h) for h in Hc])                                   # returns with psd_project=True
         R["herm_c"].append(np.abs(Jc - Jc.conj().transpose(0, 2, 1)).max((1, 2))
                            / np.maximum(np.abs(Jc).max((1, 2)), 1e-300))
         ec = np.linalg.eigvalsh(Hc)
