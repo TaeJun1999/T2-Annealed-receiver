@@ -1,3 +1,14 @@
 selftest_V2  torch 2.14.0+cu130  hp = {'arch': 'dit', 'param': 'vp', 'domain': 'angle', 'lr': 0.002238046051591068, 'ema': 0.999, 'batch': 256, 'emb': 256, 'width': 64, 'depth': 6, 'heads': 8, 'patch': 1, 'head': 'energy'}
 [1] symmetry at D2 grid k=6: sigma=9.2011e-02 nu=1.6932e-02, n=8 random inputs, float64
     V2 energy head             ||J-J^T||/||J||  max 1.228e-16  median 9.915e-17 | herm(Wirtinger) max 5.753e-17 | native x0 head max 1.216e-16
+    V0 vector head (control)   ||J-J^T||/||J||  max 3.124e-02  median 2.879e-02 | herm(Wirtinger) max 4.079e-02 | native x0 head max 3.124e-02
+    OK: V2 1.228e-16 <= 1e-05 < 3.124e-02 = V0 control
+[2] shape robustness: lead (), (b,), (b1,b2) on score_real / denoise_real / tweedie_real
+    unbatched vs batched: score 1.066e-13  denoise 1.610e-15 | GA identity |tweedie - native|/|native| max 1.457e-15
+    OK
+[3] overfit sanity: n=922 real D2/S2 samples (split cc3d808bb38d675a, power 1.0076), 300 Adam steps, batch 64, lr 2.2380e-03
+    untrained (zero-init, eps_hat=0) 1.02912  ->  last-20 mean 0.78879   (23.4% below the identity denoiser; first-20 mean 0.85203; 175.2 s on CPU)
+    OK
+
+selftest_V2 OK -- V2 Jacobian symmetry 1.228e-16 (tol 1e-05), control 3.124e-02; GA 1.457e-15; overfit 1.0291 -> 0.7888
+NOTE: symmetry is not positive-semidefiniteness.  Whether the site is a valid covariance is measured AFTER training by code/jacobian_psd.py --ckpt ckpt/d2sx_V2_N160000_a1.pt.

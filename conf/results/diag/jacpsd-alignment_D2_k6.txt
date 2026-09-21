@@ -1,0 +1,19 @@
+# independent stream seed=987654321 (NOT the claimant's SEED_GATE), n=128, grid k=6: sigma=9.2011e-02  nu=1.6932e-02
+# align_k = |<v_k,hH>|^2/||hH||^2, v_k = eigvec of the k-th smallest |eig| of Herm(J)
+
+model                  frac lmin<0   med lmin med |lmin| med align_0 med align_0..3   med cond
+diffusion                    1.000 -6.558e-02  2.882e-03   3.621e-05      2.273e-04  3.909e+02
+GMM-exact(kron,K=512)        0.000  9.941e-02  9.941e-02   2.214e-06      1.334e-04  1.659e+01
+
+# site-level belief-mean shift ||mu-hH||^2/||hH||^2 under each do()-intervention on Herm(J)
+model                 intervention   shift med   shift p90   shift max  ||eta||/||q/nu|| med
+diffusion             as-is          1.857e+00   6.346e+01   3.955e+02             3.021e+00
+diffusion             psd1e-2        1.881e-17   2.038e-16   2.782e-16             2.055e+00
+diffusion             abs1e-2        8.843e-01   2.502e+00   6.179e+00             1.395e+00
+diffusion             flip4          9.019e+00   1.165e+02   7.885e+03             3.018e+00
+diffusion             tiny4          1.138e-01   5.596e-01   1.631e+00             1.491e+02
+GMM-exact(kron,K=512) as-is          8.969e-10   1.299e-03   5.759e-03             8.275e-03
+GMM-exact(kron,K=512) psd1e-2        1.338e-21   2.819e-17   1.264e-16             1.496e-02
+GMM-exact(kron,K=512) abs1e-2        1.338e-21   2.819e-17   1.264e-16             1.496e-02
+GMM-exact(kron,K=512) flip4          4.383e-03   2.323e-02   9.007e-02             1.011e-01
+GMM-exact(kron,K=512) tiny4          8.969e-10   1.299e-03   5.759e-03             1.132e+02

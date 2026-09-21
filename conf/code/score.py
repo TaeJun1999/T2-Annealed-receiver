@@ -556,9 +556,18 @@ def make_model(rung, hp, Nr, Nt):
         # lazy import: arch_*.py do `import score` at module level, so a top-level from-import here
         # would be circular (noted by the arch_dit reviewer).
         if hp["arch"] == "dit":
-            import arch_dit
-            net = arch_dit.DiT(Nr, Nt, hp["width"], hp["depth"], hp["emb"], circular=ang,
-                               patch=hp.get("patch", 1), heads=hp.get("heads", 4))
+            # hp['head'] == 'energy' is Stage C variant V2 (10_SPEC_stageC §3b): the SAME DiT trunk with its
+            # vector output head replaced by a scalar energy and forward() returning grad_x E, so that every
+            # Jacobian downstream is a Hessian and SYMMETRIC by construction.  Absent -- which it is in every
+            # existing hp dict and every existing checkpoint -- nothing changes: the plain DiT branch runs.
+            if hp.get("head") == "energy":
+                import arch_energy
+                net = arch_energy.EnergyDiT(Nr, Nt, hp["width"], hp["depth"], hp["emb"], circular=ang,
+                                            patch=hp.get("patch", 1), heads=hp.get("heads", 4))
+            else:
+                import arch_dit
+                net = arch_dit.DiT(Nr, Nt, hp["width"], hp["depth"], hp["emb"], circular=ang,
+                                   patch=hp.get("patch", 1), heads=hp.get("heads", 4))
         elif hp["arch"] == "uvit":
             import arch_uvit
             net = arch_uvit.UViT(Nr, Nt, hp["width"], hp["depth"], hp["emb"], circular=ang,

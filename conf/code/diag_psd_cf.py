@@ -54,11 +54,15 @@ class JFix:
         self.n_call += 1
         self.n_neg_in += int(w.min() < 0)
         if self.mode == "psd":                     # valid covariance AND valid EP site: 0 < eig(J) <= 1
-            w = np.clip(w, self.delta, 1.0)
-        elif self.mode == "flip":                  # inject indefiniteness, keep tr(J) almost fixed
-            w = w.copy()
-            ix = np.argsort(np.abs(w))[: self.mflip]
+            w = np.clip(w, self.delta, 1.0)        #   removes BOTH the negative sign and the near-zero magnitude
+        elif self.mode == "absmin":                # KEEP the sign (still indefinite), remove only the
+            w = np.sign(w) * np.minimum(np.maximum(np.abs(w), self.delta), 1.0)   # near-singular magnitude
+        elif self.mode == "flip":                  # inject the SIGN defect only: |eig| unchanged, tr(J) ~ fixed
+            w = w.copy(); ix = np.argsort(np.abs(w))[: self.mflip]
             w[ix] = -np.abs(w[ix])
+        elif self.mode == "tiny":                  # inject the CONDITIONING defect only: still strictly PD
+            w = w.copy(); ix = np.argsort(np.abs(w))[: self.mflip]
+            w[ix] = self.delta
         else:
             raise ValueError(self.mode)
         return m, (V * w) @ V.conj().T
@@ -85,13 +89,13 @@ def build(cell, snr, testbed="D2", prior="S2", ckpt=None):
     rx["gmmB|eta"]       = A.route_a(*a, gm, code, Xp, "score", clip="eta")               # GMM through score wiring
     # --- (a) repair the broken arm
     rx["dscore|mean"]    = A.route_a(*a, sp, code, Xp, "score", clip="mean")
-    for d in (1e-2, 1e-3):
-        w = JFix(sp, "psd", delta=d); wrap[f"dscore|psd{d:g}"] = w
-        rx[f"dscore|psd{d:g}"] = A.route_a(*a, w, code, Xp, "score", clip="eta")
-    # --- (b) break the working arm with the SAME defect and nothing else
-    for m in (1, 4):
-        w = JFix(gm, "flip", mflip=m); wrap[f"gmmB|flip{m}"] = w
-        rx[f"gmmB|flip{m}"] = A.route_a(*a, w, code, Xp, "score", clip="eta")
+    for nm, md in (("psd", "psd"), ("abs", "absmin")):
+        w = JFix(sp, md, delta=1e-2); wrap[f"dscore|{nm}1e-2"] = w
+        rx[f"dscore|{nm}1e-2"] = A.route_a(*a, w, code, Xp, "score", clip="eta")
+    # --- (b) break the working arm: SIGN defect alone, then CONDITIONING defect alone
+    for nm, md, kw in (("flip4", "flip", dict(mflip=4)), ("tiny4", "tiny", dict(mflip=4, delta=1e-4))):
+        w = JFix(gm, md, **kw); wrap[f"gmmB|{nm}"] = w
+        rx[f"gmmB|{nm}"] = A.route_a(*a, w, code, Xp, "score", clip="eta")
     # --- reference: same denoiser, D-14 site removed entirely
     rx["dscore|belsc"]   = A.route_a(*a, sp, code, Xp, "score", clip="eta", hsite="scalar")
     rx["gauss|sitesc"]   = A.route_a(*a, Cs, code, Xp, "gaussian")                        # == R2-ours-G

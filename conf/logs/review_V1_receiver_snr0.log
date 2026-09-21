@@ -1,0 +1,26 @@
+# date        : 2026-09-21 14:49:18 KST
+# git commit  : fa40969
+# versions    : python 3.12.14  numpy 2.5.2  scipy 1.18.1  torch 2.14.0+cu130 (cuda_available=True)
+# device      : CPU (192 cores) | dtype: complex128 / float64 | deterministic: yes (fixed seeds, no GPU in the receiver)
+# testbed     : D2
+# seed rule   : default_rng([20260926, TBID[testbed], PID[prior], Nr, T, Tp, int(snr)+100])  (trials of a point = ONE stream)
+# code        : rate-1/2 conv (133,171)_8 nu=6 terminated, QPSK, outer iterations = 16 for EVERY arm
+# Demo/ hashes: t2_route_a.py=95a5408901ec125c  t2_trellis.py=31cd0ee9c68e972b  t2_gmm.py=d064e58c7510c769
+# REVIEW probe review-V1-receiver: does V1's floor-only PSD projection converge in the 16-iteration loop?  DIAGNOSTIC ONLY, NOT A RESULT.
+#   trial 8/48  (88 s)
+#   trial 16/48  (157 s)
+#   trial 24/48  (211 s)
+#   trial 32/48  (288 s)
+#   trial 40/48  (371 s)
+#   trial 48/48  (452 s)
+
+--- D2 C2  SNR +0 dB  n=48  16 iters  (paired) ---
+arm                BLER@last   +-se  NMSEmed@1 NMSEmed@last NMSEmean@last  ever>1  clip%  clipshift raised
+V0-d|scorew            0.938  0.035     1.5551       1.2328     4.429e+04   0.958  100.0  5.934e+03      0
+V1-d|scorew+psdf       0.062  0.035     0.0987       0.0261       0.03229   0.000   96.0  6.410e-04      0
+ref-d|scorew+box       0.042  0.029     0.0982       0.0277        0.0321   0.000   96.0  1.477e-15      0
+g|scorew               0.083  0.040     0.1576       0.0532        0.0638   0.000   80.1  2.703e-03      0
+
+# harness cross-check vs h4-jswap_D2_C2_snr+0_n64.npz (first 48 paired trials): max|dNMSE| = 0.000e+00, blk_err mismatches = 0
+# box arm cross-check: max|dNMSE| = 0.000e+00
+# saved /home/HTJ/t2/conf/results/diag/review-V1-receiver_D2_C2_snr+0_n48.npz  (452 s)
