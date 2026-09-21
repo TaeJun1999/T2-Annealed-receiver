@@ -1,3 +1,7 @@
 [V3] ntrain=160000 lambda=1.0 ckpt=/home/HTJ/t2/conf/ckpt/d2sx_V3_N160000_a2.pt log=/home/HTJ/t2/conf/logs/train_V3_D2_N160000_a2.log ladder=/home/HTJ/t2/conf/LADDER_C.md
 [fallback §3d] attempt=2 grad_clip=1.0 lr=2.238046e-03
 [train] D2SX160000 a1 D2/S2 8x4 | cuda:0 NVIDIA RTX PRO 6000 Blackwell Server Edition | 479426 params | resume from epoch 0 | log /home/HTJ/t2/conf/logs/train_V3_D2_N160000_a2.log
+[train] D2SX160000 a1: 200 epochs, stopped_by=patience, aborted=False, best val 7.300988e-01 @ 12, 15839.2 s (79.196 s/epoch)
+[V3] trained 200 ep, val 7.300988e-01, 15839s -> /home/HTJ/t2/conf/ckpt/d2sx_V3_N160000_a2.pt
+[V3] /home/HTJ/t2/conf/LADDER_C.md += [2026-09-21 20:08 KST] D2SX160000 | a1 | V3 lambda=1.0 | dit vp/angle w64 d6 h8 p1 emb256 lr0.002238046051591068 ema0.999 (479426 par) | train 8.811e-01 / val 7.301e-01 | GA - | GB - | GC - | GD - | UNGATED | Stage C V3 (§3b): V0 recipe + lambda=1.0 * E_v||(J-J^T)v||^2, J = d tweedie_real/dx, 1 Rademacher probe/sample, lambda FIXED (never tuned). 200 ep (stop: patience), 15839 s, 79.20 s/ep, ntrain=160000, device cuda:0 NVIDIA RTX PRO 6000 Blackwell Server Edition, ckpt /home/HTJ/t2/conf/ckpt/d2sx_V3_N160000_a2.pt, split a00951cf75b852a6. D2 has no true score: UNGATED here, gates are D1-only (04_SPEC §5). Estimator + no-op-when-off verified by code/selftest_V3.py.
+EXIT=0
