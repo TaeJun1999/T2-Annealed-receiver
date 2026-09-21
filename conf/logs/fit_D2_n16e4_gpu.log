@@ -57,3 +57,139 @@ tolerance: EXACT on n_iter / it_best / n_reseed (these prove the two codes took 
            pi, covs relative <= 1e-10.  Bitwise identity is impossible: cuBLAS and OpenBLAS reduce
            in different orders.  Observed: ll 5e-16..6e-15, pi 1e-13..5e-12, covs 4e-12..8e-11.
   ('S2', 8, 4, 'full', 512, 0, 0): iters 500 best@480 reseeds 0 ll_train -11.208 ll_val -16.383 (754 s)
+  ('S2', 8, 4, 'full', 512, 0, 1): iters 471 best@430 reseeds 0 ll_train -11.302 ll_val -16.396 (708 s)
+  ('S2', 8, 4, 'full', 512, 0, 2): iters 421 best@380 reseeds 0 ll_train -11.193 ll_val -16.316 (633 s)
+  ('S2', 8, 4, 'full', 512, 16, 0): iters 111 best@110 reseeds 1743 ll_train -30.462 ll_val -32.821 (164 s)
+  ('S2', 8, 4, 'full', 512, 16, 1): iters 93 best@90 reseeds 1228 ll_train -30.521 ll_val -32.995 (138 s)
+
+================================================================================
+[verify] 2026-09-22 05:40 KST -- INDEPENDENT verification of code/gmm_em_gpu.py
+         by a second engineer (code/verify_gpu_port.py).  Two defects found and fixed.
+================================================================================
+
+DEFECT 1 (BLOCKER, fixed) -- code/fit_gpu.py wrote to the WRONG DIRECTORY.
+  fit_gpu.py never called runner._init(tag), so runner.TAG stayed "" and arms.D2_FITS kept its
+  import-time default.  Measured: arms.fit_path("D2","S2",8,"kron",512,160000) resolved to
+      results/gmm_fits_D2/fit_S2_Nr8_kronK512_n160000.npz        (WRONG)
+  instead of
+      results/gmm_fits_D2_n16e4/fit_S2_Nr8_kronK512_n160000.npz  (where the CPU run, --tag n16e4, writes)
+  results/gmm_fits_D2 is the resolution target of FOUR tags: untagged, B1e4, C and supp
+  (gmm_fits_D2_B1e4 -> gmm_fits_D2, gmm_fits_D2_C -> gmm_fits_D2, gmm_fits_D2_supp -> gmm_fits_D2).
+  arms.load_fits() takes whatever .npz files exist and only raises if it finds NONE, so a
+  --tag C / --tag B1e4 analysis at ntrain=160000 would have found ONLY these 3-4 GPU-produced fits
+  and selected b* from that subset, silently.  That is precisely the "two fitting codes in one
+  comparison" failure the equivalence test exists to prevent -- arriving through the file routing
+  rather than through the arithmetic.
+  FIX: fit_gpu.py takes <tag> as a REQUIRED 5th argument, calls _init(tag) first, and asserts
+  os.path.dirname(out) == d_fits_d2().  launch_fit_gpu.sh passes TAG=n16e4.  A 4-argument
+  invocation now exits with a usage message instead of writing to the wrong place.
+
+DEFECT 2 (real, fixed) -- best-validation snapshot aliased the live tensor.
+  gmm_em_gpu.py used covs.cpu().numpy() for best["covs"].  t.cpu() is a NO-OP when t is already on
+  the CPU, so .numpy() returned a VIEW sharing memory with the live covs tensor; every later
+  in-place covs[k] = ... overwrote the snapshot.  t2_gmm.fit_gmm_em uses covs.copy(), a real copy.
+  Effect on device="cpu": early stopping silently returns the FINAL-iteration covariances paired
+  with the best-validation pi.  Measured before the fix, kron n=400 K=64: d_cov = 2.79 (relative),
+  i.e. a completely different model, while ll_val and pi matched exactly -- so it is invisible to
+  any check that looks only at likelihoods.
+  Effect on device="cuda": NONE.  .cpu() on a CUDA tensor always copies.  Confirmed empirically,
+  not just by argument: in all three of the author's saved CPU/GPU pairs it_best < n_iter
+  (90<131, 80<86, 90<131), so the snapshot is taken well before the end, and the GPU covs still
+  agree with numpy's to 5.2e-14..7.9e-13.  Had the alias bitten on CUDA the disagreement would be
+  O(1).  => the four fits currently running on GPUs 2-5 are NOT affected by this fix.
+  FIX: _host(t) = np.array(t.detach().cpu()), used for every host hand-off.
+
+NOT DEFECTS, but differences worth recording:
+  * fit_task's per-run `sec` starts before _sets(); fit_gpu.py's starts after.  Measured
+    sec_data = 0.6-0.8 s, i.e. <= 0.15% of any quoted time.  Immaterial.
+  * scipy.special.logsumexp vs torch.logsumexp: both max-shifted, agree to round-off.
+  * selection tie-break: max() over dict insertion order.  fit_gpu inserts sorted (kappa,restart);
+    cmd_fit inserts in pool-completion order.  Only reachable on an exact ll_val tie; the smallest
+    real margin in this grid is 4.9e-3 nat (see below).  Pre-existing in cmd_fit either way.
+  * fit_gpu.py does not call write_fit_table(); results/gmm_fit_D2_n16e4.txt comes from the CPU run.
+  * cuBLAS is not pinned deterministic, so GPU fits are not guaranteed bitwise reproducible
+    run-to-run the way the CPU fits are.  Within the round-off budget below, but worth knowing.
+
+EVERYTHING ELSE IN THE EM MATCHES t2_gmm.py:136-187 expression by expression -- seed init and
+rng.choice; seed_cov (vdot conjugation convention); _loglik via Cholesky + explicit inv(L),
+logdet = 2*sum(log diag L), -N log(pi); the it>=20 gain test; validation every val_every with
+`v > best` / `it - best >= patience`, snapshot taken BEFORE the M-step; the kappa MAP shrinkage;
+the floor*cbar*I floor; the kron 3-sweep flip-flop INCLUDING the tr(T)=Nt-then-add-floor ordering
+and R rescaled by the pre-floor c; the nk<N / nk<4 re-seed thresholds, the nk[k]=max(nk[k],1.0)
+mutation that feeds logpi, Tk[k]=I, and the rng.integers(n) draw order; the returned dict.
+The three "oddities" the author flagged are real in the read-only file and faithfully reproduced.
+
+MY OWN EQUIVALENCE TEST -- ('S2',4,4,'full',128,kappa=256,restart=0), ntrain=160000.
+A configuration the author did NOT test, chosen because it has 3422 re-seeds: 2.8x the author's
+hardest RNG path (1230), i.e. 3422 rng.integers(n) draws that must fall at the same (k, it).
+  numpy reference vs the production CPU log line 22/180:
+    iters 55/55  best@50/50  reseeds 3422/3422  ll_train -27.213839 vs -27.214  ll_val -27.283321
+    vs -27.283   -> my reference reproduces the running pipeline exactly.  (333.5 s clean vs
+    1591 s in the 184-worker pool.)
+  numpy reference vs the port:
+    n_iter 55/55   it_best 50/50   n_reseed 3422/3422        EXACT
+    ll_train rel 6.005e-15   ll_val rel 5.209e-15   ll_test rel 5.995e-15
+    pi   max|d|/max|A| 3.487e-13   covs 5.987e-13 (worst single entry 2.500e-11)
+    ll trajectory: agrees to 6.395e-15 relative at EVERY one of the 55 iterations
+    validation trajectory: identical iteration indices, values to 5.847e-15
+  SCOPE: this leg ran the port with device="cpu" -- GPUs 2-5 were all occupied by the fits and
+  Compute Mode is Exclusive_Process, so no device was free.  It therefore validates the port's
+  algebra, control flow and RNG ordering, NOT the CUDA kernels.  The CUDA leg rests on the
+  author's 6 configurations, which I recomputed from their saved .npz with my own comparison code
+  and reproduced to the digit (ll 5.1e-16..6.4e-15, pi 1.3e-13..6.0e-13, covs 5.2e-14..7.9e-13).
+
+FORCED COVERAGE OF THE ONE UNTESTED BRANCH -- `verify_gpu_port.py reseed`.
+No kron run in any of the 172 completed CPU tasks has n_reseed > 0, and the real fits have
+nk ~ n/K >> 4, so the kron starved-component branch (full seed_cov installed into a Kronecker
+component, Tk[k] reset to I) was exercised by nothing.  Forced with K large relative to n:
+  n=400 K=64  kron   n_iter 22/22  it_best 0/0   reseeds  351/351   d_cov 2.5e-16   PATH MATCH
+  n=400 K=64  full   n_iter 36/36  it_best 30/30 reseeds 1715/1715  d_cov 7.9e-14   PATH MATCH
+  n=900 K=96  kron   n_iter 25/25  it_best 20/20 reseeds  110/110   d_cov 1.6e-13   PATH MATCH
+  n=900 K=96  full   n_iter 46/46  it_best 40/40 reseeds 2066/2066  d_cov 3.6e-14   PATH MATCH
+This test is what caught DEFECT 2 (the n=900 K=96 kron case has it_best=20 < n_iter=25).
+
+FLOAT64, CHECKED AT RUNTIME NOT IN THE SOURCE.
+aten-level TorchDispatchMode trace over a complete fit, both structs:
+  struct=full  complex128 4072, float64 1922, int32 96 (Cholesky info/pivots)   reduced precision: NONE
+  struct=kron  complex128 42313, float64 9427, int32 1788                       reduced precision: NONE
+Every array in the saved GPU fits is complex128 / float64.  Independently, agreement with numpy
+float64 at 5e-16 relative is itself impossible under float32 arithmetic (~1e-7).
+
+TOLERANCE -- justified against MEASURED decision margins, not asserted.
+  smallest (kappa,restart) margin that decides a winner, over all 24 saved fits:
+      4.856e-3 nat = 1.838e-4 relative   (Nr4 kron K=32)
+  b* across-K margin: 1.007 nat (Nr=4), 14.448 nat (Nr=8); best-vs-2nd kron K: 0.074 / 0.463 nat
+  port's ll_val difference: 5.2e-15 (mine), 5.1e-16..4.6e-15 (author's six)
+  ratio margin/difference: 3.1e10.  The author said "seven orders"; measured it is TEN.
+  => no round-off difference can flip which candidate wins or which K becomes b*.
+
+SPEEDUP -- ratio (1) in the original report is inflated and should not be quoted.
+It divides POOLED CPU seconds (184 workers) by CLEAN GPU seconds.  Contention factor measured on
+every config where both a pooled and a clean CPU time exist:
+  Nr4 full K=16  551 / 117.3 = 4.70x     Nr4 full K=64  1459 / 708.7 = 2.06x
+  Nr4 kron K=16 2780 / 1521.1 = 1.83x    Nr4 full K=128 1591 / 333.5 = 4.77x  (mine)
+Fully-measured clean CPU vs GPU: full 19.9x / 74.6x, kron 15.6x.
+For the blocking kron configs only pooled CPU times exist; deflating by the measured 1.83x kron
+contention gives clean/GPU ~7.6x (Nr4 kron 256) and ~10.0x (Nr8 kron 256), not the quoted 14x/18x.
+What is not in dispute and is what matters: Nr8 kron K=256 goes from 13.6 h to 45 min per restart.
+
+GRID STATUS AT 05:40 KST (the report's "9 missing in 4 configs" is stale).
+CPU log now has 172/180 tasks.  8 EM runs missing, in THREE configs:
+  ('S2',4,4,'kron',512)  3 of 3      ('S2',8,4,'kron',256)  2 of 3      ('S2',8,4,'kron',512)  3 of 3
+('S2',8,4,'full',512) is now COMPLETE on CPU (12/12) -- so the job on GPU 5 is redundant.
+
+STATE OF THE RUNNING WORK (unchanged by me; I was not permitted to stop any process).
+CPU fit alive and undisturbed: 184 processes, still 172/180.  GPU jobs on GPUs 2,3,4,5 only;
+GPUs 0 and 1 (Stage C) untouched.  results/gmm_fits_D2_n16e4/ is still EMPTY and
+results/gmm_fits_D2/ still holds only its 24 original _n10000 files -- nothing was overwritten and
+no _n160000 file exists anywhere yet.
+ACTION STILL REQUIRED: the four GPU jobs were launched with the OLD 4-argument command line and
+still carry TAG="".  When they finish (~09:30) they will write their .npz into
+results/gmm_fits_D2/.  They do not destroy anything there (different filenames), but the files
+must be moved:
+    mv results/gmm_fits_D2/fit_S2_Nr*_*K*_n160000.npz results/gmm_fits_D2_n16e4/
+or the jobs restarted with the fixed launcher.  Their numerical content is correct and unaffected
+by DEFECT 2.
+================================================================================
+  ('S2', 8, 4, 'full', 512, 16, 2): iters 72 best@70 reseeds 386 ll_train -30.582 ll_val -33.057 (108 s)
+  ('S2', 8, 4, 'full', 512, 64, 0): iters 92 best@90 reseeds 28167 ll_train -37.929 ll_val -38.917 (92 s)

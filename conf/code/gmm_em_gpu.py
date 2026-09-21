@@ -21,6 +21,15 @@ import numpy as np
 import torch
 
 
+def _host(t):
+    """Tensor -> a numpy array that OWNS its memory.  t.cpu() is a no-op when t is already on the CPU,
+    so t.cpu().numpy() would return a VIEW that keeps tracking later in-place writes to t -- the
+    best-validation snapshot would then silently become the final-iteration parameters.  On CUDA .cpu()
+    always copies, which is why that defect is invisible on the GPU; numpy's covs.copy() in
+    t2_gmm.fit_gmm_em always copies, so a copy here is what reproduces it on every device."""
+    return np.array(t.detach().cpu())
+
+
 def _loglik_t(X, logpi, covs, N, budget=1.5e9):
     """(n,K) torch: log pi_k + log CN(x_i; 0, C_k).  Mirrors t2_gmm._loglik."""
     n = X.shape[0]; K = covs.shape[0]
@@ -63,7 +72,7 @@ def fit_gmm_em_gpu(X, K, rng, n_iter=500, tol=1e-6, floor=1e-4, kappa=0.0, struc
     logpi = torch.as_tensor(logpi_np, device=dev)
     ll = []; n_reseed = 0
     Tk = torch.eye(Nt, dtype=torch.complex128, device=dev).expand(K, Nt, Nt).clone() if struct == "kron" else None
-    best = dict(ll_val=-np.inf, it=0, pi=np.exp(logpi_np), covs=covs.cpu().numpy())
+    best = dict(ll_val=-np.inf, it=0, pi=np.exp(logpi_np), covs=_host(covs))
     llv = []
     Xv = torch.as_tensor(np.asarray(Xval, np.complex128), device=dev) if Xval is not None else None
 
@@ -75,7 +84,7 @@ def fit_gmm_em_gpu(X, K, rng, n_iter=500, tol=1e-6, floor=1e-4, kappa=0.0, struc
             v = float(torch.logsumexp(_loglik_t(Xv, logpi, covs, N), 1).mean())
             llv.append((it, v))
             if v > best["ll_val"]:
-                best = dict(ll_val=v, it=it, pi=np.exp(logpi_np), covs=covs.cpu().numpy())
+                best = dict(ll_val=v, it=it, pi=np.exp(logpi_np), covs=_host(covs))
             elif it - best["it"] >= patience:
                 break
         if log is not None and it % 25 == 0:
@@ -84,7 +93,7 @@ def fit_gmm_em_gpu(X, K, rng, n_iter=500, tol=1e-6, floor=1e-4, kappa=0.0, struc
             break
         gam = torch.exp(lw - lse[:, None])
         nk_t = gam.sum(0)
-        nk = nk_t.cpu().numpy()                                  # host copy: same float64 scalars as numpy uses
+        nk = _host(nk_t)                                         # host copy: same float64 scalars as numpy uses
         for k in range(K):
             if nk[k] < (N if struct == "full" else 4):           # starved component -> re-seed
                 covs[k] = seed_cov(int(rng.integers(n))); nk[k] = max(nk[k], 1.0); n_reseed += 1
@@ -112,8 +121,8 @@ def fit_gmm_em_gpu(X, K, rng, n_iter=500, tol=1e-6, floor=1e-4, kappa=0.0, struc
         logpi_np = np.log(nk / nk.sum())
         logpi = torch.as_tensor(logpi_np, device=dev)
 
-    out = dict(pi=np.exp(logpi_np), covs=covs.cpu().numpy(), ll=np.array(ll), n_iter=len(ll),
-               n_reseed=n_reseed, Chat=Chat.cpu().numpy(), it_best=len(ll) - 1, ll_val=np.nan)
+    out = dict(pi=np.exp(logpi_np), covs=_host(covs), ll=np.array(ll), n_iter=len(ll),
+               n_reseed=n_reseed, Chat=_host(Chat), it_best=len(ll) - 1, ll_val=np.nan)
     if Xval is not None:
         out.update(pi=best["pi"], covs=best["covs"], it_best=best["it"], ll_val=best["ll_val"],
                    ll_val_traj=np.array(llv))

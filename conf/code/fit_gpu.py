@@ -4,7 +4,14 @@ early stopping, same selection rule (validation log-likelihood ONLY), same field
 arms.fit_path() file.  The EM itself is code/gmm_em_gpu.py (float64 port of the READ-ONLY
 Demo/t2_gmm.py :: fit_gmm_em).
 
-  CUDA_VISIBLE_DEVICES=k python code/fit_gpu.py <Nr> <fam> <K> [ntrain]
+  CUDA_VISIBLE_DEVICES=k python code/fit_gpu.py <Nr> <fam> <K> <ntrain> <tag>
+
+<tag> is runner's --tag and is REQUIRED, not optional: it routes the OUTPUT DIRECTORY.  runner._init
+sets arms.D2_FITS = d_fits_d2() = results/gmm_fits_D2_<tag>/; without it arms.D2_FITS keeps its
+import-time default results/gmm_fits_D2/, which is the directory of the ORIGINAL n=1e4 fits (and the
+target of the results/gmm_fits_D2_B1e4 symlink).  A fit written there is invisible to the tagged
+pipeline and visible to an untagged reader -- i.e. it silently mixes fitting codes.  That is the bug
+this argument exists to prevent; the assert below is the guard.
 
 Never overwrites an existing fit file (the CPU run owns those).  Writes atomically.
 """
@@ -16,13 +23,16 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import common as C
 import numpy as np
 import arms as A
-from runner import _sets, ref_task, FAM, KAPPAS, N_VAL, RESTARTS, FIT_ITERS, d_fits_d2
+from runner import _sets, ref_task, FAM, KAPPAS, N_VAL, RESTARTS, FIT_ITERS, d_fits_d2, _init
 from gmm_em_gpu import fit_gmm_em_gpu
 
 
-def main(Nr, fam, K, ntrain):
+def main(Nr, fam, K, ntrain, tag):
+    _init(tag)                                           # routes arms.D2_FITS, exactly as cmd_fit does
     prior, Nt = C.PRIOR_OF["D2"], C.NT
     out = A.fit_path("D2", prior, Nr, fam, K, ntrain)
+    assert os.path.dirname(out) == d_fits_d2(), (out, d_fits_d2())
+    print(f"[gpu-fit] tag={tag!r}  out={out}", flush=True)
     if os.path.exists(out):
         print(f"[gpu-fit] {out} exists -- CPU run owns it, skipping", flush=True)
         return 0
@@ -70,4 +80,7 @@ def main(Nr, fam, K, ntrain):
 
 if __name__ == "__main__":
     a = sys.argv[1:]
-    sys.exit(main(int(a[0]), a[1], int(a[2]), int(a[3]) if len(a) > 3 else 160000))
+    if len(a) != 5:
+        sys.exit("usage: CUDA_VISIBLE_DEVICES=k fit_gpu.py <Nr> <fam> <K> <ntrain> <tag>   "
+                 "(tag routes the output dir -- see the module docstring)")
+    sys.exit(main(int(a[0]), a[1], int(a[2]), int(a[3]), a[4]))
