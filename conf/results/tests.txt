@@ -1,13 +1,12 @@
-# date        : 2026-09-20 12:44:43 KST
-# git commit  : 29993f3
+# date        : 2026-09-21 10:05:53 KST
+# git commit  : 5e2e77a
 # versions    : python 3.12.14  numpy 2.5.2  scipy 1.18.1  torch 2.14.0+cu130 (cuda_available=True)
 # device      : CPU (192 cores) | dtype: complex128 / float64 | deterministic: yes (fixed seeds, no GPU in the receiver)
-# testbed     : D1 (gates A1+A2+A3; modules integrated)
+# testbed     : D1
 # seed rule   : default_rng([20260926, TBID[testbed], PID[prior], Nr, T, Tp, int(snr)+100])  (trials of a point = ONE stream)
 # code        : rate-1/2 conv (133,171)_8 nu=6 terminated, QPSK, outer iterations = 16 for EVERY arm
 # Demo/ hashes: t2_route_a.py=95a5408901ec125c  t2_trellis.py=31cd0ee9c68e972b  t2_gmm.py=d064e58c7510c769
-# B/S/C = A1 baselines, M = A2 our model, L = A3 F2 lemma.
-# D-tests (D0..D6t) run after A5; T-tests (T2a..T2e) are recorded in conf/results/testbed_D2.txt at B1.
+# content     : conf/07_SPEC_tests.md -- groups run: B/S/C(20) M(6) L(2) D(7) T(1)
 
 id    | verdict     | residual      | criterion               | description
 ----------------------------------------------------------------------------------------------------------------------------------
@@ -39,5 +38,18 @@ M3    | PASS        |     4.283e-16 | <= 1e-12                | sum_k pi_k C_k =
 M4    | PASS        |     0.000e+00 | 0 mismatching arms      | config dump of 4 M-ours arms matches 03_SPEC §1.1
 L1    | PASS        |     6.890e-15 | tanh <= 1e-14 and FD <= 1e-9 | (133,171)_8: max|tanh(L/2) - E[x|x~]| = 2.33e-15, max Tweedie FD error = 6.89e-10 (recorded in 03_SPEC §6: 2.3e-15 / 6.9e-10)
 L2    | PASS        |     2.550e-15 | Lc=4 <= 1e-12 and Lc=2 > 1e-3 | L_c = 4/sigma_c^2 error 2.55e-15 (exact); L_c = 2/sigma_c^2 error up to 4.95e-01 (wrong)
+D0    | PASS        |     0.000e+00 | 0 missing sections, >= 10 points | sigma_grid.txt present with the measured basis distribution; 20 grid points
+D1t   | PASS        |     0.000e+00 | exactly 1 distinct split hash | 67 ladder rows, split hashes ['98d6225d67f9c15a']; live training_split hash 98d6225d67f9c15a
+D2t   | PASS        |     0.000e+00 | same N_train and identical samples | GMM training set n=10000; diffusion train 9000 + val 1000 = 10000 (N_train=10000); max element difference 0.0e+00
+D3t   | PASS        |     0.000e+00 | 0 checkpoints without a ladder row | 67 ladder rows, 37 checkpoints; every checkpoint has a row
+D4t   | PASS        |     0.000e+00 | L1, L2, L3 load + forward | loaded and ran ['L1', 'L2', 'L3']; L1=10.6MB L2=10.6MB L3=10.6MB
+D5t   | PASS        |     0.000e+00 | every TRAIN row has device / s-per-epoch / epochs | torch.cuda.is_available()=True; 27 train rows (40 gate rows excluded), 33 training logs
+D6t   | PASS        |     0.000e+00 | every non-ABORTED TRAIN row >= 200 ep or early-stopped | 27 train rows; ABORTED (not counted as attempts): none
+T2a   | PASS        |     6.735e-05 | rel err <= 1e-3         | E||H||_F^2 = 31.997845 vs Nr*Nt = 32 over n=100000; analytic C_ens=kron(Rt^T,Rr) vs MC: max|dC|/cbar = 7.265e-03 = 2.3 MC s.e., ||dC||_F/||C||_F = 1.659e-02 (per-entry MC s.e. ~ 3.2e-03). The closed form AGREES with samples it was never fitted to.
+T2b   | RECORD      |     3.877e+00 | erank(Rt) < 0.9*Nt ?    | erank(Rt) = 3.8770/4 (0.969), erank(Rr) = 7.3500/8 (0.919), erank(C_ens) = 28.4958/32 (0.890); DECISION: pilots = DFT (transmit side near-white, eigen-alignment is meaningless); Rt eigenvalues = [1.2103, 1.0857, 0.9776, 0.7264]. THE DECISION IS TAKEN ON Rt, because the pilots span the TRANSMIT side (Y = H Xp); erank(C_ens) is reported but does NOT decide. The full-covariance reading (erank(C_ens) = 28.4958 < 0.9*32 = 28.8000) would have said eigen-aligned (informative) -- IT DIFFERS from the decision in force. Knife edge: Rt is 0.969 of full and C_ens is 0.890, on opposite sides of 0.9. The choice is recorded here so it is auditable, not invisible.
+T2c   | RECORD      |     4.663e-01 | vs 1-Tp/Nt = 0.5000     | NMSE_inf(Tp=2): eig = 0.426014, dft = 0.466271; 1-Tp/Nt = 0.5000; pilots IN USE = dft (T2b decision) -> |NMSE_inf - (1-Tp/Nt)| = 0.0337, judged against the vacuity cutoff T2C_VACUOUS_GAP = 0.05 (conf-side constant, not present in 05_SPEC). CONSEQUENCE: close to 1-Tp/Nt, so same-Tp (upper bound)-(lower bound) comparisons are VACUOUS -- the reading must be CROSS-Tp goodput (cells C1 vs C2).
+T2d   | PASS        |    -2.518e-01 | max CI_hi - 2 < 0       | 8 angle sets x 20000 phase draws, 99.9% bootstrap CI (1000 resamples over realisations). Gaussian value = 2 EXACTLY. L=3: meas 1.6151 (CI 1.6134,1.6166) pred 1.6144 | L=4: meas 1.6760 (CI 1.6730,1.6790) pred 1.6784 | L=5: meas 1.7130 (CI 1.7087,1.7184) pred 1.7113 | L=6: meas 1.7344 (CI 1.7306,1.7383) pred 1.7294 | L=7: meas 1.7392 (CI 1.7354,1.7431) pred 1.7398 | L=8: meas 1.7446 (CI 1.7408,1.7482) pred 1.7459 | L=7: meas 1.7402 (CI 1.7371,1.7440) pred 1.7398 | L=5: meas 1.7120 (CI 1.7096,1.7140) pred 1.7113  -> every CI excludes 2; worst CI_hi - 2 = -0.2518. Conditional Gaussianity is broken. HOW MANY INDEPENDENT CONDITIONS: the ratio is 2 - sum_l p_l^2, i.e. L-DETERMINED and ANGLE-INVARIANT, so the evidence is indexed by L, not by the angle sets. 8 angle sets exercised 6 DISTINCT L values {3, 4, 5, 6, 7, 8} out of the 6 in Unif{3..8} (full range covered). Spread of the measured ratio WITHIN one L (repeated angle sets) = 0.0010 vs ACROSS L = 0.1294, confirming the angle-invariance.
+T2dm  | PASS        |     5.010e-03 | |meas - pred| <= 1e-2   | T2d MECHANISM: measured fourth-moment ratio vs the analytic 2 - sum_l |u_l|^4/(sum_l |u_l|^2)^2 = 2 - sum_l p_l^2 (unit-norm steering => |u_l|^2 = p_l). max |meas - pred| = 5.010e-03 -- the deviation is the deterministic power profile, not a sampling artefact.
+T2e   | RECORD      |     6.842e+00 | record only             | participating paths L ~ Unif{3..8}, E[L] = 5.50; 2D-DFT angular energy concentration over 32 bins: top-1 = 0.3022, top-2 = 0.4758, top-4 = 0.6726, top-8 = 0.8426; effective #bins (1/sum f_b^2) = 6.842/32 (0.214 of the aperture)
 ----------------------------------------------------------------------------------------------------------------------------------
-PASS 25/25, FAILED: []   (N/A: ['S4'], RECORD: ['S5', 'S7'])
+PASS 35/35, FAILED: []   (N/A: ['S4'], RECORD: ['S5', 'S7', 'T2b', 'T2c', 'T2e'])

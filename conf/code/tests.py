@@ -767,3 +767,18 @@ def test_D6t():
 
 
 D_TESTS = [test_D0, test_D1t, test_D2t, test_D3t, test_D4t, test_D5t, test_D6t]
+
+
+# ============================================================================= T -- D2 testbed (B1)
+def test_T_all():
+    """T2a..T2e (+T2dm) of conf/05_SPEC_testbed_D2.md §2, run through d2.tests_T2 on the PRIMARY prior and
+    the headline cell.  T2d is the gate for Stage B."""
+    import d2
+    rows = d2.tests_T2("S2", 8, 4, 2, n=100000)
+    for r in rows:
+        RES.append(r)
+    fails = [r[0] for r in rows if r[1] == "FAIL"]
+    return "PASS" if not fails else "FAIL"
+
+
+T_TESTS = [test_T_all]
