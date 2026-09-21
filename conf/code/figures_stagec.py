@@ -1,0 +1,586 @@
+"""conf/code/figures_stagec.py -- Stage C result figures (10_SPEC_stageC.md).
+
+figures.py draws F2-F6 (Stage A/B).  This file continues the numbering with the Stage C set:
+
+  F7   mechanism: eigenvalue spectrum of sym(Jr), D1 (learned / TRUE grid GMM / fitted GMM K=32)
+       vs D2 (learned / fitted kron GMM K=512).  D2's learned spectrum crosses zero; nothing else does.
+  F8   budget: f(lmin(Jr) < 0) and asym(Jr) on the frozen 20-point sigma grid, one line per training
+       budget, plus the epoch pair at N=1.6e5, the FITTED GMM, and D1's learned model as the contrast.
+  F9   the sigma band and the SNR shape: shift_med on the sigma grid against the settling experiment's
+       divergence rate on the SNR grid, linked ONLY by the separately measured sigma_t(SNR) the
+       receiver actually queries.  The two x axes are different quantities and are NOT forced onto one.
+  F10  the D1 confirmatory BLER run, n=2560, cells C5 / C2 / C1, with the power guard's UNDECIDED
+       pairs marked and C1's -3 dB collapse left visible.
+
+Every number is READ from the files below; nothing here recomputes, resamples or re-runs anything.
+  results/jac_spectrum.txt            F7 provenance (the ADDENDUM's D1 table is the log below)
+  logs/jacspec_D1_true.log            F7 left   (learned / TRUE 1024-comp grid GMM / fitted GMM K=32)
+  logs/jacspec_D2_N10000.log          F7 right, F8 context
+  logs/jacspec_D2_N160000.log         F7 right  (epoch-240 snapshot)
+  logs/jacpsd_N{10000_a1,40000_a1,160000,160000_late}.log   F8, F9 top
+  logs/jacpsd_D1_N160000.log          F8 contrast (gate-passing D1 checkpoint)
+  logs/diag_sigma_coverage.log        F9  the measured sigma_t(SNR) link, n=12
+  results/settling_D2.txt             F9 bottom (n=256 paired trials per SNR)
+  results/tables_D1_C.txt             F10 (TABLE A BLER, TABLE B power guard)
+  results/guard_D1_C.txt              F10 (divergence-guard firings)
+
+House style (rcParams, PDF+PNG export, legend-carries-the-condition) is inherited from figures.py by
+importing it; the STYLE table is reused verbatim and only EXTENDED with the Stage C arms.
+
+GATE STATUS, because two of these figures are diagnostic probes and must say so:
+  D1  ckpt/sx_N160000_D1.pt           PASSES all four pre-registered gates (results/samplecx_D1.txt,
+                                      LADDER_C.md SX160000: GA 9.9e-16 GB +0.27% GC 0.0999 GD 0.0718).
+  D2  ckpt/d2sx_N10000_a1.pt          FAILS (GC 0.224 vs 0.15).  Everything D2 in F7/F8/F9 is an
+      d2sx_N160000 snap / late        UN-GATED diagnostic probe and licenses no claim.
+"""
+import os, re, sys
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import numpy as np
+import matplotlib
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
+from matplotlib.ticker import FuncFormatter, NullFormatter
+from matplotlib.transforms import blended_transform_factory
+import common as C
+import figures as F0                      # house style: rcParams, FIG dir, STYLE
+
+FIG, RES, LOG = F0.FIG, os.path.join(C.CONF, "results"), os.path.join(C.CONF, "logs")
+SNRS = np.array([-3., 0., 3., 6., 9., 12., 15.])
+
+# ------------------------------------------------------------------ readers (text -> arrays) ------
+
+_JACPSD = ["k", "sigma", "nu", "asym_r", "lmin_r", "lmax_r", "f_neg_r", "herm_c", "lmin_c", "lmax_c",
+           "f_neg_c", "f_gt1_c", "clipfrac", "shift_med", "shift_max"]
+_JACSPEC = ["k", "sigma", "nneg_mean", "nneg_med", "nneg_p90", "n_lt_001", "n_lt_01",
+            "lmin", "l25", "lmed", "lmax"]
+
+
+def _sections(path, names):
+    """Read the '=== model ===' blocks of a jacpsd/jacspec log into {model: {col: array}}."""
+    out, cur = {}, None
+    for ln in open(path):
+        m = re.match(r"^=== (.+?) ===\s*$", ln)
+        if m:
+            cur = out.setdefault(m.group(1), [])
+            continue
+        if cur is None or "|" not in ln or ln.lstrip().startswith(("k ", "#")):
+            continue
+        tok = [t for part in ln.split("|") for t in part.split()]
+        if len(tok) != len(names):
+            continue
+        try:
+            cur.append([float(t) for t in tok])
+        except ValueError:
+            continue
+    return {k: dict(zip(names, np.array(v, float).T)) for k, v in out.items() if v}
+
+
+def jacpsd(tag):
+    return _sections(os.path.join(LOG, f"jacpsd_{tag}.log"), _JACPSD)
+
+
+def jacspec(tag):
+    return _sections(os.path.join(LOG, f"jacspec_{tag}.log"), _JACSPEC)
+
+
+def settling(block="fraction of trials"):
+    """results/settling_D2.txt -> {arm: array(7)} of the requested block, in SNR order."""
+    out, on = {}, False
+    for ln in open(os.path.join(RES, "settling_D2.txt")):
+        if ln.startswith(block):
+            on = True
+            continue
+        if on:
+            if ln.startswith(("-", "arm", "\n", "READING")):
+                if ln.startswith("READING"):
+                    break
+                continue
+            t = ln.split()
+            if len(t) >= 8 and "|" in t[0]:
+                out[t[0]] = np.array(t[1:8], float)
+    return out
+
+
+def sigma_of_snr():
+    """logs/diag_sigma_coverage.log -> {snr: (median, lo, hi)} of the sigma_t M-ours-dscore QUERIES.
+
+    n = 12 trials per point, cell C2, ckpt/d2sx_N10000_a1.pt -- a separate, smaller diagnostic than
+    the settling run.  This is the ONLY measured link between F9's two x axes.
+
+    NOTE on the bracket: diag_sigma_coverage.py prints [nanmin, nanmax] of the 12 x 16 = 192 queried
+    sigma_t, NOT an inter-quartile range.  It is the FULL range and is labelled as such."""
+    out, snr, arm = {}, None, None
+    for ln in open(os.path.join(LOG, "diag_sigma_coverage.log")):
+        m = re.match(r"^===== SNR ([+-]?\d+) dB", ln)
+        if m:
+            snr = float(m.group(1))
+        if ln.strip().startswith("---"):
+            arm = ln.strip().lstrip("- ").strip()
+        m = re.search(r"sigma_t queried : median ([\d.e+-]+)\s+\[([\d.e+-]+), ([\d.e+-]+)\]", ln)
+        if m and arm == "M-ours-dscore":
+            out[snr] = tuple(float(g) for g in m.groups())
+    return out
+
+
+def tableA(cell, path=os.path.join(RES, "tables_D1_C.txt")):
+    """TABLE A of results/tables_D1_C.txt -> {arm: array(7)} of BLER at the arm's reporting iteration."""
+    out, on = {}, False
+    for ln in open(path):
+        if ln.startswith(f"--- cell {cell} ("):
+            on = True
+            continue
+        if on:
+            if "per-point detail rows" in ln:
+                break
+            v = re.findall(r"(-?\d+\.\d+)\(", ln)
+            if len(v) == 7:
+                out[ln.split()[0]] = np.array(v, float)
+    return out
+
+
+def guard(path=os.path.join(RES, "guard_D1_C.txt")):
+    """results/guard_D1_C.txt -> {(cell, snr, arm): (fired, of)}"""
+    out = {}
+    for ln in open(path):
+        t = ln.split()
+        if len(t) == 7 and t[0].startswith("C") and t[2].startswith(("M-", "R")):
+            out[(t[0], float(t[1]), t[2])] = (int(t[3]), int(t[4]))
+    return out
+
+
+def undecided(cell, path=os.path.join(RES, "tables_D1_C.txt")):
+    """TABLE B -> ([(pair, [snr...])], set(snr)) for the pairs the power guard left UNDECIDED."""
+    pairs, snrs, cur, dsnr, on = [], set(), None, [], False
+    for ln in open(path):
+        if re.match(rf"^--- cell {cell}\s+prior", ln):
+            on = True
+            continue
+        if on:
+            if ln.startswith("--- cell ") or ln.startswith("="):
+                break
+            m = re.match(r"^  (\S+) -> (\S+)\s+\[decision", ln)
+            if m:
+                cur, dsnr = f"{m.group(1)} -> {m.group(2)}", []
+            m = re.search(r"decision SNRs \[([^\]]*)\]", ln)
+            if m:
+                dsnr = [float(x.strip().strip("'")) for x in m.group(1).split(",") if x.strip()]
+            if "-> UNDECIDED" in ln and cur:
+                pairs.append((cur, dsnr))
+                snrs.update(dsnr)
+                cur = None
+    return pairs, snrs
+
+
+def _save(fig, name, caption):
+    for e in ("pdf", "png"):
+        fig.savefig(os.path.join(FIG, f"{name}.{e}"))
+    with open(os.path.join(FIG, f"{name}.txt"), "w") as fh:
+        fh.write(caption.strip() + "\n")
+    plt.close(fig)
+    return name
+
+
+def _foot(fig, txt, y=-0.02):
+    fig.text(0.5, y, txt, ha="center", va="top", fontsize=6.2, color="0.35")
+
+
+# ------------------------------------------------------------------ F7  the mechanism -------------
+
+def fig7():
+    """Spectrum of sym(Jr): D1 (three models) vs D2 (two), quantile ladder per sigma.
+
+    Per model and sigma the log gives lmin / 25th pct / median / lmax over n=48 held-out samples x 64
+    eigenvalues.  Drawn as a whisker (lmin..lmax) with a bar on the 25th-percentile..median body, so the
+    reader sees the WHOLE spectrum's position relative to zero, not one order statistic."""
+    d1 = jacspec("D1_true")
+    d2a = jacspec("D2_N160000")
+    L = [("learned  N=1.6e5 (gate-PASS)", "tab:purple", d1["diffusion"]),
+         ("TRUE prior: grid GMM, 1024 comp.", "k", d1["TRUE-prior(grid GMM, 1024 comp)"]),
+         ("fitted GMM  b*=kron, K=32, N=1e4", "tab:orange", d1["FITTED-GMM(b*=kron,K=32,N=10000)"])]
+    R = [("learned  N=1.6e5, ep.240 (UN-GATED)", "tab:purple", d2a["diffusion"]),
+         ("fitted GMM  b*=kron, K=512", "tab:orange", d2a["GMM-exact(b*=kron,K=512)"])]
+
+    fig, axes = plt.subplots(1, 2, figsize=(7.8, 3.7), sharey=True)
+    for ax, sets, ttl in zip(axes, (L, R),
+                             ("(a) D1  grid-GMM prior, full support in $\\mathbb{R}^{64}$",
+                              "(b) D2  sparse specular, support $=\\bigcup$ 3L-dim manifolds")):
+        off = np.linspace(-0.105, 0.105, len(sets))
+        for j, (lab, col, d) in enumerate(sets):
+            x = d["sigma"] * 10 ** off[j]
+            ax.vlines(x, d["lmin"], d["lmax"], color=col, lw=1.0, alpha=0.85)
+            ax.vlines(x, d["l25"], d["lmed"], color=col, lw=4.4, alpha=0.95)
+            ax.plot(x, d["lmin"], marker="_", color=col, ms=7, mew=1.6, ls="none", label=lab)
+            ax.plot(x, d["lmax"], marker="_", color=col, ms=7, mew=1.6, ls="none")
+        ax.axhline(0.0, color="tab:red", lw=1.1)
+        ax.set_xscale("log")
+        ax.set_yscale("symlog", linthresh=1e-3, linscale=0.55)
+        ax.set_ylim(-1.0, 8.0)
+        ax.set_xlim(0.022, 1.35)
+        ax.set_xlabel(r"noise level $\sigma$ of the frozen grid")
+        ax.set_title(ttl, fontsize=8.6)
+        ax.legend(loc="lower left", fontsize=6.8, frameon=True, framealpha=0.9, edgecolor="none")
+    axes[1].legend(loc="lower right", fontsize=6.8, frameon=True, framealpha=0.9, edgecolor="none")
+    axes[0].set_ylabel(r"eigenvalues of $\mathrm{sym}(J_r)$" "\n" r"(n=48 samples $\times$ 64 each)")
+    axes[0].text(0.024, 4e-4, "zero", fontsize=6.6, color="tab:red")
+    axes[0].text(0.40, 0.36, r"$n_{\rm neg}=0$ for all three models" "\n" r"at all four $\sigma$",
+                 transform=axes[0].transAxes, fontsize=7.2, color="0.25")
+
+    dl, dg = d2a["diffusion"], d2a["GMM-exact(b*=kron,K=512)"]
+    blend = blended_transform_factory(axes[1].transData, axes[1].transAxes)
+    for i, s in enumerate(dl["sigma"]):
+        axes[1].text(s * 10 ** -0.105, 0.965, f"$n_{{\\rm neg}}$ {dl['nneg_mean'][i]:.1f}",
+                     transform=blend, ha="center", va="top", fontsize=6.6, color="tab:purple")
+        axes[1].annotate(f"{dg['lmin'][i]:.0e}", (s * 10 ** 0.105, dg["lmin"][i]),
+                         textcoords="offset points", xytext=(6, -7), ha="left", fontsize=6.0,
+                         color="tab:orange")
+    _foot(fig, "Whisker = $[\\lambda_{\\min},\\lambda_{\\max}]$, bar = 25th percentile..median of the 48x64 "
+               "eigenvalues at that $\\sigma$.  y is symlog (linear below $10^{-3}$): the sign change and the "
+               "near-zero bulk are both on the page, nothing is clipped.\n"
+               "On D2 at N=1e4 the same $n_{\\rm neg}$ counts are 8.0 / 10.6 / 11.2 / 7.8 "
+               "(logs/jacspec_D2_N10000.log) -- the same picture at 1/16 of the data.  The fitted GMM "
+               "on D2 stays POSITIVE but falls to $7.6\\times10^{-5}$ (per-point values beside its lower "
+               "whisker, rounded to one significant figure): it "
+               "is near the PSD boundary, not on it.")
+    fig.suptitle("The EP matrix site (D-14) inverts $\\nu\\,\\mathrm{Herm}(J)$ and therefore needs $J$ "
+                 "PSD.  It is, on D1.  It is not, on D2.", fontsize=9, y=1.03)
+    return _save(fig, "F7_jacspectrum_D1_D2", f"""
+F7.  Eigenvalue spectrum of sym(J_r), the symmetrised real Jacobian of the Tweedie denoiser that
+RouteAClip._matrix_site consumes, at four points of the frozen sigma grid (k = 0, 6, 12, 18).
+
+PLOTTED.  Per model and sigma: whisker = [lambda_min, lambda_max], bar = [25th percentile, median],
+over n = 48 held-out channel samples x 64 eigenvalues each.  The red line is zero.  y is symlog with a
+linear region below 1e-3, so negative eigenvalues and the near-zero bulk are both visible; no axis is
+truncated and no curve is smoothed.
+(a) D1: learned score, the TRUE prior (t2_gmm.angle_grid_prior, 32x32 = 1024 components, closed form),
+    and the fitted GMM (b* = kron, K = 32, N = 1e4).  n_neg = 0 for all three at all four sigma.
+(b) D2: learned score at N = 1.6e5 and the fitted 512-component Kronecker GMM.  The learned spectrum
+    crosses zero at every sigma but the largest; mean n_neg out of 64 is annotated (10.3 / 17.0 /
+    14.1 / 0.7, exactly as the log prints them).  At N = 1e4 the same counts are 8.0 / 10.6 / 11.2 / 7.8.
+
+SOURCE.  logs/jacspec_D1_true.log (panel a), logs/jacspec_D2_N160000.log (panel b), with
+logs/jacspec_D2_N10000.log for the N = 1e4 counts quoted above; the table is transcribed in
+results/jac_spectrum.txt (ADDENDUM 2026-09-21 21:55 for D1).  n = 48 per grid point.
+
+GATE STATUS.  (a) uses ckpt/sx_N160000_D1.pt, which PASSES all four pre-registered gates
+(results/samplecx_D1.txt: GB 0.0027, GC 0.0999, GD 0.0718).  (b) uses the N = 1.6e5 epoch-240 snapshot
+of the D2 run, which is NOT gate-verified -- a DIAGNOSTIC PROBE on an UN-GATED checkpoint.  The D2
+panel licenses no arm claim; 10_SPEC_stageC Sec.3c governs what may.
+
+CAVEAT the picture cannot carry on its own.  The fitted GMM is NOT ground truth on D2 -- D2 has no
+closed-form score (05_SPEC Sec.3).  A full-rank mixture cannot represent a density supported near a
+low-dimensional set, so its Jacobian stays near the identity and is PSD for free; its lambda_min is
+positive but reaches 7.6e-5 (annotated).  Its PSD-ness is therefore not evidence that the learned model
+is wrong, only that the two models disagree about the local geometry.
+""")
+
+
+# ------------------------------------------------------------------ F8  data does not fix it ------
+
+def fig8():
+    """f(lmin(Jr)<0) and asym(Jr) over the whole 20-point sigma grid, one line per training budget."""
+    runs = [("D2 learned  N=1e4   (200 ep.)", "tab:blue", "o", "-", jacpsd("N10000_a1")["diffusion"]),
+            ("D2 learned  N=4e4   (200 ep.)", "tab:green", "s", "-", jacpsd("N40000_a1")["diffusion"]),
+            ("D2 learned  N=1.6e5 (ep. 240)", "tab:purple", "^", "-", jacpsd("N160000")["diffusion"]),
+            ("D2 learned  N=1.6e5 (later snap.)", "tab:pink", "v", "--",
+             jacpsd("N160000_late")["diffusion"]),
+            ("D2 fitted GMM  b*=kron, K=512 (exact score OF the fit)", "tab:orange", "D", ":",
+             jacpsd("N10000_a1")["GMM-exact(b*=kron,K=512)"]),
+            ("D1 learned  N=1.6e5 (gate-PASS)", "tab:red", "*", "-.",
+             jacpsd("D1_N160000")["diffusion"])]
+
+    fig, axes = plt.subplots(2, 1, figsize=(5.8, 5.6), sharex=True,
+                             gridspec_kw=dict(hspace=0.10))
+    for lab, col, mk, ls, d in runs:
+        axes[0].plot(d["sigma"], d["f_neg_r"], marker=mk, color=col, ls=ls, ms=3.6, lw=1.3, label=lab)
+        axes[1].semilogy(d["sigma"], d["asym_r"], marker=mk, color=col, ls=ls, ms=3.6, lw=1.3)
+    for ax in axes:
+        ax.set_xscale("log")
+        ax.set_xticks([0.03, 0.05, 0.1, 0.2, 0.4, 0.8])
+        ax.xaxis.set_major_formatter(FuncFormatter(lambda v, _: f"{v:g}"))
+        ax.xaxis.set_minor_formatter(NullFormatter())
+    axes[0].set_ylim(-0.07, 1.14)
+    axes[0].set_ylabel(r"$f(\lambda_{\min}(J_r) < 0)$" "\n" "over n=128 held-out samples")
+    axes[0].axhline(0.0, color="0.4", lw=0.8, ls=(0, (1, 3)))
+    axes[0].text(0.30, 0.055, "PSD at every sample", fontsize=6.8, color="0.35")
+    axes[0].legend(loc="lower left", fontsize=6.5, frameon=True, framealpha=0.9, edgecolor="none")
+    axes[1].set_ylabel(r"$\mathrm{asym}(J_r)=\|J_r-J_r^{\!\top}\|\,/\,\|J_r\|$")
+    axes[1].set_xlabel(r"noise level $\sigma$  (the frozen 20-point grid)")
+    axes[1].set_ylim(1e-17, 6.0)
+    axes[1].set_yticks([1e-16, 1e-12, 1e-8, 1e-4, 1e0])
+    axes[1].text(0.055, 3e-13, "machine precision: the FITTED GMM's\nscore is symmetric by construction",
+                 fontsize=6.5, color="tab:orange")
+    axes[0].set_title("16x the data and a later epoch do not restore PSD-ness on D2;\n"
+                      "the same code and budget on D1 is valid everywhere", fontsize=8.8)
+    _foot(fig, "D1 and D2 have their own frozen sigma grids (0.0329-0.791 and 0.0331-0.845); each curve "
+               "is drawn against its OWN grid.\nD1's $f(\\lambda_{\\min}<0)$ is 0.000 at all 20 points, but "
+               "its $\\mathrm{asym}(J_r)$ is NOT zero -- it rises from 1.9e-3 to 9.8e-2.\nThe learned D1 "
+               "Jacobian is PSD everywhere and only approximately symmetric, which is why both panels "
+               "are drawn.", y=0.015)
+    return _save(fig, "F8_budget_psd_asym", """
+F8.  Two validity diagnostics of the learned Jacobian over the whole frozen 20-point sigma grid, one
+line per training budget.
+
+PLOTTED.  Top: f(lambda_min(J_r) < 0), the fraction of held-out samples whose symmetrised real
+Jacobian has a negative eigenvalue.  Bottom (log scale): asym(J_r), the relative asymmetry of J_r.
+Both are required of a true posterior-mean denoiser, for which J_r = Cov(h|q)/sigma^2 is symmetric PSD.
+n = 128 held-out samples per grid point for every curve.
+
+THE MESSAGE, WITH ITS RANGE.  Over sigma <= 0.26 -- which contains the whole band F9 measures the
+site to be damaged in -- the four D2 learned curves lie on top of each other at f = 0.95 to 1.00:
+N = 1e4 -> 4e4 -> 1.6e5 is a 16x increase in data and moves neither quantity, and the later epoch
+snapshot at N = 1.6e5 changes neither.  They do NOT coincide at large sigma, and the panel shows it:
+at sigma = 0.713 the four read 0.711 / 0.203 / 0.422 / 0.359 and at sigma = 0.845 they read 0.594 /
+0.633 / 0.359 / 0.570.  That spread is not ordered by budget, it is at the sigma where the damage has
+already vanished, and it is drawn rather than smoothed over.  What no budget changes is that f is
+pinned near 1 across the whole damaged band.  The fitted GMM sits at f = 0 and at machine-precision
+asymmetry -- but it is a FIT selected by validation log-likelihood, NOT ground truth: D2 has no
+closed-form prior (05_SPEC Sec.3), and a full-rank mixture is symmetric PSD for free.  It is a sanity
+reference for the measurement, not a target the learned model failed to reach.  D1's learned model, SAME architecture, SAME recipe, SAME budget, sits at f = 0 too.  The
+one thing that differs between the D1 and D2 learned curves is the data distribution.
+
+SOURCE.  logs/jacpsd_N10000_a1.log, jacpsd_N40000_a1.log, jacpsd_N160000.log, jacpsd_N160000_late.log,
+jacpsd_D1_N160000.log.  The GMM reference is the GMM-exact(b*=kron,K=512) block of the N=1e4 log; it is
+identical in all four D2 logs because the fit is the same object.
+
+EPOCH LABELS.  The N = 1.6e5 pair is the epoch-240 snapshot (logs/jacpsd_N160000.log, ckpt
+d2sx_N160000_snap.pt) and a later snapshot of the SAME run (logs/jacpsd_N160000_late.log, ckpt
+d2sx_N160000_late.pt).  The only record of the later snapshot's epoch is STATUS.md line 489, which
+names the best-val checkpoint at epoch 816 when the probe was launched; the figure therefore says
+"later snap." rather than a number this file can verify.  The run's own final best was epoch 1764
+(logs/train_d2sx_N160000_a1.log).
+
+GATE STATUS.  All four D2 curves are DIAGNOSTIC PROBES on UN-GATED checkpoints: ckpt/d2sx_N10000_a1.pt
+fails the pre-registered gates (GC 0.224 vs 0.15) and the two N = 1.6e5 snapshots are not gate-verified.
+The D1 curve uses ckpt/sx_N160000_D1.pt, which PASSES all four gates.
+
+HONESTY NOTE that the top panel alone would hide.  D1's f(lambda_min < 0) is exactly 0.000 at all 20
+points, but D1's asym(J_r) is NOT zero: it rises monotonically from 1.9e-3 at sigma = 0.033 to 9.8e-2
+at sigma = 0.791.  The learned D1 Jacobian is PSD everywhere and only approximately symmetric.  That is
+why both panels are drawn.
+""")
+
+
+# ------------------------------------------------------------------ F9  the sigma band -------------
+
+def fig9():
+    """Where on the sigma grid the site is damaged, against where on the SNR grid the receiver diverges."""
+    d = jacpsd("N10000_a1")["diffusion"]
+    g = jacpsd("N10000_a1")["GMM-exact(b*=kron,K=512)"]
+    band = d["sigma"][d["shift_med"] >= d["shift_med"].max() / 2.0]        # measured, not chosen
+    lo, hi = band.min(), band.max()
+    frac = settling()
+    sq = sigma_of_snr()
+
+    fig = plt.figure(figsize=(5.9, 6.3))
+    gs = fig.add_gridspec(2, 1, height_ratios=[2.75, 2.0], hspace=0.46)
+    g0 = gs[0].subgridspec(2, 1, height_ratios=[0.78, 2.0], hspace=0.34)
+    axr = fig.add_subplot(g0[0])
+    ax = fig.add_subplot(g0[1], sharex=axr)
+    axb = fig.add_subplot(gs[1])
+
+    # --- the ruler: the sigma_t the receiver ACTUALLY queries, per SNR (separate n=12 probe)
+    blend = blended_transform_factory(axr.transData, axr.transAxes)
+    for i, (snr, (med, q_lo, q_hi)) in enumerate(sorted(sq.items(), reverse=True)):
+        y = 0.88 - 0.155 * i
+        axr.plot([q_lo, q_hi], [y, y], transform=blend, color="0.5", lw=1.2, solid_capstyle="butt")
+        axr.plot([med], [y], transform=blend, marker="o", ms=3.4, color="0.15")
+        axr.text(q_hi * 1.10, y, f"{int(snr):+d} dB", transform=blend, fontsize=6.3, va="center",
+                 color="0.2")
+    axr.axvspan(lo, hi, color="tab:red", alpha=0.10, lw=0)
+    axr.set_yticks([])
+    axr.tick_params(labelbottom=False, bottom=False)
+    axr.set_ylabel("SNR", fontsize=7, rotation=0, ha="right", va="center", labelpad=4)
+    axr.set_title(r"median $\sigma_t$ Module H is actually queried with, per SNR"
+                  "   (n=12 trials, separate probe; bar = full min..max)", fontsize=7.2, pad=3,
+                  color="0.25")
+
+    ax.axvspan(lo, hi, color="tab:red", alpha=0.10, lw=0)
+    ax.loglog(d["sigma"], d["shift_med"], marker="o", color="tab:blue", ms=3.8, lw=1.4,
+              label="learned score, N=1e4 (the settling run's ckpt)")
+    ax.loglog(g["sigma"], np.maximum(g["shift_med"], 1e-7), marker="D", color="tab:orange", ms=3.4,
+              lw=1.2, ls=":", label="fitted GMM b*=kron, K=512 (6 exact zeros floored to $10^{-7}$)")
+    ax.set_xlim(0.026, 2.6)
+    ax.set_ylim(1e-7, 60)
+    ax.set_xticks([0.03, 0.05, 0.1, 0.2, 0.4, 0.8])
+    ax.xaxis.set_major_formatter(FuncFormatter(lambda v, _: f"{v:g}"))
+    ax.xaxis.set_minor_formatter(NullFormatter())
+    ax.set_xlabel(r"noise level $\sigma$  (frozen 20-point grid)", labelpad=1)
+    ax.set_ylabel("median PSD-repair shift of\nthe D-14 site,  shift_med")
+    ax.set_title(f"(a) where the site is damaged: shift_med peaks on "
+                 f"$\\sigma\\in[{lo:.3f},\\,{hi:.3f}]$", fontsize=8.6)
+    ax.legend(loc="lower right", fontsize=6.5, frameon=True, framealpha=0.9, edgecolor="none")
+    ax.text(lo * 1.02, 26, "shaded: shift_med within 2x of its maximum", fontsize=6.3,
+            color="tab:red")
+
+    for arm, col, mk, lab in (("dscore|eta", "tab:blue", "o", "eta  (D-14 matrix site as spec'd)"),
+                              ("dscore|abs1e-2", "tab:green", "s", r"abs1e-2  ($|\lambda|$ floored, SIGN KEPT)"),
+                              ("dscore|psd1e-2", "tab:purple", "^", "psd1e-2  (eig clipped into [1e-2,1])"),
+                              ("dscore|belsc", "tab:brown", "v", "belsc  (D-14 dropped, scalar site)")):
+        axb.plot(SNRS, frac[arm], marker=mk, color=col, ms=4.2, lw=1.4, label=lab)
+    axb.axvline(6, color="tab:red", lw=0.9, ls="--", alpha=0.7)
+    axb.text(6.3, 0.055, "eta peaks at +6 dB\n(abs1e-2 peaks at 0 dB)", fontsize=6.8,
+             color="tab:red")
+    axb.set_xlabel("SNR [dB]")
+    axb.set_ylabel("fraction of trials with channel\nNMSE > 1 after 16 iterations")
+    axb.set_ylim(-0.035, 0.80)
+    axb.set_xticks(SNRS)
+    axb.set_title("(b) what it costs the receiver: settling experiment,\nD2 cell C2, n=256 paired trials",
+                  fontsize=8.6)
+    axb.legend(loc="upper right", fontsize=6.5, frameon=True, framealpha=0.9, edgecolor="none",
+               title="learned score, Module H site =", title_fontsize=6.5)
+    _foot(fig, "(a) and (b) have DIFFERENT x quantities and are NOT forced onto one axis.  The only link "
+               "drawn is the ruler above (a):\nthe median $\\sigma_t$ the receiver queries at each SNR, "
+               "measured separately at n=12 (logs/diag_sigma_coverage.log);\ngrey bars are the FULL "
+               "min..max of the 192 queries, NOT an inter-quartile range.\n+12 dB was not measured "
+               "there, so it has no row.", y=0.012)
+    return _save(fig, "F9_sigma_band_vs_snr", """
+F9.  The sigma band where the D-14 site is damaged, and the SNR band where the receiver diverges.
+
+PLOTTED.
+(a) shift_med, the median shift the PSD repair has to apply to the D-14 site, over the frozen 20-point
+    sigma grid, for the learned score at N = 1e4 and for the FITTED 512-component Kronecker GMM
+    (log-log; the GMM's exact zeros at the SIX smallest sigma -- k = 0..5, sigma 0.0331 to 0.0776 --
+    are floored to 1e-7 so a log axis can show them, which is stated here rather than hidden).  The
+    GMM is a fit selected by validation log-likelihood, NOT ground truth: D2 has no closed-form prior
+    (05_SPEC Sec.3).  The shaded band is sigma where shift_med is within a
+    factor 2 of its maximum -- a rule applied in the code, not a band drawn by eye.
+(b) fraction of trials whose channel-estimate NMSE exceeds 1 after 16 iterations (NMSE > 1 = worse than
+    h_hat = 0), against SNR, for the four interventional arms of the settling experiment: the site as
+    specified, the magnitude-floored site that KEEPS the sign, the PSD-clipped site, and the scalar
+    site.  n = 256 paired trials per SNR, D2 cell C2 (8x4, T = 16, Tp = 4).
+
+THE CORRESPONDENCE, AND ITS LIMIT.  The two panels' x axes are different physical quantities and the
+figure does NOT map one onto the other.  The only link drawn is the ruler on top of (a): the median
+sigma_t that Module H is actually queried with at each SNR, measured in a separate and much smaller
+diagnostic (logs/diag_sigma_coverage.log, n = 12 trials per point, same cell, same checkpoint), with the
+grey bars giving the FULL min..max of the 12 x 16 = 192 queried sigma_t -- that is what the log prints,
+it is NOT an inter-quartile range, and it is therefore the widest possible reading of the spread.  Read together: +6 dB lands inside the shaded band, and +6 dB
+is where (b)'s eta arm peaks.  (The magnitude-floored arm abs1e-2 peaks at 0 dB, not +6; the marked peak is
+the arm that runs the site as specified.)  +12 dB was not measured in the sigma_t diagnostic and
+therefore has no tick.
+n = 12 is small; this is a consistency check, not a fitted relationship.
+
+SOURCE.  (a) logs/jacpsd_N10000_a1.log, n = 128 held-out samples per grid point.  (b)
+results/settling_D2.txt, second block, n = 256; the same numbers with more columns are in
+logs/psd_cf_snr*.log.  Ruler: logs/diag_sigma_coverage.log, n = 12.
+
+GATE STATUS.  Every row of this figure uses ckpt/d2sx_N10000_a1.pt, which FAILED the pre-registered
+gates (GC 0.224 against a bar of 0.15).  These are DIAGNOSTIC PROBES on an UN-GATED checkpoint.  They
+may not enter a result table and they license no claim; 10_SPEC_stageC Sec.6/6c specifies the
+confirmatory run with a gate-passing checkpoint at n >= 2560.
+""")
+
+
+# ------------------------------------------------------------------ F10  the D1 confirmatory ------
+
+_ARMS = [
+    ("R1-turbo", "R1  classical turbo (APP feedback, no LOO)", "tab:brown", "s", "--"),
+    ("R2-ours-G", "R2  D-15+LOO, Gaussian sample-cov. prior", "tab:blue", "o", "-"),
+    ("M-ours-bstar", "M   Module H = GMM, b* (val. log-lik.)", "tab:red", "D", "-"),
+    ("M-ours-score", "M   EXACT-score ORACLE (true prior, not learned)", "tab:green", "P", ":"),
+    ("M-ours-dscore-C-V0", "V0  learned score, D-14 MATRIX site (primary)", "tab:purple", "^", "-"),
+    ("M-ours-dscore-C-V4", "V4  learned score, D-13 scalar site (post-hoc)", "tab:pink", "v", "-"),
+    ("R5-genie", "R5  genie CSI (lower bound)", "k", "*", "-."),
+]
+
+
+def fig10(n=2560):
+    cells = [("C5", r"(a) C5  $T_p=3$"), ("C2", r"(b) C2  $T_p=4$  (headline)"),
+             ("C1", r"(c) C1  $T_p=2$  (first pass uninformative)")]
+    gd, floor = guard(), 0.5 / n
+    band_lab = ["SNR where a pre-registered pair is\nUNDECIDED (power guard)"]   # used once, then cleared
+    fig, axes = plt.subplots(1, 3, figsize=(9.6, 3.5), sharey=True)
+    for ax, (cell, ttl) in zip(axes, cells):
+        A = tableA(cell)
+        und_pairs, und_snr = undecided(cell)
+        for s in sorted(und_snr):
+            ax.axvspan(s - 0.55, s + 0.55, color="0.75", alpha=0.35, lw=0,
+                       label=band_lab.pop() if band_lab else None)
+        for arm, lab, col, mk, ls in _ARMS:
+            if arm not in A:
+                continue
+            ax.semilogy(SNRS, np.maximum(A[arm], floor), marker=mk, color=col, ls=ls, ms=4, lw=1.3,
+                        label=lab if cell == "C5" else None)
+        for (c, s, arm), (f, of) in gd.items():
+            if c == cell and arm in dict((a[0], a) for a in _ARMS) and f == of:
+                ax.plot(s, min(max(A[arm][list(SNRS).index(s)], floor), 1.0), marker="o", ms=11,
+                        mfc="none", mec="tab:red", mew=1.4, ls="none",
+                        label="divergence guard fired in ALL 2560 trials"
+                        if cell == "C1" and arm == "M-ours-dscore-C-V0" else None)
+        ax.axhline(0.1, color="0.4", lw=0.8, ls=(0, (1, 3)))
+        ax.set_xlabel("SNR [dB]")
+        ax.set_xticks(SNRS)
+        ax.set_title(ttl, fontsize=9)
+        ax.set_ylim(1.2e-4, 1.6)
+        if und_pairs:
+            ax.text(0.44, 0.26, f"{len(und_pairs)} UNDECIDED pair(s)\n(listed in the caption file)",
+                    transform=ax.transAxes, fontsize=6.2, color="0.3")
+    axes[0].set_ylabel("BLER after 16 iterations")
+    axes[2].annotate("every learned arm collapses here:\nV0 1.000, V1 0.996, V4 0.945,\nguard 2560/2560",
+                     xy=(-3, 1.0), xytext=(0.6, 4e-3), fontsize=6.6, color="tab:red",
+                     arrowprops=dict(arrowstyle="->", color="tab:red", lw=0.9))
+    hs, ls_ = [], []
+    for ax in axes:
+        for h, l in zip(*ax.get_legend_handles_labels()):
+            if l not in ls_:
+                hs.append(h); ls_.append(l)
+    fig.legend(hs, ls_, loc="center left", bbox_to_anchor=(0.995, 0.5), frameon=False)
+    fig.suptitle("D1 confirmatory run, n=2560 per point: $8\\times4$ MIMO, QPSK, rate-1/2 "
+                 "$(133,171)_8$, $T=16$, 16 iterations", fontsize=8.8, y=1.03)
+    _foot(fig, "BLER exactly 0 is drawn at the 0.5/n floor = 1.95e-4, not at the axis edge.  The power "
+               "guard is a PAIR-level verdict, so the grey bands mark the decision SNRs of the "
+               "UNDECIDED pairs, not individual curve points.", y=-0.03)
+
+    lines = []
+    for cell, _ in cells:
+        p, _ = undecided(cell)
+        lines.append(f"  cell {cell}: " + ("none" if not p else ""))
+        lines += [f"      {nm}   decision SNRs {[int(x) for x in ds]} dB" for nm, ds in p]
+    return _save(fig, "F10_bler_D1_confirmatory", """
+F10.  The D1 confirmatory BLER run.
+
+PLOTTED.  BLER after 16 outer iterations against SNR, n = 2560 trials per point, for cells C5 (Tp = 3),
+C2 (Tp = 4) and C1 (Tp = 2).  Arms: R1-turbo, R2-ours-G, M-ours-bstar, M-ours-score (the EXACT-score
+oracle on the true prior -- not a learned prior, and no learned-prior claim follows from it),
+M-ours-dscore-C-V0 (learned score through the D-14 matrix site, the Stage C primary) and
+M-ours-dscore-C-V4 (the same model through the D-13 belief scalarisation), and R5-genie.  A BLER of
+exactly 0 is drawn at the 0.5/n floor (1.95e-4); the axis is not truncated to hide it.
+
+WHAT IS MARKED.
+  - Grey bands: the decision SNRs of the arm pairs that the pre-registered power guard left UNDECIDED
+    (>= 3 decision points AND >= 6 discordant pairs at >= 2 of them; otherwise no significance call is
+    made, 08_SPEC Sec.2).  The guard is a PAIR-level verdict, so a band marks SNRs at which a
+    comparison was not decided -- it does not mean the plotted BLER values are uncertain.  The pairs:
+""" + "\n".join(lines) + """
+  - Red rings: points where the (F3) divergence guard, DIVERGE_NMSE = 10.0, fired in ALL 2560 trials.
+    That is C1 / -3 dB only, for V0 (drawn at BLER 1.000) and V4 (at 0.945); the two rings overlap
+    because those values are 0.02 of a decade apart.  V1 is 2560/2560 there too but is not plotted.
+    NOT RINGED, and said here because the all-2560 ring rule would otherwise hide it: the guard also
+    fired at C1 / +3 dB for V0, in 11 of 2560 trials (rate 0.004, worst NMSE 3.6e5).  Those four rows
+    are the whole of results/guard_D1_C.txt; the other eleven arms never fired anywhere in this run.
+  - Cell C1 at -3 dB is the failure it looks like.  M-ours-dscore-C-V0 is at BLER 1.000 with the guard
+    firing 2560/2560 and a worst NMSE of 4.5e18; V1 (not plotted, identical to V0 elsewhere) is at
+    0.996 with 2560/2560 and 1.7e20; V4 is at 0.945 with 2560/2560 and 1.4e84, and 3 of its 2560 blocks
+    carry a non-finite BLER@16, which are KEPT and counted as block errors.  The non-learned arms at the
+    same point are at 0.66-0.84.  "Every learned arm is at BLER 1.0" is the right story only for V0;
+    V1 and V4 are at 0.996 and 0.945, and the annotation gives all three.
+
+SOURCE.  results/tables_D1_C.txt -- TABLE A for the BLER values, TABLE B for the power-guard verdicts.
+results/guard_D1_C.txt for the divergence-guard firings.  n = 2560 per SNR in all three cells.
+
+GATE STATUS.  The Stage C arms use ckpt/sx_N160000_D1.pt, which PASSES all four pre-registered gates
+(LADDER_C.md SX160000: GA 9.879e-16, GB +0.27%, GC 0.0999, GD 0.0718).  This is a gate-passing
+confirmatory run, not a probe.
+
+THE STANDING CAVEAT ON THIS TESTBED, from the file's own header.  D1 is CIRCULAR: its true prior is
+defined as a grid GMM, so the GMM arm is correctly specified by construction.  No claim about learned
+priors transfers from this table to D2.
+""")
+
+
+if __name__ == "__main__":
+    for f in (fig7, fig8, fig9, fig10):
+        try:
+            print("  ok  ", f())
+        except Exception as ex:
+            print("  FAIL", f.__name__, type(ex).__name__, ex)

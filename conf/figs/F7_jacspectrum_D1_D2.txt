@@ -1,0 +1,27 @@
+F7.  Eigenvalue spectrum of sym(J_r), the symmetrised real Jacobian of the Tweedie denoiser that
+RouteAClip._matrix_site consumes, at four points of the frozen sigma grid (k = 0, 6, 12, 18).
+
+PLOTTED.  Per model and sigma: whisker = [lambda_min, lambda_max], bar = [25th percentile, median],
+over n = 48 held-out channel samples x 64 eigenvalues each.  The red line is zero.  y is symlog with a
+linear region below 1e-3, so negative eigenvalues and the near-zero bulk are both visible; no axis is
+truncated and no curve is smoothed.
+(a) D1: learned score, the TRUE prior (t2_gmm.angle_grid_prior, 32x32 = 1024 components, closed form),
+    and the fitted GMM (b* = kron, K = 32, N = 1e4).  n_neg = 0 for all three at all four sigma.
+(b) D2: learned score at N = 1.6e5 and the fitted 512-component Kronecker GMM.  The learned spectrum
+    crosses zero at every sigma but the largest; mean n_neg out of 64 is annotated (10.4 / 17.0 /
+    14.1 / 0.7).  At N = 1e4 the same counts are 8.0 / 10.6 / 11.2 / 7.8.
+
+SOURCE.  logs/jacspec_D1_true.log (panel a), logs/jacspec_D2_N160000.log (panel b), with
+logs/jacspec_D2_N10000.log for the N = 1e4 counts quoted above; the table is transcribed in
+results/jac_spectrum.txt (ADDENDUM 2026-09-21 21:55 for D1).  n = 48 per grid point.
+
+GATE STATUS.  (a) uses ckpt/sx_N160000_D1.pt, which PASSES all four pre-registered gates
+(results/samplecx_D1.txt: GB 0.0027, GC 0.0999, GD 0.0718).  (b) uses the N = 1.6e5 epoch-240 snapshot
+of the D2 run, which is NOT gate-verified -- a DIAGNOSTIC PROBE on an UN-GATED checkpoint.  The D2
+panel licenses no arm claim; 10_SPEC_stageC Sec.3c governs what may.
+
+CAVEAT the picture cannot carry on its own.  The fitted GMM is NOT ground truth on D2 -- D2 has no
+closed-form score (05_SPEC Sec.3).  A full-rank mixture cannot represent a density supported near a
+low-dimensional set, so its Jacobian stays near the identity and is PSD for free; its lambda_min is
+positive but reaches 7.6e-5 (annotated).  Its PSD-ness is therefore not evidence that the learned model
+is wrong, only that the two models disagree about the local geometry.

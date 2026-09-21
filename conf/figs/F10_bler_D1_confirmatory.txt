@@ -1,0 +1,46 @@
+F10.  The D1 confirmatory BLER run.
+
+PLOTTED.  BLER after 16 outer iterations against SNR, n = 2560 trials per point, for cells C5 (Tp = 3),
+C2 (Tp = 4) and C1 (Tp = 2).  Arms: R1-turbo, R2-ours-G, M-ours-bstar, M-ours-score (the EXACT-score
+oracle on the true prior -- not a learned prior, and no learned-prior claim follows from it),
+M-ours-dscore-C-V0 (learned score through the D-14 matrix site, the Stage C primary) and
+M-ours-dscore-C-V4 (the same model through the D-13 belief scalarisation), and R5-genie.  A BLER of
+exactly 0 is drawn at the 0.5/n floor (1.95e-4); the axis is not truncated to hide it.
+
+WHAT IS MARKED.
+  - Grey bands: the decision SNRs of the arm pairs that the pre-registered power guard left UNDECIDED
+    (>= 3 decision points AND >= 6 discordant pairs at >= 2 of them; otherwise no significance call is
+    made, 08_SPEC Sec.2).  The guard is a PAIR-level verdict, so a band marks SNRs at which a
+    comparison was not decided -- it does not mean the plotted BLER values are uncertain.  The pairs:
+  cell C5: none
+  cell C2: 
+      M-ours-gmm32 -> R6-exactEP   decision SNRs [-3, 0] dB
+      M-ours-bstar -> R6-exactEP   decision SNRs [-3, 0] dB
+      M-ours-score -> R6-exactEP   decision SNRs [-3, 0] dB
+      M-ours-bstar -> M-ours-dscore-C-V0   decision SNRs [-3, 0] dB
+      M-ours-bstar -> M-ours-dscore-C-V1   decision SNRs [-3, 0] dB
+      M-ours-bstar -> M-ours-dscore-C-V4   decision SNRs [-3, 0] dB
+      M-ours-bstar -> M-ours-bstar-scalar   decision SNRs [-3, 0] dB
+      M-ours-dscore-C-V0 -> R6-exactEP   decision SNRs [-3, 0] dB
+      M-ours-dscore-C-V1 -> R6-exactEP   decision SNRs [-3, 0] dB
+      M-ours-dscore-C-V4 -> R6-exactEP   decision SNRs [-3, 0] dB
+      M-ours-bstar-scalar -> R6-exactEP   decision SNRs [-3, 0] dB
+  cell C1: none
+  - Red rings: points where the (F3) divergence guard, DIVERGE_NMSE = 10.0, fired in ALL 2560 trials.
+  - Cell C1 at -3 dB is the failure it looks like.  M-ours-dscore-C-V0 is at BLER 1.000 with the guard
+    firing 2560/2560 and a worst NMSE of 4.5e18; V1 (not plotted, identical to V0 elsewhere) is at
+    0.996 with 2560/2560 and 1.7e20; V4 is at 0.945 with 2560/2560 and 1.4e84, and 3 of its 2560 blocks
+    carry a non-finite BLER@16, which are KEPT and counted as block errors.  The non-learned arms at the
+    same point are at 0.66-0.84.  "Every learned arm is at BLER 1.0" is the right story only for V0;
+    V1 and V4 are at 0.996 and 0.945, and the annotation gives all three.
+
+SOURCE.  results/tables_D1_C.txt -- TABLE A for the BLER values, TABLE B for the power-guard verdicts.
+results/guard_D1_C.txt for the divergence-guard firings.  n = 2560 per SNR in all three cells.
+
+GATE STATUS.  The Stage C arms use ckpt/sx_N160000_D1.pt, which PASSES all four pre-registered gates
+(LADDER_C.md SX160000: GA 9.879e-16, GB +0.27%, GC 0.0999, GD 0.0718).  This is a gate-passing
+confirmatory run, not a probe.
+
+THE STANDING CAVEAT ON THIS TESTBED, from the file's own header.  D1 is CIRCULAR: its true prior is
+defined as a grid GMM, so the GMM arm is correctly specified by construction.  No claim about learned
+priors transfers from this table to D2.

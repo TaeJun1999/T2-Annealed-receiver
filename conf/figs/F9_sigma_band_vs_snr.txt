@@ -1,0 +1,29 @@
+F9.  The sigma band where the D-14 site is damaged, and the SNR band where the receiver diverges.
+
+PLOTTED.
+(a) shift_med, the median shift the PSD repair has to apply to the D-14 site, over the frozen 20-point
+    sigma grid, for the learned score at N = 1e4 and for the exact 512-component Kronecker GMM (log-log;
+    the GMM's exact zeros at the four smallest sigma are floored to 1e-7 so a log axis can show them,
+    which is stated here rather than hidden).  The shaded band is sigma where shift_med is within a
+    factor 2 of its maximum -- a rule applied in the code, not a band drawn by eye.
+(b) fraction of trials whose channel-estimate NMSE exceeds 1 after 16 iterations (NMSE > 1 = worse than
+    h_hat = 0), against SNR, for the four interventional arms of the settling experiment: the site as
+    specified, the magnitude-floored site that KEEPS the sign, the PSD-clipped site, and the scalar
+    site.  n = 256 paired trials per SNR, D2 cell C2 (8x4, T = 16, Tp = 4).
+
+THE CORRESPONDENCE, AND ITS LIMIT.  The two panels' x axes are different physical quantities and the
+figure does NOT map one onto the other.  The only link drawn is the ruler on top of (a): the median
+sigma_t that Module H is actually queried with at each SNR, measured in a separate and much smaller
+diagnostic (logs/diag_sigma_coverage.log, n = 12 trials per point, same cell, same checkpoint), with the
+grey bars giving its inter-quartile span.  Read together: +6 dB lands inside the shaded band, and +6 dB
+is where (b) peaks.  +12 dB was not measured in the sigma_t diagnostic and therefore has no tick.
+n = 12 is small; this is a consistency check, not a fitted relationship.
+
+SOURCE.  (a) logs/jacpsd_N10000_a1.log, n = 128 held-out samples per grid point.  (b)
+results/settling_D2.txt, second block, n = 256; the same numbers with more columns are in
+logs/psd_cf_snr*.log.  Ruler: logs/diag_sigma_coverage.log, n = 12.
+
+GATE STATUS.  Every row of this figure uses ckpt/d2sx_N10000_a1.pt, which FAILED the pre-registered
+gates (GC 0.224 against a bar of 0.15).  These are DIAGNOSTIC PROBES on an UN-GATED checkpoint.  They
+may not enter a result table and they license no claim; 10_SPEC_stageC Sec.6/6c specifies the
+confirmatory run with a gate-passing checkpoint at n >= 2560.
