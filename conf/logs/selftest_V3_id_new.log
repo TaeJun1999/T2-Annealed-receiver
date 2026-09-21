@@ -1,0 +1,11 @@
+
+# ===== 2026-09-21 14:27:32 KST  V3SELFTEST attempt 1  testbed D2 prior S2  Nr=4 Nt=4
+# DEVICE      : cpu | cuda_available=False | 192 cores | torch 2.14.0+cu130 | train dtype float32 (01_RULES §9.5)
+# data        : n_train=1843 n_val=205 split_hash=4885cbb21ef8aeff E||H||_F^2/(NrNt)=0.996484 (04_SPEC §2)
+# sigma grid  : MEASURED, 20 points, log-uniform draw over [3.3062e-02, 8.4516e-01]
+# hp          : {'arch': 'dit', 'param': 'vp', 'domain': 'angle', 'width': 16, 'depth': 2, 'emb': 32, 'heads': 2, 'patch': 1, 'lr': 0.002238046051591068, 'ema': 0.999, 'batch': 256}  params=11378
+# stopping    : patience 1000000 on val loss, never before 1 epochs, max 3 (01_RULES §5)
+epoch    1 | train 9.702604e-01 | val 9.921013e-01 |   0.220 s | best 9.921013e-01 @1 *
+epoch    2 | train 9.148338e-01 | val 9.912854e-01 |   0.188 s | best 9.912854e-01 @2 *
+epoch    3 | train 8.847410e-01 | val 9.901804e-01 |   0.244 s | best 9.901804e-01 @3 *
+# done        : 3 epochs, stopped_by=max_epochs, aborted=False, best val 9.901804e-01 @ epoch 3, wall 4.5 s, 1.485 s/epoch

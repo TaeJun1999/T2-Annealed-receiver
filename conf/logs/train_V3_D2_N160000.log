@@ -1,0 +1,21 @@
+
+# ##### Stage C V3 (10_SPEC_stageC §3b): V0's recipe + lambda=1.0 * E||(J-J^T)v||^2.
+# ##### rung label 'D2SX160000' a1 is V0's ON PURPOSE (same training seed -> same
+# ##### (x0,sigma,eps) stream); the ONLY difference from V0 is the extra loss term.
+# ##### CUDA_VISIBLE_DEVICES=2  started 2026-09-21 14:27:52 KST
+
+# ===== 2026-09-21 14:27:58 KST  D2SX160000 attempt 1  testbed D2 prior S2  Nr=8 Nt=4
+# DEVICE      : cuda | cuda_available=True | NVIDIA RTX PRO 6000 Blackwell Server Edition | torch 2.14.0+cu130 | train dtype float32 (01_RULES §9.5)
+# data        : n_train=144000 n_val=16000 split_hash=a00951cf75b852a6 E||H||_F^2/(NrNt)=1.000362 (04_SPEC §2)
+# sigma grid  : MEASURED, 20 points, log-uniform draw over [3.3062e-02, 8.4516e-01]
+# hp          : {'arch': 'dit', 'param': 'vp', 'domain': 'angle', 'lr': 0.002238046051591068, 'ema': 0.999, 'batch': 256, 'emb': 256, 'width': 64, 'depth': 6, 'heads': 8, 'patch': 1}  params=479426
+# stopping    : patience 20 on val loss, never before 200 epochs, max 3000 (01_RULES §5)
+# jac_reg     : V3, loss += 1.0 * E_v||(J-J^T)v||^2, J = d tweedie_real/dx, 1 Rademacher probe/sample, lambda FIXED (10_SPEC_stageC §3b, never tuned). val loss / early stopping unchanged (pure DSM).
+epoch    1 | train 7.967930e-01 | val 8.865308e-01 |  72.488 s | best 8.865308e-01 @1 * | asym_reg 2.804242e-03
+epoch    2 | train 7.841868e-01 | val 8.246798e-01 |  71.700 s | best 8.246798e-01 @2 * | asym_reg 2.809178e-03
+epoch    3 | train 7.664631e-01 | val 8.141049e-01 |  74.285 s | best 8.141049e-01 @3 * | asym_reg 1.245653e-02
+epoch    4 | train 7.525310e-01 | val 8.199905e-01 |  83.040 s | best 8.141049e-01 @3 | asym_reg 1.811778e-02
+epoch    5 | train 7.592799e-01 | val 8.164296e-01 |  83.922 s | best 8.141049e-01 @3 | asym_reg 1.881958e-02
+epoch    6 | train 7.525946e-01 | val 7.987128e-01 |  71.996 s | best 7.987128e-01 @6 * | asym_reg 1.902422e-02
+epoch    7 | train 7.743938e-01 | val 7.766824e-01 |  71.687 s | best 7.766824e-01 @7 * | asym_reg 1.893681e-02
+epoch    8 | train 7.647715e-01 | val 7.558002e-01 |  73.327 s | best 7.558002e-01 @8 * | asym_reg 1.650904e-02

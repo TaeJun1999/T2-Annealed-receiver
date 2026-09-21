@@ -1,0 +1,20 @@
+# date        : 2026-09-21 14:17:16 KST
+# git commit  : e5ece18
+# versions    : python 3.12.14  numpy 2.5.2  scipy 1.18.1  torch 2.14.0+cu130 (cuda_available=True)
+# device      : CPU (192 cores) | dtype: complex128 / float64 | deterministic: yes (fixed seeds, no GPU in the receiver)
+# testbed     : D2
+# seed rule   : default_rng([20260926, TBID[testbed], PID[prior], Nr, T, Tp, int(snr)+100])  (trials of a point = ONE stream)
+# code        : rate-1/2 conv (133,171)_8 nu=6 terminated, QPSK, outer iterations = 16 for EVERY arm
+# Demo/ hashes: t2_route_a.py=95a5408901ec125c  t2_trellis.py=31cd0ee9c68e972b  t2_gmm.py=d064e58c7510c769
+# DIAGNOSTIC h4-jswap: single-factor Jacobian swap inside the frozen score wiring.
+# saved /home/HTJ/t2/conf/results/diag/h4-jswap_D2_C2_snr+6_n64.npz  (1216 s)
+
+--- D2 C2  SNR +6 dB  n=64  (paired trials; se = binomial) ---
+arm                    BLER@16   +-se  NMSEmed@1  NMSEmed@16  NMSEmean@16  ever>1  >1@it1  clip%  clipshift  raised
+d|scorew                 0.719  0.056     4.7744      1.1825        47.48   0.953   0.797  100.0  1.611e+03       0
+d|scorew+gmmJ            0.000  0.000     0.0255      0.0089     0.009276   0.000   0.000   55.5  8.805e-04       0
+d|scorew+psd             0.000  0.000     0.0252      0.0080     0.008668   0.000   0.000   98.5  8.243e-17       0
+d|scorew+clipmean        0.000  0.000     0.0252      0.0080     0.008668   0.000   0.000  100.0  5.490e+02       0
+g|scorew                 0.031  0.022     0.0485      0.0160      0.01784   0.000   0.000   56.4  1.304e-03       0
+g|scorew+dJ              0.922  0.034    26.2468      2.8852         4628   0.984   0.938  100.0  1.333e+03       0
+gauss|sitesc             0.016  0.016     0.0549      0.0182      0.01874   0.000   0.000    nan        nan       0
