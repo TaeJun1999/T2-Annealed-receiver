@@ -1,0 +1,163 @@
+F11.  The D2 confirmatory BLER run -- the CLAIM testbed.
+
+PLOTTED.  BLER after 16 outer iterations against SNR, n = 2560 trials per point, cell C2 (Tp = 4) as the
+main panel with C5 (Tp = 3) and C1 (Tp = 2) beside it, so the pilot-budget dependence is visible.  Nine
+arms: R1-turbo, R2-ours-G, M-ours-bstar, M-ours-bstar-scalar, M-ours-dscore-C-V0, -C-V1, -C-V4, -C-V4b,
+R5-genie.  A BLER of exactly 0 is drawn at the 0.5/n floor (1.95e-4); the axis is not truncated.
+
+THE THREE THINGS THE FIGURE IS DRAWN TO SHOW, all from TABLE A of results/tables_D2_C.txt:
+  (a) On C2, M-ours-dscore-C-V0 -- the PRE-REGISTERED score wiring -- is above classical turbo at every
+      SNR: 0.593 / 0.845 / 0.954 / 0.950 / 0.909 / 0.818 / 0.446 against R1-turbo's 0.537 / 0.213 /
+      0.079 / 0.041 / 0.025 / 0.019 / 0.009.  The same holds at every SNR of C1 and at six of the seven
+      SNRs of C5; the one exception in the whole figure is C5 / -3 dB, where V0 is 0.769 against
+      R1-turbo's 0.795.
+  (b) On C2, V1, V4 and V4b occupy the three lowest non-genie positions at EVERY SNR, clear of the
+      fourth-placed arm at all seven (at -3 dB: V1 0.145, V4 0.154, V4b 0.161, then M-ours-bstar 0.252
+      and R2-ours-G 0.329; at +9 dB: 0.003 / 0.003 / 0.003, then 0.008).  Which of the three is lowest
+      is NOT resolved by this figure: V1 is lowest at five of the seven SNRs, V4 at +3 dB (0.008
+      against V1's 0.011), and at +6 dB all three print 0.006.  R5-genie is at or below them at every
+      SNR (0.034 at -3 dB), and at +15 dB the table prints 0.001 for both genie and V1.
+  (c) On C1 that ordering does not hold.  At -3 dB V1 is 0.979 and V4 0.953 against M-ours-bstar's
+      0.778 and R1-turbo's 0.918.  TABLE B's M-ours-bstar -> V1 and M-ours-bstar -> V4 pairs, decided
+      on C1 at the anchor's decision SNRs ['+6', '+12', '+15'], are BOTH 'not significant'; the same
+      two pairs on C2, decided at ['-3', '+0', '+3'], are significant at 3/3 decision points
+      (bstar -> V1 pooled 511:78, p = 5.8e-79).
+
+WHAT IS MARKED.
+  - Grey bands: the decision SNRs of the pairs the pre-registered power guard left UNDECIDED (>= 3
+    decision points AND >= 6 discordant pairs at >= 2 of them, otherwise no significance call is made,
+    08_SPEC Sec.2).  The guard is a PAIR-level verdict: a band marks SNRs at which a comparison was not
+    decided, NOT that the plotted BLER values there are uncertain.  On C1 the single UNDECIDED pair is
+    between two arms that are not plotted in this figure (R4-llr, R4-scvamp); its band is still drawn
+    because the instruction is to mark every UNDECIDED comparison.  The full list:
+    cell C2: 7 pair(s)
+        M-ours-gmm32 -> R5-genie   decision SNRs [-3, 0] dB
+        M-ours-bstar -> R5-genie   decision SNRs [-3, 0] dB
+        M-ours-dscore-C-V0 -> R5-genie   decision SNRs [-3, 0] dB
+        M-ours-dscore-C-V1 -> R5-genie   decision SNRs [-3, 0] dB
+        M-ours-dscore-C-V4 -> R5-genie   decision SNRs [-3, 0] dB
+        M-ours-dscore-C-V4b -> R5-genie   decision SNRs [-3, 0] dB
+        M-ours-bstar-scalar -> R5-genie   decision SNRs [-3, 0] dB
+    cell C5: none
+    cell C1: 1 pair(s)
+        R4-llr -> R4-scvamp   decision SNRs [3] dB
+    On C2 every arm-vs-R5-genie comparison is UNDECIDED.  R5-genie is the anchor arm of those pairs and
+    its decision-SNR line yields only two SNRs, -3 and +0 dB, instead of the required three: TABLE A
+    puts genie at 0.034 and 0.010 there and at 0.005 or below from +3 dB up, i.e. at the edge of and
+    then outside the anchor window BLER in [0.005, 0.9].  No arm in this figure is therefore claimed to
+    differ from the genie bound on C2, however far apart the two curves look.
+  - Red rings and the red halo along a curve: the (F3) Module-H divergence guard (DIVERGE_NMSE = 10.0,
+    results/guard_D2_C.txt).  A LARGE ring plus the halo is a point where the guard fired in more than
+    50% of the 2560 trials -- the receiver was diverging, and the plotted value is not an ordinary
+    error rate.  A small ring is a point where it fired in some but not most trials.  The guard is
+    detection and classification only: no arm's trajectory was altered by it.
+    Fired in > 50% of trials (large rings + halo):
+        C1   -3 dB  M-ours-dscore-C-V0     2560/2560 = 1.000
+        C1   -3 dB  M-ours-dscore-C-V1     2560/2560 = 1.000
+        C1   -3 dB  M-ours-dscore-C-V4     2560/2560 = 1.000
+        C1   -3 dB  M-ours-dscore-C-V4b    2560/2560 = 1.000
+        C1   +0 dB  M-ours-dscore-C-V0     2432/2560 = 0.950
+        C1   +0 dB  M-ours-dscore-C-V4b    2560/2560 = 1.000
+        C1   +3 dB  M-ours-dscore-C-V0     2480/2560 = 0.969
+        C1   +3 dB  M-ours-dscore-C-V4b    2560/2560 = 1.000
+        C1   +6 dB  M-ours-dscore-C-V0     2511/2560 = 0.981
+        C1   +6 dB  M-ours-dscore-C-V4b    2560/2560 = 1.000
+        C1   +9 dB  M-ours-dscore-C-V0     2446/2560 = 0.955
+        C1   +9 dB  M-ours-dscore-C-V4b    2560/2560 = 1.000
+        C1  +12 dB  M-ours-dscore-C-V0     2337/2560 = 0.913
+        C1  +12 dB  M-ours-dscore-C-V4b    2560/2560 = 1.000
+        C1  +15 dB  M-ours-dscore-C-V0     2011/2560 = 0.786
+        C1  +15 dB  M-ours-dscore-C-V4b    2560/2560 = 1.000
+        C2   -3 dB  M-ours-dscore-C-V0     1355/2560 = 0.529
+        C2   +0 dB  M-ours-dscore-C-V0     2034/2560 = 0.795
+        C2   +3 dB  M-ours-dscore-C-V0     2347/2560 = 0.917
+        C2   +6 dB  M-ours-dscore-C-V0     2385/2560 = 0.932
+        C2   +9 dB  M-ours-dscore-C-V0     2352/2560 = 0.919
+        C2  +12 dB  M-ours-dscore-C-V0     2186/2560 = 0.854
+        C2  +15 dB  M-ours-dscore-C-V0     1682/2560 = 0.657
+        C5   -3 dB  M-ours-dscore-C-V0     1595/2560 = 0.623
+        C5   -3 dB  M-ours-dscore-C-V4b    2560/2560 = 1.000
+        C5   +0 dB  M-ours-dscore-C-V0     2076/2560 = 0.811
+        C5   +0 dB  M-ours-dscore-C-V4b    2560/2560 = 1.000
+        C5   +3 dB  M-ours-dscore-C-V0     2310/2560 = 0.902
+        C5   +3 dB  M-ours-dscore-C-V4b    2560/2560 = 1.000
+        C5   +6 dB  M-ours-dscore-C-V0     2367/2560 = 0.925
+        C5   +6 dB  M-ours-dscore-C-V4b    2560/2560 = 1.000
+        C5   +9 dB  M-ours-dscore-C-V0     2385/2560 = 0.932
+        C5   +9 dB  M-ours-dscore-C-V4b    2560/2560 = 1.000
+        C5  +12 dB  M-ours-dscore-C-V0     2135/2560 = 0.834
+        C5  +12 dB  M-ours-dscore-C-V4b    2560/2560 = 1.000
+        C5  +15 dB  M-ours-dscore-C-V0     1608/2560 = 0.628
+        C5  +15 dB  M-ours-dscore-C-V4b    2560/2560 = 1.000
+    Fired in <= 50% of trials (small rings):
+        C1   -3 dB  M-ours-bstar           2/2560 = 0.001
+        C1   +0 dB  M-ours-bstar           2/2560 = 0.001
+        C1   +0 dB  M-ours-dscore-C-V1     1/2560 = 0.000
+        C1   +3 dB  M-ours-dscore-C-V1     49/2560 = 0.019
+        C1   +6 dB  M-ours-bstar           2/2560 = 0.001
+        C1   +6 dB  M-ours-dscore-C-V1     203/2560 = 0.079
+        C1   +9 dB  M-ours-bstar           3/2560 = 0.001
+        C1   +9 dB  M-ours-bstar-scalar    2/2560 = 0.001
+        C1   +9 dB  M-ours-dscore-C-V1     365/2560 = 0.143
+        C1  +12 dB  M-ours-bstar           2/2560 = 0.001
+        C1  +12 dB  M-ours-bstar-scalar    6/2560 = 0.002
+        C1  +12 dB  M-ours-dscore-C-V1     445/2560 = 0.174
+        C1  +15 dB  M-ours-bstar           3/2560 = 0.001
+        C1  +15 dB  M-ours-bstar-scalar    5/2560 = 0.002
+        C1  +15 dB  M-ours-dscore-C-V1     458/2560 = 0.179
+        C5   +3 dB  M-ours-dscore-C-V1     13/2560 = 0.005
+        C5   +6 dB  M-ours-bstar           1/2560 = 0.000
+        C5   +6 dB  M-ours-bstar-scalar    1/2560 = 0.000
+        C5   +6 dB  M-ours-dscore-C-V1     26/2560 = 0.010
+        C5   +9 dB  M-ours-bstar-scalar    1/2560 = 0.000
+        C5   +9 dB  M-ours-dscore-C-V1     55/2560 = 0.021
+        C5  +12 dB  M-ours-bstar-scalar    2/2560 = 0.001
+        C5  +12 dB  M-ours-dscore-C-V1     79/2560 = 0.031
+        C5  +15 dB  M-ours-bstar           2/2560 = 0.001
+        C5  +15 dB  M-ours-bstar-scalar    4/2560 = 0.002
+        C5  +15 dB  M-ours-dscore-C-V1     87/2560 = 0.034
+    Fired for arms NOT plotted in this figure, so not ringed anywhere above:
+        C5  +15 dB  M-ours-gmm32           1/2560 = 0.000
+        C5  +15 dB  R3-bigamp              1/2560 = 0.000
+    Arms that never fired the guard anywhere in this raw set: R0-pilot, R1-turbo, R2-ours-G, R4-llr,
+    R4-scvamp.  R5-genie has no channel estimate and so no Module H path.
+  - Read together with the rings, cell by cell.  On C2, V0 alone fires at a high rate, and it does so
+    at EVERY SNR (0.529 to 0.932): the whole V0 curve of the claim panel is a diverging receiver, so
+    its BLER is not comparable with the others as an error rate.  On C5, V0 (0.623 to 0.932) and V4b
+    (2560/2560 at every SNR) do.  On C1, V0 (0.786 to 1.000) and V4b (2560/2560) fire at every SNR,
+    and V1 and V4 fire 2560/2560 in addition at -3 dB.  V1's firing rate on C1 then falls to
+    0.000-0.179 from +0 dB up, which is why its C1 curve carries small rings and not large ones.
+
+BUDGETS -- READ THE NUMBERS, NOT THE ARM NAMES (the run header of results/tables_D2_C.txt).
+  M-ours-dscore-C-V0 / -C-V1 / -C-V4 : N_train = 160000, rung D2SX160000, ckpt/d2sx_N160000_a1.pt.
+  R1-turbo, R2-ours-G, M-ours-bstar, M-ours-bstar-scalar : N_train = 10000 (the ONE channel set).
+  R5-genie : n/a, the true H is given.
+  M-ours-dscore-C-V4b : the header records N_train = 10000 with the note 'unclassified arm, quoting the
+  point's channel-set size'.  That is what the file says; this figure does not resolve it.
+  The learned arms therefore have 16x the GMM arms' channel budget.  This is NOT an equal-budget
+  comparison, so the learned-vs-GMM contrast is SECONDARY and the primary reading of this figure is the
+  WIRING contrast (V0 vs V1/V4 -- same checkpoint, same budget, different Module-H site).
+  M-ours-bstar-scalar is the pre-registered MANDATORY CONTROL for exactly that (10_SPEC Sec.3c: the b*
+  GMM through V4's EXACT wiring -- 'if scalarisation also helps the GMM, the gain belongs to the SITE,
+  not to the learned prior').  The numbers on C2 at -3 dB: b* 0.252, b*-scalar 0.261, V4 0.154, and
+  TABLE B's M-ours-bstar -> M-ours-bstar-scalar pair is 'not significant' (pooled 125:149, p = 0.16,
+  SNR@0.1 gap +0.04 dB [-0.12, +0.19]).
+
+CHECKPOINT AND GATE STATUS -- stated because it qualifies every learned curve here.
+  ckpt/d2sx_N160000_a1.pt.  The run header records: 'NO GATE RECORD mentions d2sx_N160000_a1.pt --
+  UNVERIFIED here', and dscore_status 'ABSENT -- no GATE-PASSING checkpoint (04_SPEC Sec.5 gates
+  GA-GD): no gate-passing checkpoint for D2; recorded PASS rows: none'.  The pre-registered arm
+  M-ours-dscore stays BLOCKED in the pre-registered table and is absent from the raw files of all three
+  cells; V0/V1/V4/V4b are the Stage C arms (10_SPEC Sec.3b/Sec.3c) and do not lift that block.
+
+NON-FINITE BLOCKS, kept and counted as block errors, never dropped (the NOTE lines of the source file):
+  C1 / -3 dB: V0 1077/2560, V1 294/2560, V4 126/2560 blocks carry a non-finite blk_err@16.  No NOTE
+  line exists for C2 or C5.
+
+SOURCE.  results/tables_D2_C.txt -- TABLE A for every BLER value, TABLE B for the power-guard verdicts
+and the paired sign tests; results/guard_D2_C.txt for every guard firing.  Both files are dated
+2026-09-22 and carry git commit f6062a0.  n = 2560 per SNR in all three cells, 16 outer iterations for
+every arm.  Nothing in this figure is recomputed, resampled or re-run from the raw .npz files.
+
+THE STANDING CAVEAT ON THIS TESTBED, from the file's own header.  D2 is the CLAIM testbed: sparse
+specular, conditional Gaussianity broken, and the upper bound is the genie only.

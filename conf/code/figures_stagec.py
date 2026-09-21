@@ -11,6 +11,10 @@ figures.py draws F2-F6 (Stage A/B).  This file continues the numbering with the 
        receiver actually queries.  The two x axes are different quantities and are NOT forced onto one.
   F10  the D1 confirmatory BLER run, n=2560, cells C5 / C2 / C1, with the power guard's UNDECIDED
        pairs marked and C1's -3 dB collapse left visible.
+  F11  the D2 CONFIRMATORY BLER run -- the headline.  n=2560, C2 (Tp=4) as the main panel with C5
+       (Tp=3) and C1 (Tp=2) beside it; the pre-registered wiring V0 sits above classical turbo, the
+       repaired wirings V1/V4 are the best non-genie arms on C2 and lose that ordering on C1, every
+       high-rate divergence-guard firing is ringed, and the UNDECIDED pairs are banded.
 
 Every number is READ from the files below; nothing here recomputes, resamples or re-runs anything.
   results/jac_spectrum.txt            F7 provenance (the ADDENDUM's D1 table is the log below)
@@ -23,6 +27,8 @@ Every number is READ from the files below; nothing here recomputes, resamples or
   results/settling_D2.txt             F9 bottom (n=256 paired trials per SNR)
   results/tables_D1_C.txt             F10 (TABLE A BLER, TABLE B power guard)
   results/guard_D1_C.txt              F10 (divergence-guard firings)
+  results/tables_D2_C.txt             F11 (TABLE A BLER, TABLE B power guard)
+  results/guard_D2_C.txt              F11 (divergence-guard firings)
 
 House style (rcParams, PDF+PNG export, legend-carries-the-condition) is inherited from figures.py by
 importing it; the STYLE table is reused verbatim and only EXTENDED with the Stage C arms.
@@ -620,8 +626,254 @@ priors transfers from this table to D2.
 """)
 
 
+# ------------------------------------------------------------------ F11  the D2 confirmatory ------
+
+# Arms of the D2 confirmatory figure.  figures.py's STYLE is reused where it already names an arm
+# (R1/R2/M-b*/R5) so F11 matches F3/F10; the Stage C arms it does not know are added here only.
+_ARMS_D2 = [
+    ("R1-turbo",            "R1   classical turbo (APP feedback, no LOO)",      "tab:brown",  "s",  "--"),
+    ("R2-ours-G",           "R2   D-15+LOO, Gaussian sample-cov. prior",        "tab:blue",   "o",  "-"),
+    ("M-ours-bstar",        "M    Module H = GMM, b* (val. log-lik.), N=1e4",   "tab:red",    "D",  "-"),
+    ("M-ours-bstar-scalar", "M    b* GMM through V4's wiring (CONTROL)",        "tab:orange", "d",  "--"),
+    ("M-ours-dscore-C-V0",  "V0   learned score, D-14 matrix site (PRE-REG.)",  "tab:purple", "^",  "-"),
+    ("M-ours-dscore-C-V1",  "V1   V0 + symmetric-PSD projection of the site",   "tab:green",  "s",  "-"),
+    ("M-ours-dscore-C-V4",  "V4   D-13 belief scalarisation (post-hoc reg.)",   "tab:pink",   "v",  "-"),
+    ("M-ours-dscore-C-V4b", "V4b  as V4 but scal=site (side report)",           "tab:olive",  "<",  ":"),
+    ("R5-genie",            "R5   genie CSI (lower bound)",                     "k",          "*",  "-."),
+]
+_GUARD_HI = 0.5          # "fired at a high rate": the point is a diverging receiver, not a BLER
+
+
+def fig11(n=2560):
+    """D2 confirmatory BLER, C2 main + C5/C1 beside it, with the divergence guard and the power
+    guard's UNDECIDED verdicts drawn on top of the curves."""
+    tabA = os.path.join(RES, "tables_D2_C.txt")
+    cells = [("C2", r"(a) C2  $T_p=4$  — CLAIM cell", 1.45),
+             ("C5", r"(b) C5  $T_p=3$", 1.0),
+             ("C1", r"(c) C1  $T_p=2$", 1.0)]
+    gd, floor = guard(os.path.join(RES, "guard_D2_C.txt")), 0.5 / n
+    plotted = {a[0] for a in _ARMS_D2}
+    BAND = "SNR of a comparison the power guard\nleft UNDECIDED (no significance call)"
+    HI = (f"divergence guard fired in > {_GUARD_HI:.0%} of trials at this point:\n"
+          f"the receiver DIVERGED — this is not an ordinary BLER")
+    LO = "divergence guard fired in some (but not most) trials"
+    band_lab, hi_lab, lo_lab = [BAND], [HI], [LO]
+
+    fig = plt.figure(figsize=(11.2, 4.6))
+    gs = fig.add_gridspec(1, 3, width_ratios=[c[2] for c in cells], wspace=0.07)
+    axes = [fig.add_subplot(gs[0, i]) for i in range(3)]
+    for ax, (cell, ttl, _) in zip(axes, cells):
+        main = cell == "C2"
+        A = tableA(cell, tabA)
+        und_pairs, und_snr = undecided(cell, tabA)
+        for s in sorted(und_snr):
+            ax.axvspan(s - 0.75, s + 0.75, color="0.72", alpha=0.32, lw=0, zorder=0,
+                       label=band_lab.pop() if band_lab else None)
+        for arm, lab, col, mk, ls in _ARMS_D2:
+            if arm not in A:
+                continue
+            y = np.maximum(A[arm], floor)
+            rate = np.array([gd.get((cell, s, arm), (0, n))[0] / n for s in SNRS])
+            # red halo along the part of the curve where the receiver was diverging
+            ax.semilogy(SNRS, np.where(rate > _GUARD_HI, y, np.nan), color="tab:red", lw=5.5,
+                        alpha=0.20, solid_capstyle="round", zorder=1)
+            ax.semilogy(SNRS, y, marker=mk, color=col, ls=ls, ms=5.0 if main else 3.8,
+                        lw=1.7 if main else 1.2, zorder=3, label=lab if main else None)
+            for s, yy, r in zip(SNRS, y, rate):
+                if r <= 0:
+                    continue
+                big = r > _GUARD_HI
+                ax.plot(s, yy, marker="o", ms=12 if big else 6.5, mfc="none", mec="tab:red",
+                        mew=1.5 if big else 0.9, ls="none", zorder=4,
+                        label=(hi_lab.pop() if big and hi_lab else
+                               lo_lab.pop() if not big and lo_lab else None))
+        ax.axhline(0.1, color="0.4", lw=0.8, ls=(0, (1, 3)), zorder=2)
+        ax.set_xlabel("SNR [dB]")
+        ax.set_xticks(SNRS)
+        ax.set_title(ttl, fontsize=9, fontweight="bold" if main else "normal")
+        ax.set_ylim(1.2e-4, 2.4)
+        ax.set_xlim(-5.2, 17.2)
+        if not main:
+            ax.set_yticklabels([])
+        if not und_pairs:
+            note = "power guard: no UNDECIDED pair in this cell"
+        elif all(p.endswith("R5-genie") for p, _ in und_pairs):
+            note = f"UNDECIDED: all {len(und_pairs)} arm $\\to$ R5-genie pairs"
+        else:
+            note = "UNDECIDED: " + ", ".join(p.replace("M-ours-", "") for p, _ in und_pairs)
+        ax.text(0.5, 0.015, note + "\n(pairs and decision SNRs in the caption file)",
+                transform=ax.transAxes, fontsize=5.8, color="0.30", va="bottom", ha="center")
+    axes[0].set_ylabel("BLER after 16 iterations")
+
+    # --- the three things the reader must get without the caption -------------------------------
+    a0 = axes[0]
+    a0.annotate("V0 — the PRE-REGISTERED wiring —\nis WORSE than classical turbo (R1)\nat every SNR of the claim cell",
+                xy=(6, 0.950), xytext=(2.4, 0.115), fontsize=6.8, color="tab:purple", ha="left",
+                va="bottom", arrowprops=dict(arrowstyle="->", color="tab:purple", lw=1.0))
+    a0.annotate("V1 / V4 — the repaired wiring —\nare the lowest NON-GENIE arms here\n(b* GMM 0.252 $\\to$ V1 0.145; V4b alongside)",
+                xy=(0, 0.034), xytext=(-4.9, 3.4e-4), fontsize=6.8, color="tab:green", ha="left",
+                va="bottom", arrowprops=dict(arrowstyle="->", color="tab:green", lw=0.9, ls=":",
+                                             shrinkB=5, connectionstyle="arc3,rad=-0.25"))
+    axes[2].annotate("that ordering does NOT hold on C1:\nV1/V4 are not better than the b* GMM\n"
+                     "(TABLE B: not significant), and at $-$3 dB\nevery learned arm diverges (2560/2560)",
+                     xy=(-3, 0.979), xytext=(0.6, 1.3e-2), fontsize=6.8, color="0.15", ha="left",
+                     va="bottom", arrowprops=dict(arrowstyle="->", color="0.35", lw=0.9, ls=":",
+                                                  shrinkB=9, connectionstyle="arc3,rad=0.30"))
+    a0.text(-5.0, 0.052, "BLER = 0.1", fontsize=6.4, color="0.4", ha="left", va="center")
+
+    H = {}
+    for ax in axes:
+        H.update(dict(zip(*reversed(ax.get_legend_handles_labels()))))
+    order = [a[1] for a in _ARMS_D2] + [HI, LO, BAND]
+    fig.legend([H[l] for l in order if l in H], [l for l in order if l in H],
+               loc="center left", bbox_to_anchor=(0.995, 0.5), frameon=False)
+    fig.suptitle("D2 CONFIRMATORY run (CLAIM testbed, sparse specular), n=2560 per point: $8\\times4$ "
+                 "MIMO, QPSK, rate-1/2 $(133,171)_8$, $T=16$, 16 outer iterations", fontsize=8.8, y=1.00)
+    _foot(fig, "NOT an equal-budget comparison: the learned arms V0/V1/V4 train on N'=1.6e5 channels "
+               "(ckpt/d2sx_N160000_a1.pt, no gate record), the GMM arms fit N=1e4.\nThe learned-vs-GMM "
+               "contrast is therefore SECONDARY; the primary contrast is the WIRING, V0 vs V1/V4 at the "
+               "same checkpoint and budget.\nThe pre-registered arm M-ours-dscore stays BLOCKED in the "
+               "pre-registered table.  BLER exactly 0 is drawn at the 0.5/n floor = 1.95e-4.",
+          y=0.005)
+
+    # ---- caption file: everything marked above, listed from the two source files -----------------
+    und_lines = []
+    for cell, _, _ in cells:
+        p, _ = undecided(cell, tabA)
+        und_lines.append(f"    cell {cell}: " + ("none" if not p else f"{len(p)} pair(s)"))
+        und_lines += [f"        {nm}   decision SNRs {[int(x) for x in ds]} dB" for nm, ds in p]
+    hi, lo, other = [], [], []
+    for (c, s, arm), (f, of) in sorted(gd.items()):
+        row = f"        {c}  {int(s):+3d} dB  {arm:22s} {f}/{of} = {f / of:.3f}"
+        (other if arm not in plotted else hi if f / of > _GUARD_HI else lo).append(row)
+    return _save(fig, "F11_bler_D2_confirmatory", """
+F11.  The D2 confirmatory BLER run -- the CLAIM testbed.
+
+PLOTTED.  BLER after 16 outer iterations against SNR, n = 2560 trials per point, cell C2 (Tp = 4) as the
+main panel with C5 (Tp = 3) and C1 (Tp = 2) beside it, so the pilot-budget dependence is visible.  Nine
+arms: R1-turbo, R2-ours-G, M-ours-bstar, M-ours-bstar-scalar, M-ours-dscore-C-V0, -C-V1, -C-V4, -C-V4b,
+R5-genie.  A BLER of exactly 0 is drawn at the 0.5/n floor (1.95e-4); the axis is not truncated.
+
+THE THREE THINGS THE FIGURE IS DRAWN TO SHOW, all from TABLE A of results/tables_D2_C.txt:
+  (a) On C2, M-ours-dscore-C-V0 -- the PRE-REGISTERED score wiring -- is above classical turbo at every
+      SNR: 0.593 / 0.845 / 0.954 / 0.950 / 0.909 / 0.818 / 0.446 against R1-turbo's 0.537 / 0.213 /
+      0.079 / 0.041 / 0.025 / 0.019 / 0.009.  The same holds at every SNR of C1 and at six of the seven
+      SNRs of C5; the one exception in the whole figure is C5 / -3 dB, where V0 is 0.769 against
+      R1-turbo's 0.795.
+  (b) On C2, V1, V4 and V4b occupy the three lowest non-genie positions at EVERY SNR, clear of the
+      fourth-placed arm at all seven (at -3 dB: V1 0.145, V4 0.154, V4b 0.161, then M-ours-bstar 0.252
+      and R2-ours-G 0.329; at +9 dB: 0.003 / 0.003 / 0.003, then 0.008).  Which of the three is lowest
+      is NOT resolved by this figure: V1 is lowest at five of the seven SNRs, V4 at +3 dB (0.008
+      against V1's 0.011), and at +6 dB all three print 0.006.  R5-genie is at or below them at every
+      SNR (0.034 at -3 dB), and at +15 dB the table prints 0.001 for both genie and V1.
+  (c) On C1 that ordering does not hold.  At -3 dB V1 is 0.979 and V4 0.953 against M-ours-bstar's
+      0.778 and R1-turbo's 0.918.  TABLE B's M-ours-bstar -> V1 and M-ours-bstar -> V4 pairs, decided
+      on C1 at the anchor's decision SNRs ['+6', '+12', '+15'], are BOTH 'not significant'; the same
+      two pairs on C2, decided at ['-3', '+0', '+3'], are significant at 3/3 decision points
+      (bstar -> V1 pooled 511:78, p = 5.8e-79).
+
+WHAT IS MARKED.
+  - Grey bands: the decision SNRs of the pairs the pre-registered power guard left UNDECIDED (>= 3
+    decision points AND >= 6 discordant pairs at >= 2 of them, otherwise no significance call is made,
+    08_SPEC Sec.2).  The guard is a PAIR-level verdict: a band marks SNRs at which a comparison was not
+    decided, NOT that the plotted BLER values there are uncertain.  On C1 the single UNDECIDED pair is
+    between two arms that are not plotted in this figure (R4-llr, R4-scvamp); its band is still drawn
+    because the instruction is to mark every UNDECIDED comparison.  The full list:
+""" + "\n".join(und_lines) + """
+    On C2 every arm-vs-R5-genie comparison is UNDECIDED.  R5-genie is the anchor arm of those pairs and
+    its decision-SNR line yields only two SNRs, -3 and +0 dB, instead of the required three: TABLE A
+    puts genie at 0.034 and 0.010 there and at 0.005 or below from +3 dB up, i.e. at the edge of and
+    then outside the anchor window BLER in [0.005, 0.9].  No arm in this figure is therefore claimed to
+    differ from the genie bound on C2, however far apart the two curves look.
+  - Red rings and the red halo along a curve: the (F3) Module-H divergence guard (DIVERGE_NMSE = 10.0,
+    results/guard_D2_C.txt).  A LARGE ring plus the halo is a point where the guard fired in more than
+    50% of the 2560 trials -- the receiver was diverging, and the plotted value is not an ordinary
+    error rate.  A small ring is a point where it fired in some but not most trials.  The guard is
+    detection and classification only: no arm's trajectory was altered by it.
+    Fired in > 50% of trials (large rings + halo):
+""" + "\n".join(hi) + """
+    Fired in <= 50% of trials (small rings):
+""" + "\n".join(lo) + """
+    Fired for arms NOT plotted in this figure, so not ringed anywhere above:
+""" + ("\n".join(other) if other else "        none") + """
+    Arms that never fired the guard anywhere in this raw set: R0-pilot, R1-turbo, R2-ours-G, R4-llr,
+    R4-scvamp.  R5-genie has no channel estimate and so no Module H path.
+  - Read together with the rings, cell by cell.  On C2, V0 alone fires at a high rate, and it does so
+    at EVERY SNR (0.529 to 0.932): the whole V0 curve of the claim panel is a diverging receiver, so
+    its BLER is not comparable with the others as an error rate.  On C5, V0 (0.623 to 0.932) and V4b
+    (2560/2560 at every SNR) do.  On C1, V0 (0.786 to 1.000) and V4b (2560/2560) fire at every SNR,
+    and V1 and V4 fire 2560/2560 in addition at -3 dB.  V1's firing rate on C1 then falls to
+    0.000-0.179 from +0 dB up, which is why its C1 curve carries small rings and not large ones.
+
+BUDGETS -- READ THE NUMBERS, NOT THE ARM NAMES (the run header of results/tables_D2_C.txt).
+  M-ours-dscore-C-V0 / -C-V1 / -C-V4 : N_train = 160000, rung D2SX160000, ckpt/d2sx_N160000_a1.pt.
+  R1-turbo, R2-ours-G, M-ours-bstar, M-ours-bstar-scalar : N_train = 10000 (the ONE channel set).
+  R5-genie : n/a, the true H is given.
+  M-ours-dscore-C-V4b : the header records N_train = 10000 with the note 'unclassified arm, quoting the
+  point's channel-set size'.  That is what the file says; this figure does not resolve it.
+  The learned arms therefore have 16x the GMM arms' channel budget.  This is NOT an equal-budget
+  comparison, so the learned-vs-GMM contrast is SECONDARY and the primary reading of this figure is the
+  WIRING contrast (V0 vs V1/V4 -- same checkpoint, same budget, different Module-H site).
+  M-ours-bstar-scalar is the pre-registered MANDATORY CONTROL for exactly that (10_SPEC Sec.3c: the b*
+  GMM through V4's EXACT wiring -- 'if scalarisation also helps the GMM, the gain belongs to the SITE,
+  not to the learned prior').  The numbers on C2 at -3 dB: b* 0.252, b*-scalar 0.261, V4 0.154, and
+  TABLE B's M-ours-bstar -> M-ours-bstar-scalar pair is 'not significant' (pooled 125:149, p = 0.16,
+  SNR@0.1 gap +0.04 dB [-0.12, +0.19]).
+
+CHECKPOINT AND GATE STATUS -- stated because it qualifies every learned curve here.
+  ckpt/d2sx_N160000_a1.pt.  The run header records: 'NO GATE RECORD mentions d2sx_N160000_a1.pt --
+  UNVERIFIED here', and dscore_status 'ABSENT -- no GATE-PASSING checkpoint (04_SPEC Sec.5 gates
+  GA-GD): no gate-passing checkpoint for D2; recorded PASS rows: none'.  The pre-registered arm
+  M-ours-dscore stays BLOCKED in the pre-registered table and is absent from the raw files of all three
+  cells; V0/V1/V4/V4b are the Stage C arms (10_SPEC Sec.3b/Sec.3c) and do not lift that block.
+
+NON-FINITE BLOCKS, kept and counted as block errors, never dropped (the NOTE lines of the source file):
+  C1 / -3 dB: V0 1077/2560, V1 294/2560, V4 126/2560 blocks carry a non-finite blk_err@16.  No NOTE
+  line exists for C2 or C5.
+
+SOURCE.  results/tables_D2_C.txt -- TABLE A for every BLER value, TABLE B for the power-guard verdicts
+and the paired sign tests; results/guard_D2_C.txt for every guard firing.  Both files are dated
+2026-09-22 and carry git commit f6062a0.  n = 2560 per SNR in all three cells, 16 outer iterations for
+every arm.  Nothing in this figure is recomputed, resampled or re-run from the raw .npz files.
+
+THE STANDING CAVEAT ON THIS TESTBED, from the file's own header.  D2 is the CLAIM testbed: sparse
+specular, conditional Gaussianity broken, and the upper bound is the genie only.
+""")
+
+def check11():
+    """F11 draws nothing it cannot cite, so the claims it makes IN THE FIGURE are asserted against the
+    two source files here.  Run by __main__ before fig11; it fails loudly if a re-run of the D2
+    confirmatory tables moves a number the figure's annotations assert."""
+    tab = os.path.join(RES, "tables_D2_C.txt")
+    A = {c: tableA(c, tab) for c in ("C1", "C2", "C5")}
+    gd = guard(os.path.join(RES, "guard_D2_C.txt"))
+    for c in A:                                   # every plotted arm exists in every cell
+        for arm, *_ in _ARMS_D2:
+            assert arm in A[c], (c, arm)
+    # (a) V0 above classical turbo -- everywhere on C2 and C1, all but -3 dB on C5
+    assert all(A["C2"]["M-ours-dscore-C-V0"] > A["C2"]["R1-turbo"]), "(a) C2"
+    assert all(A["C1"]["M-ours-dscore-C-V0"] > A["C1"]["R1-turbo"]), "(a) C1"
+    assert [i for i in range(7) if A["C5"]["M-ours-dscore-C-V0"][i] <= A["C5"]["R1-turbo"][i]] == [0], "(a) C5"
+    # (b) V1/V4/V4b are the three lowest non-genie arms at every C2 SNR, genie at or below them
+    ng = [a for a in A["C2"] if a not in ("R5-genie", "R0-pilot", "pilot_C")]
+    top3 = {"M-ours-dscore-C-V1", "M-ours-dscore-C-V4", "M-ours-dscore-C-V4b"}
+    for i in range(7):
+        assert set(sorted(ng, key=lambda a: A["C2"][a][i])[:3]) == top3, ("(b)", i)
+    assert all(A["C2"]["R5-genie"] <= A["C2"]["M-ours-dscore-C-V1"]), "(b) genie"
+    # (c) the ordering is gone on C1
+    assert A["C1"]["M-ours-dscore-C-V1"][0] > A["C1"]["M-ours-bstar"][0], "(c)"
+    # rings account for every guard row; the 2 unplotted ones are named in the caption
+    pl = {a[0] for a in _ARMS_D2}
+    assert sum(k[2] in pl for k in gd) + 2 == len(gd), "guard rows unaccounted for"
+    # the UNDECIDED bands
+    assert (len(undecided("C2", tab)[0]), undecided("C5", tab)[0], len(undecided("C1", tab)[0])) == (7, [], 1)
+    assert undecided("C2", tab)[1] == {-3.0, 0.0} and undecided("C1", tab)[1] == {3.0}
+    return "check11 ok"
+
+
 if __name__ == "__main__":
-    for f in (fig7, fig8, fig9, fig10):
+    print("  ", check11())
+    for f in (fig7, fig8, fig9, fig10, fig11):
         try:
             print("  ok  ", f())
         except Exception as ex:
