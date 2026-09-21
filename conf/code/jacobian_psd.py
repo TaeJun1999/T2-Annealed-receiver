@@ -74,13 +74,14 @@ def jac_stats(model, Xq, sg, nu, chunk=32, project=None):
 def main(a):
     torch.set_default_dtype(torch.float64)
     torch.set_num_threads(a.threads)
-    gen = C.make_gen("D2", a.prior, NR, NT)
-    nu_grid, sig_grid = SG.load("D2")
-    H = gen.sample_vecs(C.train_rng("D2", a.prior, NR, 10), a.n)          # held-out stream 10
+    TB = a.testbed                       # D1 (grid-GMM instrument) or D2 (claim testbed)
+    gen = C.make_gen(TB, a.prior, NR, NT)
+    nu_grid, sig_grid = SG.load(TB)
+    H = gen.sample_vecs(C.train_rng(TB, a.prior, NR, 10), a.n)          # held-out stream 10
     rng = np.random.default_rng(score.SEED_GATE)
     E = (rng.standard_normal((a.n, N)) + 1j * rng.standard_normal((a.n, N))) / np.sqrt(2)
 
-    fits, llv, bstar, kron_K = A.gmm_selection("D2", a.prior, NR, C.N_TRAIN)
+    fits, llv, bstar, kron_K = A.gmm_selection(TB, a.prior, NR, C.N_TRAIN)
     fam, K = ("kron", kron_K) if bstar == "kron" else ("full", int(bstar[3:]))
     gmm = C.GMMPriorB(NR, NT, fits[(fam, K)]["covs"], fits[(fam, K)]["pi"])
     models = {"diffusion": score._as_model(a.ckpt, NR, NT, "cpu")[0],
@@ -126,8 +127,12 @@ def main(a):
 if __name__ == "__main__":
     p = argparse.ArgumentParser()
     p.add_argument("--ckpt", default=os.path.join(C.CONF, "ckpt", "d2sx_N10000_a1.pt"))
-    p.add_argument("--prior", default="S2")
+    p.add_argument("--testbed", default="D2", choices=["D1", "D2"])
+    p.add_argument("--prior", default=None, help="defaults to the testbed's primary prior")
     p.add_argument("--n", type=int, default=128)
     p.add_argument("--threads", type=int, default=4)
     p.add_argument("--out", default=os.path.join(C.CONF, "results", "diag", "jacobian-psd_D2.npz"))
-    main(p.parse_args())
+    a = p.parse_args()
+    if a.prior is None:
+        a.prior = C.PRIOR_OF[a.testbed]      # D1 -> "S", D2 -> "S2" (common.PRIOR_OF)
+    main(a)
