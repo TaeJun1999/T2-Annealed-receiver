@@ -1,0 +1,77 @@
+# date        : 2026-09-21 15:48:25 KST
+# git commit  : c343853
+# versions    : python 3.12.14  numpy 2.5.2  scipy 1.18.1  torch 2.14.0+cu130 (cuda_available=True)
+# device      : CPU (192 cores) | dtype: complex128 / float64 | deterministic: yes (fixed seeds, no GPU in the receiver)
+# testbed     : D2
+# seed rule   : default_rng([20260926, TBID[testbed], PID[prior], Nr, T, Tp, int(snr)+100])  (trials of a point = ONE stream)
+# code        : rate-1/2 conv (133,171)_8 nu=6 terminated, QPSK, outer iterations = 16 for EVERY arm
+# Demo/ hashes: t2_route_a.py=95a5408901ec125c  t2_trellis.py=31cd0ee9c68e972b  t2_gmm.py=d064e58c7510c769
+# content     : structured-prior gain (R2-ours-G -> M-ours-bstar) vs pilot budget Tp,
+#               paired at EVERY SNR rather than at each cell's own decision points, so that
+#               Tp varies and SNR is held fixed.  Discordant pairs only (a two-sided sign test).
+# reading     : 'wins' = blocks the GMM prior fixes; 'loss' = blocks it breaks.  p is exact binomial.
+# NOT a new arm, NOT a new run: a re-read of the frozen conf/raw/*.npz.
+# ====================================================================================================
+# CLAIM TESTBED -- sparse specular; conditional Gaussianity broken (see T2d). Upper bound = genie only.
+# ==================================================================================================== 
+
+--- 8x4 array --------------------------------------------------------------------------------------------
+  SNR | C1(Tp=2)  win:loss        p | C5(Tp=3)  win:loss        p | C2(Tp=4)  win:loss        p
+   -3 |    60:53    5.7e-01  |    88:47    5.3e-04* |   274:79    2.5e-26*
+   +0 |    83:59    5.3e-02  |    80:43    1.1e-03* |    86:44    2.9e-04*
+   +3 |    94:75    1.7e-01  |    62:42    6.2e-02  |    14:3     1.3e-02*
+   +6 |   396:362   2.3e-01  |    66:52    2.3e-01  |    10:1     1.2e-02*
+   +9 |   413:405   8.1e-01  |    57:60    8.5e-01  |     3:1     6.2e-01 
+  +12 |    92:98    7.2e-01  |    53:51    9.2e-01  |     3:3     1.0e+00 
+  +15 |   118:105   4.2e-01  |    36:64    6.6e-03* |     2:0     5.0e-01 
+ pool |  1256:1157  4.6e-02* |   442:359   3.7e-03* |   392:131   3.1e-31*
+
+--- 4x4 array --------------------------------------------------------------------------------------------
+  SNR | C3(Tp=2)  win:loss        p | C4(Tp=4)  win:loss        p
+   +3 |                       |    30:3     1.4e-06*
+   +6 |                       |    10:1     1.2e-02*
+   +9 |    77:139   3.0e-05* |     7:1     7.0e-02 
+  +12 |   104:121   2.9e-01  |                      
+  +15 |    88:132   3.6e-03* |                      
+ pool |   269:392   2.0e-06* |    47:5     1.3e-09*
+
+READING.  * marks p < 0.05 (two-sided exact binomial on discordant pairs).
+The comparison is paired within a cell and within an SNR; cells are NOT pooled with each other,
+because Nr, T and the pilot overhead all differ and a pooled number would not mean anything.
+
+====================================================================================================
+INTERPRETATION -- EXPLORATORY, NOT A PRE-REGISTERED TEST
+====================================================================================================
+Status of this file.  The pre-registered claim is the decision-point analysis in tables_D2.txt and
+NOTHING here replaces it.  That analysis stands exactly as recorded: R2-ours-G -> M-ours-bstar is
+significant at C2 (Tp=4, pooled 374:126, p=1.4e-29) and C4 (Tp=4, 47:5, p=1.3e-09), not significant
+at C1 (Tp=2, p=0.69) and C5 (Tp=3, p=0.12), and REVERSED at C3 (Tp=2, first arm better, p=2e-06).
+The read below is a secondary, exploratory look at the same frozen raw files with the SNR axis held
+fixed instead of collapsed onto each cell's own three decision points.  It has no multiplicity
+correction across the 7 SNRs and must not be quoted as a test.
+
+What the matched-SNR read shows.
+1.  On the 8x4 array the pooled discordant ratio rises monotonically with the pilot budget:
+        Tp=2  1256:1157 = 1.09      Tp=3  442:359 = 1.23      Tp=4  392:131 = 2.99
+2.  Within every cell the gain is concentrated at the LOW-SNR end and disappears, or turns negative,
+    at the high end:
+        C2 (Tp=4): -3 dB 274:79 (3.5x)  ->  +9..+15 dB nothing
+        C5 (Tp=3): -3 dB  88:47         ->  +15 dB 36:64, i.e. the prior HURTS (p=6.6e-03)
+        C3 (Tp=2): +9 dB  77:139 and +15 dB 88:132, both negative
+3.  C3's reversal is therefore NOT a property of the 4x4 array.  C3's three decision points are all
+    at the high-SNR end (+9/+12/+15), which is exactly where C5 also goes negative on the 8x4 array.
+    The one place the two 4x4 cells overlap in SNR is +9 dB, same array, same T, only Tp differing:
+        Tp=2  77:139  (p=3.0e-05, prior hurts)        Tp=4  7:1  (p=7.0e-02, prior helps)
+    The sign flips with Tp at fixed SNR and fixed geometry.
+
+A single reading that covers all five cells.  The structured prior helps when the channel estimate is
+poor enough for prior information to matter, and hurts once the estimate is already good, because the
+mixture then pulls the estimate toward component means it no longer needs.  Raising the pilot budget
+widens the SNR range over which the first regime holds.  This is consistent with the mixture-EP
+picture: with few pilots the component posterior is itself mis-assigned, and a confidently wrong
+component is worse than no structure at all.
+
+What this does NOT license.  It does not turn C1/C5 into positive results -- their pre-registered
+tests are null and stay null.  It does not establish a threshold in Tp; three budgets on one array
+and two on another cannot locate one.  A confirmatory test of the SNR-regime statement would need
+its own pre-registration with the decision points chosen for that question, which was not done here.
