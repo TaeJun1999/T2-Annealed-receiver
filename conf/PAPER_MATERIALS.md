@@ -227,7 +227,23 @@ b* 가 격자 경계에 놓일 때마다 128 -> 256 -> 512 로 확장했다 (GMM
 - **testbed 선택 근거를 "GMM 에 불리해서"로 서술** — `01_RULES §5` 가 금지. 근거는 "물리적으로 표준"이고
   조건부 Gaussian 파괴는 그 물리의 귀결이며 T2d 가 직접 증거다.
 
-## 11. 파일 지도
+## 11. 그림 — `conf/figs/` (PDF + PNG, 생성은 `code/figures.py`)
+
+| 파일 | 내용 | 쓸 곳 |
+|---|---|---|
+| `F2_lemma.pdf/png` | 복호기 soft output = 정확 Tweedie score. (좌) 산점, (우) 오차 vs sigma^2 | 이론 앵커 |
+| `F3_bler_D2.pdf/png` | **BLER vs SNR, D2. (a) Tp=4 headline, (b) Tp=2.** 두 패널 대비가 체제 결과를 한 장에 담는다 | **메인 그림** |
+| `F3_bler_D1.pdf/png` | 같은 그림의 D1 판 (순환 testbed, 맥락용) | 부록 |
+| `F4_regime_D2.pdf/png` | Module H 이득 vs SNR, Tp = 2/3/4. **90% paired bootstrap CI**, 블록오류 15개 미만 점은 축에 눈금으로 표시하고 값은 그리지 않음 | 체제 주장 |
+| `F5_samplecx.pdf/png` | GB/GC/GD vs 학습 표본수 N, 게이트 선 점선. `GC ~ N^-0.47` 적합선 | **음성 결과 그림** |
+| `F6_arch.pdf/png` | 아키텍처 균등표본 비교 (30회씩). 빨강 = best-of-30, 검정 = median, 초록 파선 = 전 게이트 통과선 | 아키텍처 주장 |
+
+그림 주의사항:
+- `F4` 의 고SNR 구간은 **블록 오류가 적어 비율이 추정 불가**다. 눈금만 찍힌 점을 "이득 0"으로 읽으면 안 된다.
+- `F6` 에서 **초록선(1.0)에 닿은 아키텍처가 하나도 없다** — 이것이 음성 결과의 시각적 요약이다.
+- `F3(b)` 의 평탄한 곡선은 실패가 아니라 T2c 가 예측한 무정보 영역이다.
+
+## 12. 파일 지도
 
 | 파일 | 내용 |
 |---|---|
@@ -239,7 +255,8 @@ b* 가 격자 경계에 놓일 때마다 128 -> 256 -> 512 로 확장했다 (GMM
 | `results/gate_D1.txt` / `gate_D2.txt` | 게이트 GA~GD 수치 / GB' |
 | `results/testbed_D2.txt` | T2a~T2e (+T2dm) |
 | `results/gmm_fit_D2.txt` | GMM 적합표 + D1 대비 악화 |
-| `results/lemma.txt` + `figs/F2_lemma.png` | F2 lemma |
+| `results/lemma.txt` + `figs/F2_lemma.*` | F2 lemma |
+| `figs/F3..F6` | 결과 그림 (PDF + PNG). 생성: `code/figures.py` |
 | `results/tests.txt` | 사전 등록 테스트 35/35 |
 | `LADDER.md` | 사다리 전 시도 (82행, append-only) |
 | `DECISIONS.md` | 자율 판단 34건 + 근거 + 되돌리는 법 |
