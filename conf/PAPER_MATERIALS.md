@@ -563,8 +563,12 @@ dscore|belsc                0.000   0.000   0.000   0.000   0.000   0.000   0.00
 ## 14. D1 확증 실행 (Stage C) — 출처 `results/tables_D1_C.txt`, `results/guard_D1_C.txt`
 
 - 실행 조건: **전 격자점 n = 2560**, 셀 C1(Tp=2)/C2(Tp=4)/C5(Tp=3) x SNR 7점, `raw_C` 1344 파일.
-  체크포인트 `ckpt/sx_N160000_D1.pt` (**게이트 PASS**, §11.2). 전 비교가 사전 등록 power guard
-  통과(POWERED). n = 640 중간본을 먼저 보았음이 표 머리말과 `DECISIONS.md` 17:55 에 기록돼 있다.
+  체크포인트 `ckpt/sx_N160000_D1.pt` (**게이트 PASS**, §11.2).
+  **power guard 주의: 전 비교가 POWERED 인 것이 아니다.** `tables_D1_C.txt` 의 **11쌍이 UNDECIDED**
+  이고 전부 C2 에 있으며 `M-ours-bstar → V0/V1/V4` 와 `→ M-ours-bstar-scalar` 를 포함한다. 따라서
+  **C2 에서 학습 arm 대 GMM 진술은 검정 근거가 없다.** 인용한 C1·C5 비교는 POWERED 다.
+  (2026-09-22 01:00 감사 BLOCKER 1 정정.)
+  n = 640 중간본을 먼저 보았음이 표 머리말과 `DECISIONS.md` 17:55 에 기록돼 있다.
 - `M-ours-dscore-C-V4b` 는 **D1 에서 실행하지 않았다** — arm 추가가 1344 태스크 전량 재계산이라,
   누락이 아니라 기록된 결정이다 (`DECISIONS.md` 2026-09-21 21:45).
 
@@ -610,7 +614,7 @@ correctly specified). 학습 prior 에 대한 어떤 주장도 이 표에서 D2 
 ## 15. D2 확증 실행 (Stage C) — **주장 testbed** — 출처 `results/tables_D2_C.txt`, `results/guard_D2_C.txt`
 
 - 실행 조건: **전 격자점 n = 2560**, 셀 C1/C2/C5 x SNR 7점, `raw_C` 1344 파일,
-  기록 시각 2026-09-22 00:22 KST, git `f6062a0`. 전 비교가 사전 등록 power guard 통과(POWERED).
+  기록 시각 2026-09-22 00:22 KST, git `f6062a0`. **전 비교가 POWERED 인 것이 아니다** — `tables_D1_C.txt` 11쌍, `tables_D2_C.txt` 8쌍이 UNDECIDED 이며 §17.3·§17.5 에 목록이 있다. 인용 전 반드시 확인할 것.
 - 체크포인트 `ckpt/d2sx_N160000_a1.pt` (sha256 `4443921ce8d5c4a1…`, patience 로 1784 epoch 종료,
   best val **3.519379e-01 @1764**). **검증손실로 3시드 중 선택, BLER 미사용**
   (a1 3.519379e-01 / a2 3.547692e-01 / a3 3.525231e-01 — 시드 간 0.8%, `DECISIONS.md` 23:00).
@@ -687,8 +691,11 @@ C2 의 SNR@0.1 격차 (판정점 -3 / +0 / +3 dB, 90% paired bootstrap, censored
    체크포인트를 사전 등록 D-14 행렬 site 에 그대로 넣은 것이고 결과는 BLER 0.593 대 0.537.
    → **게이트 통과가 수신기 사용 가능성을 보증하지 않는다** 가 실측 확정됐다.
 2. **site 를 고치면 같은 모델이 최고 arm 이 된다.** V1 은 C2 −3 dB 에서 0.145, GMM 0.252 대비
-   **42% 감소**, genie(0.034) 까지 남은 격차의 **49%** 를 메운다. **같은 체크포인트·같은 예산·같은
-   수신기**에서 site 구성만 바꾼 결과이므로 예산 문제와 무관하게 공정하다.
+   **42% 감소** 한다 — 그러나 **이 두 수는 GMM(N=1e4) 기준이고 학습 arm 은 N'=1.6e5 다. 동일 예산이
+   아니므로 인용하지 말 것.** 공정한 것은 **같은 체크포인트** 기준의 site ablation 이다:
+   V0 0.593 → V1 0.145 = **75.5% 감소**, genie 까지 격차의 80.1%. 후자만 "같은 체크포인트·같은
+   예산·같은 수신기" 라고 말할 수 있다. (2026-09-22 01:00 감사 BLOCKER 3 정정; STATUS 의 이전 판에서
+   복사된 문장이었다.)
    **이 site ablation (V0/V1/V4/V4b) 이 Stage C 의 1차 주장이다.**
 3. **스칼라화는 학습 prior 전용 이득이 아니며 해가 되기도 한다.** 손익을 정하는 것은 prior 종류가
    아니라 **야코비안 유효성**이다 — D1(유효)에서는 손해, D2 C2(무효)에서는 이득.

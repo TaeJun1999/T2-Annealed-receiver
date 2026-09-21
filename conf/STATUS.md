@@ -119,9 +119,11 @@ tests.txt, ckpt_inventory.txt / `figs/F2_lemma.png` / `LADDER.md` (82행) / `raw
 
 ## 한 줄 (범위를 붙여서)
 
-**D1 (계측 testbed) 에서는, 게이트를 통과한 학습 prior 가 21 격자점 중 20 점에서 정상 동작하고
-가우시안 prior 를 이긴다. 1 점(C1 Tp=2, −3 dB)에서는 수리한 것까지 포함해 전부 발산한다.
-주장 testbed D2 의 Stage C BLER 은 아직 존재하지 않는다.**
+**D2 (주장 testbed) 에서, 사전 등록된 D-14 행렬 site 로는 학습 prior 가 수신기를 고전 터보보다
+나쁘게 만들고(BLER 0.593 대 0.537, C2 −3 dB), site 하나만 고치면 같은 체크포인트가 BLER 0.145 로
+**75.5% 개선**된다. 이것이 1차 주장이며 같은 모델·같은 예산이라 공정하다.
+D1 (계측 testbed) 에서는 학습 prior 가 R2-ours-G 를 이기고 GMM·정확 EP 와 구별되지 않는다.
+**두 testbed 모두 Tp=2 (C1) 저SNR 에서는 수리한 것까지 포함해 전 학습 arm 이 발산한다.**
 
 막고 있는 것은 EP 의 D-14 행렬 site 가 디노이저 야코비안을 유효한 공분산으로 요구한다는 점이고,
 이 아키텍처·목적함수로 학습한 score 는 N=1e4~1.6e5 범위에서 희소 specular prior 에 대해 그 요구를
@@ -156,8 +158,10 @@ tests.txt, ckpt_inventory.txt / `figs/F2_lemma.png` / `LADDER.md` (82행) / `raw
 
 ## 아직 존재하지 않는 것 (주장하지 않는다)
 
-- **D2 의 Stage C BLER.** `results/tables_D2_C.txt` 는 없다. D2 체크포인트가 아직 학습 중이다.
-  D2 에 대한 "쓸 수 있다/없다" 는 어느 쪽도 주장하지 않는다.
+- ~~D2 의 Stage C BLER~~ → **2026-09-22 00:25 에 실행됐다** (`results/tables_D2_C.txt`, n=2560).
+  이 항목은 해소됐고 결과는 이 파일 끝 "D2 확증 실행 결과" 에 있다.
+- **동일 예산 GMM 과의 비교.** `M-ours-bstar` 는 N=1e4, 학습 arm 은 N'=1.6e5 다. 동일예산 적합이
+  진행 중이며(166/180) 그 전에는 학습 prior 대 GMM 을 주장으로 쓰지 않는다.
 - **학습 arm 과 정확 score oracle 의 짝지음 검정.** 존재하지 않는다. 두 arm 을 공통 제3자(R2-ours-G)
   에 각각 붙여 눈으로 비교한 것이었다. "oracle 과 동률" 은 **철회한다**.
 - **V1/V4 의 D2 BLER**, **V2/V3 의 게이트**. 전부 미완이다.
