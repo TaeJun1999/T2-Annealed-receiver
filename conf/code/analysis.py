@@ -71,7 +71,8 @@ M_ARMS = ("M-ours-gmm32", "M-ours-bstar", "M-ours-score", "M-ours-dscore")
 # Stage C (10_SPEC §3b / §3c).  These arms exist only in a run launched with --stagec-ckpt, so they are NOT
 # part of ARMS: _pool() appends them and _present() then keeps only the ones actually in the raw files.  A
 # pre-registered run therefore produces a byte-identical table -- none of these names can appear in it.
-STAGEC_ARMS = ("M-ours-dscore-C-V0", "M-ours-dscore-C-V1", "M-ours-dscore-C-V4", "M-ours-bstar-scalar")
+STAGEC_ARMS = ("M-ours-dscore-C-V0", "M-ours-dscore-C-V1", "M-ours-dscore-C-V4",
+               "M-ours-dscore-C-V4b", "M-ours-bstar-scalar")
 STAGEC_NOTES = {
     "M-ours-dscore-C-V0": "Stage C V0 (PRIMARY) -- learned prior at N', D-14 MATRIX site, pre-registered score wiring, unchanged",
     "M-ours-dscore-C-V1": "Stage C V1 -- V0 + (F1) symmetric-PSD projection of the D-14 site (ScorePrior(psd_project=True))",

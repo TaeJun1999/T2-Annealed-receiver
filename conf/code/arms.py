@@ -171,6 +171,12 @@ def build_our_arms(testbed, prior, Nr, Nt, T, Tp, sigma2, code, Xp, ntrain=N_TRA
     if score_prior_c is not None:
         arms["M-ours-dscore-C-V0"] = route_a(*a, score_prior_c, code, Xp, "score", clip="eta")
         arms["M-ours-dscore-C-V4"] = route_a(*a, score_prior_c, code, Xp, "score", clip="eta", hsite="scalar")
+        # V4b (§3c: "동일하되 scal=site. 부수 보고용").  Registered with V4 and then not wired until the
+        # 2026-09-21 18:20 audit noted it had been silently dropped.  §3b's standard for this document is
+        # "넷을 다 돌린 사실과 그 결과를 전부 보고한다", so it is carried, not quietly left out.
+        #   diag dscore|sitesc = route_a(..., sp, "score", clip="eta", hsite="scalar", scal="site")
+        arms["M-ours-dscore-C-V4b"] = route_a(*a, score_prior_c, code, Xp, "score", clip="eta",
+                                              hsite="scalar", scal="site")
     if bstar_scalar:
         arms["M-ours-bstar-scalar"] = route_a(*a, hp[bstar], code, Xp, "score", clip="eta", hsite="scalar")
     if with_G:

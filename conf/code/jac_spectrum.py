@@ -39,11 +39,20 @@ def main(a):
     gen = C.make_gen(TB, prior, NR, NT)
     nu_grid, sig_grid = SG.load(TB)
     H = gen.sample_vecs(C.train_rng(TB, prior, NR, 10), a.n)          # held-out stream 10
+    models = {"diffusion": score._as_model(a.ckpt, NR, NT, "cpu")[0]}
+
+    # THE reference matters.  On D1 the TRUE prior is available in closed form -- it is the grid
+    # mixture the testbed is DEFINED by (common.D1Gen.prior = t2_gmm.angle_grid_prior(...), 32x32 =
+    # 1024 components).  An earlier version of this script used arms.gmm_selection() here, which
+    # returns an EM FIT on N_TRAIN samples, and the output was labelled "EXACT"; the 2026-09-21 18:20
+    # audit caught that and the claim resting on it was retracted.  Now BOTH are reported on D1, so a
+    # reader can see the learned model against ground truth AND against the fitted mixture.
+    if TB == "D1":
+        models["TRUE-prior(grid GMM, 1024 comp)"] = score.ExactGMMTorch(gen.prior)
     fits, llv, bstar, kron_K = A.gmm_selection(TB, prior, NR, C.N_TRAIN)
     fam, K = ("kron", kron_K) if bstar == "kron" else ("full", int(bstar[3:]))
     gmm = C.GMMPriorB(NR, NT, fits[(fam, K)]["covs"], fits[(fam, K)]["pi"])
-    models = {"diffusion": score._as_model(a.ckpt, NR, NT, "cpu")[0],
-              f"GMM-exact(b*={bstar},K={K})": score.ExactGMMTorch(gmm)}
+    models[f"FITTED-GMM(b*={bstar},K={K},N={C.N_TRAIN})"] = score.ExactGMMTorch(gmm)
 
     print(C.header(TB, extra=[
         f"content     : eigenvalue SPECTRUM of sym(Jr), not just its minimum.  ckpt = {a.ckpt}",
