@@ -154,6 +154,9 @@ def main():
                 if np.isfinite(nu).any():
                     axd.semilogy(it, np.nanmedian(nu, 0), color=col, marker="o", ms=2.8, lw=1.0, label=lab)
                     have_d = True
+    axd.set_xlim(0.5, 16.5)                               # fixed BEFORE any text: with savefig bbox='tight',
+    axd.set_yscale("log")                                 # a data-coordinate label outside auto-limits
+    axd.set_ylim(1e-3, 3.0)                               # stretched the whole figure to 8000 px wide
     axd.axhline(GRID_TOP_NU, color="tab:blue", ls=":", lw=0.9, label=f"frozen grid top $\\nu_q$ = {GRID_TOP_NU:.2f}")
     axd.axhline(2 * 0.03306220 ** 2, color="tab:blue", ls=":", lw=0.9)
     axd.text(16.2, 2 * 0.03306220 ** 2 * 1.25, "grid bottom", fontsize=5.6, color="tab:blue", ha="right")
