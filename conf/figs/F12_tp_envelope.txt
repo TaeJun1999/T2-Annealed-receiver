@@ -1,0 +1,24 @@
+F12.  The pilot-budget operating envelope, at equal training budget (10_SPEC_stageC §6f).
+Left three panels: BLER after 16 outer iterations, D2, n=2560 per SNR point, every arm trained or
+fitted on the SAME N_train=1e4 channel set.  Cells differ ONLY in Tp (C1 Tp=2, C5 Tp=3, C2 Tp=4);
+array, block length, code, SNR grid and outer-iteration count are identical.  A cross at the top of a
+panel marks an SNR where EVERY trial of that arm terminated in an exception, so no mean BLER exists
+(C1 -3 dB: V0, V1 and V4 all 2560/2560; see results/guard_D2_B1e4x.txt).
+Right panel: the pre-registered decision-point sign test for M-ours-bstar -> V1, one bar per cell,
+plotted as the pooled margin (b-a)/(a+b) so that positive means the learned arm wins.  Annotations
+give the pooled counts a:b, the pooled p, and how many of the three pre-registered decision points
+were individually significant.  All three comparisons are POWERED.  Numbers are transcribed from
+results/tables_D2_B1e4x.txt (C1, C5) and results/tables_D2_B1e4.txt (C2); this figure runs no test.
+The dashed blue line is NOT fitted to these results: it is the closed-form cavity-variance floor at
+outer iteration 1, nu_q -> cbar (Nt - Tp)/Tp, which follows from Tp < Nt leaving Nr(Nt - Tp) null
+directions in G when the data columns are still zero-valued.  It was written down in §6j before the
+C1 and C5 runs and matched the measurement to 3-4 significant figures at both ends of the SNR grid
+(C1 -3 dB predicted sigma_t 0.999, measured 0.9993; high-SNR limit predicted 0.707, measured 0.7125).
+The dotted line is the top of the FROZEN training sigma grid, sqrt(nu/2) = 0.8452 (results/
+sigma_grid_D2.txt, "FROZEN from here on").  Only C1's floor crosses it, and only C1 reverses.
+SCOPE.  One testbed (D2), one budget (N=1e4), one seed (a1); the checkpoint FAILS the pre-registered
+gate (GC 0.243 vs threshold 0.15), which §6d fixed in advance by registering these points as a
+budget-axis measurement rather than an arm result.  The gate-passing model's BLER is in
+results/tables_D2_C.txt.  The right panel's floor line explains WHERE the reversal happens; it is not
+evidence for WHY the learned score fails there -- §6j shows the out-of-grid query accounts for the
+low-SNR failure in C1 but NOT for +15 dB, where divergence precedes the out-of-range query.

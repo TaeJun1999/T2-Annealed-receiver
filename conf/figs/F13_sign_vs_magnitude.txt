@@ -1,0 +1,20 @@
+F13.  The defect is the eigenvalue SIGN, not the conditioning (10_SPEC_stageC §6h).
+Each curve is the SAME learned score through the SAME EP receiver with ONE intervention applied to
+the D-14 matrix site's Jacobian; the fitted-GMM arm runs the identical loop as a reference.
+D2, cell C2 (Tp=4), n=256 trials per SNR point, all 7 SNRs, no point dropped.
+(a) Flooring the eigenvalue MAGNITUDE at 1e-2 while KEEPING each eigenvalue's sign recovers nothing
+(BLER 0.098-0.875, gaps of +0.098 to +0.836 against the repaired arms at the seven SNRs).  Repairing
+the SIGN -- by clamping to [1e-2, 1], by dropping the matrix site, or by switching the clip rule --
+recovers everything, and the three repairs are indistinguishable from each other (all within 0.02
+absolute at all 7 SNRs).  (b) The divergence guard fires on 1.6-22.3% of trials without the
+intervention and on 0.000 of them after any of the three sign repairs; the magnitude-only floor
+leaves 0.0-1.6%.
+This was a PRE-REGISTERED prediction, committed in §6h before the roll-up was computed: "psd1e-2
+restores BLER to within 0.02 of belsc at ALL SEVEN SNRs and abs1e-2 does not -- i.e. the defect is
+the sign, not the conditioning."  Scored: psd1e-2 7/7, abs1e-2 0/7.
+PROVENANCE.  The seven raw sweeps were written 2026-09-21 16:23-17:13 and were not read until
+2026-09-22 13:15; the SUMMARY.txt sitting beside them is dated 14:56 on 2026-09-21, predates the
+sweep, and is retained unmodified as the record of that reporting gap.
+SCOPE.  One cell (C2), n=256, and a checkpoint that FAILS the pre-registered gate.  These are
+interventions on a diagnostic probe: they identify the mechanism, they are not arms, and none of them
+appears in any BLER table.  The equal-budget arm results are in results/tables_D2_B1e4.txt.
