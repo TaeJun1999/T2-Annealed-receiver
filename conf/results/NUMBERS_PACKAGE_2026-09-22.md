@@ -742,3 +742,8 @@ Each line is a sentence the evidence does not support, with the measurement that
 **쓰면 안 되는 문장 (추가)**: "Tp≥3 에서 학습 prior 가 낫다" (P3·P4 — Tp=3 은 SNR 조건 필요) ·
 "gap 최대점을 예측했다" (P7 — 문면 예측은 빗나갔다; −6/+6 은 사후 선택) · "λ 페널티는 λ 가 작으면 도움이 된다"
 (P10·P11 — GD 가 나빠지고 부호가 망가진다) · "K 를 늘리면 GMM 이 따라온다" (P9 — 안 온다).
+
+| P13 | **헤드라인 최종 (확장 격자)**: 게이트 통과 학습 prior vs K=1024 GMM, 동일예산 | GMM 0.2434 → V1 0.1449 (−40.5%); −3 dB 302:50, +0 117:21, +3 35:7, **pooled 454:78 p=1.7e-65**, 3/3; 대조군 100:149 p=0.0023 | 2560 | D2 C2 −3/+0/+3 | 형제 PASS (`sx_N160000_D1`), D2 자체 행 없음 | **예** (전 arm N=1.6e5; GMM b\*=kron K=1024, ll_val −11.459, `meta|kron_K=1024`) | POWERED | `tables_D2_B16e4k.txt` |
+| P14 | K 격자 효과 @1.6e5 | K=512 → 1024: GMM −3 dB 0.2527 → 0.2434 (−3.7%), 격차 42.7% → 40.5%; K=2048 은 미적합(캐비엇) | 2560 | D2 C2 | 형제 PASS | 예 | POWERED | `tables_D2_B16e4.txt`, `tables_D2_B16e4k.txt` |
+
+**PENDING 없음 (21:45).**
