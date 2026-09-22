@@ -688,6 +688,87 @@ def ckpt_path(rung, attempt, testbed, d=None):
     return os.path.join(d or CKPT_DIR, f"{rung}_a{attempt}_{testbed}.pt")
 
 
+def best_ckpt_path(cpath):
+    """(review_next P0-1) The BEST-validation sibling of a training checkpoint: <name>_best.pt.
+    score.train writes it on every val improvement; `cpath` itself stays the LAST epoch (the resume file)."""
+    return (cpath[:-3] if cpath.endswith(".pt") else cpath) + "_best.pt"
+
+
+def _atomic_save(obj, path):
+    """torch.save to <path>.tmp, then os.replace: an interrupted save never leaves a truncated checkpoint."""
+    tmp = path + ".tmp"
+    torch.save(obj, tmp)
+    os.replace(tmp, path)
+
+
+def ckpt_identity(path):
+    """What a result was ACTUALLY evaluated with: file hash, stored epoch, best epoch, role.
+    role 'last' / 'best' is written by score.train since review_next P0-1; a checkpoint without the key
+    predates it and holds the LAST-epoch EMA (its best-epoch weights were never stored)."""
+    st = torch.load(path, map_location="cpu", weights_only=False)
+    with open(path, "rb") as f:
+        h = hashlib.sha256(f.read()).hexdigest()[:16]
+    return dict(sha256_16=h, epoch=int(st["epoch"]), best_epoch=int(st["best_epoch"]),
+                best_val=float(st["best_val"]), role=st.get("role", "legacy-last"), Nr=int(st["Nr"]),
+                Nt=int(st["Nt"]))
+
+
+def _bad_epoch(v, best):
+    """10_SPEC_stageC §3d DIVERGE_TRAIN predicate: NaN, or val above DIVERGE_TRAIN_MULT x best.
+    For best >= 0 this is EXACTLY the original `v > 3 * best`.  For a negative loss (the VAE rung L6 reports
+    a negative val) `3 * best < best`, so the original test called every epoch bad, improvements included;
+    there it becomes `v - best > (MULT - 1) * |best|` (review_next, P0 review finding)."""
+    if v != v:
+        return True
+    return v > DIVERGE_TRAIN_MULT * best if best >= 0 else v - best > (DIVERGE_TRAIN_MULT - 1) * -best
+
+
+def _trailing_bad(hist, best):
+    """Consecutive bad epochs at the end of hist = the loop's `ndiv` at that point.  Exact with the FINAL
+    best: a bad epoch is never an improvement, so best does not move inside a streak."""
+    n = 0
+    for _, _, v in reversed(hist):
+        if not _bad_epoch(v, best):
+            break
+        n += 1
+    return n
+
+
+def _already_stopped(ep, best, best_ep, hist, patience, min_epochs, max_epochs):
+    """The stopping rules of train(), evaluated on a RESUMED state before any epoch is trained.
+    train() tests them only after an epoch, so resuming a finished run used to train one more epoch and
+    overwrite the (possibly already evaluated) checkpoint (review_next P0-1a)."""
+    if _trailing_bad(hist, best) >= DIVERGE_TRAIN_EPOCHS:
+        return "diverged"
+    if ep >= min_epochs and ep - best_ep >= patience:
+        return "patience"
+    if ep >= max_epochs:
+        return "max_epochs"
+    return None
+
+
+def _val_draws(n, dim, smin, smax):
+    """ONE fixed (sigma, eps) validation set, reused every epoch (and by val_loss_of)."""
+    vg = torch.Generator().manual_seed(SEED_VAL)
+    v_sig = torch.exp(torch.rand(n, generator=vg) * (math.log(smax) - math.log(smin)) + math.log(smin))
+    v_eps = torch.randn(n, dim, generator=vg)
+    return v_sig, v_eps
+
+
+def val_loss_of(ckpt, ntrain, device="cpu"):
+    """Re-measure a checkpoint's validation loss exactly as train() does (same split, same fixed draws,
+    float32 EMA weights).  For checking that a stored best_val belongs to the stored weights."""
+    st = torch.load(ckpt, map_location="cpu", weights_only=False)
+    _, Xva, split_hash, _ = training_split(st["testbed"], st["prior"], st["Nr"], st["Nt"], ntrain)
+    assert split_hash == st["split_hash"], f"ntrain={ntrain} does not reproduce the checkpoint's split"
+    smin, smax, _, _ = _sigma_range(st["testbed"], st.get("sigma_tag", ""))
+    va = torch.as_tensor(np_pack(Xva), dtype=torch.float32, device=device)
+    v_sig, v_eps = _val_draws(len(va), va.shape[1], smin, smax)
+    m, _ = load_model(st, device=device, dtype=torch.float32)
+    with torch.no_grad():
+        return float(m.loss(va, v_sig.to(device), v_eps.to(device)))
+
+
 def resolve_hp(rung, attempt, testbed, Nr, Nt, prior=None, device="cpu", n_eval=128, n_jac=16):
     """Fill the 'auto' fields of L3/L4/L5.  04_SPEC §4: L3 takes the backbone of whichever of L1/L2 has the
     better GATE SCORE (not BLER -- 01_RULES §5), L4 keeps the domain L3 chose, and L5 -- "flow matching on
@@ -705,7 +786,7 @@ def resolve_hp(rung, attempt, testbed, Nr, Nt, prior=None, device="cpu", n_eval=
                 return dict(hp, **{k: d1[k] for k in ("param", "domain", "arch", "base") if k in d1}), {"from": p}
         raise FileNotFoundError(f"{rung} on {testbed} needs the D1 configuration (04_SPEC §6); no D1 ckpt found")
     cand = {"L3": ("L1", "L2"), "L4": ("L1", "L2", "L3"), "L5": ("L3", "L4", "L1", "L2")}[rung]
-    sc = {}
+    sc, arg = {}, {}                                   # arg[rung] = (score, attempt, path) of that rung's best
     for r in cand:
         for a in range(1, MAX_ATTEMPTS + 1):
             p = ckpt_path(r, a, testbed)
@@ -713,20 +794,24 @@ def resolve_hp(rung, attempt, testbed, Nr, Nt, prior=None, device="cpu", n_eval=
                 try:
                     g = gates_D1(p, Nr, Nt, prior=prior or C.PRIOR_OF[testbed], n_eval=n_eval,
                                  device=device, n_jac=n_jac)
-                    sc[r] = min(sc.get(r, np.inf), gate_score(g))
+                    s = gate_score(g)
+                    sc[r] = min(sc.get(r, np.inf), s)
+                    if s <= arg.get(r, (np.inf,))[0]:
+                        arg[r] = (s, a, p)
                 except Exception as e:                                     # a broken ckpt must not stop the ladder
                     sc[f"{r}!"] = repr(e)
     ok = {k: v for k, v in sc.items() if isinstance(v, float)}
     base = min(ok, key=ok.get) if ok else "L1"
-    bhp = None
-    for a in range(1, MAX_ATTEMPTS + 1):
-        if os.path.exists(ckpt_path(base, a, testbed)):
-            bhp = torch.load(ckpt_path(base, a, testbed), map_location="cpu", weights_only=False)["hp"]
+    # review_next P0-4: inherit hp from the attempt that PRODUCED the winning gate score, not from whichever
+    # attempt of the winning rung happens to exist last.
+    b_score, b_att, b_path = arg.get(base, (None, None, None))
+    bhp = torch.load(b_path, map_location="cpu", weights_only=False)["hp"] if b_path else None
     out = dict(hp, base=base)
     for f in ("param", "domain", "arch"):              # 'arch' matters for L5: 04_SPEC §4 says L5 is the
         if out.get(f) == "auto":                       # WINNING configuration, and L4's winner may be conv
             out[f] = (bhp or DEFAULT_HP[base])[f]
-    return out, dict(gate_scores=sc, base=base, note="chosen BY GATE SCORE (04_SPEC §4), never by BLER")
+    return out, dict(gate_scores=sc, base=base, base_attempt=b_att, base_ckpt=b_path, base_score=b_score,
+                     note="chosen BY GATE SCORE (04_SPEC §4), never by BLER")
 
 
 # 10_SPEC_stageC §3d -- frozen training-divergence criterion and fallback ladder.
@@ -746,6 +831,10 @@ def train(rung, attempt, testbed, prior, Nr, Nt, device="cuda", hp=None, resume=
     A run that ends any other way is aborted=True: it must be logged to LADDER.md as ABORTED and does NOT
     count as one of the three attempts of the rung.
     Checkpoints every epoch (epoch / model / EMA / optimizer / best_val / RNG state) and resumes from them.
+    review_next P0-1: `ckpt` is the LAST epoch (role='last', resume file); every val improvement also writes
+    the full state of that epoch to best_ckpt_path(ckpt) (role='best').  Both saves are atomic.  val_loss in
+    the return value is the BEST epoch's, i.e. it belongs to the _best.pt weights, not to `ckpt`.  A resume
+    whose checkpoint already meets a stopping rule trains nothing and leaves the file untouched.
 
     jac_reg (V3, 10_SPEC_stageC §3b) is OPT-IN and defaults to 0.0, in which case NOTHING below changes:
     the loss object handed to backward() is the same object, no extra number is drawn from the training
@@ -782,9 +871,7 @@ def train(rung, attempt, testbed, prior, Nr, Nt, device="cuda", hp=None, resume=
     va = torch.as_tensor(np_pack(Xva), dtype=torch.float32, device=dev)
 
     # deterministic validation draws: ONE fixed (sigma, eps) set, reused every epoch, or early stopping is noise.
-    vg = torch.Generator().manual_seed(SEED_VAL)
-    v_sig = torch.exp(torch.rand(len(va), generator=vg) * (math.log(smax) - math.log(smin)) + math.log(smin))
-    v_eps = torch.randn(len(va), dim, generator=vg)
+    v_sig, v_eps = _val_draws(len(va), dim, smin, smax)
     v_sig, v_eps = v_sig.to(dev), v_eps.to(dev)
 
     model = make_model(rung, hp, Nr, Nt).to(dev)
@@ -834,9 +921,16 @@ def train(rung, attempt, testbed, prior, Nr, Nt, device="cuda", hp=None, resume=
             return float(vm.loss(va, v_sig, v_eps))
 
     vm = make_model(rung, hp, Nr, Nt).to(dev)
-    stopped, aborted, ep, ndiv = "max_epochs", False, ep0, 0
+    # ndiv resumes from hist: restarting it at 0 let an interrupted run stop later (or not at all) than the
+    # same run uninterrupted (review_next, P0 review finding).  A fresh run has hist == [] -> 0.
+    stopped, aborted, ep, ndiv = "max_epochs", False, ep0, _trailing_bad(hist, best)
+    pre = _already_stopped(ep0, best, best_ep, hist, patience, min_epochs, max_epochs) if st is not None else None
+    if pre:
+        stopped = pre
+        lg.write(f"# resume      : checkpoint already meets stopped_by={pre} at epoch {ep0} -- no epoch trained, "
+                 f"{cpath} left untouched\n")
     try:
-        for ep in range(ep0 + 1, max_epochs + 1):
+        for ep in range(ep0 + 1, (ep0 if pre else max_epochs) + 1):
             te = time.time()
             model.train()
             idx = torch.randperm(len(tr), generator=g).to(dev)
@@ -872,29 +966,36 @@ def train(rung, attempt, testbed, prior, Nr, Nt, device="cuda", hp=None, resume=
                      + (f" | asym_reg {rtot / nb:.6e}" if jac_reg else "")
                      + (f" | gnorm mean {gsum / max(nstep, 1):.3e} max {gmax:.3e}" if grad_clip else "")
                      + "\n")
-            torch.save(dict(epoch=ep, model=model.state_dict(), ema=ema.shadow, opt=opt.state_dict(),
-                            best_val=best, best_epoch=best_ep, rng=g.get_state(), hist=hist, hp=hp,
-                            rung=rung, attempt=attempt, testbed=testbed, prior=prior, Nr=Nr, Nt=Nt,
-                            sigma_tag=sigma_tag,     # the MEASURED grid this model was trained on:
-                            # a checkpoint trained on one array must never be read against another
-                            # array's sigma grid (10_SPEC_stageC §7).  ScorePrior reads it back.
-                            split_hash=split_hash, wall_sec=time.time() - t_start,
-                            jac_reg=jac_reg, grad_clip=grad_clip,
-                            rng_jac=(gj.get_state() if gj is not None else None),
-                            device=dname), cpath)
             # 10_SPEC_stageC §3d DIVERGE_TRAIN: val above 3x best for 5 consecutive epochs.  This
             # OVERRIDES min_epochs on purpose -- carrying a blown-up run to epoch 200 buys no
             # information.  A DIVERGED run is a COMPLETED attempt (it consumes a slot), not ABORTED.
             # NaN must COUNT as divergence.  `nan > x` is False, so the naive comparison silently
             # disables the guard exactly when it is most needed (audit 2026-09-21 18:20: V2 D2 a2 ran
             # 105 NaN epochs undetected).  math.isnan first, then the ratio test.
-            bad = (vl != vl) or (vl > DIVERGE_TRAIN_MULT * best)
+            bad = _bad_epoch(vl, best)
             ndiv = ndiv + 1 if bad else 0
-            if ndiv >= DIVERGE_TRAIN_EPOCHS:
-                stopped = "diverged"
-                break
-            if ep >= min_epochs and ep - best_ep >= patience:
-                stopped = "patience"
+            stop = ("diverged" if ndiv >= DIVERGE_TRAIN_EPOCHS else
+                    "patience" if ep >= min_epochs and ep - best_ep >= patience else
+                    "max_epochs" if ep >= max_epochs else None)
+            state = dict(epoch=ep, model=model.state_dict(), ema=ema.shadow, opt=opt.state_dict(),
+                         best_val=best, best_epoch=best_ep, rng=g.get_state(), hist=hist, hp=hp,
+                         rung=rung, attempt=attempt, testbed=testbed, prior=prior, Nr=Nr, Nt=Nt,
+                         sigma_tag=sigma_tag,     # the MEASURED grid this model was trained on:
+                         # a checkpoint trained on one array must never be read against another
+                         # array's sigma grid (10_SPEC_stageC §7).  ScorePrior reads it back.
+                         split_hash=split_hash, wall_sec=time.time() - t_start,
+                         jac_reg=jac_reg, grad_clip=grad_clip,
+                         rng_jac=(gj.get_state() if gj is not None else None),
+                         device=dname, stopped_by=stop)
+            # review_next P0-1: on a val improvement the WHOLE state of this epoch is also the best state,
+            # so it goes to <name>_best.pt (written first: a crash between the two saves leaves last one
+            # epoch behind, and resuming re-trains that epoch from the saved RNG).  torch.save serialises
+            # synchronously, so later in-place EMA/optimizer updates cannot reach the file.
+            if imp:
+                _atomic_save(dict(state, role="best"), best_ckpt_path(cpath))
+            _atomic_save(dict(state, role="last"), cpath)
+            if stop in ("diverged", "patience"):
+                stopped = stop
                 break
     except KeyboardInterrupt:
         stopped, aborted = "interrupted", True
@@ -907,7 +1008,9 @@ def train(rung, attempt, testbed, prior, Nr, Nt, device="cuda", hp=None, resume=
     if verbose:
         print(f"[train] {rung} a{attempt}: {ep} epochs, stopped_by={stopped}, aborted={aborted}, "
               f"best val {best:.6e} @ {best_ep}, {wall:.1f} s ({wall / max(ep - ep0, 1):.3f} s/epoch)", flush=True)
+    bpath = best_ckpt_path(cpath)
     return dict(rung=rung, attempt=attempt, ckpt=cpath, epochs=ep, val_loss=best,
+                best_ckpt=(bpath if os.path.exists(bpath) else None), best_epoch=best_ep,
                 train_loss=(hist[-1][1] if hist else float("nan")), wall_sec=wall, device=dname,
                 sec_per_epoch=wall / max(ep - ep0, 1), stopped_by=stopped, n_train=len(tr), n_val=len(va),
                 split_hash=split_hash, hp=hp, aborted=aborted, params=n_params(model), log=lpath,

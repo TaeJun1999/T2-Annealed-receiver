@@ -20,7 +20,8 @@ $P code/runner.py sigma --testbed D2 --cell C6 --tag NR16 >> logs/sigma_NR16.log
 log "sigma grid: $(grep -o 'sigma_t in \[[^]]*\]' logs/sigma_NR16.log | tail -1)"
 
 log "step 3/4: score training, Nr=16, N=1e4, frozen recipe"
-CUDA_VISIBLE_DEVICES=0 $P code/train_nr16.py --ntrain 10000 --attempt 1 >> logs/train_nr16.log 2>&1
+CUDA_VISIBLE_DEVICES=0 $P code/train_nr16.py --ntrain 10000 --attempt 1 >> logs/train_nr16.log 2>&1 \
+  || { log "ABORT: train_nr16.py failed (see logs/train_nr16.log) -- BLER not started"; exit 1; }
 log "training: $(grep -oE 'stopped_by=[a-z_]+|best [0-9.e+-]+ @[0-9]+' logs/train_nr16.log | tail -2 | tr '\n' ' ')"
 
 log "step 4/4: BLER C6, n=2560, equal budget N=1e4"

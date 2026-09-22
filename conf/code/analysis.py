@@ -591,7 +591,7 @@ def _head(testbed, data, meta):
         for a in _pool(testbed):
             for v in sorted(bud.get(a, ())):
                 extra.append(f"  {a:<20}: {v}")
-        for k in ("dscore_ckpt", "dscore_status", "stagec_ckpt", "stagec_gate", "stagec_status"):
+        for k in ("dscore_ckpt", "dscore_status", "stagec_ckpt", "stagec_gate", "stagec_status", "stagec_ckpt_id"):
             for v in sorted({str(m[k]) for m in meta.values() if k in m}):
                 extra.append(f"  {k:<20}: {v}")
     for cell, prior in _groups(data):
@@ -601,7 +601,11 @@ def _head(testbed, data, meta):
         n = len(data[(cell, prior, snrs[0])][pres[0]]["blk_err"]) if pres else 0
         extra.append(f"cell {cell}: {c.get('Nr', '?')}x{NT} T={c.get('T', '?')} Tp={c.get('Tp', '?')} prior {prior}"
                      f"  SNR grid {[f'{s:+.0f}' for s in snrs]} dB  n={n} per point  outer iterations={N_ITER}"
-                     f"  b*={meta.get((cell, prior), {}).get('bstar', 'n/a')}")
+                     f"  b*={meta.get((cell, prior), {}).get('bstar', 'n/a')}"
+                     # review_next M3: the K of a kron b* was recorded in meta|kron_K but never printed
+                     + (f" (kron K={meta[(cell, prior)]['kron_K']:g})"
+                        if meta.get((cell, prior), {}).get("bstar") == "kron" and "kron_K" in meta[(cell, prior)]
+                        else ""))
         # the beta / T_in / seed / dtype the runner ACTUALLY used, read back from "run|*" (06_SPEC §5):
         r = data[(cell, prior, snrs[0])].get("run", {})
         if r:

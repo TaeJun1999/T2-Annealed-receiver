@@ -128,6 +128,30 @@ def stats_obj(rx):
     return p if (getattr(rx, "exact_prior", False) and hasattr(p, "reset_stats")) else None
 
 
+_SC_ID = {}
+
+
+def stagec_identity(ckpt):
+    """score.ckpt_identity, once per process (a worker builds many points from the same file)."""
+    if ckpt not in _SC_ID:
+        import score
+        _SC_ID[ckpt] = score.ckpt_identity(ckpt)
+    return _SC_ID[ckpt]
+
+
+def stagec_id_str(ckpt):
+    """meta|stagec_ckpt_id (review_next P0-1b): which weights the Stage C arms were ACTUALLY evaluated with.
+    A pre-P0-1 checkpoint holds the LAST-epoch EMA and no best weights exist for it."""
+    c = stagec_identity(ckpt)
+    s = (f"sha256[:16]={c['sha256_16']} epoch={c['epoch']} best_epoch={c['best_epoch']} role={c['role']} "
+         f"{c['Nr']}x{c['Nt']}")
+    if c["role"] == "legacy-last" and c["epoch"] != c["best_epoch"]:
+        s += " | BEST_WEIGHTS_UNAVAILABLE: evaluated = last-epoch EMA, reported best_val belongs to best_epoch"
+    elif c["role"] == "last" and c["epoch"] != c["best_epoch"]:
+        s += " | evaluated = LAST epoch; the best-epoch weights are in the _best.pt sibling"
+    return s
+
+
 def score_prior(testbed, prior, Nr, Nt, ckpt=None, psd_project=False, ntrain=None):
     """Module H of M-ours-dscore.  score.py is authoritative; its signature is
 
@@ -295,8 +319,12 @@ def build_point(testbed, cell, prior, snr, ntrain=C.N_TRAIN, beta=C.BETA, t_in=C
     spc = spc1 = None
     sc_why = "not requested (--stagec-ckpt not given) -- arm set is the pre-registered one"
     if stagec_ckpt:
-        if Nr != 8:
-            sc_why = "ABSENT -- M-ours-dscore-C-* only: " + NO_SCORE
+        # review_next S7-b: the checkpoint's OWN array decides, not a hard-coded Nr == 8.  The old guard
+        # dropped every Stage C arm from the §7 C6 (Nr=16) run although a 16x4 checkpoint was passed.
+        cid = stagec_identity(stagec_ckpt)
+        if (cid["Nr"], cid["Nt"]) != (Nr, Nt):
+            sc_why = (f"ABSENT -- M-ours-dscore-C-* only: {NO_SCORE} "
+                      f"(checkpoint is {cid['Nr']}x{cid['Nt']}, cell is {Nr}x{Nt})")
         else:
             spc, sc_why = score_prior(testbed, prior, Nr, Nt, stagec_ckpt, ntrain=ntrain)
             spc1, w1 = score_prior(testbed, prior, Nr, Nt, stagec_ckpt, psd_project=True, ntrain=ntrain)
@@ -316,6 +344,7 @@ def build_point(testbed, cell, prior, snr, ntrain=C.N_TRAIN, beta=C.BETA, t_in=C
     if stagec_ckpt:
         meta["stagec_ckpt"] = str(stagec_ckpt)
         meta["stagec_gate"] = gate_verdict(stagec_ckpt)
+        meta["stagec_ckpt_id"] = stagec_id_str(stagec_ckpt)
     learned = {}
     if sp is not None:
         meta["dscore_ckpt"] = str(getattr(sp, "ckpt", None) or ckpt or "?")
@@ -329,6 +358,15 @@ def build_point(testbed, cell, prior, snr, ntrain=C.N_TRAIN, beta=C.BETA, t_in=C
         st = getattr(o, "st", None) or {}
         if "wall_sec" in st:            # score.train's wall-clock = the TRAINING cost of the learned arm
             meta[f"fit_sec|{k}"] = float(st["wall_sec"])
+            if st.get("role") == "best":
+                # a _best.pt stops its clock at the best epoch, but selecting it took the whole run incl. the
+                # patience tail -> charge the LAST file's wall_sec (01_RULES §1: the larger number)
+                lp = str(o.ckpt)[:-len("_best.pt")] + ".pt"
+                if str(o.ckpt).endswith("_best.pt") and os.path.isfile(lp):
+                    import torch
+                    meta[f"fit_sec|{k}"] = float(torch.load(lp, map_location="cpu", weights_only=False)["wall_sec"])
+                else:
+                    meta[f"fit_sec_note|{k}"] = "role=best but its last sibling is missing: wall_sec stops at best epoch"
     meta.update(budget_meta(arms, ntrain, learned))
     return dict(arms=arms, cfgs=cfgs, meta=meta, gen=gen, code=code, pil=pil, Xp=Xp, fits=fits,
                 Nr=Nr, Nt=Nt, T=T, Tp=Tp, sigma2=sigma2, dscore=why, stagec=sc_why)
@@ -429,7 +467,7 @@ def cmd_run(a):
     for cell, p, _ in pts:                              # fail early if a GMM fit is missing
         A.load_fits(testbed, p, C.CELLS[cell]["Nr"], a.ntrain)
     for cell in cells:
-        if C.CELLS[cell]["Nr"] != 8:
+        if C.CELLS[cell]["Nr"] not in (8, 16):          # mirrors build_point's M-ours-dscore guard
             print(f"[run] {cell}: M-ours-dscore -> {NO_SCORE}  (M-ours-score is the closed-form ORACLE and DOES run here)", flush=True)
     _, why = score_prior(testbed, prior, 8, C.NT, a.ckpt, ntrain=a.ntrain)
     print(f"[run] M-ours-dscore: {why}", flush=True)
@@ -439,8 +477,12 @@ def cmd_run(a):
               "instead of quietly printing a table without it (01_RULES §6).", flush=True)
 
     if a.stagec_ckpt:
-        print(f"[run] Stage C arms ON (10_SPEC §3b/§3c): M-ours-dscore-C-{{V0,V1,V4}} + the mandatory GMM "
-              f"control M-ours-bstar-scalar, from {a.stagec_ckpt}", flush=True)
+        cid = stagec_identity(a.stagec_ckpt)
+        on = [c for c in cells if (C.CELLS[c]["Nr"], C.CELLS[c]["Nt"]) == (cid["Nr"], cid["Nt"])]
+        print(f"[run] Stage C arms (10_SPEC §3b/§3c): M-ours-dscore-C-{{V0,V1,V4}} + the mandatory GMM "
+              f"control M-ours-bstar-scalar, from {a.stagec_ckpt} ({cid['Nr']}x{cid['Nt']}) -- ON for "
+              f"{on}, ABSENT for {[c for c in cells if c not in on]}", flush=True)
+        print(f"[run] Stage C checkpoint: {stagec_id_str(a.stagec_ckpt)}", flush=True)
         print(f"[run] Stage C gate record: {gate_verdict(a.stagec_ckpt)}", flush=True)
     tasks = [pt + (s, min(a.chunk, a.n - s), a.ntrain, a.beta, a.tin, a.iters, a.arm, a.ckpt, a.stagec_ckpt)
              for pt in pts for s in range(0, a.n, a.chunk)]
@@ -1040,6 +1082,15 @@ def main(argv=None):
             sys.exit(f"--stagec-ckpt {a.stagec_ckpt}: no such file (tried it as given and under {C.CONF}). "
                      "Refusing: the Stage C score arms would be silently ABSENT from the whole run.")
         a.stagec_ckpt = os.path.abspath(p)
+        # review_next s7/M1: a file that exists but fits NO selected cell is the same silent failure --
+        # the §7 C6 run logged 'arms ON' and produced none.  Refuse it before the run starts.
+        cid = stagec_identity(a.stagec_ckpt)
+        cells = getattr(a, "cell", None) or list(C.CELLS)
+        if a.cmd == "run" and not any((C.CELLS[c]["Nr"], C.CELLS[c]["Nt"]) == (cid["Nr"], cid["Nt"])
+                                      for c in cells):
+            sys.exit(f"--stagec-ckpt {a.stagec_ckpt} is a {cid['Nr']}x{cid['Nt']} checkpoint but no selected "
+                     f"cell {cells} has that array.  Refusing: the Stage C score arms would be ABSENT from "
+                     "the whole run.")
     _init(a.tag)
     for d in ("results", "raw", "logs", "figs", "ckpt"):
         os.makedirs(os.path.join(C.CONF, d), exist_ok=True)

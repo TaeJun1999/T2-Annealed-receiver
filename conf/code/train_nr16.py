@@ -45,7 +45,10 @@ def main():
     print(f"[nr16] trained {res['epochs']} ep, val {res['val_loss']:.5e}, {res['wall_sec']:.0f}s, "
           f"stopped_by={res.get('stopped_by')}", flush=True)
 
-    # GB' against the equal-budget GMM b* on THIS array -- report-only, same quantity as run_d2_sx.py
+    # GB' against the equal-budget GMM b* on THIS array -- report-only, same quantity as run_d2_sx.py.
+    # The Nr=16 fits live in the NR16-tagged directory (fit_gpu.py -> runner._init("NR16")); arms.D2_FITS
+    # defaults to the untagged Nr=8 one, where this used to die with FileNotFoundError (review_next S7-a).
+    A.D2_FITS = os.path.join(C.CONF, "results", "gmm_fits_D2_NR16")
     fits, llv, bstar, kron_K = A.gmm_selection("D2", PRIOR, NR, a.ntrain)
     fam, K = ("kron", kron_K) if bstar == "kron" else ("full", int(bstar[3:]))
     gp = C.GMMPriorB(NR, NT, fits[(fam, K)]["covs"], fits[(fam, K)]["pi"])

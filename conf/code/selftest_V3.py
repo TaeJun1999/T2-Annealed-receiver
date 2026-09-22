@@ -61,7 +61,7 @@ def check(name, ok, msg):
 
 
 def fresh(tag):
-    for p in (CK.format(tag), LG.format(tag)):
+    for p in (CK.format(tag), score.best_ckpt_path(CK.format(tag)), LG.format(tag)):
         if os.path.exists(p):
             os.remove(p)
     return CK.format(tag), LG.format(tag)
@@ -226,7 +226,8 @@ if __name__ == "__main__":
         if not only or n in only:
             t()
     for t in ("id_new", "id_ref", "step0", "step1", "reg0", "reg1"):
-        if os.path.exists(CK.format(t)):
-            os.remove(CK.format(t))
+        for p in (CK.format(t), score.best_ckpt_path(CK.format(t))):    # score.train also writes _best.pt
+            if os.path.exists(p):
+                os.remove(p)
     print(f"\nselftest_V3: {'OK -- all checks passed' if not FAIL else 'FAILED: ' + ', '.join(FAIL)}")
     sys.exit(1 if FAIL else 0)

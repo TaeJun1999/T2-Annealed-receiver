@@ -1,7 +1,8 @@
 # STATUS — conf 실험 (Stage A/B 완료 · Stage C 진행 중)
 
 ## 세션 설정
-- 모델 : **Opus 5 (1M context)** (`claude-opus-5[1m]`). effort/thinking 은 세션 내부에서 확인·변경 불가한
+- 모델 : **Opus 5.5 (1M context)** (`claude-opus-5-5[1m]`) — 2026-09-23 04:2x KST 부터, Claude Code 2.1.280.
+  그 이전(Stage A/B/C, §7 배선 4ad41df9 까지)은 Opus 5 (`claude-opus-5[1m]`). effort/thinking 은 세션 내부에서 확인·변경 불가한
   클라이언트 설정이라 모델이 검증할 수 없음.
 - 기간 : Stage A/B 2026-09-20 00:22 ~ 09-21 10:10 KST (약 34시간) · Stage C 09-21 14:00 ~ (진행 중)
 - 자원 : NVIDIA RTX PRO 6000 Blackwell x 6 (각 97887 MiB, Exclusive_Process), CPU 192코어.
