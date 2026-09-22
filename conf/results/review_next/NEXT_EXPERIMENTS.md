@@ -140,7 +140,7 @@ damping·restart·n_inner 는 prior/adapter 실험과 분리해 별도 사전 �
 | 항목 | 상태 | 산출물 |
 |---|---|---|
 | 선행: `runner.py --skip0` (개발 집합 생성 수단) + 수용 검사 | **구현** (chunk_plan, DEV_SKIP0, load_raw 구멍 검사, manifest split 표기; selftest `[chunk]`) | 미커밋 |
-| 선행: `score.train(init_seed=...)` opt-in + 체크포인트에 init_seed·초기 해시·phase_aug | 사용자 결정 대기 (N1) | — |
+| 선행: `score.train(init_seed=...)` opt-in + 체크포인트에 init_seed·초기 해시·phase_aug | **하지 않음** — 사용자 결정(2026-09-22 17:45 CDT, 올바른 전제로 재확인): 기록만. §0 규정대로 A1 의 aug/ctrl·attempt 비교는 "초기값 차이 포함" 으로 표기하고, 각 학습의 `torch.initial_seed()`·초기 가중치 해시를 로그에 남긴다(`train_ctrl.py` 방식) | — |
 | 선행: `pair_tags.py` (태그 간 paired 부호검정 + 3점 규칙) | 미구현 | — |
 | 선행: D1 형제 학습 wrapper (`train_ctrl.py` 확장: testbed D1, 기존 rung 라벨, phase_aug) | 미구현 | — |
 | 선행: `build_our_arms(mean_arms=True)`, gmmB-scorew arm | 미구현 | — |
