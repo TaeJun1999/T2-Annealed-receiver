@@ -1,0 +1,48 @@
+[k1024] 13:37:31 linked 24 pre-registered N=1e4 fits
+[k1024] 13:37:32 GPU 5 free -> kron K=1024, Nr=8, N=1e4
+[gpu-fit] tag='K1024'  out=/home/HTJ/t2/conf/results/gmm_fits_D2_K1024/fit_S2_Nr8_kronK1024_n10000.npz
+  ('S2', 8, 4, 'kron', 1024, 0, 0): iters 26 best@20 reseeds 9372 ll_train -13.022 ll_val -23.833 (107 s)
+  ('S2', 8, 4, 'kron', 1024, 0, 1): iters 24 best@20 reseeds 8251 ll_train -12.755 ll_val -24.005 (99 s)
+  ('S2', 8, 4, 'kron', 1024, 0, 2): iters 26 best@20 reseeds 9144 ll_train -12.526 ll_val -23.573 (103 s)
+[gpu-fit] S2 Nr=8 kron K=1024: kappa   0 restart 2 best@20  train-val gap 11.046  ll_test - ll_test(Gaussian) = 42.211 nat  pi_min 0.0001  (5.1 min GPU over 3 EM runs) -> /home/HTJ/t2/conf/results/gmm_fits_D2_K1024/fit_S2_Nr8_kronK1024_n10000.npz
+[k1024] 13:42:44 EXIT=0
+[k1024] 13:37:32 GPU 5 free -> kron K=1024, Nr=8, N=1e4
+[gpu-fit] S2 Nr=8 kron K=1024: kappa   0 restart 2 best@20  train-val gap 11.046  ll_test - ll_test(Gaussian) = 42.211 nat  pi_min 0.0001  (5.1 min GPU over 3 EM runs) -> /home/HTJ/t2/conf/results/gmm_fits_D2_K1024/fit_S2_Nr8_kronK1024_n10000.npz
+[k1024] 14:04:21 GPU 5 -> kron K=1024, Nr=8, N=40000 (tag K1024n40000)
+[gpu-fit] tag='K1024n40000'  out=/home/HTJ/t2/conf/results/gmm_fits_D2_K1024n40000/fit_S2_Nr8_kronK1024_n40000.npz
+  ('S2', 8, 4, 'kron', 1024, 0, 0): iters 137 best@130 reseeds 927 ll_train -10.177 ll_val -16.040 (2532 s)
+[k1024] 15:12:48 GPU 2 -> kron K=1024 Nr=8 N=160000 restart 0 (tag K1024n160000)
+[gpu-fit] tag='K1024n160000'  out=/home/HTJ/t2/conf/results/gmm_fits_D2_K1024n160000/fit_S2_Nr8_kronK1024_n160000.npz  restart=0
+[k1024] 15:13:08 GPU 3 -> kron K=1024 Nr=8 N=160000 restart 1 (tag K1024n160000)
+[gpu-fit] tag='K1024n160000'  out=/home/HTJ/t2/conf/results/gmm_fits_D2_K1024n160000/fit_S2_Nr8_kronK1024_n160000.npz  restart=1
+[k1024] 15:13:29 GPU 4 -> kron K=1024 Nr=8 N=160000 restart 2 (tag K1024n160000)
+[gpu-fit] tag='K1024n160000'  out=/home/HTJ/t2/conf/results/gmm_fits_D2_K1024n160000/fit_S2_Nr8_kronK1024_n160000.npz  restart=2
+  ('S2', 8, 4, 'kron', 1024, 0, 1): iters 127 best@120 reseeds 1535 ll_train -10.143 ll_val -15.903 (4203 s)
+  ('S2', 8, 4, 'kron', 1024, 0, 2): iters 102 best@100 reseeds 1388 ll_train -10.068 ll_val -15.882 (1793 s)
+[gpu-fit] S2 Nr=8 kron K=1024: kappa   0 restart 2 best@100 train-val gap  5.815  ll_test - ll_test(Gaussian) = 50.068 nat  pi_min 0.0000  (142.1 min GPU over 3 EM runs) -> /home/HTJ/t2/conf/results/gmm_fits_D2_K1024n40000/fit_S2_Nr8_kronK1024_n40000.npz
+[k2048] 16:27:54 N=4e4: K1024 -15.8823 vs K512 -17.3438 -> K1024_WINS
+[k2048] 16:27:54 GPU 5 -> kron K=2048 Nr=8 N=40000 restart 0
+[gpu-fit] tag='K2048n40000'  out=/home/HTJ/t2/conf/results/gmm_fits_D2_K2048n40000/fit_S2_Nr8_kronK2048_n40000.npz  restart=0
+  ('S2', 8, 4, 'kron', 2048, 0, 0): iters 66 best@60 reseeds 19935 ll_train -6.988 ll_val -15.223 (1955 s)
+[gpu-fit] candidate (kappa 0, restart 0) -> /home/HTJ/t2/conf/results/gmm_fits_D2_K2048n40000/fit_S2_Nr8_kronK2048_n40000.k0r0.npz  ll_val -15.223
+[k2048] 17:00:38 GPU 5 -> kron K=2048 Nr=8 N=40000 restart 1
+[gpu-fit] tag='K2048n40000'  out=/home/HTJ/t2/conf/results/gmm_fits_D2_K2048n40000/fit_S2_Nr8_kronK2048_n40000.npz  restart=1
+  ('S2', 8, 4, 'kron', 2048, 0, 1): iters 65 best@60 reseeds 20536 ll_train -7.077 ll_val -15.379 (1706 s)
+[gpu-fit] candidate (kappa 0, restart 1) -> /home/HTJ/t2/conf/results/gmm_fits_D2_K2048n40000/fit_S2_Nr8_kronK2048_n40000.k0r1.npz  ll_val -15.379
+[k2048] 17:29:16 GPU 5 -> kron K=2048 Nr=8 N=40000 restart 2
+[gpu-fit] tag='K2048n40000'  out=/home/HTJ/t2/conf/results/gmm_fits_D2_K2048n40000/fit_S2_Nr8_kronK2048_n40000.npz  restart=2
+  ('S2', 8, 4, 'kron', 2048, 0, 2): iters 84 best@80 reseeds 28004 ll_train -7.105 ll_val -15.186 (2186 s)
+[gpu-fit] candidate (kappa 0, restart 2) -> /home/HTJ/t2/conf/results/gmm_fits_D2_K2048n40000/fit_S2_Nr8_kronK2048_n40000.k0r2.npz  ll_val -15.186
+[gpu-fit] tag='K2048n40000'  out=/home/HTJ/t2/conf/results/gmm_fits_D2_K2048n40000/fit_S2_Nr8_kronK2048_n40000.npz  MERGE
+[gpu-fit] S2 Nr=8 kron K=2048: kappa   0 restart 2 best@80  train-val gap  8.081  ll_test - ll_test(Gaussian) = 50.663 nat  pi_min 0.0000  (0.0 min GPU over 3 EM runs) -> /home/HTJ/t2/conf/results/gmm_fits_D2_K2048n40000/fit_S2_Nr8_kronK2048_n40000.npz
+[k2048] 18:05:48 N=40000 K=2048 MERGE EXIT=0
+  ('S2', 8, 4, 'kron', 1024, 0, 0): iters 251 best@210 reseeds 0 ll_train -9.664 ll_val -11.776 (16235 s)
+[gpu-fit] candidate (kappa 0, restart 0) -> /home/HTJ/t2/conf/results/gmm_fits_D2_K1024n160000/fit_S2_Nr8_kronK1024_n160000.k0r0.npz  ll_val -11.776
+  ('S2', 8, 4, 'kron', 1024, 0, 1): iters 331 best@290 reseeds 0 ll_train -9.348 ll_val -11.459 (20477 s)
+[gpu-fit] candidate (kappa 0, restart 1) -> /home/HTJ/t2/conf/results/gmm_fits_D2_K1024n160000/fit_S2_Nr8_kronK1024_n160000.k0r1.npz  ll_val -11.459
+  ('S2', 8, 4, 'kron', 1024, 0, 2): iters 341 best@340 reseeds 0 ll_train -9.385 ll_val -11.674 (21647 s)
+[gpu-fit] candidate (kappa 0, restart 2) -> /home/HTJ/t2/conf/results/gmm_fits_D2_K1024n160000/fit_S2_Nr8_kronK1024_n160000.k0r2.npz  ll_val -11.674
+[k1024] 21:14:27 all 3 restarts done -> merge
+[gpu-fit] tag='K1024n160000'  out=/home/HTJ/t2/conf/results/gmm_fits_D2_K1024n160000/fit_S2_Nr8_kronK1024_n160000.npz  MERGE
+[gpu-fit] S2 Nr=8 kron K=1024: kappa   0 restart 1 best@290 train-val gap  2.111  ll_test - ll_test(Gaussian) = 54.457 nat  pi_min 0.0002  (0.0 min GPU over 3 EM runs) -> /home/HTJ/t2/conf/results/gmm_fits_D2_K1024n160000/fit_S2_Nr8_kronK1024_n160000.npz
+[k1024] 21:14:31 N=160000 K=1024 MERGE EXIT=0

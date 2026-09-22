@@ -8,3 +8,8 @@ wandb/
 __pycache__/
 graphify-out/
 .claude/settings.local.json
+
+# per-restart EM candidates: intermediates of fit_gpu.py --restart; the merged fit .npz beside them
+# carries the selected fit AND every candidate ll_val/ll_test, so these add ~83 MB of redundancy.
+# They are kept ON DISK (01_RULES: nothing is deleted), just not tracked.
+conf/results/gmm_fits_D2_K*/*.k0r*.npz

@@ -1,26 +1,23 @@
-# M6 -- Stage C V1 / (F1) symmetric-PSD projection of the D-14 site   2026-09-21 14:49:16 KST
-# ckpt = /home/HTJ/t2/conf/ckpt/d2sx_N10000_a1.pt   prior = S2   n = 64 held-out D2 samples/point   sigma grid k = [0, 3, 6, 9, 12, 15, 18]
+# M6 -- Stage C V1 / (F1) symmetric-PSD projection of the D-14 site   2026-09-22 14:36:57 KST
+# ckpt = /home/HTJ/t2/conf/ckpt/d2sx_N10000_a1.pt   prior = S2   n = 64 held-out D2 samples/point   sigma grid k = [0, 6, 12, 18]
 # projection = score.project_psd: Hermitian part, then eigenvalues floored at common.LAM_MIN = 1e-06.  lmax is NOT touched.
 
-[1] exact GMM kron(K=512): closed-form denoise_full over 7 sigma points x 16 samples
+[1] exact GMM kron(K=512): closed-form denoise_full over 4 sigma points x 16 samples
     max relative change of the projection : 2.146e-13   (must be < 1e-10)
     min eigenvalue of J seen              : 7.835e-04   (LAM_MIN = 1e-06)
-[1b] exact GMM kron(K=512) through jacobian_psd.jac_stats, sigma grid k=9 (1.5349e-01), n=16: max |after - before| lmin_c=0.000e+00  lmax_c=0.000e+00  nclip=0.000e+00  shift=0.000e+00
+[1b] exact GMM kron(K=512) through jacobian_psd.jac_stats, sigma grid k=12 (2.5606e-01), n=16: max |after - before| lmin_c=0.000e+00  lmax_c=0.000e+00  nclip=0.000e+00  shift=0.000e+00
 
 [2] learned prior d2sx_N10000_a1.pt: jacobian_psd.jac_stats before / after the projection, n=64 held-out D2 samples per sigma point
       k      sigma |  f(lmin<0)  clipfrac  shift_med  shift_max ||  f(lmin<0)  clipfrac  shift_med  shift_max
       0 3.3062e-02 |      0.844     1.000  1.928e-01  2.379e+06 ||      0.000     1.000  9.594e-06  3.629e-04
-      3 5.5155e-02 |      0.969     1.000  1.060e+00  1.030e+03 ||      0.000     1.000  2.070e-05  7.081e-04
       6 9.2011e-02 |      0.969     1.000  1.813e+00  2.126e+03 ||      0.000     0.984  4.599e-05  1.350e-03
-      9 1.5349e-01 |      0.984     1.000  4.103e+00  9.893e+02 ||      0.000     0.984  8.121e-05  1.724e-03
      12 2.5606e-01 |      0.703     1.000  2.275e+00  1.149e+04 ||      0.000     0.969  2.982e-04  8.881e-03
-     15 4.2717e-01 |      0.438     1.000  2.941e-03  2.138e+03 ||      0.000     0.938  3.312e-04  1.025e-02
      18 7.1261e-01 |      0.188     0.891  4.268e-04  6.634e+01 ||      0.000     0.844  2.336e-04  7.814e-03
 
-[3] ScorePrior(psd_project=False) vs the pre-V1 expression, 7 sigma points x 16 samples
+[3] ScorePrior(psd_project=False) vs the pre-V1 expression, 4 sigma points x 16 samples
     max |J_off - J_pre_V1|                : 0.000e+00   (must be exactly 0)
     max |m - m_pre_V1|, both flags        : 0.000e+00   (the projection never touches the mean)
     min eigenvalue with psd_project=True  : 1.000e-06   (>= LAM_MIN = 1e-06)
-    alpha = tr(J)/N shift on, mean / max  : 2.639e-03 / 1.458e-02
+    alpha = tr(J)/N shift on, mean / max  : 2.322e-03 / 1.458e-02
 
-# ALL M6 ASSERTIONS PASSED  (334.7 s)
+# ALL M6 ASSERTIONS PASSED  (388.6 s)
