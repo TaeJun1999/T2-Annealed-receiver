@@ -27,35 +27,25 @@ from runner import _sets, ref_task, FAM, KAPPAS, N_VAL, RESTARTS, FIT_ITERS, d_f
 from gmm_em_gpu import fit_gmm_em_gpu
 
 
-def main(Nr, fam, K, ntrain, tag):
-    _init(tag)                                           # routes arms.D2_FITS, exactly as cmd_fit does
-    prior, Nt = C.PRIOR_OF["D2"], C.NT
-    out = A.fit_path("D2", prior, Nr, fam, K, ntrain)
-    assert os.path.dirname(out) == d_fits_d2(), (out, d_fits_d2())
-    print(f"[gpu-fit] tag={tag!r}  out={out}", flush=True)
-    if os.path.exists(out):
-        print(f"[gpu-fit] {out} exists -- CPU run owns it, skipping", flush=True)
-        return 0
-    os.makedirs(d_fits_d2(), exist_ok=True)
-    gen, (X, Xv, Xt) = _sets(prior, Nr, Nt, ntrain)
-    ref = ref_task((prior, Nr, Nt, ntrain))[1]
-    kaps = KAPPAS if fam == "full" else (0,)
-    rs = {}
-    t0 = time.time()
-    for kap in kaps:
-        for r in range(RESTARTS):
-            rng = np.random.default_rng([C.SEED, C.TBID["D2"], 9, C.PID[prior], Nr, FAM[fam], K, kap, r])
-            t = time.time()
-            f = fit_gmm_em_gpu(X, K, rng, n_iter=FIT_ITERS, kappa=float(kap), struct=fam,
-                               dims=(Nr, Nt), Xval=Xv)
-            f["ll_test"] = float(C.GMMPriorB(Nr, Nt, f["covs"], f["pi"]).log_pdf(Xt).mean())
-            f["ll_train"] = float(f["ll"][f["it_best"]])
-            f["sec"] = time.time() - t
-            rs[(kap, r)] = f
-            print(f"  ('{prior}', {Nr}, {Nt}, '{fam}', {K}, {kap}, {r}): iters {f['n_iter']} "
-                  f"best@{f['it_best']} reseeds {f['n_reseed']} ll_train {f['ll_train']:.3f} "
-                  f"ll_val {f['ll_val']:.3f} ({f['sec']:.0f} s)", flush=True)
-    kb = max(rs, key=lambda k: rs[k]["ll_val"])          # selection: validation log-likelihood ONLY
+def _fit_one(X, Xv, Xt, prior, Nr, Nt, fam, K, kap, r):
+    """ONE (kappa, restart) EM run -- exactly runner.cmd_fit's per-task unit, same seed tuple."""
+    rng = np.random.default_rng([C.SEED, C.TBID["D2"], 9, C.PID[prior], Nr, FAM[fam], K, kap, r])
+    t = time.time()
+    f = fit_gmm_em_gpu(X, K, rng, n_iter=FIT_ITERS, kappa=float(kap), struct=fam,
+                       dims=(Nr, Nt), Xval=Xv)
+    f["ll_test"] = float(C.GMMPriorB(Nr, Nt, f["covs"], f["pi"]).log_pdf(Xt).mean())
+    f["ll_train"] = float(f["ll"][f["it_best"]])
+    f["sec"] = time.time() - t
+    print(f"  ('{prior}', {Nr}, {Nt}, '{fam}', {K}, {kap}, {r}): iters {f['n_iter']} "
+          f"best@{f['it_best']} reseeds {f['n_reseed']} ll_train {f['ll_train']:.3f} "
+          f"ll_val {f['ll_val']:.3f} ({f['sec']:.0f} s)", flush=True)
+    return f
+
+
+def _write_final(out, rs, ref, ntrain, t0, prior, Nr, fam, K):
+    """Select by validation log-likelihood ONLY and write the arms.fit_path() file (same fields as
+    runner.cmd_fit).  Shared by the all-in-one path and the --merge path."""
+    kb = max(rs, key=lambda k: rs[k]["ll_val"])
     f, cand = rs[kb], sorted(rs)
     tmp = out + f".tmp{os.getpid()}.npz"
     np.savez_compressed(tmp, pi=f["pi"], covs=f["covs"], Chat=f["Chat"], ll=f["ll"],
@@ -78,9 +68,73 @@ def main(Nr, fam, K, ntrain, tag):
     return 0
 
 
+def _cand_path(out, kap, r):
+    return out[:-4] + f".k{kap}r{r}.npz"
+
+
+def main(Nr, fam, K, ntrain, tag, restart=None, merge=False):
+    """restart=None, merge=False : the original all-in-one path (every kappa x every restart, then select).
+    restart=r                   : run ONLY restart r (for every kappa) and save a per-restart CANDIDATE
+                                  file beside the target -- the original protocol treats each (kappa, r)
+                                  as an independent pool task with its own seed, so restarts may be
+                                  spread over GPUs without changing a single RNG draw (2026-09-22 15:15).
+    merge=True                  : combine the candidate files (all of them must exist) into the final
+                                  file with exactly the fields and selection rule of the all-in-one path."""
+    _init(tag)                                           # routes arms.D2_FITS, exactly as cmd_fit does
+    prior, Nt = C.PRIOR_OF["D2"], C.NT
+    out = A.fit_path("D2", prior, Nr, fam, K, ntrain)
+    assert os.path.dirname(out) == d_fits_d2(), (out, d_fits_d2())
+    print(f"[gpu-fit] tag={tag!r}  out={out}" + (f"  restart={restart}" if restart is not None else "")
+          + ("  MERGE" if merge else ""), flush=True)
+    if os.path.exists(out):
+        print(f"[gpu-fit] {out} exists -- CPU run owns it, skipping", flush=True)
+        return 0
+    os.makedirs(d_fits_d2(), exist_ok=True)
+    kaps = KAPPAS if fam == "full" else (0,)
+    t0 = time.time()
+    if merge:
+        gen, (X, Xv, Xt) = _sets(prior, Nr, Nt, ntrain)
+        ref = ref_task((prior, Nr, Nt, ntrain))[1]
+        rs = {}
+        for kap in kaps:
+            for r in range(RESTARTS):
+                cp = _cand_path(out, kap, r)
+                if not os.path.exists(cp):
+                    sys.exit(f"[gpu-fit] MERGE refused: candidate missing {cp}")
+                d = np.load(cp)
+                rs[(kap, r)] = {k: (d[k] if d[k].shape else d[k].item()) for k in d.files}
+        return _write_final(out, rs, ref, ntrain, t0, prior, Nr, fam, K)
+    gen, (X, Xv, Xt) = _sets(prior, Nr, Nt, ntrain)
+    ref = ref_task((prior, Nr, Nt, ntrain))[1]
+    if restart is not None:
+        for kap in kaps:
+            f = _fit_one(X, Xv, Xt, prior, Nr, Nt, fam, K, kap, restart)
+            cp = _cand_path(out, kap, restart)
+            np.savez_compressed(cp + ".tmp.npz", pi=f["pi"], covs=f["covs"], Chat=f["Chat"], ll=f["ll"],
+                                it_best=f["it_best"], n_iter=f["n_iter"], n_reseed=f["n_reseed"],
+                                ll_train=f["ll_train"], ll_val=f["ll_val"], ll_test=f["ll_test"],
+                                sec=f["sec"])
+            os.replace(cp + ".tmp.npz", cp)
+            print(f"[gpu-fit] candidate (kappa {kap}, restart {restart}) -> {cp}  ll_val {f['ll_val']:.3f}",
+                  flush=True)
+        return 0
+    rs = {}
+    for kap in kaps:
+        for r in range(RESTARTS):
+            rs[(kap, r)] = _fit_one(X, Xv, Xt, prior, Nr, Nt, fam, K, kap, r)
+    return _write_final(out, rs, ref, ntrain, t0, prior, Nr, fam, K)
+
+
 if __name__ == "__main__":
     a = sys.argv[1:]
-    if len(a) != 5:
-        sys.exit("usage: CUDA_VISIBLE_DEVICES=k fit_gpu.py <Nr> <fam> <K> <ntrain> <tag>   "
-                 "(tag routes the output dir -- see the module docstring)")
-    sys.exit(main(int(a[0]), a[1], int(a[2]), int(a[3]), a[4]))
+    if len(a) < 5 or len(a) > 7:
+        sys.exit("usage: CUDA_VISIBLE_DEVICES=k fit_gpu.py <Nr> <fam> <K> <ntrain> <tag> [--restart r | --merge]"
+                 "   (tag routes the output dir -- see the module docstring)")
+    restart, merge = None, False
+    if len(a) == 7 and a[5] == "--restart":
+        restart = int(a[6])
+    elif len(a) == 6 and a[5] == "--merge":
+        merge = True
+    elif len(a) != 5:
+        sys.exit("bad trailing arguments: expected '--restart r' or '--merge'")
+    sys.exit(main(int(a[0]), a[1], int(a[2]), int(a[3]), a[4], restart=restart, merge=merge))
