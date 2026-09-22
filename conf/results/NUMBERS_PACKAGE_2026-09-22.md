@@ -714,3 +714,31 @@ Each line is a sentence the evidence does not support, with the measurement that
 | **Test M6** | **No result exists** in either test file. Do not assert it in either direction. |
 | **Any B16e4 / seed-a3 / K=1024-at-4e4-or-1.6e5 / λ<1.0 number** | **Does not exist yet.** See PENDING P1–P4. |
 | **"b* at N=1.6e5" as an authored project result** | **No summary file `results/gmm_fit_D2_n16e4.txt` exists**, and the `.npz` set is **incomplete** (Nr=8 kron K=128 missing). The values in §D1 are my own computation from a live, unfinished directory. |
+
+---
+
+# ADDENDUM (2026-09-22 18:00 KST) — 14:40 시점에 PENDING 이던 항목, 확정분
+
+인용 규칙 5요소를 각 행에 붙였다. 정본은 `source` 열의 파일이다.
+
+| # | 사실 | 수치 | n | testbed·셀·SNR | 게이트 | 동일예산 | power | source |
+|---|---|---|---|---|---|---|---|---|
+| P1 | **게이트 통과 + 동일예산** 표: V1 이 GMM 을 이김 | V1 0.145 vs GMM 0.253; `bstar→V1` −3 dB 325:49, +0 122:19, +3 42:10, **pooled 489:78 p=1e-73**, 3/3 | 2560 | D2 C2 −3/+0/+3 | 학습 arm `d2sx_N160000_a1` — D1 형제 `sx_N160000_D1` PASS (LADDER_C.md:1); D2 자체 게이트 행 없음 | **예 (전 arm N=1.6e5, b\*=kron K=512, Nr=8 12 구성 전부에서 선택)** | POWERED | `tables_D2_B16e4.txt` |
+| P2 | 동일예산 곡선 3점 완성 | V1 0.145/0.145/0.145, GMM 0.252/0.250/0.253 (N=1e4/4e4/1.6e5) | 2560 | D2 C2 −3 dB | 1e4·4e4 FAIL(GC 0.243/0.167), 1.6e5 PASS(형제) | 예 (각 점 내부) | POWERED (각 점) | `tables_D2_B{1e4,4e4,16e4}.txt` |
+| P3 | §6f @1.6e5: C5 는 동률, C1 은 GMM | C5 `bstar→V1` +6 232:156, +12 206:213, +15 185:271, pooled 623:640 p=0.65 (1/3 대 1/3); C1 1109:1691 p=3.1e-28 GMM 3/3 | 2560 | D2 C5 +6/+12/+15; C1 +6/+12/+15 | 형제 PASS | 예 | POWERED | `tables_D2_B16e4.txt` |
+| P4 | 동작 범위 문장 (게이트 통과 예산) | "Tp=4 전 SNR / Tp=3 ≤ +6 dB (−3: 0.400 vs 0.517) / Tp=2 열세" | 2560 | D2 | 형제 PASS | 예 | — | STATUS §6f@1.6e5 |
+| P5 | 시드 강건성 3/3 | V1 −3 dB 0.1453 / 0.1496 / 0.1477 (a1/a2/a3), 전부 a1 CI [0.132,0.159] 안; V0→V1 81.6/83.0/81.8%; a3 pooled 495:64 p=1.5e-83 | 2560 각 | D2 C2 | FAIL (N=1e4) | 예 | POWERED | `tables_D2_B1e4s{2,3}.txt` |
+| P6 | §6p: C2 에서 V1 이 11 SNR 전부 우세, 가드 0 | −9 41:3, −7 312:30, −6 544:56 p=2e-101, −5 567:94 | 2560 | D2 C2 −9…+15 | FAIL (N=1e4) | 예 | 앵커 규칙 2점 → UNDECIDED; §6p 규칙(4점 자체) 로 SNR 별 검정 | `tables_D2_B1e4lo.txt`, `lowsnr_6p_score.txt` |
+| P7 | §6p 예측 채점 | 1 빗나감(비 단조 감소), 2 빗나감(C2 −9 무붕괴), 3 적중(C5 −5 생존·−6 붕괴), 4 반 | — | — | — | — | — | STATUS §6p |
+| P8 | gap 최대점 (척도별) | 절대차 **−6 dB** 0.791→0.601 (0.190); 비 **+6 dB** 0.0125→0.0039 (3.2×); 판정점 −3 dB 1.74× | 2560 | D2 C2 | FAIL (N=1e4) | 예 | −3 만 3점 POWERED | `figs/F14{a,b,c}_*.txt` — **b·c 는 사후 선택 (캡션 명시)** |
+| P9 | §6l: K 두 배에 GMM BLER 불변 | K=512 0.2504 → K=1024 0.2500 (−3 dB), 전 SNR ±0.002; ll_val −17.34 → −15.88 | 2560 | D2 C2 | FAIL (N=4e4) | 예 | — | `tables_D2_B4e4k1.txt` (raw meta `kron_K=1024`) |
+| P10 | §6e λ 스윕 게이트 | λ=0.01 PASS (GB +0.32%, GC 0.0991, **GD 0.0887 > V0 0.0718**); λ=0.1 FAIL (0.065/0.369/0.319); λ=1.0 FAIL | n_eval 512, n_jac 64 | D1 | — | — | — | `gate_D1_L{0.01,0.1}.txt`, `LADDER_L*.md` |
+| P11 | §6e asym 대 PSD | λ=0.01 asym 0.79× V0 이지만 σ=0.79 에서 lmin −0.089, f<0 0.938; λ=0.1 σ≥0.48 부터 f<0 0.88~1.0; V0 20점 전부 PSD | 128/점 | D1 σ 격자 20점 | — | — | — | `logs/jacpsd_D1_lam{0.01,0.1}.log` |
+| P12 | A8 복잡도 | Module H 1회: GMM K=512 17.1 ms, 학습 78.8 ms (4.6×); PSD 투영 −0.8% (공짜) | 40/ν | CPU 1스레드 float64 | — | 추론만 | — | `complexity_moduleH.txt` |
+
+**아직 PENDING**: B16e4k (N=1.6e5 를 K=1024 격자로 재확인, 병합 대기), B4e4k (K=2048 격자, 적합 중).
+둘 다 P9 의 결과로 보아 GMM BLER 이 움직이지 않을 것으로 예상하지만 예상으로 끝내지 않고 측정한다.
+
+**쓰면 안 되는 문장 (추가)**: "Tp≥3 에서 학습 prior 가 낫다" (P3·P4 — Tp=3 은 SNR 조건 필요) ·
+"gap 최대점을 예측했다" (P7 — 문면 예측은 빗나갔다; −6/+6 은 사후 선택) · "λ 페널티는 λ 가 작으면 도움이 된다"
+(P10·P11 — GD 가 나빠지고 부호가 망가진다) · "K 를 늘리면 GMM 이 따라온다" (P9 — 안 온다).
