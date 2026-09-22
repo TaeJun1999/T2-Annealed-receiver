@@ -664,8 +664,8 @@ def training_split(testbed, prior, Nr, Nt, ntrain=C.N_TRAIN):
     return X[perm[nv:]], X[perm[:nv]], h.hexdigest()[:16], p
 
 
-def _sigma_range(testbed):
-    nu, sig = SG.load(testbed)                 # MEASURED grid (04_SPEC §3); never invent one
+def _sigma_range(testbed, sigma_tag=""):
+    nu, sig = SG.load(testbed, sigma_tag)      # MEASURED grid (04_SPEC §3); never invent one
     return float(sig.min()), float(sig.max()), nu, sig
 
 
@@ -739,7 +739,7 @@ LR_DIV_LADDER    = (1.0, 1.0, 3.0)          # divisor applied to the frozen lr
 
 def train(rung, attempt, testbed, prior, Nr, Nt, device="cuda", hp=None, resume=True,
           max_epochs=3000, patience=20, min_epochs=200, log_path=None, ckpt=None, verbose=True,
-          ntrain=C.N_TRAIN, jac_reg=0.0, grad_clip=0.0):
+          ntrain=C.N_TRAIN, jac_reg=0.0, grad_clip=0.0, sigma_tag=""):
     """One ladder attempt, exactly under the regime of 04_SPEC §2 / 01_RULES §5.
 
     Stopping: validation loss with no improvement for `patience` epochs, but never before `min_epochs`.
@@ -776,7 +776,7 @@ def train(rung, attempt, testbed, prior, Nr, Nt, device="cuda", hp=None, resume=
     # ntrain defaults to the 1e4 budget every ladder arm gets (01_RULES §5).  It is a parameter ONLY so the
     # report-only sample-complexity curve can vary it; no arm is ever built at a different budget.
     Xtr, Xva, split_hash, pw = training_split(testbed, prior, Nr, Nt, ntrain)
-    smin, smax, nu_grid, sig_grid = _sigma_range(testbed)
+    smin, smax, nu_grid, sig_grid = _sigma_range(testbed, sigma_tag)
     dim = 2 * Nr * Nt
     tr = torch.as_tensor(np_pack(Xtr), dtype=torch.float32, device=dev)
     va = torch.as_tensor(np_pack(Xva), dtype=torch.float32, device=dev)
@@ -875,6 +875,9 @@ def train(rung, attempt, testbed, prior, Nr, Nt, device="cuda", hp=None, resume=
             torch.save(dict(epoch=ep, model=model.state_dict(), ema=ema.shadow, opt=opt.state_dict(),
                             best_val=best, best_epoch=best_ep, rng=g.get_state(), hist=hist, hp=hp,
                             rung=rung, attempt=attempt, testbed=testbed, prior=prior, Nr=Nr, Nt=Nt,
+                            sigma_tag=sigma_tag,     # the MEASURED grid this model was trained on:
+                            # a checkpoint trained on one array must never be read against another
+                            # array's sigma grid (10_SPEC_stageC §7).  ScorePrior reads it back.
                             split_hash=split_hash, wall_sec=time.time() - t_start,
                             jac_reg=jac_reg, grad_clip=grad_clip,
                             rng_jac=(gj.get_state() if gj is not None else None),
@@ -940,7 +943,7 @@ class ScorePrior:
     covers the 1-99 percentile of the queries by construction, so a few percent is expected.  We do NOT clamp:
     clamping would silently return the denoiser of a different noise level."""
 
-    def __init__(self, ckpt, Nr, Nt, Chat, device="cpu", psd_project=False):
+    def __init__(self, ckpt, Nr, Nt, Chat, device="cpu", psd_project=False, sigma_tag=""):
         self.psd_project = bool(psd_project)       # (F1) / Stage C V1 -- OFF by default: V0 is unchanged
         if device == "cpu":
             torch.set_num_threads(1)               # one worker process = one thread (common.py sets the BLAS env)
@@ -954,7 +957,9 @@ class ScorePrior:
         self.cbar = np.trace(self.C).real / self.N
         self.eh2_prior = np.diag(self.C).real.reshape(Nr, Nt, order="F").mean(0)
         try:
-            _, sg = SG.load(self.st["testbed"])
+            # the checkpoint's own tag wins unless the caller names one explicitly: that is what stops
+            # an Nr=16 model from being measured against the frozen Nr=8 grid.
+            _, sg = SG.load(self.st["testbed"], sigma_tag or self.st.get("sigma_tag", ""))
             self.s_lo, self.s_hi = float(sg.min()), float(sg.max())
         except Exception:
             self.s_lo, self.s_hi = 0.0, np.inf
@@ -1215,14 +1220,22 @@ def gate_score(G):
     return float(np.max([G[g] / GATE_TOL[g] for g in GATE_TOL]))
 
 
-def gb_prime(ckpt, gmm_prior, testbed, Nr, Nt, prior=None, n_eval=512, device="cpu", true_prior=None):
+def gb_prime(ckpt, gmm_prior, testbed, Nr, Nt, prior=None, n_eval=512, device="cpu", true_prior=None,
+             sigma_tag=None):
     """GB' (04_SPEC §6) -- the pre-registered REPORT-ONLY comparison for the claim testbed D2, where no exact
     score exists: denoising NMSE of the GMM prior and of the diffusion prior on held-out samples over the SAME
     sigma grid.  It is never used to select anything (§6: "선택에 쓰지 않는다. 보고에만 쓴다")."""
     prior = prior or C.PRIOR_OF[testbed]
     gen = C.make_gen(testbed, prior, Nr, Nt)
     N = Nr * Nt
-    _, _, nu_grid, sig_grid = _sigma_range(testbed)
+    # sigma_tag=None means "ask the checkpoint" (10_SPEC_stageC §7); "" forces the frozen grid.
+    if sigma_tag is None:
+        try:
+            sigma_tag = torch.load(ckpt, map_location="cpu", weights_only=False).get("sigma_tag", "") \
+                if isinstance(ckpt, str) else ""
+        except Exception:
+            sigma_tag = ""
+    _, _, nu_grid, sig_grid = _sigma_range(testbed, sigma_tag)
     H = gen.sample_vecs(C.train_rng(testbed, prior, Nr, 10), n_eval)
     nrng = np.random.default_rng(SEED_GATE)
     E = (nrng.standard_normal((n_eval, N)) + 1j * nrng.standard_normal((n_eval, N))) / np.sqrt(2)

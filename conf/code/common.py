@@ -58,6 +58,13 @@ CELLS = {                                     # 06_SPEC_runner.md §3, priority 
     # work, diagnosed by T2c) and C2 (Tp=4, prior works).  Same array/block as C1/C2 so Tp is the ONLY
     # axis that moves.  Added after T2c's pre-registered diagnosis fired, not after seeing a BLER.
     "C5": dict(Nr=8, Nt=4, T=16, Tp=3, snrs=(-3, 0, 3, 6, 9, 12, 15)),
+    # (10_SPEC_stageC §7, added 2026-09-23) The CO-DIMENSION axis.  C6 differs from C2 in Nr ALONE:
+    # same Nt, T, Tp, code and SNR grid.  Doubling Nr doubles the ambient real dimension 2*Nr*Nt from
+    # 64 to 128 while the support stays a union of 3L-dimensional manifolds (L ~ U{3..8}), so the
+    # co-dimension goes from 40-55 to 104-119.  The channel rank is min(L, Nt) and is UNCHANGED, which
+    # is why this and not a sparser L is the right knob: L < Nt is rank-deficient and breaks the genie
+    # itself (measured: L=3 genie BLER 0.1034 vs 0.0140 at L=5, results/Lstrat_B16e4k_C2_-3dB.txt).
+    "C6": dict(Nr=16, Nt=4, T=16, Tp=4, snrs=(-3, 0, 3, 6, 9, 12, 15)),
 }
 # SNR grids are exp_0925_run.CELLS verbatim: H/H4 (8x4, T=16) -> -3..15 dB, R (4x4, T=28, Tp=2) -> 9/12/15.
 # C4 (4x4, Tp=4) has no exp_0925 counterpart -> 01_RULES §4 fallback "Tp=4 -> 0,3,6,9 dB" shifted onto the

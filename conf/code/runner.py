@@ -284,7 +284,10 @@ def build_point(testbed, cell, prior, snr, ntrain=C.N_TRAIN, beta=C.BETA, t_in=C
         arms["R3-bigamp"] = A.R3BiGAMP(Nr, Nt, T, Tp, sigma2, code, Xp, beta=beta, t_in=t_in)
         cfgs["R3-bigamp"] = dict(arms["R3-bigamp"].cfg_dump, arm="R3-bigamp")
 
-    sp, why = (score_prior(testbed, prior, Nr, Nt, ckpt, ntrain=ntrain) if Nr == 8
+    # Nr in (8, 16): 8 is the Stage A/B array, 16 is the §7 co-dimension cell C6.  The score net is
+    # dimension-agnostic (score.make_model uses dim = 2*Nr*Nt); the guard only keeps arrays with no
+    # trained checkpoint from silently building a score arm.
+    sp, why = (score_prior(testbed, prior, Nr, Nt, ckpt, ntrain=ntrain) if Nr in (8, 16)
                else (None, "ABSENT -- M-ours-dscore only: " + NO_SCORE))
     # Stage C (10_SPEC §3b/§3c).  STRICTLY OPT-IN: with stagec_ckpt=None nothing below is built and the arm
     # set of this point is exactly the pre-registered one.  --stagec-ckpt is a SEPARATE flag from --ckpt, so

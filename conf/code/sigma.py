@@ -105,6 +105,10 @@ def write(testbed, res, prior, out=None, tag=""):
     return nu, sig, out
 
 
-def load(testbed):
-    z = np.load(os.path.join(C.CONF, "results", f"sigma_grid_{testbed}.npz"))
+def load(testbed, tag=""):
+    """tag="" is the FROZEN grid every Stage A/B number was taken with (04_SPEC §3) and is never
+    overwritten.  tag="NR16" etc. loads a grid measured for a DIFFERENT array, which is a different
+    ruler and must never be mixed with the frozen one in the same table (10_SPEC_stageC §7)."""
+    sfx = f"_{tag}" if tag else ""
+    z = np.load(os.path.join(C.CONF, "results", f"sigma_grid_{testbed}{sfx}.npz"))
     return z["nu"], z["sigma"]
