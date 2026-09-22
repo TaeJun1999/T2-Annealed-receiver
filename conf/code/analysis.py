@@ -124,7 +124,8 @@ def load_raw(testbed, root=None):
     data, meta = {}, {}
     for key, chunks in sorted(pts.items()):
         chunks.sort()
-        pos, ok = 0, True
+        # test set starts at trial 0; a review_next DEVELOPMENT run starts at C.DEV_SKIP0 (runner --skip0)
+        pos, ok = (C.DEV_SKIP0 if chunks[0][0] >= C.DEV_SKIP0 else 0), True
         for skip, n, _ in chunks:
             ok &= skip == pos
             pos = skip + n

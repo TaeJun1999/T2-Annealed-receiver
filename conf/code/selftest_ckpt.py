@@ -124,7 +124,18 @@ def test_p04(d):
     print(f"[P0-4] ok: base L1 attempt {sel['base_attempt']} (score {sel['base_score']}), param {hp['param']}")
 
 
+def test_chunk_plan():
+    """runner --skip0: the development set is exactly 16 chunks (2560+40k, 40); the test set is unchanged."""
+    import common as C, runner as R
+    dev = R.chunk_plan(C.DEV_SKIP0, 640, 40)
+    assert dev == [(C.DEV_SKIP0 + 40 * k, 40) for k in range(16)], dev[:3]
+    assert R.chunk_plan(0, 2560, 40) == [(40 * k, 40) for k in range(64)]
+    assert R.chunk_plan(0, 100, 40) == [(0, 40), (40, 40), (80, 20)]
+    print(f"[chunk] ok: dev set = 16 x ({C.DEV_SKIP0}+40k, 40); test set unchanged")
+
+
 if __name__ == "__main__":
+    test_chunk_plan()
     test_stop_rules()
     with tempfile.TemporaryDirectory() as d:
         test_p04(d)

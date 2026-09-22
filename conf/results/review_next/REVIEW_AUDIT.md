@@ -727,3 +727,5 @@ The verifier's nuance is correct. M-ours-bstar and R2-ours-G are mode='colored',
 | N1 | CONFIRMED | 기록만 (사용자 결정 2026-09-23) | `score.train`의 `make_model`은 초기 가중치를 torch 전역 RNG에서 명시적 seed 없이 뽑는다 (`score.py` train 내부, `make_model(rung, hp, Nr, Nt)`). 한 프로세스 한 run이면 torch 기본 seed로 재현되지만, 한 프로세스에서 여러 번 학습하면 순서에 따라 초기값이 달라진다 (selftest에서 같은 설정 두 번 학습 시 epoch 1부터 val 상이 — 0.8848 vs 0.8965). 미수정. |
 | N2 | CONFIRMED → 수정 | FIX | 발산 판정 `vl > 3·best`는 best<0(L6 VAE)에서 val이 음수가 된 뒤 모든 epoch를 bad로 본다. HEAD부터 존재. 기록된 L6 run은 판정 도입(c343853c) 전 학습이라 영향 없음. |
 | N3 | CONFIRMED → 수정 | FIX | 재개 시 발산 카운터 `ndiv`가 0으로 초기화 → 발산 streak 도중 중단·재개한 run이 무중단 run과 다른 epoch에서(또는 다른 판정으로) 멈춘다. HEAD부터 존재. |
+
+> **정정 (2026-09-23 17:20 CDT, N1)**: 위의 "한 프로세스 한 run이면 torch 기본 seed로 재현된다"는 **틀렸다.** 이 torch 빌드(2.14.0+cu130)는 프로세스마다 `torch.initial_seed()`가 달라진다(두 번 실행: 472102272832343518 / 16063582425403287908; common·score import 후에도 매번 다름). 따라서 `score.train`의 초기 가중치는 **어떤 wrapper에서도 재현되지 않는다** — 기존 모든 체크포인트의 초기값은 기록되지 않은 난수다. 데이터 순서·σ·ε 스트림(`g`)과 split은 seed 고정이라 그대로 재현된다. 사용자의 '기록만' 결정은 틀린 전제에서 내려졌으므로 재확인을 요청했다.

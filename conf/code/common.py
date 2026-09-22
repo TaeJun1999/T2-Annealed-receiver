@@ -41,6 +41,7 @@ M_QAM = 2                                     # QPSK
 NT = 4                                        # transmit antennas (all cells)
 N_ITER = 16                                   # outer iterations, ALL arms
 RHO_C, KG = 0.7, 32                           # D1 grid prior: per-component correlation, grid size
+DEV_SKIP0 = 2560                              # review_next: DEVELOPMENT set = trials 2560.. of each point's stream
 N_TRAIN = 10000                               # channel dataset for GMM fit AND diffusion training (identical samples)
 SEED = 20260926
 BETA = 0.7                                    # damping, v1 configuration

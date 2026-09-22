@@ -53,8 +53,10 @@ def main():
     fam, K = ("kron", kron_K) if bstar == "kron" else ("full", int(bstar[3:]))
     gp = C.GMMPriorB(NR, NT, fits[(fam, K)]["covs"], fits[(fam, K)]["pi"])
     G = score.gb_prime(ck, gp, "D2", NR, NT, prior=PRIOR, n_eval=a.n_eval, device="cuda",
-                       sigma_tag=STAG)
+                       sigma_tag=STAG, gmm_device="cuda")      # GMM posterior mean batched on GPU, CPU-checked
     rat = np.array([r["nmse_model"] / r["nmse_gmm"] for r in G["per_sigma"]])
+    chk = max(r.get("gmm_gpu_check_rel", 0.0) for r in G["per_sigma"])
+    print(f"[nr16] GMM on GPU, max rel diff vs CPU loop on the checked samples {chk:.2e} (limit 1e-10)", flush=True)
     print(f"[nr16] GMM b* = {bstar} ({fam} K={K}) @N={a.ntrain} | diff/gmm min {rat.min():.4f} "
           f"max {rat.max():.4f} median {np.median(rat):.4f} | equal_budget=True", flush=True)
     np.savez_compressed(os.path.join(C.CONF, "results", f"d2_gbprime_{tag}.npz"),

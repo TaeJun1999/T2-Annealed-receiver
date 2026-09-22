@@ -112,6 +112,12 @@ def _init(tag):
         t.set_num_threads(1)               # one BLAS/torch thread per worker (common.py did the env vars)
 
 
+def chunk_plan(skip0, n, chunk):
+    """[(skip, n_chunk)] covering trials skip0 .. skip0+n-1 of a point's stream (skip0=0: the test set;
+    skip0=C.DEV_SKIP0: the review_next development set)."""
+    return [(s, min(chunk, skip0 + n - s)) for s in range(skip0, skip0 + n, chunk)]
+
+
 def raw_file(testbed, cell, prior, pil, snr, skip, n):
     c = C.CELLS[cell]
     return os.path.join(d_raw(), f"{testbed}_{cell}_{prior}_Nr{c['Nr']}_T{c['T']}_Tp{c['Tp']}_{pil}"
@@ -484,8 +490,8 @@ def cmd_run(a):
               f"{on}, ABSENT for {[c for c in cells if c not in on]}", flush=True)
         print(f"[run] Stage C checkpoint: {stagec_id_str(a.stagec_ckpt)}", flush=True)
         print(f"[run] Stage C gate record: {gate_verdict(a.stagec_ckpt)}", flush=True)
-    tasks = [pt + (s, min(a.chunk, a.n - s), a.ntrain, a.beta, a.tin, a.iters, a.arm, a.ckpt, a.stagec_ckpt)
-             for pt in pts for s in range(0, a.n, a.chunk)]
+    tasks = [pt + (s, m, a.ntrain, a.beta, a.tin, a.iters, a.arm, a.ckpt, a.stagec_ckpt)
+             for pt in pts for s, m in chunk_plan(a.skip0, a.n, a.chunk)]
     tasks = [(testbed,) + t for t in tasks]
     tasks.sort(key=lambda t: (t[4], -C.CELLS[t[1]]["Nr"]))   # first chunks of every point early; 8x4 first
     jobs = min(os.cpu_count(), len(tasks))
@@ -1019,6 +1025,9 @@ def main(argv=None):
     ap.add_argument("--prior", default=None, choices=list(C.PID), help="default: S on D1, S2 on D2")
     ap.add_argument("--n", type=int, default=640, help="trials per point (01_RULES: never below 640 for a real run)")
     ap.add_argument("--chunk", type=int, default=40, help="trials per resumable task")
+    ap.add_argument("--skip0", type=int, default=0,
+                    help="first trial index (review_next: the DEVELOPMENT set is skip 2560.. of the same stream; "
+                         "0 = the pre-registered test set). Non-zero requires --tag.")
     ap.add_argument("--arm", nargs="+", default=None, help="subset of arms to run (requires --tag)")
     ap.add_argument("--iters", type=int, default=C.N_ITER, help="outer iterations, 16 for every arm")
     ap.add_argument("--beta", type=float, default=C.BETA, help="BiG-AMP damping (01_RULES §4: 0.7 -> 0.5 -> 0.3)")
@@ -1064,6 +1073,7 @@ def main(argv=None):
     changed = [f"--{k}" for k, v in (("iters", a.iters != C.N_ITER),
                                      ("beta", a.beta != C.BETA), ("tin", a.tin != C.T_IN),
                                      ("arm", a.arm is not None), ("ntrain", a.ntrain != C.N_TRAIN),
+                                     ("skip0", a.skip0 != 0),
                                      ("restarts", a.restarts != RESTARTS),
                                      ("fit-iters", a.fit_iters != FIT_ITERS),
                                      # --stagec-ckpt ADDS arms to the point, so it changes the frozen arm

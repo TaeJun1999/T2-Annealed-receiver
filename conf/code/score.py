@@ -1323,11 +1323,35 @@ def gate_score(G):
     return float(np.max([G[g] / GATE_TOL[g] for g in GATE_TOL]))
 
 
+def gmm_denoise_batch(gmm_prior, Q, nu, device="cuda", chunk=256):
+    """Posterior mean of GMMPrior.denoise for a BATCH of queries, torch float64/complex128 on `device`.
+    Same formulas as Demo/t2_route_a.GMMPrior._post (U_k^H q, per-component Wiener gains, softmax weights);
+    only the mean is returned (GB' needs no Jacobian).  01_RULES §9.2 priority 2 / §9.3: separate wrapper in
+    conf/code, same precision as the CPU path; callers check it against the CPU loop (gb_prime does)."""
+    dev = torch.device(device)
+    U = torch.as_tensor(gmm_prior.U, dtype=torch.complex128, device=dev)              # (K,N,N)
+    lam = torch.as_tensor(gmm_prior.lam, dtype=torch.float64, device=dev)             # (K,N)
+    logpi = torch.as_tensor(np.log(gmm_prior.pi), dtype=torch.float64, device=dev)
+    g = lam / (lam + nu)
+    base = logpi - torch.log(lam + nu).sum(1)
+    out = []
+    for i in range(0, len(Q), chunk):
+        q = torch.as_tensor(Q[i:i + chunk], dtype=torch.complex128, device=dev)       # (B,N)
+        z = torch.einsum("kji,bj->bki", U.conj(), q)                                   # (B,K,N)
+        w = torch.softmax(base - (z.abs() ** 2 / (lam + nu)).sum(2), dim=1)           # (B,K)
+        mk = torch.einsum("kij,bkj->bki", U, g * z)                                    # (B,K,N)
+        out.append(torch.einsum("bk,bki->bi", w.to(mk.dtype), mk).cpu().numpy())
+    return np.concatenate(out)
+
+
 def gb_prime(ckpt, gmm_prior, testbed, Nr, Nt, prior=None, n_eval=512, device="cpu", true_prior=None,
-             sigma_tag=None):
+             sigma_tag=None, gmm_device=None, gmm_check=64):
     """GB' (04_SPEC §6) -- the pre-registered REPORT-ONLY comparison for the claim testbed D2, where no exact
     score exists: denoising NMSE of the GMM prior and of the diffusion prior on held-out samples over the SAME
-    sigma grid.  It is never used to select anything (§6: "선택에 쓰지 않는다. 보고에만 쓴다")."""
+    sigma grid.  It is never used to select anything (§6: "선택에 쓰지 않는다. 보고에만 쓴다").
+    gmm_device (opt-in, default None = the original per-sample CPU loop): evaluate the GMM posterior mean with
+    gmm_denoise_batch on that device.  The first `gmm_check` samples of every sigma are ALSO run through the CPU
+    loop and must agree to 1e-10 relative (01_RULES §9.4 G1 for complex128), or this raises."""
     prior = prior or C.PRIOR_OF[testbed]
     gen = C.make_gen(testbed, prior, Nr, Nt)
     N = Nr * Nt
@@ -1348,8 +1372,18 @@ def gb_prime(ckpt, gmm_prior, testbed, Nr, Nt, prior=None, n_eval=512, device="c
     for k, (nu, sg) in enumerate(zip(nu_grid, sig_grid)):
         Q = H + np.sqrt(nu) * E
         p_h = float(np.mean(np.sum(np.abs(H) ** 2, 1)))
-        r = dict(k=k, nu=float(nu), sigma=float(sg), nmse_gmm=float(np.mean(
-            [np.sum(np.abs(gmm_prior.denoise(Q[i], nu)[0] - H[i]) ** 2) for i in range(n_eval)])) / p_h)
+        if gmm_device is None:
+            r = dict(k=k, nu=float(nu), sigma=float(sg), nmse_gmm=float(np.mean(
+                [np.sum(np.abs(gmm_prior.denoise(Q[i], nu)[0] - H[i]) ** 2) for i in range(n_eval)])) / p_h)
+        else:
+            Mg = gmm_denoise_batch(gmm_prior, Q, float(nu), device=gmm_device)
+            nc = min(gmm_check, n_eval)
+            Mc = np.array([gmm_prior.denoise(Q[i], nu)[0] for i in range(nc)])
+            rel = float(np.max(np.linalg.norm(Mg[:nc] - Mc, axis=1) / np.maximum(np.linalg.norm(Mc, axis=1), 1e-300)))
+            if not rel <= 1e-10:
+                raise RuntimeError(f"gmm_denoise_batch disagrees with the CPU loop at sigma={sg:.4g}: rel {rel:.3e}")
+            r = dict(k=k, nu=float(nu), sigma=float(sg), gmm_gpu_check_rel=rel,
+                     nmse_gmm=float(np.mean(np.sum(np.abs(Mg - H) ** 2, 1))) / p_h)
         if true_prior is not None:
             r["nmse_exact"] = float(np.mean(
                 [np.sum(np.abs(true_prior.denoise(Q[i], nu)[0] - H[i]) ** 2) for i in range(n_eval)])) / p_h
