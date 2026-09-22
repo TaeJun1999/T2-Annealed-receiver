@@ -595,6 +595,9 @@ In the equal-budget tables the same V0→V1 ratio is **81.6 %** (B1e4), **80.4 %
 
 ## E7. PENDING — runs not yet landed
 
+> **[SUPERSEDED 2026-09-22 21:45]** 이 절은 14:40 시점 상태다. 나열된 항목은 전부 착지했고
+> 확정 수치는 아래 ADDENDUM (P1~P14) 에 있다. 이 절은 "무엇이 언제 없었는가" 의 기록으로만 남긴다.
+
 | # | What is missing | What will fill it | Current state |
 |---|---|---|---|
 | **P1** | **`tables_D2_B16e4.txt`** — the equal-budget N=1.6e5 comparison. **This is the only run that would make a headline both gate-qualified AND equal-budget.** | The N=1.6e5 GMM EM fit completing for Nr=8, then a BLER run at N_train=160000 for every arm. | **Does not exist.** `results/gmm_fits_D2_n16e4/` was still being written while the verifiers read it. As of my read: **Nr=8 kron K=128 missing** (full family K=16…512 complete); **Nr=4 kron K=64/128/256 missing**. **No authored summary `results/gmm_fit_D2_n16e4.txt` exists** — every N=1.6e5 GMM likelihood in §D1 above is my own computation from the `.npz` files. `DECISIONS.md` 2026-09-22 12:55 flags a live hazard: `arms.load_fits` **silently accepts a partial grid** and `gmm_selection` then picks b* from the reduced set — the same failure path as the 05:55 BLOCKER. **Until `check_fits_n16e4.sh` passes for Nr=8, no B16e4 number should be quoted.** |
@@ -712,7 +715,7 @@ Each line is a sentence the evidence does not support, with the measurement that
 | **`tables_D2_C.txt:41` V4b budget `N_train=10000`** | **(iv) equal budget — wrong in that table.** Code wins: V4b's budget there is N_train=1.6e5. [X5] |
 | **The n=640 D1 confirmatory figures** (C2 "7:8 p=1.0", C1 "92:72 p=0.14") | **(i) n.** Below the pre-registered n ≥ 2560 floor at decision points; superseded. |
 | **Test M6** | **No result exists** in either test file. Do not assert it in either direction. |
-| **Any B16e4 / seed-a3 / K=1024-at-4e4-or-1.6e5 / λ<1.0 number** | **Does not exist yet.** See PENDING P1–P4. |
+| ~~**Any B16e4 / seed-a3 / K=1024-at-4e4-or-1.6e5 / λ<1.0 number**~~ | ~~**Does not exist yet.**~~ **[SUPERSEDED 21:45 — 전부 존재한다. ADDENDUM P1~P14 참조.]** |
 | **"b* at N=1.6e5" as an authored project result** | **No summary file `results/gmm_fit_D2_n16e4.txt` exists**, and the `.npz` set is **incomplete** (Nr=8 kron K=128 missing). The values in §D1 are my own computation from a live, unfinished directory. |
 
 ---
@@ -724,7 +727,9 @@ Each line is a sentence the evidence does not support, with the measurement that
 | # | 사실 | 수치 | n | testbed·셀·SNR | 게이트 | 동일예산 | power | source |
 |---|---|---|---|---|---|---|---|---|
 | P1 | **게이트 통과 + 동일예산** 표: V1 이 GMM 을 이김 | V1 0.145 vs GMM 0.253; `bstar→V1` −3 dB 325:49, +0 122:19, +3 42:10, **pooled 489:78 p=1e-73**, 3/3 | 2560 | D2 C2 −3/+0/+3 | 학습 arm `d2sx_N160000_a1` — D1 형제 `sx_N160000_D1` PASS (LADDER_C.md:1); D2 자체 게이트 행 없음 | **예 (전 arm N=1.6e5, b\*=kron K=512, Nr=8 12 구성 전부에서 선택)** | POWERED | `tables_D2_B16e4.txt` |
-| P2 | 동일예산 곡선 3점 완성 | V1 0.145/0.145/0.145, GMM 0.252/0.250/0.253 (N=1e4/4e4/1.6e5) | 2560 | D2 C2 −3 dB | 1e4·4e4 FAIL(GC 0.243/0.167), 1.6e5 PASS(형제) | 예 (각 점 내부) | POWERED (각 점) | `tables_D2_B{1e4,4e4,16e4}.txt` |
+| P2 | 동일예산 곡선 3점, **K 고정 512** | V1 0.145/0.145/0.145, GMM 0.252/0.250/0.253 → 격차 0.107/0.106/0.108 | 2560 | D2 C2 −3 dB | 1e4·4e4 FAIL(GC 0.243/0.167), 1.6e5 PASS(형제) | 예 (각 점 내부) | POWERED (각 점) | `tables_D2_B{1e4,4e4,16e4}.txt` |
+| P2′ | 같은 곡선, **각 예산의 실제 b\*** (§6l 이 요구하는 baseline) | GMM 0.252(K=512)/0.248(K=2048)/0.243(K=1024) → **격차 0.107/0.104/0.098 (8% 감소)** | 2560 | D2 C2 −3 dB | 위와 같음 | 예 | POWERED | `tables_D2_B{1e4,4e4k,16e4k}.txt` |
+| | **P2 와 P2′ 는 반드시 함께 인용한다.** "예산은 격차를 움직이지 않는다" 는 P2(K 고정)에서만 참이고, §6l 무결성 조건이 요구하는 예산별 b\* 로는 격차가 8% 줄어든다. 한쪽만 쓰면 F15(b) 에서 잡힌 것과 같은 결함이다 | | | | | | | `figs/F15_gap_robustness.txt` |
 | P3 | §6f @1.6e5: C5 는 동률, C1 은 GMM | C5 `bstar→V1` +6 232:156, +12 206:213, +15 185:271, pooled 623:640 p=0.65 (1/3 대 1/3); C1 1109:1691 p=3.1e-28 GMM 3/3 | 2560 | D2 C5 +6/+12/+15; C1 +6/+12/+15 | 형제 PASS | 예 | POWERED | `tables_D2_B16e4.txt` |
 | P4 | 동작 범위 문장 (게이트 통과 예산) | "Tp=4 전 SNR / Tp=3 ≤ +6 dB (−3: 0.400 vs 0.517) / Tp=2 열세" | 2560 | D2 | 형제 PASS | 예 | — | STATUS §6f@1.6e5 |
 | P5 | 시드 강건성 3/3 | V1 −3 dB 0.1453 / 0.1496 / 0.1477 (a1/a2/a3), 전부 a1 CI [0.132,0.159] 안; V0→V1 81.6/83.0/81.8%; a3 pooled 495:64 p=1.5e-83 | 2560 각 | D2 C2 | FAIL (N=1e4) | 예 | POWERED | `tables_D2_B1e4s{2,3}.txt` |
