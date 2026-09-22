@@ -146,11 +146,11 @@ damping·restart·n_inner 는 prior/adapter 실험과 분리해 별도 사전 �
 | 선행: `build_our_arms(mean_arms=True)`, gmmB-scorew arm | 미구현 | — |
 | 선행: `score.train(phase_aug=True)` + selftest | 미구현 | — |
 | §2.1 P1-1 cavity | 미실행 (코드 미작성) | — |
-| §2.2 P1-2 calibration | 미실행 | — |
-| §2.3 P1-3 phase | 미실행 (예비 n=16 값만, 미저장) | — |
-| §2.4 P1-4 pseudo | 미실행 (예비 n=16 값만, 미저장) | — |
+| §2.2 P1-2 calibration | held-out **완료** (18:05 CDT): H2 기각 안 됨, C-calib 만족(1/20 점만 두 대역 충족; ρ_sub 는 대역 안, cov90 이 대역 밖). 실제 질의 부분은 §2.1 과 함께 | `p1_heldout.{npz,txt}` |
+| §2.3 P1-3 phase | held-out **완료**: C-phase 만족(0.246/0.148/0.083, 해석 무관) → A1 진행 | `p1_heldout.{npz,txt}` |
+| §2.4 P1-4 pseudo | held-out(보고 전용) 완료: V1 r_P 0.33~0.49. 판정(H4)은 §2.1 실제 질의 반복 4 에서 | `p1_heldout.{npz,txt}` |
 | §2.5 H0 통제 재학습 | **실행 중** (2026-09-22 17:14 CDT~, GPU 1, 초기값 비고정 — N1 결정에 따라 재시작 가능) | `ckpt_review_next/ctrl_N160000_a1.pt` |
-| §3.1 A1 | C-phase 대기 | — |
+| §3.1 A1 | C-phase 만족 → 1단계(D1 형제 aug 학습 + 게이트) 선행 코드(phase_aug, D1 wrapper) 대기 | — |
 | §3.2 A2 | 선행 코드 뒤 실행 | — |
 | P0-2 실경로 비용 벤치 | 코드 있음, C6 종료 후 실행 | `complexity_moduleH_ep.txt` |
 | §7 C6 재실행 (`NR16run2`) | 실행 중 (05:28~) | `raw_NR16run2`, `tables_D2_NR16run2.txt` |
