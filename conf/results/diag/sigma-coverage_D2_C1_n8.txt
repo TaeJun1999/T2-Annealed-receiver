@@ -1,0 +1,132 @@
+# date        : 2026-09-22 13:09:27 KST
+# git commit  : 7737551
+# versions    : python 3.12.14  numpy 2.5.2  scipy 1.18.1  torch 2.14.0+cu130 (cuda_available=True)
+# device      : CPU (192 cores) | dtype: complex128 / float64 | deterministic: yes (fixed seeds, no GPU in the receiver)
+# testbed     : D2
+# seed rule   : default_rng([20260926, TBID[testbed], PID[prior], Nr, T, Tp, int(snr)+100])  (trials of a point = ONE stream)
+# code        : rate-1/2 conv (133,171)_8 nu=6 terminated, QPSK, outer iterations = 16 for EVERY arm
+# Demo/ hashes: t2_route_a.py=95a5408901ec125c  t2_trellis.py=31cd0ee9c68e972b  t2_gmm.py=d064e58c7510c769
+# content     : H2 diagnostic -- the sigma_t the RouteA loop ACTUALLY queries Module H with,
+#               per outer iteration, vs the FROZEN trained/gated grid range.  DIAGNOSTIC ONLY;
+#               nothing here selects, tunes or replaces any pre-registered number.
+# checkpoint  : /home/HTJ/t2/conf/ckpt/d2sx_N10000_a1.pt  (fixed, not retrained)
+# cell        : C1 (8x4 T=16 Tp=4) prior S2  pilots=dft  b*=kron  n=8 trials/point
+# trained/gated sigma_t range = [3.306220e-02, 8.451555e-01]  (score._sigma_range -> sigma.load('D2'),
+#               the frozen measured grid; train() draws sigma log-uniform on exactly this interval)
+# convention  : nu_q per complex entry, sigma_t = sqrt(nu_q/2) per real dimension
+
+===== SNR -3 dB ======================================================================
+  --- M-ours-dscore
+      sigma_t queried : median 2.9998e+05  [9.9926e-01, 3.2109e+07]
+      out of range    : 48/48 = 100.0%   (below 0, above 48)
+      first it out of range : [0 0 0 1 0 1 0 1]  (0 = never)
+      first it NMSE > 1     : [0 0 0 1 0 1 0 1]  (0 = never)
+      ORDER on the 3 trials with both: NMSE>1 strictly first 0, same iteration 3, out-of-range first 0
+      it :          1         2         3         4         5         6         7         8         9        10        11        12        13        14        15        16
+      sig:  9.993e-01 5.455e+00 2.030e+01 1.036e+04 3.000e+05 3.000e+05 3.006e+05 3.006e+05 8.521e+05 5.640e+06 5.640e+06 1.780e+05 8.635e+05 2.253e+06 1.963e+07 1.963e+07
+      oor%:      37.5      37.5      37.5      37.5      37.5      37.5      37.5      37.5      37.5      37.5      37.5      37.5      37.5      37.5      37.5      37.5
+      nmse: 1.267e+11 1.487e+12 1.050e+09 2.846e+04 4.403e+01 5.301e+01 6.126e+01 8.838e+02 8.141e+01 1.192e+01 1.425e+01 1.886e+03 2.651e+02 1.372e+00 1.099e+00 9.523e-01
+      BLER@1/@2/@16 = 1.000 1.000 1.000
+  --- M-ours-bstar
+      nu_q is NaN at every iteration: this arm never queries a DENOISER (mode='colored', exact mixture-EP site).  NMSE trajectory only.
+      nmse: 6.539e-01 7.262e-01 7.417e-01 6.942e-01 6.761e-01 7.549e-01 7.044e-01 7.172e-01 6.851e-01 7.752e-01 6.769e-01 6.216e-01 6.038e-01 6.299e-01 6.270e-01 5.887e-01
+      BLER@1/@2/@16 = 1.000 1.000 0.875
+  --- ctrl-bstar-sIF
+      sigma_t queried : median 4.4143e-01  [2.6432e-01, 1.0459e+00]
+      out of range    : 8/128 = 6.2%   (below 0, above 8)
+      first it out of range : [1 1 1 1 1 1 1 1]  (0 = never)
+      first it NMSE > 1     : [7 7 4 0 7 1 3 9]  (0 = never)
+      ORDER on the 7 trials with both: NMSE>1 strictly first 0, same iteration 1, out-of-range first 6
+      it :          1         2         3         4         5         6         7         8         9        10        11        12        13        14        15        16
+      sig:  1.046e+00 7.499e-01 6.072e-01 5.564e-01 5.049e-01 4.687e-01 4.389e-01 4.106e-01 4.083e-01 3.705e-01 3.419e-01 2.913e-01 3.373e-01 3.357e-01 3.472e-01 3.486e-01
+      oor%:     100.0       0.0       0.0       0.0       0.0       0.0       0.0       0.0       0.0       0.0       0.0       0.0       0.0       0.0       0.0       0.0
+      nmse: 6.610e-01 8.529e-01 8.528e-01 9.091e-01 9.193e-01 9.642e-01 1.054e+00 9.808e-01 9.771e-01 1.020e+00 9.865e-01 9.916e-01 9.535e-01 9.476e-01 9.592e-01 1.019e+00
+      BLER@1/@2/@16 = 1.000 1.000 0.875
+  --- ctrl-G-sIF
+      sigma_t queried : median 3.6724e-01  [2.7318e-01, 9.9926e-01]
+      out of range    : 8/128 = 6.2%   (below 0, above 8)
+      first it out of range : [1 1 1 1 1 1 1 1]  (0 = never)
+      first it NMSE > 1     : [0 0 0 0 0 2 4 6]  (0 = never)
+      ORDER on the 3 trials with both: NMSE>1 strictly first 0, same iteration 0, out-of-range first 3
+      it :          1         2         3         4         5         6         7         8         9        10        11        12        13        14        15        16
+      sig:  9.993e-01 8.114e-01 6.805e-01 4.968e-01 4.507e-01 3.738e-01 3.707e-01 3.358e-01 3.571e-01 3.382e-01 3.541e-01 3.285e-01 3.205e-01 3.309e-01 3.184e-01 3.291e-01
+      oor%:     100.0       0.0       0.0       0.0       0.0       0.0       0.0       0.0       0.0       0.0       0.0       0.0       0.0       0.0       0.0       0.0
+      nmse: 6.592e-01 7.073e-01 8.267e-01 7.870e-01 8.678e-01 9.684e-01 9.186e-01 9.120e-01 8.488e-01 7.933e-01 7.543e-01 7.905e-01 7.383e-01 8.020e-01 8.095e-01 7.811e-01
+      BLER@1/@2/@16 = 1.000 1.000 0.750
+
+===== SNR +0 dB ======================================================================
+  --- M-ours-dscore
+      sigma_t queried : median 4.8397e-01  [1.9511e-01, 8.6585e-01]
+      out of range    : 8/128 = 6.2%   (below 0, above 8)
+      first it out of range : [1 1 1 1 1 1 1 1]  (0 = never)
+      first it NMSE > 1     : [1 1 1 2 2 2 3 1]  (0 = never)
+      ORDER on the 8 trials with both: NMSE>1 strictly first 0, same iteration 4, out-of-range first 4
+      it :          1         2         3         4         5         6         7         8         9        10        11        12        13        14        15        16
+      sig:  8.659e-01 4.283e-01 3.307e-01 3.364e-01 3.114e-01 3.518e-01 4.190e-01 4.614e-01 4.945e-01 4.775e-01 6.286e-01 5.248e-01 5.839e-01 6.151e-01 5.958e-01 4.922e-01
+      oor%:     100.0       0.0       0.0       0.0       0.0       0.0       0.0       0.0       0.0       0.0       0.0       0.0       0.0       0.0       0.0       0.0
+      nmse: 9.880e-01 1.880e+00 1.720e+00 2.706e+00 2.323e+00 3.768e+00 2.984e+00 1.622e+00 1.546e+00 9.057e-01 2.204e+00 1.493e+00 1.206e+00 9.301e-01 8.394e-01 1.485e+00
+      BLER@1/@2/@16 = 1.000 1.000 0.875
+  --- M-ours-bstar
+      nu_q is NaN at every iteration: this arm never queries a DENOISER (mode='colored', exact mixture-EP site).  NMSE trajectory only.
+      nmse: 7.797e-01 1.162e+00 9.804e-01 8.280e-01 7.586e-01 7.438e-01 7.958e-01 7.872e-01 7.907e-01 7.720e-01 8.072e-01 7.475e-01 7.373e-01 6.814e-01 7.229e-01 6.826e-01
+      BLER@1/@2/@16 = 1.000 1.000 0.625
+  --- ctrl-bstar-sIF
+      sigma_t queried : median 2.3942e-01  [1.8626e-01, 9.1932e-01]
+      out of range    : 8/128 = 6.2%   (below 0, above 8)
+      first it out of range : [1 1 1 1 1 1 1 1]  (0 = never)
+      first it NMSE > 1     : [3 1 0 2 0 2 0 0]  (0 = never)
+      ORDER on the 4 trials with both: NMSE>1 strictly first 0, same iteration 1, out-of-range first 3
+      it :          1         2         3         4         5         6         7         8         9        10        11        12        13        14        15        16
+      sig:  9.193e-01 6.261e-01 4.177e-01 3.326e-01 2.372e-01 2.556e-01 2.362e-01 2.243e-01 2.220e-01 1.972e-01 1.944e-01 2.007e-01 1.947e-01 1.933e-01 2.046e-01 1.958e-01
+      oor%:     100.0       0.0       0.0       0.0       0.0       0.0       0.0       0.0       0.0       0.0       0.0       0.0       0.0       0.0       0.0       0.0
+      nmse: 8.566e-01 7.994e-01 1.116e+00 1.132e+00 9.876e-01 8.735e-01 8.693e-01 7.580e-01 6.824e-01 7.619e-01 7.973e-01 7.425e-01 7.965e-01 7.301e-01 9.062e-01 8.051e-01
+      BLER@1/@2/@16 = 1.000 1.000 0.625
+  --- ctrl-G-sIF
+      sigma_t queried : median 2.2814e-01  [1.9122e-01, 8.6585e-01]
+      out of range    : 8/128 = 6.2%   (below 0, above 8)
+      first it out of range : [1 1 1 1 1 1 1 1]  (0 = never)
+      first it NMSE > 1     : [0 1 3 3 0 2 0 0]  (0 = never)
+      ORDER on the 4 trials with both: NMSE>1 strictly first 0, same iteration 1, out-of-range first 3
+      it :          1         2         3         4         5         6         7         8         9        10        11        12        13        14        15        16
+      sig:  8.659e-01 7.393e-01 4.782e-01 3.592e-01 2.712e-01 2.308e-01 2.194e-01 2.021e-01 2.003e-01 2.142e-01 2.003e-01 2.107e-01 2.003e-01 2.209e-01 2.057e-01 2.002e-01
+      oor%:     100.0       0.0       0.0       0.0       0.0       0.0       0.0       0.0       0.0       0.0       0.0       0.0       0.0       0.0       0.0       0.0
+      nmse: 8.637e-01 8.420e-01 9.494e-01 9.408e-01 8.610e-01 7.978e-01 7.978e-01 7.530e-01 8.188e-01 7.507e-01 7.202e-01 7.444e-01 8.196e-01 7.860e-01 8.113e-01 7.963e-01
+      BLER@1/@2/@16 = 1.000 1.000 0.750
+
+===== SNR +15 dB ======================================================================
+  --- M-ours-dscore
+      sigma_t queried : median 9.5157e-02  [3.2438e-02, 7.1246e-01]
+      out of range    : 27/128 = 21.1%   (below 27, above 0)
+      first it out of range : [ 0  5 14  0  0  0  0  3]  (0 = never)
+      first it NMSE > 1     : [2 1 2 1 1 1 1 1]  (0 = never)
+      ORDER on the 3 trials with both: NMSE>1 strictly first 3, same iteration 0, out-of-range first 0
+      it :          1         2         3         4         5         6         7         8         9        10        11        12        13        14        15        16
+      sig:  7.125e-01 4.458e-02 4.217e-02 4.920e-02 1.112e-01 1.645e-01 1.745e-01 1.601e-01 1.950e-01 1.577e-01 1.280e-01 8.686e-02 8.396e-02 3.787e-02 3.376e-02 4.244e-02
+      oor%:       0.0       0.0      12.5      12.5      25.0      25.0      25.0      25.0      25.0      25.0      25.0      25.0      25.0      37.5      25.0      25.0
+      nmse: 1.974e+02 1.192e+00 1.094e+00 1.427e+00 4.279e+00 3.837e+00 8.027e+00 9.788e+01 3.236e+01 1.241e+01 6.005e+00 2.001e+00 1.059e+00 1.157e+00 1.108e+00 1.106e+00
+      BLER@1/@2/@16 = 0.875 0.875 0.750
+  --- M-ours-bstar
+      nu_q is NaN at every iteration: this arm never queries a DENOISER (mode='colored', exact mixture-EP site).  NMSE trajectory only.
+      nmse: 4.325e-01 4.582e-01 1.350e-01 1.746e-01 2.787e-03 2.787e-03 2.787e-03 2.787e-03 2.787e-03 2.787e-03 2.787e-03 2.787e-03 2.787e-03 2.787e-03 2.787e-03 2.787e-03
+      BLER@1/@2/@16 = 1.000 0.750 0.250
+  --- ctrl-bstar-sIF
+      sigma_t queried : median 3.6127e-02  [3.2783e-02, 7.7656e-01]
+      out of range    : 14/128 = 10.9%   (below 14, above 0)
+      first it out of range : [0 0 0 0 0 0 0 3]  (0 = never)
+      first it NMSE > 1     : [0 0 0 0 0 2 0 0]  (0 = never)
+      it :          1         2         3         4         5         6         7         8         9        10        11        12        13        14        15        16
+      sig:  7.766e-01 2.252e-01 5.882e-02 3.606e-02 3.592e-02 3.474e-02 3.600e-02 3.516e-02 3.514e-02 3.551e-02 3.537e-02 3.427e-02 3.499e-02 3.600e-02 3.578e-02 3.600e-02
+      oor%:       0.0       0.0      12.5      12.5      12.5      12.5      12.5      12.5      12.5      12.5      12.5      12.5      12.5      12.5      12.5      12.5
+      nmse: 4.415e-01 3.805e-01 1.918e-01 1.920e-01 3.249e-03 3.546e-03 3.537e-03 3.546e-03 3.545e-03 3.547e-03 3.547e-03 3.547e-03 3.547e-03 3.547e-03 3.547e-03 3.547e-03
+      BLER@1/@2/@16 = 0.875 0.750 0.375
+  --- ctrl-G-sIF
+      sigma_t queried : median 3.6666e-02  [3.2750e-02, 7.1246e-01]
+      out of range    : 16/128 = 12.5%   (below 16, above 0)
+      first it out of range : [0 0 0 9 0 0 0 3]  (0 = never)
+      first it NMSE > 1     : [0 0 0 0 0 0 0 0]  (0 = never)
+      it :          1         2         3         4         5         6         7         8         9        10        11        12        13        14        15        16
+      sig:  7.125e-01 3.837e-01 1.094e-01 3.672e-02 3.672e-02 3.630e-02 3.672e-02 3.607e-02 3.495e-02 3.531e-02 3.511e-02 3.522e-02 3.495e-02 3.495e-02 3.495e-02 3.591e-02
+      oor%:       0.0       0.0      12.5      12.5      12.5      12.5      12.5      12.5      25.0      12.5      12.5      12.5      12.5      12.5      25.0      12.5
+      nmse: 4.434e-01 3.490e-01 2.608e-01 1.811e-01 3.494e-03 3.494e-03 3.494e-03 3.494e-03 3.494e-03 3.494e-03 3.494e-03 3.494e-03 3.494e-03 3.494e-03 3.494e-03 3.494e-03
+      BLER@1/@2/@16 = 1.000 0.625 0.375
+

@@ -72,6 +72,7 @@ def run(cell, snrs, n, testbed="D2", prior="S2"):
         first = rx["M-ours-bstar"]
         logs = {k: {q: [] for q in KEYS} for k in rx}
         qnu = {k: [] for k in rx}
+        nfail = {}
         for tr in range(n):
             H = gen.sample(rng)
             u = rng.integers(0, 2, code.K)
@@ -79,13 +80,36 @@ def run(cell, snrs, n, testbed="D2", prior="S2"):
             X, Y = first.transmit(u, perm, H, rng)
             for k, r in rx.items():
                 del rec[k][:]
-                o = r.run(Y, H, u, perm, C.N_ITER)
+                try:
+                    o = r.run(Y, H, u, perm, C.N_ITER)
+                except Exception as e:                       # noqa: BLE001
+                    # (10_SPEC_stageC §6j) An arm that blows up hard enough is not a missing
+                    # measurement, it IS the measurement: at C1 the learned arm drives nuE to
+                    # infinity and `I/nuE + G` goes singular inside t2_route_a.  runner.py already
+                    # records such trials as "arm-trial exceptions"; this driver did not, so a
+                    # single C1 trial killed the whole sweep.  Record NaN for that trial and count
+                    # it.  No successful trial's numbers change; nothing under Demo/ is touched.
+                    nfail[k] = nfail.get(k, 0) + 1
+                    if nfail[k] == 1:
+                        print(f"[diag] EXCEPTION arm={k} snr={snr:+.0f} trial={tr}: "
+                              f"{type(e).__name__}: {e}", flush=True)
+                    for q in KEYS:
+                        logs[k][q].append(np.full(C.N_ITER, np.nan))
+                    qnu[k].append([v for _, v in rec[k]])
+                    continue
                 for q in KEYS:
                     logs[k][q].append(o[q])
                 qnu[k].append([v for _, v in rec[k]])
+        if nfail:
+            print(f"[diag] snr {snr:+.0f} dB  arm-trial exceptions: "
+                  + "  ".join(f"{k}={v}/{n}" for k, v in sorted(nfail.items())), flush=True)
         res[snr] = {k: {q: np.asarray(v, float) for q, v in d.items()} for k, d in logs.items()}
         for k in rx:
-            res[snr][k]["queried_nu"] = np.asarray(qnu[k], float) if qnu[k] and qnu[k][0] else np.zeros((n, 0))
+            # (§6j) a trial that raised may have logged fewer nu_q than a completed one, which would
+            # make this list ragged.  Pad with NaN to the longest trial instead of dropping anything.
+            w = max((len(v) for v in qnu[k]), default=0)
+            res[snr][k]["queried_nu"] = (np.array([v + [np.nan] * (w - len(v)) for v in qnu[k]], float)
+                                         if w else np.zeros((n, 0)))
         print(f"[diag] snr {snr:+.0f} dB  n={n}  {time.time() - t0:.0f} s  pil={pil}  b*={bstar}  "
               f"dscore qstats={sp.query_stats()}", flush=True)
     return res, pil, bstar, sp
