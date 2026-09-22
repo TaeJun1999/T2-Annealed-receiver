@@ -127,7 +127,7 @@ def report(res, s_lo, s_hi, pil, bstar, cell, n, path):
         "              per outer iteration, vs the FROZEN trained/gated grid range.  DIAGNOSTIC ONLY;",
         "              nothing here selects, tunes or replaces any pre-registered number.",
         f"checkpoint  : {CKPT}  (fixed, not retrained)",
-        f"cell        : {cell} (8x4 T=16 Tp=4) prior S2  pilots={pil}  b*={bstar}  n={n} trials/point",
+        f"cell        : {cell} (8x4 T=16 Tp={C.CELLS[cell]['Tp']}) prior S2  pilots={pil}  b*={bstar}  n={n} trials/point",
         f"trained/gated sigma_t range = [{s_lo:.6e}, {s_hi:.6e}]  (score._sigma_range -> sigma.load('D2'),",
         "              the frozen measured grid; train() draws sigma log-uniform on exactly this interval)",
         "convention  : nu_q per complex entry, sigma_t = sqrt(nu_q/2) per real dimension",

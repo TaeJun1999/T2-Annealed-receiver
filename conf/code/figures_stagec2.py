@@ -64,7 +64,11 @@ def bler_from_raw(rawdir, cell):
                 acc[k.split("|")[0]][snr].append(d[k][:, 15])
     out = {}
     for arm, per in acc.items():
-        out[arm] = np.array([np.concatenate(per[s]).mean() if s in per else np.nan for s in SNRS])
+        # SAME rule as the pre-registered analysis.py:172-175 -- a block on which the arm raised carries a
+        # non-finite blk_err and is COUNTED AS A BLOCK ERROR, never dropped.  (A first draft averaged with
+        # np.mean and printed 'nan' for C1 -3 dB; the tables file says 1.000, and the tables file is right.)
+        out[arm] = np.array([np.where(np.isfinite(v := np.concatenate(per[s])), v, 1.0).mean()
+                             if s in per else np.nan for s in SNRS])
     return out
 
 
@@ -110,10 +114,6 @@ def fig12():
             y = b[arm]
             ax.semilogy(SNRS, y, ls, color=col, marker=mk, ms=4.2, lw=1.4,
                         label=lab if cell == "C2" else None)
-            nanmask = np.isnan(y)
-            if nanmask.any():                       # C1 -3 dB: every trial raised -> no mean exists
-                ax.plot(SNRS[nanmask], np.full(nanmask.sum(), 1.35), marker="x", ms=7, mew=1.8,
-                        ls="none", color=col, clip_on=False)
         ax.set_title(f"{cell}   $T_p$={tp}", fontsize=9)
         ax.set_xlabel("SNR (dB)")
         ax.set_xlim(-4.5, 16.5)
@@ -121,8 +121,9 @@ def fig12():
         ax.grid(alpha=0.25, which="both", lw=0.5)
         if cell == "C1":
             ax.set_ylabel("BLER after 16 outer iterations")
-            ax.text(0.2, 1.30, "x = every trial diverged\n(no mean exists)", fontsize=6.0,
-                    color="0.3", va="center", ha="left")
+            ax.annotate("-3 dB: V0/V1 = 1.000 (970 / 804 of 2560\nblocks raised, counted as errors)",
+                        xy=(-3, 1.0), xytext=(0.3, 0.42), fontsize=5.9, color="0.3",
+                        arrowprops=dict(arrowstyle="-", color="0.5", lw=0.6))
         else:
             ax.set_yticklabels([])
     h, l = axes[2].get_legend_handles_labels()
@@ -175,9 +176,11 @@ def fig12():
 F12.  The pilot-budget operating envelope, at equal training budget (10_SPEC_stageC §6f).
 Left three panels: BLER after 16 outer iterations, D2, n=2560 per SNR point, every arm trained or
 fitted on the SAME N_train=1e4 channel set.  Cells differ ONLY in Tp (C1 Tp=2, C5 Tp=3, C2 Tp=4);
-array, block length, code, SNR grid and outer-iteration count are identical.  A cross at the top of a
-panel marks an SNR where EVERY trial of that arm terminated in an exception, so no mean BLER exists
-(C1 -3 dB: V0, V1 and V4 all 2560/2560; see results/guard_D2_B1e4x.txt).
+array, block length, code, SNR grid and outer-iteration count are identical.  Blocks on which an arm
+raised carry a non-finite block error and are COUNTED AS BLOCK ERRORS, exactly as the pre-registered
+analysis does (code/analysis.py:172-175; tables_D2_B1e4x.txt NOTE rows): at C1 -3 dB that is V0 970,
+V1 804 and V4 136 of 2560 blocks, giving BLER 1.000 / 1.000 / 0.996.  The F3 divergence guard fires on
+2560 / 2560 / 2552 of those trials (results/guard_D2_B1e4x.txt).
 Right panel: the pre-registered decision-point sign test for M-ours-bstar -> V1, one bar per cell,
 plotted as the pooled margin (b-a)/(a+b) so that positive means the learned arm wins.  Annotations
 give the pooled counts a:b, the pooled p, and how many of the three pre-registered decision points

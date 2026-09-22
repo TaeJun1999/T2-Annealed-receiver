@@ -10,7 +10,7 @@
 #               per outer iteration, vs the FROZEN trained/gated grid range.  DIAGNOSTIC ONLY;
 #               nothing here selects, tunes or replaces any pre-registered number.
 # checkpoint  : /home/HTJ/t2/conf/ckpt/d2sx_N10000_a1.pt  (fixed, not retrained)
-# cell        : C1 (8x4 T=16 Tp=4) prior S2  pilots=dft  b*=kron  n=8 trials/point
+# cell        : C1 (8x4 T=16 Tp=2) prior S2   [header corrected 2026-09-22 14:45 -- the driver printed a hard-coded "Tp=4" (cross-check X14); the data are C1 = Tp=2, see common.CELLS]  pilots=dft  b*=kron  n=8 trials/point
 # trained/gated sigma_t range = [3.306220e-02, 8.451555e-01]  (score._sigma_range -> sigma.load('D2'),
 #               the frozen measured grid; train() draws sigma log-uniform on exactly this interval)
 # convention  : nu_q per complex entry, sigma_t = sqrt(nu_q/2) per real dimension
