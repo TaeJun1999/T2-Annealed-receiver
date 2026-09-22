@@ -60,6 +60,20 @@ def load_point(rawdir, cell, snr):
     return out
 
 
+def read_guard(tag, cell, snr):
+    """The pre-registered F3 guard rows for one (cell, SNR) out of results/guard_D2_<tag>.txt.
+    Columns: cell  SNR  arm  fired  of  rate  worst-NMSE.  Returns {arm: (rate, worst)}."""
+    path = os.path.join(RES, f"guard_D2_{tag}.txt")
+    out = {}
+    if not os.path.exists(path):
+        return out
+    for line in open(path, encoding="utf-8", errors="replace"):
+        m = re.match(r"\s*(\S+)\s+([+-]?\d+)\s+(\S+)\s+(\d+)\s+(\d+)\s+([0-9.]+)\s+(\S+)", line)
+        if m and m.group(1) == cell and int(m.group(2)) == int(snr):
+            out[m.group(3)] = (float(m.group(6)), float(m.group(7)))
+    return out
+
+
 def wilson(p, n, z=1.96):
     den = 1 + z * z / n
     c = (p + z * z / (2 * n)) / den
@@ -93,8 +107,12 @@ def main():
         n = be.shape[0]
         nm = d[kn]
         stats[arm] = dict(bler_it=be.mean(0), nmse_it=np.nanmedian(np.where(np.isfinite(nm), nm, np.nan), 0),
-                          bler=float(be[:, 15].mean()), raised=int((~np.isfinite(d[kb][:, 15])).sum()),
-                          guard=float(np.mean(~np.isfinite(nm[:, 15]) | (nm[:, 15] > 10.0))))
+                          bler=float(be[:, 15].mean()), raised=int((~np.isfinite(d[kb][:, 15])).sum()))
+    # (§6q A4) The divergence guard is the PRE-REGISTERED F3 statistic: a trial fires if NMSE > 10 or is
+    # non-finite at ANY of the 16 iterations (guard_report.py:42-43).  An earlier draft of this figure
+    # recomputed it at iteration 16 only, which understated V0 by 3-6x and reported the genie -- an arm
+    # the guard file excludes.  Read the file instead; it is the artefact §6q A4 names.
+    guard = read_guard(a.tag, a.cell, a.snr)
     fig = plt.figure(figsize=(7.16, 5.6))
     gs = GridSpec(2, 2, figure=fig, hspace=0.46, wspace=0.30, left=0.09, right=0.985, top=0.94, bottom=0.20)
 
@@ -174,10 +192,13 @@ def main():
     h, l = axb.get_legend_handles_labels()
     fig.legend(h, l, loc="lower center", bbox_to_anchor=(0.5, 0.045), ncol=3, fontsize=6.2, framealpha=0.95)
     fig.text(0.5, 0.008, gate_line, ha="center", fontsize=6.4, color="0.3")
-    guard_txt = "; ".join(f"{arm.replace('M-ours-', '').replace('dscore-C-', '')} {stats[arm]['guard']:.3f}"
-                          for arm, *_ in ARMS if arm in stats and stats[arm]["guard"] > 0)
-    first = ("POST-HOC HEADLINE POINT: " + a.posthoc + "  ") if a.posthoc else \
-            "This point is the one §6p predicted before the low-SNR run.  "
+    guard_txt = ("; ".join(f"{k.replace('M-ours-', '').replace('dscore-C-', '')} {v[0]:.3f} "
+                           f"(worst NMSE {v[1]:.3g})" for k, v in sorted(guard.items()))
+                 or "no arm in the guard file fires at this point")
+    first = ("POST-HOC HEADLINE POINT: " + a.posthoc + "  ") if a.posthoc else (
+        "This is the §6d/§6q PRE-REGISTERED DECISION POINT (anchor rule, 3 points, POWERED), not the "
+        "§6p-predicted maximum-gap point: §6p predicted the largest GMM/V1 ratio at -6/-7 dB and that "
+        "prediction FAILED (measured 1.32 / 1.14 there against 1.74 at -3 dB; see F15a and F14b).  ")
     return _save(fig, a.name, f"""
 F14.  The headline operating point, analysed with the menu frozen in 10_SPEC_stageC §6q (A1-A8).
 {first}D2 cell {a.cell}, SNR {a.snr:+.0f} dB, equal training budget (every arm on the same N_train channel
@@ -194,10 +215,16 @@ recomputed here.
 the GMM within the first iterations and hold the gap to iteration 16.
 (d) The cavity variance nu_q the denoiser is queried with, per iteration (median of the n = 8
 diagnostic results/diag/sigma-coverage_D2_{a.cell}_n8.npz), against the frozen training grid (A5).
-A4, divergence guard (NMSE@16 > 10) at this point: {guard_txt or 'no arm fires'}; every other arm 0.000.
+A4, the pre-registered F3 divergence guard at this point -- a trial fires if NMSE > 10 or is
+non-finite at ANY of the 16 iterations, results/guard_D2_{a.tag}.txt, which is the artefact §6q A4
+names and which EXCLUDES non-estimator arms such as the genie: {guard_txt}.  Arms absent from that
+list never fire anywhere in this raw set.
 Panel (d) is a SEPARATE probe: results/diag/sigma-coverage_D2_{a.cell}_n8.npz is measured on\nckpt/d2sx_N10000_a1.pt (n = 8), not on this figure's checkpoint, so it shows what the receiver ASKS\nfor in this cell, not what this checkpoint answers.\nA8, Module H cost per call (results/complexity_moduleH.txt, CPU float64 one thread): fitted GMM b*
 K=512 17.1 ms, learned score 78.8 ms (4.6x; the PSD projection itself is -0.8%, i.e. free); the
-equal-budget claim is 'same training data', not 'same inference complexity'.
+equal-budget claim is 'same training data', not 'same inference complexity'.  CAVEAT: that benchmark
+was run against K=512.  The GMM arm in THIS table is K=1024, whose mixture-EP site costs roughly twice
+as much, so the ratio here is nearer 2x -- but that was not measured, and the measured number is the
+K=512 one.
 SCOPE.  {gate_line}  One cell, one seed (the a1 numbers reproduce on seeds a2/a3 within 0.005 BLER,
 §6g), one testbed.
 """)

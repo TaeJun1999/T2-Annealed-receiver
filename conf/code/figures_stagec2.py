@@ -110,6 +110,7 @@ def pooled_test(path, cell, pair="M-ours-bstar -> M-ours-dscore-C-V1"):
     m = re.search(r"pooled (\d+):(\d+) p=([0-9.e+-]+)", seg)
     if not m:
         return None
+    ver = re.search(r"-> (not significant|significant)", seg)
     counts = dict((w, int(k)) for w, k in re.findall(r"(first|second) arm fewer failures at (\d)/3", seg))
     who = max(counts, key=counts.get) if counts else "?"
     dsn = re.search(r"decision SNRs \[([^\]]*)\]", seg)
@@ -117,6 +118,7 @@ def pooled_test(path, cell, pair="M-ours-bstar -> M-ours-dscore-C-V1"):
            re.findall(r"([+-]?\d+) dB (\d+):(\d+) p=([0-9.e+-]+)", seg)]
     return dict(a=int(m.group(1)), b=int(m.group(2)), p=float(m.group(3)),
                 who=who, k=(counts.get(who, 0) if counts else 0),
+                sig=(ver.group(1) == "significant") if ver else None,
                 snrs=(dsn.group(1).replace("'", "") if dsn else "?"), per=per)
 
 
@@ -160,7 +162,8 @@ def fig12():
         if cell == "C1":
             ax.set_ylabel("BLER after 16 outer iterations")
             v0, v1 = nf["M-ours-dscore-C-V0"][0], nf["M-ours-dscore-C-V1"][0]
-            ax.text(0.97, 0.72, f"-3 dB: V0 = V1 = 1.000\n({v0} / {v1} of 2560 blocks raised;\n"
+            b0, b1 = b["M-ours-dscore-C-V0"][0], b["M-ours-dscore-C-V1"][0]
+            ax.text(0.97, 0.72, f"-3 dB: V0 {b0:.3f}, V1 {b1:.3f}\n({v0} / {v1} of 2560 blocks raised;\n"
                                 f"counted as block errors)", transform=ax.transAxes, fontsize=6.3,
                     color="0.25", va="top", ha="right")
             ax.text(0.03, 0.055, "hollow on dashed line = 0 of 2560", transform=ax.transAxes,
@@ -177,27 +180,30 @@ def fig12():
         if r is None:
             continue
         frac = (r["a"] - r["b"]) / (r["a"] + r["b"])            # a:b = only-first-fails : only-second-fails
-        col = "tab:green" if frac > 0 else "tab:red"            # pair is bstar -> V1, so a > b = V1 wins
+        # pair is bstar -> V1, so a > b means V1 wins.  A bar the 3-point rule calls NOT significant is
+        # a tie and is drawn grey: colouring it as a win for either arm would assert what the test denies.
+        col = "0.55" if r["sig"] is False else ("tab:green" if frac > 0 else "tab:red")
         ax.bar(tp, frac, width=0.42, color=col, alpha=0.85, zorder=3)
-        winner = "V1" if r["who"] == "second" else "GMM"
+        winner = ("neither (TIE by the 3-point rule)" if r["sig"] is False
+                  else ("V1" if r["who"] == "second" else "GMM"))
         rev = [(s, a, b_, p) for s, a, b_, p in r["per"] if (a - b_) * frac < 0]
-        txt = (f"{r['a']}:{r['b']} of {r['a'] + r['b']} discordant\n(3 x 2560 pairs), p = {r['p']:.1e}\n"
-               f"{r['k']}/3 to {winner};  SNRs {r['snrs']} dB")
-        if rev:
-            s, a, b_, p = rev[0]
-            txt += f"\nreverses at {s:+.0f} dB ({a}:{b_}, p = {p:.2g})"
-        dy = 0.04 if frac > 0 else (-0.04 if tp == 2 else -0.30)   # C5's bar is short: drop its label
-        ax.text(tp, frac + dy, txt, ha="center", va="bottom" if frac > 0 else "top",
-                fontsize=6.0, linespacing=1.3)
+        # Keep the in-figure label to what a reader needs at a glance; the decision SNRs, the
+        # reversal and the per-SNR counts are in the caption, which is the file of record.
+        short = winner if winner in ("V1", "GMM") else "TIE"
+        txt = f"{r['a']}:{r['b']},  p = {r['p']:.1e}\n{r['k']}/3 to {short}"
+        ax.text(tp, frac + (0.05 if frac > 0 else -0.05), txt, ha="center",
+                va="bottom" if frac > 0 else "top", fontsize=6.2, linespacing=1.35)
     ax.axhline(0, color="0.35", lw=0.9)
     ax.set_xticks([2, 3, 4])
-    ax.set_xlim(1.35, 4.65)
-    ax.set_ylim(-0.78, 1.25)
+    ax.set_xlim(1.30, 4.70)
+    ax.set_ylim(-0.50, 1.45)
     ax.set_xlabel("$T_p$ (pilot symbols; $N_t$ = 4)")
     ax.set_ylabel("sign-test margin among discordant pairs\n(a$-$b)/(a+b);  + = V1 wins, $-$ = GMM wins",
                   fontsize=7)
     ax.set_title("pre-registered decision-point test (left axis)  vs  cavity variance $\\nu_q$ (right axis)")
     ax.grid(alpha=0.25, axis="y", lw=0.4)
+    ax.text(0.5, -0.19, "decision SNRs (anchor rule): C1 and C5 at +6/+12/+15 dB, C2 at $-$3/+0/+3 dB;  C5 reverses at +6 dB (232:156, p = 1.3e-04)",
+            transform=ax.transAxes, ha="center", va="top", fontsize=6.0, color="0.3")
     ax2 = ax.twinx()
     tps = np.array([2, 3, 4])
     ax2.plot(tps, [floor[t] for t in tps], color="tab:blue", marker="s", ms=4.2, lw=1.1, ls="--",
@@ -211,9 +217,9 @@ def fig12():
     ax2.set_ylim(-0.12, 2.45)
     ax2.set_ylabel("$\\nu_q$ (it. 1)", color="tab:blue", fontsize=7)
     ax2.tick_params(axis="y", colors="tab:blue", labelsize=6.8)
-    ax2.text(1.42, 2.42, "all closed-form floors are INSIDE the grid;  measured C1 $-$3 dB $\\nu_q$ = 2.00 "
-                         "= 1.40 x grid top\nbut leaving the grid is NOT sufficient: C2 at $-$9 dB has the same "
-                         "$\\nu_q$ = 1.99 and does not collapse (§6p)",
+    ax2.text(1.42, 2.42, "all closed-form floors are INSIDE the grid; measured C1 $-$3 dB $\\nu_q$ = 2.00\n"
+                         "= 1.40 x grid top.  Leaving the grid is NOT sufficient, though: C2 at $-$9 dB\n"
+                         "has the same $\\nu_q$ = 1.99 and does not collapse (§6p)",
              fontsize=5.8, color="tab:blue", va="top", ha="left", linespacing=1.3)
     h2, l2 = ax2.get_legend_handles_labels()
 
@@ -229,7 +235,8 @@ def fig12():
 
     fig.text(0.5, 0.058, "EQUAL BUDGET: every arm, learned and classical, is fitted / trained on the SAME "
                          "N_train = 1.6e5 channel set (10_SPEC_stageC A3).  n = 2560 trials per SNR point.  "
-                         "GMM b* = kron K=512, chosen by validation log-likelihood over the full Nr=8 grid.",
+                         "GMM b* = kron K=512, by validation log-likelihood over all 12 configurations "
+                         "of the K <= 512 grid; the extended K=1024 grid moves b* (F15c).",
              ha="center", fontsize=6.8, color="0.3")
     fig.text(0.5, 0.030, GATE_LINE_PASS.split("; GA")[0] + ".", ha="center", fontsize=6.8, color="0.3")
     fig.text(0.5, 0.006, "At this budget C2's GMM improves to 0.2434 on the extended K=1024 grid "
@@ -240,15 +247,17 @@ F12.  The pilot-budget operating envelope at equal training budget, GATE-PASSING
 (10_SPEC_stageC §6f, run B16e4).
 TOP: BLER after 16 outer iterations, D2, n = 2560 per SNR point, every arm -- learned and classical --
 fitted or trained on the SAME N_train = 1.6e5 channel set.  The GMM arm is b* = kron K=512, chosen by
-validation log-likelihood over the complete Nr=8 grid (all 12 configurations present; see
-code/check_fits_n16e4.sh).  Array (8x4), frame length T = 16, code and SNR grid are identical across
+validation log-likelihood over all 12 configurations of the Nr=8 grid up to K = 512 (all present; see
+code/check_fits_n16e4.sh).  That grid is NOT the widest one available: §6l later fitted K = 1024 at
+this budget, b* moved there, and the C2 GMM improves from 0.2527 to 0.2434 (F14, F15c).  This figure
+keeps K <= 512 because that is the grid measured for all three cells.  Array (8x4), frame length T = 16, code and SNR grid are identical across
 the three panels; the information block SHRINKS with Tp (K = 50 / 46 / 42 bits), so absolute BLER
 levels are not on a common codeword footing across panels -- only the within-panel arm ordering is
 compared.  A block on which an arm raised carries a non-finite block error and is COUNTED AS A BLOCK
 ERROR, exactly as the pre-registered analysis does (code/analysis.py:172-175).  A point drawn hollow
 on the dashed line is 0 of 2560 blocks (resolution 1/2560).
 READING THE THREE PANELS.  At Tp = 4 the learned arm (V1) is below the GMM at every SNR.  At Tp = 3
-the two curves CROSS: V1 is below the GMM from -3 to +6 dB and above it from +12 dB.  At Tp = 2 the
+the two curves CROSS: V1 is below the GMM from -3 to +9 dB and above it at +12 and +15 dB.  At Tp = 2 the
 GMM is below V1 everywhere except +0 dB, and at -3 dB every learned arm collapses (V0 BLER 1.000,
 V1 0.982; the F3 divergence guard fires on 2560/2560 trials, results/guard_D2_B16e4.txt).
 BOTTOM-LEFT, bars (left axis): the pre-registered decision-point sign test for M-ours-bstar -> V1 in
@@ -413,7 +422,13 @@ SCOPE.  One cell (C2), n = 256, and a checkpoint with NO D2 gate record whose D1
 These are interventions on a diagnostic probe: they identify the mechanism, they are not arms, and
 none appears in any BLER table.  The equal-budget arm results are in results/tables_D2_B1e4.txt.
 Because dropping the matrix site performs identically to PSD-projecting it here, these data do not
-isolate the PSD projection as the mechanism behind F12's V1 curve.
+isolate the PSD projection as the mechanism behind the V1 curve.
+BUDGET NOTE (added 2026-09-22 22:20).  F12 and F14 were re-drawn on the gate-passing N = 1.6e5 run
+(checkpoint ckpt/d2sx_N160000_a1.pt, n = 2560).  This figure was NOT: it stays on the n = 256
+diagnostic sweep of ckpt/d2sx_N10000_a1.pt, whose D1 sibling FAILS GC.  So the V1 reference band
+quoted above is from tables_D2_B1e4.txt (N = 1e4), the budget these interventions were run at, and
+these curves are NOT directly comparable to the arms plotted in F12 or F14.  They identify the
+mechanism; the arm results are in the tables.
 """)
 
 

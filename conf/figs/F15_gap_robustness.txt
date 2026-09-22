@@ -11,18 +11,26 @@ reduction is at -6 dB (0.791 -> 0.601) and the largest RATIO is at +6 dB (0.0125
 below -3 dB because every arm's BLER is compressed towards 1.  The prediction was registered at commit
 279512b before the run.
 (b) THE BUDGET AXIS.  BLER at -3 dB against N_train = 1e4 / 4e4 / 1.6e5, every arm equal-budget within
-each point.  V1 is 0.1453 / 0.1445 / 0.1449 and the GMM is 0.2523 / 0.2504 / 0.2527; the gap is
-0.107 / 0.105 / 0.108.  Sixteen times the data moves neither arm.  §6d predicted the gap would GROW
-with budget; that prediction failed, and the flat curve is the stronger result: none of the gap is
-explained by sample size.
+each point.  V1 is 0.1453 / 0.1445 / 0.1449 -- flat to the third decimal across a 16-fold change in
+training data.  The GMM is drawn twice because §6l changed what its b* is: with K HELD at 512 it is
+0.2523 / 0.2504 / 0.2527 (gap 0.107 / 0.106 / 0.108, flat), and with b* taken from the EXTENDED K grid
+at each budget -- which §6l's integrity condition obliges us to use, "새 b* 가 나오면 그것이 GMM arm 이
+된다" -- it is 0.2523 (K=512) / 0.2480 (K=2048) / 0.2434 (K=1024) and the gap FALLS 0.107 / 0.104 /
+0.098, about 8% over the range.  Read the solid red series: the honest statement is that the budget
+alone does not move the gap, and that the larger budgets let the GMM use more components, which
+narrows it slightly.  §6d predicted the gap would GROW with budget; that prediction FAILED.
 (c) THE COMPONENT AXIS.  The GMM arm against K, with b* re-selected by validation log-likelihood on
 the extended grid at each point (§6l; raw meta kron_K confirms the selection moved).  At N = 4e4 the
 validation log-likelihood rises 2.16 nat from K=512 to K=2048 while the BLER moves from 0.2504 to
 0.2480; at N = 1.6e5 it rises 3.18 nat from K=512 to K=1024 while the BLER moves from 0.2527 to
-0.2434.  The mixture keeps improving as a density model and stops improving as a receiver prior, so
-the grid truncation of the earlier runs did not weaken the baseline (01_RULES:76).  K = 2048 was not
-fitted at N = 1.6e5: the N = 4e4 measurement shows the BLER effect of that step is about 1%, and one
-restart costs roughly nine GPU-hours.
+0.2434.  The mixture keeps improving as a density model far faster than it improves as a receiver
+prior: 2.16 nat buys 1.0% of BLER at N = 4e4 and 3.18 nat buys 3.7% at N = 1.6e5.  §6l's own
+prediction -- that extending the grid would move b* and SHRINK the 42% gap -- is therefore scored
+PARTLY CORRECT: b* did move at both budgets, and the gap shrank from 42.7% to 40.5% at N = 1.6e5,
+far less than the likelihood gain would suggest.  The consequence for the claim is that the earlier
+grid truncation did not weaken the baseline (01_RULES:76).  K = 2048 was not fitted at N = 1.6e5: the
+N = 4e4 measurement shows the BLER effect of that step is about 1%, and one restart costs roughly
+nine GPU-hours; that is a stated limit, not a measurement.
 (d) THE SEED AXIS.  V0 and V1 at -3 dB for three independently trained checkpoints (a1/a2/a3, same
 recipe, same budget, selected among themselves by validation loss only -- never by BLER, §6g).  V1 is
 0.1453 / 0.1496 / 0.1477 (spread 0.0043) against the GMM's 0.2523; V0 is 0.789 / 0.881 / 0.812

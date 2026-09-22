@@ -2,15 +2,17 @@ F12.  The pilot-budget operating envelope at equal training budget, GATE-PASSING
 (10_SPEC_stageC §6f, run B16e4).
 TOP: BLER after 16 outer iterations, D2, n = 2560 per SNR point, every arm -- learned and classical --
 fitted or trained on the SAME N_train = 1.6e5 channel set.  The GMM arm is b* = kron K=512, chosen by
-validation log-likelihood over the complete Nr=8 grid (all 12 configurations present; see
-code/check_fits_n16e4.sh).  Array (8x4), frame length T = 16, code and SNR grid are identical across
+validation log-likelihood over all 12 configurations of the Nr=8 grid up to K = 512 (all present; see
+code/check_fits_n16e4.sh).  That grid is NOT the widest one available: §6l later fitted K = 1024 at
+this budget, b* moved there, and the C2 GMM improves from 0.2527 to 0.2434 (F14, F15c).  This figure
+keeps K <= 512 because that is the grid measured for all three cells.  Array (8x4), frame length T = 16, code and SNR grid are identical across
 the three panels; the information block SHRINKS with Tp (K = 50 / 46 / 42 bits), so absolute BLER
 levels are not on a common codeword footing across panels -- only the within-panel arm ordering is
 compared.  A block on which an arm raised carries a non-finite block error and is COUNTED AS A BLOCK
 ERROR, exactly as the pre-registered analysis does (code/analysis.py:172-175).  A point drawn hollow
 on the dashed line is 0 of 2560 blocks (resolution 1/2560).
 READING THE THREE PANELS.  At Tp = 4 the learned arm (V1) is below the GMM at every SNR.  At Tp = 3
-the two curves CROSS: V1 is below the GMM from -3 to +6 dB and above it from +12 dB.  At Tp = 2 the
+the two curves CROSS: V1 is below the GMM from -3 to +9 dB and above it at +12 and +15 dB.  At Tp = 2 the
 GMM is below V1 everywhere except +0 dB, and at -3 dB every learned arm collapses (V0 BLER 1.000,
 V1 0.982; the F3 divergence guard fires on 2560/2560 trials, results/guard_D2_B16e4.txt).
 BOTTOM-LEFT, bars (left axis): the pre-registered decision-point sign test for M-ours-bstar -> V1 in

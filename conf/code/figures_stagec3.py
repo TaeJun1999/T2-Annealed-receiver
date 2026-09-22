@@ -106,21 +106,34 @@ def fig15():
 
     # ---------- (b) the budget axis
     ax = fig.add_subplot(gs[0, 1])
-    B = [(1e4, "raw_B1e4"), (4e4, "raw_B4e4"), (1.6e5, "raw_B16e4")]
-    xs = [b for b, _ in B]
-    yg = [cell_arm(d, "C2", GMM, -3)[0][-3] for _, d in B]
-    yv = [cell_arm(d, "C2", V1, -3)[0][-3] for _, d in B]
-    ax.semilogx(xs, yg, "-D", color="tab:red", ms=4.0, lw=1.2)
-    ax.semilogx(xs, yv, "-o", color="tab:green", ms=4.0, lw=1.2)
-    for x, a, b in zip(xs, yg, yv):
-        ax.text(x, a + 0.012, f"{a:.3f}", ha="center", fontsize=6.0, color="tab:red")
-        ax.text(x, b - 0.016, f"{b:.3f}", ha="center", va="top", fontsize=6.0, color="tab:green")
+    # Two GMM series, because §6l changed what b* is at the larger budgets and the two readings differ:
+    #   K held at 512  -> the like-for-like budget axis (only N moves)
+    #   b* on the extended grid -> the baseline the project is actually obliged to use (§6l 무결성 조건:
+    #   "새 b* 가 나오면 그것이 GMM arm 이 된다. 기존 K=512 결과로 되돌아가지 않는다.")
+    B512 = [(1e4, "raw_B1e4"), (4e4, "raw_B4e4"), (1.6e5, "raw_B16e4")]
+    BSTAR = [(1e4, "raw_B1e4", 512), (4e4, "raw_B4e4k", 2048), (1.6e5, "raw_B16e4k", 1024)]
+    xs = [n for n, _ in B512]
+    g512 = [cell_arm(d, "C2", GMM, -3)[0][-3] for _, d in B512]
+    gstar = [cell_arm(d, "C2", GMM, -3)[0][-3] for _, d, _ in BSTAR]
+    yv = [cell_arm(d, "C2", V1, -3)[0][-3] for _, d, _ in BSTAR]
+    ax.semilogx(xs, g512, ":D", color="tab:red", ms=3.6, lw=1.0, mfc="white",
+                label="GMM, $K$ held at 512")
+    ax.semilogx(xs, gstar, "-D", color="tab:red", ms=4.0, lw=1.3,
+                label="GMM, $b^*$ on the extended $K$ grid")
+    ax.semilogx(xs, yv, "-o", color="tab:green", ms=4.0, lw=1.3, label="learned score, V1")
+    for x, gv_, kk in zip(xs, gstar, [k for _, _, k in BSTAR]):   # NOT `gs`: that is the GridSpec
+        ax.text(x, gv_ - 0.008, f"{gv_:.3f}\n$K$={kk}", ha="center", va="top", fontsize=5.9,
+                color="tab:red", linespacing=1.2)
+    for x, v in zip(xs, yv):
+        ax.text(x, v - 0.010, f"{v:.3f}", ha="center", va="top", fontsize=6.0, color="tab:green")
     ax.set_xlabel("$N_{\\rm train}$ (channel samples, SAME set for every arm)")
     ax.set_ylabel("BLER at $-$3 dB")
-    ax.set_title("(b)  the budget axis: 16x data, no change")
-    ax.set_ylim(0.10, 0.31); ax.grid(alpha=0.25, which="both", lw=0.4)
-    ax.text(0.5, 0.52, "gap 0.107 / 0.105 / 0.108", transform=ax.transAxes, ha="center",
-            fontsize=6.2, color="0.25")
+    ax.set_title("(b)  the budget axis: 16x data")
+    ax.set_ylim(0.09, 0.33); ax.grid(alpha=0.25, which="both", lw=0.4)
+    ax.legend(loc="upper left", fontsize=5.8, framealpha=0.95)
+    ax.text(0.97, 0.38, "gap, $K$ = 512:  " + " / ".join(f"{a-b:.3f}" for a, b in zip(g512, yv))
+            + "\ngap, $b^*$ extended:  " + " / ".join(f"{a-b:.3f}" for a, b in zip(gstar, yv)),
+            transform=ax.transAxes, ha="right", fontsize=6.0, color="0.25", linespacing=1.35)
 
     # ---------- (c) the K axis
     ax = fig.add_subplot(gs[1, 0])
@@ -147,7 +160,7 @@ def fig15():
     ax.set_xticks([512, 1024, 2048]); ax.set_xticklabels(["512", "1024", "2048"])
     ax.set_xlabel("$K$ (mixture components; $b^*$ re-selected on the extended grid)", fontsize=7)
     ax.set_ylabel("BLER at $-$3 dB")
-    ax.set_title("(c)  the component axis: 4x $K$, no change")
+    ax.set_title("(c)  the component axis: 4x $K$, $\\leq$ 4% change")
     ax.set_xlim(430, 2600)
     ax.set_ylim(0.13, 0.30); ax.grid(alpha=0.25, which="both", lw=0.4)
     ax.legend(loc="lower right", fontsize=6.0, bbox_to_anchor=(1.0, 0.03))
@@ -195,18 +208,26 @@ reduction is at -6 dB (0.791 -> 0.601) and the largest RATIO is at +6 dB (0.0125
 below -3 dB because every arm's BLER is compressed towards 1.  The prediction was registered at commit
 279512b before the run.
 (b) THE BUDGET AXIS.  BLER at -3 dB against N_train = 1e4 / 4e4 / 1.6e5, every arm equal-budget within
-each point.  V1 is 0.1453 / 0.1445 / 0.1449 and the GMM is 0.2523 / 0.2504 / 0.2527; the gap is
-0.107 / 0.105 / 0.108.  Sixteen times the data moves neither arm.  §6d predicted the gap would GROW
-with budget; that prediction failed, and the flat curve is the stronger result: none of the gap is
-explained by sample size.
+each point.  V1 is 0.1453 / 0.1445 / 0.1449 -- flat to the third decimal across a 16-fold change in
+training data.  The GMM is drawn twice because §6l changed what its b* is: with K HELD at 512 it is
+0.2523 / 0.2504 / 0.2527 (gap 0.107 / 0.106 / 0.108, flat), and with b* taken from the EXTENDED K grid
+at each budget -- which §6l's integrity condition obliges us to use, "새 b* 가 나오면 그것이 GMM arm 이
+된다" -- it is 0.2523 (K=512) / 0.2480 (K=2048) / 0.2434 (K=1024) and the gap FALLS 0.107 / 0.104 /
+0.098, about 8% over the range.  Read the solid red series: the honest statement is that the budget
+alone does not move the gap, and that the larger budgets let the GMM use more components, which
+narrows it slightly.  §6d predicted the gap would GROW with budget; that prediction FAILED.
 (c) THE COMPONENT AXIS.  The GMM arm against K, with b* re-selected by validation log-likelihood on
 the extended grid at each point (§6l; raw meta kron_K confirms the selection moved).  At N = 4e4 the
 validation log-likelihood rises 2.16 nat from K=512 to K=2048 while the BLER moves from 0.2504 to
 0.2480; at N = 1.6e5 it rises 3.18 nat from K=512 to K=1024 while the BLER moves from 0.2527 to
-0.2434.  The mixture keeps improving as a density model and stops improving as a receiver prior, so
-the grid truncation of the earlier runs did not weaken the baseline (01_RULES:76).  K = 2048 was not
-fitted at N = 1.6e5: the N = 4e4 measurement shows the BLER effect of that step is about 1%, and one
-restart costs roughly nine GPU-hours.
+0.2434.  The mixture keeps improving as a density model far faster than it improves as a receiver
+prior: 2.16 nat buys 1.0% of BLER at N = 4e4 and 3.18 nat buys 3.7% at N = 1.6e5.  §6l's own
+prediction -- that extending the grid would move b* and SHRINK the 42% gap -- is therefore scored
+PARTLY CORRECT: b* did move at both budgets, and the gap shrank from 42.7% to 40.5% at N = 1.6e5,
+far less than the likelihood gain would suggest.  The consequence for the claim is that the earlier
+grid truncation did not weaken the baseline (01_RULES:76).  K = 2048 was not fitted at N = 1.6e5: the
+N = 4e4 measurement shows the BLER effect of that step is about 1%, and one restart costs roughly
+nine GPU-hours; that is a stated limit, not a measurement.
 (d) THE SEED AXIS.  V0 and V1 at -3 dB for three independently trained checkpoints (a1/a2/a3, same
 recipe, same budget, selected among themselves by validation loss only -- never by BLER, §6g).  V1 is
 0.1453 / 0.1496 / 0.1477 (spread 0.0043) against the GMM's 0.2523; V0 is 0.789 / 0.881 / 0.812
