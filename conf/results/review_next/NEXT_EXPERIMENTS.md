@@ -156,6 +156,20 @@ damping·restart·n_inner 는 prior/adapter 실험과 분리해 별도 사전 �
 | §7 C6 재실행 (`NR16run2`) | 실행 중 (05:28~) | `raw_NR16run2`, `tables_D2_NR16run2.txt` |
 | NR16 GB′ | 완료 (GPU, CPU 대조 7.4e-15) | `d2_gbprime_NR16_N10000_a1.npz` |
 
+
+### 6.1 구현 시 해석 명확화 (2026-09-22 18:10 CDT, 전체 실행 전 — n=32·1 시행 스모크만 본 상태)
+
+구현(`diag_p1_heldout.py`, `diag_p1_cavity.py`)에서 문구가 두 가지로 읽히는 곳이 나왔다. 아래를 **1차 해석**으로 고정하고, 스크립트는 다른 해석의 값도 함께 출력해 판정이 해석에 따라 갈리면 `READING-DEPENDENT` 로 표시한다.
+
+1. H2·C-calib 의 ρ_tr = **floor 제외 고유부분공간의 ρ_tr (ρ_sub)** — §1·§2.6 문구 그대로. 전체 공간 ρ_tr 은 보고.
+2. §2.3 위상 풀링 = **φ = 2πk′/8, k′ = 1..7** (k′=0 은 항등이라 0 에 가까운 값만 더한다). k′=0..7 값도 보고.
+3. §2.3 비 = **표본별 ε_φ/δ 의 중앙값**(격자점별) → 구간값 = 격자점 중앙값의 중앙값. 중앙값끼리의 비도 보고.
+4. coverage 기준분포 = 수신기가 가정하는 **proper complex Gaussian** (2d² ~ χ²(2·dim)).
+5. V0 의 "PSD 부분집합" = λ_min(Herm J) ≥ 0. floor 적중 = 고유값이 floor(1e-6)에 붙은 것만.
+6. a_t 의 ν_E = 수신기 자신의 순서(cbar, 이후 nuE[t−1]) — SigL 재구성이 수신기 ν_q 를 오차 0 으로 재현.
+7. §2.4 변환 검사는 선형-Gaussian toy 대신 **widely-linear 사상 m = Mq + Wq\*** 로 한다(K ≠ 0 이라 더 강한 검사).
+8. 산출 파일명: held-out 은 `p1_heldout.{npz,txt}` 하나(키 접두사 calib|/phase|/pseudo|), 실제 질의는 `p1_cavity/` 청크 + 병합본 `p1_cavity_<point>.{npz,txt}`.
+
 ## 7. 미리 적는 예측과 약속하지 않는 것
 
 - 예측: C-phase 만족(예비값 0.29/0.16 @하·중; 상 0.07). C-cavity: e_8 ∈ [0.7, 1.4] 이지만 a_8 > 3 → 만족(비등방 쪽). C-pseudo: 반복 4 r_P 중앙값 ≈ 0.4 로 크지만 NMSE·ν_q 통제 후 추가 설명력 없음 → 불만족. C-calib: 하 구간에서 ρ_tr < 0.8(과대 분산)이 7점 이상 → 만족. C-clip: 알려진 사실. H0 기각 안 됨(p ≥ 0.05). A1: D1 형제 게이트 PASS, 1단계 개발 집합 부호검정 p ≥ 0.05(MDD 이하의 개선) — 즉 **위상 augmentation 이 ε_φ 는 줄이지만 BLER 개선은 이 설계로 판정 불가**가 가장 그럴듯한 결과다. 빗나가면 그대로 쓴다.
