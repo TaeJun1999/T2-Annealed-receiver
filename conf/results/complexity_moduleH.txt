@@ -1,0 +1,31 @@
+# (10_SPEC_stageC §6q A8) Module H cost per call -- fitted GMM vs learned score
+# date        : 2026-09-22 14:29:53 KST
+# host        : CPU, float64, ONE thread (OMP_NUM_THREADS=1); the receiver runs one thread per worker process
+# entry point : prior.denoise_full(q, nu) -> (m, J).  Called ONCE per outer iteration, 16 per trial.
+# GMM arm     : b* = kron  (K = 512 components, selected by validation log-likelihood)
+# learned arm : d2sx_N10000_a1.pt  (479,426 parameters)
+# fresh q per call (the ScorePrior caches on (q, nu); a repeated q would time a cache hit)
+# reps        : 40 calls per (arm, nu)
+
+      nu   sigma_t |   GMM b* (ms)  score V0 (ms)  score V1 (ms) |   V0/GMM   V1/GMM
+   0.500    0.5000 |        16.251         80.560         79.384 |      5.0      4.9
+   0.250    0.3536 |        16.748         79.206         78.705 |      4.7      4.7
+   0.050    0.1581 |        16.088         76.796         77.227 |      4.8      4.8
+   0.008    0.0632 |        19.130         78.438         77.137 |      4.1      4.0
+
+mean over the four nu: GMM 17.054 ms, score V0 78.750 ms, score V1 78.113 ms
+  -> the learned prior costs 4.6x the GMM per Module H call (V1: 4.6x).
+  -> per trial (16 outer iterations): GMM 272.9 ms, score V0 1260.0 ms, V1 1249.8 ms.
+  -> V1 minus V0 = the PSD projection (one 32x32 Hermitian eigendecomposition): -0.637 ms, -0.8% of the V0 call.
+
+WHAT THIS DOES AND DOES NOT SAY
+  - It is INFERENCE cost only.  Training / fitting cost is separate and is already a column of
+    TABLE A in every results table (GMM EM wall-clock); the score model's training wall-clock is
+    in LADDER_C.md.  Neither is included here.
+  - It is ONE implementation on ONE machine: numpy/BLAS for the GMM, torch.func.jacrev for the
+    network, both float64 single-thread.  A different Jacobian implementation (forward-mode,
+    batched, or an analytic head) would change the learned arm's number and not the GMM's.
+  - The GMM cost scales with K; the learned cost does not.  At b* = K above, that is the
+    comparison the BLER tables actually used.
+  - If the learned arm is the more expensive one, then the equal-budget claim in this work is
+    'same training data', NOT 'same inference complexity', and must be written that way.
