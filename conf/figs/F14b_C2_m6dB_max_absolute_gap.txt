@@ -1,5 +1,5 @@
 F14.  The headline operating point, analysed with the menu frozen in 10_SPEC_stageC §6q (A1-A8).
-POST-HOC HEADLINE POINT: §6p predicted the largest GMM/V1 BLER RATIO at -6/-7 dB; that prediction FAILED (ratio 1.32 / 1.14 < 1.74 at -3 dB). The largest ABSOLUTE BLER reduction (0.791 -> 0.601) is at -6 dB, and this point was chosen after seeing the data (10_SPEC_stageC §6q rule 2).  D2 cell C2, SNR -6 dB, equal training budget (every arm on the same N_train channel
+POST-HOC HEADLINE POINT: POST-HOC POINT. §6p predicted the largest GMM/V1 BLER RATIO at -6/-7 dB and that prediction FAILED (ratio 1.32 / 1.14 there, against 1.74 at -3 dB); what -6 dB actually maximises is the ABSOLUTE reduction, 0.791 -> 0.601. The point was chosen after seeing the data, under 10_SPEC_stageC §6q rule 2, and it sits at a gate-FAILING budget (N=1e4). The headline table is F14_headline_C2_m3dB.  D2 cell C2, SNR -6 dB, equal training budget (every arm on the same N_train channel
 set; raw raw_B1e4lo), n = 2560 trials.  Blocks on which an arm raised are counted as block errors
 (analysis.py:172-175).
 (a) BLER after 16 outer iterations with Wilson 95% intervals for every arm, so the site ablation
@@ -14,6 +14,9 @@ the GMM within the first iterations and hold the gap to iteration 16.
 (d) The cavity variance nu_q the denoiser is queried with, per iteration (median of the n = 8
 diagnostic results/diag/sigma-coverage_D2_C2_n8.npz), against the frozen training grid (A5).
 A4, divergence guard (NMSE@16 > 10) at this point: V0 0.127; R5-genie 1.000; every other arm 0.000.
+Panel (d) is a SEPARATE probe: results/diag/sigma-coverage_D2_C2_n8.npz is measured on
+ckpt/d2sx_N10000_a1.pt (n = 8), not on this figure's checkpoint, so it shows what the receiver ASKS
+for in this cell, not what this checkpoint answers.
 A8, Module H cost per call (results/complexity_moduleH.txt, CPU float64 one thread): fitted GMM b*
 K=512 17.1 ms, learned score 78.8 ms (4.6x; the PSD projection itself is -0.8%, i.e. free); the
 equal-budget claim is 'same training data', not 'same inference complexity'.

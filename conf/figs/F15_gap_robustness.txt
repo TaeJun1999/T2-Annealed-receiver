@@ -1,0 +1,35 @@
+F15.  The gap is not explained by training data, by mixture components, or by the checkpoint seed.
+All panels: D2, cell C2 (Tp = 4), n = 2560 trials per point, the same receiver for every arm, and
+within each point the fitted GMM and the learned score are given the SAME channel set (equal budget,
+10_SPEC_stageC A3).
+(a) WHERE THE GAP LIVES.  Eleven SNRs from -9 to +15 dB at N_train = 1e4; the four lowest points are
+the §6p extension (results/tables_D2_B1e4lo.txt), the rest are results/tables_D2_B1e4.txt.  V1 is
+below the GMM at all eleven, and its F3 divergence guard never exceeds 0.000 across the whole range.
+The two summaries of "gap" peak in different places and both are marked: the largest ABSOLUTE
+reduction is at -6 dB (0.791 -> 0.601) and the largest RATIO is at +6 dB (0.0125 / 0.0039 = 3.2x).
+§6p predicted the ratio would peak at -6/-7 dB; that prediction FAILED -- the ratio falls monotonically
+below -3 dB because every arm's BLER is compressed towards 1.  The prediction was registered at commit
+279512b before the run.
+(b) THE BUDGET AXIS.  BLER at -3 dB against N_train = 1e4 / 4e4 / 1.6e5, every arm equal-budget within
+each point.  V1 is 0.1453 / 0.1445 / 0.1449 and the GMM is 0.2523 / 0.2504 / 0.2527; the gap is
+0.107 / 0.105 / 0.108.  Sixteen times the data moves neither arm.  §6d predicted the gap would GROW
+with budget; that prediction failed, and the flat curve is the stronger result: none of the gap is
+explained by sample size.
+(c) THE COMPONENT AXIS.  The GMM arm against K, with b* re-selected by validation log-likelihood on
+the extended grid at each point (§6l; raw meta kron_K confirms the selection moved).  At N = 4e4 the
+validation log-likelihood rises 2.16 nat from K=512 to K=2048 while the BLER moves from 0.2504 to
+0.2480; at N = 1.6e5 it rises 3.18 nat from K=512 to K=1024 while the BLER moves from 0.2527 to
+0.2434.  The mixture keeps improving as a density model and stops improving as a receiver prior, so
+the grid truncation of the earlier runs did not weaken the baseline (01_RULES:76).  K = 2048 was not
+fitted at N = 1.6e5: the N = 4e4 measurement shows the BLER effect of that step is about 1%, and one
+restart costs roughly nine GPU-hours.
+(d) THE SEED AXIS.  V0 and V1 at -3 dB for three independently trained checkpoints (a1/a2/a3, same
+recipe, same budget, selected among themselves by validation loss only -- never by BLER, §6g).  V1 is
+0.1453 / 0.1496 / 0.1477 (spread 0.0043) against the GMM's 0.2523; V0 is 0.789 / 0.881 / 0.812
+(spread 0.092).  The repaired wiring is insensitive to the seed and the pre-registered one is not.
+The cause of that difference was not measured and is not claimed.
+SCOPE.  One cell (C2, Tp = 4) and one testbed.  The envelope over Tp is F12, where the ordering
+reverses at Tp = 2.  Panels (a), (d) and the N = 4e4 column of (c) use checkpoints whose D1 siblings
+FAIL the pre-registered GC gate (0.243 at N = 1e4, 0.167 at N = 4e4); §6d registered those points in
+advance as budget-axis measurements rather than arm results.  The rightmost point of (b) and the
+N = 1.6e5 curve of (c) use the gate-passing checkpoint: checkpoint ckpt/d2sx_N160000_a1.pt: gates are measurable on D1 only, so this D2 checkpoint is qualified through its D1 sibling sx_N160000_D1.pt, which PASSES GB 2.66e-3 / GC 0.0999 / GD 0.0718 (LADDER_C.md:1); GA is a structural zero for this model family.

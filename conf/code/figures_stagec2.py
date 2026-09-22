@@ -57,6 +57,9 @@ MEASURED_NU_M3 = {2: 1.997, 4: 0.4988}
 CLOSED_NU_M3 = {3: 0.998}
 GATE_LINE = ("checkpoint ckpt/d2sx_N10000_a1.pt: the table records NO GATE RECORD for it on D2 "
              "(GA-GD are measurable on D1 only); its D1 sibling at N_train=1e4 FAILS GC 0.243 vs 0.15.")
+GATE_LINE_PASS = ("checkpoint ckpt/d2sx_N160000_a1.pt: gates are measurable on D1 only, so this D2 checkpoint "
+                  "is qualified through its D1 sibling sx_N160000_D1.pt, which PASSES GB 2.66e-3 / GC 0.0999 / "
+                  "GD 0.0718 (LADDER_C.md:1); GA is a structural zero for this model family.")
 
 ST = {   # arm -> (legend label incl. condition, colour, marker, linestyle)
     "R1-turbo":            ("classical turbo (no channel prior)",       "tab:brown",  "s", "--"),
@@ -65,7 +68,8 @@ ST = {   # arm -> (legend label incl. condition, colour, marker, linestyle)
     "M-ours-dscore-C-V0":  ("learned score, pre-registered site (V0)",  "tab:purple", "v", ":"),
     "R5-genie":            ("genie CSI (lower bound)",                  "k",          "*", "-."),
 }
-CELLS = [("C1", 2, "raw_B1e4x", 50), ("C5", 3, "raw_B1e4x", 46), ("C2", 4, "raw_B1e4", 42)]
+CELLS = [("C1", 2, "raw_B16e4", 50), ("C5", 3, "raw_B16e4", 46), ("C2", 4, "raw_B16e4", 42)]
+TBL_F12 = "tables_D2_B16e4.txt"
 
 
 # ------------------------------------------------------------------ readers ---------------------
@@ -166,9 +170,7 @@ def fig12():
 
     # ---- bottom-left: the pre-registered sign tests, margin over discordant pairs, + nu_q twin axis
     ax = fig.add_subplot(gs[1, 0:2])
-    res = {"C1": pooled_test(os.path.join(RES, "tables_D2_B1e4x.txt"), "C1"),
-           "C5": pooled_test(os.path.join(RES, "tables_D2_B1e4x.txt"), "C5"),
-           "C2": pooled_test(os.path.join(RES, "tables_D2_B1e4.txt"), "C2")}
+    res = {c: pooled_test(os.path.join(RES, TBL_F12), c) for c in ("C1", "C5", "C2")}
     floor = {tp: (4 - tp) / tp for _, tp, _, _ in CELLS}          # cbar (Nt - Tp) / Tp, Nt = 4, cbar = 1
     for cell, tp, _, _ in CELLS:
         r = res[cell]
@@ -184,12 +186,13 @@ def fig12():
         if rev:
             s, a, b_, p = rev[0]
             txt += f"\nreverses at {s:+.0f} dB ({a}:{b_}, p = {p:.2g})"
-        ax.text(tp, frac + (0.04 if frac > 0 else -0.04), txt, ha="center",
-                va="bottom" if frac > 0 else "top", fontsize=6.0, linespacing=1.3)
+        dy = 0.04 if frac > 0 else (-0.04 if tp == 2 else -0.30)   # C5's bar is short: drop its label
+        ax.text(tp, frac + dy, txt, ha="center", va="bottom" if frac > 0 else "top",
+                fontsize=6.0, linespacing=1.3)
     ax.axhline(0, color="0.35", lw=0.9)
     ax.set_xticks([2, 3, 4])
     ax.set_xlim(1.35, 4.65)
-    ax.set_ylim(-0.55, 1.25)
+    ax.set_ylim(-0.78, 1.25)
     ax.set_xlabel("$T_p$ (pilot symbols; $N_t$ = 4)")
     ax.set_ylabel("sign-test margin among discordant pairs\n(a$-$b)/(a+b);  + = V1 wins, $-$ = GMM wins",
                   fontsize=7)
@@ -208,8 +211,9 @@ def fig12():
     ax2.set_ylim(-0.12, 2.45)
     ax2.set_ylabel("$\\nu_q$ (it. 1)", color="tab:blue", fontsize=7)
     ax2.tick_params(axis="y", colors="tab:blue", labelsize=6.8)
-    ax2.text(1.42, 2.42, "measured C1 $-$3 dB: $\\nu_q$ = 2.00 = 1.40 x grid top -> out of support\n"
-                         "all closed-form floors are INSIDE the grid;  C1 +15 dB is not explained by this (§6j)",
+    ax2.text(1.42, 2.42, "all closed-form floors are INSIDE the grid;  measured C1 $-$3 dB $\\nu_q$ = 2.00 "
+                         "= 1.40 x grid top\nbut leaving the grid is NOT sufficient: C2 at $-$9 dB has the same "
+                         "$\\nu_q$ = 1.99 and does not collapse (§6p)",
              fontsize=5.8, color="tab:blue", va="top", ha="left", linespacing=1.3)
     h2, l2 = ax2.get_legend_handles_labels()
 
@@ -224,36 +228,40 @@ def fig12():
                title="bottom-left, blue (right axis)", title_fontsize=6.0, handlelength=1.6)
 
     fig.text(0.5, 0.058, "EQUAL BUDGET: every arm, learned and classical, is fitted / trained on the SAME "
-                         "N_train = 1e4 channel set (10_SPEC_stageC A3).  n = 2560 trials per SNR point.",
+                         "N_train = 1.6e5 channel set (10_SPEC_stageC A3).  n = 2560 trials per SNR point.  "
+                         "GMM b* = kron K=512, chosen by validation log-likelihood over the full Nr=8 grid.",
              ha="center", fontsize=6.8, color="0.3")
-    fig.text(0.5, 0.030, GATE_LINE, ha="center", fontsize=6.8, color="0.3")
-    fig.text(0.5, 0.006, "§6d registers these points as a budget-axis measurement, not an arm result; "
-                         "the gate-passing model's BLER is in results/tables_D2_C.txt.",
+    fig.text(0.5, 0.030, GATE_LINE_PASS.split("; GA")[0] + ".", ha="center", fontsize=6.8, color="0.3")
+    fig.text(0.5, 0.006, "At this budget C2's GMM improves to 0.2434 on the extended K=1024 grid "
+                         "(results/tables_D2_B16e4k.txt); V1 is 0.1449 there.  See F15.",
              ha="center", fontsize=6.8, color="0.3")
     return _save(fig, "F12_tp_envelope", """
-F12.  The pilot-budget operating envelope at equal training budget (10_SPEC_stageC §6f).
-TOP: BLER after 16 outer iterations, D2, n = 2560 per SNR point, every arm fitted or trained on the
-SAME N_train = 1e4 channel set.  Array (8x4), frame length T = 16, code and SNR grid are identical
-across the three panels; the information block SHRINKS with Tp (K = 50 / 46 / 42 bits), so absolute
-BLER levels are not on a common codeword footing across panels -- only the within-panel arm ordering
-is compared.  A block on which an arm raised carries a non-finite block error and is COUNTED AS A
-BLOCK ERROR, exactly as the pre-registered analysis does (code/analysis.py:172-175; tables_D2_B1e4x.txt
-NOTE rows): at C1 -3 dB that is V0 970 and V1 804 of 2560 blocks, and the plotted BLER is 1.000 for
-both, as the table prints it.  (V4, not plotted, is 136 raised / BLER 0.996.)  These exception counts
-are a different quantity from the F3 divergence-guard rate (NMSE@16 > 10), which is 2560/2560 for V0
-and V1 at that point (results/guard_D2_B1e4x.txt).  A point drawn hollow on the dashed line is
-0 of 2560 blocks (resolution 1/2560).
+F12.  The pilot-budget operating envelope at equal training budget, GATE-PASSING checkpoint
+(10_SPEC_stageC §6f, run B16e4).
+TOP: BLER after 16 outer iterations, D2, n = 2560 per SNR point, every arm -- learned and classical --
+fitted or trained on the SAME N_train = 1.6e5 channel set.  The GMM arm is b* = kron K=512, chosen by
+validation log-likelihood over the complete Nr=8 grid (all 12 configurations present; see
+code/check_fits_n16e4.sh).  Array (8x4), frame length T = 16, code and SNR grid are identical across
+the three panels; the information block SHRINKS with Tp (K = 50 / 46 / 42 bits), so absolute BLER
+levels are not on a common codeword footing across panels -- only the within-panel arm ordering is
+compared.  A block on which an arm raised carries a non-finite block error and is COUNTED AS A BLOCK
+ERROR, exactly as the pre-registered analysis does (code/analysis.py:172-175).  A point drawn hollow
+on the dashed line is 0 of 2560 blocks (resolution 1/2560).
+READING THE THREE PANELS.  At Tp = 4 the learned arm (V1) is below the GMM at every SNR.  At Tp = 3
+the two curves CROSS: V1 is below the GMM from -3 to +6 dB and above it from +12 dB.  At Tp = 2 the
+GMM is below V1 everywhere except +0 dB, and at -3 dB every learned arm collapses (V0 BLER 1.000,
+V1 0.982; the F3 divergence guard fires on 2560/2560 trials, results/guard_D2_B16e4.txt).
 BOTTOM-LEFT, bars (left axis): the pre-registered decision-point sign test for M-ours-bstar -> V1 in
 each cell, as the margin (a - b)/(a + b) over DISCORDANT pairs, where a:b = only-first-fails :
-only-second-fails (tables_D2_B1e4x.txt TABLE B convention), so positive = the learned arm wins.  This
-is a margin among discordant pairs, not an effect size; each annotation gives a:b, the number of
-discordant pairs out of 3 x 2560, the pooled p, how many of the three decision points went to which
-arm, and WHICH SNRs those decision points were -- the anchor rule places them at +6/+12/+15 dB for
-C1, +9/+12/+15 dB for C5 and -3/0/+3 dB for C2, so the three bars are not read at a common SNR.
-C5's pooled win is carried by +9 and +12 dB and reverses at +15 dB (243:276, p = 0.16); the bar is
-annotated accordingly.  All three comparisons are POWERED (3 decision points, all with >= 6
-discordant pairs).  Numbers are transcribed from results/tables_D2_B1e4x.txt (C1, C5) and
-results/tables_D2_B1e4.txt (C2); this figure runs no test.
+only-second-fails, so positive = the learned arm wins.  This is a margin among discordant pairs, not
+an effect size.  Each annotation gives a:b, the number of discordant pairs out of 3 x 2560, the
+pooled p, how many of the three decision points went to which arm, and WHICH SNRs those decision
+points were -- the anchor rule (|log10(BLER/0.1)| smallest, BLER in [0.005, 0.9]) places them at
+-3/+0/+3 dB for C2 and at +6/+12/+15 dB for C5 and C1, so the three bars are NOT read at a common
+SNR.  That is why C5's bar is a tie (623:640, p = 0.65) although its curve is below the GMM's over
+-3..+6 dB: its decision points sit in the high-SNR region where the curves have already crossed.
+All three comparisons are POWERED.  Numbers are transcribed from results/tables_D2_B16e4.txt; this
+figure runs no test.
 BOTTOM-LEFT, blue (right axis, in nu_q units): the closed-form iteration-1 cavity-variance floor
 nu_q -> cbar (Nt - Tp)/Tp (squares, dashed) = 1.00 / 0.33 / 0.00, which follows from Tp < Nt leaving
 Nr(Nt - Tp) null directions in G while the data columns are still zero-valued; the MEASURED
@@ -261,22 +269,22 @@ iteration-1 nu_q at -3 dB where a measurement exists (filled circles: C1 1.997 a
 results/sigma_grid_D2.txt, 2026-09-20, n = 64; C5 was not in that measurement and its -3 dB value
 0.998 is the closed form, drawn hollow); and the top of the FROZEN training sigma grid (dotted),
 nu_q = 1.43.  ALL THREE FLOORS ARE INSIDE THE GRID.  What leaves the grid is the measured C1 value at
--3 dB, 2.00 = 1.40 x the top; the floor explains why C1 is queried high, the measured value is what
-leaves support.  §6j shows this accounts for the LOW-SNR C1 failure and NOT for +15 dB, where
-divergence precedes the out-of-range query.
-PROVENANCE OF THE PREDICTION.  The cell-level envelope prediction (V1 beats the GMM at Tp = 3 and 4,
-loses at Tp = 2) is §6f, commit 8880d33 at 12:23:43, before the run started at 12:33:04; §6f itself
-discloses that those cell predictions were made after seeing the NON-equal-budget N = 1.6e5 C1/C5
-results, so only the equal-budget ordering was blind.  The closed form was derived and registered
-(§6j, commit 7737551 at 13:06:25) while that run was still executing (12:33-13:12) and before the
-diagnostic that scored it was written (13:09:27); its agreement with 1.997 at -3 dB and 1.015 at
-+15 dB is a consistency check against values already on disk since 2026-09-20, not a blind
-prediction.
-SCOPE.  One testbed (D2), one budget (N = 1e4), one seed (a1).  """ + GATE_LINE + """  §6d fixed
-this in advance by registering these points as a budget-axis measurement rather than an arm result;
-the gate-passing model's BLER is in results/tables_D2_C.txt.  F13 shows that dropping the matrix
-site performs identically to PSD-projecting it in the C2 diagnostic, so these data do not isolate
-the PSD projection as the mechanism behind the V1 curve; V1 is one of three interchangeable repairs.
+-3 dB, 2.00 = 1.40 x the top.
+LIMIT OF THAT EXPLANATION, measured later and reported here: leaving the grid is NOT sufficient for
+collapse.  §6p put C2 at -9 dB, where nu_q = 1.99 -- the same place as C1 at -3 dB -- and V1 did not
+collapse there (guard 0.000, and V1 still beat the GMM 41:3).  What separates the cells is the
+Nr(Nt - Tp) null directions of an anisotropic cavity, not the size of the scalar nu_q.
+PROVENANCE OF THE PREDICTION.  The cell-level envelope prediction is §6f, commit 8880d33 at 12:23:43,
+before the first run started at 12:33:04; §6f itself discloses that those cell predictions were made
+after seeing the NON-equal-budget N = 1.6e5 C1/C5 results, so only the equal-budget ordering was
+blind.  The closed form was registered in §6j (commit 7737551, 13:06:25) while that run was still
+executing, and its agreement with 1.997 at -3 dB is a consistency check against a value on disk since
+2026-09-20, not a blind prediction.
+SCOPE.  One testbed (D2), one seed (a1; the C2 numbers reproduce on seeds a2/a3 within 0.005 BLER at
+N = 1e4, §6g), GMM grid truncated at K = 512 for this run.  """ + GATE_LINE_PASS + """  On the
+extended K = 1024 grid at the same budget the C2 GMM improves from 0.2527 to 0.2434 while V1 is
+0.1449 (results/tables_D2_B16e4k.txt); F15 shows that the gap is insensitive to both the training
+budget and the number of mixture components.
 """)
 
 

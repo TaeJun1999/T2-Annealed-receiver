@@ -1,21 +1,24 @@
 F14.  The headline operating point, analysed with the menu frozen in 10_SPEC_stageC §6q (A1-A8).
 This point is the one §6p predicted before the low-SNR run.  D2 cell C2, SNR -3 dB, equal training budget (every arm on the same N_train channel
-set; raw raw_B1e4), n = 2560 trials.  Blocks on which an arm raised are counted as block errors
+set; raw raw_B16e4k), n = 2560 trials.  Blocks on which an arm raised are counted as block errors
 (analysis.py:172-175).
 (a) BLER after 16 outer iterations with Wilson 95% intervals for every arm, so the site ablation
 (V0 -> V1 -> V4 / V4b, same checkpoint) and the GMM control (bstar -> bstar-scalar, same fit) are read
-side by side (A1, A6).  GMM 0.252 vs V1 0.145: V1 removes 42.4% of the GMM's
-block errors and closes 49% of the GMM-to-genie gap (A7); V0 -> V1 removes
-81.6% (the pre-registered wiring against its one-line repair).  The paired sign
-test and its confidence interval (A3) are in results/tables_D2_B1e4.txt TABLE B and are not
+side by side (A1, A6).  GMM 0.243 vs V1 0.145: V1 removes 40.4% of the GMM's
+block errors and closes 47% of the GMM-to-genie gap (A7); V0 -> V1 removes
+75.5% (the pre-registered wiring against its one-line repair).  The paired sign
+test and its confidence interval (A3) are in results/tables_D2_B16e4k.txt TABLE B and are not
 recomputed here.
 (b)-(c) NMSE_H (median) and BLER against the outer iteration (A2): the learned-score arms separate from
 the GMM within the first iterations and hold the gap to iteration 16.
 (d) The cavity variance nu_q the denoiser is queried with, per iteration (median of the n = 8
 diagnostic results/diag/sigma-coverage_D2_C2_n8.npz), against the frozen training grid (A5).
-A4, divergence guard (NMSE@16 > 10) at this point: V0 0.134; R5-genie 1.000; every other arm 0.000.
+A4, divergence guard (NMSE@16 > 10) at this point: V0 0.085; R5-genie 1.000; every other arm 0.000.
+Panel (d) is a SEPARATE probe: results/diag/sigma-coverage_D2_C2_n8.npz is measured on
+ckpt/d2sx_N10000_a1.pt (n = 8), not on this figure's checkpoint, so it shows what the receiver ASKS
+for in this cell, not what this checkpoint answers.
 A8, Module H cost per call (results/complexity_moduleH.txt, CPU float64 one thread): fitted GMM b*
 K=512 17.1 ms, learned score 78.8 ms (4.6x; the PSD projection itself is -0.8%, i.e. free); the
 equal-budget claim is 'same training data', not 'same inference complexity'.
-SCOPE.  checkpoint ckpt/d2sx_N10000_a1.pt: the table records NO GATE RECORD for it on D2 (GA-GD are measurable on D1 only); its D1 sibling at N_train=1e4 FAILS GC 0.243 vs 0.15.  One cell, one seed (the a1 numbers reproduce on seeds a2/a3 within 0.005 BLER,
+SCOPE.  checkpoint ckpt/d2sx_N160000_a1.pt: gates are measurable on D1 only, so this D2 checkpoint is qualified through its D1 sibling sx_N160000_D1.pt, which PASSES GB 2.66e-3 / GC 0.0999 / GD 0.0718 (LADDER_C.md:1); GA is a structural zero for this model family.  One cell, one seed (the a1 numbers reproduce on seeds a2/a3 within 0.005 BLER,
 §6g), one testbed.

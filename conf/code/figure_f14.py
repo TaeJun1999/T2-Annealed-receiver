@@ -32,7 +32,7 @@ from matplotlib.gridspec import GridSpec
 import common as C
 import figures as F0
 from figures_stagec import _save, RES
-from figures_stagec2 import cp95, GATE_LINE, GRID_TOP_NU
+from figures_stagec2 import cp95, GATE_LINE, GATE_LINE_PASS, GRID_TOP_NU
 
 ARMS = [   # (arm, label, colour, marker)
     ("R1-turbo",            "classical turbo (no prior)",             "tab:brown",  "s"),
@@ -79,6 +79,9 @@ def main():
     plt.rcParams.update({"font.size": 7.5, "axes.labelsize": 7.5, "axes.titlesize": 8,
                          "xtick.labelsize": 6.8, "ytick.labelsize": 6.8, "legend.fontsize": 6.4})
     d = load_point(a.raw, a.cell, a.snr)
+    # the gate sentence must follow the CHECKPOINT this run used, not a module default: raw_B16e4* is
+    # the gate-passing d2sx_N160000_a1, every other raw dir here is a gate-failing sibling.
+    gate_line = GATE_LINE_PASS if a.raw.startswith("raw_B16e4") else GATE_LINE
     n = None
     stats = {}
     for arm, lab, col, mk in ARMS:
@@ -162,12 +165,15 @@ def main():
     axd.text(16.2, 2 * 0.03306220 ** 2 * 1.25, "grid bottom", fontsize=5.6, color="tab:blue", ha="right")
     axd.set_xlabel("outer iteration"); axd.set_ylabel("$\\nu_q$ queried (median, n = 8)")
     axd.set_title("(d)  cavity variance the denoiser is asked for" + ("" if have_d else "  [diagnostic not yet run]"))
+    if have_d:
+        axd.text(0.02, 0.97, "probe uses ckpt d2sx_N10000_a1 (n = 8),\nnot this figure's checkpoint",
+                 transform=axd.transAxes, fontsize=5.6, color="0.35", va="top")
     axd.grid(alpha=0.25, which="both", lw=0.4)
     if have_d:
         axd.legend(fontsize=5.8, loc="lower right")
     h, l = axb.get_legend_handles_labels()
     fig.legend(h, l, loc="lower center", bbox_to_anchor=(0.5, 0.045), ncol=3, fontsize=6.2, framealpha=0.95)
-    fig.text(0.5, 0.008, GATE_LINE, ha="center", fontsize=6.4, color="0.3")
+    fig.text(0.5, 0.008, gate_line, ha="center", fontsize=6.4, color="0.3")
     guard_txt = "; ".join(f"{arm.replace('M-ours-', '').replace('dscore-C-', '')} {stats[arm]['guard']:.3f}"
                           for arm, *_ in ARMS if arm in stats and stats[arm]["guard"] > 0)
     first = ("POST-HOC HEADLINE POINT: " + a.posthoc + "  ") if a.posthoc else \
@@ -189,10 +195,10 @@ the GMM within the first iterations and hold the gap to iteration 16.
 (d) The cavity variance nu_q the denoiser is queried with, per iteration (median of the n = 8
 diagnostic results/diag/sigma-coverage_D2_{a.cell}_n8.npz), against the frozen training grid (A5).
 A4, divergence guard (NMSE@16 > 10) at this point: {guard_txt or 'no arm fires'}; every other arm 0.000.
-A8, Module H cost per call (results/complexity_moduleH.txt, CPU float64 one thread): fitted GMM b*
+Panel (d) is a SEPARATE probe: results/diag/sigma-coverage_D2_{a.cell}_n8.npz is measured on\nckpt/d2sx_N10000_a1.pt (n = 8), not on this figure's checkpoint, so it shows what the receiver ASKS\nfor in this cell, not what this checkpoint answers.\nA8, Module H cost per call (results/complexity_moduleH.txt, CPU float64 one thread): fitted GMM b*
 K=512 17.1 ms, learned score 78.8 ms (4.6x; the PSD projection itself is -0.8%, i.e. free); the
 equal-budget claim is 'same training data', not 'same inference complexity'.
-SCOPE.  {GATE_LINE}  One cell, one seed (the a1 numbers reproduce on seeds a2/a3 within 0.005 BLER,
+SCOPE.  {gate_line}  One cell, one seed (the a1 numbers reproduce on seeds a2/a3 within 0.005 BLER,
 §6g), one testbed.
 """)
 
