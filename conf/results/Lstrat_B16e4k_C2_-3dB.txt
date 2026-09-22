@@ -1,0 +1,16 @@
+# L-stratification of raw_B16e4k / D2 C2 / -3 dB   (report-only, no new simulation)
+# D2 draws L ~ Unif{3..8} per block (05_SPEC §1); L is recovered by replaying
+# the deterministic trial stream, runner.py:354-360.  n = 2560 trials.
+# manifold dimension of a block = 3L real dims inside 2*Nr*Nt = 64
+
+  L   3L  codim     n |    R1-turbo   R2-ours-G       bstar          V1          V4    R5-genie | GMM/V1  GMM-V1  bstar->V1 (a:b, p)
+  3    9     55   416 |      0.6947      0.4952      0.3534      0.2043      0.2212      0.1034 |   1.73  0.1490  67:5, p=6.4e-15
+  4   12     52   413 |      0.5690      0.3850      0.2542      0.1356      0.1404      0.0436 |   1.88  0.1186  55:6, p=5.4e-11
+  5   15     49   428 |      0.5537      0.3271      0.2266      0.1308      0.1285      0.0140 |   1.73  0.0958  51:10, p=9.6e-08
+  6   18     46   415 |      0.4892      0.2578      0.2120      0.1301      0.1446      0.0145 |   1.63  0.0819  39:5, p=1.4e-07
+  7   21     43   444 |      0.4685      0.2568      0.2095      0.1374      0.1464      0.0135 |   1.52  0.0721  42:10, p=9.1e-06
+  8   24     40   444 |      0.4887      0.2545      0.2095      0.1329      0.1441      0.0180 |   1.58  0.0766  48:14, p=1.7e-05
+
+READ: if the learned prior's advantage comes from the manifold geometry, the GMM/V1 ratio and the
+paired a:b split must grow as L falls (thinner manifold, higher co-dimension).  If they are flat in
+L, the geometry story does not explain the advantage and a sparser testbed will not enlarge it.
