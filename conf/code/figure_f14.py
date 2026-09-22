@@ -114,8 +114,8 @@ def main():
     ax.grid(alpha=0.25, axis="y", lw=0.4)
     g, v1, gm = stats["R5-genie"]["bler"], stats["M-ours-dscore-C-V1"]["bler"], stats["M-ours-bstar"]["bler"]
     v0 = stats["M-ours-dscore-C-V0"]["bler"]
-    ax.text(0.98, 0.96, f"V1 closes {100 * (gm - v1) / (gm - g):.0f}% of the GMM-to-genie gap\n"
-                        f"V0 -> V1: {100 * (v0 - v1) / v0:.1f}% fewer block errors",
+    ax.text(0.985, 0.60, f"V1 closes {100 * (gm - v1) / (gm - g):.0f}% of the GMM-to-genie gap\n"
+                         f"V0 -> V1: {100 * (v0 - v1) / v0:.1f}% fewer block errors",
             transform=ax.transAxes, ha="right", va="top", fontsize=6.2, color="0.25")
 
     # (b) NMSE vs iteration ; (c) BLER vs iteration
@@ -156,11 +156,12 @@ def main():
                     have_d = True
     axd.axhline(GRID_TOP_NU, color="tab:blue", ls=":", lw=0.9, label=f"frozen grid top $\\nu_q$ = {GRID_TOP_NU:.2f}")
     axd.axhline(2 * 0.03306220 ** 2, color="tab:blue", ls=":", lw=0.9)
+    axd.text(16.2, 2 * 0.03306220 ** 2 * 1.25, "grid bottom", fontsize=5.6, color="tab:blue", ha="right")
     axd.set_xlabel("outer iteration"); axd.set_ylabel("$\\nu_q$ queried (median, n = 8)")
     axd.set_title("(d)  cavity variance the denoiser is asked for" + ("" if have_d else "  [diagnostic not yet run]"))
     axd.grid(alpha=0.25, which="both", lw=0.4)
     if have_d:
-        axd.legend(fontsize=5.8, loc="upper right")
+        axd.legend(fontsize=5.8, loc="lower right")
     h, l = axb.get_legend_handles_labels()
     fig.legend(h, l, loc="lower center", bbox_to_anchor=(0.5, 0.045), ncol=3, fontsize=6.2, framealpha=0.95)
     fig.text(0.5, 0.008, GATE_LINE, ha="center", fontsize=6.4, color="0.3")
