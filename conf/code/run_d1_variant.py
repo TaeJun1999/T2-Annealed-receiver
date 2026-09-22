@@ -22,6 +22,12 @@ ap.add_argument("--attempt", type=int, default=1)
 ap.add_argument("--device", default="cuda")
 ap.add_argument("--max-epochs", type=int, default=3000)
 ap.add_argument("--tag", default="C")
+# §6e DIAGNOSTIC SWEEP ONLY.  Default None = use the §3b fixed value.  When given, this is the
+# lambda sweep that asks "is there a lambda at which the penalty HELPS", because the prior-art
+# survey found Chao et al. (ICML 2023) making the same penalty work and we have no explanation.
+# §6e states in advance that NO lambda from this sweep becomes an arm, gate-passing or not.
+ap.add_argument("--jac-reg", type=float, default=None,
+                help="§6e sweep only; omit to use the §3b fixed value")
 a = ap.parse_args()
 
 HP = dict(BASE)
@@ -30,10 +36,13 @@ if a.variant == "V2":
     HP["head"] = "energy"
 else:
     jac_reg = 1.0                      # FIXED by 10_SPEC_stageC §3b -- never tuned, never swept
+if a.jac_reg is not None:              # §6e diagnostic sweep; see the flag's help and §6e
+    jac_reg = a.jac_reg
 
 prior = C.PRIOR_OF["D1"]
-ck = os.path.join(C.CONF, "ckpt", f"sx_{a.variant}_N{a.ntrain}_D1_a{a.attempt}.pt")
-lg = os.path.join(C.CONF, "logs", f"train_{a.variant}_D1_N{a.ntrain}_a{a.attempt}.log")
+sfx = "" if a.jac_reg is None else f"_lam{a.jac_reg:g}"
+ck = os.path.join(C.CONF, "ckpt", f"sx_{a.variant}_N{a.ntrain}_D1_a{a.attempt}{sfx}.pt")
+lg = os.path.join(C.CONF, "logs", f"train_{a.variant}_D1_N{a.ntrain}_a{a.attempt}{sfx}.log")
 print(f"[{a.variant}/D1] ntrain={a.ntrain} attempt={a.attempt} prior={prior} device={a.device} "
       f"CUDA_VISIBLE_DEVICES={os.environ.get('CUDA_VISIBLE_DEVICES','<unset>')}", flush=True)
 print(f"[{a.variant}/D1] hp={HP} jac_reg={jac_reg}\n[{a.variant}/D1] ckpt {ck}", flush=True)
@@ -57,7 +66,10 @@ print(f"[{a.variant}/D1] {res['epochs']} ep, best val {res['val_loss']:.6e}, {re
 # attempt (it consumes a slot), so it is neither ABORTED nor a plain UNGATED result.
 res["verdict"] = ("ABORTED" if res.get("aborted") else
                   "DIVERGED" if res.get("stopped_by") == "diverged" else "UNGATED")
-res["note"] = (f"Stage C {a.variant} on D1 (gate twin): N_train={a.ntrain}, ckpt {ck}, "
+res["note"] = ((("" if a.jac_reg is None else
+                 f"§6e LAMBDA SWEEP lambda={a.jac_reg:g} -- DIAGNOSTIC, NOT AN ARM (§6e forbids "
+                 f"promoting any lambda from this sweep, gate-passing or not).  ") )
+               + f"Stage C {a.variant} on D1 (gate twin): N_train={a.ntrain}, ckpt {ck}, "
                f"split {res['split_hash']}  || UNGATED here; run `runner.py gate --testbed D1 "
                f"--ckpt {ck} --tag {a.tag}` to obtain GA-GD.")
 try:
