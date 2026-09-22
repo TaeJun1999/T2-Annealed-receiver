@@ -84,11 +84,34 @@ def main():
         w(row)
     w("")
 
-    # the §6h prediction, scored here so the scoring cannot drift later
-    w("===== §6h prediction, scored =====")
-    w("prediction (committed before this file was written): dscore|psd1e-2 (sign repair) restores C2")
-    w("BLER@16 to within 0.02 absolute of dscore|belsc at ALL SEVEN SNRs, and dscore|abs1e-2")
-    w("(magnitude floor, SIGN KEPT) does not.  i.e. the defect is the SIGN, not the conditioning.")
+    # ---- the §6h prediction, scored against its LITERAL wording first (2026-09-22 14:55 correction).
+    # 10_SPEC_stageC §6h (commit 7ec3d37) says, verbatim: "dscore|psd1e-2(부호 교정)가 7 SNR 전부에서
+    # C2 BLER 을 V1 대역(절대 0.02 이내)으로 회복시키고, dscore|abs1e-2(크기만 바닥치고 부호 유지)는
+    # 회복시키지 못한다".  The reference band is the V1 ARM (equal budget N=1e4, n=2560, raw_B1e4), NOT
+    # dscore|belsc.  The first version of this roll-up scored against belsc; an independent figure
+    # verification (wf_49dc79b9-4cf, item 6) caught the substituted reference.  Both scorings are kept.
+    v1 = {}
+    for s in SNRS:
+        snr_int = int(s)
+        vals = []
+        for f in glob.glob(os.path.join(C.CONF, "raw_B1e4", f"D2_C2_*snr{snr_int}_*.npz")):
+            b = np.load(f, allow_pickle=True)["M-ours-dscore-C-V1|blk_err"][:, 15]
+            vals.append(np.where(np.isfinite(b), b, 1.0))          # analysis.py rule: raised = block error
+        v1[s] = float(np.concatenate(vals).mean()) if vals else float("nan")
+    w("===== §6h prediction, scored against the LITERAL pre-registered reference: the V1 ARM =====")
+    w("§6h verbatim: psd1e-2 restores C2 BLER@16 to within 0.02 absolute of the V1 BAND at ALL SEVEN")
+    w("SNRs, and abs1e-2 (magnitude floor, SIGN KEPT) does not.  V1 = M-ours-dscore-C-V1 from")
+    w("raw_B1e4 (equal budget N=1e4, n=2560; this probe is n=256, so 0.02 is ~1 sigma at BLER 0.15).")
+    w("  V1 BLER@16 : " + " ".join(f"{v1[s]:.4f}" for s in SNRS))
+    for cand in ("dscore|psd1e-2", "dscore|abs1e-2", "dscore|mean", "dscore|belsc", "dscore|eta"):
+        if f"{cand}|blk_err" not in loaded[SNRS[0]].files:
+            continue
+        gaps = [float(np.mean(loaded[s][f"{cand}|blk_err"][:, 15])) - v1[s] for s in SNRS]
+        ok = sum(abs(g) <= 0.02 for g in gaps)
+        w(f"  {cand:<20} vs V1 arm : within 0.02 at {ok}/7 SNRs   gaps " +
+          " ".join(f"{g:+.3f}" for g in gaps))
+    w("")
+    w("===== the same prediction as this roll-up FIRST scored it (belsc reference -- NOT the §6h wording) =====")
     ref = "dscore|belsc"
     for cand in ("dscore|psd1e-2", "dscore|abs1e-2", "dscore|mean", "dscore|eta"):
         if f"{cand}|blk_err" not in loaded[SNRS[0]].files:
@@ -99,7 +122,7 @@ def main():
         w(f"  {cand:<20} vs {ref}: within 0.02 at {ok}/7 SNRs   gaps " +
           " ".join(f"{g:+.3f}" for g in gaps))
     w("")
-    w("Read the two lines above against the prediction; do not restate them selectively.")
+    w("Read BOTH blocks against the prediction; the V1-referenced block is the one §6h wrote.")
 
     with open(OUT, "w") as f:
         f.write("\n".join(lines) + "\n")

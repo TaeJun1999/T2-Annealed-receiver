@@ -51,13 +51,21 @@ gmmB|flip4                      0.000      0.000      0.000      0.000      0.00
 gmmB|tiny4                      0.000      0.000      0.000      0.000      0.000      0.000      0.000
 meta|json                          --         --         --         --         --         --         --
 
-===== §6h prediction, scored =====
-prediction (committed before this file was written): dscore|psd1e-2 (sign repair) restores C2
-BLER@16 to within 0.02 absolute of dscore|belsc at ALL SEVEN SNRs, and dscore|abs1e-2
-(magnitude floor, SIGN KEPT) does not.  i.e. the defect is the SIGN, not the conditioning.
+===== §6h prediction, scored against the LITERAL pre-registered reference: the V1 ARM =====
+§6h verbatim: psd1e-2 restores C2 BLER@16 to within 0.02 absolute of the V1 BAND at ALL SEVEN
+SNRs, and abs1e-2 (magnitude floor, SIGN KEPT) does not.  V1 = M-ours-dscore-C-V1 from
+raw_B1e4 (equal budget N=1e4, n=2560; this probe is n=256, so 0.02 is ~1 sigma at BLER 0.15).
+  V1 BLER@16 : 0.1453 0.0371 0.0094 0.0039 0.0035 0.0027 0.0016
+  dscore|psd1e-2       vs V1 arm : within 0.02 at 6/7 SNRs   gaps +0.030 +0.006 +0.002 +0.000 +0.000 -0.003 -0.002
+  dscore|abs1e-2       vs V1 arm : within 0.02 at 0/7 SNRs   gaps +0.648 +0.838 +0.764 +0.609 +0.418 +0.236 +0.096
+  dscore|mean          vs V1 arm : within 0.02 at 6/7 SNRs   gaps +0.038 +0.002 -0.005 +0.000 +0.000 -0.003 -0.002
+  dscore|belsc         vs V1 arm : within 0.02 at 6/7 SNRs   gaps +0.023 +0.002 +0.006 +0.004 -0.004 -0.003 -0.002
+  dscore|eta           vs V1 arm : within 0.02 at 0/7 SNRs   gaps +0.679 +0.865 +0.885 +0.773 +0.661 +0.497 +0.330
+
+===== the same prediction as this roll-up FIRST scored it (belsc reference -- NOT the §6h wording) =====
   dscore|psd1e-2       vs dscore|belsc: within 0.02 at 7/7 SNRs   gaps +0.008 +0.004 -0.004 -0.004 +0.004 +0.000 +0.000
   dscore|abs1e-2       vs dscore|belsc: within 0.02 at 0/7 SNRs   gaps +0.625 +0.836 +0.758 +0.605 +0.422 +0.238 +0.098
   dscore|mean          vs dscore|belsc: within 0.02 at 7/7 SNRs   gaps +0.016 +0.000 -0.012 -0.004 +0.004 +0.000 +0.000
   dscore|eta           vs dscore|belsc: within 0.02 at 0/7 SNRs   gaps +0.656 +0.863 +0.879 +0.770 +0.664 +0.500 +0.332
 
-Read the two lines above against the prediction; do not restate them selectively.
+Read BOTH blocks against the prediction; the V1-referenced block is the one §6h wrote.

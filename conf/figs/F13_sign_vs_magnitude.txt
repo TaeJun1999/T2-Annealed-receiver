@@ -1,20 +1,34 @@
-F13.  The defect is the eigenvalue SIGN, not the conditioning (10_SPEC_stageC §6h).
-Each curve is the SAME learned score through the SAME EP receiver with ONE intervention applied to
-the D-14 matrix site's Jacobian; the fitted-GMM arm runs the identical loop as a reference.
-D2, cell C2 (Tp=4), n=256 trials per SNR point, all 7 SNRs, no point dropped.
-(a) Flooring the eigenvalue MAGNITUDE at 1e-2 while KEEPING each eigenvalue's sign recovers nothing
-(BLER 0.098-0.875, gaps of +0.098 to +0.836 against the repaired arms at the seven SNRs).  Repairing
-the SIGN -- by clamping to [1e-2, 1], by dropping the matrix site, or by switching the clip rule --
-recovers everything, and the three repairs are indistinguishable from each other (all within 0.02
-absolute at all 7 SNRs).  (b) The divergence guard fires on 1.6-22.3% of trials without the
-intervention and on 0.000 of them after any of the three sign repairs; the magnitude-only floor
-leaves 0.0-1.6%.
-This was a PRE-REGISTERED prediction, committed in §6h before the roll-up was computed: "psd1e-2
-restores BLER to within 0.02 of belsc at ALL SEVEN SNRs and abs1e-2 does not -- i.e. the defect is
-the sign, not the conditioning."  Scored: psd1e-2 7/7, abs1e-2 0/7.
-PROVENANCE.  The seven raw sweeps were written 2026-09-21 16:23-17:13 and were not read until
-2026-09-22 13:15; the SUMMARY.txt sitting beside them is dated 14:56 on 2026-09-21, predates the
-sweep, and is retained unmodified as the record of that reporting gap.
-SCOPE.  One cell (C2), n=256, and a checkpoint that FAILS the pre-registered gate.  These are
-interventions on a diagnostic probe: they identify the mechanism, they are not arms, and none of them
-appears in any BLER table.  The equal-budget arm results are in results/tables_D2_B1e4.txt.
+F13.  Sign versus magnitude of the site Jacobian's eigenvalues (10_SPEC_stageC §6h).
+Each learned-score curve is the SAME checkpoint through the SAME EP receiver with ONE change to the
+D-14 site: to its Jacobian eigenvalues (abs1e-2, psd1e-2), to the site itself (belsc removes it), or
+to the clip rule (mean).  Only the psd1e-2 / abs1e-2 pair is the sign contrast; belsc and mean are two
+other ways of removing the indefinite site, and their coincidence with psd1e-2 is an observation, not
+part of the pre-registered score.  The fitted-GMM reference (N = 1e4 fit, equal budget) runs the
+identical loop, and two GMM-side interventions isolate the two axes cleanly on a VALID Jacobian:
+flip4 flips the SIGN of four eigenvalues (BLER 0.418 / 0.117 at -3 / 0 dB against the untouched
+GMM's 0.301 / 0.090) while tiny4 shrinks the same four to 1e-4 with sign kept (0.305 / 0.090,
+unchanged).  Note that the psd1e-2 / abs1e-2 pair confounds magnitude for eigenvalues below -1e-2
+(psd1e-2 maps them to +1e-2, abs1e-2 leaves them), which is why the GMM-side pair is shown.
+D2, cell C2 (Tp = 4), n = 256 trials per SNR point, all 7 SNRs, no point dropped; error bars are
+Clopper-Pearson 95% intervals; a hollow marker on the dashed line is 0 of 256 (resolution 1/256),
+a real 1/256 plots above the line.
+(a) The magnitude-only floor does not reach the sign-repaired band at any of the seven SNRs
+(0/7, gaps +0.098 to +0.836 against dscore|belsc), although it does reduce BLER against the
+un-intervened arm (0.332 -> 0.098 at +15 dB) and, in (b), nearly eliminates guard firings.
+Repairing the sign, removing the site or changing the clip rule all recover the receiver; at n = 256
+the three are statistically indistinguishable (all within the pre-registered 0.02 absolute band of
+each other at all 7 SNRs).  The GMM reference's +12 dB point is 4/256; §6h records an unexplained
+normalisation kink at 12 dB.  (b) The guard fires on 1.6-22.3% of trials without the intervention
+and on 0.000 after any of the three repairs; the magnitude-only floor leaves 0.0-1.6%.
+SCORING AGAINST THE PRE-REGISTERED SENTENCE.  §6h (commit 7ec3d37, before the roll-up) reads,
+verbatim: "dscore|psd1e-2(부호 교정)가 7 SNR 전부에서 C2 BLER 을 V1 대역(절대 0.02 이내)으로 회복시키고,
+dscore|abs1e-2(크기만 바닥치고 부호 유지)는 회복시키지 못한다" -- the reference band is the V1 ARM
+(tables_D2_B1e4.txt, n = 2560).  Scored against that literal reference, psd1e-2 is within 0.02 at
+6/7 SNRs (gap +0.031 at -3 dB, about 1.3 sigma at n = 256) and abs1e-2 at 0/7.  The roll-up file
+scored against dscore|belsc instead (7/7 and 0/7).  Both scorings are reported; the substituted
+reference was an error of the roll-up, not of the pre-registration.
+SCOPE.  One cell (C2), n = 256, and a checkpoint with NO D2 gate record whose D1 sibling fails GC.
+These are interventions on a diagnostic probe: they identify the mechanism, they are not arms, and
+none appears in any BLER table.  The equal-budget arm results are in results/tables_D2_B1e4.txt.
+Because dropping the matrix site performs identically to PSD-projecting it here, these data do not
+isolate the PSD projection as the mechanism behind F12's V1 curve.

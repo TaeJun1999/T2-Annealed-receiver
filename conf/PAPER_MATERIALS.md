@@ -901,6 +901,11 @@ C2 의 SNR@0.1 격차 (판정점 -3 / +0 / +3 dB, 90% paired bootstrap, censored
 | `F10_bler_D1_confirmatory.*` | D1 확증 BLER, **n=2560**, 셀 C5/C2/C1. arm: R1-turbo, R2-ours-G, M-ours-bstar, M-ours-score(oracle), V0, V4, R5-genie. **회색 띠** = power guard 가 UNDECIDED 로 남긴 쌍의 판정 SNR (쌍 수준 판정이며 BLER 값이 불확실하다는 뜻이 아니다). **빨간 고리** = (F3) 가드가 2560 전부 발동한 점 (C1/−3 dB 의 V0·V4). BLER 0 은 0.5/n = 1.95e-4 에 그린다 | **PASS** (`sx_N160000_D1.pt`) — 탐침이 아니라 확증 | D1 확증 |
 | `F11_bler_D2_confirmatory.*` | **D2 확증 BLER = 주장 testbed.** n=2560, C2(Tp=4) 주 패널 + C5/C1. arm 9종 (R1-turbo, R2-ours-G, M-ours-bstar, M-ours-bstar-scalar, V0, V1, V4, V4b, R5-genie). **빨간 큰 고리 + 후광** = (F3) 가드가 2560 중 50% 초과 발동한 점 (= 발산 중인 수신기이므로 그 BLER 은 보통의 오류율이 아니다), **작은 고리** = 일부 발동. 회색 띠 = power guard UNDECIDED 쌍의 판정 SNR. BLER 0 은 0.5/n = 1.95e-4 에 그린다 | 체크포인트 `d2sx_N160000_a1.pt` — **D2 게이트 행 없음** (§15), 캡션이 `NO GATE RECORD … UNVERIFIED here` 를 그대로 인용 | **주장 그림** |
 
+| `F12_tp_envelope.*` | **Tp 동작 범위, 동일예산 N=1e4**, n=2560, C1/C5/C2 BLER (위) + 사전 등록 판정점 부호검정을 불일치쌍 마진 (a−b)/(a+b) 로 (아래, 좌축) + 폐형식 바닥·**측정** ν_q·격자 상한을 우축 ν_q 단위로. 예외 블록은 `analysis.py` 규칙대로 블록 오류 1.0 으로 센다(C1 −3 dB V0/V1 = 1.000). 생성 `code/figures_stagec2.py` | `d2sx_N10000_a1.pt` — D2 게이트 행 없음, D1 형제 GC 0.243 FAIL. §6d 가 예산축 측정으로 사전 등록 | **범위 그림** (§6f) |
+| `F13_sign_vs_magnitude.*` | **부호 대 크기** (§6h do() 반사실, C2, n=256, 7 SNR). Clopper–Pearson 95% 구간, 0/256 은 해상도선 위 속 빈 표식, GMM 쪽 flip4/tiny4 로 부호·크기 분리. 캡션이 §6h 문면(V1 대역) 기준 **6/7** 과 정산 파일의 belsc 기준 7/7 을 **둘 다** 적는다. 생성 `code/figures_stagec2.py` | 같은 체크포인트, 진단 탐침 (arm 아님) | **기전 그림** (§6h) |
+
+`F12`/`F13` 는 2026-09-22 14:55 에 독립 검증(wf_49dc79b9-4cf, 확인 결함 38건)을 반영해 인쇄 폭 7.16 in 으로 다시 그렸다.
+
 `F8` 의 알려진 한계 (캡션이 직접 적음): N=1.6e5 곡선 2개는 **임시 디렉토리 체크포인트**라 다시 돌릴 수
 없고, 재측정 로그(`logs/jacpsd_D2_final.log`)는 그릴 때 20점 중 7점만 있어 **그리지 않았다**
 (그 7점은 f = 0.992, 1.000 × 6 으로 그려진 곡선과 겹친다). 20행이 차면 **다시 그릴 것.**

@@ -1,26 +1,46 @@
-F12.  The pilot-budget operating envelope, at equal training budget (10_SPEC_stageC §6f).
-Left three panels: BLER after 16 outer iterations, D2, n=2560 per SNR point, every arm trained or
-fitted on the SAME N_train=1e4 channel set.  Cells differ ONLY in Tp (C1 Tp=2, C5 Tp=3, C2 Tp=4);
-array, block length, code, SNR grid and outer-iteration count are identical.  Blocks on which an arm
-raised carry a non-finite block error and are COUNTED AS BLOCK ERRORS, exactly as the pre-registered
-analysis does (code/analysis.py:172-175; tables_D2_B1e4x.txt NOTE rows): at C1 -3 dB that is V0 970,
-V1 804 and V4 136 of 2560 blocks, giving BLER 1.000 / 1.000 / 0.996.  The F3 divergence guard fires on
-2560 / 2560 / 2552 of those trials (results/guard_D2_B1e4x.txt).
-Right panel: the pre-registered decision-point sign test for M-ours-bstar -> V1, one bar per cell,
-plotted as the pooled margin (b-a)/(a+b) so that positive means the learned arm wins.  Annotations
-give the pooled counts a:b, the pooled p, and how many of the three pre-registered decision points
-were individually significant.  All three comparisons are POWERED.  Numbers are transcribed from
-results/tables_D2_B1e4x.txt (C1, C5) and results/tables_D2_B1e4.txt (C2); this figure runs no test.
-The dashed blue line is NOT fitted to these results: it is the closed-form cavity-variance floor at
-outer iteration 1, nu_q -> cbar (Nt - Tp)/Tp, which follows from Tp < Nt leaving Nr(Nt - Tp) null
-directions in G when the data columns are still zero-valued.  It was written down in §6j before the
-C1 and C5 runs and matched the measurement to 3-4 significant figures at both ends of the SNR grid
-(C1 -3 dB predicted sigma_t 0.999, measured 0.9993; high-SNR limit predicted 0.707, measured 0.7125).
-The dotted line is the top of the FROZEN training sigma grid, sqrt(nu/2) = 0.8452 (results/
-sigma_grid_D2.txt, "FROZEN from here on").  Only C1's floor crosses it, and only C1 reverses.
-SCOPE.  One testbed (D2), one budget (N=1e4), one seed (a1); the checkpoint FAILS the pre-registered
-gate (GC 0.243 vs threshold 0.15), which §6d fixed in advance by registering these points as a
-budget-axis measurement rather than an arm result.  The gate-passing model's BLER is in
-results/tables_D2_C.txt.  The right panel's floor line explains WHERE the reversal happens; it is not
-evidence for WHY the learned score fails there -- §6j shows the out-of-grid query accounts for the
-low-SNR failure in C1 but NOT for +15 dB, where divergence precedes the out-of-range query.
+F12.  The pilot-budget operating envelope at equal training budget (10_SPEC_stageC §6f).
+TOP: BLER after 16 outer iterations, D2, n = 2560 per SNR point, every arm fitted or trained on the
+SAME N_train = 1e4 channel set.  Array (8x4), frame length T = 16, code and SNR grid are identical
+across the three panels; the information block SHRINKS with Tp (K = 50 / 46 / 42 bits), so absolute
+BLER levels are not on a common codeword footing across panels -- only the within-panel arm ordering
+is compared.  A block on which an arm raised carries a non-finite block error and is COUNTED AS A
+BLOCK ERROR, exactly as the pre-registered analysis does (code/analysis.py:172-175; tables_D2_B1e4x.txt
+NOTE rows): at C1 -3 dB that is V0 970 and V1 804 of 2560 blocks, and the plotted BLER is 1.000 for
+both, as the table prints it.  (V4, not plotted, is 136 raised / BLER 0.996.)  These exception counts
+are a different quantity from the F3 divergence-guard rate (NMSE@16 > 10), which is 2560/2560 for V0
+and V1 at that point (results/guard_D2_B1e4x.txt).  A point drawn hollow on the dashed line is
+0 of 2560 blocks (resolution 1/2560).
+BOTTOM-LEFT, bars (left axis): the pre-registered decision-point sign test for M-ours-bstar -> V1 in
+each cell, as the margin (a - b)/(a + b) over DISCORDANT pairs, where a:b = only-first-fails :
+only-second-fails (tables_D2_B1e4x.txt TABLE B convention), so positive = the learned arm wins.  This
+is a margin among discordant pairs, not an effect size; each annotation gives a:b, the number of
+discordant pairs out of 3 x 2560, the pooled p, how many of the three decision points went to which
+arm, and WHICH SNRs those decision points were -- the anchor rule places them at +6/+12/+15 dB for
+C1, +9/+12/+15 dB for C5 and -3/0/+3 dB for C2, so the three bars are not read at a common SNR.
+C5's pooled win is carried by +9 and +12 dB and reverses at +15 dB (243:276, p = 0.16); the bar is
+annotated accordingly.  All three comparisons are POWERED (3 decision points, all with >= 6
+discordant pairs).  Numbers are transcribed from results/tables_D2_B1e4x.txt (C1, C5) and
+results/tables_D2_B1e4.txt (C2); this figure runs no test.
+BOTTOM-LEFT, blue (right axis, in nu_q units): the closed-form iteration-1 cavity-variance floor
+nu_q -> cbar (Nt - Tp)/Tp (squares, dashed) = 1.00 / 0.33 / 0.00, which follows from Tp < Nt leaving
+Nr(Nt - Tp) null directions in G while the data columns are still zero-valued; the MEASURED
+iteration-1 nu_q at -3 dB where a measurement exists (filled circles: C1 1.997 and C2 0.499 from
+results/sigma_grid_D2.txt, 2026-09-20, n = 64; C5 was not in that measurement and its -3 dB value
+0.998 is the closed form, drawn hollow); and the top of the FROZEN training sigma grid (dotted),
+nu_q = 1.43.  ALL THREE FLOORS ARE INSIDE THE GRID.  What leaves the grid is the measured C1 value at
+-3 dB, 2.00 = 1.40 x the top; the floor explains why C1 is queried high, the measured value is what
+leaves support.  §6j shows this accounts for the LOW-SNR C1 failure and NOT for +15 dB, where
+divergence precedes the out-of-range query.
+PROVENANCE OF THE PREDICTION.  The cell-level envelope prediction (V1 beats the GMM at Tp = 3 and 4,
+loses at Tp = 2) is §6f, commit 8880d33 at 12:23:43, before the run started at 12:33:04; §6f itself
+discloses that those cell predictions were made after seeing the NON-equal-budget N = 1.6e5 C1/C5
+results, so only the equal-budget ordering was blind.  The closed form was derived and registered
+(§6j, commit 7737551 at 13:06:25) while that run was still executing (12:33-13:12) and before the
+diagnostic that scored it was written (13:09:27); its agreement with 1.997 at -3 dB and 1.015 at
++15 dB is a consistency check against values already on disk since 2026-09-20, not a blind
+prediction.
+SCOPE.  One testbed (D2), one budget (N = 1e4), one seed (a1).  checkpoint ckpt/d2sx_N10000_a1.pt: the table records NO GATE RECORD for it on D2 (GA-GD are measurable on D1 only); its D1 sibling at N_train=1e4 FAILS GC 0.243 vs 0.15.  §6d fixed
+this in advance by registering these points as a budget-axis measurement rather than an arm result;
+the gate-passing model's BLER is in results/tables_D2_C.txt.  F13 shows that dropping the matrix
+site performs identically to PSD-projecting it in the C2 diagnostic, so these data do not isolate
+the PSD projection as the mechanism behind the V1 curve; V1 is one of three interchangeable repairs.
