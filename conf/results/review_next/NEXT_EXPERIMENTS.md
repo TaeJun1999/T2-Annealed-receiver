@@ -141,10 +141,10 @@ damping·restart·n_inner 는 prior/adapter 실험과 분리해 별도 사전 �
 |---|---|---|
 | 선행: `runner.py --skip0` (개발 집합 생성 수단) + 수용 검사 | **구현** (chunk_plan, DEV_SKIP0, load_raw 구멍 검사, manifest split 표기; selftest `[chunk]`) | 미커밋 |
 | 선행: `score.train(init_seed=...)` opt-in + 체크포인트에 init_seed·초기 해시·phase_aug | **하지 않음** — 사용자 결정(2026-09-22 17:45 CDT, 올바른 전제로 재확인): 기록만. §0 규정대로 A1 의 aug/ctrl·attempt 비교는 "초기값 차이 포함" 으로 표기하고, 각 학습의 `torch.initial_seed()`·초기 가중치 해시를 로그에 남긴다(`train_ctrl.py` 방식) | — |
-| 선행: `pair_tags.py` (태그 간 paired 부호검정 + 3점 규칙) | 미구현 | — |
-| 선행: D1 형제 학습 wrapper (`train_ctrl.py` 확장: testbed D1, 기존 rung 라벨, phase_aug) | 미구현 | — |
-| 선행: `build_our_arms(mean_arms=True)`, gmmB-scorew arm | 미구현 | — |
-| 선행: `score.train(phase_aug=True)` + selftest | 미구현 | — |
+| 선행: `pair_tags.py` (태그 간 paired 부호검정 + 3점 규칙) | **구현·검증** (tables_D2_B16e4k 표 B p 값 재현) | `conf/code/pair_tags.py` |
+| 선행: D1 형제 학습 wrapper (`train_ctrl.py` 확장: testbed D1, 기존 rung 라벨, phase_aug) | **구현·검증** (`--testbed D1 --phase-aug --gate`; 기존 sx_N160000_D1.pt 의 rung/prior/hp 와 일치 확인 후에만 학습) | `conf/code/train_ctrl.py` |
+| 선행: `build_our_arms(mean_arms=True)`, gmmB-scorew arm | **구현·검증** (runner `--mean-arms`, --tag 필수; 기본 arm 집합 비트 동일; gmmB-scorew 가 ep_site 가 아닌 _matrix_site 경로를 탐 확인) | `arms.py`, `runner.py` |
+| 선행: `score.train(phase_aug=True)` + selftest | **구현·검증** (별도 generator, 체크포인트에 rng_phase, 재개==무중단, 기본 경로 비트 동일; selftest [A1r~A1e]) | `score.py`, `selftest_ckpt.py` |
 | §2.1 P1-1 cavity | 미실행 (코드 미작성) | — |
 | §2.2 P1-2 calibration | held-out **완료** (18:05 CDT): H2 기각 안 됨, C-calib 만족(1/20 점만 두 대역 충족; ρ_sub 는 대역 안, cov90 이 대역 밖). 실제 질의 부분은 §2.1 과 함께 | `p1_heldout.{npz,txt}` |
 | §2.3 P1-3 phase | held-out **완료**: C-phase 만족(0.246/0.148/0.083, 해석 무관) → A1 진행 | `p1_heldout.{npz,txt}` |
@@ -157,7 +157,7 @@ damping·restart·n_inner 는 prior/adapter 실험과 분리해 별도 사전 �
 | NR16 GB′ | 완료 (GPU, CPU 대조 7.4e-15) | `d2_gbprime_NR16_N10000_a1.npz` |
 
 
-### 6.1 구현 시 해석 명확화 (2026-09-22 18:10 CDT, 전체 실행 전 — n=32·1 시행 스모크만 본 상태)
+### 6.1 구현 시 해석 명확화 (2026-09-22 18:10 CDT, 전체 실행 전 — n=32·1 시행 스모크만 본 상태; 9~11 은 18:40 CDT, A1 학습 전)
 
 구현(`diag_p1_heldout.py`, `diag_p1_cavity.py`)에서 문구가 두 가지로 읽히는 곳이 나왔다. 아래를 **1차 해석**으로 고정하고, 스크립트는 다른 해석의 값도 함께 출력해 판정이 해석에 따라 갈리면 `READING-DEPENDENT` 로 표시한다.
 
@@ -169,6 +169,9 @@ damping·restart·n_inner 는 prior/adapter 실험과 분리해 별도 사전 �
 6. a_t 의 ν_E = 수신기 자신의 순서(cbar, 이후 nuE[t−1]) — SigL 재구성이 수신기 ν_q 를 오차 0 으로 재현.
 7. §2.4 변환 검사는 선형-Gaussian toy 대신 **widely-linear 사상 m = Mq + Wq\*** 로 한다(K ≠ 0 이라 더 강한 검사).
 8. 산출 파일명: held-out 은 `p1_heldout.{npz,txt}` 하나(키 접두사 calib|/phase|/pseudo|), 실제 질의는 `p1_cavity/` 청크 + 병합본 `p1_cavity_<point>.{npz,txt}`.
+9. A1 체크포인트 이름: §3.1 의 `sx_N160000_D1_aug.pt` 대신 `ckpt_review_next/aug_D1_N160000_a1.pt` (D2 는 `aug_N<N>_a<k>.pt`, 통제군 `ctrl_N<N>_a<k>.pt`). 내용은 같다.
+10. A1 학습이 §3d 로 발산하면 wrapper 가 자동 fallback 을 하지 않는다 — 발산 시 같은 태그 체계로 attempt 2(grad_clip 1.0), 3(+lr/3) 을 수동으로 실행하고 기록한다. 게이트는 발산한 run 에 대해 돌리지 않는다.
+11. 2·3단계 학습은 1단계 게이트 결과 전에 **학습만** 미리 돌린다(GPU 여유). 개발 집합 BLER 은 1단계 PASS 뒤에만 계산하고, FAIL 이면 "학습됨·미평가" 로 기록한다(DECISIONS 2026-09-23 08:40 KST).
 
 ## 7. 미리 적는 예측과 약속하지 않는 것
 

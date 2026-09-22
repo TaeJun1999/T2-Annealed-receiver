@@ -227,7 +227,8 @@ BUDGET_NOTE = ("training budget (N_train, channel samples) of EVERY arm -- 10_SP
                "learned arms are only equal-budget when their N_train below are EQUAL; read the numbers, not "
                "the arm names.  The GMM re-fit at N'=1.6e5 may not have finished when this table was written.")
 GMM_BUDGET_ARMS = ("R0-pilot", "R1-turbo", "R2-ours-G", "R4-scvamp", "R4-llr", "M-ours-G",
-                   "M-ours-gmm32", "M-ours-bstar", "M-ours-bstar-scalar")
+                   "M-ours-gmm32", "M-ours-bstar", "M-ours-bstar-scalar",
+                   "gmmB-scorew-eta", "gmmB-scorew-mean", "M-ours-bstar-mean")      # the last 3: --mean-arms only
 EXACT_BUDGET_ARMS = ("M-ours-score", "R6-exactEP")
 
 
@@ -290,7 +291,7 @@ def budget_meta(arm_names, ntrain, learned):
 
 
 def build_point(testbed, cell, prior, snr, ntrain=C.N_TRAIN, beta=C.BETA, t_in=C.T_IN, ckpt=None,
-                stagec_ckpt=None):
+                stagec_ckpt=None, mean_arms=False):
     """Every arm of `testbed` at one (cell, prior, SNR) point, all sharing one pilot matrix (06_SPEC §2).
 
     D1: R0 R1 R2 R3 R4-scvamp R4-llr R5-genie R6-exactEP + M-ours-{gmm32,bstar,score,dscore}
@@ -338,7 +339,7 @@ def build_point(testbed, cell, prior, snr, ntrain=C.N_TRAIN, beta=C.BETA, t_in=C
     # `true` (not `true if Nr == 8`): the oracle score arm is closed-form and array-size independent.
     our, ocfg, meta, hp, _ = A.build_our_arms(*a, ntrain=ntrain, true_prior=true, score_prior=sp,
                                               score_prior_c=spc, score_prior_v1=spc1,
-                                              bstar_scalar=bool(stagec_ckpt))
+                                              bstar_scalar=bool(stagec_ckpt), mean_arms=mean_arms)
     arms.update(our)
     cfgs.update(ocfg)
     # An arm that is not built must leave a trace with the REASON, or the analysis sees a missing row and
@@ -373,6 +374,15 @@ def build_point(testbed, cell, prior, snr, ntrain=C.N_TRAIN, beta=C.BETA, t_in=C
                     meta[f"fit_sec|{k}"] = float(torch.load(lp, map_location="cpu", weights_only=False)["wall_sec"])
                 else:
                     meta[f"fit_sec_note|{k}"] = "role=best but its last sibling is missing: wall_sec stops at best epoch"
+    if mean_arms:                   # review_next A2 (NEXT_EXPERIMENTS §3.2): opt-in, nothing above changes
+        meta["mean_arms"] = "A2 (§3.2) clip='mean' ablation: " + " ".join(
+            k for k in ("M-ours-dscore-C-V1-mean", "gmmB-scorew-eta", "gmmB-scorew-mean", "M-ours-bstar-mean")
+            if k in arms)
+        if "M-ours-dscore-C-V1-mean" in arms:           # the SAME V1 weights; only the clip rule differs
+            learned["M-ours-dscore-C-V1-mean"] = learned["M-ours-dscore-C-V1"]
+            for f in ("fit_sec", "fit_sec_note"):
+                if f"{f}|M-ours-dscore-C-V1" in meta:
+                    meta[f"{f}|M-ours-dscore-C-V1-mean"] = meta[f"{f}|M-ours-dscore-C-V1"]
     meta.update(budget_meta(arms, ntrain, learned))
     return dict(arms=arms, cfgs=cfgs, meta=meta, gen=gen, code=code, pil=pil, Xp=Xp, fits=fits,
                 Nr=Nr, Nt=Nt, T=T, Tp=Tp, sigma2=sigma2, dscore=why, stagec=sc_why)
@@ -383,14 +393,14 @@ def run_task(task):
     """One (point, skip, chunk).  The trials that a previous chunk consumed are REGENERATED from the same
     common.trial_rng stream and then dropped, so chunks concatenate and every arm at a point sees the same
     (H, u, perm, Y) -- paired inside a cell (01_RULES §5, test C4)."""
-    testbed, cell, prior, snr, skip, n, ntrain, beta, t_in, iters, arm_sel, ckpt, stagec_ckpt = task
+    testbed, cell, prior, snr, skip, n, ntrain, beta, t_in, iters, arm_sel, ckpt, stagec_ckpt, mean_arms = task
     c = C.CELLS[cell]
     pil = C.make_pilots(testbed, prior, c["Nt"], c["Tp"], c["Nr"])[0]   # cheap; the build is not
     out = raw_file(testbed, cell, prior, pil, snr, skip, n)
     if os.path.exists(out):
         return f"exists  {os.path.basename(out)}"                      # FINISHED CHUNKS ARE SKIPPED
     t0 = time.time()
-    P = build_point(testbed, cell, prior, snr, ntrain, beta, t_in, ckpt, stagec_ckpt)
+    P = build_point(testbed, cell, prior, snr, ntrain, beta, t_in, ckpt, stagec_ckpt, mean_arms)
     code, gen = P["code"], P["gen"]
     first = P["arms"]["R5-genie"]                       # transmit() is arm-independent; use one object
     arms = {k: v for k, v in P["arms"].items() if (not arm_sel or k in arm_sel)}
@@ -490,7 +500,10 @@ def cmd_run(a):
               f"{on}, ABSENT for {[c for c in cells if c not in on]}", flush=True)
         print(f"[run] Stage C checkpoint: {stagec_id_str(a.stagec_ckpt)}", flush=True)
         print(f"[run] Stage C gate record: {gate_verdict(a.stagec_ckpt)}", flush=True)
-    tasks = [pt + (s, m, a.ntrain, a.beta, a.tin, a.iters, a.arm, a.ckpt, a.stagec_ckpt)
+    if a.mean_arms:
+        print("[run] review_next A2 (NEXT_EXPERIMENTS §3.2): + M-ours-dscore-C-V1-mean, gmmB-scorew-{eta,mean}, "
+              "M-ours-bstar-mean (report-only)", flush=True)
+    tasks = [pt + (s, m, a.ntrain, a.beta, a.tin, a.iters, a.arm, a.ckpt, a.stagec_ckpt, a.mean_arms)
              for pt in pts for s, m in chunk_plan(a.skip0, a.n, a.chunk)]
     tasks = [(testbed,) + t for t in tasks]
     tasks.sort(key=lambda t: (t[4], -C.CELLS[t[1]]["Nr"]))   # first chunks of every point early; 8x4 first
@@ -518,7 +531,7 @@ def cmd_smoke(a):
     for cell in (a.cell or ["C1"]):
         snr = float((a.snr or [C.CELLS[cell]["snrs"][-1]])[0])
         t0 = time.time()
-        P = build_point(testbed, cell, prior, snr, a.ntrain, a.beta, a.tin, a.ckpt, a.stagec_ckpt)
+        P = build_point(testbed, cell, prior, snr, a.ntrain, a.beta, a.tin, a.ckpt, a.stagec_ckpt, a.mean_arms)
         print(f"[smoke] {cell}: Stage C: {P['stagec']}", flush=True)
         print(f"[smoke] {testbed} {cell} prior={prior} snr={snr:g} pilots={P['pil']} "
               f"({P['Nr']}x{P['Nt']}, T={P['T']}, Tp={P['Tp']}): {len(P['arms'])} arms "
@@ -1049,6 +1062,10 @@ def main(argv=None):
                          "checkpoint, plus the mandatory GMM control M-ours-bstar-scalar.  OPT-IN: without "
                          "it the arm set is exactly the pre-registered one, and --ckpt / M-ours-dscore are "
                          "untouched either way.  Requires --tag (Stage C writes raw_C/, tables_D2_C.txt).")
+    ap.add_argument("--mean-arms", action="store_true",
+                    help="review_next A2 (NEXT_EXPERIMENTS §3.2), run/smoke: ADD M-ours-dscore-C-V1-mean, "
+                         "gmmB-scorew-eta/-mean and M-ours-bstar-mean.  OPT-IN; requires --stagec-ckpt and --tag, "
+                         "and (run) the development set --skip0 2560.")
     ap.add_argument("--tag", default="", help="route EVERY output (raw/, ckpt/, LADDER, gates, sigma grid, "
                                               "tests, lemma, D2 fits) to suffixed paths")
     ap.add_argument("--force-regrid", action="store_true",
@@ -1078,11 +1095,18 @@ def main(argv=None):
                                      ("fit-iters", a.fit_iters != FIT_ITERS),
                                      # --stagec-ckpt ADDS arms to the point, so it changes the frozen arm
                                      # set: it may never write the pre-registered raw/ or tables_D2.txt.
-                                     ("stagec-ckpt", a.stagec_ckpt is not None)) if v]
+                                     ("stagec-ckpt", a.stagec_ckpt is not None),
+                                     ("mean-arms", a.mean_arms)) if v]      # adds arms, like --stagec-ckpt
     if changed and a.cmd in ("run", "fit") and not a.tag:
         sys.exit(f"refusing to write the pre-registered output with {', '.join(changed)} -- pass --tag X "
                  "(01_RULES §5: the configuration is frozen before the run and not changed afterwards, and "
                  "the diffusion arm gets no more data or budget than the GMM arm)")
+    if a.mean_arms and not a.stagec_ckpt:
+        sys.exit("--mean-arms needs --stagec-ckpt: the H5 pair V1-mean vs V1-eta (NEXT_EXPERIMENTS §3.2) is built "
+                 "from the Stage C checkpoint, and without it V1-mean would be silently ABSENT from the run.")
+    if a.mean_arms and a.cmd == "run" and a.skip0 < C.DEV_SKIP0:
+        sys.exit(f"--mean-arms is DEVELOPMENT-set only (NEXT_EXPERIMENTS §3.2; the test set skip 0..{C.DEV_SKIP0 - 1} "
+                 f"is not part of A2) -- pass --skip0 {C.DEV_SKIP0}.")
     if a.stagec_ckpt:
         # 10_SPEC A5: the confirmatory BLER runs ONCE.  score.load_prior reports a bad path as "ABSENT"
         # and the run would then quietly produce a table with V0/V1/V4 missing -- and there is no second

@@ -139,7 +139,7 @@ def module_h_priors(testbed, prior, Nr, Nt, ntrain=N_TRAIN, true_prior=None):
 
 def build_our_arms(testbed, prior, Nr, Nt, T, Tp, sigma2, code, Xp, ntrain=N_TRAIN,
                    true_prior=None, score_prior=None, with_G=False, score_prior_v1=None,
-                   score_prior_c=None, bstar_scalar=False):
+                   score_prior_c=None, bstar_scalar=False, mean_arms=False):
     """M-ours-gmm32 / M-ours-bstar / M-ours-score (D1 only) / M-ours-dscore / M-ours-G (test M2 only).
 
     score_prior_v1: a SECOND score.ScorePrior built with psd_project=True (Stage C V1, spec 10 §3b / (F1)).
@@ -153,7 +153,13 @@ def build_our_arms(testbed, prior, Nr, Nt, T, Tp, sigma2, code, Xp, ntrain=N_TRA
                       drives its dscore|scorew and dscore|belsc cells from one object.
       bstar_scalar  : M-ours-bstar-scalar, the b* GMM through V4's wiring.  §3c makes this arm MANDATORY
                       in the same run as V4: if scalarisation also helps the GMM, the gain belongs to the
-                      site, not to the learned prior."""
+                      site, not to the learned prior.
+
+    review_next A2, OPT-IN (NEXT_EXPERIMENTS v3 §3.2; development set only, report-only):
+      mean_arms     : the clip='mean' symmetric ablation.  M-ours-dscore-C-V1-mean = V1 with RouteAClip
+                      clip='mean' (needs score_prior_v1); gmmB-scorew-eta / -mean = b* in V1's wiring, the
+                      adapter control; M-ours-bstar-mean = b*.view('mean') on the gmm_site path (a different
+                      mean is preserved there -> report-only row, audit M3).  Existing arms are untouched."""
     hp, fits, llv, bstar, kron_K = module_h_priors(testbed, prior, Nr, Nt, ntrain)
     Cs = GaussianPrior(Nr, Nt, fits[("full", 32)]["Chat"])
     a = (Nr, Nt, T, Tp, sigma2)
@@ -183,6 +189,18 @@ def build_our_arms(testbed, prior, Nr, Nt, T, Tp, sigma2, code, Xp, ntrain=N_TRA
                                               hsite="scalar", scal="site")
     if bstar_scalar:
         arms["M-ours-bstar-scalar"] = route_a(*a, hp[bstar], code, Xp, "score", clip="eta", hsite="scalar")
+    # --- review_next A2 (§3.2).  The gmmB-scorew pair is LIFTED VERBATIM from code/diag_ep_site.py:
+    #   diag  gmmB|scorew = route_a(..., hp[bstar] (raw prior, NOT .view()), "score", clip="eta")
+    # MODULE_H["score"] has exact_prior=False, and RouteA keeps exact_prior only when it is asked for AND the
+    # prior has ep_site -- so the raw GMMPriorB goes through the scalar belief + RouteAClip._matrix_site path,
+    # exactly like V1, never through ep_site.  The assert makes that a build-time fact.
+    if mean_arms:
+        if score_prior_v1 is not None:
+            arms["M-ours-dscore-C-V1-mean"] = route_a(*a, score_prior_v1, code, Xp, "score", clip="mean")
+        for cl in ("eta", "mean"):
+            arms[f"gmmB-scorew-{cl}"] = route_a(*a, hp[bstar], code, Xp, "score", clip=cl)
+            assert not arms[f"gmmB-scorew-{cl}"].exact_prior, "gmmB-scorew must not take the ep_site path"
+        arms["M-ours-bstar-mean"] = route_a(*a, hp[bstar].view("mean"), code, Xp, "gmm_site")
     if with_G:
         arms["M-ours-G"] = route_a(*a, Cs, code, Xp, "gaussian")
 

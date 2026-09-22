@@ -822,9 +822,19 @@ GRAD_CLIP_LADDER = (0.0, 1.0, 1.0)          # attempt 1, 2, 3;  attempt 3 also u
 LR_DIV_LADDER    = (1.0, 1.0, 3.0)          # divisor applied to the frozen lr
 
 
+def phase_rotate(x, phi):
+    """(review_next A1, NEXT_EXPERIMENTS §3.1) ONE global phase per row on the packed [Re; Im] map:
+    x (..., 2N), phi (...,)  ->  np_pack(e^{j phi} * np_unpack(x)), i.e. re' = c re - s im, im' = s re + c im.
+    No angle / phase-ramp augmentation -- the same e^{j phi} multiplies every entry of the row."""
+    n = x.shape[-1] // 2
+    c, s = torch.cos(phi).unsqueeze(-1), torch.sin(phi).unsqueeze(-1)
+    re, im = x[..., :n], x[..., n:]
+    return torch.cat([c * re - s * im, s * re + c * im], -1)
+
+
 def train(rung, attempt, testbed, prior, Nr, Nt, device="cuda", hp=None, resume=True,
           max_epochs=3000, patience=20, min_epochs=200, log_path=None, ckpt=None, verbose=True,
-          ntrain=C.N_TRAIN, jac_reg=0.0, grad_clip=0.0, sigma_tag=""):
+          ntrain=C.N_TRAIN, jac_reg=0.0, grad_clip=0.0, sigma_tag="", phase_aug=False):
     """One ladder attempt, exactly under the regime of 04_SPEC §2 / 01_RULES §5.
 
     Stopping: validation loss with no improvement for `patience` epochs, but never before `min_epochs`.
@@ -841,7 +851,13 @@ def train(rung, attempt, testbed, prior, Nr, Nt, device="cuda", hp=None, resume=
     generator `g`, and the log line is byte-identical.  When it is > 0 the loss becomes
     DSM + jac_reg * jac_asym_hutch(...), the probe v is drawn from a SEPARATE generator `gj` so that the
     (x0, sigma, eps) stream stays bit-identical to the jac_reg=0 run of the same rung/attempt, and the
-    EARLY-STOPPING criterion is left alone: val_loss() is the pure DSM validation loss, as in V0."""
+    EARLY-STOPPING criterion is left alone: val_loss() is the pure DSM validation loss, as in V0.
+
+    phase_aug (review_next A1, NEXT_EXPERIMENTS §3.1) is OPT-IN, default False = nothing changes.  When True,
+    each training sample b and its noise e are multiplied by ONE common e^{j phi}, phi ~ U[0, 2pi) per sample
+    (phase_rotate), phi drawn from a SEPARATE generator `gp` -- the (perm, sigma, eps) stream of `g` stays
+    bit-identical to phase_aug=False.  gp's state is checkpointed (rng_phase) and restored on resume; a resume
+    must use the checkpoint's phase_aug.  Validation is NOT augmented (same fixed draws)."""
     t_start = time.time()
     dev = torch.device(device if (device != "cuda" or torch.cuda.is_available()) else "cpu")
     base_hp = hp
@@ -854,6 +870,8 @@ def train(rung, attempt, testbed, prior, Nr, Nt, device="cuda", hp=None, resume=
     # unchanged: the weights would load silently and the net would then be optimised under a different
     # loss than the one it was trained with, while the saved hp still claimed the old configuration.
     st = torch.load(cpath, map_location=dev, weights_only=False) if (resume and os.path.exists(cpath)) else None
+    assert st is None or st.get("phase_aug", False) == phase_aug, \
+        f"{cpath} was trained with phase_aug={st.get('phase_aug', False)}; resume with the same flag"
     if hp is not None:
         sel = {}
     elif st is not None:
@@ -883,6 +901,9 @@ def train(rung, attempt, testbed, prior, Nr, Nt, device="cuda", hp=None, resume=
     # separate stream for the Hutchinson probes: the data order of a jac_reg run must match jac_reg=0.
     gj = (torch.Generator(device="cpu").manual_seed(SEED_TRAIN + _rung_ix(rung) * 17 + attempt + 7919)
           if jac_reg else None)
+    # A1: separate stream for the global phases, so the data order of a phase_aug run matches phase_aug=False.
+    gp = (torch.Generator(device="cpu").manual_seed(SEED_TRAIN + _rung_ix(rung) * 17 + attempt + 104729)
+          if phase_aug else None)
     ep0, best, best_ep, hist = 0, np.inf, -1, []
     if st is not None:
         model.load_state_dict(st["model"]); opt.load_state_dict(st["opt"])
@@ -890,6 +911,8 @@ def train(rung, attempt, testbed, prior, Nr, Nt, device="cuda", hp=None, resume=
         g.set_state(st["rng"].cpu() if torch.is_tensor(st["rng"]) else st["rng"])
         if gj is not None and st.get("rng_jac") is not None:
             gj.set_state(st["rng_jac"].cpu() if torch.is_tensor(st["rng_jac"]) else st["rng_jac"])
+        if gp is not None:
+            gp.set_state(st["rng_phase"].cpu())
         ep0, best, best_ep, hist = st["epoch"], st["best_val"], st["best_epoch"], st["hist"]
 
     lg = open(lpath, "a", buffering=1)
@@ -908,6 +931,10 @@ def train(rung, attempt, testbed, prior, Nr, Nt, device="cuda", hp=None, resume=
         lg.write(f"# jac_reg     : V3, loss += {jac_reg} * E_v||(J-J^T)v||^2, J = d tweedie_real/dx, "
                  f"1 Rademacher probe/sample, lambda FIXED (10_SPEC_stageC §3b, never tuned). "
                  f"val loss / early stopping unchanged (pure DSM).\n")
+    if phase_aug:
+        lg.write(f"# phase_aug   : True -- A1, b and e x ONE e^{{j phi}} per sample, phi ~ U[0, 2pi) from a separate "
+                 f"generator (seed offset 104729); no angle/phase-ramp aug; val loss un-augmented "
+                 f"(NEXT_EXPERIMENTS §3.1)\n")
     dname = (f"{dev}:{torch.cuda.current_device()} {torch.cuda.get_device_name(dev)}" if dev.type == "cuda"
              else f"{dev} ({os.cpu_count()} cores)")
     if verbose:
@@ -941,6 +968,9 @@ def train(rung, attempt, testbed, prior, Nr, Nt, device="cuda", hp=None, resume=
                 s = torch.exp(torch.rand(len(b), generator=g) * (math.log(smax) - math.log(smin))
                               + math.log(smin)).to(dev)
                 e = torch.randn(len(b), dim, generator=g).to(dev)
+                if phase_aug:          # A1: the SAME e^{j phi} on b and e; phi from gp, never from g
+                    phi = (torch.rand(len(b), generator=gp) * (2.0 * math.pi)).to(dev)
+                    b, e = phase_rotate(b, phi), phase_rotate(e, phi)
                 dsm = model.loss(b, s, e)
                 loss = dsm
                 if jac_reg:
@@ -986,6 +1016,7 @@ def train(rung, attempt, testbed, prior, Nr, Nt, device="cuda", hp=None, resume=
                          split_hash=split_hash, wall_sec=time.time() - t_start,
                          jac_reg=jac_reg, grad_clip=grad_clip,
                          rng_jac=(gj.get_state() if gj is not None else None),
+                         phase_aug=phase_aug, rng_phase=(gp.get_state() if gp is not None else None),
                          device=dname, stopped_by=stop)
             # review_next P0-1: on a val improvement the WHOLE state of this epoch is also the best state,
             # so it goes to <name>_best.pt (written first: a crash between the two saves leaves last one
@@ -1014,7 +1045,7 @@ def train(rung, attempt, testbed, prior, Nr, Nt, device="cuda", hp=None, resume=
                 train_loss=(hist[-1][1] if hist else float("nan")), wall_sec=wall, device=dname,
                 sec_per_epoch=wall / max(ep - ep0, 1), stopped_by=stopped, n_train=len(tr), n_val=len(va),
                 split_hash=split_hash, hp=hp, aborted=aborted, params=n_params(model), log=lpath,
-                selection=sel, given_hp=base_hp is not None, jac_reg=jac_reg)
+                selection=sel, given_hp=base_hp is not None, jac_reg=jac_reg, phase_aug=phase_aug)
 
 
 # ----------------------------------------------------------------------------- receiver adapter (04_SPEC §1)

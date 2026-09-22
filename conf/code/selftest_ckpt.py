@@ -11,6 +11,10 @@ P0-1  a tiny D2 score net trained until patience fires (so best_epoch < last epo
      both after the best epoch [4] and before it [4b] (the resumed segment writes _best.pt itself)
 stop rules: sign-safe divergence predicate (negative VAE loss), resume restores the divergence counter.
 P0-4  resolve_hp inherits hp from the argmin-gate-score ATTEMPT, not from the last existing attempt.
+A1    (NEXT_EXPERIMENTS §3.1) phase_rotate == e^{j phi} * z under np_pack/np_unpack; phase_aug=False == flag
+      omitted (EMA, hist, g state); phase_aug=True trains, differs, leaves the g stream untouched; every
+      training step's (b, e) == e^{j phi} x the un-augmented draw, phi rebuilt by hand from gp's seed; aug
+      resume == uninterrupted; resuming with the other flag is refused.
 """
 import hashlib
 import os
@@ -18,10 +22,11 @@ import sys
 import tempfile
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import numpy as np
 import torch
 import score
 
-torch.set_num_threads(4)
+torch.set_num_threads(int(os.environ.get("OMP_NUM_THREADS", 4)))
 HP = dict(arch="dit", param="vp", domain="angle", lr=1e-2, ema=0.9, batch=64, emb=32, width=16, depth=1,
           heads=2, patch=1)
 KW = dict(testbed="D2", prior="S2", Nr=8, Nt=4, device="cpu", hp=HP, ntrain=600, max_epochs=80,
@@ -90,6 +95,66 @@ def test_p01(d):
     print(f"[4b] ok: stop at {k} (< best @{best['epoch']}) + resume rewrites _best.pt == uninterrupted")
 
 
+def test_phase_aug(d):
+    """A1 (NEXT_EXPERIMENTS §3.1): opt-in global-phase augmentation, separate generator, resumable."""
+    rng = np.random.default_rng(0)
+    z = rng.standard_normal((5, 32)) + 1j * rng.standard_normal((5, 32))
+    phi = rng.uniform(0, 2 * np.pi, 5)
+    rot = score.phase_rotate(torch.as_tensor(score.np_pack(z)), torch.as_tensor(phi)).numpy()
+    assert np.allclose(score.np_unpack(rot), np.exp(1j * phi)[:, None] * z, rtol=0, atol=1e-12)
+    print("[A1r] ok: phase_rotate on [Re; Im] == e^{j phi} * z (np_pack/np_unpack), one phase per row")
+
+    k = 3
+    _, c0 = run(d, "F0", max_epochs=k)                               # flag omitted
+    _, c1 = run(d, "F1", max_epochs=k, phase_aug=False)
+    r2, c2 = run(d, "F2", max_epochs=k, phase_aug=True)
+    f0, f1, f2 = load(c0), load(c1), load(c2)
+    assert same_ema(f0, f1) and f0["hist"] == f1["hist"] and torch.equal(f0["rng"], f1["rng"])
+    assert f1["phase_aug"] is False and f1["rng_phase"] is None
+    print(f"[A1a] ok: phase_aug=False == flag omitted ({k} epochs: EMA, hist, g state identical)")
+    assert r2["phase_aug"] is True and f2["phase_aug"] is True and f2["rng_phase"] is not None
+    assert torch.equal(f2["rng"], f0["rng"]), "phase_aug moved the main generator g"
+    assert not same_ema(f2, f0) and f2["hist"][0][1] != f0["hist"][0][1] and np.isfinite(r2["val_loss"])
+    print(f"[A1b] ok: phase_aug=True trains (val {r2['val_loss']:.4e}) and differs; g state == phase_aug=False")
+
+    # the training step itself: spy on the loss inputs of epoch 1 and rebuild each (b, e) by hand -- catches
+    # rotating only b, a different phase on e, a wrong phi range, or a gp seed that ignores rung/attempt.
+    rec, loss0 = [], score.ScoreModel.loss
+    score.ScoreModel.loss = lambda m, x0, s, e: (rec.append((x0, e)) if m.training else None) or loss0(m, x0, s, e)
+    try:
+        run(d, "PH", max_epochs=1, phase_aug=True)
+    finally:
+        score.ScoreModel.loss = loss0
+    tr = torch.as_tensor(score.np_pack(score.training_split("D2", "S2", 8, 4, NTRAIN)[0]), dtype=torch.float32)
+    seed = score.SEED_TRAIN + score._rung_ix("SELFTESTCK") * 17 + 1
+    g, gp = torch.Generator().manual_seed(seed), torch.Generator().manual_seed(seed + 104729)
+    idx, B = torch.randperm(len(tr), generator=g), HP["batch"]
+    assert len(rec) == -(-len(tr) // B)
+    for i, (x0, e0) in zip(range(0, len(tr), B), rec):
+        n = len(x0)
+        torch.rand(n, generator=g)                                    # sigma
+        e = torch.randn(n, x0.shape[1], generator=g)
+        z = np.exp(2j * np.pi * torch.rand(n, generator=gp).double().numpy())[:, None]
+        for got, ref in ((x0, tr[idx[i:i + n]]), (e0, e)):
+            assert np.allclose(score.np_unpack(got.double().numpy()), z * score.np_unpack(ref.double().numpy()),
+                               rtol=0, atol=1e-5)
+    print(f"[A1e] ok: {len(rec)} training steps: (b, e) == e^(j phi) x un-augmented draw, phi = 2pi U from gp (hand)")
+
+    res, cu = run(d, "PU", phase_aug=True)
+    k = max(1, res["epochs"] - 2)
+    run(d, "PI", max_epochs=k, phase_aug=True)
+    resi, ci = run(d, "PI", phase_aug=True)
+    u, i = load(cu), load(ci)
+    assert resi["epochs"] == res["epochs"] > k and same_ema(u, i) and torch.equal(u["rng_phase"], i["rng_phase"])
+    assert same_ema(load(score.best_ckpt_path(cu)), load(score.best_ckpt_path(ci)))
+    print(f"[A1c] ok: aug stop at {k} + resume == uninterrupted ({res['epochs']} epochs; last/best EMA, rng_phase)")
+    try:
+        run(d, "PI", phase_aug=False)
+        raise RuntimeError("resume with the other phase_aug flag was not refused")
+    except AssertionError:
+        print("[A1d] ok: resuming a phase_aug=True checkpoint with phase_aug=False is refused")
+
+
 def test_stop_rules():
     """_bad_epoch / _trailing_bad / _already_stopped on synthetic histories (no training)."""
     M, E = score.DIVERGE_TRAIN_MULT, score.DIVERGE_TRAIN_EPOCHS
@@ -141,4 +206,6 @@ if __name__ == "__main__":
         test_p04(d)
     with tempfile.TemporaryDirectory() as d:
         test_p01(d)
+    with tempfile.TemporaryDirectory() as d:
+        test_phase_aug(d)
     print("selftest_ckpt: ALL OK")
