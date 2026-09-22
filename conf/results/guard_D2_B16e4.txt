@@ -1,5 +1,5 @@
-# date        : 2026-09-22 14:57:45 KST
-# git commit  : 8562e40
+# date        : 2026-09-22 16:25:32 KST
+# git commit  : 89ee7db
 # versions    : python 3.12.14  numpy 2.5.2  scipy 1.18.1  torch 2.14.0+cu130 (cuda_available=True)
 # device      : CPU (192 cores) | dtype: complex128 / float64 | deterministic: yes (fixed seeds, no GPU in the receiver)
 # testbed     : D2
@@ -15,6 +15,32 @@
 
 cell    SNR arm                        fired     of    rate  worst NMSE seen
 ------------------------------------------------------------------------------
+C1       -3 M-ours-dscore-C-V0          2560   2560   1.000  5.361e+20
+C1       -3 M-ours-dscore-C-V1          2560   2560   1.000  5.052e+24
+C1       -3 M-ours-dscore-C-V4          2560   2560   1.000  3.686e+33
+C1       -3 M-ours-dscore-C-V4b         2560   2560   1.000  1.125e+21
+C1       +0 M-ours-dscore-C-V0          2432   2560   0.950  8.616e+14
+C1       +0 M-ours-dscore-C-V1             2   2560   0.001  26.77
+C1       +0 M-ours-dscore-C-V4b         2560   2560   1.000  8.922e+20
+C1       +3 M-ours-dscore-C-V0          2464   2560   0.963  7.269e+13
+C1       +3 M-ours-dscore-C-V1            51   2560   0.020  310.6
+C1       +3 M-ours-dscore-C-V4b         2560   2560   1.000  9.968e+20
+C1       +6 M-ours-bstar                   2   2560   0.001  12.61
+C1       +6 M-ours-bstar-scalar            1   2560   0.000  567.8
+C1       +6 M-ours-dscore-C-V0          2509   2560   0.980  2.006e+16
+C1       +6 M-ours-dscore-C-V1           225   2560   0.088  3059
+C1       +6 M-ours-dscore-C-V4b         2560   2560   1.000  1.06e+21
+C1       +9 M-ours-dscore-C-V0          2437   2560   0.952  5.64e+14
+C1       +9 M-ours-dscore-C-V1           400   2560   0.156  3599
+C1       +9 M-ours-dscore-C-V4b         2560   2560   1.000  9.583e+20
+C1      +12 M-ours-bstar-scalar            3   2560   0.001  2.641e+05
+C1      +12 M-ours-dscore-C-V0          2336   2560   0.912  1.322e+17
+C1      +12 M-ours-dscore-C-V1           424   2560   0.166  4787
+C1      +12 M-ours-dscore-C-V4b         2560   2560   1.000  9.407e+20
+C1      +15 M-ours-bstar-scalar            3   2560   0.001  2.117e+04
+C1      +15 M-ours-dscore-C-V0          2029   2560   0.793  2.596e+16
+C1      +15 M-ours-dscore-C-V1           488   2560   0.191  1.141e+04
+C1      +15 M-ours-dscore-C-V4b         2560   2560   1.000  1.037e+21
 C2       -3 M-ours-dscore-C-V0          1355   2560   0.529  2.942e+09
 C2       +0 M-ours-dscore-C-V0          2033   2560   0.794  5.327e+07
 C2       +3 M-ours-dscore-C-V0          2349   2560   0.918  5.253e+08
@@ -22,6 +48,29 @@ C2       +6 M-ours-dscore-C-V0          2387   2560   0.932  2.588e+10
 C2       +9 M-ours-dscore-C-V0          2352   2560   0.919  1.197e+10
 C2      +12 M-ours-dscore-C-V0          2184   2560   0.853  4.461e+08
 C2      +15 M-ours-dscore-C-V0          1682   2560   0.657  1.956e+09
+C5       -3 M-ours-dscore-C-V0          1604   2560   0.627  6.725e+10
+C5       -3 M-ours-dscore-C-V4b         2560   2560   1.000  1.12e+21
+C5       +0 M-ours-dscore-C-V0          2084   2560   0.814  9.858e+09
+C5       +0 M-ours-dscore-C-V4b         2560   2560   1.000  9.599e+20
+C5       +3 M-ours-dscore-C-V0          2296   2560   0.897  5.3e+08
+C5       +3 M-ours-dscore-C-V1            14   2560   0.005  391.1
+C5       +3 M-ours-dscore-C-V4b         2560   2560   1.000  9.229e+20
+C5       +6 M-ours-dscore-C-V0          2393   2560   0.935  3.151e+10
+C5       +6 M-ours-dscore-C-V1            25   2560   0.010  205.1
+C5       +6 M-ours-dscore-C-V4b         2560   2560   1.000  1.352e+21
+C5       +9 M-ours-dscore-C-V0          2390   2560   0.934  1.363e+11
+C5       +9 M-ours-dscore-C-V1            52   2560   0.020  819
+C5       +9 M-ours-dscore-C-V4b         2560   2560   1.000  9.47e+20
+C5      +12 M-ours-bstar-scalar            1   2560   0.000  222.7
+C5      +12 M-ours-dscore-C-V0          2140   2560   0.836  3.876e+10
+C5      +12 M-ours-dscore-C-V1            70   2560   0.027  553
+C5      +12 M-ours-dscore-C-V4b         2560   2560   1.000  1.031e+21
+C5      +15 M-ours-bstar                   1   2560   0.000  16.4
+C5      +15 M-ours-bstar-scalar            9   2560   0.004  1.595e+09
+C5      +15 M-ours-dscore-C-V0          1655   2560   0.646  1.007e+14
+C5      +15 M-ours-dscore-C-V1            85   2560   0.033  1278
+C5      +15 M-ours-dscore-C-V4b         2560   2560   1.000  1.047e+21
+C5      +15 R3-bigamp                      1   2560   0.000  13.09
 
-arms that NEVER fired the guard anywhere in this raw set (12): M-ours-bstar, M-ours-bstar-scalar, M-ours-dscore-C-V1, M-ours-dscore-C-V4, M-ours-dscore-C-V4b, M-ours-gmm32, R0-pilot, R1-turbo, R2-ours-G, R3-bigamp, R4-llr, R4-scvamp
+arms that NEVER fired the guard anywhere in this raw set (6): M-ours-gmm32, R0-pilot, R1-turbo, R2-ours-G, R4-llr, R4-scvamp
 not applicable -- no channel estimate, so no Module H path (1): R5-genie
