@@ -77,11 +77,14 @@ def point_glob(tag, cell, snr):
     return os.path.join(C.CONF, f"raw_{tag}", f"D2_{cell}_S2_Nr{c['Nr']}_T{c['T']}_Tp{c['Tp']}_{pil}_snr{int(snr)}_skip*_n*.npz")
 
 
-def load(tag, cell, snr, n, iters, arms, rt=False):
-    """-> {arm: {field: (n, ...)}} plus the point's meta; raises Invalid on any acceptance failure."""
+def load(tag, cell, snr, n, iters, arms, rt=False, skip0=None, need_id=True):
+    """-> {arm: {field: (n, ...)}} plus the point's meta; raises Invalid on any acceptance failure.
+    skip0: first trial (default C.P3_SKIP0; 0 = the test set for the §3 confirmation).  need_id=False for raw written
+    before meta|stagec_ckpt_id existed (raw_B16e4k, the §3 R16 reference)."""
+    skip0 = C.P3_SKIP0 if skip0 is None else skip0
     files = glob.glob(point_glob(tag, cell, snr))
     have = sorted((int(s), int(m), f) for f in files for s, m in [re.search(r"_skip(\d+)_n(\d+)\.npz$", f).groups()])
-    plan = [(C.P3_SKIP0 + CHUNK * k, CHUNK) for k in range(n // CHUNK)]
+    plan = [(skip0 + CHUNK * k, CHUNK) for k in range(n // CHUNK)]
     if [(s, m) for s, m, _ in have] != plan:
         raise Invalid(f"{tag} {cell} {snr:g} dB: chunk set {[(s, m) for s, m, _ in have]} != {plan}")
     fields = list(C.KEYS_RAW) + (["r_t"] if rt else [])
@@ -107,7 +110,7 @@ def load(tag, cell, snr, n, iters, arms, rt=False):
                     out[a][q].append(x)
                 out[a]["failed"].append(z[f"{a}|failed"] if f"{a}|failed" in z.files else np.zeros(m))
     one = {k: next(iter(v)) for k, v in meta.items() if len(v) == 1}
-    for k in ("stagec_ckpt", "stagec_ckpt_id", "bstar", "kron_K", "ntrain"):
+    for k in ("stagec_ckpt", "bstar", "kron_K", "ntrain") + (("stagec_ckpt_id",) if need_id else ()):
         if k not in one:
             raise Invalid(f"{tag} {cell} {snr:g} dB: meta|{k} not unique across chunks: {sorted(meta.get(k, []))}")
     if os.path.realpath(one["stagec_ckpt"]) != os.path.realpath(CKPT):
@@ -423,6 +426,95 @@ def judge(cell, snr, n, judging):
     print(txt + f"# -> {os.path.join(OUT, name)}.txt / .npz", flush=True)
 
 
+# ----------------------------------------------------------------------------- §3 one-shot test-set confirmation
+# User decision 2026-09-23 10:15 CDT ("지금 실행").  Content fixed by §3: primary comparison = the adopted rule (R-adapt)
+# vs R16, V1 and b* each, test set 0..2559, decision points C2 -3/0/+3 dB; pass = at >= 2 of the 3 points the rule has
+# fewer failures with p < 0.05, AND the 08_SPEC §2 power guard (all 3 points present, n_d >= 6 at >= 2 of them); the
+# other SNRs and the pooled p are report-only.  Run = new tag, 32 iterations once, same arms; the R16 reference is
+# iteration 16 of that run and must be bit-identical to raw_B16e4k (check_bit against it).
+TAG_TEST, TAG_B16 = "review_next_P3test", "B16e4k"
+ADOPTED = "R-adapt"                                            # §7.1: the adopted rule
+CONF_SNRS = (-3.0, 0.0, 3.0)
+SNRS = C.CELLS["C2"]["snrs"]                                   # every C2 SNR of the test run (non-decision: report only)
+N_TEST, TEST_SKIP0, WIN_MIN, DISC_PTS = 2560, 0, 2, 2
+
+
+def rule3(rows):
+    """rows = the 3 decision-point sign_rows (X = adopted rule, Y = R16) -> (pass, wins, guard, pooled a, b, p)."""
+    wins = sum(int(r["a"] < r["b"] and r["p"] < ALPHA) for r in rows)
+    guard = len(rows) == len(CONF_SNRS) and sum(int(r["a"] + r["b"] >= MIN_DISC) for r in rows) >= DISC_PTS
+    a, b = sum(r["a"] for r in rows), sum(r["b"] for r in rows)
+    return guard and wins >= WIN_MIN, wins, guard, a, b, sign_p(a, b)
+
+
+def demo_hashes_of(tag):
+    """code_hashes.Demo recorded by run_manifest.py for a raw tag (the hashes AT RUN TIME, not at judging time)."""
+    import json
+    p = os.path.join(OUT, f"run_manifest_{tag}.json")
+    if not os.path.isfile(p):
+        raise Invalid(f"{p} missing -- §3 '(Demo 해시 동일)' cannot be checked")
+    with open(p) as fh:
+        return json.load(fh)["code_hashes"]["Demo"]
+
+
+def confirm():
+    arms3 = [ARM[X][r] for X in PRIORS for r in RUNS]
+    hd = {t: demo_hashes_of(t) for t in (TAG_TEST, TAG_B16)}
+    if hd[TAG_TEST] != hd[TAG_B16]:                    # §3 "(Demo 해시 동일)"
+        raise Invalid(f"Demo hashes differ: {TAG_TEST} {hd[TAG_TEST]} vs {TAG_B16} {hd[TAG_B16]}")
+    snrs = [float(x) for x in SNRS]
+    rows, cnt = {}, {}
+    for snr in snrs:
+        p3, m3 = load(TAG_TEST, "C2", snr, N_TEST, T_MAX, arms3, rt=True, skip0=TEST_SKIP0)
+        ref, _ = load(TAG_B16, "C2", snr, N_TEST, T_REF, [BASE[X] for X in PRIORS], skip0=TEST_SKIP0, need_id=False)
+        check_variants(m3)
+        late = check_bit(p3, ref)                          # §3: R16 of this run == raw_B16e4k, bit for bit
+        R = apply_rules(p3, ref)
+        for X in PRIORS:
+            f = R[X]["f"]
+            rows[(X, snr)] = sign_row(f"{ADOPTED} vs R16", f[("base", ADOPTED)], f[("base", "R16")])
+            cnt[(X, snr)] = dict(R16=int(f[("base", "R16")].sum()), R32=int(f[("base", "R32")].sum()),
+                                 Rad=int(f[("base", "R-adapt")].sum()), t=float(R[X]["stop"]["base"].mean()),
+                                 tmax=int(R[X]["stop"]["base"].max()), sres=int(f["S-res"].sum()),
+                                 oracle=int(f["oracle"].sum()), raised=R[X]["raised"]["base"], late=late[X],
+                                 div=int(R[X]["div"][("base", "R-adapt")].sum()))
+    L = [C.header("D2", extra=[
+        "content     : review_next P3 §3 ONE-SHOT test-set confirmation of the adopted rule R-adapt (NEXT_EXPERIMENTS_P3 v2)",
+        f"runs        : conf/raw_{TAG_TEST} (32 iterations + r_t, test trials 0..{N_TEST - 1}); R16 reference = its iteration "
+        f"16, verified BIT-IDENTICAL to conf/raw_{TAG_B16} for V1 and b* in every KEYS_RAW field at every SNR; the receiver "
+        f"ran {T_MAX} outer iterations (the 'outer iterations = 16' line above is the common header's default)",
+        "Demo hashes : at run time (run manifests) identical for both tags: "
+        + "  ".join(f"{k}={v}" for k, v in sorted(hd[TAG_TEST].items())),
+        f"rule        : pass (per prior) = at >= {WIN_MIN} of C2 {'/'.join(f'{x:+g}' for x in CONF_SNRS)} dB R-adapt has fewer "
+        f"failures with p < {ALPHA}, AND power guard (all 3 present, n_d >= {MIN_DISC} at >= {DISC_PTS}); other SNRs and "
+        f"pooled p report-only; headline unchanged either way",
+        f"checkpoint  : {CKPT} (last-EMA, BEST_WEIGHTS_UNAVAILABLE); GMM b* kron K={BSTAR_K}, N_train {NTRAIN}"])]
+    w = L.append
+    for X in PRIORS:
+        w(f"\n## {X}: R-adapt vs R16 (a = only R-adapt fails, b = only R16 fails)")
+        w(f"  {'SNR':>5} {'R16':>5} {'R32':>5} {'R-adapt':>8} {'mean t':>7} {'max t':>6} {'S-res':>6} {'oracle':>7} "
+          f"{'raised':>6} {'div':>4}   test")
+        for snr in snrs:
+            c, r = cnt[(X, snr)], rows[(X, snr)]
+            tag = "decision" if snr in CONF_SNRS else "report-only"
+            w(f"  {snr:>+5g} {c['R16']:>5} {c['R32']:>5} {c['Rad']:>8} {c['t']:>7.2f} {c['tmax']:>6} {c['sres']:>6} "
+              f"{c['oracle']:>7} {c['raised']:>6} {c['div']:>4}   a:b = {r['a']}:{r['b']}  n_d {r['a'] + r['b']}  "
+              f"p = {r['p']:.3g}  -> {r['v']}  [{tag}]")
+        ok, wins, guard, a, b, pp = rule3([rows[(X, s_)] for s_ in CONF_SNRS])
+        verdict_ = ("PASS" if ok else "NOT PASSED" if guard
+                    else "NOT PASSED -- power guard UNDECIDED (08_SPEC §2): no judgement")
+        w(f"  3-point rule: wins {wins}/{len(CONF_SNRS)} (need >= {WIN_MIN}), power guard {'OK' if guard else 'UNDECIDED'} "
+          f"-> {X}: {verdict_}   (pooled over the 3 points, report only: a:b = {a}:{b}, p = {pp:.3g})")
+    w("\n(S-res / oracle columns: report only -- S-res is not a confirmation candidate (§3), the oracle uses true bits.  "
+      "'raised' base trials take their R16 from raw_B16e4k (§1 '비정상 값'); per prior and SNR that count is "
+      + ", ".join(f"{X} {s_:+g}: {cnt[(X, s_)]['late']}" for X in PRIORS for s_ in snrs if cnt[(X, s_)]['late']) + " (others 0).)")
+    txt = "\n".join(L) + "\n"
+    os.makedirs(OUT, exist_ok=True)
+    with open(os.path.join(OUT, "p3_confirm_C2.txt"), "w") as fh:  # noqa: one-shot output
+        fh.write(txt)
+    print(txt + f"# -> {os.path.join(OUT, 'p3_confirm_C2.txt')}", flush=True)
+
+
 # ----------------------------------------------------------------------------- selftest
 def selftest():
     inf, nan = np.inf, np.nan
@@ -446,15 +538,29 @@ def selftest():
     assert list(diverged_upto(A, np.array([1, 2, 1]))) == [0, 0, 1] and list(diverged_upto(A, 3)) == [1, 1, 1]
     A = dict(blk_err=np.array([[0, 1], [nan, nan], [1, 0]], float), failed=np.array([0, 1.0, 0]))
     assert list(fail_at(A, 2)) == [1, 1, 0]
+    rw = lambda a, b: dict(a=a, b=b, p=sign_p(a, b))
+    assert rule3([rw(2, 15), rw(3, 14), rw(9, 10)])[:3] == (True, 2, True)
+    assert rule3([rw(2, 15), rw(9, 10), rw(9, 10)])[:3] == (False, 1, True)
+    assert rule3([rw(0, 9), rw(0, 9), rw(1, 3)])[:3] == (True, 2, True)          # guard: n_d >= 6 at 2 points is enough
+    assert rule3([rw(0, 9), rw(1, 3), rw(1, 2)])[:3] == (False, 1, False)
+    print("[p3_rules selftest] OK: §3 rule3,", end=" ")
     print("[p3_rules selftest] OK: R-adapt stop, S-res tie/inf rule, §2.4 sign convention, verdict mapping, divergence, raised")
 
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--selftest", action="store_true")
+    ap.add_argument("--confirm", action="store_true", help="§3 one-shot test-set confirmation (tag review_next_P3test)")
     a = ap.parse_args()
     selftest()
     if a.selftest:
+        return 0
+    if a.confirm:
+        try:
+            confirm()
+        except Invalid as ex:
+            print(f"[p3_rules --confirm] INVALID -- {ex}", flush=True)
+            return 1
         return 0
     bad = []
     for cell, snr, n, judging in POINTS:
