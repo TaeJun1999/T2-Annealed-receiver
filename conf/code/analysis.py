@@ -125,9 +125,10 @@ def load_raw(testbed, root=None):
     data, meta = {}, {}
     for key, chunks in sorted(pts.items()):
         chunks.sort()
-        # test set starts at trial 0; a review_next DEVELOPMENT run starts at C.DEV_SKIP0 and a P3 JUDGING
-        # run at C.P3_SKIP0 (runner --skip0): the check starts at the largest of these <= the first chunk
-        pos, ok = max(s for s in (0, C.DEV_SKIP0, C.P3_SKIP0) if s <= chunks[0][0]), True
+        # test set starts at trial 0; a review_next DEVELOPMENT run starts at C.DEV_SKIP0, a P3 JUDGING run at
+        # C.P3_SKIP0 and an A1-C5 JUDGING run at C.A1C5_SKIP0 (runner --skip0): the check starts at the largest
+        # of these <= the first chunk
+        pos, ok = max(s for s in (0, C.DEV_SKIP0, C.P3_SKIP0, C.A1C5_SKIP0) if s <= chunks[0][0]), True
         for skip, n, _ in chunks:
             ok &= skip == pos
             pos = skip + n

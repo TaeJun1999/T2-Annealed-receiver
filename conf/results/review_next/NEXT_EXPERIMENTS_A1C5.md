@@ -66,10 +66,10 @@
 
 | 항목 | 상태 |
 |---|---|
-| `common.A1C5_SKIP0 = 4480`; `analysis.load_raw` 구멍 검사 시작점 ∈ {0, 2560, 3200, 4480}; `run_manifest.py` 분할 표기 "A1C5 judging set (trials ≥ 4480)" | 미구현 |
-| `pair_tags.py` 수용 검사 확장: skip ≥ 4480 인 점은 (C5, −3) = 정확히 32 청크, (C5, 0)·(C2, −3) = 정확히 16 청크일 때만 유효, 그 외 **거부**(라벨이 아니라 종료); 태그마다 `meta\|stagec_ckpt_id` 의 `role=best` 와 `epoch == best_epoch` 확인, `--expect-ckpt TAG=sha` 로 DECISIONS 에 적은 sha 와 대조; `M-ours-bstar`·`R5-genie` 의 KEYS_RAW 태그 간 비트 동일 검사(기준 aug_a1) | 미구현 |
-| `pair_tags.py rule3` 확장: `--aug/--ctrl` 멤버 목록(평균 = group_counts) + `--decision <cell> <snr×3>` (C5 −3 0 3) → 점별 PRIMARY, ≥2점 승, power guard, PASS / NOT PASSED / guard UNDECIDED 출력; 테스트 집합 [0, 2560) 전체만 수용 | 미구현 |
-| `conf/code/run_a1c5.sh`: `A1C5_TRAIN_DONE` 확인 → 4개 last 파일의 `stopped_by`·`aborted`·best/last epoch 일치를 읽어 자격을 판정하고 6 체크포인트 identity(sha, epoch)를 `DECISIONS.md` 에 기록 → 6 태그 × 3점 실행 → manifest → `pair_tags.py group` (H9 = `--aug a2 a3 --ctrl a2 a3`; 보고용 3쌍·쌍별) | 미구현 |
-| `conf/code/a1c5_report.py` (GB′, B16e4k kron K=1024 assert) + `diag_p1_heldout.py --ckpt … --out …` 호출 (보고 전용) | 미구현 |
+| `common.A1C5_SKIP0 = 4480`; `analysis.load_raw` 구멍 검사 시작점 ∈ {0, 2560, 3200, 4480}; `run_manifest.py` 분할 표기 "A1C5 judging set (trials ≥ 4480)" | **구현** (Opus, 2026-09-23 12:40 CDT; 커밋은 아래 행과 함께) |
+| `pair_tags.py` 수용 검사 확장: skip ≥ 4480 인 점은 (C5, −3) = 정확히 32 청크, (C5, 0)·(C2, −3) = 정확히 16 청크일 때만 유효, 그 외 **거부**(라벨이 아니라 종료); 태그마다 `meta\|stagec_ckpt_id` 의 `role=best` 와 `epoch == best_epoch` 확인, `--expect-ckpt TAG=sha` 로 DECISIONS 에 적은 sha 와 대조; `M-ours-bstar`·`R5-genie` 의 KEYS_RAW 태그 간 비트 동일 검사(기준 aug_a1) | **구현·검증** (`split_of` 점별 계획 + 4480 경계 걸침 거부, `check_ckpt`, `accept` 모드(+ b\*·genie 실패 수 출력); selftest, 기존 A1s2 group·A1s3 pair 출력 재현(헤더 환경 줄 제외 동일), 개발 태그로 accept·sha 거부 확인) |
+| `pair_tags.py rule3` 확장: `--aug/--ctrl` 멤버 목록(평균 = group_counts) + `--decision <cell> <snr×3>` (C5 −3 0 3) → 점별 PRIMARY, ≥2점 승, power guard, PASS / NOT PASSED / guard UNDECIDED 출력; 테스트 집합 [0, 2560) 전체만 수용 | **구현** (`rule3 --aug/--ctrl` 멤버 목록 = group_counts, 1멤버는 기존 pair 와 동일; `--decision` 은 `--expect-ckpt` 필수, 결측·무효 점 거부; 기존 헤드라인 쌍으로 pooled 454:78 재현) |
+| `conf/code/run_a1c5.sh`: `A1C5_TRAIN_DONE` 확인 → 4개 last 파일의 `stopped_by`·`aborted`·best/last epoch 일치를 읽어 자격을 판정하고 6 체크포인트 identity(sha, epoch)를 `DECISIONS.md` 에 기록 → 6 태그 × 3점 실행 → manifest → `pair_tags.py group` (H9 = `--aug a2 a3 --ctrl a2 a3`; 보고용 3쌍·쌍별) | **구현** (`run_a1c5.sh`: 깨끗한 코드 트리 확인, identity 커밋 실패 시 중단, 재실행 시 identity 재기록 없음, 빈 GPU 만 사용, 3 태그씩 192 워커, H9 는 `--h9` 로만(그 외 group 출력은 '부차 (보고, 판정 아님)'); 적대적 코드 검토 wf_fa31d00f-f4a 반영) |
+| `conf/code/a1c5_report.py` (GB′, B16e4k kron K=1024 assert) + `diag_p1_heldout.py --ckpt … --out …` 호출 (보고 전용) | **구현** (`ckpts`: 쌍 자격·identity → `a1c5_ckpts.json` + DECISIONS, a1 은 등록 sha 로 대조; `gbprime`: a1 aug 로 시험 8 s, 시험 산출물은 삭제) |
 | a2·a3 학습 | 진행 중 (09:38 CDT~, epoch ≈ 330 @ 11:20 CDT, ≈ 18~20 s/epoch) |
-| 판정 실행 | 미실행 |
+| 판정 실행 | 대기 (`run_a1c5.sh`, tmux `a1c5eval`: 학습 종료 → 자격·identity 커밋 → 평가) |

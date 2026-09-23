@@ -29,7 +29,7 @@ Modes
 Members are TAG:ARM; TAG is a runner tag (conf/raw_<TAG>, '' = conf/raw) or a directory when it contains '/'.
 Output: stdout, plus results/review_next/<--out>.txt when --out is given.
 """
-import argparse, glob, os, sys
+import argparse, glob, os, re, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import numpy as np
 import common as C, analysis as AN
@@ -43,6 +43,11 @@ N_POINTS, WIN_MIN, DISC_PTS = 3, 2, 2                          # §3.1 step 4: 3
 DECISION = ("C2", [-3.0, 0.0, 3.0])                            # §3.1 step 4: 판정점 C2 -3/0/+3 dB, TEST set
 RUN_KEYS = ("seed", "iters", "beta", "t_in", "dtype")          # runner run|<k>: must agree in every chunk of every tag
 SECTION = {"pair": "§0 house test", "group": "§3.1 step 2", "rule3": "§3.1 step 4", "interaction": "§3.2"}
+# ---- NEXT_EXPERIMENTS_A1C5 (v2, frozen ad32f48b) -- the A1-C5 judging set, trials C.A1C5_SKIP0 (4480).. in chunks of 40
+A1C5_PLAN = {("C5", -3.0): 32, ("C5", 0.0): 16, ("C2", -3.0): 16}   # §1: exact chunk count per point, else REFUSED
+SECTION_A1C5 = {"pair": "A1C5 §1 부차 (보고)", "group": "A1C5 §1 H9 / 부차", "rule3": "A1C5 §2 테스트 집합 확증",
+                "interaction": "n/a", "accept": "A1C5 §1 수용 검사"}
+CKPT_RE = re.compile(r"sha256\[:16\]=([0-9a-f]{16}) epoch=(-?\d+) best_epoch=(-?\d+) role=(\S+)")
 
 
 # ----------------------------------------------------------------------------- statistics
@@ -110,9 +115,11 @@ def chunk_ids(key, chunks):
     return runs, ids
 
 
-def split_of(ch):
+def split_of(ch, key=None):
     """-> (text, accepted, is_test).  Split by C.DEV_SKIP0.  §0 acceptance: a development point is exactly
-    DEV_CHUNKS; a test point is exactly the contiguous skip [0, DEV_SKIP0).  Overlapping chunks are refused."""
+    DEV_CHUNKS; a test point is exactly the contiguous skip [0, DEV_SKIP0).  Overlapping chunks are refused.
+    A1C5 (NEXT_EXPERIMENTS_A1C5 §1): a point starting at >= C.A1C5_SKIP0 must be EXACTLY its registered plan
+    [(4480 + 40k, 40)] (A1C5_PLAN: C5 -3 dB 32 chunks, C5 0 dB and C2 -3 dB 16 chunks) -- anything else is REFUSED."""
     lo, hi = ch[0][0], ch[-1][0] + ch[-1][1]
     contig = all(a[0] + a[1] == b[0] for a, b in zip(ch, ch[1:]))
     rng = f"skip [{lo}, {hi}) in {len(ch)} chunks, n={sum(n for _, n in ch)}" + ("" if contig else " (NOT CONTIGUOUS)")
@@ -120,6 +127,15 @@ def split_of(ch):
         sys.exit(f"REFUSED: chunk list straddles DEV_SKIP0={C.DEV_SKIP0} (test and development trials mixed): {ch}")
     if any(a[0] + a[1] > b[0] for a, b in zip(ch, ch[1:])):
         sys.exit(f"REFUSED: overlapping chunks (the same trial would be counted twice): {ch}")
+    if lo < C.A1C5_SKIP0 < hi:
+        sys.exit(f"REFUSED: chunk list straddles A1C5_SKIP0={C.A1C5_SKIP0} (A1C5 set mixed with earlier trials): {ch}")
+    if lo >= C.A1C5_SKIP0:
+        k = A1C5_PLAN.get((key[0], float(key[2]))) if key else None
+        want = [(C.A1C5_SKIP0 + 40 * i, 40) for i in range(k or 0)]
+        if k is None or list(ch) != want:
+            sys.exit(f"REFUSED: A1C5 point {key}: chunk list {ch} is not the registered plan {want} "
+                     "(NEXT_EXPERIMENTS_A1C5 §1: exact chunk count per point)")
+        return f"A1C5 set {rng}  A1C5 §1 plan ({k} x 40) OK", True, False
     if hi <= C.DEV_SKIP0:
         ok = contig and lo == 0 and hi == C.DEV_SKIP0
         return f"TEST        {rng}  §0 test set " + ("OK" if ok else "INCOMPLETE -> this run is INVALID"), ok, True
@@ -135,7 +151,30 @@ def fail_vec(v):
     return f.astype(np.int64)
 
 
-def load(members, testbed, cell, prior, snrs, allow_missing=False):
+def check_ckpt(ids, expect, strict):
+    """ids {tag: {id string}} -> header lines.  strict (an A1C5 point, or --expect-ckpt given): every tag must name
+    ONE checkpoint with role=best and epoch == best_epoch, and its sha256[:16] must equal the expected one (A1C5 §1:
+    the sha recorded in DECISIONS.md before evaluation); a tag without an expectation is refused."""
+    if not strict:
+        return []
+    out = []
+    for t, i in ids.items():
+        m = CKPT_RE.search(next(iter(i))) if len(i) == 1 else None
+        if m is None:
+            sys.exit(f"REFUSED: tag {t!r}: no parsable Stage C checkpoint identity {sorted(i)}")
+        sha, ep, bep, role = m[1], int(m[2]), int(m[3]), m[4]
+        if role != "best" or ep != bep:
+            sys.exit(f"REFUSED: tag {t!r}: checkpoint role={role} epoch={ep} best_epoch={bep} -- must be role=best "
+                     "with epoch == best_epoch (A1C5 §1 / v3 §0 evaluation weights = _best.pt)")
+        if t not in (expect or {}):
+            sys.exit(f"REFUSED: tag {t!r} has no --expect-ckpt {t}=<sha256[:16]> (A1C5 §1: sha from DECISIONS.md)")
+        if expect[t] != sha:
+            sys.exit(f"REFUSED: tag {t!r}: checkpoint sha256[:16] {sha} != expected {expect[t]}")
+        out.append(f"ckpt check  : [{t}] sha256[:16]={sha} == expected, role=best, epoch={ep} == best_epoch")
+    return out
+
+
+def load(members, testbed, cell, prior, snrs, allow_missing=False, expect=None):
     """members [(tag, arm)] -> (F {(tag, arm, snr): int (n,)}, header lines, missing snrs, invalid snrs, test snrs).
     A point absent from some tag is fatal unless allow_missing (rule3: it then fails the power guard).
     Every chunk must carry the same run parameters (RUN_KEYS, iters = C.N_ITER) in every tag, and one tag's
@@ -159,7 +198,7 @@ def load(members, testbed, cell, prior, snrs, allow_missing=False):
                 sys.exit(f"REFUSED: chunk sets differ at {key}:\n  {tags[0]!r}: {ref}\n  {t!r}: {sn[t]}"
                          f"\n  only in {tags[0]!r}: {sorted(set(ref) - set(sn[t]))}"
                          f"\n  only in {t!r}: {sorted(set(sn[t]) - set(ref))}")
-        txt, ok, is_test = split_of(ref)
+        txt, ok, is_test = split_of(ref, key)
         invalid += [] if ok else [s]
         test += [s] if is_test else []
         for t in tags:
@@ -177,6 +216,8 @@ def load(members, testbed, cell, prior, snrs, allow_missing=False):
     lines += ["run params  : " + "  ".join(f"{k}={v}" for k, v in zip(RUN_KEYS, r)) + "  (every chunk, every tag)"
               for r in runs]
     lines += [f"stage C ckpt: [{t}] {' || '.join(sorted(ids[t]))}" for t in tags]
+    a1c5 = any(ch[0][0] >= C.A1C5_SKIP0 for t in tags for k, ch in chs[t].items() if k in keep)
+    lines += check_ckpt(ids, expect, strict=a1c5 or bool(expect))
     F = {}
     for t in tags:
         data, _, warns = AN.load_raw(testbed, root_of(t))
@@ -218,8 +259,19 @@ def run_pair(F, a, snrs, out):
         out.append("   " + test_line(*disc(F[x + (s,)], F[y + (s,)]), "X fewer failures", "Y fewer failures"))
 
 
+def h9_outcome(npos, nneg):
+    """NEXT_EXPERIMENTS_A1C5 §1 H9: a = #d>0 (aug worse), b = #d<0 (aug better) -> one of the four registered outcomes."""
+    nd, p = npos + nneg, sign_p(npos, nneg)
+    if nd < MIN_DISC:
+        return "UNDECIDED (n_d < 6)"
+    if p >= ALPHA:
+        return "판정 불가 (p >= 0.05)"
+    return "지지 (p < 0.05, aug 가 적음)" if nneg > npos else "반대 방향 유의 (p < 0.05, aug 가 많음) -> 지지 아님"
+
+
 def run_group(F, a, snrs, out):
-    out.append(f"\nGROUP (§3.1 step 2)  aug = {[lbl(m) for m in a.aug]}   ctrl = {[lbl(m) for m in a.ctrl]}")
+    sec = "§3.1 step 2" if a.registry == "v3" else ("A1C5 §1 H9 (1차 검정)" if a.h9 else "A1C5 §1 부차 (보고, 판정 아님)")
+    out.append(f"\nGROUP ({sec})  aug = {[lbl(m) for m in a.aug]}   ctrl = {[lbl(m) for m in a.ctrl]}")
     out.append("  d = mean_aug(fail) - mean_ctrl(fail) per trial; d = 0 dropped; a = #d>0 (aug worse), b = #d<0 (aug better)")
     for s in snrs:
         fa = np.stack([F[m + (s,)] for m in a.aug])
@@ -229,6 +281,8 @@ def run_group(F, a, snrs, out):
         out.append(f"   group mean failures aug={fa.mean(0).sum():.2f} ctrl={fc.mean(0).sum():.2f} of n={fa.shape[1]}"
                    f"   d=0 dropped: {nz}")
         out.append("   PRIMARY  " + test_line(npos, nneg, "aug fewer failures", "ctrl fewer failures"))
+        if a.h9:
+            out.append(f"   H9 VERDICT (NEXT_EXPERIMENTS_A1C5 §1): {h9_outcome(npos, nneg)}")
         if len(a.aug) != len(a.ctrl):
             out.append("   secondary (member i vs member i): n/a -- member counts differ")
             continue
@@ -243,17 +297,20 @@ def run_group(F, a, snrs, out):
 
 
 def run_rule3(F, a, snrs, missing, test, out):
-    x, y = a.aug, a.ctrl
-    out.append(f"\nRULE3 (§3.1 step 4)  aug = {lbl(x)}   ctrl = {lbl(y)}   decision points {[f'{s:+g}' for s in snrs]}")
-    out.append("  a = only aug fails, b = only ctrl fails")
+    xs, ys = a.aug, a.ctrl
+    out.append(f"\nRULE3  aug = {[lbl(m) for m in xs]}   ctrl = {[lbl(m) for m in ys]}   decision points "
+               f"{[f'{s:+g}' for s in snrs]}")
+    out.append("  per point: d = mean_aug(fail) - mean_ctrl(fail) per trial (one member each = the plain pair), d = 0 dropped;"
+               " a = #d>0 (aug worse), b = #d<0 (aug better)")
     res = []
     for s in snrs:
         if s in missing:
             out.append(f" {s:+g} dB  ABSENT")
             continue
-        ab = disc(F[x + (s,)], F[y + (s,)])
+        npos, nneg, _ = group_counts(np.stack([F[m + (s,)] for m in xs]), np.stack([F[m + (s,)] for m in ys]))
+        ab = (npos, nneg)
         res.append(ab)
-        out.append(f" {s:+g} dB" + fails_line(F, [x, y], s))
+        out.append(f" {s:+g} dB" + fails_line(F, xs + ys, s))
         out.append("   " + test_line(*ab, "aug fewer failures", "ctrl fewer failures"))
     A, B = sum(r[0] for r in res), sum(r[1] for r in res)
     nd = [p + q for p, q in res]
@@ -265,10 +322,16 @@ def run_rule3(F, a, snrs, missing, test, out):
                f"counts {nd} (needs >= {MIN_DISC} at >= {DISC_PTS}) -> " + ("POWERED" if guard else "UNDECIDED"))
     out.append(f"  aug fewer failures with p < 0.05 at {wins}/{len(snrs)} points; ctrl fewer failures with p < 0.05 at "
                f"{loss}/{len(snrs)} points")
-    prereg = a.cell == DECISION[0] and sorted(snrs) == DECISION[1] and sorted(test) == DECISION[1]
-    out.append(("  §3.1 step 4 verdict: " if prereg else
-                f"  rule outcome (NOT the §3.1 step 4 verdict: its decision points are {DECISION[0]} "
-                f"{DECISION[1]} dB on the TEST set): ")
+    if a.decision:                          # NEXT_EXPERIMENTS_A1C5 §2: the registered test-set confirmation
+        dc, ds = a.decision[0], sorted(float(x) for x in a.decision[1:])
+        prereg = a.cell == dc and sorted(snrs) == ds and sorted(test) == ds and not missing
+        name = f"NEXT_EXPERIMENTS_A1C5 §2 test-set confirmation verdict ({dc} {ds} dB)"
+    else:
+        prereg = a.cell == DECISION[0] and sorted(snrs) == DECISION[1] and sorted(test) == DECISION[1]
+        name = "§3.1 step 4 verdict"
+    out.append((f"  {name}: " if prereg else
+                f"  rule outcome (NOT the {name}: its decision points are "
+                f"{a.decision or DECISION} dB on the TEST set): ")
                + ("PASS" if guard and wins >= WIN_MIN else
                   "NOT PASSED (power guard failed)" if not guard else "NOT PASSED"))
 
@@ -290,6 +353,29 @@ def run_interaction(F, a, snrs, out):
         met = npos + nneg >= MIN_DISC and sign_p(npos, nneg) < ALPHA and nneg > npos
         out.append(f"   §3.2 attribution condition (n_d >= {MIN_DISC}, p < 0.05 AND #d<0 > #d>0): "
                    + ("met" if met else "not met"))
+
+
+def run_accept(a, keys, out):
+    """A1C5 §1 acceptance beyond load(): the arms named by --arms (checkpoint-independent: M-ours-bstar, R5-genie)
+    must be BIT-IDENTICAL in every KEYS_RAW field across all tags (reference = the first tag), point by point."""
+    ref = None
+    for t in a.tags:
+        data, _, _ = AN.load_raw(a.testbed, root_of(t))
+        cur = {(k, arm, q): data[k][arm][q] for k in keys for arm in a.arms for q in C.KEYS_RAW}
+        del data
+        if ref is None:
+            ref, rt = cur, t
+            continue
+        bad = [f"{k[2]:+g} dB {arm}|{q}" for (k, arm, q), v in cur.items() if not np.array_equal(v, ref[(k, arm, q)], equal_nan=True)]
+        if bad:
+            sys.exit(f"REFUSED: tag {t!r} differs from {rt!r} in {len(bad)} checkpoint-independent field(s): {bad[:6]} "
+                     "(A1C5 §1: the run is INVALID; see the 수용 실패 절차)")
+        out.append(f"  bit-identical to {rt!r}: {t!r}  ({len(cur)} arrays: {a.arms} x {list(C.KEYS_RAW)} x {len(keys)} point(s))")
+    for k in keys:                                       # A1C5 §1 부차 (5): the context arms' failures (identical in every tag)
+        be = {arm: ref[(k, arm, "blk_err")] for arm in a.arms}
+        out.append(f"  failures @16 {k[2]:+g} dB (n={len(next(iter(be.values())))}): "
+                   + "  ".join(f"{arm}={int(np.sum(np.where(np.isfinite(v[:, -1]), v[:, -1], 1)))}" for arm, v in be.items()))
+    out.append(f"\nACCEPT: OK -- {len(a.tags)} tags, points {[f'{k[2]:+g}' for k in keys]} dB")
 
 
 def selftest():
@@ -315,8 +401,34 @@ def selftest():
             raise AssertionError(bad)
         except SystemExit:
             pass
+    a1 = [(C.A1C5_SKIP0 + 40 * i, 40) for i in range(32)]
+    assert split_of(a1, ("C5", "S2", -3.0))[1:] == (True, False) and split_of(a1[:16], ("C5", "S2", 0.0))[1:] == (True, False)
+    for ch, key in ((a1[:16], ("C5", "S2", -3.0)), (a1, ("C5", "S2", 0.0)), (a1[:16], ("C5", "S2", 3.0)), (a1[1:17], ("C2", "S2", -3.0))):
+        try:
+            split_of(ch, key)
+            raise AssertionError((len(ch), key))
+        except SystemExit:
+            pass
+    try:
+        split_of([(3840, 40), (3880, 40)] + a1[:15], ("C5", "S2", 0.0))
+        raise AssertionError("straddle across A1C5_SKIP0 not refused")
+    except SystemExit:
+        pass
+    assert h9_outcome(3, 2).startswith("UNDECIDED") and h9_outcome(20, 22).startswith("판정 불가")
+    assert h9_outcome(10, 30).startswith("지지") and h9_outcome(30, 10).startswith("반대")
+    ok_id = {"t": {"sha256[:16]=40c55cb294340594 epoch=1082 best_epoch=1082 role=best 8x4"}}
+    assert check_ckpt(ok_id, {"t": "40c55cb294340594"}, True) and check_ckpt(ok_id, None, False) == []
+    for ids, ex in (({"t": {"sha256[:16]=40c55cb294340594 epoch=1100 best_epoch=1082 role=last 8x4"}}, {"t": "40c55cb294340594"}),
+                    (ok_id, {"t": "0000000000000000"}), (ok_id, {})):
+        try:
+            check_ckpt(ids, ex, True)
+            raise AssertionError(ids)
+        except SystemExit:
+            pass
+    f1, f2 = o([1, 0, 1, 0, 1]), o([0, 1, 1, 0, 0])
+    assert group_counts(f1[None], f2[None])[:2] == disc(f1, f2)                                    # rule3 1-member == pair
     return ("selftest OK -- §0 MDD table, MIN_DISC, exact group d==0 with unequal member counts, interaction signs, "
-            "§0 split acceptance")
+            "§0 split acceptance, A1C5 plan / checkpoint checks, rule3 member lists")
 
 
 def main():
@@ -329,15 +441,24 @@ def main():
     com.add_argument("--snr", type=float, nargs="+", required=True, help="SNR points (dB); rule3: the 3 decision points")
     com.add_argument("--out", default=None, help="also write results/review_next/<OUT>.txt")
     com.add_argument("--overwrite", action="store_true")
+    com.add_argument("--expect-ckpt", nargs="+", default=None, metavar="TAG=SHA16",
+                     help="A1C5 §1: expected sha256[:16] of each tag's Stage C checkpoint (role=best is then required)")
+    com.add_argument("--registry", choices=("v3", "A1C5"), default="v3", help="which pre-registration's section labels")
     p = sub.add_parser("pair", parents=[com])
     p.add_argument("--x", type=member, required=True)
     p.add_argument("--y", type=member, required=True)
     p = sub.add_parser("group", parents=[com])
     p.add_argument("--aug", type=member, nargs="+", required=True)
     p.add_argument("--ctrl", type=member, nargs="+", required=True)
+    p.add_argument("--h9", action="store_true", help="the registered A1C5 §1 H9 call: prints the H9 verdict line")
     p = sub.add_parser("rule3", parents=[com])
-    p.add_argument("--aug", type=member, required=True)
-    p.add_argument("--ctrl", type=member, required=True)
+    p.add_argument("--aug", type=member, nargs="+", required=True)
+    p.add_argument("--ctrl", type=member, nargs="+", required=True)
+    p.add_argument("--decision", nargs=4, default=None, metavar=("CELL", "S1", "S2", "S3"),
+                   help="A1C5 §2: the registered decision cell and 3 SNRs (else v3 §3.1 step 4's C2 -3/0/+3)")
+    p = sub.add_parser("accept", parents=[com])
+    p.add_argument("--tags", nargs="+", required=True)
+    p.add_argument("--arms", nargs="+", default=["M-ours-bstar", "R5-genie"])
     p = sub.add_parser("interaction", parents=[com])
     for k in ("--v1-mean", "--v1-eta", "--gmm-mean", "--gmm-eta"):
         p.add_argument(k, type=member, required=True)
@@ -347,29 +468,47 @@ def main():
         print(selftest())
         return
     prior = a.prior or C.PRIOR_OF[a.testbed]
-    members = {"pair": lambda: [a.x, a.y], "group": lambda: a.aug + a.ctrl, "rule3": lambda: [a.aug, a.ctrl],
-               "interaction": lambda: [a.v1_mean, a.v1_eta, a.gmm_mean, a.gmm_eta]}[a.mode]()
+    members = {"pair": lambda: [a.x, a.y], "group": lambda: a.aug + a.ctrl, "rule3": lambda: a.aug + a.ctrl,
+               "interaction": lambda: [a.v1_mean, a.v1_eta, a.gmm_mean, a.gmm_eta],
+               "accept": lambda: [(t, arm) for t in a.tags for arm in a.arms]}[a.mode]()
+    expect = dict(x.split("=", 1) for x in a.expect_ckpt) if a.expect_ckpt else None
     if len(set(a.snr)) != len(a.snr) or len(set(members)) != len(members):
         sys.exit(f"REFUSED: a point or a member is given twice (it would be counted twice): {a.snr} {members}")
     path = os.path.join(OUT, os.path.basename(a.out) + ".txt") if a.out else None
     if path and os.path.exists(path) and not a.overwrite:
         sys.exit(f"REFUSED: {path} exists (pass --overwrite)")
-    F, lines, missing, invalid, test = load(members, a.testbed, a.cell, prior, a.snr, allow_missing=a.mode == "rule3")
+    F, lines, missing, invalid, test = load(members, a.testbed, a.cell, prior, a.snr, allow_missing=a.mode == "rule3",
+                                            expect=expect)
+    if (a.mode == "accept" or a.registry == "A1C5") and invalid:
+        sys.exit(f"REFUSED: acceptance FAILED at {invalid} dB (A1C5 §1 / §0) -- not judged")
+    if getattr(a, "h9", False) and not (a.registry == "A1C5" and a.cell == "C5" and a.snr == [-3.0] and
+                                        [m[0] for m in a.aug] == ["review_next_A1C5_aug_a2", "review_next_A1C5_aug_a3"] and
+                                        [m[0] for m in a.ctrl] == ["review_next_A1C5_ctrl_a2", "review_next_A1C5_ctrl_a3"]):
+        sys.exit("REFUSED: --h9 is only the registered H9 call (A1C5, C5 -3 dB, aug a2 a3 vs ctrl a2 a3)")
+    if a.mode == "rule3" and a.decision and not expect:
+        sys.exit("REFUSED: --decision (A1C5 §2) needs --expect-ckpt for every tag")
+    if a.mode == "rule3" and a.decision and (invalid or missing):
+        sys.exit(f"REFUSED: A1C5 §2 decision points must all be present and valid test-set points (invalid {invalid}, "
+                 f"missing {missing})")
     snrs = [s for s in a.snr if s not in missing] if a.mode != "rule3" else a.snr
     tags = list(dict.fromkeys(t for t, _ in members))
     out = [C.header(a.testbed, [
-        f"script      : conf/code/pair_tags.py {a.mode}  (NEXT_EXPERIMENTS v3 {SECTION[a.mode]})",
+        f"script      : conf/code/pair_tags.py {a.mode}  (" + (f"NEXT_EXPERIMENTS v3 {SECTION.get(a.mode, 'n/a')}" if a.registry == "v3"
+                                                                 else f"NEXT_EXPERIMENTS_{SECTION_A1C5[a.mode]}") + ")",
         f"points      : testbed {a.testbed}  cell {a.cell}  prior {prior}  SNR {[f'{s:+g}' for s in a.snr]} dB",
         f"house test  : exact two-sided sign test on discordant pairs (exp_0921_analysis.sign_p), p < {ALPHA}; n_d < "
         f"{MIN_DISC} -> UNDECIDED; MDD = smallest net |a-b| with p < {ALPHA} at the observed n_d (report only)",
         "failure     : blk_err[:, -1] (BLER@16) via analysis.load_raw; a trial whose arm RAISED is a failure and is kept",
-        f"split       : DEVELOPMENT = skip >= C.DEV_SKIP0 = {C.DEV_SKIP0} (§0 acceptance = exactly 16 chunks (2560+40k, 40)),"
-        f" TEST = skip < {C.DEV_SKIP0}",
+        (f"split       : DEVELOPMENT = skip >= C.DEV_SKIP0 = {C.DEV_SKIP0} (§0 acceptance = exactly 16 chunks (2560+40k, 40)),"
+         f" TEST = skip < {C.DEV_SKIP0}") if a.registry == "v3" else
+        (f"split       : A1C5 set = skip >= C.A1C5_SKIP0 = {C.A1C5_SKIP0}, exact plan per point {A1C5_PLAN} chunks of 40 "
+         f"(NEXT_EXPERIMENTS_A1C5 §1); TEST = skip [0, {C.DEV_SKIP0}) whole (§2 confirmation)"),
     ] + [f"tag         : {t!r:<16} -> {root_of(t)}" for t in tags]
       + [f"member      : {lbl(m)}" for m in members] + lines)]
     {"pair": lambda: run_pair(F, a, snrs, out), "group": lambda: run_group(F, a, snrs, out),
      "rule3": lambda: run_rule3(F, a, snrs, missing, test, out),
-     "interaction": lambda: run_interaction(F, a, snrs, out)}[a.mode]()
+     "interaction": lambda: run_interaction(F, a, snrs, out),
+     "accept": lambda: run_accept(a, [(a.cell, prior, float(s)) for s in snrs], out)}[a.mode]()
     if invalid:
         out.append(f"\n!!! §0 acceptance FAILED at {[f'{s:+g}' for s in invalid]} dB -> every number above comes from an "
                    "INVALID run (development: not exactly 16 x 40 from DEV_SKIP0; test: not the whole skip [0, DEV_SKIP0))")
