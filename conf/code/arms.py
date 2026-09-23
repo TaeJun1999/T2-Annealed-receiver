@@ -148,10 +148,14 @@ def build_our_arms(testbed, prior, Nr, Nt, T, Tp, sigma2, code, Xp, ntrain=N_TRA
 
     Stage C, OPT-IN (spec 10 §3b / §3c).  Every argument below defaults to "not built", so a caller that
     does not ask for Stage C gets exactly the pre-registered arm set, bit for bit:
-      score_prior_c : the gate-passing Stage C checkpoint -> M-ours-dscore-C-V0 (D-14 MATRIX site, the
+      score_prior_c : the Stage C checkpoint (--stagec-ckpt) -> M-ours-dscore-C-V0 (D-14 MATRIX site, the
                       pre-registered score wiring) and M-ours-dscore-C-V4 (D-14 REPLACED by the D-13
                       belief scalarisation).  ONE ScorePrior drives both, exactly as code/diag_ep_site.py
-                      drives its dscore|scorew and dscore|belsc cells from one object.
+                      drives its dscore|scorew and dscore|belsc cells from one object.  Gate status is not
+                      enforced (the runner records it in meta|stagec_gate): D1 sx_N160000_D1.pt passes; a D2
+                      checkpoint has no gate row and is qualified through its D1 sibling, which passes only at
+                      N_train=1.6e5.  [record correction 2026-09-23, review_next G-1.2: previously 'the
+                      gate-passing Stage C checkpoint'.]
       bstar_scalar  : M-ours-bstar-scalar, the b* GMM through V4's wiring.  §3c makes this arm MANDATORY
                       in the same run as V4: if scalarisation also helps the GMM, the gain belongs to the
                       site, not to the learned prior.

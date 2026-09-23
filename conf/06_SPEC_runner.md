@@ -17,6 +17,8 @@
 | `R5-genie` | genie CSI | 기존 |
 | `R6-exactEP` | `exactEP-true` (참 prior 정확 EP, oracle 상한) | 기존 |
 
+> **정정 (2026-09-23, review_next M-10.3a)** (사용자 위임에 따라 적용, 2026-09-22 CDT): 18행 `R6-exactEP` 의 "oracle 상한" 은 참조 수신기를 bound 로 부른다. R6 은 참 prior GMM site 를 넣은 같은 route_a EP/터보 반복 루프다(`code/arms.py:118-119`). 스스로 반복 의존적이다(D1 C5 −3 dB BLER@1/@2/@8/@16 = 0.961/0.821/0.551/0.505, `results/tables_D1_C.txt:554`). 블록별 하한이 아니다: D1 C5 에서 V0 성공·R6 실패 91 블록(−3/+0/+3 dB 합, `tables_D1_C.txt:1139` 88:91, a:b 규약 :754). 점추정으로도 최저가 아니다: C5 −3 dB 에서 M-ours-bstar 0.502, V0 0.504, R6 0.505(`tables_D1_C.txt:534,537,536`). 이 차이는 유의하지 않다(V0→R6 88:91 p=0.88 `:1139`, bstar→R6 74:76 p=0.93 `:1079`, 둘 다 POWERED). 제안 문구: "| `R6-exactEP` | `exactEP-true` (참 prior 정확 EP = exact-prior EP reference, bound 아님) | 기존 |". arm id·구성·testbed 집합(38행)은 그대로다. DECISIONS [2026-09-23 11:47] 명칭 정정(genie-2)을 참조한다.
+
 ### 우리 모델 (baseline 테스트 통과 후에 만든다)
 
 | tag | Module H | 출처 |

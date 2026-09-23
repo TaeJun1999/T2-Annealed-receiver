@@ -226,7 +226,7 @@ D1_WARNING = (
 
 D2_WARNING = (
     "# " + "=" * 100 + "\n"
-    "# CLAIM TESTBED -- sparse specular; conditional Gaussianity broken (see T2d). Upper bound = genie only.\n"
+    "# CLAIM TESTBED -- sparse specular; conditional Gaussianity broken (see T2d). Reference = known-channel receiver (R5-genie: same EP detector + BCJR, true H); not a bound.\n"
     "# " + "=" * 100
 )
 

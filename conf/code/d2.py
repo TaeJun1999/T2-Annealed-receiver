@@ -16,11 +16,20 @@ Channel model [exact, 05_SPEC §1]
     p_l ∝ exp(-l/tau), tau = 2, normalised to sum_l p_l = 1 (so p_l depends on the drawn L).
     a(theta)[n] = exp(j pi n sin(theta)) / sqrt(N)   -- half-wavelength ULA, UNIT NORM.
 
-Why |alpha_l| is deterministic [05_SPEC §1]: with alpha_l ~ CN (the 3GPP-style convention) H would be
-Gaussian GIVEN the angles, i.e. a conditionally-Gaussian mixture, and a GMM would be correctly specified.
-Sparse specular multipath with a deterministic power-delay profile is the physically standard mmWave
-model; the failure of conditional Gaussianity is a CONSEQUENCE of that physics, and test T2d is its
-direct evidence (conf/01_RULES.md §5 framing rule).
+Why |alpha_l| is deterministic [05_SPEC §1]: if the path gains were instead alpha_l ~ CN, independent
+of the angles (a common simplification, as opposed to the fixed-amplitude model used here), H would be
+Gaussian GIVEN (L, angles), i.e. a conditionally-Gaussian mixture over (L, angles).  The angles are
+continuous, so that mixture is continuous: even then a finite-K GMM would approximate it, not be
+correctly specified (unlike D1, whose true prior IS a grid GMM: conf/05_SPEC_testbed_D2.md, opening note).
+D2 is a CONTROLLED sparse specular model -- fixed |alpha_l|, continuous uniform angles, fixed
+exp(-l/tau) power profile -- built to isolate the failure of conditional Gaussianity; it is not
+presented as a standard or realistic mmWave channel (conf/05_SPEC_testbed_D2.md §1 caution note;
+retraction 56 in conf/results/NUMBERS_PACKAGE_2026-09-22.md).  Test T2d is the direct evidence that
+conditional Gaussianity fails in D2.  The stated reason is never 'unfavourable to the GMM'
+(conf/01_RULES.md §5).
+[record correction 2026-09-23, review_next R-5.2 / M-5.2a: this paragraph previously called CN path
+gains 'the 3GPP-style convention', said a GMM 'would be correctly specified', and called D2 'the
+physically standard mmWave model'.]
 
 NORMALISATION -- one correction to the printed spec, already recorded in conf/DECISIONS.md.
 05_SPEC prints sqrt(Nr*Nt/L) TOGETHER WITH sum_l p_l = 1; using both gives E||H||_F^2 = Nr*Nt/L, which

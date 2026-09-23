@@ -161,3 +161,5 @@ every arm.  Nothing in this figure is recomputed, resampled or re-run from the r
 
 THE STANDING CAVEAT ON THIS TESTBED, from the file's own header.  D2 is the CLAIM testbed: sparse
 specular, conditional Gaussianity broken, and the upper bound is the genie only.
+
+NOTE (2026-09-23, review_next R-10.3 / M-10.3a): the legend entry "R5 genie CSI (lower bound)" and "the upper bound is the genie only" name a reference receiver, not a bound: R5-genie is the same EP detector + BCJR loop fed the true H (code/arms.py R5-genie; its own BLER keeps falling with iterations), and at C2 -3 dB 15 blocks decode under V1 but fail under R5-genie (raw_B16e4k / raw_C). Read "genie" as the known-channel receiver reference. The generator strings are corrected for future renders; this PNG is not regenerated. See DECISIONS [2026-09-23 11:47 KST].

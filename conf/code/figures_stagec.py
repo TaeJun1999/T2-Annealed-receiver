@@ -481,6 +481,16 @@ def fig9():
                "measured separately at n=12 (logs/diag_sigma_coverage.log);\ngrey bars are the FULL "
                "min..max of the 192 queries, NOT an inter-quartile range.\n+12 dB was not measured "
                "there, so it has no row.", y=0.012)
+    # NOTE (2026-09-23, review_next G-1.2): the caption's GATE STATUS paragraph below says
+    # ckpt/d2sx_N10000_a1.pt "FAILED the pre-registered gates (GC 0.224 ...)".  Shorthand (mirror case):
+    # that D2 checkpoint has no gate row (results/tables_D2_B1e4.txt:45; gates are measurable on D1 only,
+    # 10_SPEC_stageC Sec.5).  GC 0.224 is the D1 re-gate of the same recipe (HPO trial 386,
+    # results/hpo_final_r2.txt: GC 2.24111e-01, passed=False; NUMBERS_PACKAGE_2026-09-22.md:402-406).
+    # The next sentence ("DIAGNOSTIC PROBES on an UN-GATED checkpoint") is already exact.
+    # figs/F9_sigma_band_vs_snr.* are NOT regenerated; at the next regeneration read "... uses
+    # ckpt/d2sx_N10000_a1.pt, which has no gate record on D2; the D1 re-gate of its recipe FAILS
+    # (GC 0.224 against a bar of 0.15, HPO trial 386)." and "... with a checkpoint whose D1 sibling
+    # passes the gates, at n >= 2560."
     return _save(fig, "F9_sigma_band_vs_snr", """
 F9.  The sigma band where the D-14 site is damaged, and the SNR band where the receiver diverges.
 
@@ -528,7 +538,7 @@ _ARMS = [
     ("M-ours-score", "M   EXACT-score ORACLE (true prior, not learned)", "tab:green", "P", ":"),
     ("M-ours-dscore-C-V0", "V0  learned score, D-14 MATRIX site (primary)", "tab:purple", "^", "-"),
     ("M-ours-dscore-C-V4", "V4  learned score, D-13 scalar site (post-hoc)", "tab:pink", "v", "-"),
-    ("R5-genie", "R5  genie CSI (lower bound)", "k", "*", "-."),
+    ("R5-genie", "R5  genie CSI (known-H reference)", "k", "*", "-."),
 ]
 
 
@@ -618,7 +628,8 @@ results/guard_D1_C.txt for the divergence-guard firings.  n = 2560 per SNR in al
 
 GATE STATUS.  The Stage C arms use ckpt/sx_N160000_D1.pt, which PASSES all four pre-registered gates
 (LADDER_C.md SX160000: GA 9.879e-16, GB +0.27%, GC 0.0999, GD 0.0718).  This is a gate-passing
-confirmatory run, not a probe.
+confirmatory run, not a probe.  The gates and this run read the same weights, the file's last-epoch
+EMA (epoch 200, val 7.398687e-01); the best-val epoch 136 (7.398444e-01) was not stored.
 
 THE STANDING CAVEAT ON THIS TESTBED, from the file's own header.  D1 is CIRCULAR: its true prior is
 defined as a grid GMM, so the GMM arm is correctly specified by construction.  No claim about learned
@@ -639,7 +650,7 @@ _ARMS_D2 = [
     ("M-ours-dscore-C-V1",  "V1   V0 + symmetric-PSD projection of the site",   "tab:green",  "s",  "-"),
     ("M-ours-dscore-C-V4",  "V4   D-13 belief scalarisation (post-hoc reg.)",   "tab:pink",   "v",  "-"),
     ("M-ours-dscore-C-V4b", "V4b  as V4 but scal=site (side report)",           "tab:olive",  "<",  ":"),
-    ("R5-genie",            "R5   genie CSI (lower bound)",                     "k",          "*",  "-."),
+    ("R5-genie",            "R5   genie CSI (known-H reference)",               "k",          "*",  "-."),
 ]
 _GUARD_HI = 0.5          # "fired at a high rate": the point is a diverging receiver, not a BLER
 
@@ -784,7 +795,7 @@ WHAT IS MARKED.
     its decision-SNR line yields only two SNRs, -3 and +0 dB, instead of the required three: TABLE A
     puts genie at 0.034 and 0.010 there and at 0.005 or below from +3 dB up, i.e. at the edge of and
     then outside the anchor window BLER in [0.005, 0.9].  No arm in this figure is therefore claimed to
-    differ from the genie bound on C2, however far apart the two curves look.
+    differ from the known-channel receiver reference on C2, however far apart the two curves look.
   - Red rings and the red halo along a curve: the (F3) Module-H divergence guard (DIVERGE_NMSE = 10.0,
     results/guard_D2_C.txt).  A LARGE ring plus the halo is a point where the guard fired in more than
     50% of the 2560 trials -- the receiver was diverging, and the plotted value is not an ordinary
@@ -837,7 +848,8 @@ and the paired sign tests; results/guard_D2_C.txt for every guard firing.  Both 
 every arm.  Nothing in this figure is recomputed, resampled or re-run from the raw .npz files.
 
 THE STANDING CAVEAT ON THIS TESTBED, from the file's own header.  D2 is the CLAIM testbed: sparse
-specular, conditional Gaussianity broken, and the upper bound is the genie only.
+specular, conditional Gaussianity broken, and R5-genie (true H) is the only oracle reference left: a
+known-channel receiver reference (same EP detector + BCJR), not a bound.
 """)
 
 def check11():

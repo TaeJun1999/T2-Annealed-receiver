@@ -32,7 +32,7 @@ STYLE = {                                    # (label incl. condition, colour, m
     "R4-scvamp":    ("R4  3-module SC-VAMP-type (Onsager interface)", "tab:olive", "X", "--"),
     "M-ours-gmm32": ("M   Module H = GMM, K=32 (literal)",           "tab:orange", "^", "-"),
     "M-ours-bstar": ("M   Module H = GMM, b* (val. log-lik.)",       "tab:red", "D", "-"),
-    "R5-genie":     ("R5  genie CSI (lower bound)",                  "k", "*", "-."),
+    "R5-genie":     ("R5  genie CSI (known-H reference)",            "k", "*", "-."),
 }
 ORDER = ["R0-pilot", "R1-turbo", "R3-bigamp", "R4-scvamp", "R2-ours-G", "M-ours-gmm32", "M-ours-bstar", "R5-genie"]
 

@@ -9,6 +9,8 @@ D1과 D2는 **arm 집합이 다르다**(`06_SPEC_runner.md` §1). 합치지 않�
 - **D1 표** 헤더: `CIRCULAR TESTBED — true prior is defined as a grid GMM; the GMM arm is correctly specified. No claim about learned priors can be made from this table.`
 - **D2 표** 헤더: `CLAIM TESTBED — sparse specular; conditional Gaussianity broken (see T2d). Upper bound = genie only.`
 
+> **정정 (2026-09-23, review_next R-10.3)** (사용자 위임에 따라 적용, 2026-09-22 CDT): 위 D2 헤더의 `Upper bound = genie only.` 는 R5-genie 를 bound 로 명명한다. R5-genie 는 같은 route_a 반복 수신기에 참 H 를 넣은 것이다(`code/arms.py:117`, `Demo/t2_route_a.py:388-389`; BLER@1/@2/@8/@16 = 0.225/0.102/0.043/0.034, `results/tables_D2_B16e4k.txt:92`). C2 −3 dB 에서 V1 성공·genie 실패 15 블록(`raw_B16e4k`)이 있어 블록별 하한도 아니다. 제안 헤더: `CLAIM TESTBED — sparse specular; conditional Gaussianity broken (see T2d). Reference = known-channel receiver (R5-genie: same EP detector + BCJR, true H); not a bound.` 승인되면 `code/common.py:228` 만 바꾸고 이미 생성된 `tables_D2_*.txt` 는 재생성하지 않는다 — 옛 헤더는 이 주석으로 읽는다.
+
 ## 1. 표 A — 셀별 arm 비교 (주 산출물)
 
 행 = arm 10종, 열 = 각 SNR 점. 셀마다 한 표.
@@ -36,6 +38,8 @@ D1과 D2는 **arm 집합이 다르다**(`06_SPEC_runner.md` §1). 합치지 않�
 | R4-llr → R4-scvamp | 원문 ablation 재현 (기지 채널이 아닌 우리 설정에서도 성립하나) |
 | R2 → R3-bigamp | AMP 계열 대조 |
 | M-ours-* → R6-exactEP *(D1만)* / → R5-genie *(D2)* | 남은 headroom |
+
+> **정정 (2026-09-23, review_next M-10.3a)** (사용자 위임에 따라 적용, 2026-09-22 CDT): 위 행의 "남은 headroom" 을 "reference 까지의 격차 (R6 = exact-prior EP reference, R5 = known-channel receiver reference; 기술적 서술이며 bound 아님)" 로 읽기를 제안한다. 근거는 10행 주석과 같다. R6 도 같은 route_a 루프(`code/arms.py:119`, 참 prior GMM site)이고 D1 C5 에서 V0 성공·R6 실패 91 블록이 있다(−3/+0/+3 dB 합, `results/tables_D1_C.txt:1139` 88:91).
 
 각 쌍에 대해: paired sign test의 불일치 쌍 수와 $p$-값, SNR@0.1 격차와 90% paired bootstrap CI.
 

@@ -88,7 +88,8 @@ STAGEC_NOTES = {
 
 def _pool(testbed):
     """Arm order of the tables: the pre-registered set with the Stage C arms slotted in just above the
-    bound arm (R6-exactEP / R5-genie), which stays last."""
+    last arm, R5-genie (known-channel receiver reference, not a bound), which stays last; on D1
+    R6-exactEP keeps its place above the Stage C arms."""
     p = list(ARMS[testbed])
     return p[:-1] + list(STAGEC_ARMS) + p[-1:]
 
@@ -378,7 +379,7 @@ def pair_list(testbed, present):
     our own arm choose where the comparison is evaluated.  So:
       R2-ours-G -> M-ours-*            anchor R2-ours-G          (the baseline of the comparison)
       M-ours-bstar <-> M-ours-dscore   anchor M-ours-bstar       (the GMM arm, and the pre-registered b*)
-      M-ours-*     -> R6-exactEP/R5-genie  anchor the BOUND      (the non-ours member)
+      M-ours-*     -> R6-exactEP/R5-genie  anchor the REFERENCE  (the non-ours member)
     """
     P = [("R1-turbo", "R2-ours-G", "R1-turbo"),
          (REF, "M-ours-gmm32", REF), (REF, "M-ours-bstar", REF), (REF, "M-ours-dscore", REF),
@@ -386,7 +387,7 @@ def pair_list(testbed, present):
     if testbed == "D1":
         P.append((REF, "M-ours-score", REF))
     P += [(REF, "R4-scvamp", REF), ("R4-llr", "R4-scvamp", "R4-llr"), (REF, "R3-bigamp", REF)]
-    top = "R6-exactEP" if testbed == "D1" else "R5-genie"          # headroom: D1 = exact EP, D2 = genie only
+    top = "R6-exactEP" if testbed == "D1" else "R5-genie"          # reference arm: D1 = exact-prior EP, D2 = known-channel (genie) only
     P += [(a, top, top) for a in M_ARMS]
     # Stage C, pre-registered in 10_SPEC §6 (comparisons 1-3) and §3c ("1차 비교").  Same anchoring rule:
     # the BASELINE member of the pair fixes the decision SNRs.  Filtered out below when the arms are absent,

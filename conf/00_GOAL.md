@@ -109,3 +109,5 @@ D-19의 kill test(exp_0925)는 "정확 score가 유한표본 GMM을 못 이기�
 | **M-ours-dscore** | 학습된 diffusion 채널 prior (주장 대상) |
 | M-ours-score *(D1만)* | 정확 score = 학습 score의 상한. **계측기** |
 | R5 genie / R6 exactEP *(D1만)* | 상한 — 남은 headroom |
+
+> **정정 (2026-09-23, review_next M-10.3a)** (사용자 위임에 따라 적용, 2026-09-22 CDT): 위 행의 "상한 — 남은 headroom" 은 두 참조 수신기를 bound 로 명명한다. 둘 다 같은 route_a 반복 루프다 — R5 는 참 H(`code/arms.py:117`), R6 은 참 prior GMM site(`code/arms.py:119`). 블록별 하한도 아니다: D2 C2 −3 dB 에서 V1 성공·R5 실패 15 (`raw_B16e4k`), D1 C5 에서 V0 성공·R6 실패 91 (`raw_C`, −3/+0/+3 dB 합). 제안 문구: "| R5 genie / R6 exactEP *(D1만)* | 참조 수신기 (bound 아님) — R5 = known-channel receiver reference (동일 EP detector + BCJR, 참 H), R6 = exact-prior EP reference. 이 arm 까지의 격차는 기술적 서술 |"

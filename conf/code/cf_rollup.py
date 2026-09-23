@@ -43,6 +43,11 @@ def main():
     w("# source    : results/diag/jacpsd-counterfactual_D2_C2_snr{-3,+0,+3,+6,+9,+12,+15}_n256.npz")
     w("#             written 2026-09-21 16:23-17:13 KST.  The SUMMARY.txt beside them is dated 14:56,")
     w("#             i.e. it predates the sweep and never read it.  That file is left unmodified.")
+    # NOTE (2026-09-23, review_next G-1.2): the SCOPE line below is shorthand.  The sweep's checkpoint,
+    # ckpt/d2sx_N10000_a1.pt, has no D2 gate row (GA-GD are measurable on D1 only; results/tables_D2_B1e4.txt:45);
+    # GC 0.243 is its D1 sibling at N_train=1e4 (results/samplecx_D1.txt:28), which FAILS.  Output left unchanged
+    # (results/jacpsd_counterfactual_SUMMARY_n256.txt is not regenerated); at the next regeneration read
+    # "... on ckpt/d2sx_N10000_a1.pt, which has no D2 gate record; its D1 sibling at N_train=1e4 FAILS GC 0.243 vs 0.15".
     w("# SCOPE     : diagnostic probe on the N=1e4 checkpoint, which FAILED the pre-registered gate")
     w("#             (GC 0.243 vs 0.15).  These are NOT arms and appear in no BLER table.")
     w(f"# guard     : 'div' = fraction of trials with NMSE@16 > {DIVERGE_NMSE} (same constant as F3)")

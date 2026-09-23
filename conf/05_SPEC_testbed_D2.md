@@ -4,6 +4,8 @@
 >
 > **선택 기준은 "GMM에 불리해서"가 아니라 "물리적으로 표준이라서"다.** 전자는 리뷰어가 정확히 그 지점을 친다. 아래 §1의 채널은 mmWave 희소 다중경로라는 표준 모델이고, 조건부 Gaussian 가정이 깨지는 것은 그 물리의 **귀결**이지 목적이 아니다.
 
+> **정정 (2026-09-23, review_next M-5.2a)** (사용자 위임에 따라 적용, 2026-09-22 CDT): 이 문단의 "물리적으로 표준이라서"·"mmWave 희소 다중경로라는 표준 모델" 은 이 문서 25행("D2의 차별점은 "실제 채널"이 아니라 "조건부 Gaussian의 파괴"")과 `results/NUMBERS_PACKAGE_2026-09-22.md:695` 철회 56 과 충돌한다. "GMM에 불리해서" 가 아니라는 부분은 유지한다. 제안 문구: "선택 기준은 "GMM에 불리해서"가 아니라 "조건부 Gaussian 가정의 파괴를 분리해 보는 통제 모델이라서"다. 아래 §1의 채널은 |α_ℓ| 와 PDP 를 고정한 희소 정반사 다중경로 통제 모델이고, 조건부 Gaussian 가정이 깨지는 것은 결정적 |α_ℓ| 의 귀결이다."
+
 ---
 
 ## 1. 채널 모델
@@ -21,6 +23,12 @@ $$\mathbf H=\sqrt{\frac{N_rN_t}{L}}\sum_{\ell=1}^{L}\alpha_\ell\,\mathbf a_r(\th
 ### 이 모델이 D1과 다른 점 (핵심)
 
 $|\alpha_\ell|$가 **결정적**이므로, **각도를 조건으로 줘도 $\mathbf H$가 Gaussian이 아니다.** 3GPP 계열 모델은 각도가 주어지면 $\alpha_\ell\sim\mathcal{CN}$ 이라 $\mathbf H\mid\text{angles}$가 Gaussian이고, 그래서 conditionally-Gaussian mixture(= GMM)가 correctly specified가 된다. 여기서는 그 성질이 깨진다. 이것이 D2의 존재 이유다.
+
+> **정정 (2026-09-23, review_next R-5.2)** (사용자 위임에 따라 적용, 2026-09-22 CDT): 위 문단의 "3GPP 계열 모델은 각도가 주어지면 α_ℓ∼CN 이라 … GMM)가 correctly specified가 된다" 는 두 곳이 과하다.
+> (i) α_ℓ∼CN 을 "3GPP 계열" 의 성질로 적었으나 저장소에 출처가 없다(HEAD `cd241b7e` conf 전체에서 "38.901"·"Sionna" 0건, review_next 감사 문서 제외. "3GPP" 는 이 문서 23·25행, `code/d2.py:19`, NUMBERS_PACKAGE 의 이 문서 인용뿐이고, 25행도 [추측, VERIFY] 표시다). 출처 없이 적을 수 있는 것은 "각도와 독립인 α_ℓ∼CN 은 흔한 단순화" 정도다(감사 R-5.2 수정 방향의 표현).
+> (ii) 그 단순화에서 H|(L, angles) 가 Gaussian 인 것은 맞다. 그러나 각도가 연속 균등(§1 표, 16행)이라 혼합은 연속 혼합이고, 유한 K GMM 은 그 근사이지 correctly specified 가 아니다. correctly specified GMM arm 은 참 prior 를 격자 GMM 으로 정의한 D1 뿐이다(3행).
+> 대체 문구: "각도와 독립인 α_ℓ∼CN 이라는 흔한 단순화를 쓰면 H|(L, angles) 가 Gaussian 이 되어 앙상블이 조건부 Gaussian 혼합이 된다(각도가 연속이므로 연속 혼합이고, 유한 K GMM 은 그 근사다). 여기서는 |α_ℓ| 가 결정적이라 그 성질이 깨진다. 이것이 D2의 존재 이유다."
+> 25행 주의, D2 정의(§1 표), T2d 는 불변.
 
 > **주의 [추측, VERIFY].** "표준 채널이면 GMM에 불리하다"는 성립하지 않는다. Utschick 그룹의 GMM 채널추정 라인(arXiv:2112.12499, 2205.03634)이 존재하는 이유가 바로 3GPP 채널의 조건부 Gaussian 구조다. 따라서 CDL을 그냥 가져오면 **오히려 GMM에 유리할 수 있다.** D2의 차별점은 "실제 채널"이 아니라 **"조건부 Gaussian의 파괴"** 라는 것을 서술에서 흐리지 말 것.
 
@@ -48,6 +56,8 @@ testbed가 검증되지 않으면 그 위의 모든 숫자가 무효다. 세션 
 | `exactEP-true` (oracle 상한) | 없음. 상한은 `R5-genie`만 남는다 |
 | eigen-aligned 파일럿 정당성 | T2b의 판정에 따름 |
 | 기존 GMM 적합·`b*` | **새 데이터로 전부 재적합.** 검증 우도만으로 재선택 |
+
+> **정정 (2026-09-23, review_next M-10.3a)** (사용자 위임에 따라 적용, 2026-09-22 CDT): 48행의 "`exactEP-true` (oracle 상한)" 과 "상한은 `R5-genie`만 남는다" 는 두 참조 수신기를 bound 로 명명한다. `exactEP-true`(= D1 의 `R6-exactEP`)는 참 prior GMM site 를 쓰는 같은 route_a EP/터보 루프이고(`code/arms.py:119`) D1 C5 에서 V0 성공·R6 실패 91 블록이 있다(−3/+0/+3 dB 합, `results/tables_D1_C.txt:1139` 88:91). `R5-genie` 는 같은 루프에 참 H 를 넣은 것이고(`code/arms.py:117`) D2 C2 −3 dB 에서 V1 성공·genie 실패 15 블록이 있다(`raw_B16e4k`). 제안 문구: "| `exactEP-true` (exact-prior EP reference) | 없음. D2 에서 참값(참 prior·참 H)을 쓰는 참조 수신기는 `R5-genie` = known-channel receiver reference (동일 EP detector + BCJR, 참 H) 하나만 남는다. 어느 것도 bound 가 아니다 |"
 
 ## 4. GMM arm 재구성 (공정성)
 

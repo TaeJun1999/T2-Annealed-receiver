@@ -189,6 +189,15 @@ def fig15():
     fig.text(0.5, 0.055, "All panels: D2, cell C2 (Tp = 4), n = 2560 trials per point, receiver identical "
                          "across arms; within every point the GMM and the learned prior see the SAME channel set.",
              ha="center", fontsize=6.5, color="0.3")
+    # NOTE (2026-09-23, review_next G-1.2): the two footer strings below are printed INTO the figure
+    # (figs/F15_gap_robustness.png/.pdf); they are NOT changed here and F15 is NOT regenerated.
+    # "the gate-passing d2sx_N160000_a1" is shorthand: that D2 checkpoint has no gate row
+    # (results/tables_D2_B16e4k.txt:45); it is qualified through its D1 sibling sx_N160000_D1.pt
+    # (LADDER_C.md:1).  "the gate-failing points" are points whose D1 siblings FAIL GC
+    # (results/samplecx_D1.txt:28-29).  At the next regeneration read: "... use d2sx_N160000_a1, whose
+    # D1 sibling passes the gates." and "§6d registers the points whose D1 siblings fail GC as
+    # budget-axis measurements, not arm results."  (Optional: the caption's "use the gate-passing
+    # checkpoint:" is followed by GATE_LINE_PASS, which already carries the sibling qualifier.)
     fig.text(0.5, 0.028, "(a), (c) N=4e4 column and (d) use checkpoints whose D1 siblings FAIL GC "
                          "(0.243 at N=1e4, 0.167 at N=4e4); (b) rightmost point and (c) N=1.6e5 use the "
                          "gate-passing d2sx_N160000_a1.", ha="center", fontsize=6.5, color="0.3")

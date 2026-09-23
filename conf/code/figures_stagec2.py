@@ -28,7 +28,9 @@ point sizes; nothing below 6.0 pt.
 GATE STATUS -- both figures are built on ckpt/d2sx_N10000_a1.pt.  The tables record NO GATE RECORD for
 that checkpoint on D2 (gates are measurable on D1 only); its D1 sibling at the same N_train FAILS GC
 (0.243 vs 0.15, results/samplecx_D1.txt).  §6d registered these points as a BUDGET-AXIS measurement, not
-an arm result.  The gate-passing model's numbers live in results/tables_D2_C.txt.
+an arm result.  The numbers of ckpt/d2sx_N160000_a1.pt -- no D2 gate row either; its D1 sibling
+sx_N160000_D1.pt PASSES (LADDER_C.md:1) -- live in results/tables_D2_C.txt.  [record correction
+2026-09-23, review_next G-1.2: previously 'The gate-passing model's numbers'.]
 """
 import os
 import re
@@ -57,6 +59,11 @@ MEASURED_NU_M3 = {2: 1.997, 4: 0.4988}
 CLOSED_NU_M3 = {3: 0.998}
 GATE_LINE = ("checkpoint ckpt/d2sx_N10000_a1.pt: the table records NO GATE RECORD for it on D2 "
              "(GA-GD are measurable on D1 only); its D1 sibling at N_train=1e4 FAILS GC 0.243 vs 0.15.")
+# NOTE (2026-09-23, review_next cost-ckpt-37): both checkpoints named in GATE_LINE_PASS hold LAST-epoch EMA
+# weights -- sx_N160000_D1.pt epoch 200 (best val epoch 136), d2sx_N160000_a1.pt epoch 1784 (best val epoch
+# 1764); the best-epoch weights were not stored, and the D1 gates (LADDER_C.md:1) read the epoch-200 EMA.
+# Not appended to the string: it is also drawn inside the F14 figure (figure_f14.py), where a longer line
+# widens the tight-bbox PNG.
 GATE_LINE_PASS = ("checkpoint ckpt/d2sx_N160000_a1.pt: gates are measurable on D1 only, so this D2 checkpoint "
                   "is qualified through its D1 sibling sx_N160000_D1.pt, which PASSES GB 2.66e-3 / GC 0.0999 / "
                   "GD 0.0718 (LADDER_C.md:1); GA is a structural zero for this model family.")
@@ -66,7 +73,7 @@ ST = {   # arm -> (legend label incl. condition, colour, marker, linestyle)
     "M-ours-bstar":        ("fitted GMM prior, b* by val. log-lik.",    "tab:red",    "D", "-"),
     "M-ours-dscore-C-V1":  ("learned score, PSD-projected site (V1)",   "tab:green",  "o", "-"),
     "M-ours-dscore-C-V0":  ("learned score, pre-registered site (V0)",  "tab:purple", "v", ":"),
-    "R5-genie":            ("genie CSI (lower bound)",                  "k",          "*", "-."),
+    "R5-genie":            ("genie CSI (known-H reference)",            "k",          "*", "-."),
 }
 CELLS = [("C1", 2, "raw_B16e4", 50), ("C5", 3, "raw_B16e4", 46), ("C2", 4, "raw_B16e4", 42)]
 TBL_F12 = "tables_D2_B16e4.txt"
@@ -242,6 +249,11 @@ def fig12():
     fig.text(0.5, 0.006, "At this budget C2's GMM improves to 0.2434 on the extended K=1024 grid "
                          "(results/tables_D2_B16e4k.txt); V1 is 0.1449 there.  See F15.",
              ha="center", fontsize=6.8, color="0.3")
+    # NOTE (2026-09-23, review_next G-1.2): "GATE-PASSING checkpoint" in the caption title below is
+    # shorthand.  The D2 checkpoint d2sx_N160000_a1.pt has no gate row (results/tables_D2_B16e4.txt:45);
+    # it is qualified through its D1 sibling sx_N160000_D1.pt (GATE_LINE_PASS, printed in this caption).
+    # figs/F12_tp_envelope.* are NOT regenerated for this; at the next regeneration the title should read
+    # "checkpoint whose D1 sibling passes the gates".
     return _save(fig, "F12_tp_envelope", """
 F12.  The pilot-budget operating envelope at equal training budget, GATE-PASSING checkpoint
 (10_SPEC_stageC §6f, run B16e4).
@@ -388,6 +400,12 @@ def fig13():
              color="0.3")
     fig.text(0.5, 0.008, GATE_LINE + "  The GMM reference uses the N = 1e4 fit: equal budget.",
              ha="center", fontsize=6.6, color="0.3")
+    # NOTE (2026-09-23, review_next G-1.2): the caption's BUDGET NOTE below says F12 and F14 "were
+    # re-drawn on the gate-passing N = 1.6e5 run".  Shorthand: that run's D2 checkpoint
+    # d2sx_N160000_a1.pt has no gate row (results/tables_D2_B16e4.txt:45, tables_D2_B16e4k.txt:45); it
+    # is qualified through its D1 sibling sx_N160000_D1.pt (LADDER_C.md:1).  figs/F13_sign_vs_magnitude.*
+    # are NOT regenerated for this; at the next regeneration read "re-drawn on the N = 1.6e5 run whose
+    # D1 sibling passes the gates".
     return _save(fig, "F13_sign_vs_magnitude", """
 F13.  Sign versus magnitude of the site Jacobian's eigenvalues (10_SPEC_stageC §6h).
 Each learned-score curve is the SAME checkpoint through the SAME EP receiver with ONE change to the

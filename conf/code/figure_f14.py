@@ -10,9 +10,11 @@ Panels (§6q items):
   (c) A2           BLER vs outer iteration.
   (d) A5           nu_q queried per outer iteration (median, n=8 diagnostic) against the frozen grid top,
                    from results/diag/sigma-coverage_D2_<cell>_n8.npz when present.
-  A4 (guard) and A8 (Module H cost) are printed in the caption from results/guard_D2_<tag>.txt and
-  results/complexity_moduleH.txt.
-Every number is read from files; nothing is recomputed, resampled or re-run.  The headline-selection
+  A4 (guard) is printed in the caption from results/guard_D2_<tag>.txt.  A8 (Module H cost) is NOT read
+  from results/complexity_moduleH.txt or results/review_next/complexity_moduleH_ep.txt: its text and
+  numbers are hardcoded in the caption below and printed for every raw set (review_next cost/M1, 2026-09-23).
+BLER, NMSE and guard numbers are read from files; the A8 text, the §6p ratios in the default first line and
+the SCOPE/gate sentences are fixed text.  Nothing is recomputed, resampled or re-run.  The headline-selection
 rule of §6q is enforced in the caption: if the point was NOT the §6p-predicted one, the caption says
 "post-hoc" in its first line, verbatim.
 """
@@ -43,7 +45,7 @@ ARMS = [   # (arm, label, colour, marker)
     ("M-ours-dscore-C-V1",  "learned score, PSD-projected site (V1)", "tab:green",  "o"),
     ("M-ours-dscore-C-V4",  "learned score, scalar site (V4)",        "tab:olive",  "^"),
     ("M-ours-dscore-C-V4b", "learned score, scalar site, scal=site (V4b)", "tab:cyan", "<"),
-    ("R5-genie",            "genie CSI (lower bound)",                "k",          "*"),
+    ("R5-genie",            "genie CSI (known-H reference)",          "k",          "*"),
 ]
 
 
@@ -93,8 +95,9 @@ def main():
     plt.rcParams.update({"font.size": 7.5, "axes.labelsize": 7.5, "axes.titlesize": 8,
                          "xtick.labelsize": 6.8, "ytick.labelsize": 6.8, "legend.fontsize": 6.4})
     d = load_point(a.raw, a.cell, a.snr)
-    # the gate sentence must follow the CHECKPOINT this run used, not a module default: raw_B16e4* is
-    # the gate-passing d2sx_N160000_a1, every other raw dir here is a gate-failing sibling.
+    # the gate sentence must follow the CHECKPOINT this run used, not a module default: raw_B16e4* used
+    # d2sx_N160000_a1 (no D2 gate row; its D1 sibling passes the gates), every other raw dir here used a
+    # checkpoint whose D1 sibling fails GC.  [record correction 2026-09-23, review_next G-1.2]
     gate_line = GATE_LINE_PASS if a.raw.startswith("raw_B16e4") else GATE_LINE
     n = None
     stats = {}
@@ -219,12 +222,14 @@ A4, the pre-registered F3 divergence guard at this point -- a trial fires if NMS
 non-finite at ANY of the 16 iterations, results/guard_D2_{a.tag}.txt, which is the artefact §6q A4
 names and which EXCLUDES non-estimator arms such as the genie: {guard_txt}.  Arms absent from that
 list never fire anywhere in this raw set.
-Panel (d) is a SEPARATE probe: results/diag/sigma-coverage_D2_{a.cell}_n8.npz is measured on\nckpt/d2sx_N10000_a1.pt (n = 8), not on this figure's checkpoint, so it shows what the receiver ASKS\nfor in this cell, not what this checkpoint answers.\nA8, Module H cost per call (results/complexity_moduleH.txt, CPU float64 one thread): fitted GMM b*
-K=512 17.1 ms, learned score 78.8 ms (4.6x; the PSD projection itself is -0.8%, i.e. free); the
-equal-budget claim is 'same training data', not 'same inference complexity'.  CAVEAT: that benchmark
-was run against K=512.  The GMM arm in THIS table is K=1024, whose mixture-EP site costs roughly twice
-as much, so the ratio here is nearer 2x -- but that was not measured, and the measured number is the
-K=512 one.
+Panel (d) is a SEPARATE probe: results/diag/sigma-coverage_D2_{a.cell}_n8.npz is measured on\nckpt/d2sx_N10000_a1.pt (n = 8), not on this figure's checkpoint, so it shows what the receiver ASKS\nfor in this cell, not what this checkpoint answers.\nA8, Module H cost per call (results/complexity_moduleH.txt, CPU float64 one thread, means only): an
+isotropic denoise_full microbenchmark -- fitted GMM b* kron K=512 (N=1e4 fit) 17.1 ms, learned score
+ckpt/d2sx_N10000_a1.pt 78.8 ms (4.6x; the PSD projection itself is -0.8%, i.e. free).  It is NOT the
+receiver cost ratio of the arms: M-ours-bstar calls GMMPriorB.ep_site, which that benchmark did not time.
+Real-path Module H cost (kron K=1024, ckpt/d2sx_N160000_a1.pt): V1 / GMM b* = 1.35x per Module H call,
+1.33x per full block at C2 -3 dB; 1.39x and 1.38x at C2 +6 dB (medians, one CPU thread,
+results/review_next/complexity_moduleH_ep.txt).  The equal-budget claim is 'same training data', not
+'same inference complexity'.
 SCOPE.  {gate_line}  One cell, one seed (the a1 numbers reproduce on seeds a2/a3 within 0.005 BLER,
 §6g), one testbed.
 """)

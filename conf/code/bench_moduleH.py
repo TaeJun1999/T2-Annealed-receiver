@@ -1,14 +1,19 @@
 """(10_SPEC_stageC §6q, item A8) Module H cost per call: fitted GMM vs learned score.
 
-The receiver calls Module H ONCE per outer iteration (16 per trial), through the identical entry point
-`prior.denoise_full(q, nu) -> (m, J)`.  Everything else in the loop is shared by every arm, so this
-single call IS the complexity difference between the arms.  Nothing else here is claimed.
+Times `prior.denoise_full(q, nu) -> (m, J)` for both priors: an isotropic microbenchmark.  Nothing else is
+claimed.  NOTE (review_next P0-2a/P0-2b, 2026-09-23): this is NOT the arm-to-arm receiver cost difference.
+The headline GMM arm M-ours-bstar never calls denoise_full: once per outer iteration it calls
+GMMPriorB.ep_site(G, b, lam_min) (arms.py:36,170; Demo/t2_route_a.py:373-374), which is not timed here.
+The score side does time the receiver's call (one network+Jacobian evaluation per outer iteration).
+The real-path cost is code/bench_moduleH_ep.py -> results/review_next/complexity_moduleH_ep.txt.
 
 Fairness conditions, all enforced below:
   - same q, same nu, same process, float64, ONE thread (the receiver runs one thread per worker)
   - the ScorePrior caches on (q, nu), so every call gets a FRESH q -- otherwise the learned arm would
     be timed on a cache hit and look free
-  - the GMM is b* selected by validation log-likelihood, exactly the arm in the BLER tables
+  - the GMM is b* selected by validation log-likelihood from the N=1e4 fits (NTRAIN below -> kron K=512;
+    not the K=1024 headline b*).  It is the fit M-ours-bstar uses in the N=1e4 tables, but timed here
+    through denoise_full, not through that arm's .view("eta").ep_site call (see NOTE)
   - both are timed on the same nu grid the receiver actually queries
 
 Report-only.  Selects nothing, changes no arm, and is not a BLER measurement.
