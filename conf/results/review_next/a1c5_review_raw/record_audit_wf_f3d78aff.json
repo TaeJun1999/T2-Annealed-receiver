@@ -1,0 +1,48 @@
+{
+ "findings": [
+  {
+   "title": "§6.2 leaves out §1 부차 item (2) (per-pair a2/a3 results and the pair counts) for the two report-only points",
+   "location": "conf/results/review_next/NEXT_EXPERIMENTS_A1C5.md:97-100 (§6.2 table)",
+   "severity": "minor",
+   "evidence": "The frozen §1 (ad32f48b) says '(4) 보고 전용 2점에도 같은 세 가지를 찍는다', which covers (1) the a1 pair, (2) 'attempt 2·3 각각의 paired 부호검정과 \"새 2쌍 중 aug 가 적은 쌍 수 / p < 0.05 인 쌍 수\"' and (3) the 3-pair group. The §6.2 table only has columns '2쌍 group (a2·a3) | 3쌍 group | a1 쌍 | b* / genie'. The a2 and a3 pair results are missing. Their source values: A1C5_rep_group2_C5_0.txt gives C5 0 dB a2 19:14 p=0.487, a3 11:18 p=0.265, 'aug fewer failures in 1/2 pairs, with p < 0.05 in 0/2'. A1C5_rep_group2_C2_m3.txt gives C2 -3 dB a2 8:8 p=1, a3 8:9 p=1, 1/2 pairs, 0/2. These are also in rep_pair_a{2,3}_*.txt. I recounted all of them from the raw npz and they are correct in the source files; the document just never reports them. All other §6.2 numbers match the raw data.",
+   "fix": "Add to §6.2 (append only) a column or a line per point: 'a2 쌍 19:14 (p=0.49), a3 쌍 11:18 (p=0.26); aug 가 적은 쌍 1/2, p<0.05 0/2' for C5 0 dB and 'a2 8:8 (p=1), a3 8:9 (p=1); 1/2, 0/2' for C2 -3 dB."
+  },
+  {
+   "title": "§6.5 H9 row states a causal conclusion ('초기값 운' 지지되지 않는다) from a secondary result that is report-only, not a judgement",
+   "location": "conf/results/review_next/NEXT_EXPERIMENTS_A1C5.md:123 (§6.5, H9 row)",
+   "severity": "minor",
+   "evidence": "The row says: '다만 대안 시나리오의 이유로 적은 \"a1 의 신호가 초기값 운\" 은 a1 쌍 자체가 새 시행에서 재현되지 않아(47:45) 지지되지 않는다'. The basis is the a1 pair re-run, which frozen §1 lists under '부차 (보고, 판정 아님)': 47:45, n_d 92, p=0.917, MDD 20 (A1C5_rep_pair_a1_C5_m3.txt). The frozen §3 lists the alternative scenario only as an outcome to compare against ('group net ≈ 0, 판정 불가'). Nothing in §1-§3 lets a report-only test accept or reject an explanation. The sentence also implies the other explanation (the dev signal was trial-level chance). That goes beyond the §2 closing wording ('재현되지 않음(또는 판정 불가)') and against the project rule of no interpretation in the record. The numbers themselves are correct.",
+   "fix": "Append a correction note (do not rewrite §6 silently). Reduce the sentence to a description, e.g. 'H9 결과는 §3 대안 시나리오의 결과 형태(group net ≈ 0, 판정 불가)와 같다; a1 쌍 새 시행은 47:45 (p=0.92, 보고 전용)', and drop the '지지되지 않는다' conclusion about the cause."
+  },
+  {
+   "title": "The EXPERIMENTS.md summary of the §3 prediction check lists only some of the misses",
+   "location": "docs/EXPERIMENTS.md:33 (the 2026-09-24 07:15 ~ 07:25 KST row, memo column)",
+   "severity": "minor",
+   "evidence": "The row says: '§3 예측: H9 지지·a1 재현·3쌍 지지 빗나감, GB′·ε_φ·C2 판정 불가 적중'. §6.5 of NEXT_EXPERIMENTS_A1C5.md records two more misses: 'p < 0.05 인 쌍 1~2' → 0/2 **빗나감** (A1C5_H9_C5_m3.txt: 'with p < 0.05 in 0/2'), and C5 0 dB 'aug 가 적음' → 2쌍 group 24:24 **빗나감** (A1C5_rep_group2_C5_0.txt). It also records one partial hit, direction 2/2. The summary drops both misses, so the row reads as more favourable than §6.5. §3 asks for misses to be written down as they are ('빗나가면 그대로 쓴다').",
+   "fix": "Do not edit the table row. Add a DECISIONS.md correction line, as done in earlier rounds, saying the row should also read '새 2쌍 p<0.05 쌍 수(0/2)·C5 0 dB \"aug 가 적음\"(2쌍 24:24) 빗나감, 방향 2/2 적중'."
+  }
+ ],
+ "verdicts": [
+  {
+   "title": "§6.2 leaves out §1 부차 item (2) (per-pair a2/a3 results and the pair counts) for the two report-only points",
+   "real": true,
+   "severity": "minor",
+   "reason": "Frozen §1 (ad32f48b, line 38) says '(4) 보고 전용 2점에도 같은 세 가지를 찍는다', and item (2) is the per-attempt paired tests plus the '새 2쌍 중 aug 가 적은 쌍 수 / p < 0.05 인 쌍 수' counts. §6.1:93 reports item (2) for the judging point. The §6.2 table (NEXT_EXPERIMENTS_A1C5.md:97-100) has only the 2-pair group, 3-pair group, a1 pair and b*/genie columns. It has no a2/a3 pair results and no 1/2 and 0/2 counts. I checked the source files. A1C5_rep_group2_C5_0.txt gives a2 19:14 p=0.487, a3 11:18 p=0.265, 'aug fewer failures in 1/2 pairs, with p < 0.05 in 0/2'. A1C5_rep_group2_C2_m3.txt gives a2 8:8 p=1, a3 8:9 p=1, 1/2, 0/2. The committed output files contain the item, but the §6 report does not, so a required report item is missing from the record text. None of these missing numbers changes the verdict.",
+   "fix": "Add to §6.2 as an appended note, without rewriting the table silently. C5 0 dB: a2 19:14 (p=0.49), a3 11:18 (p=0.26); aug fewer in 1/2 pairs, p<0.05 in 0/2. C2 −3 dB: a2 8:8 (p=1), a3 8:9 (p=1); 1/2 pairs, 0/2. Sources: A1C5_rep_group2_{C5_0,C2_m3}.txt."
+  },
+  {
+   "title": "§6.5 H9 row states a causal conclusion ('초기값 운' 지지되지 않는다) from a secondary result that is report-only, not a judgement",
+   "real": false,
+   "severity": "none",
+   "reason": "The sentence at :123 is the reasoning that the frozen text already sets up, not a verdict added on top of it. Frozen §0 (line 20) says a re-run of the same a1 pair on new trials would reproduce any checkpoint property ('체크포인트의 성질은 새 시행에서도 그대로 재현된다'). Frozen §1 (1) labels the a1 re-run as the test of that '재현 (체크포인트의 성질)'. So the a1 pair failing to reproduce (47:45, p=0.92 in A1C5_rep_pair_a1_C5_m3.txt) is exactly the evidence the frozen design lists against the init-luck explanation. The wording is hedged: 'not supported', not 'refuted'. It does not say the dev signal was noise or chance. It does not change the H9 verdict or the §2 closing wording, which §6.4 quotes exactly ('재현되지 않음(판정 불가)'). The RESULTS.md no-interpretation rule does not govern this pre-registration record, which already contains prediction and rationale text.",
+   "fix": "None required."
+  },
+  {
+   "title": "The EXPERIMENTS.md summary of the §3 prediction check lists only some of the misses",
+   "real": false,
+   "severity": "none",
+   "reason": "The memo lists the items that were a clean hit or a clean miss: H9, a1 reproduction and 3-pair support were misses; GB′, ε_φ and C2 were hits. It leaves out the two items that §6.5 records as mixed: the new-pair line (direction 2/2 hit, p<0.05 in 0/2 miss) and C5 0 dB ('aug 가 적음' miss, 판정 불가 hit). The omission is symmetric, since a partial hit and a partial miss are both left out, so it does not make the row read more favourably. No listed item is wrong, and the full check is in §6.5 of the committed document. The frozen §3 rule '빗나가면 그대로 쓴다' is met there. A shortened memo cell is not a numeric mismatch or a misreading of §3.",
+   "fix": "None required. Optionally append 'new-pair and C5 0 dB lines: partial (see §6.5)' in a later DECISIONS note."
+  }
+ ]
+}
