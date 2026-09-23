@@ -1,0 +1,36 @@
+# date        : 2026-09-24 07:16:04 KST
+# git commit  : 57709965
+# versions    : python 3.12.14  numpy 2.5.2  scipy 1.18.1  torch 2.14.0+cu130 (cuda_available=True)
+# device      : CPU (192 cores) | dtype: complex128 / float64 | deterministic: yes (fixed seeds, no GPU in the receiver)
+# testbed     : D2
+# seed rule   : default_rng([20260926, TBID[testbed], PID[prior], Nr, T, Tp, int(snr)+100])  (trials of a point = ONE stream)
+# code        : rate-1/2 conv (133,171)_8 nu=6 terminated, QPSK, outer iterations = 16 for EVERY arm
+# Demo/ hashes: t2_route_a.py=95a5408901ec125c  t2_trellis.py=31cd0ee9c68e972b  t2_gmm.py=d064e58c7510c769
+# content     : NEXT_EXPERIMENTS_A1C5 §1 report-only GB' (04_SPEC §6): held-out denoising NMSE, learned prior vs GMM b* on the same sigma grid -- NOT used for any judgement
+# checkpoint  : /home/HTJ/t2/conf/ckpt_review_next/ctrl_N160000_a2_best.pt  sha256[:16]=a45fdf61281dfcc6 epoch=1037 best_epoch=1037 role=best
+# GMM b*      : kron K=1024 @ N_train 160000 (gmm_fits_D2_B16e4k), validation ll -11.4592
+# n_eval      : 512  device cuda (GMM posterior on cuda, checked against the CPU loop by gb_prime)  wall 18 s
+worst excess (learned vs GMM) = -12.4614%
+GB' is REPORT-ONLY (04_SPEC §6); arm selection was fixed by the D1 gates
+
+  k            nu         sigma      nmse_gmm    nmse_model        excess
+  0   2.18622e-03   3.30622e-02   1.87947e-03   8.90127e-04  -5.26395e-01
+  1   3.07512e-03   3.92118e-02   2.60665e-03   1.20656e-03  -5.37121e-01
+  2   4.32545e-03   4.65051e-02   3.60767e-03   1.64285e-03  -5.44623e-01
+  3   6.08416e-03   5.51550e-02   4.98544e-03   2.24704e-03  -5.49279e-01
+  4   8.55794e-03   6.54138e-02   6.88303e-03   3.08929e-03  -5.51172e-01
+  5   1.20376e-02   7.75808e-02   9.51850e-03   4.27606e-03  -5.50764e-01
+  6   1.69320e-02   9.20108e-02   1.31454e-02   5.95188e-03  -5.47228e-01
+  7   2.38164e-02   1.09125e-01   1.80774e-02   8.35473e-03  -5.37835e-01
+  8   3.35000e-02   1.29422e-01   2.47423e-02   1.18041e-02  -5.22916e-01
+  9   4.71209e-02   1.53494e-01   3.37243e-02   1.67485e-02  -5.03370e-01
+ 10   6.62801e-02   1.82044e-01   4.56379e-02   2.38423e-02  -4.77576e-01
+ 11   9.32292e-02   2.15904e-01   6.13697e-02   3.36678e-02  -4.51394e-01
+ 12   1.31136e-01   2.56062e-01   8.19715e-02   4.74231e-02  -4.21468e-01
+ 13   1.84455e-01   3.03690e-01   1.08440e-01   6.62547e-02  -3.89018e-01
+ 14   2.59453e-01   3.60176e-01   1.42348e-01   9.23416e-02  -3.51296e-01
+ 15   3.64945e-01   4.27168e-01   1.85277e-01   1.27522e-01  -3.11719e-01
+ 16   5.13330e-01   5.06621e-01   2.38519e-01   1.74840e-01  -2.66976e-01
+ 17   7.22047e-01   6.00852e-01   3.03228e-01   2.37662e-01  -2.16227e-01
+ 18   1.01563e+00   7.12610e-01   3.80099e-01   3.16815e-01  -1.66495e-01
+ 19   1.42858e+00   8.45156e-01   4.67987e-01   4.09670e-01  -1.24614e-01

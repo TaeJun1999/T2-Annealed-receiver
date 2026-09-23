@@ -1,0 +1,176 @@
+{
+ "manifest_version": 1,
+ "written": "2026-09-24 07:24:44 KST",
+ "git_commit": "57709965",
+ "result_tag": "review_next_A1C5_ctrl_a2",
+ "testbed": "D2",
+ "raw_dir": "/home/HTJ/t2/conf/raw_review_next_A1C5_ctrl_a2",
+ "n_raw_files": 64,
+ "config_hash": "d18355c566070c9a",
+ "code_hashes": {
+  "Demo": {
+   "t2_route_a.py": "95a5408901ec125c",
+   "t2_trellis.py": "31cd0ee9c68e972b",
+   "t2_gmm.py": "d064e58c7510c769"
+  },
+  "conf_code": {
+   "runner.py": "bfb96be54c74ee1c",
+   "arms.py": "80876b05370b16ac",
+   "score.py": "f5379bdf8a085fc9",
+   "common.py": "beabba569e522f06",
+   "d2.py": "fa6f6e7c012427dc",
+   "analysis.py": "593544e60730295d",
+   "rt_tap.py": "5d97dc7124150423",
+   "p3_rules.py": "a06e952b1eddf3ad"
+  }
+ },
+ "channel_model": {
+  "testbed": "D2",
+  "prior": "S2",
+  "description": "D2 sparse specular: L ~ Unif{3..8} per block, continuous AoA/AoD (S2: +-pi/3), |alpha_l| = sqrt(p_l) deterministic, p_l ∝ exp(-l/2.0), psi_l ~ Unif[0,2pi), H = sqrt(Nr Nt) sum_l alpha_l a_r a_t^H"
+ },
+ "cells": {
+  "C2": {
+   "Nr": 8,
+   "Nt": 4,
+   "T": 16,
+   "Tp": 4,
+   "snrs": [
+    -3,
+    0,
+    3,
+    6,
+    9,
+    12,
+    15
+   ]
+  },
+  "C5": {
+   "Nr": 8,
+   "Nt": 4,
+   "T": 16,
+   "Tp": 3,
+   "snrs": [
+    -3,
+    0,
+    3,
+    6,
+    9,
+    12,
+    15
+   ]
+  }
+ },
+ "points": {
+  "D2_C2_S2_Nr8_T16_Tp4_dft_snr-3": 640,
+  "D2_C5_S2_Nr8_T16_Tp3_dft_snr-3": 1280,
+  "D2_C5_S2_Nr8_T16_Tp3_dft_snr0": 640
+ },
+ "trial_stream": {
+  "rule": "default_rng([20260926, TBID[testbed], PID[prior], Nr, T, Tp, int(snr)+100])",
+  "skip_min": 4480,
+  "skip_max_end": 5760,
+  "split": "A1C5 judging set (trials >= 4480)"
+ },
+ "run_params": {
+  "beta": "0.7",
+  "dtype": "complex128/float64",
+  "iters": "16",
+  "n": "40",
+  "seed": "20260926",
+  "snr": [
+   "-3.0",
+   "0.0"
+  ],
+  "t_in": "5",
+  "n_chunks": 64
+ },
+ "receiver": {
+  "outer_iterations": 16,
+  "beta": 0.7,
+  "arm_overrides": "(none)",
+  "t_in_bigamp": 5,
+  "n_inner_routeA": 1,
+  "dtype": "complex128/float64",
+  "device": "CPU, one thread per worker",
+  "code": "conv (133,171)_8 nu=6 terminated, QPSK"
+ },
+ "gmm": {
+  "bstar": "kron",
+  "kron_K": "1024",
+  "ntrain": 160000.0,
+  "selection": "validation log-likelihood over the pre-registered K grid (BLER never consulted)",
+  "fits_dir": "/home/HTJ/t2/conf/results/gmm_fits_D2_review_next_A1C5_ctrl_a2",
+  "em_sec": "107957.18832826614"
+ },
+ "sample_counts": {
+  "train_channels": 160000,
+  "score_train": 144000,
+  "score_val": 16000,
+  "test_trials_per_point": [
+   640,
+   1280
+  ]
+ },
+ "stagec_checkpoint": {
+  "path": "/home/HTJ/t2/conf/ckpt_review_next/ctrl_N160000_a2_best.pt",
+  "sha256_16": "a45fdf61281dfcc6",
+  "stored_epoch": 1037,
+  "best_epoch": 1037,
+  "best_val": 0.34993258118629456,
+  "role": "best",
+  "evaluated_weights": "best EMA @1037",
+  "best_pt": null,
+  "hp": {
+   "arch": "dit",
+   "param": "vp",
+   "domain": "angle",
+   "lr": 0.002238046051591068,
+   "ema": 0.999,
+   "batch": 256,
+   "emb": 256,
+   "width": 64,
+   "depth": 6,
+   "heads": 8,
+   "patch": 1
+  },
+  "params": 479426,
+  "rung": "D2SX160000",
+  "attempt": 2,
+  "Nr": 8,
+  "Nt": 4,
+  "split_hash": "a00951cf75b852a6",
+  "sigma_tag": "",
+  "train_epochs": 1037,
+  "stopped_by": null,
+  "train_wall_sec": 18939.748981952667,
+  "train_device": "cuda:0 NVIDIA RTX PRO 6000 Blackwell Server Edition",
+  "val_frac": 0.1,
+  "seeds": {
+   "split": 20260926,
+   "val": 20260927,
+   "train": 20260928,
+   "gate": 20260929
+  }
+ },
+ "stagec_status": "built from explicit ckpt /home/HTJ/t2/conf/ckpt_review_next/ctrl_N160000_a2_best.pt -- caller override, NOT verified against the gate record here (recorded PASS rows: none) | V1 (psd_project=True): built from explicit ckpt /home/HTJ/t2/conf/ckpt_review_next/ctrl_N160000_a2_best.pt -- caller override, NOT verified against the gate record here (recorded PASS rows: none)",
+ "stagec_gate": "NO GATE RECORD mentions ctrl_N160000_a2_best.pt -- UNVERIFIED here.  (GA-GD are measurable on D1 only, 10_SPEC §5: a D2 re-train is qualified by its D1 sibling's gate row, which this string cannot prove.)",
+ "stagec_ckpt_id": "sha256[:16]=a45fdf61281dfcc6 epoch=1037 best_epoch=1037 role=best 8x4",
+ "arms": [
+  "M-ours-bstar",
+  "M-ours-dscore-C-V1",
+  "R5-genie"
+ ],
+ "versions": {
+  "python": "3.12.14",
+  "numpy": "2.5.2",
+  "torch": "2.14.0+cu130",
+  "host": "9000babdde68",
+  "cpu_count": 192
+ },
+ "output_paths": {
+  "tables": "/home/HTJ/t2/conf/results/tables_D2_review_next_A1C5_ctrl_a2.txt",
+  "guard": "/home/HTJ/t2/conf/results/guard_D2_review_next_A1C5_ctrl_a2.txt",
+  "log": "/home/HTJ/t2/conf/logs/run_D2_review_next_A1C5_ctrl_a2.log"
+ }
+}

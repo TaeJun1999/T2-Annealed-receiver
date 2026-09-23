@@ -1,0 +1,27 @@
+# date        : 2026-09-24 07:25:14 KST
+# git commit  : 57709965
+# versions    : python 3.12.14  numpy 2.5.2  scipy 1.18.1  torch 2.14.0+cu130 (cuda_available=True)
+# device      : CPU (192 cores) | dtype: complex128 / float64 | deterministic: yes (fixed seeds, no GPU in the receiver)
+# testbed     : D2
+# seed rule   : default_rng([20260926, TBID[testbed], PID[prior], Nr, T, Tp, int(snr)+100])  (trials of a point = ONE stream)
+# code        : rate-1/2 conv (133,171)_8 nu=6 terminated, QPSK, outer iterations = 16 for EVERY arm
+# Demo/ hashes: t2_route_a.py=95a5408901ec125c  t2_trellis.py=31cd0ee9c68e972b  t2_gmm.py=d064e58c7510c769
+# script      : conf/code/pair_tags.py pair  (NEXT_EXPERIMENTS_A1C5 §1 부차 (보고))
+# points      : testbed D2  cell C5  prior S2  SNR ['-3'] dB
+# house test  : exact two-sided sign test on discordant pairs (exp_0921_analysis.sign_p), p < 0.05; n_d < 6 -> UNDECIDED; MDD = smallest net |a-b| with p < 0.05 at the observed n_d (report only)
+# failure     : blk_err[:, -1] (BLER@16) via analysis.load_raw; a trial whose arm RAISED is a failure and is kept
+# split       : A1C5 set = skip >= C.A1C5_SKIP0 = 4480, exact plan per point {('C5', -3.0): 32, ('C5', 0.0): 16, ('C2', -3.0): 16} chunks of 40 (NEXT_EXPERIMENTS_A1C5 §1); TEST = skip [0, 2560) whole (§2 confirmation)
+# tag         : 'review_next_A1C5_aug_a3' -> /home/HTJ/t2/conf/raw_review_next_A1C5_aug_a3
+# tag         : 'review_next_A1C5_ctrl_a3' -> /home/HTJ/t2/conf/raw_review_next_A1C5_ctrl_a3
+# member      : review_next_A1C5_aug_a3:M-ours-dscore-C-V1
+# member      : review_next_A1C5_ctrl_a3:M-ours-dscore-C-V1
+# point -3 dB: A1C5 set skip [4480, 5760) in 32 chunks, n=1280  A1C5 §1 plan (32 x 40) OK; identical (skip, n) chunk list in all 2 tag(s)
+# run params  : seed=20260926  iters=16  beta=0.7  t_in=5  dtype=complex128/float64  (every chunk, every tag)
+# stage C ckpt: [review_next_A1C5_aug_a3] sha256[:16]=646926eb5f77b25d epoch=1320 best_epoch=1320 role=best 8x4
+# stage C ckpt: [review_next_A1C5_ctrl_a3] sha256[:16]=23ed9e6db8d865f7 epoch=1426 best_epoch=1426 role=best 8x4
+# ckpt check  : [review_next_A1C5_aug_a3] sha256[:16]=646926eb5f77b25d == expected, role=best, epoch=1320 == best_epoch
+# ckpt check  : [review_next_A1C5_ctrl_a3] sha256[:16]=23ed9e6db8d865f7 == expected, role=best, epoch=1426 == best_epoch
+
+PAIR  X = review_next_A1C5_aug_a3:M-ours-dscore-C-V1   Y = review_next_A1C5_ctrl_a3:M-ours-dscore-C-V1   (a = only X fails, b = only Y fails)
+ -3 dB  failures review_next_A1C5_aug_a3:M-ours-dscore-C-V1=518/1280 (0.4047)  review_next_A1C5_ctrl_a3:M-ours-dscore-C-V1=519/1280 (0.4055)
+   a:b=50:51  net(a-b)=-1  n_d=101  p=1  MDD@n_d=21  -> p >= 0.05: not decided by this design
