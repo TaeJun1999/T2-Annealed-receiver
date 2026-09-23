@@ -2,7 +2,7 @@ gmm_fits_D2_n16e4_cpuEM -- preserved output of the CPU EM job (logs/fit_D2_n16e4
 that finished 2026-09-23 09:14 KST (09-22 19:14 CDT) and OVERWROTE the 24 files of results/gmm_fits_D2_n16e4/, which
 had already been produced by the GPU EM port (fit_gpu.py) and committed in cc3d40ab.
 
-Action (review_next, 2026-09-23 12:5x KST): these 24 CPU-EM files were copied here unchanged; results/gmm_fits_D2_n16e4/
+Action (review_next, 2026-09-23 12:27 KST): these 24 CPU-EM files were copied here unchanged; results/gmm_fits_D2_n16e4/
 was restored to the committed GPU-EM versions (git checkout HEAD), i.e. to the files every B16e4 / B16e4k table used.
 The npz files here are NOT committed (23 MB); this README and gmm_fit_D2_n16e4_cpuEM.txt (the CPU job's report) are.
 

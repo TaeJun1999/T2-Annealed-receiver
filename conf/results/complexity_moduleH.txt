@@ -29,3 +29,18 @@ WHAT THIS DOES AND DOES NOT SAY
     comparison the BLER tables actually used.
   - If the learned arm is the more expensive one, then the equal-budget claim in this work is
     'same training data', NOT 'same inference complexity', and must be written that way.
+
+CORRECTION NOTE (2026-09-23, review_next P0-2a/P0-2b/cost-M2) -- this file is kept unchanged as the historical A8 record.
+  - The GMM number times GMMPriorB.denoise_full.  The headline GMM arm M-ours-bstar never calls it: once per
+    outer iteration it calls GMMPriorB.ep_site(G, b, lam_min) (arms.py:36,163; Demo/t2_route_a.py:373-374).
+    'that is the comparison the BLER tables actually used' (lines 28-29) is therefore wrong for the GMM side.
+  - K=512 and ckpt d2sx_N10000_a1.pt are the N=1e4 configuration.  The headline table (raw_B16e4k) is K=1024,
+    N=1.6e5, ckpt d2sx_N160000_a1.pt.
+  - Only means are recorded, and the arms are timed in consecutive blocks per nu (bench_moduleH.py:39-44,75-87),
+    so load drift on the shared host enters the ratio directly.  A same-code replay did not reproduce 4.6x
+    (REVIEW_AUDIT cost/M2; that replay was not stored).
+  - Real-path cost: results/review_next/complexity_moduleH_ep.txt (2026-09-23 11:17 KST; headline configuration
+    kron K=1024 + d2sx_N160000_a1.pt, real receiver call paths, medians of 24 trials per SNR): learned V1 / GMM b*
+    = 1.35x per Module H call at -3 dB and 1.39x at +6 dB; full block 1.33x and 1.38x.  That file supersedes
+    this one as the arm-to-arm cost statement.
+  - Code line numbers in this note are at commit cd241b7e.

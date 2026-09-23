@@ -1,6 +1,7 @@
 <!-- 원고용 검증 숫자 패키지.  4 검증자 + 판정자 워크플로(wf_b69bb0d7-06e)가 소스 파일에 대조해 조립.
      이 파일은 conf/ 의 정본을 대체하지 않는다 -- 인용 시 'source' 열의 파일을 다시 연다.
      PENDING 표시: B16e4(게이트 통과 + 동일예산), 시드 a3, §6p 저SNR, K=1024@4e4/1.6e5, λ 스윕.
+     정정 (2026-09-23, review_next G-1.2): "B16e4(게이트 통과 + 동일예산)" 은 "B16e4(D1 형제 게이트 PASS 레시피 + 동일예산)" 로 읽는다. B16e4 의 D2 체크포인트 d2sx_N160000_a1.pt 에는 게이트 행이 없고(tables_D2_B16e4.txt:45), PASS 는 LADDER_C.md:1 의 sx_N160000_D1.pt 행이다. 이 패키지 ADDENDUM 의 P1·P13 게이트 열은 이미 그렇게 한정한다.
      교차검증 X1/X6/X10/X14/X15 는 14:40 에 STATUS.md 와 F12 에 반영했다. -->
 
 # VERIFIED NUMBERS PACKAGE — Stage C, D1/D2
@@ -187,12 +188,16 @@ Never fired (12 arms): M-ours-bstar, M-ours-bstar-scalar, V1, V4, V4b, M-ours-gm
 **D1, gate PASS** (`ckpt/sx_N160000_D1.pt`: GA 9.879e-16, GB 2.659e-3, GC 9.986e-2, GD 7.183e-2 — **PASS rests on GB/GC/GD; GA is a structural zero**). Equal budget **NO**: learned N=1.6e5 vs the FITTED reference (kron K=32) fitted at N=1e4; the TRUE prior is closed-form and carries no budget.
 Source `results/jac_spectrum.txt:92-104` (ADDENDUM 2026-09-21 21:55).
 
+> **정정 (2026-09-23, review_next ckpt/M2·P0-1b)**: 이 PASS 값과 아래 D1 스펙트럼(`logs/jacspec_D1_true.log`, 09-21 21:27)은 `sx_N160000_D1.pt` 에 저장된 마지막 epoch(200) EMA 에서 측정됐다(ema sha256[:16] ae04fefa33998484, val 7.398687e-01). best val 7.398444e-01 @136 의 가중치는 저장되지 않았다(BEST_WEIGHTS_UNAVAILABLE). 판정·수치는 불변이다.
+
 - **n_neg = 0 of 64 at all four grid points, for learned, TRUE and FITTED alike.**
 - learned λmin/25%/λmax at σ = .0329/.0899/.2452/.6690: .9407/.9789/1.012 · .6765/.8664/1.073 · .2232/.4702/1.190 · .0308/.1184/1.317
 - TRUE: .9450/.9798/1.019 · .6978/.8670/1.096 · .2369/.4699/1.162 · .0403/.1163/1.350
 - Relative error vs TRUE (learned / fitted, %) — **λmin** 0.46/2.55 · 3.05/11.22 · 5.78/9.58 · **23.47/2.63** (learned closer 3 of 4; **fitted closer at the largest σ**). **25th percentile** 0.09/0.01 · 0.07/0.05 · 0.06/0.32 · 1.81/0.77 (learned closer 1 of 4; both under 2 %). **λmax** 0.69/3.14 · 2.10/11.22 · 2.41/21.00 · 2.44/4.44 (learned closer **4 of 4**).
 
 **D2, gate NOT VERIFIABLE BY CONSTRUCTION** — D2 has no true score, so GA–GD are D1-only (`04_SPEC §5`). Diagnostic probe on `ckpt/d2sx_N160000_a1.pt` (patience-stopped 1784 epochs, best val 3.519379e-01 @1764, sha256 4443921ce8d5c4a1…). Equal budget **NO**: learned N=1.6e5 vs FITTED kron K=512 at N=1e4 (16×). Source `jac_spectrum.txt:132-138` (ADDENDUM 2026-09-21 23:50).
+
+> **정정 (2026-09-23, review_next P0-1b)**: 이 탐침이 읽은 가중치는 `d2sx_N160000_a1.pt` 의 **마지막 epoch(1784) EMA** 다. 경로는 `jac_spectrum.py:42` → `score._as_model` → `load_model` 이고 `load_model` 이 `st["ema"]` 를 읽는다(ema sha256[:16] a43f1105eb27a29b, 이 가중치의 val 3.519602e-01). 괄호 안 "best val 3.519379e-01 @1764" 는 저장되지 않은 @1764 가중치의 값이다(BEST_WEIGHTS_UNAVAILABLE). 아래 스펙트럼 수치는 @1784 EMA 의 값이며 바뀌지 않는다.
 
 - learned at σ = .0331/.0920/.2561/.7126 — **n_neg (of 64): 6.71 / 19.79 / 13.50 / 0.69**; n<0.1: 26.52 / 37.58 / 41.10 / 35.50; 25th pct: 0.0381 / **−0.0104** / 0.0063 / 0.0565; λmin: −0.140 / −0.298 / −0.451 / −0.033
 - FITTED (kron K=512): **n_neg 0.00 at all four**; n<0.1: 3.44 / 6.54 / 11.19 / 16.94; 25th pct: 0.9476 / 0.6654 / 0.2028 / 0.0916
@@ -408,6 +413,8 @@ Both FAIL, so the verdict is unaffected — **but the citation must name which r
 **The only PASS in the project.** `LADDER_C.md:1` (2026-09-21 14:12 KST): SX160000 attempt a1, `ckpt/sx_N160000_D1.pt`, `dit vp/angle w64 d6 lr 2.238046e-3 ema 0.999`: **GA 9.879e-16 / GB +0.27 % / GC 0.0999 / GD 0.0718 → PASS**; GD_trace 0.007462 reported not gated. n_eval=512, n_jac=64, N_train=160000, D1 8×4 prior S.
 **TRACEABILITY GAP:** this PASS lives **only** in the append-only `LADDER_C.md` log line. `results/gate_D1_C.txt` was regenerated with the filter `ckpt=ckpt/sx_V3_N160000_D1_a3.pt` (`:10`) and now holds **only the V3 FAIL row**. `results/gate_D1.txt` holds only Stage A/B rows, all FAIL. **STATUS cites `gate_D1_C.txt` for the V0 PASS and the V2 FAIL — those rows are no longer in that file. Cite `LADDER_C.md:1` (V0) and `LADDER_C.md:9` (V2).**
 
+> **정정 (2026-09-23, review_next ckpt/M2)**: 이 PASS 는 `sx_N160000_D1.pt` 에 저장된 마지막 epoch(200) EMA 에서 측정됐다(`gates_D1 → _as_model → load_model` 이 `st["ema"]` 를 읽는다; best val 7.398444e-01 @136 의 가중치는 저장되지 않음, BEST_WEIGHTS_UNAVAILABLE). §C1 "D1, gate PASS" 문단 뒤 정정과 같은 점이며 판정은 불변이다.
+
 **Stage A/B ladder: 49 gated rows, ZERO PASS.** Best: L9 attempt 3 (`uvit vp/pixel w64 d7`) GA 1.011e-15 / GB +2.89 % / GC 0.3164 / GD 0.2405 → FAIL. HPO best gate_score **1.347** (trial 346, `dit vp/angle w64 d6`: GB 0.01231 / GC 0.2021 / GD 0.163); ladder's own best gate_score 2.109 (L4 a1). `gate_score < 1.0` would mean all four pass. Sources `LADDER.md:73-92`, `gate_D1.txt:27-35`, `hpo_D1.txt:20-26`.
 **This is why `M-ours-dscore` is BLOCKED in the pre-registered table on both testbeds: the registered comparison is at N=1e4 and it fails there. The Stage C PASS is at 16× that budget and does not lift the block.**
 
@@ -424,6 +431,8 @@ Both FAIL, so the verdict is unaffected — **but the citation must name which r
 **CONFOUND, stated in the source:** V2's D1 twin was finally trained under the §3d fallback at **lr/3 (7.46e-4 vs V0's 2.238e-3)**. No V2 D1 run at the frozen lr ever completed, and the 3-attempt ladder is exhausted. **The GC failure cannot be attributed to the parameterisation rather than the reduced lr.**
 **Training-loss observation only:** V2 D2 a3 best val **3.361999e-01 @ epoch 1262** (1282 ep, patience stop, 60892 s, 47.50 s/ep) vs V0 D2 best **3.519379e-01 @ epoch 1764** — **4.5 % lower**. gate: **UNGATED** (D2), twin FAILED. Equal budget YES. **No test — single runs, no seeds, no CI.** `LADDER_C.md:13`.
 **DSM validation loss does not predict GC:** D1 val V0 7.398444e-01 vs V2 7.398676e-01 = **0.003 % apart**, while GC is 9.986e-02 vs 1.674e-01 = **68 % higher** (ratio 1.676). Two checkpoints, no repeats. `STATUS.md:620-625`, gate values `LADDER_C.md:1,9`.
+
+> **정정 (2026-09-23, review_next ckpt/M2)**: 위 "D1 val V0 7.398444e-01 vs V2 7.398676e-01 = 0.003 % apart" 는 두 파일의 **best val**(V0 @136, V2 a3 @74) 비교다. GC 9.986e-02·1.674e-01 은 각 파일에 저장된 @200 EMA 에서 쟀고, 그 가중치의 val 은 7.398687e-01·7.409458e-01 로 **0.146 %** 차다(CPU torch.load `hist`). "val 차가 GC 차(68 %)보다 훨씬 작다" 는 방향은 남지만 0.003 % 는 게이트된 가중치끼리의 차가 아니다. best 가중치는 둘 다 저장되지 않았다(BEST_WEIGHTS_UNAVAILABLE).
 
 **V3 (Jacobian asymmetry penalty, λ = 1.0).** `ckpt/sx_V3_N160000_D1_a3.pt`, n_eval=512 (stream 10), n_jac=64, 20 σ points, N_train=160000, D1: **GA 1.11803e-15 PASS / GB 5.91351e-02 FAIL / GC 3.52507e-01 FAIL / GD 3.44911e-01 FAIL**; GD_trace 1.45260e-01 reported not gated; best val 7.488075e-01 @159. VERDICT FAIL — **three gates**. Equal budget YES vs V0; λ fixed at 1.0 and never tuned (tuning would violate A2). **No test exists.** `results/gate_D1_C.txt:27-35` (per-σ table `:38-58`); `LADDER_C.md:12`.
 **The regulariser made its own target worse:** GD 7.183e-02 → 3.449e-01 = **4.80×**; GC 9.986e-02 → 3.525e-01 = **3.53×**. GD rises from 5.907e-03 at k=0 to 3.449e-01 at k=19. The stated mechanism (the model stopped fitting the score at all) is **inferred from the two gate values, not separately measured.**
@@ -475,9 +484,13 @@ R3-bigamp's budget is recorded as a **STRUCTURAL** limitation (`correlated prior
 | V4 → R6-exactEP | 88:45 p=0.00024 · 32:20 p=0.13 | 120:65 p=6.4e-05 | [133, 52] | PASS | n/a | `:1015-1020` |
 | M-ours-bstar-scalar → R6-exactEP | 94:46 p=6.1e-05 · 26:14 p=0.081 | 120:60 p=9.1e-06 | [140, 40] | n/a | n/a | `:1021-1026` |
 
+> **정정 (2026-09-23, review_next ckpt/M2)**: 위 표 게이트 열의 "PASS (sx_N160000_D1.pt)"·"PASS" 는 그 파일에 저장된 마지막 epoch(200) EMA 에서 잰 판정이다. 같은 @200 EMA 가 이 표 학습 arm(V0/V1/V4)의 BLER 에도 쓰였다(`raw_C` D1 1344파일 전부 `meta|stagec_ckpt` = `sx_N160000_D1.pt`). best @136 가중치는 저장되지 않았다(BEST_WEIGHTS_UNAVAILABLE).
+
 V0 and V1 print **byte-identical** counts on D1 because the PSD projection never fires there — that identity is evidence about D1's Jacobian, **not a second independent result**.
 **The only POWERED "ties the exact-EP bound" statement on D1 is C5: V0 → R6-exactEP 88:91 p=0.88.**
 **On D1, `M-ours-bstar-scalar` (scalarisation hurts the GMM) is POWERED and significant on C1 (268:443 p=5.5e-11, 3/3) and C5 (129:270 p=1.4e-12, 2/3) but UNDECIDED on C2.**
+
+> **정정 (2026-09-23, review_next M-10.3a)**: 위 문단의 "the exact-EP bound" 는 `R6-exactEP` = exact-prior EP reference 로 읽는다(참 prior GMM site 를 쓰는 같은 route_a 루프, `code/arms.py:119`). bound 가 아니다 — C5 에서 V0 성공·R6 실패 91 블록(−3/+0/+3 dB 합, `raw_C`; `tables_D1_C.txt:1139`). 88:91 p=0.88 POWERED 와 판정은 그대로다. DECISIONS [2026-09-23 11:47] 명칭 정정 참조.
 
 ## D6. Power-guard census
 
@@ -541,6 +554,9 @@ In the equal-budget tables the same V0→V1 ratio is **81.6 %** (B1e4), **80.4 %
 
 - **`10_SPEC_stageC.md:197-205` (§3b) fixes the primary result as V0 ALONE** ("주 결과는 V0 하나다"); V1–V3 are secondary mechanism variants. **STATUS.md:672-676 presents the V0 → V1 site ablation as "본 연구의 1차 주장".** That reverses the registered primary/secondary split and I found no `DECISIONS.md` entry recording the reversal.
 - **V4 is POST-HOC registered.** `10_SPEC_stageC.md` §3c: *"V1–V3 were registered before results were seen. V4 was NOT. V4 is registered AFTER being observed in the §2 H4 diagnostic cross-experiment."* §3c also required V4/V4b to be built **only from a GATE-PASSING checkpoint** (`N′=1.6e5`); the equal-budget tables build them from gate-FAILED checkpoints, licensed only by the §6d/§6f carve-out.
+
+  > **정정 (2026-09-23, review_next G-1.2)**: "the equal-budget tables build them from gate-FAILED checkpoints" 는 "… from D2 checkpoints (N=1e4: `d2sx_N10000_a1`·`a2`·`a3`, N=4e4: `d2sx_N40000_a1`) that have no gate row (`tables_D2_B1e4*.txt:45`, `tables_D2_B4e4*.txt:45`) and whose D1 siblings FAIL GC (0.24333 / 0.16651, `samplecx_D1.txt:28-29`)" 로 읽는다. 이 패키지 §D2 끝 문단("No D2 checkpoint has a gate record")과 §E6 표(`:825 and 10_SPEC_stageC.md:453` 행)가 같은 유형을 이미 지목했다.
+
 - **V4b was pre-registered and silently dropped** until the 2026-09-21 18:20 audit caught it; wired the same day (`code/arms.py:174-179` carries the comment). **V4b was never run on D1 at all** — `DECISIONS.md` 2026-09-21 21:45: *"D1's V4b was NOT run - recorded here as a decision, not an omission."* So the cross-testbed symmetry argument does not cover V4b.
 - **§6f predictions were NOT blind.** `10_SPEC_stageC.md:551-557`, under the heading `DISCLOSURE BEFORE WRITING THE PREDICTION (IMPORTANT)`, states the predictions were made **after** seeing the non-equal-budget N=1.6e5 C1 and C5 results (bstar → V1: C5 821:674 p=1.6e-04, C1 1402:1602 p=2.8e-04) and are therefore **"WEAK predictions"**, with blinding retained only on "does the same ordering appear at equal budget". **STATUS §6f omits that disclosure and scores them 3/3.**
 - **§6h was pre-registered *before reading*, not before running** (see C2): 20-hour gap between the `.npz` files and the prediction commit. Disclosed by the spec itself.
@@ -630,6 +646,9 @@ Each line is a sentence the evidence does not support, with the measurement that
 3. ❌ *"V1 reduces BLER by 75.5 % over V0 at equal budget."* — 75.5 % is the **N=1.6e5** number (`tables_D2_C.txt`). The equal-budget figures are **81.6 % (N=1e4), 80.4 % (N=4e4), 83.0 % (a2)**.
 4. ❌ *"The V0 → V1 site ablation is significant (p = …)."* — **No V0 → V1 paired sign test is computed in any shipped table.** `code/analysis.py:371-397` never pairs two Stage C arms. No p-value, no discordant-pair count, no power verdict.
 5. ❌ *"V1 closes 80.1 % (or 85.3 %) of the gap to the genie bound"* stated as a result. — **Every arm-vs-R5-genie pair on C2 is UNDECIDED** under the pre-registered power guard (2 decision points where 3 are required) in **all three** C2 equal-budget tables **and** in `tables_D2_C.txt`. It is a TABLE A point-estimate description only.
+
+   > **정정 (2026-09-23, review_next R-10.3·M-10.3a)**: 항목 5 의 철회·금지 판정은 그대로다. 바뀌는 것은 인용 속 "the genie bound" 라는 명칭뿐이다. R5-genie 는 known-channel receiver reference(동일 EP detector + BCJR, 참 H; `code/arms.py:117`)이며 bound 가 아니다. C2 −3 dB 에서 V1 성공·genie 실패 15 블록이 있다(`raw_B16e4k`·`raw_C` `blk_err[:,15]`, n=2560). 80.1 %·85.3 % 수치와 UNDECIDED 판정은 그대로다.
+
 6. ❌ *"V1 is the best non-genie arm at equal budget."* — True on **C2 only**. On C5 V1 does **not** beat R2-ours-G (pooled 661:681 p=0.6, not significant); on C1 **R2-ours-G beats V1** at 2/3 (pooled 1107:1498, p=1.9e-14).
 7. ❌ *"The primary claim is the V0-to-V1 site ablation, as pre-registered."* — `10_SPEC §3b` pre-registered **V0 alone** as primary. The swap is a post-hoc reordering.
 8. ❌ *"V4 is a pre-registered variant."* — `10_SPEC §3c` states V4 was registered **AFTER** being observed in the H4 diagnostic, and requires that fact to appear in the paper.
@@ -677,6 +696,8 @@ Each line is a sentence the evidence does not support, with the measurement that
 42. ❌ *"The §6h 7/7 result is a pre-registered prediction confirmed by a fresh run."* — The seven `.npz` files existed on disk for **~20 hours** before the prediction was written. Pre-registered **before reading**, not before running; the disclosure must travel with the 7/7.
 43. ❌ *"The repaired arm beats the fitted GMM at every SNR."* — **5 wins, 1 loss (+9 dB), 1 tie (+15 dB)**, margins of 1 and 0 blocks out of 256. The source ends with the instruction *"do not restate them selectively."*
 44. ❌ *"These diagnostics show the learned prior works."* — Every number in the mechanism family **except the D1 spectrum rows** is a diagnostic probe on a **gate-FAILED** checkpoint, is not an arm, and appears in no BLER table. The D1 spectrum rows use a **gate-PASSING** checkpoint whose learned arms nonetheless collapse completely at C1 / Tp=2 / −3 dB (2560/2560, worst NMSE 1.411e+84).
+
+> **정정 (2026-09-23, review_next G-1.2)**: 44번의 "a diagnostic probe on a **gate-FAILED** checkpoint" 는 D2 탐침 체크포인트에 판정을 직접 붙인 줄임말이다. 그 D2 체크포인트들에는 게이트 행이 없다(`d2sx_N10000_a1.pt`: `tables_D2_B1e4.txt:45`; 탐침 출처 `results/diag/SUMMARY.md:4`, `settling_D2.txt:14`). 그중 `d2sx_N10000_a1.pt` 는 같은 레시피의 N=1e4 D1 기록이 GC 에서 FAIL 이다(0.24333 `samplecx_D1.txt:28` / 0.224111 `hpo_final_r2.txt` trial 386 — 어느 쪽인지는 §D2 "TWO GC values" 대로 밝힌다). 탐침에는 게이트 기록이 없는 N=1.6e5 임시 스냅샷도 있다(PAPER_MATERIALS §17.3 표의 `figs/F8` 행). 읽는 법: "a diagnostic probe on an **UN-GATED** D2 checkpoint (PAPER_MATERIALS §17.3)". 같은 줄의 "D1 spectrum rows use a gate-PASSING checkpoint" 는 D1 체크포인트(`sx_N160000_D1.pt`, @200 EMA — §C1 "D1, gate PASS" 문단 뒤 정정)라 맞다. 철회 문구 자체는 불변이다.
 
 **On V2 / V3**
 45. ❌ *"V2's energy parameterisation is what caused the gate failure."* / ❌ *"V3 shows the Jacobian penalty does not work."* — Both D1 twins were trained under the §3d fallback at **lr/3** after two divergences; **no frozen-lr run of either variant ever completed**, and the 3-attempt ladder is exhausted.
@@ -740,6 +761,10 @@ Each line is a sentence the evidence does not support, with the measurement that
 | P10 | §6e λ 스윕 게이트 | λ=0.01 PASS (GB +0.32%, GC 0.0991, **GD 0.0887 > V0 0.0718**); λ=0.1 FAIL (0.065/0.369/0.319); λ=1.0 FAIL | n_eval 512, n_jac 64 | D1 | — | — | — | `gate_D1_L{0.01,0.1}.txt`, `LADDER_L*.md` |
 | P11 | §6e asym 대 PSD | λ=0.01 asym 0.79× V0 이지만 σ=0.79 에서 lmin −0.089, f<0 0.938; λ=0.1 σ≥0.48 부터 f<0 0.88~1.0; V0 20점 전부 PSD | 128/점 | D1 σ 격자 20점 | — | — | — | `logs/jacpsd_D1_lam{0.01,0.1}.log` |
 | P12 | A8 복잡도 | Module H 1회: GMM K=512 17.1 ms, 학습 78.8 ms (4.6×); PSD 투영 −0.8% (공짜) | 40/ν | CPU 1스레드 float64 | — | 추론만 | — | `complexity_moduleH.txt` |
+
+> **정정 (2026-09-23, review_next P0-2b·cost/M2)**: P12 는 **등방 `denoise_full` 마이크로벤치마크**(GMM kron K=512 = N=1e4 적합, 학습 arm `d2sx_N10000_a1.pt`, 1 스레드, ν 당 40회 평균만)의 수이지 arm 간 수신기 비용비가 아니다. 헤드라인 GMM arm `M-ours-bstar` 는 Module H 로 `GMMPriorB.ep_site` 를 부르는데(`arms.py:36,163`, cd241b7e 줄 번호; `Demo/t2_route_a.py:373-374`) 이 벤치는 그 함수를 재지 않았다. 헤드라인 표(P13, `raw_B16e4k`)는 K=1024·N=1.6e5 이다. 같은 코드로 다시 돌렸을 때 4.6× 는 재현되지 않았다(REVIEW_AUDIT cost/M2, 저장 안 됨). **인용할 때**: "P12 = A8 마이크로벤치마크(K=512, denoise_full). 실경로 비용비는 V1/b\* = Module H 호출당 1.35× (−3 dB) · 1.39× (+6 dB), 블록 전체 1.33× · 1.38× (헤드라인 구성 kron K=1024 + `d2sx_N160000_a1.pt`, 실제 수신기 경로, SNR 당 24 시행 중앙값; `results/review_next/complexity_moduleH_ep.txt`)." 원래 행은 기록으로 둔다.
+
+> **정정 (2026-09-23, review_next ckpt/M2)**: P10 의 게이트 값은 모두 각 파일에 저장된 @200 EMA 에서 측정됐다 — λ=0.01 `sx_V3_N160000_D1_a1_lam0.01.pt`(best @142), λ=0.1 `sx_V3_N160000_D1_a2_lam0.1.pt`(best @33), λ=1.0 `sx_V3_N160000_D1_a3.pt`(best @159), 비교 기준 V0 `sx_N160000_D1.pt`(best @136). best 가중치는 저장되지 않았다(BEST_WEIGHTS_UNAVAILABLE). 네 값은 같은 조건(@200 EMA)끼리의 비교이며 판정은 불변이다.
 
 **아직 PENDING**: B16e4k (N=1.6e5 를 K=1024 격자로 재확인, 병합 대기), B4e4k (K=2048 격자, 적합 중).
 둘 다 P9 의 결과로 보아 GMM BLER 이 움직이지 않을 것으로 예상하지만 예상으로 끝내지 않고 측정한다.

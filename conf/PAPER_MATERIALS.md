@@ -28,6 +28,8 @@ testbed D2 에서 붕괴한다** (C2 −3 dB BLER 0.593 으로 고전 터보 0.5
 야코비안의 **고유값 부호**이고, D1 과 D2 를 가르는 것은 추정기 품질이 아니라 **참 스펙트럼의 여유
 (margin)** 다. 게이트 통과가 수신기 사용 가능성을 보증하지 않는다는 것이 이 실행의 실측 결과다.
 
+> **정정 (2026-09-23, review_next G-1.2)**: 23-25행 "그 체크포인트로 두 testbed 의 확증 BLER 을 n = 2560 으로 돌렸다" 는 사실과 다르다. D1 게이트를 통과한 것은 D1 체크포인트 `ckpt/sx_N160000_D1.pt` 이고(`LADDER_C.md:1`) D1 확증(`raw_C` D1 1344파일)은 이 파일로 돌렸다. D2 확증(`raw_C` D2 1344파일)은 같은 레시피·예산으로 D2 에 따로 학습한 `ckpt/d2sx_N160000_a1.pt` 로 돌렸고(`results/tables_D2_C.txt:37-39,44`), 그 D2 체크포인트에는 게이트 행이 없다(`:45` `NO GATE RECORD mentions d2sx_N160000_a1.pt -- UNVERIFIED here`). 읽는 법: "… D1 게이트를 **통과**했고 (…), D1 확증은 그 체크포인트로, D2 확증은 같은 레시피·예산으로 D2 에 따로 학습한 체크포인트(`d2sx_N160000_a1.pt`, D2 게이트 행 없음)로 n = 2560 에서 돌렸다." 26행 "같은 체크포인트·같은 예산" 은 D2 안의 V0 대 V1 비교(둘 다 `d2sx_N160000_a1.pt`)라 맞다. 29행 "게이트 통과가 수신기 사용 가능성을 보증하지 않는다" 는 "D1 형제의 게이트 PASS 가 D2 수신기 사용 가능성을 보증하지 않는다" 로 읽는다(STATUS 744-745 의 형제-자격 한정, 이 파일 690행 뒤 G-1.2 정정과 같은 뜻; 줄 번호는 cd241b7e). 수치·판정 불변.
+
 ---
 
 ## 1. 시스템 설정 — 출처 `results/tables_D2.txt` 헤더
@@ -238,6 +240,8 @@ arm 비교는 **동일 1e4 예산 고정** (01_RULES §5) 이고, 이 곡선은 
 D1 체크포인트 `ckpt/sx_N160000_D1.pt` 이다. 즉 Stage C 는 "GC 는 N ~ 5e4 에서 넘는다"는 이 곡선의
 예측을 실제로 집행한 것이고, `LADDER_C.md` 의 PASS 행이 그 집행 기록이다.
 
+> **정정 (2026-09-23, review_next ckpt/M2)**: 위 §8 표의 `160,000 … PASS` 행과 이 문단의 `N_train = 160,000  PASS` 는 `sx_N160000_D1.pt` 에 저장된 마지막 epoch(200) EMA 에서 잰 게이트 값이다. 같은 행의 `val_loss` 7.3984e-01 은 best(@136) 가중치의 값이고, 게이트된 @200 EMA 의 val 은 7.398687e-01 이다. §8 표 네 행 모두 `epochs` 열은 마지막 epoch, `val_loss` 열은 best val 이다(2,500: 357 대 best @337 · 10,000: 200 대 @165 · 40,000: 200 대 @105 · 160,000: 200 대 @136, CPU torch.load 재확인. `run_samplecx.py:21·28` 이 `gates_D1` 로 파일에 남은 EMA 를 게이트하고 `res['epochs']`·`res['val_loss']` 를 적는다. `results/samplecx.csv` 도 같다). best 가중치는 저장되지 않았다(BEST_WEIGHTS_UNAVAILABLE). 판정은 불변이며 §11.2 뒤 정정과 같은 점이다.
+
 ## 9. GMM 적합 — 출처 `results/gmm_fit_D2.txt`
 
 K in {16,32,64,128,256,512} x {full, kron} x MAP shrinkage kappa x restarts, **검증 우도로만 선택**.
@@ -310,11 +314,15 @@ inconsistency only, and PASS therefore rests on GB/GC/GD.
 측정 조건: `n_eval = 512` held-out (`common.train_rng` stream 10), `n_jac = 64`, 8x4, prior S,
 D1 val loss 7.398444e-01. GB/GC/GD 는 `results/samplecx_D1.txt` 의 `N_train = 160,000` 행과 같은 값이다 (§8).
 
+> **정정 (2026-09-23, review_next ckpt/M2)**: 위 PASS 는 `sx_N160000_D1.pt` 에 저장된 마지막 epoch(200) EMA 에서 측정됐다(ema sha256[:16] ae04fefa33998484; `gates_D1 → _as_model → load_model` 이 `st["ema"]` 를 읽는다). 바로 위 "D1 val loss 7.398444e-01" 은 best(@136) 가중치의 값이다. 게이트된 @200 EMA 의 val 은 7.398687e-01 이다(`logs/train_sx_N160000_D1.log:143,207`). best 가중치는 저장되지 않았다(BEST_WEIGHTS_UNAVAILABLE). 판정은 불변이다.
+
 ### 11.3 V2 (에너지 매개화) — 게이트 FAIL, **arm 이 아니다**
 
 출처 `results/gate_D1_C.txt` (이 파일이 담고 있는 체크포인트는 **이것 하나**다:
 `# checkpoints : 1 found under /home/HTJ/t2/conf/ckpt_C (filter: ckpt=ckpt/sx_V2_N160000_D1_a3.pt)`)
 및 `LADDER_C.md` `[2026-09-21 22:24 KST] D1V2160000 | a3`:
+
+> **정정 (2026-09-23, review_next ckpt/M2)** `results/gate_D1_C.txt` 는 게이트 실행마다 통째로 다시 쓰였다. 지금 파일(헤더 2026-09-22 07:30 KST, commit 266e7c7)은 `ckpt/sx_V3_N160000_D1_a3.pt` 한 행만 담는다 — 여기서 이 파일을 출처로 든 V2 a3 값은 이 파일에 더 이상 없다. 남아 있는 출처: `LADDER_C.md` (append-only 행)과 `results/samplecx_D1.txt`. 게이트 값 자체는 그 두 곳과 일치한다. (DECISIONS [2026-09-23 12:54 KST] '감사 밖 추가 발견' 줄)
 
 | 게이트 | V0 `sx_N160000_D1` | **V2 `sx_V2_N160000_D1_a3`** |
 |---|---|---|
@@ -337,6 +345,8 @@ V2 hp: `{'arch':'dit','param':'vp','domain':'angle','lr':7.46015350530356e-04,'e
    두 번 발산해 §3d 폴백의 **lr/3** 으로 학습됐다. GC 실패가 에너지 매개화 탓인지 낮아진 lr 탓인지
    이 실험은 가르지 못한다. **동결 lr 로 완주한 V2 D1 실행은 존재하지 않는다.** 사다리 3시행이
    소진돼(a1 DIVERGED, a2 DIVERGED, a3 완료 후 FAIL) 교란된 채로 보고한다.
+
+  > **정정 (2026-09-23, review_next ckpt/M2)** "0.003% 차" 는 두 체크포인트의 **best-epoch** val(7.398444e-01 @136 대 7.398676e-01 @74)끼리의 비교다. 게이트(GC)는 두 파일에 저장된 **마지막 epoch(200) EMA** 에서 쟀고, 그 가중치들의 val 은 7.398687e-01 대 7.409458e-01 로 **0.146% 차**다 (`ckpt/sx_N160000_D1.pt`, `ckpt/sx_V2_N160000_D1_a3.pt` 의 hist). "같은 val 인데 GC 가 68% 다르다" 는 비교 대상이 서로 다른 가중치라 그대로 쓸 수 없다.
 
 ### 11.4 V3 (야코비안 정칙화 λ=1.0) — 게이트 없음
 
@@ -479,6 +489,8 @@ k=12 에서 **7.6e-5**, 즉 **76배**. 항등은 성립하되 여유는 **3자�
 > **GC 2.24111e-01 FAIL** (기준 0.15), GD 1.49894e-01 PASS, `GD_trace` 2.96603e-02 보고용).
 > 두 소스 파일 모두 머리에 "DIAGNOSTIC PROBES, NOT ARMS … may NOT enter any result table and do NOT
 > license a claim" 을 박아 두었다. **§17.4 를 반드시 함께 읽을 것.**
+
+> **정정 (2026-09-23, review_next 3차 잔여)**: 위 "두 절의 모든 수치는 `ckpt/d2sx_N10000_a1.pt` 에서 나왔고" 에는 예외가 있다. §13.1 표 1번 GB′(`results/gate_D2.txt`)는 이 파일이 아니라 같은 hp·같은 split 의 형제 시드 `ckpt/B3_dscore_D2.pt` 에서 나왔다(`results/diag/checkpoint-provenance_SUMMARY.md:26-38`; §13.1 머리의 P0-1b 정정). a1 로 다시 잰 worst_excess 는 −0.1227(기록 −0.1219)로 결론은 같다(STATUS "부수 발견").
 
 ### 13.1 발산 진단 — 출처 `results/diag/SUMMARY.md`
 
@@ -635,6 +647,8 @@ correctly specified). 학습 prior 에 대한 어떤 주장도 이 표에서 D2 
   only, 10_SPEC §5: a D2 re-train is qualified by its D1 sibling's gate row, which this string cannot prove.)`
   즉 **D2 체크포인트 자체에는 게이트 행이 없다** (D2 에는 참 score 가 없어 원리적으로 잴 수 없다).
   자격은 **같은 레시피의 D1 쌍둥이 `sx_N160000_D1.pt` 의 PASS 행**(§11.2)이 부여한다.
+
+  > **정정 (2026-09-23, review_next ckpt/M2)**: 이 PASS 행은 형제 `sx_N160000_D1.pt` 에 저장된 @200 EMA(best @136 아님)에 대한 판정이다(§11.2 뒤 정정). 이 §15 의 D2 체크포인트도 @1784 EMA 다(바로 위 P0-1b 정정).
 
 ### 15.1 셀 C2 (8x4, T=16, **Tp=4**, K=42), −3 dB, n = 2560 — TABLE A
 
@@ -841,6 +855,8 @@ C2 의 SNR@0.1 격차 (판정점 -3 / +0 / +3 dB, 90% paired bootstrap, censored
 "게이트를 통과한 D2 모델" 이라고 쓰면 안 되고, **"D1 에서 게이트를 통과한 레시피로 D2 에 학습한
 체크포인트"** 라고 쓴다.
 
+> **정정 (2026-09-23, review_next ckpt/M2)**: 여기서 말하는 D1 쌍둥이의 PASS 행은 `sx_N160000_D1.pt` 에 저장된 @200 EMA 에 대한 판정이다(best @136 가중치는 저장되지 않음). §11.2 뒤 정정을 볼 것.
+
 ### 17.4 **동일 예산이 아닌 학습 vs GMM 비교** — 1차 비교로 인용 금지
 
 `01_RULES §5` / `10_SPEC A3` / `§6b`: arm 간 공정 비교는 **동일 N_train** 에서만 성립한다.
@@ -884,6 +900,9 @@ C2 의 SNR@0.1 격차 (판정점 -3 / +0 / +3 dB, 90% paired bootstrap, censored
   **모든 쌍이 사전 등록 power guard 에서 UNDECIDED** 다 (판정 SNR 이 −3, +0 dB 두 개뿐 — genie 가
   +3 dB 부터 앵커 창 `BLER in [0.005, 0.9]` 밖). §15.5 의 "남은 격차의 49%" 는 TABLE A 값의
   **기술적 서술**일 뿐 검정이 아니다. 출처: `figs/F11_bler_D2_confirmatory.txt`.
+
+  > **정정 (2026-09-23, review_next M-10.3a)**: "genie 상한" 은 `R5-genie` = known-channel receiver reference(동일 EP detector + BCJR, 참 H; `code/arms.py:117`)로 읽는다. bound 가 아니다 — 같은 C2 −3 dB 에서 V1 성공·genie 실패 15 블록(`raw_C` `blk_err[:,15]`, n=2560). 금지 내용(UNDECIDED 라 검정 진술을 할 수 없다)은 그대로다. DECISIONS [2026-09-23 11:47] 명칭 정정 참조.
+
 - **`M-ours-dscore-C-V0` 의 BLER 을 보통의 오류율로 읽기** — C2 의 V0 곡선은 **전 SNR 에서 (F3) 가드가
   52.9~93.2% 발동**한다 (`guard_D2_C.txt`). 발산 중인 수신기의 값이므로 다른 arm 과 오류율로서
   비교되지 않는다. 같은 이유로 C5·C1 의 V4b 곡선(전 SNR 2560/2560)도 그렇다.
@@ -952,6 +971,8 @@ C1 의 `bstar → V1` · `bstar → V4` 는 **둘 다 무의미**이고, C2 의 
 사전 등록 power guard 가 판정을 내리지 않는다. → **C2 에서 어떤 arm 도 genie 상한과 다르다고 주장할 수
 없다.** §15.5 의 "genie 까지 남은 격차의 49% 를 메운다" 는 TABLE A 값의 **기술적 서술**이며 검정이 아니다.
 
+> **정정 (2026-09-23, review_next M-10.3a)**: 위 "genie 상한" 도 `R5-genie` = known-channel receiver reference 로 읽는다(bound 아님; §17.6 의 같은 표기 뒤 정정, DECISIONS [2026-09-23 11:47] 명칭 정정). UNDECIDED 판정과 "주장할 수 없다" 는 그대로다.
+
 `F10` 의 정직 주석: C1/−3 dB 에서 "모든 학습 arm 이 BLER 1.0" 은 **V0 에만 맞다** — V1 0.996(미도시),
 V4 0.945 이고 V4 의 2560 블록 중 3개가 비유한 BLER@16 (KEPT, 블록 오류로 계수).
 
@@ -1007,6 +1028,10 @@ V4 0.945 이고 V4 의 2560 블록 중 3개가 비유한 BLER@16 (KEPT, 블록 �
 | `STATUS.md` | 실행 기록. 상단 "■ Stage C 요약" 과 "감사 정정", 하단 "■■ D2 확증 실행 결과" | 전반 |
 | `DECISIONS.md` | 자율 판단 1행/건 + 근거 + 되돌리는 법 (Stage C 분 포함) | 전반 |
 
+> **정정 (2026-09-23, review_next ckpt/M2)** 위 표의 `gate_D1_C.txt` 행: 지금 파일은 V2 a3 가 아니라 `sx_V3_N160000_D1_a3.pt` 한 행만 담는다(이후 V3 게이트 실행이 덮어씀). `raw_C/` 행: 파일 수는 **2688** 이다(D1 1344 + D2 1344).
+
+> **정정 (2026-09-23, review_next ckpt/M2)**: 위 표 `LADDER_C.md` 행과 `ckpt/sx_N160000_D1.pt` 행의 "PASS" 는 그 파일에 저장된 @200 EMA 에 대한 판정이다(best @136 가중치는 저장되지 않음; §11.2 뒤 정정). `ckpt/d2sx_N160000_a1.pt` 행의 "best val 3.519379e-01 @1764" 는 선택 기준값이고 평가 가중치는 @1784 EMA 다(§15 머리의 P0-1b 정정).
+
 ## 20. 출처를 찾지 못한 것 / 아직 존재하지 않는 것
 
 누락 대신 여기에 적는다. **아래 항목은 인용할 수 없다.**
@@ -1042,3 +1067,5 @@ V4 0.945 이고 V4 의 2560 블록 중 3개가 비유한 BLER@16 (KEPT, 블록 �
    학습 로그가 종결값이므로 **`3.519379e-01 @1764` 를 쓴다** — STATUS 의 값은 실행 도중(1784 ep 완주 전)
    에 적힌 중간 best 다. 확인 명령:
    `tail -1 conf/logs/train_d2sx_N160000_a1.log`
+
+   > **정정 (2026-09-23, review_next P0-1b)**: `3.519379e-01 @1764` 는 best val 기록으로서 맞다. 다만 평가에 쓴 가중치의 값은 아니다 — `d2sx_N160000_a1.pt` 가 담은 것은 마지막 epoch(1784) EMA(val 3.519602e-01, `logs/train_d2sx_N160000_a1.log` 의 epoch 1784 행)이고 @1764 가중치는 저장되지 않았다(BEST_WEIGHTS_UNAVAILABLE; §15 머리의 P0-1b 정정). 인용할 때는 "선택 기준 best val 3.519379e-01 @1764, 평가 가중치 = @1784 EMA" 로 쓴다.

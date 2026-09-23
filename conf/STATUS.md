@@ -380,6 +380,8 @@ BLER 의 SNR 비단조성은 **부분적으로만** 설명된다. 12 dB 에서 �
 `results/gate_D1_C.txt` / `LADDER_C.md`, 체크포인트 `ckpt/sx_N160000_D1.pt`,
 구성 `dit vp/angle w64 d6 lr2.238e-3 ema0.999`, `n_eval=512 n_jac=64`, 보고용 stream 10.
 
+> **정정 (2026-09-23, review_next ckpt/M2)** `results/gate_D1_C.txt` 는 게이트 실행마다 통째로 다시 쓰였다. 지금 파일(헤더 2026-09-22 07:30 KST, commit 266e7c7)은 `ckpt/sx_V3_N160000_D1_a3.pt` 한 행만 담는다 — 여기서 이 파일을 출처로 든 `sx_N160000_D1.pt` PASS (그리고 619행의 V2 a3) 값은 이 파일에 더 이상 없다. 남아 있는 출처: `LADDER_C.md` (append-only 행)과 `results/samplecx_D1.txt`. 게이트 값 자체는 그 두 곳과 일치한다. (DECISIONS [2026-09-23 12:54 KST] '감사 밖 추가 발견' 줄)
+
 > **정정 (2026-09-23, review_next ckpt/M2)**: 아래 표의 PASS 는 `sx_N160000_D1.pt` 에 저장된 **마지막 epoch(200) EMA** 에서 측정됐다. `gates_D1 → _as_model → load_model` 경로가 `st["ema"]` 를 읽는다(ema sha256[:16] ae04fefa33998484). 그 run 의 best val 은 7.398444e-01 @136 이고, 게이트된 @200 EMA 의 val 은 7.398687e-01 이다(`logs/train_sx_N160000_D1.log:143,207-208`). min_epochs=200 때문에 best 이후 64 epoch 을 더 학습했다(EMA 갱신 563×64 = 36,032회). 따라서 둘은 다른 가중치다. best(@136) 가중치는 저장되지 않아 그 게이트 값은 측정된 적도 없고 복구할 수도 없다(BEST_WEIGHTS_UNAVAILABLE). 판정은 고치지 않는다. PASS 는 이 파일(@200 EMA)에 대해 참이고, §6b D1 확증 실행도 같은 가중치를 읽었다(441 행 뒤 정정). 661 행 뒤 정정을 볼 것.
 
 | 게이트 | 값 | 임계 | 판정 |
@@ -470,6 +472,8 @@ N=4e4 · N=1.6e5 결과가 나오면 같은 표로 비교한다.
 C2 (Tp=4): `R2-ours-G → V0` −3 dB 60:16 p=3.9e-07, pooled 72:21 p=1.0e-07.
 **`V0 → R6-exactEP` 7:8 p=1.0** — 정확 EP 상한과 통계적으로 구별되지 않는다.
 C1 (Tp=2): `V0 → R6-exactEP` 92:72 p=0.14, 역시 동률.
+
+> **정정 (2026-09-23, review_next M-10.3a)**: 위 462행(cd241b7e 줄 번호) "정확 EP 상한" 의 `R6-exactEP` 는 bound 가 아니라 exact-prior EP reference 다 — 참 prior GMM site 를 쓰는 같은 route_a EP/터보 루프다(`code/arms.py:119`). DECISIONS [2026-09-23 11:47] 명칭 정정 줄과 590행(cd241b7e) 뒤 정정을 볼 것. 또 이 절의 `V0 → R6-exactEP` 7:8 p=1.0 과 C1 92:72 p=0.14 는 n=640 중간본 수치이며 철회됐다(`results/NUMBERS_PACKAGE_2026-09-22.md` §E5 R10). n=2560 에서 C2 는 56:42 p=0.19 로 UNDECIDED(판정점 2개)이고, 검정력을 갖춘 비교는 C5 88:91 p=0.88 POWERED 다.
 
 ## 두 가지 구조적 관찰
 
@@ -635,6 +639,8 @@ val 7.77. `asym_reg` 는 5.6e-2 → 2.6e-2 로 **줄고 있으므로 정칙화 �
 7.398676e-01 로 0.003% 차이인데 GC 는 0.0999 대 0.1674 로 **68% 차이**다. 목적함수가 같은 값에
 도달해도 수신기가 소비하는 score 정확도는 크게 다를 수 있다. 사전 등록 게이트를 검증손실로
 대체할 수 없다는 직접적 근거다.
+
+> **정정 (2026-09-23, review_next ckpt/M2)** "0.003% 차" 는 두 체크포인트의 **best-epoch** val(7.398444e-01 @136 대 7.398676e-01 @74)끼리의 비교다. 게이트(GC)는 두 파일에 저장된 **마지막 epoch(200) EMA** 에서 쟀고, 그 가중치들의 val 은 7.398687e-01 대 7.409458e-01 로 **0.146% 차**다 (`ckpt/sx_N160000_D1.pt`, `ckpt/sx_V2_N160000_D1_a3.pt` 의 hist). "같은 val 인데 GC 가 68% 다르다" 는 비교 대상이 서로 다른 가중치라 그대로 쓸 수 없다.
 
 **(2) 매개화와 학습률이 교란돼 있다 — 이것을 V2 의 결론으로 확정하지 않는다.** V2 의 D1 쌍둥이는
 동결 lr 에서 두 번 발산해 §3d 폴백의 **lr/3** 으로 학습됐다. 따라서 GC 실패가 에너지 매개화 탓인지
@@ -962,6 +968,8 @@ SVHN 에서 작동**시켰다 (`11_PRIOR_ART_JACOBIAN.md`). 우리는 실패했�
 **V2 D2 a3 종료**: 1282 ep patience, best val **3.361999e-01 @1262** (V0 최선 3.519379e-01 대비 4.5% 낮음).
 `LADDER_C.md` 11:17 행. **arm 아님** — D1 쌍둥이가 게이트 FAIL (GC 0.167). 검증손실은 GC 를 예측하지
 못하므로(V0 vs V2: val 0.003% 차이, GC 68% 차이) 이 4.5% 는 관측 사실로만 남긴다.
+
+> **정정 (2026-09-23, review_next ckpt/M2)** "val 0.003% 차이" 는 best-epoch val 끼리의 비교다; 게이트된 마지막 epoch 가중치끼리는 0.146% 차다(637행 뒤 정정 참고).
 
 **λ 스윕 (§6e)**: λ=0.1 시행 1 이 **동결 lr 에서 발산** (ep 100, best 7.456974e-01 @44, `LADDER_L0.1.md`).
 λ=1.0 과 같은 궤적이다 — 발산 전 best 가 V0(7.398) 에 못 미친다. §3d 사다리대로 시행 2(클리핑) 를
@@ -1301,6 +1309,8 @@ a2 = **0.150 → CI 안**. **맞음** (a3 대기).
 **모든 arm 이 N_train = 1.6e5** — GMM 은 `gmm_fits_D2_n16e4/` 의 **Nr=8 12 구성 전부**에서 검증 우도로
 b\* = kron K=512 선택(`check_fits_n16e4.sh` 통과 후 실행, 부분집합 선택 아님), 학습 arm 은
 `ckpt/d2sx_N160000_a1.pt` (D1 형제 `sx_N160000_D1.pt` 가 GA~GD PASS, `LADDER_C.md:1`). C2, n=2560.
+
+> **정정 (2026-09-23, review_next ckpt/M2·P0-1b)**: 위 1262행(cd241b7e 줄 번호)의 형제 PASS 는 `sx_N160000_D1.pt` 에 저장된 @200 EMA(best @136 아님)에서 측정됐다. 이 표의 학습 arm 은 `d2sx_N160000_a1.pt` 의 @1784 EMA(best @1764 아님)로 평가됐다(`raw_B16e4` 1344파일 전부 `meta|stagec_ckpt` = 이 파일). 두 파일 모두 best 가중치는 저장되지 않았다(BEST_WEIGHTS_UNAVAILABLE). 376행 뒤 ckpt/M2 정정과 652행 뒤 P0-1b 정정(둘 다 cd241b7e 줄 번호)을 볼 것. 수치·판정 불변.
 
 ## BLER@16
 
