@@ -101,6 +101,7 @@
 | r_t 래퍼: RouteA/RouteAClip 인스턴스 훅(`_sites`→b, `_matrix_site`→P,η / `prior.ep_site`→Λ,η)으로 h_post^t 를 받아 r_t 를 계산, 로그에 `r_t` 추가; runner opt-in `--extra-log r_t` 로 raw 저장; 훅 전후 로그 비트 동일 검사(`diag_p1_cavity.py` 의 검사 재사용; 그 스크립트 자체는 DEV 청크만 받으므로 새 래퍼 필요) | **구현·검증** (f5856204, `conf/code/rt_tap.py`; selftest 개발 시행 2560~2561 × 6 arm: 훅 전후 모든 로그 키 비트 동일, 재구성 h_post 의 NMSE 가 로그와 상대오차 0, 32회 실행의 반복 1~16 = 16회 실행 비트 동일; `conf/logs/review_next/rt_tap_selftest.log`) |
 | `p3_rules.py`: 수용 검사(32×40 from 3200; P3ref 와 P3 의 반복 1~16 비트 동일), R16/R32/R-adapt/S-res/S-conf/오라클, 규칙별 발산 재계산, prior 별 부호검정 17개, §2.4 상호작용, 선택 빈도표, 평균 반복 수·비용 환산. `pair_tags.py` 는 쓰지 않는다(DEV 청크·iters 16 고정) | **구현** (f5856204; `--selftest` + 개발 시행 4개 종단 smoke(수용 검사 통과, 음성 검사 4종 검출); 판정 데이터 적용 전 적대적 코드 검토) |
 | 판정 실행 명령 | `ln -sfn gmm_fits_D2_B16e4k conf/results/gmm_fits_D2_review_next_P3ref` (P3 도 동일) → `runner.py run --testbed D2 --cell C2 --snr -3 --prior S2 --skip0 3200 --n 1280 --chunk 40 --iters 16 --ntrain 160000 --stagec-ckpt conf/ckpt/d2sx_N160000_a1.pt --arm M-ours-dscore-C-V1 M-ours-bstar R5-genie --tag review_next_P3ref` / 같은 인자에 `--iters 32 --p3-arms --extra-log r_t --arm M-ours-dscore-C-V1 M-ours-bstar V1-b05 bstar-b05 V1-fb05 bstar-fb05 --tag review_next_P3`; 보고 전용 2점은 `--cell C2 --snr 6` / `--cell C5 --snr -3` 에 `--n 640` |
+| 테스트 집합 확증 (§3, 사용자 결정 10:15 CDT) | **완료 — V1·b\* 모두 PASS** (실행 `run_p3test.sh` 10:12~11:02 CDT @d00bb877, 판정 `p3_rules.py --confirm` @2b599c14; R16 = raw_B16e4k 비트 동일, Demo 해시 동일). 수치는 §7.4 | `p3_confirm_C2.txt`, `run_manifest_review_next_P3test.json` |
 | 판정 실행 | **완료** (실행 09:35~09:46 CDT, 코드 f5856204; 판정 `p3_rules.py` 09:58 CDT, 코드 39e13126). 세 점 모두 수용 검사 통과. 판정점 C2 −3 dB: **H6a·H6b 두 prior 모두 지지 → 채택 규칙 R-adapt** (테스트 확증 후보; 실행 여부는 사용자 결정), H7 지지 없음(b\* 는 b05·fb05 모두 반대 방향 유의), **H8 두 prior 모두 지지**(두 해석 동일), §2.4 세 규칙 모두 판정 불가. 수치는 §7 | `p3_rules_{C2_m3,C2_p6,C5_m3}.{txt,npz}`, `run_manifest_review_next_P3{,ref}.json` |
 
 ### 5.1 구현 시 해석 명확화 (2026-09-23 09:57 CDT = 23:57 KST, 커밋 39e13126 09:58 CDT; 판정 데이터를 열기 전(p3_rules 판정 실행 09:58:43 CDT); §1~§3 은 바꾸지 않는다)
@@ -174,3 +175,18 @@ C5 −3 dB 의 H7 은 네 검정 모두 판정 불가(V1 b05 14:18, fb05 28:20; 
 | H8: 셋 중 하나 이상 판정 불가 → 지지 아님 (선택이 대부분 기본) | **빗나감** — 두 prior 모두 세 비교 전부 지지. 선택 분포: V1 기본 579 / b05 562 / fb05 139, b\* 1006 / 148 / 126 |
 | 오라클은 실패를 30% 이상 줄임 | **빗나감** — 기본 R32 대비 V1 −12% (154→135), b\* −10% (290→262); R16 대비 −22% / −15% |
 | §2.4: 세 규칙 모두 판정 불가, 규칙별 V1 < b\* 격차 유지 (p < 0.05) | **적중** |
+
+### 7.4 테스트 집합 확증 (§3; 사용자 결정 2026-09-23 10:15 CDT "지금 실행"; 한 번)
+
+실행 `conf/code/run_p3test.sh` (태그 `review_next_P3test`, 테스트 시행 0..2559, C2 7개 SNR, 32회 + r_t, P3 와 같은 arm 구성), 10:12~11:02 CDT, 코드 d00bb877. 판정 `p3_rules.py --confirm` @2b599c14 (테스트 결과를 보기 전에 커밋; 적대적 검토 wf_481ecc8d-2cb 반영). R16 기준 = 이 실행의 반복 16, **raw_B16e4k 와 V1·b\* 의 모든 KEYS_RAW 필드가 7개 SNR 모두 비트 동일**, 두 실행의 Demo 해시 동일. 예외 0, 발산 0. 산출물 `results/review_next/p3_confirm_C2.txt`.
+
+| SNR | V1 R16 → R-adapt (R32) | a:b, p | b\* R16 → R-adapt (R32) | a:b, p |
+|---|---|---|---|---|
+| −3 dB (판정) | 371 → 342 (341) | 2:31, 1.3e-7 → 지지 | 623 → 589 (589) | 1:35, 1.1e-9 → 지지 |
+| 0 dB (판정) | 88 → 79 (79) | 0:9, 0.0039 → 지지 | 184 → 162 (159) | 0:22, 4.8e-7 → 지지 |
+| +3 dB (판정) | 29 → 25 (24) | 0:4 → UNDECIDED | 57 → 49 (49) | 0:8, 0.0078 → 지지 |
+| +6 / +9 / +12 / +15 dB (보고) | 16→15 / 7→7 / 5→4 / 3→3 | 전부 UNDECIDED | 28→28 / 17→13 / 16→16 / 8→7 | 전부 UNDECIDED |
+
+**3점 규칙: V1 2/3 승 + power guard 충족 → PASS; b\* 3/3 승 → PASS** (pooled, 보고 전용: V1 2:44 p = 3.1e-11, b\* 1:65 p = 1.8e-18). R16 실패율(V1 371/2560 = 0.1449, b\* 623/2560 = 0.2434)은 헤드라인 표(`tables_D2_B16e4k.txt`)의 값과 같다. **헤드라인 표는 바꾸지 않는다**(§3); 이 결과는 "루프 규칙을 R-adapt 로 바꾼 별도 표" 다.
+
+보고 전용: R-adapt 평균 반복 V1 17.90 / 16.55 / 16.20 (−3/0/+3 dB), b\* 18.72 / 16.77 / 16.18. 판정 집합과 달리 테스트 집합에서는 R-adapt 와 R32 가 몇 블록 다르다(V1 −3 dB 342 vs 341, +3 dB 25 vs 24; b\* 0 dB 162 vs 159 — R-adapt 가 멈춘 뒤 R32 에서 풀린 블록). S-res(보고 전용, 확증 후보 아님) V1 303 / 58 / 19, b\* 548 / 131 / 34; 오라클 V1 287 / 55 / 15, b\* 529 / 115 / 30.

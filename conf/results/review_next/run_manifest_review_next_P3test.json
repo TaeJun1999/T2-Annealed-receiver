@@ -1,0 +1,172 @@
+{
+ "manifest_version": 1,
+ "written": "2026-09-24 01:02:31 KST",
+ "git_commit": "2b599c14",
+ "result_tag": "review_next_P3test",
+ "testbed": "D2",
+ "raw_dir": "/home/HTJ/t2/conf/raw_review_next_P3test",
+ "n_raw_files": 448,
+ "config_hash": "1f5906edb6c84cf7",
+ "code_hashes": {
+  "Demo": {
+   "t2_route_a.py": "95a5408901ec125c",
+   "t2_trellis.py": "31cd0ee9c68e972b",
+   "t2_gmm.py": "d064e58c7510c769"
+  },
+  "conf_code": {
+   "runner.py": "bfb96be54c74ee1c",
+   "arms.py": "80876b05370b16ac",
+   "score.py": "f5379bdf8a085fc9",
+   "common.py": "bd29b34a84ddf55b",
+   "d2.py": "fa6f6e7c012427dc",
+   "analysis.py": "016c54500435c6cc",
+   "rt_tap.py": "5d97dc7124150423",
+   "p3_rules.py": "a06e952b1eddf3ad"
+  }
+ },
+ "channel_model": {
+  "testbed": "D2",
+  "prior": "S2",
+  "description": "D2 sparse specular: L ~ Unif{3..8} per block, continuous AoA/AoD (S2: +-pi/3), |alpha_l| = sqrt(p_l) deterministic, p_l ∝ exp(-l/2.0), psi_l ~ Unif[0,2pi), H = sqrt(Nr Nt) sum_l alpha_l a_r a_t^H"
+ },
+ "cells": {
+  "C2": {
+   "Nr": 8,
+   "Nt": 4,
+   "T": 16,
+   "Tp": 4,
+   "snrs": [
+    -3,
+    0,
+    3,
+    6,
+    9,
+    12,
+    15
+   ]
+  }
+ },
+ "points": {
+  "D2_C2_S2_Nr8_T16_Tp4_dft_snr-3": 2560,
+  "D2_C2_S2_Nr8_T16_Tp4_dft_snr0": 2560,
+  "D2_C2_S2_Nr8_T16_Tp4_dft_snr12": 2560,
+  "D2_C2_S2_Nr8_T16_Tp4_dft_snr15": 2560,
+  "D2_C2_S2_Nr8_T16_Tp4_dft_snr3": 2560,
+  "D2_C2_S2_Nr8_T16_Tp4_dft_snr6": 2560,
+  "D2_C2_S2_Nr8_T16_Tp4_dft_snr9": 2560
+ },
+ "trial_stream": {
+  "rule": "default_rng([20260926, TBID[testbed], PID[prior], Nr, T, Tp, int(snr)+100])",
+  "skip_min": 0,
+  "skip_max_end": 2560,
+  "split": "TEST set (trials from 0; paired across arms)"
+ },
+ "run_params": {
+  "beta": "0.7",
+  "dtype": "complex128/float64",
+  "iters": "32",
+  "n": "40",
+  "seed": "20260926",
+  "snr": [
+   "-3.0",
+   "0.0",
+   "12.0",
+   "15.0",
+   "3.0",
+   "6.0",
+   "9.0"
+  ],
+  "t_in": "5",
+  "n_chunks": 448
+ },
+ "receiver": {
+  "outer_iterations": 32,
+  "beta": 0.7,
+  "arm_overrides": "P3 (NEXT_EXPERIMENTS_P3 §2.2) loop-constant variants: V1-b05[beta=0.5,beta_fb=None] V1-fb05[beta=0.7,beta_fb=0.5] bstar-b05[beta=0.5,beta_fb=None] bstar-fb05[beta=0.7,beta_fb=0.5]",
+  "t_in_bigamp": 5,
+  "n_inner_routeA": 1,
+  "dtype": "complex128/float64",
+  "device": "CPU, one thread per worker",
+  "code": "conv (133,171)_8 nu=6 terminated, QPSK"
+ },
+ "gmm": {
+  "bstar": "kron",
+  "kron_K": "1024",
+  "ntrain": 160000.0,
+  "selection": "validation log-likelihood over the pre-registered K grid (BLER never consulted)",
+  "fits_dir": "/home/HTJ/t2/conf/results/gmm_fits_D2_review_next_P3test",
+  "em_sec": "107957.18832826614"
+ },
+ "sample_counts": {
+  "train_channels": 160000,
+  "score_train": 144000,
+  "score_val": 16000,
+  "test_trials_per_point": [
+   2560
+  ]
+ },
+ "stagec_checkpoint": {
+  "path": "/home/HTJ/t2/conf/ckpt/d2sx_N160000_a1.pt",
+  "sha256_16": "4443921ce8d5c4a1",
+  "stored_epoch": 1784,
+  "best_epoch": 1764,
+  "best_val": 0.3519378900527954,
+  "role": "legacy-last",
+  "evaluated_weights": "last-epoch EMA (best weights NOT stored: BEST_WEIGHTS_UNAVAILABLE)",
+  "best_pt": null,
+  "hp": {
+   "arch": "dit",
+   "param": "vp",
+   "domain": "angle",
+   "lr": 0.002238046051591068,
+   "ema": 0.999,
+   "batch": 256,
+   "emb": 256,
+   "width": 64,
+   "depth": 6,
+   "heads": 8,
+   "patch": 1
+  },
+  "params": 479426,
+  "rung": "D2SX160000",
+  "attempt": 1,
+  "Nr": 8,
+  "Nt": 4,
+  "split_hash": "a00951cf75b852a6",
+  "sigma_tag": "",
+  "train_epochs": 1784,
+  "stopped_by": "(legacy: not recorded)",
+  "train_wall_sec": 35774.54626870155,
+  "train_device": "cuda:0 NVIDIA RTX PRO 6000 Blackwell Server Edition",
+  "val_frac": 0.1,
+  "seeds": {
+   "split": 20260926,
+   "val": 20260927,
+   "train": 20260928,
+   "gate": 20260929
+  }
+ },
+ "stagec_status": "built from explicit ckpt /home/HTJ/t2/conf/ckpt/d2sx_N160000_a1.pt -- caller override, NOT verified against the gate record here (recorded PASS rows: none) | V1 (psd_project=True): built from explicit ckpt /home/HTJ/t2/conf/ckpt/d2sx_N160000_a1.pt -- caller override, NOT verified against the gate record here (recorded PASS rows: none)",
+ "stagec_gate": "NO GATE RECORD mentions d2sx_N160000_a1.pt -- UNVERIFIED here.  (GA-GD are measurable on D1 only, 10_SPEC §5: a D2 re-train is qualified by its D1 sibling's gate row, which this string cannot prove.)",
+ "stagec_ckpt_id": "sha256[:16]=4443921ce8d5c4a1 epoch=1784 best_epoch=1764 role=legacy-last 8x4 | BEST_WEIGHTS_UNAVAILABLE: evaluated = last-epoch EMA, reported best_val belongs to best_epoch",
+ "arms": [
+  "M-ours-bstar",
+  "M-ours-dscore-C-V1",
+  "V1-b05",
+  "V1-fb05",
+  "bstar-b05",
+  "bstar-fb05"
+ ],
+ "versions": {
+  "python": "3.12.14",
+  "numpy": "2.5.2",
+  "torch": "2.14.0+cu130",
+  "host": "9000babdde68",
+  "cpu_count": 192
+ },
+ "output_paths": {
+  "tables": "/home/HTJ/t2/conf/results/tables_D2_review_next_P3test.txt",
+  "guard": "/home/HTJ/t2/conf/results/guard_D2_review_next_P3test.txt",
+  "log": "/home/HTJ/t2/conf/logs/run_D2_review_next_P3test.log"
+ }
+}
