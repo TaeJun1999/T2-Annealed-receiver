@@ -125,8 +125,9 @@ def load_raw(testbed, root=None):
     data, meta = {}, {}
     for key, chunks in sorted(pts.items()):
         chunks.sort()
-        # test set starts at trial 0; a review_next DEVELOPMENT run starts at C.DEV_SKIP0 (runner --skip0)
-        pos, ok = (C.DEV_SKIP0 if chunks[0][0] >= C.DEV_SKIP0 else 0), True
+        # test set starts at trial 0; a review_next DEVELOPMENT run starts at C.DEV_SKIP0 and a P3 JUDGING
+        # run at C.P3_SKIP0 (runner --skip0): the check starts at the largest of these <= the first chunk
+        pos, ok = max(s for s in (0, C.DEV_SKIP0, C.P3_SKIP0) if s <= chunks[0][0]), True
         for skip, n, _ in chunks:
             ok &= skip == pos
             pos = skip + n
@@ -616,15 +617,32 @@ def _head(testbed, data, meta):
     return header(testbed, extra)
 
 
+def iters_guard(testbed, root):
+    """review_next P3 (NEXT_EXPERIMENTS_P3 §5): every table here is named @16 (BLER@16, NMSE@16, last column),
+    so raw written with run|iters != C.N_ITER (a P3 32-iteration run) must never be tabulated under that name.
+    -> the offending file names (empty = fine)."""
+    bad = []
+    for f in sorted(glob.glob(os.path.join(root, f"{testbed}_*.npz"))):
+        with np.load(f) as z:
+            it = int(z["run|iters"]) if "run|iters" in z.files else C.N_ITER
+        if it != C.N_ITER:
+            bad.append(f"{os.path.basename(f)} (iters {it})")
+    return bad
+
+
 def main(testbed, tag="", root=None, out_dir=None, results_dir=None):
     """Write conf/results/tables_<testbed>.txt and return its text.  D1 and D2 go to SEPARATE files and
     are never merged (08_SPEC §0): their arm sets are different (06_SPEC §1).
 
     If no raw file is found the returned text CONTAINS NO_RAW_MARKER: a caller (runner.py cmd_analysis,
     the __main__ block below) tests `NO_RAW_MARKER in txt` and exits non-zero instead of letting an empty
-    table pass for a result."""
+    table pass for a result.  Raw with run|iters != 16 is refused outright (iters_guard)."""
     sfx = f"_{tag}" if tag else ""
     root = root or (RAW + sfx)
+    bad = iters_guard(testbed, root)
+    if bad:
+        raise SystemExit(f"refused: {len(bad)} raw file(s) under {root} have run|iters != {C.N_ITER} "
+                         f"(e.g. {bad[:3]}) -- these tables are @{C.N_ITER}; a P3 run is judged by code/p3_rules.py")
     data, meta, warns = load_raw(testbed, root)
     out = []
     _p(out, _head(testbed, data, meta))

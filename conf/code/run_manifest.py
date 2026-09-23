@@ -52,7 +52,8 @@ def main():
         sk, nn = os.path.basename(f).rsplit("_skip", 1)[1][:-4].split("_n")
         skips.append(int(sk)); skips_end.append(int(sk) + int(nn))
         pt = os.path.basename(f).rsplit("_skip", 1)[0]
-        points[pt] = points.get(pt, 0) + int(z["R5-genie|blk_err"].shape[0])      # trials in this chunk, once
+        be = next(k for k in z.files if k.endswith("|blk_err"))                   # any arm: a P3 run has no genie
+        points[pt] = points.get(pt, 0) + int(z[be].shape[0])                       # trials in this chunk, once
     one = lambda s: sorted(s)[0] if len(s) == 1 else sorted(s)
     ck = one(meta.get("stagec_ckpt", {"(none)"}))
     ckpt = None
@@ -90,10 +91,12 @@ def main():
         cells={c: dict(C.CELLS[c]) for c in cells}, points={k: v for k, v in sorted(points.items())},
         trial_stream=dict(rule=f"default_rng([{C.SEED}, TBID[testbed], PID[prior], Nr, T, Tp, int(snr)+100])",
                           skip_min=min(skips), skip_max_end=max(skips_end),
-                          split=("DEVELOPMENT set (review_next, trials >= %d)" % C.DEV_SKIP0 if min(skips) >= C.DEV_SKIP0
+                          split=("P3 judging set (trials >= %d)" % C.P3_SKIP0 if min(skips) >= C.P3_SKIP0
+                                 else "DEVELOPMENT set (review_next, trials >= %d)" % C.DEV_SKIP0 if min(skips) >= C.DEV_SKIP0
                                  else "TEST set (trials from 0; paired across arms)")),
         run_params={k: one(v) for k, v in sorted(run.items()) if k != "skip"} | dict(n_chunks=len(files)),
-        receiver=dict(outer_iterations=C.N_ITER, beta=C.BETA, t_in_bigamp=C.T_IN, n_inner_routeA=1,
+        receiver=dict(outer_iterations=int(one(run.get("iters", {str(C.N_ITER)}))), beta=C.BETA,
+                      arm_overrides=one(meta.get("p3_arms", {"(none)"})), t_in_bigamp=C.T_IN, n_inner_routeA=1,
                       dtype="complex128/float64", device="CPU, one thread per worker", code=f"conv ({C.GENS[0]},{C.GENS[1]})_8 nu={C.NU} terminated, QPSK"),
         gmm=dict(bstar=one(meta.get("bstar", {"?"})), kron_K=one(meta.get("kron_K", {"?"})), ntrain=ntrain,
                  selection="validation log-likelihood over the pre-registered K grid (BLER never consulted)",

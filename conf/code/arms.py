@@ -124,6 +124,8 @@ def build_baseline_arms(testbed, prior, Nr, Nt, T, Tp, sigma2, code, Xp, ntrain=
     return arms, cfgs, Cs, fits
 
 
+P3_BETA = 0.5                       # NEXT_EXPERIMENTS_P3 §2.2: the one value of beta / beta_fb the P3 variants use
+
 # ----------------------------------------------------------------------------- our model (conf/03_SPEC_ourmodel.md)
 # M-ours-* differs from R2-ours-G in MODULE H AND NOTHING ELSE.  Test M2 is the proof of that sentence and is
 # the single most important test in this experiment (03_SPEC §4).
@@ -140,7 +142,7 @@ def module_h_priors(testbed, prior, Nr, Nt, ntrain=N_TRAIN, true_prior=None):
 def build_our_arms(testbed, prior, Nr, Nt, T, Tp, sigma2, code, Xp, ntrain=N_TRAIN,
                    true_prior=None, score_prior=None, with_G=False, score_prior_v1=None,
                    score_prior_c=None, bstar_scalar=False, mean_arms=False,
-                   score_prior_v1_floor=None):
+                   score_prior_v1_floor=None, p3_arms=False):
     """M-ours-gmm32 / M-ours-bstar / M-ours-score (D1 only) / M-ours-dscore / M-ours-G (test M2 only).
 
     score_prior_v1: a SECOND score.ScorePrior built with psd_project=True (Stage C V1, spec 10 §3b / (F1)).
@@ -164,7 +166,14 @@ def build_our_arms(testbed, prior, Nr, Nt, T, Tp, sigma2, code, Xp, ntrain=N_TRA
       mean_arms     : the clip='mean' symmetric ablation.  M-ours-dscore-C-V1-mean = V1 with RouteAClip
                       clip='mean' (needs score_prior_v1); gmmB-scorew-eta / -mean = b* in V1's wiring, the
                       adapter control; M-ours-bstar-mean = b*.view('mean') on the gmm_site path (a different
-                      mean is preserved there -> report-only row, audit M3).  Existing arms are untouched."""
+                      mean is preserved there -> report-only row, audit M3).  Existing arms are untouched.
+
+    review_next P3, OPT-IN (NEXT_EXPERIMENTS_P3 §2.2; judging set skip >= 3200):
+      p3_arms       : the loop-constant ablation.  V1-b05 / bstar-b05 = V1 / M-ours-bstar with beta = P3_BETA (damping
+                      of the extrinsic pair (rD, tauD); v1 value 0.7), V1-fb05 / bstar-fb05 = the same with beta_fb =
+                      P3_BETA (damping of the posterior feedback (xbar, v); D-15 value None).  Everything else is the
+                      base arm's route_a() call verbatim; each bstar variant gets its OWN .view("eta") (own clip
+                      counters, and a per-arm object for instance hooks).  Existing arms are untouched."""
     hp, fits, llv, bstar, kron_K = module_h_priors(testbed, prior, Nr, Nt, ntrain)
     Cs = GaussianPrior(Nr, Nt, fits[("full", 32)]["Chat"])
     a = (Nr, Nt, T, Tp, sigma2)
@@ -208,6 +217,11 @@ def build_our_arms(testbed, prior, Nr, Nt, T, Tp, sigma2, code, Xp, ntrain=N_TRA
         arms["M-ours-bstar-mean"] = route_a(*a, hp[bstar].view("mean"), code, Xp, "gmm_site")
         if score_prior_v1_floor is not None:   # §2.6 C-calib report-only row: V1 with eigenvalue floor 1e-2
             arms["M-ours-dscore-C-V1-floor1e-2"] = route_a(*a, score_prior_v1_floor, code, Xp, "score", clip="eta")
+    if p3_arms:                     # review_next P3 §2.2 -- same call as the base arm, ONE loop constant changed
+        for sfx, over in (("b05", dict(beta=P3_BETA)), ("fb05", dict(beta_fb=P3_BETA))):
+            if score_prior_v1 is not None:
+                arms[f"V1-{sfx}"] = route_a(*a, score_prior_v1, code, Xp, "score", clip="eta", **over)
+            arms[f"bstar-{sfx}"] = route_a(*a, hp[bstar].view("eta"), code, Xp, "gmm_site", **over)
     if with_G:
         arms["M-ours-G"] = route_a(*a, Cs, code, Xp, "gaussian")
 
