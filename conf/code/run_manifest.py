@@ -79,10 +79,11 @@ def main():
         manifest_version=1, written=time.strftime("%Y-%m-%d %H:%M:%S %Z"), git_commit=C.git_commit(),
         result_tag=a.tag, testbed=a.testbed, raw_dir=raw_dir, n_raw_files=len(files),
         config_hash=hashlib.sha256(json.dumps(dict(sorted((k, sorted(v)) for k, v in run.items())) | dict(
-            cells=cells, ntrain=ntrain, iters=C.N_ITER), sort_keys=True).encode()).hexdigest()[:16],
+            cells=cells, ntrain=ntrain, iters=int(one(run.get("iters", {str(C.N_ITER)})))),   # was C.N_ITER: hid 32 vs 16
+            sort_keys=True).encode()).hexdigest()[:16],
         code_hashes=dict(Demo=C.demo_hashes(), conf_code={f: sha16(os.path.join(C.CONF, "code", f)) for f in
                                                           ("runner.py", "arms.py", "score.py", "common.py", "d2.py",
-                                                           "analysis.py") if os.path.isfile(os.path.join(C.CONF, "code", f))}),
+                                                           "analysis.py", "rt_tap.py", "p3_rules.py") if os.path.isfile(os.path.join(C.CONF, "code", f))}),
         channel_model=dict(testbed=a.testbed, prior=one(meta.get("prior", set()) or {"S2"}),
                            description=("D2 sparse specular: L ~ Unif{%d..%d} per block, continuous AoA/AoD (S2: +-pi/3), "
                                         "|alpha_l| = sqrt(p_l) deterministic, p_l ∝ exp(-l/%.1f), psi_l ~ Unif[0,2pi), "

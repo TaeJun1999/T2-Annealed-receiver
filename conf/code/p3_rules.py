@@ -14,6 +14,9 @@ Acceptance (else the point is INVALID and nothing is judged):
 Rules     per block, offline (§2):  R16 = iteration 16;  R32 = iteration 32;  R-adapt = first t in [16, 32] with
           r_{t-1} < 1e-3 and r_t < 1e-3, else 32 (cost = t);  S-res = among {base, b05, fb05} the run with the smallest
           r_32 (tie or all +inf -> base);  S-conf = smallest alphaD_32 (report only; tie -> base; non-finite = +inf);
+          the tie clause has two readings (NEXT_EXPERIMENTS_P3 §5.1, fixed before the judging data were opened):
+          PRIMARY = the smallest, base first among tied minimisers then b05, fb05 (all +inf -> base); LITERAL = any tie
+          at the minimum -> base.  Both are computed; a verdict that differs between them is printed READING-DEPENDENT.
           oracle = any of the three succeeds at 32 (true bits; not an arm).  r_t non-finite -> +inf.  A trial whose run
           raised: R32 / R-adapt fail with cost 32; the base arm's R16 is then the P3ref value (§1 "비정상 값"); a variant
           has no reference run, so its R16 counts as a failure and the count is printed.  Divergence per rule is
@@ -139,6 +142,8 @@ def check_bit(p3, ref):
         if np.any(rr & ~r3):
             raise Invalid(f"{a}: {int(np.sum(rr & ~r3))} trials raised in the 16-iteration run but not in the 32-iteration run")
         ok = ~r3
+        if not ok.any():
+            raise Invalid(f"{a}: every trial raised in the 32-iteration run -- nothing to compare")
         for q in C.KEYS_RAW:
             if not np.array_equal(p3[a][q][ok, :T_REF], ref[a][q][ok], equal_nan=True):
                 bad = int(np.sum(np.any(~((p3[a][q][ok, :T_REF] == ref[a][q][ok])
@@ -166,9 +171,14 @@ def radapt_stop(r):
     return np.where(ok.any(1), T_REF + ok.argmax(1), T_MAX)
 
 
-def select(x):
-    """(n, 3) score per run [base, b05, fb05] -> index of the smallest; a tie at the minimum or all +inf -> 0 (base)."""
+def select(x, literal=False):
+    """(n, 3) score per run [base, b05, fb05] (non-finite = +inf) -> index of the chosen run.
+    PRIMARY (§5.1): the smallest; among tied minimisers the first in RUNS order (base, b05, fb05); all +inf -> base
+    (= argmin, which returns the first minimiser).  literal=True: any tie at the minimum or all +inf -> base, even
+    when base is not a minimiser."""
     x = finite_or_inf(x)
+    if not literal:
+        return x.argmin(1)
     m = x.min(1)
     tie = (x == m[:, None]).sum(1) > 1
     return np.where(tie | ~np.isfinite(m), 0, x.argmin(1))
@@ -236,19 +246,32 @@ def apply_rules(p3, ref):
             be = A[r]["blk_err"][np.arange(len(t)), t - 1]
             f[(r, "R-adapt")] = np.where((A[r]["failed"] > 0) | ~np.isfinite(be), 1, be).astype(int)
         R32 = np.stack([f[(r, "R32")] for r in RUNS], 1)
-        sres = select(np.stack([A[r]["r_t"][:, T_MAX - 1] for r in RUNS], 1))
-        sconf = select(np.stack([A[r]["alphaD"][:, T_MAX - 1] for r in RUNS], 1))
-        idx = np.arange(len(sres))
-        f["S-res"], f["S-conf"] = R32[idx, sres], R32[idx, sconf]
+        rt32 = np.stack([A[r]["r_t"][:, T_MAX - 1] for r in RUNS], 1)
+        ad32 = np.stack([A[r]["alphaD"][:, T_MAX - 1] for r in RUNS], 1)
+        sel = {"S-res": select(rt32), "S-res|literal": select(rt32, literal=True),
+               "S-conf": select(ad32), "S-conf|literal": select(ad32, literal=True)}
+        idx = np.arange(len(R32))
+        for k, s_ in sel.items():
+            f[k] = R32[idx, s_]
         f["oracle"] = R32.min(1)
+        # where the PRIMARY reading's RUNS order (b05 before fb05) decides: base not a minimiser, b05 == fb05 < base
+        x = finite_or_inf(rt32)
+        order_tie = (x[:, 1] == x[:, 2]) & (x[:, 1] < x[:, 0])
+        order_matters = order_tie & (R32[:, 1] != R32[:, 2])
         div = {}
         for r in RUNS:
             div[(r, "R16")] = diverged_upto(A[r], T_REF)
             div[(r, "R32")] = diverged_upto(A[r], T_MAX)
             div[(r, "R-adapt")] = diverged_upto(A[r], stop[r])
         div[("base", "R16")] = np.where(rb & ~rr, diverged_upto(ref[BASE[X]], T_REF), div[("base", "R16")])
-        R[X] = dict(f=f, stop=stop, sres=sres, sconf=sconf, div=div,
-                    raised={r: int(np.sum(A[r]["failed"] > 0)) for r in RUNS})
+        D32 = np.stack([div[(r, "R32")] for r in RUNS], 1)
+        for k, s_ in sel.items():
+            div[k] = D32[idx, s_]
+        div["oracle"] = D32.min(1)                              # all three runs diverged
+        R[X] = dict(f=f, stop=stop, sel=sel, div=div, order_tie=int(order_tie.sum()),
+                    order_matters=int(order_matters.sum()),
+                    raised={r: int(np.sum(A[r]["failed"] > 0)) for r in RUNS},
+                    raised_mask={r: A[r]["failed"] > 0 for r in RUNS})
     return R
 
 
@@ -262,10 +285,11 @@ def tests(R):
         for v in ("b05", "fb05"):
             T[(f"H7-{v}", X)] = [sign_row(f"{v} R16 vs base R16", f[(v, "R16")], f[("base", "R16")])]
         T[("H8", X)] = [sign_row(f"S-res vs {r} R32", f["S-res"], f[(r, "R32")]) for r in RUNS]
+        T[("H8|literal", X)] = [sign_row(f"S-res(lit) vs {r} R32", f["S-res|literal"], f[(r, "R32")]) for r in RUNS]
     fV, fB = R["V1"]["f"], R["bstar"]["f"]
     I = {}
-    for rule in ("R32", "R-adapt", "S-res"):
-        g = (lambda F: F[rule]) if rule == "S-res" else (lambda F: F[("base", rule)])
+    for rule in ("R32", "R-adapt", "S-res", "S-res|literal"):
+        g = (lambda F: F[rule]) if rule.startswith("S-res") else (lambda F: F[("base", rule)])
         I[rule] = interaction(g(fV), fV[("base", "R16")], g(fB), fB[("base", "R16")])
     gap = {}
     for rule in ("R16", "R32", "R-adapt", "S-res"):
@@ -315,21 +339,44 @@ def report(cell, snr, n, judging, R, T, I, gap, late, genie16):
             w(f"  {X:<6} {r:<5} {f[(r, 'R16')].sum():>5} {f[(r, 'R32')].sum():>5} {f[(r, 'R-adapt')].sum():>8} "
               f"{st.mean():>7.2f} {st.max():>6} {R[X]['raised'][r]:>7} {d[(r, 'R16')].sum():>6} {d[(r, 'R32')].sum():>6} "
               f"{d[(r, 'R-adapt')].sum():>6}")
-        w(f"  {X:<6} S-res {f['S-res'].sum():>5}   S-conf (report only) {f['S-conf'].sum():>5}   "
-          f"oracle (true bits, not an arm) {f['oracle'].sum():>5}")
+        for k in ("S-res", "S-res|literal", "S-conf", "S-conf|literal", "oracle"):
+            note = {"S-conf": " (report only)", "S-conf|literal": " (report only)",
+                    "oracle": " (true bits, not an arm; div = all three runs diverged)"}.get(k, "")
+            w(f"  {X:<6} {k:<15} R32-of-chosen fail {f[k].sum():>5}   div {d[k].sum():>5}{note}")
+        w(f"  {X:<6} readings: blocks where S-res PRIMARY != LITERAL choice {int(np.sum(R[X]['sel']['S-res'] != R[X]['sel']['S-res|literal']))}, "
+          f"S-conf {int(np.sum(R[X]['sel']['S-conf'] != R[X]['sel']['S-conf|literal']))}; b05 == fb05 < base on r_32 "
+          f"{R[X]['order_tie']} blocks, of which b05/fb05 differ at 32 on {R[X]['order_matters']} (only these depend on "
+          f"the b05-before-fb05 order)")
+        for v in ("b05", "fb05"):
+            if R[X]["raised"][v]:
+                w(f"  {X:<6} {v}: {R[X]['raised'][v]} trials raised in the 32-iteration run -> R16 UNKNOWN (no reference run "
+                  f"for variants), counted as failures; see the H7 sensitivity line")
     if any(late.values()):
         w(f"  trials that raised only in the 32-iteration run (base R16 taken from the reference): {late}")
     w("\n## pre-registered tests (per prior; X vs Y, 'fail X vs Y', a = only X fails)")
-    for key in ("H6a", "H6b", "H7-b05", "H7-fb05", "H8"):
+    for key in ("H6a", "H6b", "H7-b05", "H7-fb05", "H8", "H8|literal"):
         for X in PRIORS:
             rows = T[(key, X)]
-            tag = ("  => H8 " + ("지지" if supported(rows) else "지지 아님") + f" ({X})") if key == "H8" else ""
+            tag = ""
+            if key.startswith("H8"):
+                tag = f"  => {key} " + ("지지" if supported(rows) else "지지 아님") + f" ({X})"
+                if key == "H8|literal":
+                    same = supported(rows) == supported(T[("H8", X)])
+                    tag += "  [reading check: same verdict as PRIMARY]" if same else "  [READING-DEPENDENT: differs from PRIMARY]"
             w(f"{key} [{X}]{tag}")
             for r in rows:
                 w(fmt_row(r))
+            if key.startswith("H7") and R[X]["raised"][key[3:]]:
+                v = key[3:]
+                ok = ~R[X]["raised_mask"][v]
+                w("  sensitivity (not a verdict): " + fmt_row(sign_row(f"{v} R16 vs base R16 excl. raised",
+                                                                       R[X]["f"][(v, "R16")][ok], R[X]["f"][("base", "R16")][ok])).strip())
     w("\n## §2.4 prior-gain separation: d = (fV1^rule - fV1^R16) - (fb*^rule - fb*^R16), sign test on sign(d)")
     for rule, (pos, neg, p, s) in I.items():
-        w(f"  {rule:<8} #d>0 {pos}  #d<0 {neg}  n_d {pos + neg}  p = {p:.3g}  -> {s}")
+        chk = ""
+        if rule == "S-res|literal":
+            chk = "  [reading check: same statement as PRIMARY]" if s == I["S-res"][3] else "  [READING-DEPENDENT]"
+        w(f"  {rule:<14} #d>0 {pos}  #d<0 {neg}  n_d {pos + neg}  p = {p:.3g}  -> {s}{chk}")
     w("  report beside it (does not replace it): V1 vs b* gap per rule")
     for rule, r in gap.items():
         w(fmt_row(r))
@@ -337,12 +384,11 @@ def report(cell, snr, n, judging, R, T, I, gap, late, genie16):
     w("\n## §3 adoption (" + ("judging point" if judging else "REPORT-ONLY point: printed for completeness, NOT an adoption") + ")")
     w(f"  net(R-adapt - R32): " + "  ".join(f"{X} {net[X]:+d}" for X in PRIORS) + f"  (<= +{NET_MAX} required)")
     w(f"  -> test-set confirmation candidate: {rule if judging else 'n/a (report-only point)'}")
-    w("\n## selection frequency (S-res / S-conf; blocks split by the S-res outcome at 32)")
+    w("\n## selection frequency (each row split by that rule's own outcome at 32: the R32 of the run it chose)")
     for X in PRIORS:
-        fs = R[X]["f"]["S-res"]
-        for nm in ("sres", "sconf"):
-            s = R[X][nm]
-            w(f"  {X:<6} {nm:<6} " + "  ".join(f"{r}: {int(np.sum(s == i))} (fail {int(np.sum((s == i) & (fs == 1)))} / "
+        for nm in ("S-res", "S-res|literal", "S-conf", "S-conf|literal"):
+            s, fs = R[X]["sel"][nm], R[X]["f"][nm]
+            w(f"  {X:<6} {nm:<15} " + "  ".join(f"{r}: {int(np.sum(s == i))} (fail {int(np.sum((s == i) & (fs == 1)))} / "
                                                f"ok {int(np.sum((s == i) & (fs == 0)))})" for i, r in enumerate(RUNS)))
     w("\n## cost (report only): iterations and real-path block time, scaled from complexity_moduleH_ep.txt "
       "(16-iteration block at C2 -3 dB: V1 1006 ms, b* 754 ms) in proportion to the iteration count")
@@ -371,7 +417,9 @@ def judge(cell, snr, n, judging):
                         **{f"{X}|{k if isinstance(k, str) else '|'.join(k)}": v for X in PRIORS
                            for k, v in R[X]["f"].items()},
                         **{f"{X}|stop|{r}": R[X]["stop"][r] for X in PRIORS for r in RUNS},
-                        **{f"{X}|{nm}": R[X][nm] for X in PRIORS for nm in ("sres", "sconf")})
+                        **{f"{X}|sel|{k}": v for X in PRIORS for k, v in R[X]["sel"].items()},
+                        **{f"{X}|div|{k if isinstance(k, str) else '|'.join(k)}": v for X in PRIORS
+                           for k, v in R[X]["div"].items()})
     print(txt + f"# -> {os.path.join(OUT, name)}.txt / .npz", flush=True)
 
 
@@ -386,7 +434,9 @@ def selftest():
     r[4, 30:32] = 1e-4; r[4, 31] = inf                         # r_32 = +inf -> no stop at 32 -> 32
     r[4, 29:31] = 1e-4                                         # r_30, r_31 < tol -> stop 31
     assert list(radapt_stop(r)) == [16, 17, 32, 32, 31], radapt_stop(r)
-    assert list(select(np.array([[1, 1, 2], [3, 1, 2], [inf, inf, inf], [nan, 2, 1], [2, 1, 1]], float))) == [0, 1, 0, 2, 0]
+    xs = np.array([[1, 1, 2], [3, 1, 2], [inf, inf, inf], [nan, 2, 1], [2, 1, 1], [inf, 0, 0], [0.4, 1e-6, 1e-6]], float)
+    assert list(select(xs)) == [0, 1, 0, 2, 1, 1, 1], select(xs)                          # PRIMARY (§5.1)
+    assert list(select(xs, literal=True)) == [0, 1, 0, 2, 0, 0, 0], select(xs, literal=True)
     fV16, fV, fB16, fB = (np.array(x) for x in ([1, 1, 0, 1, 0], [0, 1, 0, 1, 1], [1, 1, 1, 0, 0], [0, 0, 1, 0, 0]))
     # d = (fV - fV16) - (fB - fB16) = [-1-(-1), 0-(-1), 0-0, 0-0, 1-0] = [0, 1, 0, 0, 1]
     assert interaction(fV, fV16, fB, fB16)[:2] == (2, 0)

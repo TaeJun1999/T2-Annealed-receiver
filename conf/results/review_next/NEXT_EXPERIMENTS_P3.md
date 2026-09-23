@@ -96,12 +96,21 @@
 
 | 항목 | 상태 |
 |---|---|
-| `common.P3_SKIP0 = 3200`; `analysis.load_raw` 구멍 검사 시작점 ∈ {0, DEV_SKIP0, P3_SKIP0}; `run_manifest.py` 분할 표기 "P3 judging set (trials ≥ 3200)"; `runner.py analysis` 는 `run\|iters ≠ 16` 인 raw 를 거부(표 이름이 @16 이므로) | 미구현 |
-| `build_our_arms(p3_arms=True)` + runner `--p3-arms` (opt-in, `--tag` 필수): 4 변형 arm, budget_meta/learned 배선(`mean_arms` 와 같은 방식, GMM_BUDGET_ARMS 포함) | 미구현 |
-| r_t 래퍼: RouteA/RouteAClip 인스턴스 훅(`_sites`→b, `_matrix_site`→P,η / `prior.ep_site`→Λ,η)으로 h_post^t 를 받아 r_t 를 계산, 로그에 `r_t` 추가; runner opt-in `--extra-log r_t` 로 raw 저장; 훅 전후 로그 비트 동일 검사(`diag_p1_cavity.py` 의 검사 재사용; 그 스크립트 자체는 DEV 청크만 받으므로 새 래퍼 필요) | 미구현 |
-| `p3_rules.py`: 수용 검사(32×40 from 3200; P3ref 와 P3 의 반복 1~16 비트 동일), R16/R32/R-adapt/S-res/S-conf/오라클, 규칙별 발산 재계산, prior 별 부호검정 17개, §2.4 상호작용, 선택 빈도표, 평균 반복 수·비용 환산. `pair_tags.py` 는 쓰지 않는다(DEV 청크·iters 16 고정) | 미구현 |
+| `common.P3_SKIP0 = 3200`; `analysis.load_raw` 구멍 검사 시작점 ∈ {0, DEV_SKIP0, P3_SKIP0}; `run_manifest.py` 분할 표기 "P3 judging set (trials ≥ 3200)"; `runner.py analysis` 는 `run\|iters ≠ 16` 인 raw 를 거부(표 이름이 @16 이므로) | **구현** (f5856204; `analysis.iters_guard`, 32회 smoke raw 로 거부 확인; 기존 raw 디렉터리 구멍 검사 결과 불변) |
+| `build_our_arms(p3_arms=True)` + runner `--p3-arms` (opt-in, `--tag` 필수): 4 변형 arm, budget_meta/learned 배선(`mean_arms` 와 같은 방식, GMM_BUDGET_ARMS 포함) | **구현** (f5856204; b\* 변형마다 별도 `.view("eta")`, 변형 설정은 raw `meta\|p3_cfg\|<arm>` 에 기록; 요청 arm 미생성 시 runner 오류) |
+| r_t 래퍼: RouteA/RouteAClip 인스턴스 훅(`_sites`→b, `_matrix_site`→P,η / `prior.ep_site`→Λ,η)으로 h_post^t 를 받아 r_t 를 계산, 로그에 `r_t` 추가; runner opt-in `--extra-log r_t` 로 raw 저장; 훅 전후 로그 비트 동일 검사(`diag_p1_cavity.py` 의 검사 재사용; 그 스크립트 자체는 DEV 청크만 받으므로 새 래퍼 필요) | **구현·검증** (f5856204, `conf/code/rt_tap.py`; selftest 개발 시행 2560~2561 × 6 arm: 훅 전후 모든 로그 키 비트 동일, 재구성 h_post 의 NMSE 가 로그와 상대오차 0, 32회 실행의 반복 1~16 = 16회 실행 비트 동일; `conf/logs/review_next/rt_tap_selftest.log`) |
+| `p3_rules.py`: 수용 검사(32×40 from 3200; P3ref 와 P3 의 반복 1~16 비트 동일), R16/R32/R-adapt/S-res/S-conf/오라클, 규칙별 발산 재계산, prior 별 부호검정 17개, §2.4 상호작용, 선택 빈도표, 평균 반복 수·비용 환산. `pair_tags.py` 는 쓰지 않는다(DEV 청크·iters 16 고정) | **구현** (f5856204; `--selftest` + 개발 시행 4개 종단 smoke(수용 검사 통과, 음성 검사 4종 검출); 판정 데이터 적용 전 적대적 코드 검토) |
 | 판정 실행 명령 | `ln -sfn gmm_fits_D2_B16e4k conf/results/gmm_fits_D2_review_next_P3ref` (P3 도 동일) → `runner.py run --testbed D2 --cell C2 --snr -3 --prior S2 --skip0 3200 --n 1280 --chunk 40 --iters 16 --ntrain 160000 --stagec-ckpt conf/ckpt/d2sx_N160000_a1.pt --arm M-ours-dscore-C-V1 M-ours-bstar R5-genie --tag review_next_P3ref` / 같은 인자에 `--iters 32 --p3-arms --extra-log r_t --arm M-ours-dscore-C-V1 M-ours-bstar V1-b05 bstar-b05 V1-fb05 bstar-fb05 --tag review_next_P3`; 보고 전용 2점은 `--cell C2 --snr 6` / `--cell C5 --snr -3` 에 `--n 640` |
-| 판정 실행 | 미실행 |
+| 판정 실행 | **실행 중** (2026-09-23 09:35 CDT~, `conf/code/run_p3.sh`, tmux `p3`, 코드 f5856204) |
+
+### 5.1 구현 시 해석 명확화 (2026-09-23 10:15 CDT, 판정 데이터를 열기 전; §1~§3 은 바꾸지 않는다)
+
+p3_rules.py 를 판정 데이터에 적용하기 전의 적대적 코드 검토(4 lens + 검증)에서 문구가 두 가지로 읽히거나 비어 있는 곳이 나왔다. 아래를 **1차 해석**으로 고정한다. 다른 해석의 값도 함께 출력하고, 판정이 해석에 따라 갈리면 `READING-DEPENDENT` 로 표시한다(`NEXT_EXPERIMENTS.md` §6.1 선례). `conf/DECISIONS.md` 같은 날 항목.
+
+1. **S-res·S-conf 의 동률** "(동률·전부 +∞ 이면 기본)": 1차 = **가장 작은 실행; 최솟값 동률 안에서는 기본 우선, 그다음 b05, fb05; 전부 +∞ 이면 기본**. 본 조항("가장 작은 실행")과 §1("+∞ … S-res 에서 최댓값")에 모두 맞는 읽기다. 문자 해석(최솟값에 동률이 있으면 기본이 최솟값이 아니어도 기본)은 `S-res|literal` 로 병기하고, H8·§2.4(S-res)를 두 해석으로 모두 계산한다. b05 = fb05 < 기본인 블록 수와, 그중 b05·fb05 결과가 다른 블록 수(= b05 우선 순서에만 달린 블록)를 보고한다. 최초 구현(f5856204)은 문자 해석이었다.
+2. **감쇠 변형 arm 의 예외(raised)**: 기준 16회 실행(①)에 변형이 없어 §1 "비정상 값" 의 R16 대체를 적용할 수 없다(공백). 변형의 R16 은 실패로 세고, 변형별 예외 수와 그 시행을 뺀 H7 민감도 줄을 함께 출력한다(판정은 바꾸지 않는다).
+3. **판정 집합 노출 기록**: 동결 전 검토(`p3_review_raw/review2_rules_code.md`)는 판정점 C2 −3 dB 의 시행 3200~3202 에서 V1·b\*·b05·fb05 의 r_32 와 ΔNMSE 를 관측했다(실패 여부는 보지 않음). §2 에는 3200~3201(비트 동일 검사)만 적혀 있다. 이 시행들은 판정에서 빼지 않는다.
+4. 발산 수는 S-res·S-conf(선택된 실행 기준)에도 규칙별로 출력한다. 선택 빈도표는 각 규칙이 고른 실행의 반복 32 결과로 나눈다.
 
 ## 6. 미리 적는 예측
 
