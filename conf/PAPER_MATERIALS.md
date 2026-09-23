@@ -415,6 +415,8 @@ D2 both     FITTED  |     0.0     0.1   0.948 +4e-03 |     0.0     2.5   0.665 +
 체크포인트 `conf/ckpt/d2sx_N160000_a1.pt` (sha256 `4443921ce8d5c4a1…`, `stopped_by=patience`,
 **1784 epoch**, best val **3.519379e-01 @1764**). `logs/jacspec_D2_final.log`, n = 48.
 
+> **정정 (2026-09-23, review_next P0-1b)**: §12.3 의 스펙트럼은 이 파일의 **마지막 epoch(1784) EMA** 로 측정됐다. `jac_spectrum.py:42` → `score._as_model` → `load_model` 경로가 `st["ema"]` 를 읽는다(ema sha256[:16] a43f1105eb27a29b, 이 가중치의 val 3.519602e-01). 파일 mtime 09-21 22:37 이 측정(로그 23:47)보다 앞선다. "best val 3.519379e-01 @1764" 는 저장되지 않은 @1764 가중치의 값이다(BEST_WEIGHTS_UNAVAILABLE). 표 수치는 바뀌지 않는다. 원고에 "best 체크포인트에서 측정" 으로 쓰지 말 것. 620 행 뒤 정정을 볼 것.
+
 ```
   model                k=0 s=.0331          k=6 s=.0920          k=12 s=.2561        k=18 s=.7126
   learned  n_neg          6.71                19.79                13.50               0.69
@@ -482,6 +484,8 @@ k=12 에서 **7.6e-5**, 즉 **76배**. 항등은 성립하되 여유는 **3자�
 
 체크포인트 `ckpt/d2sx_N10000_a1.pt` (sha256 `d94aa99bdc5689067f90895b28d6394e7c61a296ed58ada3f041eb4ad8fdf01a`,
 HPO trial 386), D2 셀 C2.
+
+> **정정 (2026-09-23, review_next P0-1b)**: 이 파일(sha256 `d94aa99b…`)의 가중치는 **마지막 epoch(673) EMA** 다(ema sha256[:16] 62432fd33f0c9378, 이 가중치의 val 3.986240e-01, `logs/train_d2sx_N10000_a1.log:680-681`). best val 3.985658e-01 @653 의 가중치는 저장되지 않았다(BEST_WEIGHTS_UNAVAILABLE). 두 시점 사이 EMA 갱신은 36×20 = 720회다(0.999^720 ≈ 0.49). 그래서 두 가중치는 일부 겹치지만 같지 않다. 평가 경로 `score.load_model` 은 `st["ema"]` 를 읽는다. 따라서 §13 에서 이 파일을 읽은 수치(표 3번 BLER 포함)는 이 @673 EMA 의 값이다. 표 1번 GB'(`results/gate_D2.txt`, 09-21 07:49)는 이 파일이 아니라 형제 시드 `ckpt/B3_dscore_D2.pt` 에서 나왔다(`results/diag/checkpoint-provenance_SUMMARY.md:26-38`). 표 3번 BLER 의 출처는 `raw_supp` 112파일(전부 `meta|dscore_ckpt` = `ckpt/d2sx_N10000_a1.pt`, arm `M-ours-dscore`)이며, ckpt mtime 09-21 12:51:59 가 raw_supp 13:19–13:20 보다 앞선다. H5 "체크포인트 출처 REFUTED" 는 파일 동일성에 대한 판정이므로 그대로 둔다.
 
 세 진단이 서로 어긋나는 것이 출발점이다:
 
@@ -569,6 +573,9 @@ dscore|belsc                0.000   0.000   0.000   0.000   0.000   0.000   0.00
   **C2 에서 학습 arm 대 GMM 진술은 검정 근거가 없다.** 인용한 C1·C5 비교는 POWERED 다.
   (2026-09-22 01:00 감사 BLOCKER 1 정정.)
   n = 640 중간본을 먼저 보았음이 표 머리말과 `DECISIONS.md` 17:55 에 기록돼 있다.
+
+  > **정정 (2026-09-23, review_next P0-1b·ckpt/M2)**: `sx_N160000_D1.pt` 가 담은 가중치는 마지막 epoch(200) EMA 다(ema sha256[:16] ae04fefa33998484, 이 가중치의 val 7.398687e-01). best val 7.398444e-01 @136 의 가중치는 저장되지 않았다(BEST_WEIGHTS_UNAVAILABLE). §14 의 학습 arm(V0/V1/V4, `raw_C` D1 1344파일)과 §11.2 의 게이트 PASS 는 둘 다 이 같은 @200 EMA 에서 측정됐다. 원고에 "best 체크포인트" 로 쓰지 말 것.
+
 - `M-ours-dscore-C-V4b` 는 **D1 에서 실행하지 않았다** — arm 추가가 1344 태스크 전량 재계산이라,
   누락이 아니라 기록된 결정이다 (`DECISIONS.md` 2026-09-21 21:45).
 
@@ -584,6 +591,8 @@ dscore|belsc                0.000   0.000   0.000   0.000   0.000   0.000   0.00
 
 **상한 대비 (C5):** `M-ours-dscore-C-V0 → R6-exactEP` 88:91 **p=0.88, POWERED**,
 SNR@0.1 gap -0.00 dB [90% paired bootstrap -0.08, +0.07]. 검정력을 갖춘 상태의 동률이다.
+
+> **정정 (2026-09-23, review_next M-10.3a)**: "상한 대비 (C5)" → "exact-prior EP reference 대비 (C5)". `R6-exactEP` 는 참 prior GMM site 를 쓰는 같은 route_a EP/터보 루프(`code/arms.py:119`)이며 bound 가 아니다: 88:91 의 91 = V0 성공·R6 실패 블록(C5 −3/+0/+3 dB 합, `results/tables_D1_C.txt:1139`, 규약 :754). 수치·판정 불변. DECISIONS [2026-09-23 11:47] 명칭 정정 참조.
 
 **GMM 대비 (C5):** `M-ours-bstar → V0` 103:102 **p=1**, SNR@0.1 +0.03 dB [-0.04, +0.11].
 C1 은 299:354 p=0.035 0/3 무의미, C2 는 UNDECIDED.
@@ -618,6 +627,9 @@ correctly specified). 학습 prior 에 대한 어떤 주장도 이 표에서 D2 
 - 체크포인트 `ckpt/d2sx_N160000_a1.pt` (sha256 `4443921ce8d5c4a1…`, patience 로 1784 epoch 종료,
   best val **3.519379e-01 @1764**). **검증손실로 3시드 중 선택, BLER 미사용**
   (a1 3.519379e-01 / a2 3.547692e-01 / a3 3.525231e-01 — 시드 간 0.8%, `DECISIONS.md` 23:00).
+
+  > **정정 (2026-09-23, review_next P0-1b)**: 이 파일의 가중치는 마지막 epoch(1784) EMA 다(ema sha256[:16] a43f1105eb27a29b, 이 가중치의 val 3.519602e-01). best val 3.519379e-01 @1764 는 선택 기준값일 뿐이고, 그 epoch 의 가중치는 저장되지 않았다(BEST_WEIGHTS_UNAVAILABLE). §15 와 이후 표의 V0/V1/V4/V4b 는 전부 last-EMA 로 낸 값이다. 원고에 "best 체크포인트" 로 쓰지 말 것. 977 행 표의 같은 서술에도 적용된다. 마지막 epoch val 로 비교해도 시드 순서는 같다(a1 3.519602e-01 < a3 3.525437e-01 < a2 3.548169e-01).
+
 - **게이트 상태 — 정확히 쓸 것.** 표 헤더가 그대로 적고 있다:
   `gate: NO GATE RECORD mentions d2sx_N160000_a1.pt -- UNVERIFIED here. (GA-GD are measurable on D1
   only, 10_SPEC §5: a D2 re-train is qualified by its D1 sibling's gate row, which this string cannot prove.)`
@@ -637,6 +649,8 @@ correctly specified). 학습 prior 에 대한 어떤 주장도 이 표에서 D2 
 | M-ours-dscore-C-V4 (스칼라 site) | 0.154 | [0.140, 0.168] |
 | M-ours-dscore-C-V4b (`scal=site`) | 0.161 | [0.148, 0.176] |
 | R5-genie (상한) | 0.034 | [0.028, 0.042] |
+
+> **정정 (2026-09-23, review_next R-10.3)**: `R5-genie (상한)` → `R5-genie` (known-channel receiver reference: 동일 EP detector + BCJR, 참 H). 같은 route_a 반복 루프에 참 H 를 넣은 것이며(`code/arms.py:117`, `Demo/t2_route_a.py:388-389`) bound 가 아니다: 같은 C2 −3 dB 에서 V1 성공·genie 실패 15 블록(`raw_C` `blk_err[:,15]`, n=2560). 0.034 [0.028, 0.042] 불변. DECISIONS [2026-09-23 11:47] 명칭 정정 참조.
 
 ### 15.2 사전 등록 짝지음 검정 (pooled, 판정점 3개 규칙) — TABLE B
 
@@ -667,6 +681,8 @@ C2 의 SNR@0.1 격차 (판정점 -3 / +0 / +3 dB, 90% paired bootstrap, censored
 | 3 | D1 과 D2 에서 V1·V4 순서가 뒤집힌다 | **틀림.** 뒤집힌 것은 **V0 의 위치**다 (D1 최상위 → D2 최하위). V1 과 V4 의 상대 순서는 양쪽 다 V1 ≳ V4 |
 | 4 | GMM 스칼라 대조군은 차이가 없을 것 | **부분적으로 틀림.** C2 에서는 맞지만(p=0.16) C1·C5 에서는 스칼라화가 GMM 을 **유의하게 악화**시킨다 (3/3) |
 
+> **정정 (2026-09-23, review_next G-1.2)**: 예측 1 의 "게이트 통과에도" 는 "D1 형제 게이트 PASS 레시피로 학습한 D2 체크포인트(`d2sx_N160000_a1.pt`)에서도" 로 읽는다. 등록 원문(`10_SPEC_stageC.md:385-386`, 예측 커밋 `9e0023c`)은 사전 등록 텍스트라 고치지 않는다. 채점(맞음)과 수치는 불변.
+
 **→ 2 맞음 / 2 틀림.** 예측을 실행 전에 커밋했고 채점은 그대로 보고한다.
 
 ### 15.4 (F3) 발산 가드 — 출처 `results/guard_D2_C.txt`
@@ -690,6 +706,9 @@ C2 의 SNR@0.1 격차 (판정점 -3 / +0 / +3 dB, 90% paired bootstrap, censored
 1. **사전 등록 배선이 수신기를 고전 터보보다 나쁘게 만든다.** V0 는 실질 세 게이트를 통과한
    체크포인트를 사전 등록 D-14 행렬 site 에 그대로 넣은 것이고 결과는 BLER 0.593 대 0.537.
    → **게이트 통과가 수신기 사용 가능성을 보증하지 않는다** 가 실측 확정됐다.
+
+   > **정정 (2026-09-23, review_next G-1.2)**: 690-691행 "V0 는 실질 세 게이트를 통과한 체크포인트를" 은 §17.3 규칙(819-820)대로 "V0 는 D1 형제 `sx_N160000_D1.pt` 가 실질 세 게이트(GB·GC·GD. GA 는 이 모델 계열에서 구조적 0)를 통과한 레시피로 D2 에 학습한 체크포인트(`d2sx_N160000_a1.pt`)를" 로 읽는다. 그 D2 체크포인트에는 게이트 행이 없다(`results/tables_D2_C.txt:45`). 692행은 "D1 형제의 게이트 PASS 가 D2 수신기 사용 가능성을 보증하지 않는다" 로 읽는다(STATUS:390 과 같은 뜻). 수치(BLER 0.593 대 0.537)는 불변이다.
+
 2. **site 를 고치면 같은 모델이 최고 arm 이 된다.** V1 은 C2 −3 dB 에서 0.145, GMM 0.252 대비
    **42% 감소** 한다 — 그러나 **이 두 수는 GMM(N=1e4) 기준이고 학습 arm 은 N'=1.6e5 다. 동일 예산이
    아니므로 인용하지 말 것.** 공정한 것은 **같은 체크포인트** 기준의 site ablation 이다:
@@ -768,6 +787,9 @@ C2 의 SNR@0.1 격차 (판정점 -3 / +0 / +3 dB, 90% paired bootstrap, censored
 - **TPE 결과로 아키텍처 우열** — 시도 수 불균등. 균등표본 표(`hpo_strat_D1.txt`)를 쓸 것.
 - **testbed 선택 근거를 "GMM 에 불리해서"로 서술** — `01_RULES §5` 가 금지. 근거는 "물리적으로 표준"이고
   조건부 Gaussian 파괴는 그 물리의 귀결이며 T2d 가 직접 증거다.
+
+  > **정정 (2026-09-23, review_next M-5.2a)**: 앞 절의 금지("GMM 에 불리해서" 로 서술하지 않는다)는 유지한다. 뒤따르는 "근거는 "물리적으로 표준"이고 조건부 Gaussian 파괴는 그 물리의 귀결" 은 같은 기록의 철회와 충돌한다. `results/NUMBERS_PACKAGE_2026-09-22.md:695`(철회 56)는 "D2 is a standard mmWave channel, so the result transfers to real deployments." 를 인용 금지로 두고, `05_SPEC_testbed_D2.md:25` 는 "D2의 차별점은 "실제 채널"이 아니라 "조건부 Gaussian의 파괴"" 라 적는다. D2 는 고정 |α_ℓ|·연속 균등 각도·고정 지수 PDP(τ=2)로 정의된 통제 모델 하나다(`05_SPEC_testbed_D2.md:16-18`).
+  > 인용할 때는 이렇게 쓴다: "근거는 조건부 Gaussian 가정의 파괴를 분리해 보는 통제된 희소 정반사 모델이라는 것이고, T2d 가 그 파괴의 직접 증거다." `01_RULES:77` 의 같은 근거 문구는 사용자 결정을 기다린다(review_next M-5.2a 노트).
 
 ### 17.2 Stage C 가 **철회한** 주장 — 인용 금지 (출처 `STATUS.md` "감사 정정", 2026-09-21 18:20 감사)
 
@@ -909,6 +931,8 @@ C2 의 SNR@0.1 격차 (판정점 -3 / +0 / +3 dB, 90% paired bootstrap, censored
 
 `F12`/`F13` 는 2026-09-22 14:55 에 독립 검증(wf_49dc79b9-4cf, 확인 결함 38건)을 반영해 인쇄 폭 7.16 in 으로 다시 그렸고,
 `F12`·`F14` 는 22:00 에 **실험 마감본**(F12 → 게이트 통과 `B16e4`, F14 → 확장 격자 `B16e4k`)으로 다시 그렸다. `F15` 는 그때 신규.
+
+> **정정 (2026-09-23, review_next G-1.2)**: §17.3 규칙(819-820: "게이트를 통과한 D2 모델" 이라고 쓰지 않고 "D1 에서 게이트를 통과한 레시피로 D2 에 학습한 체크포인트" 라고 쓴다)을 위 표가 스스로 어긴 곳이 있다. 읽는 법 — 905 설명: "run `B16e4k` = D1 형제 게이트 PASS 레시피 + 동일예산 + 확장 K=1024 격자"(게이트 열 "게이트 통과 (형제)" 는 이미 한정됨). 908 게이트 열: "D1 형제 게이트 PASS". 907 게이트 열: "D1 형제 게이트 FAIL (N=1e4)". 911: "F12 → D1 형제 게이트 PASS 예산 `B16e4`". 906 게이트 열 '어느 패널이 게이트 실패분인지' 는 '어느 패널이 D1 형제 게이트 FAIL 분인지' 로 읽는다. F15 캡션과 푸터 원문은 이미 'checkpoints whose D1 siblings FAIL GC' 로 한정한다(`code/figures_stagec3.py:192-193`, `:237-238`). 근거: D2 체크포인트 게이트 행 없음(`tables_D2_B16e4.txt:45`, `tables_D2_B16e4k.txt:45`, `tables_D2_B1e4.txt:45`), 형제 행 `LADDER_C.md:1` PASS(GB +0.27% / GC 0.0999 / GD 0.0718), `samplecx_D1.txt:28` GC 0.24333 FAIL. 904·908 괄호 안의 "게이트 통과 예산" 은 예산 표현이라 그대로 둔다. 그림 파일과 캡션은 재생성하지 않는다. 수치 불변.
 
 `F8` 의 알려진 한계 (캡션이 직접 적음): N=1.6e5 곡선 2개는 **임시 디렉토리 체크포인트**라 다시 돌릴 수
 없고, 재측정 로그(`logs/jacpsd_D2_final.log`)는 그릴 때 20점 중 7점만 있어 **그리지 않았다**
