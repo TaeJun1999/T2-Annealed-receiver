@@ -1069,3 +1069,10 @@ V4 0.945 이고 V4 의 2560 블록 중 3개가 비유한 BLER@16 (KEPT, 블록 �
    `tail -1 conf/logs/train_d2sx_N160000_a1.log`
 
    > **정정 (2026-09-23, review_next P0-1b)**: `3.519379e-01 @1764` 는 best val 기록으로서 맞다. 다만 평가에 쓴 가중치의 값은 아니다 — `d2sx_N160000_a1.pt` 가 담은 것은 마지막 epoch(1784) EMA(val 3.519602e-01, `logs/train_d2sx_N160000_a1.log` 의 epoch 1784 행)이고 @1764 가중치는 저장되지 않았다(BEST_WEIGHTS_UNAVAILABLE; §15 머리의 P0-1b 정정). 인용할 때는 "선택 기준 best val 3.519379e-01 @1764, 평가 가중치 = @1784 EMA" 로 쓴다.
+
+---
+
+## 21. review_next (2026-09-22 ~ 23) — 결과는 `docs/RESULTS.md` 로 (2026-09-23 18:05 CDT 추가)
+
+이 파일 §0~§20 이후의 결과(P0-2 실경로 비용, P1 진단, A2, H0, A1 1~3단계 + A1-C5, P3 판정·테스트 확증, C6 Nr=16)는 **`docs/RESULTS.md` §2~§5** 에 EXPERIMENTS.md 행 출처와 함께 정리했다. 인용 주의(정정된 읽기, 쓰면 안 되는 것, 보고 전용·사후 선택 신호)는 **`docs/RESULTS.md` §6** 이 이 파일 §17 을 보충한다. 헤드라인(Stage C 동일예산) 수치와 그 정정된 읽기(last-EMA 평가, "D1 형제 게이트 PASS 레시피")는 `docs/RESULTS.md` §1.
+- 표 머리말 표기 오류 하나: `tables_D2_NR16run2.txt:37-39` 의 `N_train=1610000 rung=D2SXNR1610000` 은 rung 이름 파싱 오류이고 실제 예산은 N_train=10000 이다(`docs/RESULTS.md` §5.1·§5.4).
