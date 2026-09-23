@@ -1,0 +1,43 @@
+# date        : 2026-09-23 11:14:36 KST
+# git commit  : 73e53af4
+# versions    : python 3.12.14  numpy 2.5.2  scipy 1.18.1  torch 2.14.0+cu130 (cuda_available=False)
+# device      : CPU (192 cores) | dtype: complex128 / float64 | deterministic: yes (fixed seeds, no GPU in the receiver)
+# testbed     : D2
+# seed rule   : default_rng([20260926, TBID[testbed], PID[prior], Nr, T, Tp, int(snr)+100])  (trials of a point = ONE stream)
+# code        : rate-1/2 conv (133,171)_8 nu=6 terminated, QPSK, outer iterations = 16 for EVERY arm
+# Demo/ hashes: t2_route_a.py=95a5408901ec125c  t2_trellis.py=31cd0ee9c68e972b  t2_gmm.py=d064e58c7510c769
+# script      : conf/code/pair_tags.py group  (NEXT_EXPERIMENTS v3 §3.1 step 2)
+# points      : testbed D2  cell C2  prior S2  SNR ['-3'] dB
+# house test  : exact two-sided sign test on discordant pairs (exp_0921_analysis.sign_p), p < 0.05; n_d < 6 -> UNDECIDED; MDD = smallest net |a-b| with p < 0.05 at the observed n_d (report only)
+# failure     : blk_err[:, -1] (BLER@16) via analysis.load_raw; a trial whose arm RAISED is a failure and is kept
+# split       : DEVELOPMENT = skip >= C.DEV_SKIP0 = 2560 (§0 acceptance = exactly 16 chunks (2560+40k, 40)), TEST = skip < 2560
+# tag         : 'review_next_A1s2_aug_a1' -> /home/HTJ/t2/conf/raw_review_next_A1s2_aug_a1
+# tag         : 'review_next_A1s2_aug_a2' -> /home/HTJ/t2/conf/raw_review_next_A1s2_aug_a2
+# tag         : 'review_next_A1s2_aug_a3' -> /home/HTJ/t2/conf/raw_review_next_A1s2_aug_a3
+# tag         : 'review_next_A1s2_ctrl_a1' -> /home/HTJ/t2/conf/raw_review_next_A1s2_ctrl_a1
+# tag         : 'review_next_A1s2_ctrl_a2' -> /home/HTJ/t2/conf/raw_review_next_A1s2_ctrl_a2
+# tag         : 'review_next_A1s2_ctrl_a3' -> /home/HTJ/t2/conf/raw_review_next_A1s2_ctrl_a3
+# member      : review_next_A1s2_aug_a1:M-ours-dscore-C-V1
+# member      : review_next_A1s2_aug_a2:M-ours-dscore-C-V1
+# member      : review_next_A1s2_aug_a3:M-ours-dscore-C-V1
+# member      : review_next_A1s2_ctrl_a1:M-ours-dscore-C-V1
+# member      : review_next_A1s2_ctrl_a2:M-ours-dscore-C-V1
+# member      : review_next_A1s2_ctrl_a3:M-ours-dscore-C-V1
+# point -3 dB: DEVELOPMENT skip [2560, 3200) in 16 chunks, n=640  §0 acceptance OK; identical (skip, n) chunk list in all 6 tag(s)
+# run params  : seed=20260926  iters=16  beta=0.7  t_in=5  dtype=complex128/float64  (every chunk, every tag)
+# stage C ckpt: [review_next_A1s2_aug_a1] sha256[:16]=7f8120e6731c95f6 epoch=1315 best_epoch=1315 role=best 8x4
+# stage C ckpt: [review_next_A1s2_aug_a2] sha256[:16]=acd168cbc7f17af9 epoch=1437 best_epoch=1437 role=best 8x4
+# stage C ckpt: [review_next_A1s2_aug_a3] sha256[:16]=594e62a036fbb5e8 epoch=1384 best_epoch=1384 role=best 8x4
+# stage C ckpt: [review_next_A1s2_ctrl_a1] sha256[:16]=0243a4783708f2d4 epoch=652 best_epoch=652 role=best 8x4
+# stage C ckpt: [review_next_A1s2_ctrl_a2] sha256[:16]=02732b44bcee64e2 epoch=651 best_epoch=651 role=best 8x4
+# stage C ckpt: [review_next_A1s2_ctrl_a3] sha256[:16]=50370ad6ce825cc8 epoch=661 best_epoch=661 role=best 8x4
+
+GROUP (§3.1 step 2)  aug = ['review_next_A1s2_aug_a1:M-ours-dscore-C-V1', 'review_next_A1s2_aug_a2:M-ours-dscore-C-V1', 'review_next_A1s2_aug_a3:M-ours-dscore-C-V1']   ctrl = ['review_next_A1s2_ctrl_a1:M-ours-dscore-C-V1', 'review_next_A1s2_ctrl_a2:M-ours-dscore-C-V1', 'review_next_A1s2_ctrl_a3:M-ours-dscore-C-V1']
+  d = mean_aug(fail) - mean_ctrl(fail) per trial; d = 0 dropped; a = #d>0 (aug worse), b = #d<0 (aug better)
+ -3 dB  failures review_next_A1s2_aug_a1:M-ours-dscore-C-V1=85/640 (0.1328)  review_next_A1s2_aug_a2:M-ours-dscore-C-V1=82/640 (0.1281)  review_next_A1s2_aug_a3:M-ours-dscore-C-V1=83/640 (0.1297)  review_next_A1s2_ctrl_a1:M-ours-dscore-C-V1=85/640 (0.1328)  review_next_A1s2_ctrl_a2:M-ours-dscore-C-V1=85/640 (0.1328)  review_next_A1s2_ctrl_a3:M-ours-dscore-C-V1=88/640 (0.1375)
+   group mean failures aug=83.33 ctrl=86.00 of n=640   d=0 dropped: 606
+   PRIMARY  a:b=15:19  net(a-b)=-4  n_d=34  p=0.608  MDD@n_d=14  -> p >= 0.05: not decided by this design
+   secondary 1: review_next_A1s2_aug_a1:M-ours-dscore-C-V1 vs review_next_A1s2_ctrl_a1:M-ours-dscore-C-V1  a:b=8:8  net(a-b)=+0  n_d=16  p=1  MDD@n_d=10  -> p >= 0.05: not decided by this design
+   secondary 2: review_next_A1s2_aug_a2:M-ours-dscore-C-V1 vs review_next_A1s2_ctrl_a2:M-ours-dscore-C-V1  a:b=7:10  net(a-b)=-3  n_d=17  p=0.629  MDD@n_d=9  -> p >= 0.05: not decided by this design
+   secondary 3: review_next_A1s2_aug_a3:M-ours-dscore-C-V1 vs review_next_A1s2_ctrl_a3:M-ours-dscore-C-V1  a:b=8:13  net(a-b)=-5  n_d=21  p=0.383  MDD@n_d=11  -> p >= 0.05: not decided by this design
+   secondary: aug fewer failures in 2/3 pairs, with p < 0.05 in 0/3

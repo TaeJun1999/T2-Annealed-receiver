@@ -1,0 +1,152 @@
+{
+ "manifest_version": 1,
+ "written": "2026-09-23 11:14:06 KST",
+ "git_commit": "73e53af4",
+ "result_tag": "review_next_A1s2_aug_a2",
+ "testbed": "D2",
+ "raw_dir": "/home/HTJ/t2/conf/raw_review_next_A1s2_aug_a2",
+ "n_raw_files": 16,
+ "config_hash": "a0ea2464cefcaa81",
+ "code_hashes": {
+  "Demo": {
+   "t2_route_a.py": "95a5408901ec125c",
+   "t2_trellis.py": "31cd0ee9c68e972b",
+   "t2_gmm.py": "d064e58c7510c769"
+  },
+  "conf_code": {
+   "runner.py": "c406797779524872",
+   "arms.py": "8cc78cebea296c2a",
+   "score.py": "f5379bdf8a085fc9",
+   "common.py": "b182a6af1f3594e4",
+   "d2.py": "f8f12b39a34a419d",
+   "analysis.py": "6e3a9df523bea94d"
+  }
+ },
+ "channel_model": {
+  "testbed": "D2",
+  "prior": "S2",
+  "description": "D2 sparse specular: L ~ Unif{3..8} per block, continuous AoA/AoD (S2: +-pi/3), |alpha_l| = sqrt(p_l) deterministic, p_l ∝ exp(-l/2.0), psi_l ~ Unif[0,2pi), H = sqrt(Nr Nt) sum_l alpha_l a_r a_t^H"
+ },
+ "cells": {
+  "C2": {
+   "Nr": 8,
+   "Nt": 4,
+   "T": 16,
+   "Tp": 4,
+   "snrs": [
+    -3,
+    0,
+    3,
+    6,
+    9,
+    12,
+    15
+   ]
+  }
+ },
+ "points": {
+  "D2_C2_S2_Nr8_T16_Tp4_dft_snr-3": 640
+ },
+ "trial_stream": {
+  "rule": "default_rng([20260926, TBID[testbed], PID[prior], Nr, T, Tp, int(snr)+100])",
+  "skip_min": 2560,
+  "skip_max_end": 3200,
+  "split": "DEVELOPMENT set (review_next, trials >= 2560)"
+ },
+ "run_params": {
+  "beta": "0.7",
+  "dtype": "complex128/float64",
+  "iters": "16",
+  "n": "40",
+  "seed": "20260926",
+  "snr": "-3.0",
+  "t_in": "5",
+  "n_chunks": 16
+ },
+ "receiver": {
+  "outer_iterations": 16,
+  "beta": 0.7,
+  "t_in_bigamp": 5,
+  "n_inner_routeA": 1,
+  "dtype": "complex128/float64",
+  "device": "CPU, one thread per worker",
+  "code": "conv (133,171)_8 nu=6 terminated, QPSK"
+ },
+ "gmm": {
+  "bstar": "kron",
+  "kron_K": "512",
+  "ntrain": 10000.0,
+  "selection": "validation log-likelihood over the pre-registered K grid (BLER never consulted)",
+  "fits_dir": "/home/HTJ/t2/conf/results/gmm_fits_D2_review_next_A1s2_aug_a2",
+  "em_sec": "14280.912514448166"
+ },
+ "sample_counts": {
+  "train_channels": 10000,
+  "score_train": 9000,
+  "score_val": 1000,
+  "test_trials_per_point": [
+   640
+  ]
+ },
+ "stagec_checkpoint": {
+  "path": "/home/HTJ/t2/conf/ckpt_review_next/aug_N10000_a2_best.pt",
+  "sha256_16": "acd168cbc7f17af9",
+  "stored_epoch": 1437,
+  "best_epoch": 1437,
+  "best_val": 0.3786020874977112,
+  "role": "best",
+  "evaluated_weights": "best EMA @1437",
+  "best_pt": null,
+  "hp": {
+   "arch": "dit",
+   "param": "vp",
+   "domain": "angle",
+   "lr": 0.002238046051591068,
+   "ema": 0.999,
+   "batch": 256,
+   "emb": 256,
+   "width": 64,
+   "depth": 6,
+   "heads": 8,
+   "patch": 1
+  },
+  "params": 479426,
+  "rung": "D2SX10000",
+  "attempt": 2,
+  "Nr": 8,
+  "Nt": 4,
+  "split_hash": "5340d785c2ad3eb6",
+  "sigma_tag": "",
+  "train_epochs": 1437,
+  "stopped_by": null,
+  "train_wall_sec": 2112.7030396461487,
+  "train_device": "cuda:0 NVIDIA RTX PRO 6000 Blackwell Server Edition",
+  "val_frac": 0.1,
+  "seeds": {
+   "split": 20260926,
+   "val": 20260927,
+   "train": 20260928,
+   "gate": 20260929
+  }
+ },
+ "stagec_status": "built from explicit ckpt /home/HTJ/t2/conf/ckpt_review_next/aug_N10000_a2_best.pt -- caller override, NOT verified against the gate record here (recorded PASS rows: none) | V1 (psd_project=True): built from explicit ckpt /home/HTJ/t2/conf/ckpt_review_next/aug_N10000_a2_best.pt -- caller override, NOT verified against the gate record here (recorded PASS rows: none)",
+ "stagec_gate": "NO GATE RECORD mentions aug_N10000_a2_best.pt -- UNVERIFIED here.  (GA-GD are measurable on D1 only, 10_SPEC §5: a D2 re-train is qualified by its D1 sibling's gate row, which this string cannot prove.)",
+ "stagec_ckpt_id": "sha256[:16]=acd168cbc7f17af9 epoch=1437 best_epoch=1437 role=best 8x4",
+ "arms": [
+  "M-ours-bstar",
+  "M-ours-dscore-C-V1",
+  "R5-genie"
+ ],
+ "versions": {
+  "python": "3.12.14",
+  "numpy": "2.5.2",
+  "torch": "2.14.0+cu130",
+  "host": "9000babdde68",
+  "cpu_count": 192
+ },
+ "output_paths": {
+  "tables": "/home/HTJ/t2/conf/results/tables_D2_review_next_A1s2_aug_a2.txt",
+  "guard": "/home/HTJ/t2/conf/results/guard_D2_review_next_A1s2_aug_a2.txt",
+  "log": "/home/HTJ/t2/conf/logs/run_D2_review_next_A1s2_aug_a2.log"
+ }
+}

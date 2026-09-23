@@ -150,7 +150,7 @@ damping·restart·n_inner 는 prior/adapter 실험과 분리해 별도 사전 �
 | §2.3 P1-3 phase | held-out **완료**: C-phase 만족(0.246/0.148/0.083, 해석 무관) → A1 진행 | `p1_heldout.{npz,txt}` |
 | §2.4 P1-4 pseudo | held-out(보고 전용) 완료: V1 r_P 0.33~0.49. 판정(H4)은 §2.1 실제 질의 반복 4 에서 | `p1_heldout.{npz,txt}` |
 | §2.5 H0 통제 재학습 | **실행 중** (2026-09-22 17:14 CDT~, GPU 1, 초기값 비고정 — N1 결정에 따라 재시작 가능) | `ckpt_review_next/ctrl_N160000_a1.pt` |
-| §3.1 A1 | C-phase 만족 → 1단계(D1 형제 aug 학습 + 게이트) 선행 코드(phase_aug, D1 wrapper) 대기 | — |
+| §3.1 A1 | 1단계 **D1 형제 게이트 PASS** (GA 9.5e-16, GB 4.8e-4, GC 0.081, GD 0.066; `_best.pt` epoch 164). 2단계(N=1e4, 개발 집합 C2 −3 dB): aug 평균 83.3 vs ctrl 86.0 실패, 1차 부호검정 15:19 p=0.608 → **판정 불가**. 3단계(N=1.6e5 aug vs ctrl) 학습 중 | `gate_aug_D1_N160000_a1.txt`, `A1s2_group_C2_m3.txt` |
 | §3.2 A2 | **완료** (19:52 CDT). C2 −3 dB: V1-mean vs V1-eta 88:88 (4:4, p=1) → **H5 기각**. 상호작용 9:19 p=0.087 → 귀속 조건 불충족. gmmB-scorew: mean 이 eta 보다 나쁨(134 vs 124, p=0.041). 보고 전용 floor1e-2 행: 88 | `raw_review_next_A2`, `A2_interaction_C2_m3.txt` |
 | P0-2 실경로 비용 벤치 | 코드 있음, C6 종료 후 실행 | `complexity_moduleH_ep.txt` |
 | §7 C6 재실행 (`NR16run2`) | 실행 중 (05:28~) | `raw_NR16run2`, `tables_D2_NR16run2.txt` |
