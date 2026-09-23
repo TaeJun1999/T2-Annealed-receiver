@@ -1,0 +1,83 @@
+# date        : 2026-09-23 08:25:30 KST
+# git commit  : b7fca4b1
+# versions    : python 3.12.14  numpy 2.5.2  scipy 1.18.1  torch 2.14.0+cu130 (cuda_available=False)
+# device      : CPU (192 cores) | dtype: complex128 / float64 | deterministic: yes (fixed seeds, no GPU in the receiver)
+# testbed     : D2
+# seed rule   : default_rng([20260926, TBID[testbed], PID[prior], Nr, T, Tp, int(snr)+100])  (trials of a point = ONE stream)
+# code        : rate-1/2 conv (133,171)_8 nu=6 terminated, QPSK, outer iterations = 16 for EVERY arm
+# Demo/ hashes: t2_route_a.py=95a5408901ec125c  t2_trellis.py=31cd0ee9c68e972b  t2_gmm.py=d064e58c7510c769
+# content     : P1-1 cavity (NEXT_EXPERIMENTS v3 §2.1) + real-query parts of §2.2 / §2.4; DEVELOPMENT set; diagnostic P1-x, not a gate; h_true diagnostic only
+# point       : D2_C1_S2_Nr8_T16_Tp2_dft_snr-3  trials 2560..3199  n = 640
+# arms        : M-ours-dscore-C-V1, M-ours-dscore-C-V0, M-ours-bstar-scalar, M-ours-bstar  (paired: same H, u, perm, Y)
+# GMM b*      : kron K=1024  fits /home/HTJ/t2/conf/results/gmm_fits_D2_B16e4k  N_train 160000
+# checkpoint  : /home/HTJ/t2/conf/ckpt/d2sx_N160000_a1.pt  sha256[:16]=4443921ce8d5c4a1 epoch=1784 best_epoch=1764 role=legacy-last 8x4 | BEST_WEIGHTS_UNAVAILABLE: evaluated = last-epoch EMA, reported best_val belongs to best_epoch
+# grid        : frozen D2 sigma grid (20 pts) [s_lo, s_hi] = [0.0331, 0.8452]; unfloored = eig(J) > 10 x LAM_MIN = 1e-05
+# seeds       : trial stream only (common.trial_rng, SEED 20260926); no other randomness
+# run device  : CPU only (CUDA_VISIBLE_DEVICES=''), 1 thread, complex128/float64 (receiver and r_P post-pass)
+# run         : git b7fca4b1  wall 5644 s  outer iterations 16
+
+## §2.1 cavity -- block median [IQR]; exit = sigma(nu_q) outside the grid; shift = median over clipped calls
+arm                  it                      e_t                      a_t   exit  alpha_H   clip     shift  NMSE h_post  |hp-hH|/|hH|   BLER
+M-ours-dscore-C-V1    1           1 [0.855,1.14]                        -  1.000     5.25  1.000     0.669     1.44e+06          9.18  1.000
+M-ours-dscore-C-V1    2 9.57e+03 [6.06e+03,7.24e+06]           1 [0.422,5.01]  1.000        1  1.000     0.126     1.98e+04         0.879  1.000
+M-ours-dscore-C-V1    4 3.72e+07 [3.84e+04,2.17e+08]        1.57 [0.502,5.23]  0.915        1  0.973     0.495     1.87e+07             1  1.000
+M-ours-dscore-C-V1    8 6.64e+04 [3.28e+03,3.81e+06]       0.927 [0.296,1.97]  0.879        1  0.981         1     2.15e+03             1  0.993
+M-ours-dscore-C-V1   16 6.27e+04 [4.55e+03,6.61e+05]       0.716 [0.253,1.62]  0.861        1  0.984         1          243             1  0.970
+M-ours-dscore-C-V0    1           1 [0.855,1.14]                        -  1.000    0.834  1.000      1.08     2.35e+14      1.19e+05  1.000
+M-ours-dscore-C-V0    2 6.06e+04 [2.2e+04,8e+09]         0.8 [0.602,1.31]  0.836        1  0.825     0.217     1.07e+10          1.14  1.000
+M-ours-dscore-C-V0    4 4.12e+10 [6.12e+08,2.01e+12]        1.04 [0.314,2.03]  0.931        1  0.933         1     3.99e+06             1  1.000
+M-ours-dscore-C-V0    8 8.2e+08 [4.83e+06,6.82e+12]      0.303 [0.253,0.339]  1.000        1  1.000         1          920             1  1.000
+M-ours-dscore-C-V0   16 5.04e+07 [3.63e+05,1.33e+13]         0.32 [0.27,1.38]  1.000        1  1.000         1     2.25e+04             1  1.000
+M-ours-bstar-scalar   1        0.915 [0.78,1.04]                        -  1.000    0.251      -         -        0.634          0.19  1.000
+M-ours-bstar-scalar   2        1.15 [0.866,1.58]       0.533 [0.306,0.85]  0.006    0.348      -         -        0.611         0.181  0.989
+M-ours-bstar-scalar   4         1.72 [1.13,2.71]       0.949 [0.583,1.62]  0.000    0.433      -         -        0.638        0.0918  0.905
+M-ours-bstar-scalar   8           2.54 [1.4,4.6]        1.43 [0.885,2.45]  0.000    0.525      -         -        0.648        0.0612  0.842
+M-ours-bstar-scalar  16           3.1 [1.4,5.87]        1.47 [0.909,2.45]  0.000    0.558      -         -        0.646        0.0343  0.798
+
+## §2.1 M-ours-bstar (colored ep_site; G-based only)
+ it   clip     shift  NMSE h_post  NMSE m_tilt  eig G min  eig G max   BLER
+  1  0.589    0.0187        0.578        0.579  -1.24e-15          2  1.000
+  2  0.844    0.0484        0.547        0.561     0.0331       3.95  0.978
+  4  0.744    0.0479        0.592        0.598       0.29       4.42  0.873
+  8  0.686    0.0426        0.602        0.595       1.42       6.24  0.786
+ 16  0.694    0.0437        0.595        0.603       2.12       8.74  0.755
+
+## §2.2 real-query calibration (Sigma = nu J); rho_tr = sum|h-m|^2 / sum tr Sigma (all blocks); on the PSD subset (psd = its fraction): rho_unf = rho_tr on the unfloored subspace (H2 / C-calib form), d2/dim, coverage, #fl = mean count outside it, mfl / mfe = median floored share of |h-m|^2 / of tr Sigma; hit = frac with an eigenvalue at the LAM_MIN floor
+source                 it   rho_tr  rho_unf   d2/dim  cov50  cov90    #fl      mfl      mfe    hit    psd
+V1 own (J_psd)          1     38.1       21 1.29e+03  0.000  0.000  12.69    0.449 7.47e-08  1.000  1.000
+V1 own (J_psd)          2 7.54e+09 7.54e+09 1.89e+04  0.000  0.000   0.16        0        0  0.131  1.000
+V1 own (J_psd)          4 1.64e+09 1.64e+09 3.63e+07  0.006  0.011   0.45        0        0  0.089  1.000
+V1 own (J_psd)          8 7.84e+05 7.84e+05 9.53e+03  0.061  0.066   0.78        0        0  0.191  1.000
+V1 own (J_psd)         16 4.53e+08 4.53e+08 6.16e+03  0.108  0.111   0.66        0        0  0.208  1.000
+V0 own (Herm J)         1    -46.5        -        -      -      -      -        -        -  0.000  0.000
+V0 own (Herm J)         2 8.57e+09 8.57e+09 5.39e+05  0.000  0.000   0.00        0        0  0.000  0.977
+V0 own (Herm J)         4 1.01e+10 9.99e+09 4.07e+10  0.000  0.000   0.00        0        0  0.000  0.992
+V0 own (Herm J)         8 9.37e+12 9.71e+12 8.67e+08  0.000  0.000   0.00        0        0  0.000  0.932
+V0 own (Herm J)        16 1.42e+11 1.65e+13 3.09e+09  0.000  0.000   0.00        0        0  0.000  0.853
+GMM b* cf @ V1 (q,nu)   1     1.41     1.41     2.48  0.113  0.172   0.00        0        0  0.000  1.000
+GMM b* cf @ V1 (q,nu)   2  6.7e+07 4.56e+07 3.82e+03  0.000  0.000   5.77        0        0  0.000  0.972
+GMM b* cf @ V1 (q,nu)   4 4.56e+07 2.36e+07 3.29e+04  0.011  0.019  19.89 9.86e-07  0.00131  0.000  0.966
+GMM b* cf @ V1 (q,nu)   8 4.63e+09 1.99e+05      9.6  0.016  0.020  25.05        1        1  0.000  0.995
+GMM b* cf @ V1 (q,nu)  16  5.4e+06 1.93e+06     7.02  0.024  0.033  25.36        1        1  0.000  0.998
+GMM b* cf @ V0 (q,nu)   1     1.41     1.41     2.48  0.113  0.172   0.00        0        0  0.000  1.000
+GMM b* cf @ V0 (q,nu)   2 1.66e+07 1.68e+07 1.66e+04  0.000  0.000  11.51        0        0  0.000  1.000
+GMM b* cf @ V0 (q,nu)   4 5.09e+06 3.66e+07 2.83e+06  0.000  0.000  28.81        1        1  0.000  0.992
+GMM b* cf @ V0 (q,nu)   8 7.77e+11 1.29e+07 1.75e+06  0.000  0.000  31.96        1        1  0.000  0.985
+GMM b* cf @ V0 (q,nu)  16 1.18e+11        -        -  0.000  0.000  32.00        1        1  0.000  0.989
+
+## §2.4 real-query r_P (V1) = |nu K|_F / max(|nu J|_F, eps), J = raw Wirtinger
+  it         1         2         4         8        16
+  med        1    0.0957   0.00797     0.084    0.0989
+  max     1.14       1.7      1.06      1.27      1.13
+
+## inputs of the registered rules (the verdicts belong to the full C2 -3 dB development point, n = 640)
+H1: V1 iteration 8 block medians  e_8 = 6.639e+04  a_8 = 0.9275   (rule: reject H1 iff e in [0.7, 1.4] AND a <= 3)
+H4: V1 iteration 4 block r_P median = 0.007969   (rule: reject H4 iff median < 0.2 OR LR p >= 0.05 in the NMSE + nu_q logistic model -- LR test not computed here)
+
+## per block
+M-ours-dscore-C-V1   fail@16 623/640  raised 64  diverged(guardH) 640  sec/block 1.3
+M-ours-dscore-C-V0   fail@16 640/640  raised 265  diverged(guardH) 640  sec/block 1.1
+M-ours-bstar-scalar  fail@16 511/640  raised 0  diverged(guardH) 0  sec/block 0.2
+M-ours-bstar         fail@16 483/640  raised 0  diverged(guardH) 0  sec/block 0.9
+
+## consistency: max rel |nu_q(SigL) - nu_q| = 0.00e+00  max rel |NMSE(h_post) - logged nmse| = 0.00e+00  max |eig project_psd(J_post) - eig J_hooked| = 1.47e+00  K/J toy rel err = 1.44e-16

@@ -1077,8 +1077,11 @@ class ScorePrior:
     covers the 1-99 percentile of the queries by construction, so a few percent is expected.  We do NOT clamp:
     clamping would silently return the denoiser of a different noise level."""
 
-    def __init__(self, ckpt, Nr, Nt, Chat, device="cpu", psd_project=False, sigma_tag=""):
+    def __init__(self, ckpt, Nr, Nt, Chat, device="cpu", psd_project=False, sigma_tag="", psd_floor=None):
         self.psd_project = bool(psd_project)       # (F1) / Stage C V1 -- OFF by default: V0 is unchanged
+        # review_next A2 report-only row (NEXT_EXPERIMENTS §2.6 C-calib): a different eigenvalue floor for the
+        # V1 projection.  None = C.LAM_MIN, i.e. exactly the pre-registered V1.
+        self.psd_floor = C.LAM_MIN if psd_floor is None else float(psd_floor)
         if device == "cpu":
             torch.set_num_threads(1)               # one worker process = one thread (common.py sets the BLAS env)
         self.model, self.st = load_model(ckpt, Nr, Nt, device=device)
@@ -1123,7 +1126,7 @@ class ScorePrior:
         # nu*J must be Hermitian for RouteAClip._matrix_site; the receiver symmetrises anyway, so the
         # Hermitian part changes nothing there and leaves alpha = tr(J).real/N untouched.
         # psd_project=True additionally floors the eigenvalues (F1); it is a DIFFERENT arm, never the default.
-        J = project_psd(J) if self.psd_project else 0.5 * (J + J.conj().T)
+        J = project_psd(J, self.psd_floor) if self.psd_project else 0.5 * (J + J.conj().T)
         self._cache = (key, (m, J))
         return m, J
 
@@ -1169,7 +1172,7 @@ def _passing_attempts(testbed):
 
 
 def load_prior(testbed, prior, Nr, Nt, rung=None, attempt=None, ckpt=None, device="cpu", psd_project=False,
-               ntrain=None):
+               ntrain=None, psd_floor=None):
     """Module H for M-ours-dscore: the gate-passing checkpoint wrapped as a ScorePrior.
     ckpt given -> use it.  Otherwise pick the checkpoint recorded as PASSING in
     conf/results/gate_<testbed>.txt / the ladder state, or (rung, attempt) if given.
@@ -1207,7 +1210,7 @@ def load_prior(testbed, prior, Nr, Nt, rung=None, attempt=None, ckpt=None, devic
         # Stage C passes the run's --ntrain so that Chat comes from the SAME channel set the GMM arms were
         # fitted on (10_SPEC A3, equal budget); with N'=1.6e5 fits the default would find no file at all.
         Chat = A.load_fits(testbed, prior, Nr, *( () if ntrain is None else (ntrain,) ))[("full", 32)]["Chat"]
-        sp = ScorePrior(ckpt, Nr, Nt, Chat, device=device, psd_project=psd_project)
+        sp = ScorePrior(ckpt, Nr, Nt, Chat, device=device, psd_project=psd_project, psd_floor=psd_floor)
         last_reason = why
         return sp
     except Exception as ex:

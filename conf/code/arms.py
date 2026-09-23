@@ -139,7 +139,8 @@ def module_h_priors(testbed, prior, Nr, Nt, ntrain=N_TRAIN, true_prior=None):
 
 def build_our_arms(testbed, prior, Nr, Nt, T, Tp, sigma2, code, Xp, ntrain=N_TRAIN,
                    true_prior=None, score_prior=None, with_G=False, score_prior_v1=None,
-                   score_prior_c=None, bstar_scalar=False, mean_arms=False):
+                   score_prior_c=None, bstar_scalar=False, mean_arms=False,
+                   score_prior_v1_floor=None):
     """M-ours-gmm32 / M-ours-bstar / M-ours-score (D1 only) / M-ours-dscore / M-ours-G (test M2 only).
 
     score_prior_v1: a SECOND score.ScorePrior built with psd_project=True (Stage C V1, spec 10 §3b / (F1)).
@@ -201,6 +202,8 @@ def build_our_arms(testbed, prior, Nr, Nt, T, Tp, sigma2, code, Xp, ntrain=N_TRA
             arms[f"gmmB-scorew-{cl}"] = route_a(*a, hp[bstar], code, Xp, "score", clip=cl)
             assert not arms[f"gmmB-scorew-{cl}"].exact_prior, "gmmB-scorew must not take the ep_site path"
         arms["M-ours-bstar-mean"] = route_a(*a, hp[bstar].view("mean"), code, Xp, "gmm_site")
+        if score_prior_v1_floor is not None:   # §2.6 C-calib report-only row: V1 with eigenvalue floor 1e-2
+            arms["M-ours-dscore-C-V1-floor1e-2"] = route_a(*a, score_prior_v1_floor, code, Xp, "score", clip="eta")
     if with_G:
         arms["M-ours-G"] = route_a(*a, Cs, code, Xp, "gaussian")
 

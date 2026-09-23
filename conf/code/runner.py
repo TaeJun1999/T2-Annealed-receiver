@@ -158,7 +158,7 @@ def stagec_id_str(ckpt):
     return s
 
 
-def score_prior(testbed, prior, Nr, Nt, ckpt=None, psd_project=False, ntrain=None):
+def score_prior(testbed, prior, Nr, Nt, ckpt=None, psd_project=False, ntrain=None, psd_floor=None):
     """Module H of M-ours-dscore.  score.py is authoritative; its signature is
 
         score.load_prior(testbed, prior, Nr, Nt, rung=None, attempt=None, ckpt=None, device="cpu",
@@ -181,6 +181,8 @@ def score_prior(testbed, prior, Nr, Nt, ckpt=None, psd_project=False, ntrain=Non
                       "(M-ours-dscore = the gate-passing checkpoint) cannot be honoured")
     try:
         kw = dict(psd_project=True) if psd_project else {}      # Stage C V1 / (F1); default path unchanged
+        if psd_floor is not None:                                # review_next A2 report-only floor row
+            kw["psd_floor"] = psd_floor
         if ntrain is not None and ntrain != C.N_TRAIN:
             kw["ntrain"] = ntrain          # equal budget: Chat from the SAME fits the GMM arms use (10_SPEC A3)
         p = fn(testbed, prior, Nr, Nt, rung=None, attempt=None, ckpt=ckpt, device="cpu", **kw)
@@ -194,6 +196,8 @@ def score_prior(testbed, prior, Nr, Nt, ckpt=None, psd_project=False, ntrain=Non
 
 
 NO_SCORE = "n/a (no score model for this array size)"
+A2_PSD_FLOOR = 1e-2                         # NEXT_EXPERIMENTS §2.6 C-calib: "ν 상대 floor 1e-2" (J is Cov/ν)
+A2_FLOOR_ARM = "M-ours-dscore-C-V1-floor1e-2"
 
 
 def fit_cost_meta(testbed, fits):
@@ -323,7 +327,7 @@ def build_point(testbed, cell, prior, snr, ntrain=C.N_TRAIN, beta=C.BETA, t_in=C
     # Stage C (10_SPEC §3b/§3c).  STRICTLY OPT-IN: with stagec_ckpt=None nothing below is built and the arm
     # set of this point is exactly the pre-registered one.  --stagec-ckpt is a SEPARATE flag from --ckpt, so
     # turning Stage C on never changes what M-ours-dscore is (its pre-registered judgement stays untouched).
-    spc = spc1 = None
+    spc = spc1 = spcf = None
     sc_why = "not requested (--stagec-ckpt not given) -- arm set is the pre-registered one"
     if stagec_ckpt:
         # review_next S7-b: the checkpoint's OWN array decides, not a hard-coded Nr == 8.  The old guard
@@ -336,10 +340,15 @@ def build_point(testbed, cell, prior, snr, ntrain=C.N_TRAIN, beta=C.BETA, t_in=C
             spc, sc_why = score_prior(testbed, prior, Nr, Nt, stagec_ckpt, ntrain=ntrain)
             spc1, w1 = score_prior(testbed, prior, Nr, Nt, stagec_ckpt, psd_project=True, ntrain=ntrain)
             sc_why += " | V1 (psd_project=True): " + w1
+            if mean_arms:           # review_next A2: V1 with the eigenvalue floor 1e-2 (§2.6 C-calib, report-only)
+                spcf, wf = score_prior(testbed, prior, Nr, Nt, stagec_ckpt, psd_project=True, ntrain=ntrain,
+                                       psd_floor=A2_PSD_FLOOR)
+                sc_why += f" | V1-floor{A2_PSD_FLOOR:g}: " + wf
     # `true` (not `true if Nr == 8`): the oracle score arm is closed-form and array-size independent.
     our, ocfg, meta, hp, _ = A.build_our_arms(*a, ntrain=ntrain, true_prior=true, score_prior=sp,
                                               score_prior_c=spc, score_prior_v1=spc1,
-                                              bstar_scalar=bool(stagec_ckpt), mean_arms=mean_arms)
+                                              bstar_scalar=bool(stagec_ckpt), mean_arms=mean_arms,
+                                              score_prior_v1_floor=spcf)
     arms.update(our)
     cfgs.update(ocfg)
     # An arm that is not built must leave a trace with the REASON, or the analysis sees a missing row and
@@ -376,10 +385,11 @@ def build_point(testbed, cell, prior, snr, ntrain=C.N_TRAIN, beta=C.BETA, t_in=C
                     meta[f"fit_sec_note|{k}"] = "role=best but its last sibling is missing: wall_sec stops at best epoch"
     if mean_arms:                   # review_next A2 (NEXT_EXPERIMENTS §3.2): opt-in, nothing above changes
         meta["mean_arms"] = "A2 (§3.2) clip='mean' ablation: " + " ".join(
-            k for k in ("M-ours-dscore-C-V1-mean", "gmmB-scorew-eta", "gmmB-scorew-mean", "M-ours-bstar-mean")
-            if k in arms)
-        if "M-ours-dscore-C-V1-mean" in arms:           # the SAME V1 weights; only the clip rule differs
-            learned["M-ours-dscore-C-V1-mean"] = learned["M-ours-dscore-C-V1"]
+            k for k in ("M-ours-dscore-C-V1-mean", "gmmB-scorew-eta", "gmmB-scorew-mean", "M-ours-bstar-mean",
+                        A2_FLOOR_ARM) if k in arms)
+        for k in ("M-ours-dscore-C-V1-mean", A2_FLOOR_ARM):  # the SAME V1 weights; only clip rule / floor differ
+            if k in arms:
+                learned[k] = learned["M-ours-dscore-C-V1"]
             for f in ("fit_sec", "fit_sec_note"):
                 if f"{f}|M-ours-dscore-C-V1" in meta:
                     meta[f"{f}|M-ours-dscore-C-V1-mean"] = meta[f"{f}|M-ours-dscore-C-V1"]
