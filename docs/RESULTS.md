@@ -2,7 +2,7 @@
 
 웹에서 해석할 때 가져가는 파일. 표와 수치는 반드시 EXPERIMENTS.md의 행(커밋·설정)을 가리킨다. 해석과 결론은 여기 쓰지 않는다.
 
-- 갱신: 2026-09-23 18:05 CDT (= 09-24 08:05 KST), 기준 커밋 6d56404a. 절마다 초안 작성자와 별도 검증자가 원 결과 파일·EXPERIMENTS.md 행과 대조했다(워크플로 wf_6422f535-670; 검증 메모 원문 `conf/results/review_next/results_md_raw/sections_wf_6422f535.json`).
+- 갱신: 2026-09-23 17:59 CDT (커밋 8cf4b954; 처음에 18:05 CDT 로 잘못 적었던 것을 정정), 기준 커밋 6d56404a. 절마다 초안 작성자와 별도 검증자가 원 결과 파일·EXPERIMENTS.md 행과 대조했다(워크플로 wf_6422f535-670; 검증 메모 원문 `conf/results/review_next/results_md_raw/sections_wf_6422f535.json`).
 - 판정 문구는 사전 등록 라벨(지지 / 판정 불가 / UNDECIDED / 기각 / PASS 등) 그대로다. 수치를 인용하기 전에 **§6 인용 주의**를 먼저 읽는다.
 - 목차: §1 헤드라인(Stage C, 동일예산) · §2 review_next 진단·ablation · §3 A1 위상 augmentation · §4 P3 반복 루프 규칙 · §5 C6 (Nr=16) · §6 인용 주의
 
