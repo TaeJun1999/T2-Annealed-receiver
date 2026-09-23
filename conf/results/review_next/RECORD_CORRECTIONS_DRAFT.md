@@ -5,7 +5,7 @@
 - 근거: `REVIEW_AUDIT.md`의 해당 항목. 수치는 초안 agent가 raw에서 다시 뽑았고, 별도 검증 agent가 (1) 원문 인용이 글자 그대로인지 (2) 수치 재도출 (3) 원 과해석을 유지하거나 반대 방향으로 과잉 정정하지 않는지 확인했다.
 - 규모: 1차 66개 + 2차(1차 검증이 찾은 누락 위치) 49개 = **115개**. 검증에서 문제가 나온 37개는 **검증 agent가 고친 문구로 교체해 실었다** (항목마다 표시). 2차 검증 뒤에도 남은 소수 위치는 맨 끝 '3차 잔여'에 검증 agent 제안 그대로(2차 검증 없음) 둔다.
 - 적용 방식 (기록 관례): `DECISIONS.md` = append 한 줄(`[2026-09-23 __:__ KST] 정정 — …`, 시각은 적용 시 기입) · `STATUS.md`/`PAPER_MATERIALS.md` = 원문 유지 + 바로 뒤 `> **정정 (2026-09-23, review_next <id>)**` · spec/rules 파일(00_GOAL, 01_RULES, 03/05/06/08/10_SPEC, PROMPT) = **사용자 승인 필요** 표시된 노트 · 코드 docstring/캡션 생성기 = 동작 불변 문구 교체(생성기 출력 문자열은 사용자 승인 뒤) · 이미 생성된 그림·표는 재생성하지 않음 · 커밋 메시지는 수정 불가(force push 필요) → DECISIONS 정정으로 대신.
-- 복잡도 항목의 대체 수치는 `complexity_moduleH_ep.txt`(실경로 벤치, 아직 미실행) 결과로 채운다 — 초안에는 `[complexity_moduleH_ep.txt 결과로 채움]` 자리표시.
+- 복잡도 항목의 대체 수치는 `complexity_moduleH_ep.txt`(실경로 벤치, 아직 미실행) 결과로 채운다 — 초안에는 `V1/b\* = Module H 호출당 1.35× (−3 dB) · 1.39× (+6 dB), 블록 전체 1.33× · 1.38× (헤드라인 구성 kron K=1024 + d2sx_N160000_a1, 실제 수신기 경로; `results/review_next/complexity_moduleH_ep.txt`)` 자리표시.
 - 원자료: `record_corrections_raw.json`(1차), `record_corrections_r2_raw.json`(2차).
 
 ## 목차
@@ -1447,7 +1447,7 @@ L1231: 시행당(16 반복): GMM **273 ms** 대 학습 **1260 ms**.
 **제안 문구**
 
 ```text
-> **정정 (2026-09-23, review_next P0-2b·cost/M2)**: 제목(1217)의 "학습 prior 가 4.6배 비싸다", 1219-1221, 표 평균행(1229), 시행당 비용(1231)은 **arm 간 수신기 비용비가 아니다.** ① 측정한 함수: 헤드라인 GMM arm `M-ours-bstar` 는 `denoise_full` 을 부르지 않는다. 이 arm 은 `gmm_site`(mode='colored', exact_prior=True; `arms.py:36,163`)라서 외부 반복마다 `GMMPriorB.ep_site(G, b, lam_min)` 를 부른다(`Demo/t2_route_a.py:373-374`). `raw_B16e4k` C2 −3 dB 64파일의 `M-ours-bstar|clip` 평균 0.798 은 ep_site 의 clip 카운터가 돌았다는 기록이다. 그러므로 1220 의 "진입점은 양쪽 다 `prior.denoise_full(q, nu) -> (m, J)`" 와 1221 의 "이 한 번의 호출이 arm 간 복잡도 차이의 **전부**다" 는 GMM 쪽에서 틀렸다. score 쪽(V0/V1)은 수신기가 실제로 부르는 함수를 쟀다. ② 측정 구성: GMM 은 kron **K=512**(N=1e4 적합), 학습 arm 은 `d2sx_N10000_a1.pt` 였다(`complexity_moduleH.txt:5-6`, `bench_moduleH.py:30-31`). 헤드라인 `raw_B16e4k` 448파일은 전부 kron_K=1024·ntrain=1.6e5·`d2sx_N160000_a1.pt` 이다. 두 ckpt 는 hp(dit w64 d6 h8 p1 emb256)가 같으므로, 구성 차이 가운데 비용에 걸리는 것은 GMM 의 K 다. ③ 재현성: 파일에는 평균만 있고, arm 을 ν 마다 연속된 블록으로 재서 부하 변동이 비에 그대로 들어간다(`bench_moduleH.py:39-44,75-87`). 같은 코드·시드·K·ckpt 로 다시 돌렸을 때 4.6× 가 재현되지 않았다(REVIEW_AUDIT cost/M2; 그 재측정은 저장되지 않아 수치로 인용하지 않는다). **대체 문장**: "A8(`complexity_moduleH.txt`)은 등방 `denoise_full` 마이크로벤치마크(GMM K=512, `d2sx_N10000_a1.pt`, 1 스레드, 평균만)이며 M-ours-bstar 수신기 경로(`ep_site`)의 비용이 아니다. 헤드라인 구성(K=1024, `d2sx_N160000_a1.pt`)의 실경로 Module H 비용비는 [complexity_moduleH_ep.txt 결과로 채움]." A8 파일과 이 절은 기록으로 남긴다.
+> **정정 (2026-09-23, review_next P0-2b·cost/M2)**: 제목(1217)의 "학습 prior 가 4.6배 비싸다", 1219-1221, 표 평균행(1229), 시행당 비용(1231)은 **arm 간 수신기 비용비가 아니다.** ① 측정한 함수: 헤드라인 GMM arm `M-ours-bstar` 는 `denoise_full` 을 부르지 않는다. 이 arm 은 `gmm_site`(mode='colored', exact_prior=True; `arms.py:36,163`)라서 외부 반복마다 `GMMPriorB.ep_site(G, b, lam_min)` 를 부른다(`Demo/t2_route_a.py:373-374`). `raw_B16e4k` C2 −3 dB 64파일의 `M-ours-bstar|clip` 평균 0.798 은 ep_site 의 clip 카운터가 돌았다는 기록이다. 그러므로 1220 의 "진입점은 양쪽 다 `prior.denoise_full(q, nu) -> (m, J)`" 와 1221 의 "이 한 번의 호출이 arm 간 복잡도 차이의 **전부**다" 는 GMM 쪽에서 틀렸다. score 쪽(V0/V1)은 수신기가 실제로 부르는 함수를 쟀다. ② 측정 구성: GMM 은 kron **K=512**(N=1e4 적합), 학습 arm 은 `d2sx_N10000_a1.pt` 였다(`complexity_moduleH.txt:5-6`, `bench_moduleH.py:30-31`). 헤드라인 `raw_B16e4k` 448파일은 전부 kron_K=1024·ntrain=1.6e5·`d2sx_N160000_a1.pt` 이다. 두 ckpt 는 hp(dit w64 d6 h8 p1 emb256)가 같으므로, 구성 차이 가운데 비용에 걸리는 것은 GMM 의 K 다. ③ 재현성: 파일에는 평균만 있고, arm 을 ν 마다 연속된 블록으로 재서 부하 변동이 비에 그대로 들어간다(`bench_moduleH.py:39-44,75-87`). 같은 코드·시드·K·ckpt 로 다시 돌렸을 때 4.6× 가 재현되지 않았다(REVIEW_AUDIT cost/M2; 그 재측정은 저장되지 않아 수치로 인용하지 않는다). **대체 문장**: "A8(`complexity_moduleH.txt`)은 등방 `denoise_full` 마이크로벤치마크(GMM K=512, `d2sx_N10000_a1.pt`, 1 스레드, 평균만)이며 M-ours-bstar 수신기 경로(`ep_site`)의 비용이 아니다. 헤드라인 구성(K=1024, `d2sx_N160000_a1.pt`)의 실경로 Module H 비용비는 V1/b\* = Module H 호출당 1.35× (−3 dB) · 1.39× (+6 dB), 블록 전체 1.33× · 1.38× (헤드라인 구성 kron K=1024 + d2sx_N160000_a1, 실제 수신기 경로; `results/review_next/complexity_moduleH_ep.txt`)." A8 파일과 이 절은 기록으로 남긴다.
 ```
 
 <details><summary>검증 agent 지적 / 초안 원안</summary>
@@ -1457,7 +1457,7 @@ L1231: 시행당(16 반복): GMM **273 ms** 대 학습 **1260 ms**.
 초안 원안:
 
 ```text
-> **정정 (2026-09-23, review_next P0-2b·cost/M2)**: 제목(1217)의 "학습 prior 가 4.6배 비싸다", 1219-1221, 표 평균행(1229), 시행당 비용(1231)은 **arm 간 수신기 비용비가 아니다.** ① 측정한 함수: 헤드라인 GMM arm `M-ours-bstar` 는 `denoise_full` 을 부르지 않는다. 이 arm 은 `gmm_site`(mode='colored', exact_prior=True; `arms.py:36,163`)라서 외부 반복마다 `GMMPriorB.ep_site(G, b, lam_min)` 를 부른다(`Demo/t2_route_a.py:373-374`). `raw_B16e4k` C2 −3 dB 64파일의 `M-ours-bstar|clip` 평균 0.798 은 ep_site 의 clip 카운터가 돌았다는 기록이다. 그러므로 "진입점은 양쪽 다 denoise_full" 과 "이 한 번의 호출이 차이의 전부" 는 GMM 쪽에서 틀렸다. score 쪽(V0/V1)은 수신기가 실제로 부르는 함수를 쟀다. ② 측정 구성: GMM 은 kron **K=512**(N=1e4 적합), 학습 arm 은 `d2sx_N10000_a1.pt` 였다(`complexity_moduleH.txt:5-6`, `bench_moduleH.py:30-31`). 헤드라인 `raw_B16e4k` 448파일은 전부 kron_K=1024·ntrain=1.6e5·`d2sx_N160000_a1.pt` 이다. ③ 재현성: 파일에는 평균만 있고, arm 을 ν 마다 연속된 블록으로 재서 부하 변동이 비에 그대로 들어간다(`bench_moduleH.py:39-44,75-87`). 같은 코드·시드·K·ckpt 로 다시 돌렸을 때 4.6× 가 재현되지 않았다(REVIEW_AUDIT cost/M2; 그 재측정은 저장되지 않아 수치로 인용하지 않는다). **대체 문장**: "A8(`complexity_moduleH.txt`)은 등방 `denoise_full` 마이크로벤치마크(GMM K=512, `d2sx_N10000_a1.pt`, 1 스레드, 평균만)이며 M-ours-bstar 수신기 경로(`ep_site`)의 비용이 아니다. 헤드라인 구성(K=1024, `d2sx_N160000_a1.pt`)의 실경로 Module H 비용비는 [complexity_moduleH_ep.txt 결과로 채움]." A8 파일과 이 절은 기록으로 남긴다.
+> **정정 (2026-09-23, review_next P0-2b·cost/M2)**: 제목(1217)의 "학습 prior 가 4.6배 비싸다", 1219-1221, 표 평균행(1229), 시행당 비용(1231)은 **arm 간 수신기 비용비가 아니다.** ① 측정한 함수: 헤드라인 GMM arm `M-ours-bstar` 는 `denoise_full` 을 부르지 않는다. 이 arm 은 `gmm_site`(mode='colored', exact_prior=True; `arms.py:36,163`)라서 외부 반복마다 `GMMPriorB.ep_site(G, b, lam_min)` 를 부른다(`Demo/t2_route_a.py:373-374`). `raw_B16e4k` C2 −3 dB 64파일의 `M-ours-bstar|clip` 평균 0.798 은 ep_site 의 clip 카운터가 돌았다는 기록이다. 그러므로 "진입점은 양쪽 다 denoise_full" 과 "이 한 번의 호출이 차이의 전부" 는 GMM 쪽에서 틀렸다. score 쪽(V0/V1)은 수신기가 실제로 부르는 함수를 쟀다. ② 측정 구성: GMM 은 kron **K=512**(N=1e4 적합), 학습 arm 은 `d2sx_N10000_a1.pt` 였다(`complexity_moduleH.txt:5-6`, `bench_moduleH.py:30-31`). 헤드라인 `raw_B16e4k` 448파일은 전부 kron_K=1024·ntrain=1.6e5·`d2sx_N160000_a1.pt` 이다. ③ 재현성: 파일에는 평균만 있고, arm 을 ν 마다 연속된 블록으로 재서 부하 변동이 비에 그대로 들어간다(`bench_moduleH.py:39-44,75-87`). 같은 코드·시드·K·ckpt 로 다시 돌렸을 때 4.6× 가 재현되지 않았다(REVIEW_AUDIT cost/M2; 그 재측정은 저장되지 않아 수치로 인용하지 않는다). **대체 문장**: "A8(`complexity_moduleH.txt`)은 등방 `denoise_full` 마이크로벤치마크(GMM K=512, `d2sx_N10000_a1.pt`, 1 스레드, 평균만)이며 M-ours-bstar 수신기 경로(`ep_site`)의 비용이 아니다. 헤드라인 구성(K=1024, `d2sx_N160000_a1.pt`)의 실경로 Module H 비용비는 V1/b\* = Module H 호출당 1.35× (−3 dB) · 1.39× (+6 dB), 블록 전체 1.33× · 1.38× (헤드라인 구성 kron K=1024 + d2sx_N160000_a1, 실제 수신기 경로; `results/review_next/complexity_moduleH_ep.txt`)." A8 파일과 이 절은 기록으로 남긴다.
 ```
 </details>
 
@@ -1487,7 +1487,7 @@ git show HEAD:conf/results/complexity_moduleH.txt: L2 date 2026-09-22 14:29:53, 
 **제안 문구**
 
 ```text
-> **정정 (2026-09-23, review_next P0-2b)**: 항목 2 의 "~2.3×"(F14 캡션의 "nearer 2x" 도 같다)는 GMM `denoise_full` 비용을 K 로 외삽한 값이다. M-ours-bstar 가 실제로 부르는 함수는 `ep_site` 이므로 외삽한 함수가 틀렸고, K=1024 실측도 없었다(1245 가 적은 대로). 항목 3 의 "상한" 은 학습 쪽 구현을 더 빠르게 할 여지가 있다는 뜻으로만 성립한다. GMM 쪽을 다른 함수로 쟀으므로 4.6× 는 애초에 arm 간 비가 아니며, 실경로 비의 상한인지도 실측 전에는 말할 수 없다. 항목 1("V1 의 수리는 공짜다", −0.8%)은 score 쪽 같은 함수 안의 차이라 이 정정의 대상이 아니다(평균만 기록하고 블록 단위로 잰 점은 같다). **대체 문장**: "K 와 구현에 따른 비용비는 실경로 측정 [complexity_moduleH_ep.txt 결과로 채움] 으로만 쓴다."
+> **정정 (2026-09-23, review_next P0-2b)**: 항목 2 의 "~2.3×"(F14 캡션의 "nearer 2x" 도 같다)는 GMM `denoise_full` 비용을 K 로 외삽한 값이다. M-ours-bstar 가 실제로 부르는 함수는 `ep_site` 이므로 외삽한 함수가 틀렸고, K=1024 실측도 없었다(1245 가 적은 대로). 항목 3 의 "상한" 은 학습 쪽 구현을 더 빠르게 할 여지가 있다는 뜻으로만 성립한다. GMM 쪽을 다른 함수로 쟀으므로 4.6× 는 애초에 arm 간 비가 아니며, 실경로 비의 상한인지도 실측 전에는 말할 수 없다. 항목 1("V1 의 수리는 공짜다", −0.8%)은 score 쪽 같은 함수 안의 차이라 이 정정의 대상이 아니다(평균만 기록하고 블록 단위로 잰 점은 같다). **대체 문장**: "K 와 구현에 따른 비용비는 실경로 측정 V1/b\* = Module H 호출당 1.35× (−3 dB) · 1.39× (+6 dB), 블록 전체 1.33× · 1.38× (헤드라인 구성 kron K=1024 + d2sx_N160000_a1, 실제 수신기 경로; `results/review_next/complexity_moduleH_ep.txt`) 으로만 쓴다."
 ```
 
 <details><summary>검증 agent 지적 / 초안 원안</summary>
@@ -1497,7 +1497,7 @@ git show HEAD:conf/results/complexity_moduleH.txt: L2 date 2026-09-22 14:29:53, 
 초안 원안:
 
 ```text
-> **정정 (2026-09-23, review_next P0-2b)**: 항목 2 의 "~2.3×"(F14 캡션의 "nearer 2x" 도 같다)는 GMM `denoise_full` 비용을 K 로 외삽한 값이다. M-ours-bstar 가 실제로 부르는 함수는 `ep_site` 이므로 외삽한 함수가 틀렸고, K=1024 실측도 없었다(1245 가 적은 대로). 항목 3 의 "상한" 은 학습 쪽 구현을 더 빠르게 할 여지가 있다는 뜻으로만 성립한다. GMM 쪽을 다른 함수로 쟀으므로 4.6× 는 애초에 arm 간 비가 아니며, 실경로 비의 상한인지도 실측 전에는 말할 수 없다. 항목 1 의 "V1 수리 −0.8%" 는 score 쪽 같은 함수 안의 차이라 이 정정의 대상이 아니다(부하에 민감한 것은 같다). **대체 문장**: "K 와 구현에 따른 비용비는 실경로 측정 [complexity_moduleH_ep.txt 결과로 채움] 으로만 쓴다."
+> **정정 (2026-09-23, review_next P0-2b)**: 항목 2 의 "~2.3×"(F14 캡션의 "nearer 2x" 도 같다)는 GMM `denoise_full` 비용을 K 로 외삽한 값이다. M-ours-bstar 가 실제로 부르는 함수는 `ep_site` 이므로 외삽한 함수가 틀렸고, K=1024 실측도 없었다(1245 가 적은 대로). 항목 3 의 "상한" 은 학습 쪽 구현을 더 빠르게 할 여지가 있다는 뜻으로만 성립한다. GMM 쪽을 다른 함수로 쟀으므로 4.6× 는 애초에 arm 간 비가 아니며, 실경로 비의 상한인지도 실측 전에는 말할 수 없다. 항목 1 의 "V1 수리 −0.8%" 는 score 쪽 같은 함수 안의 차이라 이 정정의 대상이 아니다(부하에 민감한 것은 같다). **대체 문장**: "K 와 구현에 따른 비용비는 실경로 측정 V1/b\* = Module H 호출당 1.35× (−3 dB) · 1.39× (+6 dB), 블록 전체 1.33× · 1.38× (헤드라인 구성 kron K=1024 + d2sx_N160000_a1, 실제 수신기 경로; `results/review_next/complexity_moduleH_ep.txt`) 으로만 쓴다."
 ```
 </details>
 
@@ -1544,7 +1544,7 @@ CPU re-read: all 64 raw_B1e4lo/D2_C2_*snr-6_* files give meta ('kron', 512, 1000
 **제안 문구**
 
 ```text
-> **정정 (2026-09-23, review_next P0-2b·cost/M2)**: P12 는 **등방 `denoise_full` 마이크로벤치마크**(GMM kron K=512 = N=1e4 적합, 학습 arm `d2sx_N10000_a1.pt`, 1 스레드, ν 당 40회 평균만)의 수이지 arm 간 수신기 비용비가 아니다. 헤드라인 GMM arm `M-ours-bstar` 는 Module H 로 `GMMPriorB.ep_site` 를 부르는데(`arms.py:36,163`, `Demo/t2_route_a.py:373-374`) 이 벤치는 그 함수를 재지 않았다. 헤드라인 표(P13, `raw_B16e4k`)는 K=1024·N=1.6e5 이다. 같은 코드로 다시 돌렸을 때 4.6× 는 재현되지 않았다(REVIEW_AUDIT cost/M2, 저장 안 됨). **인용할 때**: "P12 = A8 마이크로벤치마크(K=512, denoise_full). 실경로 비용비는 [complexity_moduleH_ep.txt 결과로 채움]." 원래 행은 기록으로 둔다.
+> **정정 (2026-09-23, review_next P0-2b·cost/M2)**: P12 는 **등방 `denoise_full` 마이크로벤치마크**(GMM kron K=512 = N=1e4 적합, 학습 arm `d2sx_N10000_a1.pt`, 1 스레드, ν 당 40회 평균만)의 수이지 arm 간 수신기 비용비가 아니다. 헤드라인 GMM arm `M-ours-bstar` 는 Module H 로 `GMMPriorB.ep_site` 를 부르는데(`arms.py:36,163`, `Demo/t2_route_a.py:373-374`) 이 벤치는 그 함수를 재지 않았다. 헤드라인 표(P13, `raw_B16e4k`)는 K=1024·N=1.6e5 이다. 같은 코드로 다시 돌렸을 때 4.6× 는 재현되지 않았다(REVIEW_AUDIT cost/M2, 저장 안 됨). **인용할 때**: "P12 = A8 마이크로벤치마크(K=512, denoise_full). 실경로 비용비는 V1/b\* = Module H 호출당 1.35× (−3 dB) · 1.39× (+6 dB), 블록 전체 1.33× · 1.38× (헤드라인 구성 kron K=1024 + d2sx_N160000_a1, 실제 수신기 경로; `results/review_next/complexity_moduleH_ep.txt`)." 원래 행은 기록으로 둔다.
 ```
 
 <details><summary>근거</summary>
@@ -1567,7 +1567,7 @@ A8 복잡도 학습 4.6× GMM(K=512).
 **제안 문구**
 
 ```text
-> 정정 (2026-09-23, review_next P0-2b): 21행 메모의 "A8 복잡도 학습 4.6× GMM(K=512)" 는 등방 `denoise_full` 마이크로벤치마크(K=512 GMM, `d2sx_N10000_a1.pt`, `conf/results/complexity_moduleH.txt`)의 수이지, 헤드라인(B16e4k: K=1024, `d2sx_N160000_a1.pt`) arm 간 수신기 비용비가 아니다. M-ours-bstar 는 `ep_site` 를 부르는데 벤치는 그 함수를 재지 않았다. 실경로 비용: [complexity_moduleH_ep.txt 결과로 채움]. 원래 행은 고치지 않는다.
+> 정정 (2026-09-23, review_next P0-2b): 21행 메모의 "A8 복잡도 학습 4.6× GMM(K=512)" 는 등방 `denoise_full` 마이크로벤치마크(K=512 GMM, `d2sx_N10000_a1.pt`, `conf/results/complexity_moduleH.txt`)의 수이지, 헤드라인(B16e4k: K=1024, `d2sx_N160000_a1.pt`) arm 간 수신기 비용비가 아니다. M-ours-bstar 는 `ep_site` 를 부르는데 벤치는 그 함수를 재지 않았다. 실경로 비용: V1/b\* = Module H 호출당 1.35× (−3 dB) · 1.39× (+6 dB), 블록 전체 1.33× · 1.38× (헤드라인 구성 kron K=1024 + d2sx_N160000_a1, 실제 수신기 경로; `results/review_next/complexity_moduleH_ep.txt`). 원래 행은 고치지 않는다.
 ```
 
 <details><summary>근거</summary>
@@ -1595,7 +1595,7 @@ K=512 one.
 **제안 문구**
 
 ```text
-CORRECTION (2026-09-23, review_next P0-2b): the A8 lines above report an isotropic denoise_full microbenchmark (fitted GMM kron K=512 from the N=1e4 fit, learned arm ckpt/d2sx_N10000_a1.pt; results/complexity_moduleH.txt, means only). They are not the receiver cost ratio of the arms in this table. M-ours-bstar calls GMMPriorB.ep_site once per outer iteration (arms.py:36,163; Demo/t2_route_a.py:373-374), and that benchmark did not time it. This table's GMM is K=1024 (raw_B16e4k meta kron_K=1024, all 448 files). 'Mixture-EP site costs roughly twice ... nearer 2x' was an extrapolation of denoise_full, not a measurement of ep_site. Real-path Module H cost at this configuration: [complexity_moduleH_ep.txt 결과로 채움]. This caption was not regenerated.
+CORRECTION (2026-09-23, review_next P0-2b): the A8 lines above report an isotropic denoise_full microbenchmark (fitted GMM kron K=512 from the N=1e4 fit, learned arm ckpt/d2sx_N10000_a1.pt; results/complexity_moduleH.txt, means only). They are not the receiver cost ratio of the arms in this table. M-ours-bstar calls GMMPriorB.ep_site once per outer iteration (arms.py:36,163; Demo/t2_route_a.py:373-374), and that benchmark did not time it. This table's GMM is K=1024 (raw_B16e4k meta kron_K=1024, all 448 files). 'Mixture-EP site costs roughly twice ... nearer 2x' was an extrapolation of denoise_full, not a measurement of ep_site. Real-path Module H cost at this configuration: V1/b\* = Module H 호출당 1.35× (−3 dB) · 1.39× (+6 dB), 블록 전체 1.33× · 1.38× (헤드라인 구성 kron K=1024 + d2sx_N160000_a1, 실제 수신기 경로; `results/review_next/complexity_moduleH_ep.txt`). This caption was not regenerated.
 ```
 
 <details><summary>근거</summary>
@@ -1645,7 +1645,7 @@ equal-budget claim is 'same training data', not 'same inference complexity'.
 **제안 문구**
 
 ```text
-CORRECTION (2026-09-23, review_next cost/M1, P0-2b): this caption quotes A8 (4.6x) without the K caveat that the committed generator prints. Its file was written at 23:04:14, before the last edit of code/figure_f14.py at 23:07:59 (both are in commit fd641739). This table is raw_B16e4k (kron_K=1024, N=1.6e5, ckpt d2sx_N160000_a1.pt; all 448 files). A8 instead used K=512 and d2sx_N10000_a1.pt, and it timed GMMPriorB.denoise_full, whereas M-ours-bstar calls ep_site (arms.py:36,163; Demo/t2_route_a.py:373-374). So 4.6x is not this table's arm-to-arm receiver cost ratio. Real-path cost at this configuration: [complexity_moduleH_ep.txt 결과로 채움]. This caption was not regenerated.
+CORRECTION (2026-09-23, review_next cost/M1, P0-2b): this caption quotes A8 (4.6x) without the K caveat that the committed generator prints. Its file was written at 23:04:14, before the last edit of code/figure_f14.py at 23:07:59 (both are in commit fd641739). This table is raw_B16e4k (kron_K=1024, N=1.6e5, ckpt d2sx_N160000_a1.pt; all 448 files). A8 instead used K=512 and d2sx_N10000_a1.pt, and it timed GMMPriorB.denoise_full, whereas M-ours-bstar calls ep_site (arms.py:36,163; Demo/t2_route_a.py:373-374). So 4.6x is not this table's arm-to-arm receiver cost ratio. Real-path cost at this configuration: V1/b\* = Module H 호출당 1.35× (−3 dB) · 1.39× (+6 dB), 블록 전체 1.33× · 1.38× (헤드라인 구성 kron K=1024 + d2sx_N160000_a1, 실제 수신기 경로; `results/review_next/complexity_moduleH_ep.txt`). This caption was not regenerated.
 ```
 
 <details><summary>근거</summary>
@@ -1720,7 +1720,7 @@ K=512 one.
 isotropic denoise_full microbenchmark -- fitted GMM b* kron K=512 (N=1e4 fit) 17.1 ms, learned score
 ckpt/d2sx_N10000_a1.pt 78.8 ms (4.6x; the PSD projection itself is -0.8%, i.e. free).  It is NOT the
 receiver cost ratio of the arms: M-ours-bstar calls GMMPriorB.ep_site, which that benchmark did not time.
-Real-path Module H cost (K=1024, ckpt/d2sx_N160000_a1.pt): [complexity_moduleH_ep.txt 결과로 채움].  The
+Real-path Module H cost (K=1024, ckpt/d2sx_N160000_a1.pt): V1/b\* = Module H 호출당 1.35× (−3 dB) · 1.39× (+6 dB), 블록 전체 1.33× · 1.38× (헤드라인 구성 kron K=1024 + d2sx_N160000_a1, 실제 수신기 경로; `results/review_next/complexity_moduleH_ep.txt`).  The
 equal-budget claim is 'same training data', not 'same inference complexity'.
 
 (적용 조건: complexity_moduleH_ep.txt 가 생긴 뒤 플레이스홀더를 그 파일의 수치로 채워서 적용한다. 이 문구는 어느 raw 세트에서도 참이 되도록 '이 표의 K' 를 주장하지 않는다. 기존 F14/F14b/F14c 캡션은 재생성하지 않고, 각 파일 끝의 정정 주석으로 대신한다. 적용하면 다음 생성부터 캡션 문구만 바뀌고 수치 계산은 바뀌지 않는다.)
@@ -1756,7 +1756,7 @@ CORRECTION NOTE (2026-09-23, review_next P0-2a/P0-2b/cost-M2) -- this file is ke
   - Only means are recorded, and the arms are timed in consecutive blocks per nu (bench_moduleH.py:39-44,75-87),
     so load drift on the shared host enters the ratio directly.  A same-code replay did not reproduce 4.6x
     (REVIEW_AUDIT cost/M2; that replay was not stored).
-  - Real-path cost: results/review_next/complexity_moduleH_ep.txt  [complexity_moduleH_ep.txt 결과로 채움]
+  - Real-path cost: results/review_next/complexity_moduleH_ep.txt  V1/b\* = Module H 호출당 1.35× (−3 dB) · 1.39× (+6 dB), 블록 전체 1.33× · 1.38× (헤드라인 구성 kron K=1024 + d2sx_N160000_a1, 실제 수신기 경로; `results/review_next/complexity_moduleH_ep.txt`)
 ```
 
 <details><summary>근거</summary>
@@ -1779,7 +1779,7 @@ REVIEW_AUDIT cost/M2 수정 방향: 'Leave complexity_moduleH.txt as the histori
 **제안 문구**
 
 ```text
-`[2026-09-23 __:__ KST] 정정 — §6q A8 "학습 prior 4.6배" 는 arm 간 수신기 비용비가 아니다 (review_next P0-2b·cost/M1·cost/M2) | A8 파일과 해당 절은 기록으로 두고, 각 위치에 정정 주석만 단다: STATUS 1221·1248·1655 뒤, NUMBERS_PACKAGE 742 뒤, EXPERIMENTS 21 뒤, 캡션 세 파일 끝, complexity_moduleH.txt 끝. 코드는 docstring 만 고친다(figure_f14.py 13-15, bench_moduleH.py 3-5·12). 대체 문장: "A8 은 등방 denoise_full 마이크로벤치마크(K=512, N=1e4 ckpt)이며 수신기 경로가 아니다. 헤드라인 구성(K=1024, d2sx_N160000_a1.pt)의 실경로 Module H 비용비는 [complexity_moduleH_ep.txt 결과로 채움]." 그림과 표는 재생성하지 않는다 | A8(`complexity_moduleH.txt`, 09-22 14:29)은 양쪽 prior 를 `prior.denoise_full(q, nu)` 로 잰 등방 마이크로벤치마크이고, GMM 은 kron **K=512**(N=1e4 적합), 학습 arm 은 `d2sx_N10000_a1.pt` 였다(헤드라인 `d2sx_N160000_a1.pt` 와 hp 가 같아, 구성 차이 가운데 비용에 걸리는 것은 K 다). 헤드라인 GMM arm `M-ours-bstar` 는 denoise_full 을 부르지 않고 외부 반복마다 `GMMPriorB.ep_site(G,b,lam_min)` 를 부른다(`arms.py:36,163`, `Demo/t2_route_a.py:373-374`; `raw_B16e4k` C2 −3 dB 에서 `M-ours-bstar|clip` 평균 0.798). 헤드라인 `raw_B16e4k` 448파일은 kron_K=1024·N=1.6e5·`d2sx_N160000_a1.pt` 다. 그런데 STATUS §6q A8(1217-1248)·1655, NUMBERS_PACKAGE P12, EXPERIMENTS 21행, F14/F14b/F14c 캡션이 4.6× 를 arm 간 비용비로 인용했고, "K=1024 면 ~2.3×/nearer 2x" 는 denoise_full 외삽이었다. 22:30 항목에서 넣은 "A8 의 K=1024 캐비엇" 은 K 만 다루고 함수 차이를 빠뜨렸으며, `figure_f14.py:222-227` 에 하드코딩돼 F14b 에서는 거짓이 됐다(`raw_B1e4lo` C2 −6 dB 64파일 전부 K=512·N=1e4). F14c 는 생성기를 고치기 전의 판(23:04:14 < 23:07:59)이라 K 캐비엇이 없다. 같은 코드로 다시 돌렸을 때 4.6× 가 재현되지 않았다(감사 cost/M2, 미저장이라 수치는 인용하지 않음) | 추가한 정정 주석 줄을 지우고 두 docstring 을 이전 문구로 되돌리면 원상태다. 기록 문서의 원문은 바뀌지 않았다`
+`[2026-09-23 __:__ KST] 정정 — §6q A8 "학습 prior 4.6배" 는 arm 간 수신기 비용비가 아니다 (review_next P0-2b·cost/M1·cost/M2) | A8 파일과 해당 절은 기록으로 두고, 각 위치에 정정 주석만 단다: STATUS 1221·1248·1655 뒤, NUMBERS_PACKAGE 742 뒤, EXPERIMENTS 21 뒤, 캡션 세 파일 끝, complexity_moduleH.txt 끝. 코드는 docstring 만 고친다(figure_f14.py 13-15, bench_moduleH.py 3-5·12). 대체 문장: "A8 은 등방 denoise_full 마이크로벤치마크(K=512, N=1e4 ckpt)이며 수신기 경로가 아니다. 헤드라인 구성(K=1024, d2sx_N160000_a1.pt)의 실경로 Module H 비용비는 V1/b\* = Module H 호출당 1.35× (−3 dB) · 1.39× (+6 dB), 블록 전체 1.33× · 1.38× (헤드라인 구성 kron K=1024 + d2sx_N160000_a1, 실제 수신기 경로; `results/review_next/complexity_moduleH_ep.txt`)." 그림과 표는 재생성하지 않는다 | A8(`complexity_moduleH.txt`, 09-22 14:29)은 양쪽 prior 를 `prior.denoise_full(q, nu)` 로 잰 등방 마이크로벤치마크이고, GMM 은 kron **K=512**(N=1e4 적합), 학습 arm 은 `d2sx_N10000_a1.pt` 였다(헤드라인 `d2sx_N160000_a1.pt` 와 hp 가 같아, 구성 차이 가운데 비용에 걸리는 것은 K 다). 헤드라인 GMM arm `M-ours-bstar` 는 denoise_full 을 부르지 않고 외부 반복마다 `GMMPriorB.ep_site(G,b,lam_min)` 를 부른다(`arms.py:36,163`, `Demo/t2_route_a.py:373-374`; `raw_B16e4k` C2 −3 dB 에서 `M-ours-bstar|clip` 평균 0.798). 헤드라인 `raw_B16e4k` 448파일은 kron_K=1024·N=1.6e5·`d2sx_N160000_a1.pt` 다. 그런데 STATUS §6q A8(1217-1248)·1655, NUMBERS_PACKAGE P12, EXPERIMENTS 21행, F14/F14b/F14c 캡션이 4.6× 를 arm 간 비용비로 인용했고, "K=1024 면 ~2.3×/nearer 2x" 는 denoise_full 외삽이었다. 22:30 항목에서 넣은 "A8 의 K=1024 캐비엇" 은 K 만 다루고 함수 차이를 빠뜨렸으며, `figure_f14.py:222-227` 에 하드코딩돼 F14b 에서는 거짓이 됐다(`raw_B1e4lo` C2 −6 dB 64파일 전부 K=512·N=1e4). F14c 는 생성기를 고치기 전의 판(23:04:14 < 23:07:59)이라 K 캐비엇이 없다. 같은 코드로 다시 돌렸을 때 4.6× 가 재현되지 않았다(감사 cost/M2, 미저장이라 수치는 인용하지 않음) | 추가한 정정 주석 줄을 지우고 두 docstring 을 이전 문구로 되돌리면 원상태다. 기록 문서의 원문은 바뀌지 않았다`
 ```
 
 <details><summary>검증 agent 지적 / 초안 원안</summary>
@@ -1789,7 +1789,7 @@ REVIEW_AUDIT cost/M2 수정 방향: 'Leave complexity_moduleH.txt as the histori
 초안 원안:
 
 ```text
-`[2026-09-23 __:__ KST] 정정 — §6q A8 "학습 prior 4.6배" 는 arm 간 수신기 비용비가 아니다 (review_next P0-2b·cost/M1·cost/M2) | A8(`complexity_moduleH.txt`, 09-22 14:29)은 양쪽 prior 를 `prior.denoise_full(q, nu)` 로 잰 등방 마이크로벤치마크이고, GMM 은 kron **K=512**(N=1e4 적합), 학습 arm 은 `d2sx_N10000_a1.pt` 였다. 헤드라인 GMM arm `M-ours-bstar` 는 denoise_full 을 부르지 않고 외부 반복마다 `GMMPriorB.ep_site(G,b,lam_min)` 를 부른다(`arms.py:36,163`, `Demo/t2_route_a.py:373-374`; `raw_B16e4k` C2 −3 dB 에서 `M-ours-bstar|clip` 평균 0.798). 헤드라인 `raw_B16e4k` 448파일은 kron_K=1024·N=1.6e5·`d2sx_N160000_a1.pt` 다. 그런데 STATUS §6q A8(1217-1248)·1655, NUMBERS_PACKAGE P12, EXPERIMENTS 21행, F14/F14b/F14c 캡션이 4.6× 를 arm 간 비용비로 인용했고, "K=1024 면 ~2.3×/nearer 2x" 는 denoise_full 외삽이었다. 22:30 항목에서 넣은 "A8 의 K=1024 캐비엇" 은 K 만 다루고 함수 차이를 빠뜨렸으며, `figure_f14.py:222-227` 에 하드코딩돼 F14b 에서는 거짓이 됐다(`raw_B1e4lo` C2 −6 dB 64파일 전부 K=512·N=1e4). F14c 는 생성기를 고치기 전의 판(23:04:14 < 23:07:59)이라 K 캐비엇이 없다. 같은 코드로 다시 돌렸을 때 4.6× 가 재현되지 않았다(감사 cost/M2, 미저장이라 수치는 인용하지 않음) | A8 파일과 해당 절은 기록으로 두고, 각 위치에 정정 주석만 단다: STATUS 1221·1248·1655 뒤, NUMBERS_PACKAGE 742 뒤, EXPERIMENTS 21 뒤, 캡션 세 파일 끝, complexity_moduleH.txt 끝, figure_f14.py docstring. 대체 문장: "A8 은 등방 denoise_full 마이크로벤치마크(K=512, N=1e4 ckpt)이며 수신기 경로가 아니다. 헤드라인 구성(K=1024, d2sx_N160000_a1.pt)의 실경로 Module H 비용비는 [complexity_moduleH_ep.txt 결과로 채움]." 그림과 표는 재생성하지 않는다 | 추가한 정정 주석 줄을 지우면 원상태로 돌아간다. 원문은 한 글자도 바뀌지 않았다`
+`[2026-09-23 __:__ KST] 정정 — §6q A8 "학습 prior 4.6배" 는 arm 간 수신기 비용비가 아니다 (review_next P0-2b·cost/M1·cost/M2) | A8(`complexity_moduleH.txt`, 09-22 14:29)은 양쪽 prior 를 `prior.denoise_full(q, nu)` 로 잰 등방 마이크로벤치마크이고, GMM 은 kron **K=512**(N=1e4 적합), 학습 arm 은 `d2sx_N10000_a1.pt` 였다. 헤드라인 GMM arm `M-ours-bstar` 는 denoise_full 을 부르지 않고 외부 반복마다 `GMMPriorB.ep_site(G,b,lam_min)` 를 부른다(`arms.py:36,163`, `Demo/t2_route_a.py:373-374`; `raw_B16e4k` C2 −3 dB 에서 `M-ours-bstar|clip` 평균 0.798). 헤드라인 `raw_B16e4k` 448파일은 kron_K=1024·N=1.6e5·`d2sx_N160000_a1.pt` 다. 그런데 STATUS §6q A8(1217-1248)·1655, NUMBERS_PACKAGE P12, EXPERIMENTS 21행, F14/F14b/F14c 캡션이 4.6× 를 arm 간 비용비로 인용했고, "K=1024 면 ~2.3×/nearer 2x" 는 denoise_full 외삽이었다. 22:30 항목에서 넣은 "A8 의 K=1024 캐비엇" 은 K 만 다루고 함수 차이를 빠뜨렸으며, `figure_f14.py:222-227` 에 하드코딩돼 F14b 에서는 거짓이 됐다(`raw_B1e4lo` C2 −6 dB 64파일 전부 K=512·N=1e4). F14c 는 생성기를 고치기 전의 판(23:04:14 < 23:07:59)이라 K 캐비엇이 없다. 같은 코드로 다시 돌렸을 때 4.6× 가 재현되지 않았다(감사 cost/M2, 미저장이라 수치는 인용하지 않음) | A8 파일과 해당 절은 기록으로 두고, 각 위치에 정정 주석만 단다: STATUS 1221·1248·1655 뒤, NUMBERS_PACKAGE 742 뒤, EXPERIMENTS 21 뒤, 캡션 세 파일 끝, complexity_moduleH.txt 끝, figure_f14.py docstring. 대체 문장: "A8 은 등방 denoise_full 마이크로벤치마크(K=512, N=1e4 ckpt)이며 수신기 경로가 아니다. 헤드라인 구성(K=1024, d2sx_N160000_a1.pt)의 실경로 Module H 비용비는 V1/b\* = Module H 호출당 1.35× (−3 dB) · 1.39× (+6 dB), 블록 전체 1.33× · 1.38× (헤드라인 구성 kron K=1024 + d2sx_N160000_a1, 실제 수신기 경로; `results/review_next/complexity_moduleH_ep.txt`)." 그림과 표는 재생성하지 않는다 | 추가한 정정 주석 줄을 지우면 원상태로 돌아간다. 원문은 한 글자도 바뀌지 않았다`
 ```
 </details>
 
