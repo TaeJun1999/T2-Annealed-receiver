@@ -1,0 +1,87 @@
+# date        : 2026-09-23 09:14:52 KST
+# git commit  : 240394b9
+# versions    : python 3.12.14  numpy 2.5.2  scipy 1.18.1  torch 2.14.0+cu130 (cuda_available=True)
+# device      : CPU (192 cores) | dtype: complex128 / float64 | deterministic: yes (fixed seeds, no GPU in the receiver)
+# testbed     : D2
+# seed rule   : default_rng([20260926, TBID[testbed], PID[prior], Nr, T, Tp, int(snr)+100])  (trials of a point = ONE stream)
+# code        : rate-1/2 conv (133,171)_8 nu=6 terminated, QPSK, outer iterations = 16 for EVERY arm
+# Demo/ hashes: t2_route_a.py=95a5408901ec125c  t2_trellis.py=31cd0ee9c68e972b  t2_gmm.py=d064e58c7510c769
+# content     : conf/05_SPEC_testbed_D2.md §4 -- GMM re-fit on D2 (prior S2), K (16, 32, 64, 128, 256, 512) x {full, kron} x kappa (0, 16, 64, 256) x restarts, ntrain 160000, n_val = n_test = 5000
+# selection   : VALIDATION log-likelihood only.  BLER is never consulted (01_RULES §5).
+# D1 fits     : /home/HTJ/t2/Demo/exp_0925_fits (prior S, K (16, 32, 64)) -- reused verbatim, see DECISIONS
+# ====================================================================================================
+# CLAIM TESTBED -- sparse specular; conditional Gaussianity broken (see T2d). Upper bound = genie only.
+# ====================================================================================================
+
+Nr = 4 x Nt = 4
+  fam      K  kappa   ll_train     ll_val      gap    ll_test   -gauss  reseed   EM min
+  full    16      0    -26.601    -26.565   -0.036    -26.611    7.098       0    179.5
+  full    32      0    -24.459    -24.603    0.144    -24.456    9.253       0    444.3
+  full    64      0    -22.508    -22.747    0.239    -22.584   11.125       0    668.8
+  full   128      0    -20.646    -21.009    0.363    -20.913   12.796       0   1105.7
+  full   256      0    -18.935    -19.653    0.717    -19.588   14.121       0   1755.2
+  full   512      0    -17.379    -18.870    1.491    -18.735   14.974       0   2266.3
+  kron    16      0    -27.658    -27.767    0.109    -27.523    6.186       0    149.7
+  kron    32      0    -26.157    -26.277    0.120    -26.056    7.653       0    365.6
+  kron    64      0    -24.904    -25.019    0.115    -24.904    8.805       0   1031.7
+  kron   128      0    -23.802    -23.977    0.175    -23.871    9.838       0   1556.2
+  kron   256      0    -22.868    -23.169    0.301    -23.000   10.709       0   1946.5
+  kron   512      0    -21.943    -22.407    0.464    -22.264   11.445       0   4590.4
+  b* (validation log-likelihood) = full K=512   ll_val -18.870
+
+  degradation relative to D1 (05_SPEC §4)
+  Absolute log-likelihoods of two DIFFERENT distributions are not comparable, so the
+  comparable quantity is what the mixture buys over the Gaussian sample-covariance prior
+  on the same held-out set:  G := ll_test(GMM) - ll_test(Gaussian)  [nat/sample].
+  fam      K     G(D2)     G(D1)     D2-D1   gap(D2)   gap(D1)    KL(D1)
+  full    16     7.098       nan       nan    -0.036       nan       nan
+  full    32     9.253       nan       nan     0.144       nan       nan
+  full    64    11.125       nan       nan     0.239       nan       nan
+  full   128    12.796       nan       nan     0.363       nan       nan
+  full   256    14.121       nan       nan     0.717       nan       nan
+  full   512    14.974       nan       nan     1.491       nan       nan
+  kron    16     6.186       nan       nan     0.109       nan       nan
+  kron    32     7.653       nan       nan     0.120       nan       nan
+  kron    64     8.805       nan       nan     0.115       nan       nan
+  kron   128     9.838       nan       nan     0.175       nan       nan
+  kron   256    10.709       nan       nan     0.301       nan       nan
+  kron   512    11.445       nan       nan     0.464       nan       nan
+  KL(D1) = KL(true || fit) on the D1 test set [nat/sample]; D2 has no closed-form true
+  density, so no KL column exists there (05_SPEC §3).
+
+Nr = 8 x Nt = 4
+  fam      K  kappa   ll_train     ll_val      gap    ll_test   -gauss  reseed   EM min
+  full    16      0    -38.050    -38.152    0.102    -37.865   27.702       0    352.7
+  full    32      0    -31.279    -31.460    0.181    -30.881   34.685       0    909.3
+  full    64      0    -24.601    -25.344    0.743    -24.696   40.870       0   1464.7
+  full   128      0    -18.915    -20.206    1.291    -19.687   45.879       0   2299.5
+  full   256      0    -13.846    -16.561    2.715    -16.047   49.520       0   3373.8
+  full   512      0    -11.193    -16.316    5.123    -15.600   49.966       0   4144.2
+  kron    16      0    -38.804    -39.018    0.213    -38.458   27.108       0    346.7
+  kron    32      0    -32.799    -33.023    0.224    -32.497   33.069       0    507.1
+  kron    64      0    -27.173    -27.475    0.303    -26.991   38.575       0   1155.2
+  kron   128      0    -22.262    -22.573    0.312    -22.128   43.438       0   1746.5
+  kron   256      0    -17.818    -18.417    0.598    -18.046   47.521       0   2851.9
+  kron   512      0    -13.365    -14.636    1.271    -14.335   51.231       0   6409.9
+  b* (validation log-likelihood) = kron K=512   ll_val -14.636
+
+  degradation relative to D1 (05_SPEC §4)
+  Absolute log-likelihoods of two DIFFERENT distributions are not comparable, so the
+  comparable quantity is what the mixture buys over the Gaussian sample-covariance prior
+  on the same held-out set:  G := ll_test(GMM) - ll_test(Gaussian)  [nat/sample].
+  fam      K     G(D2)     G(D1)     D2-D1   gap(D2)   gap(D1)    KL(D1)
+  full    16    27.702       nan       nan     0.102       nan       nan
+  full    32    34.685       nan       nan     0.181       nan       nan
+  full    64    40.870       nan       nan     0.743       nan       nan
+  full   128    45.879       nan       nan     1.291       nan       nan
+  full   256    49.520       nan       nan     2.715       nan       nan
+  full   512    49.966       nan       nan     5.123       nan       nan
+  kron    16    27.108       nan       nan     0.213       nan       nan
+  kron    32    33.069       nan       nan     0.224       nan       nan
+  kron    64    38.575       nan       nan     0.303       nan       nan
+  kron   128    43.438       nan       nan     0.312       nan       nan
+  kron   256    47.521       nan       nan     0.598       nan       nan
+  kron   512    51.231       nan       nan     1.271       nan       nan
+  KL(D1) = KL(true || fit) on the D1 test set [nat/sample]; D2 has no closed-form true
+  density, so no KL column exists there (05_SPEC §3).
+
