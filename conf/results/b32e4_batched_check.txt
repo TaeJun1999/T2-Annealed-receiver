@@ -1,0 +1,13 @@
+# date        : 2026-09-25 04:11:52 KST
+# git commit  : 96ca6581
+# versions    : python 3.12.14  numpy 2.5.2  scipy 1.18.1  torch 2.14.0+cu130 (cuda_available=True)
+# device      : CPU (192 cores) | dtype: complex128 / float64 | deterministic: yes (fixed seeds, no GPU in the receiver)
+# testbed     : D2
+# seed rule   : default_rng([20260926, TBID[testbed], PID[prior], Nr, T, Tp, int(snr)+100])  (trials of a point = ONE stream)
+# code        : rate-1/2 conv (133,171)_8 nu=6 terminated, QPSK, outer iterations = 16 for EVERY arm
+# Demo/ hashes: t2_route_a.py=95a5408901ec125c  t2_trellis.py=31cd0ee9c68e972b  t2_gmm.py=d064e58c7510c769
+# content     : NEXT_EXPERIMENTS_B32e4 speed-up 2 -- batched kron M-step vs exact EM on the real N'=320000 data, kron K=1024 restart-0 seed, 8 iterations
+exact        : 967 s (120.9 s/iter), n_iter 8, reseeds 0, ll_val -62.307267066
+batched     : 28 s (3.5 s/iter, x34.5), max|dll_t| 1.55e-12, |dll_val| 0.00e+00, max rel dcov 0.00e+00, max|dpi| 0.00e+00, reseeds 0 -> PASS
+timing K=4096 batched: 68 s for 5 iterations (13.7 s/iter)
+VERDICT: PASS (criterion in the module docstring)
