@@ -1,0 +1,408 @@
+[
+ {
+  "lens": "design-stats",
+  "findings": [
+   {
+    "title": "K=4096 확장은 현재 코드로 선택에 반영되지 않는다 (arms.D2_KS 상한 2048)",
+    "section": "§1 GMM 격자와 b* / §3 예측 2",
+    "severity": "major",
+    "evidence": "초안: \"b* 가 kron 의 최대 K 이고 … 2K 를 같은 프로토콜로 적합해 다시 선택한다\". 코드: `conf/code/arms.py` `D2_KS = (16, 32, 64, 128, 256, 512, 1024, 2048)`; `load_fits()` 는 이 튜플만 순회하므로 `fit_S2_Nr8_kronK4096_n320000.npz` 를 써 놓아도 `gmm_selection()`·`module_h_priors()`·`write_fit_table()` 이 보지 못한다. `fit_gpu.py` 는 K 를 argv 로 받아 파일은 만들 수 있으나, `runner.py run --tag B32e4` 는 K=2048 을 b* 로 조용히 선택한다. 실패 시나리오: K=4096 적합 후 b*=4096 이라고 §5 에 적고 실행하면 raw meta `kron_K=2048` — 수용 검사가 잡더라도 30~60 분 실행 무효, 못 잡으면 GMM arm 이 격자 끝 K=2048 로 평가돼 01_RULES §5(GMM 약화 금지) 위반 상태로 판정이 난다.",
+    "fix": "§1 에 선행 코드 변경을 명시: \"K=4096(및 필요 시 8192) 적합 전에 `arms.D2_KS` 에 해당 K 를 추가해 커밋(해시를 §5 에 기록). 기존 태그 디렉터리에는 그 파일이 없어 선택이 바뀌지 않음(load_fits 는 존재 파일만 적재)\". 수용 검사에 `meta|ll_val|kron` 이 §5 의 최종 b* ll_val 과 일치할 것을 추가."
+   },
+   {
+    "title": "GB′ 재실행(run_d2_sx.py)은 태그 없는 fits 디렉터리만 읽어 동일예산 b* 를 찾지 못한다",
+    "section": "§1 보고 전용 / §4 선행 작업",
+    "severity": "major",
+    "evidence": "초안: \"GB′(`run_d2_sx.py` 재실행, b* 기준)\", §4 \"`run_d2_sx.py --ntrain 320000` 재실행(GB′, 적합 완료 뒤)\". 코드: `run_d2_sx.py` 는 `runner._init(tag)` 를 호출하지 않으므로 `A.gmm_selection(\"D2\", \"S2\", 8, 320000)` 은 `results/gmm_fits_D2/fit_S2_Nr8_*_n320000.npz` 를 찾는다(큐는 `gmm_fits_D2_B32e4/` 에 쓴다) → `FileNotFoundError`. 선례: `results/d2_gbprime.csv` 의 N=160000 세 행 모두 `gmm_ntrain=10000, equal_budget=False, gmm_K=512` — 1.6e5 에서도 동일예산 GB′ 는 한 번도 계산되지 않았다. 실패 시나리오: 재실행이 실패하거나, 누군가 `--gmm-ntrain 10000` 으로 우회해 `equal_budget=False` 행이 \"b* 기준 GB′\" 로 보고된다.",
+    "fix": "§1·§4 에 실행 경로를 고정: (a) `run_d2_sx.py` 에 fits 디렉터리 인자(또는 `runner._init(\"B32e4\")` 호출)를 추가하는 코드 변경을 선행 작업으로 명시하거나, (b) 사전 등록 디렉터리 `gmm_fits_D2/` 에 복사하지 않는다는 조건과 함께 심볼릭 링크 방식을 적시. 수용 검사: csv 행 `gmm_ntrain=320000, equal_budget=True, gmm_K = §5 최종 b*`. 아울러 1.6e5 GB′ 가 비동일예산이었음을 §0 에 한 줄 공개."
+   },
+   {
+    "title": "참조되는 §5(평가 전 기록 절)가 문서에 없다",
+    "section": "§1 GMM 격자 / 수용 검사 / §4",
+    "severity": "major",
+    "evidence": "초안 세 곳: \"확장 과정의 모든 ll_val 을 §5 에 적는다\", \"`bstar`·`kron_K` = §5 에 적은 최종 선택\", \"epoch·sha 는 §5 에 학습 종료 후 **평가 전** 기록\". 문서는 §4 에서 끝난다. 수용 검사의 비교 대상이 존재하지 않으므로 검사를 실행할 수 없고, 어느 시점의 값이 '최종'인지(평가 전 vs 후) 두 읽기가 가능하다.",
+    "fix": "§5 '평가 전 고정 기록' 절을 추가: 표(K별 ll_val 전부, 확장 결정·시각, 최종 b*·kron_K, D2 last/best sha·epoch·best_epoch·stopped_by·aborted·init sha, D1 형제 GA~GD 와 PASS/FAIL, arms.D2_KS 커밋 해시). 규칙: \"§5 가 커밋된 뒤에만 실행 ①②③ 시작. §5 이후 변경은 DECISIONS.\""
+   },
+   {
+    "title": "학습 발산·ABORTED 처리가 없고, §3d 폴백 사다리는 run_d2_sx.py 로 실행 불가",
+    "section": "§1 체크포인트 / §3 예측 8",
+    "severity": "major",
+    "evidence": "초안: \"attempt 1 만(시드 반복은 등록하지 않음; 비용)\"; §3-8 빗나갈 경로에 발산 없음. 동결 규칙 `10_SPEC` §3d: DIVERGED 는 완료 시행이며 시행 2 = 기울기 클리핑 1.0, 시행 3 = +lr/3, \"모든 Stage C 학습에 동일 적용\". 코드: `score.train` 은 DIVERGE_TRAIN(3×best, 5 epoch) 을 구현하지만 `run_d2_sx.py` 의 `HP` 는 고정 dict 라 `--attempt 2` 는 시드만 바꾸고 클리핑·lr 을 바꾸지 못한다. 실패 시나리오: 3.2e5 학습이 `stopped_by=diverged` 로 끝나면 (i) 규칙상 시행 2 를 돌려야 하나 도구가 없고, (ii) 초안대로면 발산한 `_best.pt` 로 평가하거나 실행을 포기하는 두 읽기가 생긴다. 같은 문제가 D1 형제 `run_samplecx.py` 에도 있다.",
+    "fix": "§1 에 추가: \"학습이 diverged/aborted 로 끝나면 §3d 사다리(시행 2 클리핑 1.0, 시행 3 +lr/3)를 그대로 적용하며 폴백 시행 간 선택은 val loss 만. 이를 위해 run_d2_sx.py/run_samplecx.py 에 `--clip`/`--lr-div` 인자를 추가(선행 코드). 시행 3 도 실패하면 이 예산은 '학습 실패' 로 기록, BLER 미실행\". 시드 반복 미등록과 §3d 사다리는 별개임을 명시."
+   },
+   {
+    "title": "헤드라인 예산 선택을 결과 관측 후 사용자 결정으로 미룬다 — 사후 선택 자유도",
+    "section": "§1 헤드라인 / §2",
+    "severity": "major",
+    "evidence": "초안: \"원고에서 어느 예산을 헤드라인으로 쓸지는 **사용자 결정**(이 문서가 정하지 않음)\", §2 PASS·통과 행 \"헤드라인 교체는 사용자 결정\". 네 예산 결과를 모두 본 뒤 가장 좋은 점을 헤드라인으로 고를 수 있는 경로가 문서에 열려 있다. `10_SPEC` §7-5 는 예산 결과를 \"하나의 곡선\" 으로 보고하도록 동결했고, v3 §0 는 헤드라인 구성을 1.6e5 로 고정한다. 실패 시나리오: 3.2e5 격차가 1.6e5 보다 크면 3.2e5 를, 작으면 1.6e5 를 헤드라인으로 — 어느 쪽이든 사전 규칙 없이 정당화된다.",
+    "fix": "규칙을 지금 고정: 예컨대 \"헤드라인은 v3 §0 의 1.6e5 로 불변. 3.2e5 는 곡선의 한 점이며 어떤 결과에서도 헤드라인 표를 대체하지 않는다\" 또는 \"D1 형제 PASS 인 최대 예산이 헤드라인\" 중 하나를 결과 전에 택하고, 사용자가 다른 선택을 하면 DECISIONS 에 '사후 선택' 으로 명기."
+   },
+   {
+    "title": "판정에 쓰는 실행(태그)과 예산 곡선의 3.2e5 V1 값이 best/last 중 어느 것인지 미지정",
+    "section": "§1 실행·판정·보고 전용 / §2",
+    "severity": "major",
+    "evidence": "§1 은 \"1차 평가 = `_best.pt`\" 라 하지만 판정 행은 \"표 B `b* → V1` (C2)\" 만 적고 태그(B32e4 vs B32e4last)를 지정하지 않는다. 같은 C2·같은 시행에서 두 실행이 나오므로 best 통과·last 미통과(또는 반대) 시 §2 표의 행이 둘로 갈린다. 예산 곡선 행: \"네 예산의 C2 −3 dB BLER(GMM b*, V1)\" — 이전 세 점은 last-EMA, 3.2e5 는 best 가 1차이므로 곡선에 어느 값을 놓는지 두 읽기. 실패 시나리오: 격차가 큰 쪽을 곡선에 싣고 다른 쪽을 각주로.",
+    "fix": "판정 행에 \"판정 = 태그 B32e4(`_best.pt`)만. B32e4last 는 어떤 판정에도 쓰지 않음\" 을 명시. 예산 곡선 표는 두 행(last-EMA 4점 곡선 = 동일 가중치 규약; best 는 3.2e5 만 별도 열)으로 형식을 지금 고정."
+   },
+   {
+    "title": "판정 문자열 방향과 판정점 거리의 정의가 표 B 코드와 정확히 같지 않게 서술됨",
+    "section": "§1 판정",
+    "severity": "minor",
+    "evidence": "초안: \"결과는 표 B 의 문자열 그대로(`significant` / `not significant` / `UNDECIDED`)\". `analysis.table_B` 는 `max(wx, wy) >= 2` 이면 방향 무관하게 `significant` 를 찍는다(GMM 이 2/3 이겨도 같은 문자열; 1.6e5 C1 이 그 예). 또 \"0.1 에 가장 가까운 3 SNR\" 은 코드상 `|log10(BLER/0.1)|` 최소(선형 거리 아님). §2 표에는 'GMM 방향 유의' 행이 없다.",
+    "fix": "판정 행을 \"통과 = POWERED 이고 문자열이 `second arm fewer failures at ≥2/3` ; 그 외(`first arm …≥2/3` 포함)는 통과 못함으로 §2 두 번째 행\" 으로 쓰고, 판정점 정의에 'log 거리' 를 명시."
+   },
+   {
+    "title": "D1 형제 게이트를 재는 가중치(last)와 D2 평가 가중치(best)가 다르며 명시가 없다",
+    "section": "§1 자격",
+    "severity": "minor",
+    "evidence": "초안: \"`ckpt/sx_N320000_D1.pt` 의 GA~GD\". `run_samplecx.py` 는 `ck`(role=last) 만 게이트하고, P0-1 코드는 `sx_N320000_D1_best.pt` 도 만든다. v3 §0 는 새 학습본 평가를 `_best.pt` 로 고정. 두 파일의 GC 가 0.15 를 사이에 두고 갈리면 '자격' 판정이 파일 선택에 따라 달라진다.",
+    "fix": "\"게이트 = last 파일(1.6e5 선례 @200 EMA 와 동일 규약); `_best.pt` 의 GA~GD 는 보고 전용, 둘이 갈리면 last 가 판정\" 을 한 줄로 고정."
+   },
+   {
+    "title": "태그 B32e4x·B32e4last 는 자기 fits 디렉터리를 요구한다 (심볼릭 링크 선행 작업 누락)",
+    "section": "§1 실행 ②",
+    "severity": "minor",
+    "evidence": "`runner._init(tag)` → `A.D2_FITS = results/gmm_fits_D2_<tag>/`; `cmd_run` 은 시작 시 `load_fits` 로 fail-early. `gmm_fits_D2_B32e4x`·`gmm_fits_D2_B32e4last` 는 없다(기존 태그들은 `gmm_fits_D2_B1e4x -> gmm_fits_D2` 식 링크). 초안은 ①에만 `fits = results/gmm_fits_D2_B32e4` 를 적었다.",
+    "fix": "§4 선행 작업에 \"`gmm_fits_D2_B32e4x`, `gmm_fits_D2_B32e4last` → `gmm_fits_D2_B32e4` 링크 생성(파일명에 n320000 이 있어 잘못된 링크는 fail-early)\" 추가."
+   },
+   {
+    "title": "01_RULES:76 인용이 원문과 다르다",
+    "section": "머리말·§1",
+    "severity": "minor",
+    "evidence": "초안: \"`01_RULES.md` … :76(b* 가 격자 내부일 때까지 확장)\", \"(01_RULES:76 반복 규칙)\". 실제 76행: \"**GMM arm을 약화시키지 않는다.** D2에서도 K 전 범위 적합 + shrinkage + 검증 우도 early stopping\". '내부' 요구는 `10_SPEC` §6l 의 해석이고, 75행은 동일예산을 N_train=1e4 로 적는다.",
+    "fix": "\"01_RULES:76 (GMM 약화 금지·K 전 범위) 의 §6l 해석 = b* 가 내부일 때까지 확장\" 으로 고쳐 쓰고, 동일예산 근거는 10_SPEC A3 로 명시."
+   },
+   {
+    "title": "예측 2 는 자기모순: b*=4096 은 정의상 '내부' 가 아니다",
+    "section": "§3 예측 2·8(c)",
+    "severity": "minor",
+    "evidence": "초안: \"b* 는 K=4096 또는 2048 (내부 도달)\". §1 멈춤 규칙(최대 K 의 ll_val ≤ K/2)에 따르면 b*=4096 이면 격자 끝이라 8192 결정이 필요하다(예측 8(c)). 또 8192 를 사용자가 거부하면 어떻게 기록하는지(4e4 선례처럼 캐비엇) 없음. full 이 512 에서 b* 가 되는 경우도 미처리.",
+    "fix": "예측 2 를 \"b* = 2048(4096 이 지지 않음) 또는 4096(격자 끝, 8192 는 사용자 결정)\" 으로 고치고, §1 에 \"확장 거부 시 4e4 와 같은 '격자 끝' 캐비엇으로 표 머리말에 기록; full K=512 가 b* 면 full 1024 도 같은 규칙\" 추가."
+   },
+   {
+    "title": "예측 5 의 근거가 기록과 반대다 (F3 가드 발동률은 예산과 함께 감소)",
+    "section": "§3 예측 5",
+    "severity": "minor",
+    "evidence": "초안: \"F3 가드 발동률 1.6e5(0.529) 보다 높거나 같음(야코비안은 예산과 함께 나빠짐, §6d)\". `docs/RESULTS.md` §1.2: V0 가드 0.712 (1e4) → 0.702 (4e4) → 0.529 (1.6e5); `samplecx_D1.txt` GD 0.161 → 0.101 → 0.072. §6d 원문도 '나빠질 수 있다' 는 약한 가정이다.",
+    "fix": "근거 문구를 삭제하거나 \"기록된 추세(감소)와 반대 방향의 예측이며 §6d 의 가정 검정용\" 으로 명시. 예측 자체는 유지 가능."
+   },
+   {
+    "title": "예측 3 '3/3 유의' 와 통과 규칙(≥2/3) 의 채점 기준 불일치",
+    "section": "§3 예측 3",
+    "severity": "minor",
+    "evidence": "초안: \"표 B `b* → V1` **3/3 유의, 통과**\". 2/3 유의로 통과하면 예측 3 이 '맞음' 인지 '빗나감' 인지 두 읽기.",
+    "fix": "\"통과(≥2/3)\" 와 \"3/3\" 을 별도 예측 항목으로 분리해 각각 채점."
+   },
+   {
+    "title": "테스트 집합 재사용 사실과 예측의 정보 상태를 명시하지 않는다",
+    "section": "머리말 / §3",
+    "severity": "minor",
+    "evidence": "시행 0..2559 는 세 예산·A1·P3 확증에 이미 쓰였다. 3.2e5 의 어떤 선택(b* = ll_val, 체크포인트 = val loss)도 이 집합을 쓰지 않으므로 누출은 아니지만, 예측 3·4·7 은 같은 시행의 이전 결과에 근거한 '눈 뜬 예측' 이다(§6f 는 이를 먼저 공개했다).",
+    "fix": "머리말에 한 줄: \"테스트 시행은 이전 예산과 같다(같은 채널·잡음 실현이라 예산 간 비교는 paired). 3.2e5 의 어떤 선택도 테스트 BLER 을 참조하지 않는다. §3 예측은 이전 예산의 테스트 결과를 본 상태에서 적은 약한 예측이다.\""
+   },
+   {
+    "title": "score 학습 비용이 과소 추정됐다",
+    "section": "§1 비용",
+    "severity": "minor",
+    "evidence": "초안: \"score 학습 ≈ 13 h × 2\". `train_d2sx_N160000_a1.log`: 20.05 s/epoch, 1784 epoch, 35,775 s(9.9 h). 표본 2배면 epoch 당 ≈ 40 s; 같은 epoch 수면 ≈ 20 h. 큐에서 학습은 kron 재시작 6개 뒤에 시작하므로 완료는 09-25 CDT 이후.",
+    "fix": "\"≈ 20 h(1.6e5 의 20 s/epoch × 2 배, epoch 수 미지) × 2\" 로 고치고, K=4096 필요 시 3 GPU × ≈ 2.8 일이 학습 완료 뒤에 이어진다는 순서를 적는다."
+   }
+  ],
+  "verdicts": [
+   {
+    "title": "K=4096 확장은 현재 코드로 선택에 반영되지 않는다 (arms.D2_KS 상한 2048)",
+    "real": true,
+    "severity": "major",
+    "reason": "Confirmed in code. conf/code/arms.py:57 `D2_KS = (16, …, 1024, 2048)`; `load_fits()` (arms.py:70-80) iterates only that tuple, and `gmm_selection`, `module_h_priors`, `build_our_arms` (meta bstar/kron_K/ll_val) and `runner.fit_cost_meta` all consume `load_fits` output. `fit_gpu.py` takes K from argv and `fit_path` formats any K, so `fit_S2_Nr8_kronK4096_n320000.npz` gets written but is invisible to selection, meta and the cost column. The draft's §1 rule '2K 를 같은 프로토콜로 적합해 다시 선택한다' therefore cannot execute as written: `runner.py run --tag B32e4` silently picks K=2048 as b*. The acceptance check only compares to '§5 에 적은 최종 선택', which does not exist yet (see §5 finding), so it would not necessarily catch it.",
+    "fix": "Add to §1/§4 as a prerequisite code change: extend `arms.D2_KS` to include 4096 (and 8192 if ever fitted) before fitting, commit, record the hash in the pre-evaluation record; note that existing tag dirs without such files select unchanged. Add to the acceptance check: raw meta `kron_K` and `ll_val|kron` must equal the recorded final b* and its ll_val."
+   },
+   {
+    "title": "GB′ 재실행(run_d2_sx.py)은 태그 없는 fits 디렉터리만 읽어 동일예산 b* 를 찾지 못한다",
+    "real": true,
+    "severity": "major",
+    "reason": "Confirmed. conf/code/run_d2_sx.py:285 calls `A.gmm_selection(\"D2\", PRIOR, NR, gmm_n)` with `arms.D2_FITS` at its import default `results/gmm_fits_D2/` (never calls `runner._init`); the queue writes to `results/gmm_fits_D2_B32e4/`. With `--ntrain 320000` and no `--gmm-ntrain`, gmm_n=320000 → `load_fits` raises FileNotFoundError (run_b32e4.sh's own comment admits the GB′ step 'may fail now'). Precedent in results/d2_gbprime.csv: all three N=160000 rows have gmm_ntrain=10000, equal_budget=False, gmm_K=512 — an equal-budget GB′ has never been computed at 1.6e5 either. The draft's §4 row '`run_d2_sx.py --ntrain 320000` 재실행(GB′, 적합 완료 뒤)' will fail, or be worked around with `--gmm-ntrain 10000`, yielding an equal_budget=False row that the draft would label 'b* 기준 GB′'.",
+    "fix": "State the execution path in §1/§4: either add a fits-dir/tag argument to run_d2_sx.py (calling `runner._init(\"B32e4\")`) as a prerequisite code change, or specify a symlink approach that never copies into the pre-registered `gmm_fits_D2/`. Acceptance: csv row must show gmm_ntrain=320000, equal_budget=True, gmm_K = final b*. Disclose in §0 that the 1.6e5 GB′ rows are non-equal-budget."
+   },
+   {
+    "title": "참조되는 §5(평가 전 기록 절)가 문서에 없다",
+    "real": true,
+    "severity": "major",
+    "reason": "Confirmed. The draft has sections 0-4 only. §1 references §5 three times ('확장 과정의 모든 ll_val 을 §5 에 적는다', '`bstar`·`kron_K` = §5 에 적은 최종 선택', 'epoch·sha 는 §5 에 학습 종료 후 평가 전 기록'). The acceptance check compares raw meta against a record that has no defined location or format, so it cannot be executed, and 'final' selection could be read as pre- or post-evaluation. §4 mentions writing identity to DECISIONS.md instead, a second inconsistent location.",
+    "fix": "Add a §5 '평가 전 고정 기록' section with a fixed table (every K's ll_val incl. extension steps and timestamps, final b*/kron_K, D2 last/best sha256[:16]/epoch/best_epoch/stopped_by/aborted, D1 sibling GA-GD and PASS/FAIL, arms.D2_KS commit hash), plus the rule 'runs ①②③ start only after §5 is committed; later changes go to DECISIONS'. Reconcile §4's DECISIONS.md row with it."
+   },
+   {
+    "title": "학습 발산·ABORTED 처리가 없고, §3d 폴백 사다리는 run_d2_sx.py 로 실행 불가",
+    "real": true,
+    "severity": "major",
+    "reason": "Confirmed. 10_SPEC_stageC.md §3d (:305-323) freezes: DIVERGED is a completed attempt; ladder = attempt 2 + grad clip 1.0, attempt 3 + lr/3; '모든 Stage C 학습에 동일하게 적용'; selection among fallback attempts by val loss only. `score.train` implements DIVERGE_TRAIN and accepts `grad_clip`, but run_d2_sx.py:263 and run_samplecx.py:317 hard-code `HP` (lr fixed) and pass no `grad_clip`; `--attempt` changes only the seed. The draft's 'attempt 1 만(시드 반복은 등록하지 않음)' and §3-8 give no divergence path, so if the 3.2e5 run ends `stopped_by=diverged` two readings exist (evaluate the diverged `_best.pt` vs. abandon), and the frozen ladder cannot be run without new code.",
+    "fix": "Add to §1: 'If training ends diverged/aborted, apply §3d as frozen (attempt 2 clip 1.0, attempt 3 +lr/3; select by val loss only); prerequisite: add `--clip`/`--lr-div` to run_d2_sx.py and run_samplecx.py. If attempt 3 also diverges, record the budget as 학습 실패, no BLER.' State explicitly that 'no seed repeats' and the §3d ladder are separate things."
+   },
+   {
+    "title": "헤드라인 예산 선택을 결과 관측 후 사용자 결정으로 미룬다 — 사후 선택 자유도",
+    "real": true,
+    "severity": "major",
+    "reason": "Confirmed as a genuine post-hoc degree of freedom. The draft fixes the record ('자동 교체 없음. B16e4k 표는 그대로') but explicitly leaves the manuscript headline budget to a user decision after all four budget results are seen (§1 헤드라인 row, §2 PASS/통과 row). 10_SPEC §7-5 (:162-164) requires budget results to be reported as one curve, and v3 §0 fixes the headline configuration at 1.6e5. §6l:690 additionally says the headline changes if GMM catches up, so the specs already conflict and the draft resolves nothing. Result: whichever budget shows the larger gap can be chosen as headline without a pre-stated rule.",
+    "fix": "Fix a rule now, before results: e.g. 'headline stays v3 §0 1.6e5; 3.2e5 is one point on the curve and never replaces the headline table', or 'headline = largest budget whose D1 sibling PASSES'. If the user later chooses otherwise, DECISIONS.md must label it 사후 선택."
+   },
+   {
+    "title": "판정에 쓰는 실행(태그)과 예산 곡선의 3.2e5 V1 값이 best/last 중 어느 것인지 미지정",
+    "real": true,
+    "severity": "minor",
+    "reason": "Partly refuted, partly confirmed. The verdict run IS specified: §1 실행 ① is labelled '판정' with `--stagec-ckpt …_best.pt --tag B32e4`, and ② (B32e4x, B32e4last) is labelled '보고 전용'; together with '1차 평가 = `_best.pt`' the judgement tag is unambiguous, so the 'major' claim does not survive. What remains ambiguous is the budget-curve value: §1 says last-EMA is '예산 곡선 비교용 보고 전용 두 번째 실행' (suggesting the curve uses last-EMA for weight-convention consistency with the three prior points), but the 보고 전용 row '네 예산의 C2 −3 dB BLER(GMM b*, V1)' does not say which 3.2e5 V1 value goes in. Two readings → the larger-gap one could be plotted.",
+    "fix": "Fix the curve table format now: one row of last-EMA at all four budgets (same weight convention), with the 3.2e5 `_best.pt` value in a separate column, and state that only tag B32e4 enters any verdict."
+   },
+   {
+    "title": "판정 문자열 방향과 판정점 거리의 정의가 표 B 코드와 정확히 같지 않게 서술됨",
+    "real": true,
+    "severity": "minor",
+    "reason": "Confirmed in conf/code/analysis.py:447-449: the string is `significant` if `max(wx, wy) >= 2`, direction-agnostic (e.g. tables_D2_B16e4x.txt:744 'first arm fewer failures at 3/3 points -> significant'). Decision SNRs use `|log10(BLER/0.1)|` (analysis.py:410), not linear distance. The draft's pass rule is directional ('V1 실패가 적고'), but the sentence '결과는 표 B 의 문자열 그대로' allows reading verdict = string, under which a GMM-direction 'significant' would count as 통과; §2 has no row for that case. Linear vs log distance can select different SNRs when the anchor BLER grid is asymmetric around 0.1.",
+    "fix": "Write the verdict row as 'PASS = POWERED and `second arm fewer failures at ≥2/3`; `first arm …` or `not significant`/UNDECIDED → §2 second row', and say 'closest to 0.1 in |log10|'."
+   },
+   {
+    "title": "D1 형제 게이트를 재는 가중치(last)와 D2 평가 가중치(best)가 다르며 명시가 없다",
+    "real": true,
+    "severity": "minor",
+    "reason": "Confirmed with a nuance. run_samplecx.py:325 gates `ck` = `sx_N{N}_D1.pt` (role=last); `score.train` also writes `sx_N320000_D1_best.pt`. The draft does name the last file explicitly ('`ckpt/sx_N320000_D1.pt` 의 GA~GD'), so the file choice is stated — but v3 §0 :23 says all newly trained arms are evaluated with `_best.pt`, and the draft never reconciles gating on last with evaluating D2 on best. If GC of last and best fall on opposite sides of 0.15, the eligibility verdict depends on which file one reads as 'the' D1 sibling under v3 §0.",
+    "fix": "One line in §1 자격: 'Gate = last file (same convention as the 1.6e5 precedent, samplecx @200); GA-GD of `_best.pt` are report-only; if they disagree, last decides.'"
+   },
+   {
+    "title": "태그 B32e4x·B32e4last 는 자기 fits 디렉터리를 요구한다 (심볼릭 링크 선행 작업 누락)",
+    "real": true,
+    "severity": "minor",
+    "reason": "Confirmed. `runner._init(tag)` sets `A.D2_FITS = results/gmm_fits_D2_<tag>/` (runner.py:105-109); `cmd_run` calls `load_fits(..., a.ntrain)` at start (runner.py:525-526) and raises FileNotFoundError if absent. `ls conf/results` shows `gmm_fits_D2_B32e4` exists but no `_B32e4x` or `_B32e4last`; all prior x/last tags were symlinks. Fail-early makes this harmless to the record, but §4 lists no such prerequisite and §1 gives the fits path only for ①.",
+    "fix": "Add to §4: create symlinks `gmm_fits_D2_B32e4x` and `gmm_fits_D2_B32e4last` → `gmm_fits_D2_B32e4` (a wrong target fails early because the filename carries n320000)."
+   },
+   {
+    "title": "01_RULES:76 인용이 원문과 다르다",
+    "real": true,
+    "severity": "minor",
+    "reason": "Confirmed. conf/01_RULES.md:76 reads '**GMM arm을 약화시키지 않는다.** D2에서도 K 전 범위 적합 + shrinkage + 검증 우도 early stopping'; :75 gives equal budget at N_train=1e4. The 'b* interior' requirement is 10_SPEC §6l's interpretation of :76 (§6l:662-664 says so explicitly). The draft's ':76(b* 가 격자 내부일 때까지 확장)' paraphrases the interpretation as the rule text; arms.py:59 and run_b32e4.sh:337 repeat the same shorthand, so the record is consistently loose but still not the wording.",
+    "fix": "Rewrite as '01_RULES:76 (GMM 약화 금지·K 전 범위) 의 §6l 해석 = b* 가 내부일 때까지 확장', and cite 10_SPEC A3 for the equal-budget basis."
+   },
+   {
+    "title": "예측 2 는 자기모순: b*=4096 은 정의상 '내부' 가 아니다",
+    "real": true,
+    "severity": "minor",
+    "reason": "Confirmed. §1's stopping rule: 멈춤 = 최대 K 의 ll_val ≤ K/2 의 ll_val. If b*=4096 then K=4096 (the max fitted) beat K=2048, so it is by that rule at the grid edge and 8192 is required (or a user refusal). Prediction 2's '(내부 도달)' is only true for b*=2048. The draft also gives no recording rule for a refused extension (the 4e4 precedent used a '격자 끝' caveat) and does not say what happens if full K=512 wins.",
+    "fix": "Rewrite prediction 2 as 'b* = 2048 (4096 does not win) or 4096 (grid edge; 8192 is a user decision)'. Add to §1: on refused extension record a grid-edge caveat as at 4e4; if full K=512 is b*, full K=1024 follows the same rule."
+   },
+   {
+    "title": "예측 5 의 근거가 기록과 반대다 (F3 가드 발동률은 예산과 함께 감소)",
+    "real": true,
+    "severity": "minor",
+    "reason": "Confirmed. docs/RESULTS.md §1.2 (:52-57) V0 guard rate 0.712 (1e4) → 0.702 (4e4) → 0.529 (1.6e5); results/samplecx_D1.txt GD 0.161 → 0.101 → 0.072. Both fall with budget. 10_SPEC §6d:491 does contain '야코비안은 예산과 함께 나빠지므로 V0 는 더 나빠질 수 있고', so the draft's citation is accurate, but that was a pre-observation assumption now contradicted by three points. The prediction ('≥ 0.529') is allowed, its stated basis is not.",
+    "fix": "Drop the parenthetical or replace with 'against the recorded downward trend; tests §6d's assumption'."
+   },
+   {
+    "title": "예측 3 '3/3 유의' 와 통과 규칙(≥2/3) 의 채점 기준 불일치",
+    "real": true,
+    "severity": "minor",
+    "reason": "Confirmed. §3-3 reads '표 B `b* → V1` **3/3 유의, 통과**' while the §1 pass rule is ≥2/3 points. A 2/3 outcome is 통과 under §1 but the prediction '3/3' is missed; the draft's own rule '빗나가면 그대로 쓴다' then has two possible scorings for one prediction line.",
+    "fix": "Split into two prediction items: (a) 통과 (≥2/3), (b) 3/3 significant."
+   },
+   {
+    "title": "테스트 집합 재사용 사실과 예측의 정보 상태를 명시하지 않는다",
+    "real": true,
+    "severity": "minor",
+    "reason": "Confirmed as a missing statement rather than leakage. v3 §0 fixes the test set at skip 0..2559; the same trials were used at 1e4/4e4/1.6e5 and by A1/P3 confirmations. No 3.2e5 selection (b* by ll_val on validation stream 8, checkpoint by val loss on the 9:1 split) touches test BLER, so there is no leakage, and the draft header does say no 3.2e5 checkpoint/fit has been evaluated. But it never states (i) that the test trials are identical across budgets (paired comparison across budgets is possible), and (ii) that predictions 3/4/7 are written with the previous budgets' test results in view (§0 shows them). Without (ii) the predictions read stronger than they are.",
+    "fix": "Add one line to the header: 'Test trials are the same as at every prior budget (same channel/noise realisations; budget-to-budget comparisons are paired). No 3.2e5 selection references test BLER. §3 predictions are weak predictions made after seeing prior budgets' test results.'"
+   },
+   {
+    "title": "score 학습 비용이 과소 추정됐다",
+    "real": true,
+    "severity": "minor",
+    "reason": "Confirmed. conf/logs/train_d2sx_N160000_a1.log '# done: 1784 epochs … wall 35774.6 s, 20.053 s/epoch' (9.9 h at 1.6e5; v3 §0:79 also says ≈10 h). With batch 256 fixed, 2× samples ≈ 40 s/epoch; at the same epoch count ≈ 20 h, not 13 h (the draft gives no derivation for 13). Queue order (run_b32e4.sh:351-353) puts the two trainings after six kron restarts on six GPUs, so training starts only when the first K=1024 restart (14-17 h) finishes, i.e. ~09-24 10:00-13:00 CDT, finishing ~09-25. Any K=4096 restarts (2.5-3 d each) are additional and serialised after.",
+    "fix": "Write '≈ 20 h per training (20 s/epoch × 2 at 1.6e5; epoch count unknown) × 2, starting after the first kron restart frees a GPU', and lay out the ordering with the possible K=4096 extension."
+   }
+  ]
+ },
+ {
+  "lens": "executability",
+  "findings": [
+   {
+    "title": "K=4096 확장은 현재 코드로 실행 불가 — arms.D2_KS 가 2048 에서 끝남",
+    "section": "§1 GMM 격자와 b* (반복 규칙), §1 실행 ①, 수용 검사",
+    "severity": "critical",
+    "evidence": "초안: \"b* 가 kron 의 최대 K 이고 그 ll_val 이 K/2 보다 높으면 2K 를 같은 프로토콜로 적합해 다시 선택한다\", \"raw meta bstar·kron_K = §5 에 적은 최종 선택\". 코드: conf/code/arms.py:57 `D2_KS = (16, …, 1024, 2048)`; load_fits(:70-80) 는 D2_KS 의 K 만 열고, gmm_selection(:89-98) 은 그 안에서만 max ll_val 을 고른다. fit_gpu.py 로 K=4096 파일을 gmm_fits_D2_B32e4 에 만들어도 `runner.py run --tag B32e4` 는 그 파일을 절대 읽지 않고 b*=kron K=2048 을 만든다(fit_cost_meta 도 4096 비용을 제외). 실패 시나리오: §3.2 예측대로 K=4096 이 필요해져 적합·§5 에 'b*=4096' 을 적어도 실행 ①의 GMM arm 은 K=2048 — 10_SPEC §6l \"새 b* 가 나오면 그것이 GMM arm 이 된다\" 위반이며 우리에게 유리한 방향(더 좋은 GMM 미사용). 수용 검사 `kron_K = §5` 로 잡히지 않으면 판정이 잘못된 GMM 상대로 내려진다.",
+    "fix": "§1 에 코드 변경을 사전 등록: 어떤 K=4096 적합도 시작하기 전에 `arms.D2_KS` 에 4096(및 8192) 을 추가하고 커밋 해시를 §5 에 기록(기존 태그 디렉터리에는 파일이 없으므로 선택 불변 — 그 사실도 적음). 수용 검사에 `meta|kron_K` 와 `meta|ll_val|kron` 이 §5 의 최종 K 와 그 npz 의 ll_val 과 일치할 것을 추가."
+   },
+   {
+    "title": "'통과' 정의와 analysis 의 'significant' 문자열이 방향을 다르게 다룸 — 두 읽기가 다른 판정",
+    "section": "§1 판정 (셀 C2), §2 표",
+    "severity": "critical",
+    "evidence": "초안: \"통과 = 3점 중 2점 이상에서 V1 실패가 적고 p < 0.05 + power guard … 결과는 표 B 의 문자열 그대로(significant / not significant / UNDECIDED)\". 코드 conf/code/analysis.py:436-449: `wy`(둘째 arm 실패 적음)·`wx`(첫째 arm 실패 적음) 를 따로 세고 `\"significant\" if max(wx, wy) >= 2` — GMM 이 2/3 점에서 이겨도 'significant' 가 찍힌다. §2 의 행은 '통과 / 통과 못함 / UNDECIDED' 인데 어느 문자열이 '통과' 인지 방향 규정이 없다. 실패 시나리오: wy=1, wx=2 → 표 B 는 'significant' → \"문자열 그대로\" 읽기는 통과, \"V1 실패가 적고\" 읽기는 통과 못함.",
+    "fix": "통과를 출력 줄 단위로 못박는다: POWERED 이고 `second arm fewer failures at k/3 points` 의 k ≥ 2 (그리고 wx 가 2 이상이면 어떤 경우에도 통과 아님). 'significant' 토큰 자체는 판정 기준이 아님을 명시하고 §2 표 머리를 그 문구로 바꾼다."
+   },
+   {
+    "title": "run_d2_sx.py 의 GB′ 단계는 큐 안에서도, '적합 완료 뒤 재실행' 에서도 실패한다 (태그 라우팅 없음)",
+    "section": "§0 이미 도는 것, §1 보고 전용 GB′, §4 run_d2_sx.py 재실행",
+    "severity": "major",
+    "evidence": "초안: \"GB′(`run_d2_sx.py` 재실행, b* 기준)\", §4 \"`run_d2_sx.py --ntrain 320000` 재실행(GB′, 적합 완료 뒤)\". 코드 conf/code/run_d2_sx.py:38 `A.gmm_selection(\"D2\", PRIOR, NR, gmm_n)` 는 runner._init(tag) 를 부르지 않아 A.D2_FITS 가 import 기본값 results/gmm_fits_D2 (n10000 파일만 있음, `ls` 확인) 이다. n320000 파일은 gmm_fits_D2_B32e4 에만 생기므로 load_fits 가 FileNotFoundError 를 내고 rc≠0 (학습 자체는 완료·ckpt/_best.pt 는 온전, resume 시 재학습 없음 — 이 부분은 문제 없음). 기존 d2_gbprime.csv 의 1.6e5 행도 gmm_ntrain=10000, equal_budget=False 로 우회한 것이다. 실패 시나리오: 적합이 다 끝난 뒤 그대로 재실행해도 같은 오류 → 등록한 GB′ 보고가 나오지 않거나, 임시로 gmm_fits_D2 에 파일을 복사해 fit_gpu.py 문서(:9-15)가 경고한 코드 혼합이 생긴다.",
+    "fix": "§1/§4 에 실행 방법을 고정: (a) `results/gmm_fits_D2/` 에 B32e4 의 n320000 파일을 심볼릭 링크로 노출(파일명에 n320000 이 있어 충돌 없음)하거나 (b) run_d2_sx.py 에 --tag 를 추가해 _init(tag) 를 호출(코드 변경 사전 등록). 아울러 GB′ 는 3.2e5 에서 처음으로 equal_budget=True 이므로 1.6e5 행(대 n=1e4 GMM)과 직접 비교하지 않는다는 캐비엇을 §1 에 적는다."
+   },
+   {
+    "title": "태그 B32e4x·B32e4last 는 적합 디렉터리 gmm_fits_D2_B32e4x / _B32e4last 를 요구 — 링크 없으면 실행 ②③ 시작 전 예외",
+    "section": "§1 실행 ② 보고 전용, §4",
+    "severity": "major",
+    "evidence": "초안: \"같은 명령을 `--cell C5 C1 --tag B32e4x`, `--stagec-ckpt …/d2sx_N320000_a1.pt --tag B32e4last`\" 와 \"fits = results/gmm_fits_D2_B32e4\" 는 ① 에만 적혀 있음. 코드 runner.py:91-92 d_fits_d2() = results/gmm_fits_D2_<TAG>, :105-109 _init 이 A.D2_FITS 를 그 경로로 바꾸고, cmd_run :525-526 이 첫 줄에서 load_fits 를 호출한다. 기존 관행은 심볼릭 링크(gmm_fits_D2_review_next_P3 -> gmm_fits_D2_B16e4k 등, `ls -la results` 확인)이나 초안에는 그 단계가 없다. 실패 시나리오: ② 실행 → FileNotFoundError('no GMM fits … run runner.py fit') 로 즉시 종료하거나, 급히 만든 링크가 다른 디렉터리를 가리켜 ①과 다른 b* 로 C5/C1 을 돌린다.",
+    "fix": "§1 ②③ 명령 앞에 `ln -s gmm_fits_D2_B32e4 results/gmm_fits_D2_B32e4x` / `…_B32e4last` 를 명시하고, 수용 검사에 세 태그의 raw meta `bstar`·`kron_K`·`em_sec` 동일 + run_manifest fits_dir 가 같은 디렉터리로 해석됨을 추가."
+   },
+   {
+    "title": "§5 를 여섯 번 참조하지만 문서에 §5 가 없다 — 수용 검사와 identity 기록의 목적지 부재",
+    "section": "§1 GMM 격자, 체크포인트, 수용 검사; §4",
+    "severity": "major",
+    "evidence": "초안: \"확장 과정의 모든 ll_val 을 §5 에 적는다\", \"bstar·kron_K = §5 에 적은 최종 선택\", \"epoch·sha 는 §5 에 학습 종료 후 평가 전 기록\". 문서는 §0~§4 로 끝난다. v3 §0 (NEXT_EXPERIMENTS.md '평가 가중치' 행) 은 `ckpt_identity(best)['epoch'] == ckpt_identity(last)['best_epoch']` 확인을 manifest 에 적으라 하는데 초안 수용 검사에는 이 동등성 검사가 없다. 실패 시나리오: 평가 전 기록 의무가 어디에도 채워지지 않은 채 ① 이 돌고, 사후에 §5 를 쓰면 '평가 전 기록' 이 증명되지 않는다.",
+    "fix": "§5 '기록 (평가 전 채움, 갱신 시각 명시)' 를 추가: K 별·재시작별 ll_val·n_iter·it_best, 최종 b*, K=4096/8192 결정과 시각, D2 last/best 의 sha256[:16]·epoch·best_epoch·stopped_by·aborted 와 위 동등성 검사, D1 형제 게이트 행(GA~GD, epochs, 가중치=last), 코드 변경 커밋 해시. 수용 검사에 동등성 검사를 추가."
+   },
+   {
+    "title": "게이트는 D1 형제의 last 가중치, 1차 평가는 D2 의 _best.pt — 짝이 다름을 규정하지 않음",
+    "section": "§1 자격 (D1 형제 게이트), §1 체크포인트·평가 가중치",
+    "severity": "major",
+    "evidence": "초안: \"`ckpt/sx_N320000_D1.pt` 의 GA~GD (`run_samplecx.py` …)\" 와 \"1차 평가 = `_best.pt`\". 코드 run_samplecx.py:19-21: score.train 의 `ck` (= last, role='last') 를 그대로 gates_D1 에 넘긴다; `_best.pt` 는 게이트하지 않는다. 1.6e5 도 @200 EMA(last) 에서 PASS 했고 best@136 은 미저장이었다(RESULTS §1 정정 노트). 실패 시나리오: GC 가 임계 근처(예측 0.072 이나 GB 는 예산과 함께 나빠질 수 있다고 §3.8 스스로 적음)에서 last 는 FAIL, best 라면 PASS(혹은 반대) 일 때 'best 로 평가한 arm 의 자격' 을 두 가지로 읽을 수 있다.",
+    "fix": "§1 자격 행에 명시: 자격은 D1 형제 last 가중치(sx_N320000_D1.pt, 1.6e5 와 동일 규약) 한 행으로만 정해지고 B32e4(best)·B32e4last(last) 두 실행에 같이 적용된다. 보고 전용으로 `sx_N320000_D1_best.pt` 의 GA~GD 도 잰다(게이트 계산이지 BLER 아님, GPU 수 분) — 판정에는 쓰지 않음을 적는다."
+   },
+   {
+    "title": "학습 비용 '13 h × 2' 는 실측과 맞지 않고, 큐 순서·max_epochs 상한을 반영한 일정이 없다",
+    "section": "§1 비용, §4",
+    "severity": "major",
+    "evidence": "초안: \"score 학습 ≈ 13 h × 2\". 로그 logs/train_d2sx_N160000_a1.log '# done': 1784 epochs, wall 35774.6 s (≈10 h), 20.05 s/epoch (n_train 144000); epochs 는 1e4 673 → 4e4 1051 → 1.6e5 1784 로 증가. 3.2e5 는 epoch 당 ≈40 s 이고 epochs ≥ 1784 면 ≥ 20 h, max_epochs=3000 (run_d2_sx.py:34) 에 닿으면 ≈ 33 h. D1 형제는 logs/train_sx_N160000_D1.log: 200 epochs, 4306 s (1.2 h) → 3.2e5 ≈ 2.5 h. 두 학습 작업은 큐(b32e4_queue.txt) 에서 kron 1024 재시작 3개(≈17 h) 뒤에야 GPU 를 받는다. 실패 시나리오: max_epochs 로 멈추면 stopped_by='max_epochs' — 01_RULES §5 (ii) 로 시도는 성립하지만 초안은 patience 종료만 가정해 identity 기록·해석 규칙이 없다.",
+    "fix": "비용을 D2 ≈ 20~33 h, D1 ≈ 2~3 h 로 고치고 시작 시점(≈ 09-24 12:30 CDT) 을 적는다. 예상 일정을 §4 에 추가(K=4096 없으면 ① ≈ 09-26, 있으면 ≈ 09-28 이후 CDT). stopped_by=max_epochs 는 유효 시도로 인정하되 §5 에 그대로 적고 max_epochs 를 늘리지 않는다고 고정."
+   },
+   {
+    "title": "학습 발산·EM 후보 누락·K=8192 거부 시 처리가 등록돼 있지 않음 (attempt 1 만)",
+    "section": "§1 체크포인트, §1 GMM 격자, §3.8 빗나갈 경로",
+    "severity": "major",
+    "evidence": "초안: \"attempt 1 만(시드 반복은 등록하지 않음)\", \"K = 8192 가 필요해지면 … 사용자 결정 뒤에만\", §3.8 은 (a) 게이트 FAIL (b) 격차 축소 (c) K=4096 도 격자 끝 만 다룬다. 코드: score.train 은 stopped_by='diverged' (10_SPEC §3d 규칙) 로 끝날 수 있고(score.py:1005-1007), fit_gpu.py --merge 는 후보 하나라도 없으면 sys.exit (:101-103). 실패 시나리오: D2 학습이 발산하면 이 예산의 학습 arm 이 없는데 '재시도' 가 등록되지 않아 사후 결정이 되고, 사용자가 K=8192 를 거부하면 b* 가 격자 끝(K=4096) 인 채로 판정을 내려야 하는지 아닌지 규정이 없다.",
+    "fix": "§1 에 추가: (i) diverged/aborted → 그 상태로 §5 에 적고 attempt 2 는 새 등록 없이는 돌리지 않는다(돌리면 판정 arm 이 아니라 보고 전용); (ii) 재시작 후보 누락 → 같은 시드의 그 재시작만 재실행(결정적)하고 기록; (iii) K=8192 거부 시 b* = K=4096(격자 끝) 으로 실행하되 4e4 와 같은 '격자 끝 캐비엇' 을 표 머리말에 적는다."
+   },
+   {
+    "title": "멈춤 규칙이 500 반복 상한과 full 계열의 격자 끝을 다루지 않음",
+    "section": "§1 GMM 격자와 b*",
+    "severity": "minor",
+    "evidence": "초안: \"멈춤 = 최대 K 의 ll_val ≤ K/2 의 ll_val (b* 내부)\", \"full 은 512 까지\". fit_gpu.py 는 FIT_ITERS=500 상한(runner.py:62) 과 검증 조기 종료를 쓰고 npz 에 n_iter·it_best 를 저장한다. K=2048 은 반복당 243 s 라 500 회 상한이 K=1024 보다 먼저 묶일 수 있어 '내부' 가 수렴이 아니라 상한 때문일 수 있다. 또 full K=512 가 kron 을 모두 이기면 b* 는 full 의 격자 끝인데 규칙이 침묵한다.",
+    "fix": "§5 기록에 선택된 K 와 그 이웃의 n_iter·it_best(상한 500 도달 여부)를 넣고, 상한이 묶인 경우 '상한 하 내부' 로 표기. full 이 b* 가 되는 경우의 처리를 한 줄로 고정(같은 2K 규칙 적용 또는 격자 끝 캐비엇)."
+   },
+   {
+    "title": "예산 곡선 표에 들어가는 V1 이 best 인지 last 인지 미지정",
+    "section": "§1 보고 전용 (예산 곡선), §3.3~3.4",
+    "severity": "minor",
+    "evidence": "초안: \"예산 곡선: 네 예산의 C2 −3 dB BLER(GMM b*, V1)\" 과 \"last-EMA 는 예산 곡선 비교용 보고 전용 두 번째 실행\"; §3.3 \"V1 ≈ 0.14~0.15\" 는 어느 실행인지 없음. 이전 세 예산은 모두 last-EMA 다. 실패 시나리오: best 와 last 의 −3 dB BLER 이 다르면(H0 는 개발 집합 n=640 에서만 85:85) 곡선의 네 번째 점을 어느 쪽으로 찍느냐가 사후 선택이 된다.",
+    "fix": "곡선 표의 V1 은 B32e4last(이전 예산과 같은 가중치 종류)로 고정하고 best 값을 같은 표에 별도 열로 싣는다고 적는다. §3.3~3.4 예측은 두 실행 모두에 적용됨을 명시."
+   },
+   {
+    "title": "테스트 집합 재사용·순차적 예산 선택에 대한 진술이 없음",
+    "section": "머리말, §1 판정, §2",
+    "severity": "minor",
+    "evidence": "초안은 테스트 0..2559 를 쓰고 추세 검정을 등록하지 않는다고만 적는다. 3.2e5 라는 예산 점은 1.6e5 의 테스트 결과(V1 평평, GMM 완만한 개선)를 본 뒤 추가됐다(머리말의 사용자 결정 시각). 점별 판정은 사전 등록으로 유효하지만 예산 축 자체는 자료 의존적 순차 선택이며, 3.2e5 가 통과 못하면 6.4e5 를 또 추가할 수 있다는 규정이 없다.",
+    "fix": "머리말에 한 줄: '이 예산 점은 이전 예산의 테스트 결과를 본 뒤 추가됐다. 점별 판정은 독립 사전 등록이나 예산 축은 순차 선택이며(그래서 추세 검정 없음), 이 결과를 보고 예산 점을 더 추가하려면 별도 등록이 필요하다. 같은 테스트 시행의 재사용은 점별 paired 추론에는 영향이 없다.'"
+   },
+   {
+    "title": "근거 인용 오기: 01_RULES:76 은 '내부까지 확장' 규칙이 아님",
+    "section": "머리말 근거·틀, §1 GMM 격자",
+    "severity": "minor",
+    "evidence": "초안: \"`01_RULES.md` … :76(b* 가 격자 내부일 때까지 확장)\". 실제 01_RULES.md:76 은 \"GMM arm을 약화시키지 않는다. D2에서도 K 전 범위 적합 + shrinkage + 검증 우도 early stopping\" 이고, '내부에 들어올 때까지 확장' 은 10_SPEC_stageC.md §6l (:657-693) 의 규칙이다.",
+    "fix": "인용을 '01_RULES:76(K 전 범위 적합) + 10_SPEC §6l(내부까지 확장)' 로 고친다."
+   },
+   {
+    "title": "samplecx_D1.txt 갱신 여부 미지정 — RESULTS 가 게이트 출처로 인용하는 파일",
+    "section": "§4 선행 작업",
+    "severity": "minor",
+    "evidence": "초안 §4: \"D1 형제 게이트 결과(`samplecx.csv`, 로그)\". run_samplecx.py 는 samplecx.csv 에만 행을 붙이고, results/samplecx_D1.txt(로그-로그 적합 GC ~ N^-0.474 포함, docs/RESULTS.md §1.1 이 게이트 출처로 인용)는 code/cf_rollup.py·figures_stagec*.py 가 만든다. 5점째가 들어가면 적합 지수 문장이 바뀌므로 재생성하면 기존 인용(:28-30 행 번호)이 어긋나고, 안 하면 3.2e5 게이트 행이 인용 가능한 표에 없다.",
+    "fix": "§4 에 'samplecx_D1.txt 는 재생성하지 않고 보관, 3.2e5 행은 §5·DECISIONS 와 samplecx.csv 에서 인용' (또는 새 파일명으로 재생성) 을 하나 골라 적는다."
+   }
+  ],
+  "verdicts": [
+   {
+    "title": "K=4096 확장은 현재 코드로 실행 불가 — arms.D2_KS 가 2048 에서 끝남",
+    "real": true,
+    "severity": "major",
+    "reason": "확인됨. conf/code/arms.py:57 `D2_KS = (16, …, 1024, 2048)`; load_fits(:70-80) 는 이 튜플의 K 만 열고 gmm_selection(:89-98) 은 열린 것 중 max ll_val 을 고른다. fit_gpu.py 는 K 를 검사하지 않으므로 K=4096 npz 는 만들어지지만 `runner.py run --tag B32e4` 는 그 파일을 읽지 못해 b*=kron 2048 로 arm 을 만든다(runner.py:1188 _init → :526 load_fits, fit_cost_meta 도 로드된 파일만 합산). 초안 §1 의 '2K 를 적합해 다시 선택' 은 코드 변경 없이는 실행 불가다. 다만 critical 로는 보지 않는다: 초안 수용 검사 `raw meta bstar·kron_K = §5 에 적은 최종 선택` 이 kron_K=2048≠4096 을 잡아 그 실행을 무효로 만들므로 잘못된 GMM 상대의 판정이 '성립' 하지는 않고, BLER 을 보기 전의 코드 변경이라 조작 여지도 낮다. 문제는 사전 등록 없는 사후 코드 변경이 강제된다는 점이다.",
+    "fix": "§1 GMM 격자 행에 코드 변경을 사전 등록: K=4096 적합 시작 전 `arms.D2_KS` 에 4096·8192 를 추가하고(기존 태그 디렉터리에 그 K 파일이 없어 이전 선택 불변 — 그 사실도 적음) 커밋 해시를 기록 절에 남긴다. 수용 검사에 `meta|kron_K` 와 그 npz 의 ll_val 이 기록 절의 최종 K·ll_val 과 일치할 것을 추가."
+   },
+   {
+    "title": "'통과' 정의와 analysis 의 'significant' 문자열이 방향을 다르게 다룸 — 두 읽기가 다른 판정",
+    "real": true,
+    "severity": "major",
+    "reason": "코드 확인: analysis.py:436-449 는 wy(둘째 arm 실패 적음)·wx(첫째 arm 실패 적음)를 따로 세고 `\"significant\" if max(wx, wy) >= 2` 로 방향 무관하게 찍는다. 초안은 '통과 = 3점 중 2점 이상에서 V1 실패가 적고 p<0.05' 로 방향을 명시하지만 바로 이어 '결과는 표 B 의 문자열 그대로(significant/not significant/UNDECIDED)' 라 적고 §2 표는 '통과/통과 못함/UNDECIDED' 로 머리를 달아 문자열→판정 매핑이 없다. wy=1, wx=2 (GMM 이 2점에서 우세) 이면 문자열은 'significant' 인데 정의로는 통과 아님. 1차 정의가 명시적이라 critical 은 아니지만 한 줄 규정이 빠져 있다.",
+    "fix": "통과를 출력 줄 단위로 못박는다: 'POWERED 이고 `second arm fewer failures at k/3 points` 의 k ≥ 2' (wx ≥ 2 이면 어떤 경우에도 통과 아님). 'significant' 토큰은 판정 기준이 아니라고 §1 판정 행과 §2 표 머리에 적는다."
+   },
+   {
+    "title": "run_d2_sx.py 의 GB′ 단계는 큐 안에서도, '적합 완료 뒤 재실행' 에서도 실패한다 (태그 라우팅 없음)",
+    "real": true,
+    "severity": "major",
+    "reason": "확인됨. run_d2_sx.py:38 `A.gmm_selection(\"D2\", PRIOR, NR, gmm_n)` 는 runner._init(tag) 를 부르지 않고 --tag 인자도 없다. A.D2_FITS 는 import 기본값 results/gmm_fits_D2 이고 그 디렉터리에는 n10000 파일만 있다(ls 확인). n320000 파일은 gmm_fits_D2_B32e4 에만 생기므로 load_fits 가 FileNotFoundError → rc≠0. run_b32e4.sh 머리말도 '지금은 실패할 수 있음, 나중에 재실행' 이라 적었지만 재실행도 같은 이유로 실패한다. 기존 d2_gbprime.csv 의 1.6e5 세 행이 gmm_ntrain=10000, equal_budget=False 인 것이 그 증거. 학습·ckpt·_best.pt·resume(_already_stopped) 는 온전하다.",
+    "fix": "§1 보고 전용 행과 §4 에 실행 방법을 고정: (a) `results/gmm_fits_D2/` 에 B32e4 의 n320000 파일 심볼릭 링크(파일명에 n320000 이 있어 충돌 없음) 또는 (b) run_d2_sx.py 에 --tag 추가(runner._init 호출)를 사전 등록. GB′ 는 3.2e5 에서 처음 equal_budget=True 이므로 1.6e5 행(대 n=1e4 GMM)과 직접 비교하지 않는다는 캐비엇을 적는다."
+   },
+   {
+    "title": "태그 B32e4x·B32e4last 는 적합 디렉터리 gmm_fits_D2_B32e4x / _B32e4last 를 요구 — 링크 없으면 실행 ②③ 시작 전 예외",
+    "real": true,
+    "severity": "major",
+    "reason": "확인됨. runner.py:1188 이 cmd_run 전에 `_init(a.tag)` 를 호출해 A.D2_FITS = results/gmm_fits_D2_<TAG> 로 바꾸고(:91-92, :105-109), cmd_run :525-526 첫 루프가 load_fits 를 호출한다. 디렉터리가 없으면 FileNotFoundError 로 즉시 종료. 기존 관행은 전부 심볼릭 링크(gmm_fits_D2_review_next_P3 → gmm_fits_D2_B16e4k 등 `ls -la results` 로 확인)인데 초안에는 그 단계가 없고 'fits = results/gmm_fits_D2_B32e4' 는 ① 에만 적혀 있다. run_manifest.py:105 도 fits_dir 를 태그로 해석한다.",
+    "fix": "§1 ②③ 명령 앞에 `ln -s gmm_fits_D2_B32e4 results/gmm_fits_D2_B32e4x` / `…_B32e4last` 를 명시하고, 수용 검사에 세 태그의 raw meta bstar·kron_K·em_sec 동일 + run_manifest fits_dir 가 같은 디렉터리로 해석됨을 추가."
+   },
+   {
+    "title": "§5 를 여섯 번 참조하지만 문서에 §5 가 없다 — 수용 검사와 identity 기록의 목적지 부재",
+    "real": true,
+    "severity": "major",
+    "reason": "확인됨. 문서 헤더는 ## 0 ~ ## 4 뿐이고, §1 의 GMM 격자 행('모든 ll_val 을 §5 에'), 수용 검사 행('bstar·kron_K = §5 에 적은 최종 선택', 'epoch·sha 는 §5 에 … 평가 전 기록') 이 존재하지 않는 절을 가리킨다. §4 가 identity 를 '평가 전 DECISIONS.md 에 기록' 이라 적어 목적지가 완전히 없는 것은 아니지만, 수용 검사가 대조하는 '§5 의 값' 이 문서 안에 없어 검사가 실행 불가다. 또 v3 §0 평가 가중치 행의 `ckpt_identity(best)['epoch'] == ckpt_identity(last)['best_epoch']` 확인이 초안 수용 검사에 없다(score.ckpt_identity 가 두 값을 주므로 실행 가능).",
+    "fix": "§5 '기록 (평가 전 채움, 갱신 시각 명시)' 를 추가: K 별·재시작별 ll_val·n_iter·it_best, 최종 b*, K=4096/8192 결정과 시각, D2 last/best 의 sha256[:16]·epoch·best_epoch·stopped_by·aborted 와 위 동등성 검사, D1 형제 게이트 행, 코드 변경 커밋 해시. 수용 검사에 동등성 검사를 추가하고 §4 의 DECISIONS 기록과 역할을 구분."
+   },
+   {
+    "title": "게이트는 D1 형제의 last 가중치, 1차 평가는 D2 의 _best.pt — 짝이 다름을 규정하지 않음",
+    "real": true,
+    "severity": "minor",
+    "reason": "사실 관계는 확인됨: run_samplecx.py:19-21 은 score.train 의 `ck`(last, role='last')를 그대로 gates_D1 에 넘기고 _best.pt 는 게이트하지 않는다; 1.6e5 도 @200 EMA 에서 PASS. 다만 초안은 파일명 `ckpt/sx_N320000_D1.pt` 와 스크립트를 명시하므로 규칙 자체는 실행 가능하고 한 가지로 읽힌다 — 그 파일이 last 라는 점을 적지 않았을 뿐이다. 임계 근처에서 best 를 재게이트해 바꿔 타는 것을 명시적으로 막는 문장이 없다는 점만 남으므로 major 가 아니라 minor.",
+    "fix": "§1 자격 행에 '자격은 D1 형제 last 가중치(sx_N320000_D1.pt, 1.6e5 와 같은 규약) 한 행으로만 정해지고 B32e4(best)·B32e4last(last) 두 실행에 같이 적용된다' 를 적고, `_best.pt` 의 GA~GD 를 잰다면 보고 전용임을 명시."
+   },
+   {
+    "title": "학습 비용 '13 h × 2' 는 실측과 맞지 않고, 큐 순서·max_epochs 상한을 반영한 일정이 없다",
+    "real": true,
+    "severity": "major",
+    "reason": "로그로 확인: train_d2sx_N160000_a1.log '# done' = 1784 epochs, wall 35774.6 s(≈9.9 h), 20.05 s/epoch; s/epoch 는 1e4 1.00 → 4e4 3.79 → 1.6e5 20.05 로 선형 이상 증가하고 epochs 도 673 → 1051 → 1784 로 증가. 3.2e5 는 ≥40 s/epoch × ≥1784 ≈ ≥20 h, max_epochs=3000(run_d2_sx.py:34) 이면 ≈33 h 이상. D1 형제는 train_sx_N160000_D1.log 200 epochs 4306 s → 3.2e5 ≈ 2.5 h. 큐 확인: 남은 b32e4_queue.txt 의 1·2 행이 D2/D1 학습이고 6 GPU 는 kron 2048/1024 재시작 6개를 돌리는 중이라 첫 빈 GPU 는 kron 1024 종료(≈14~17 h) 뒤다. 초안은 patience 종료만 가정하고 stopped_by=max_epochs(score.py:1009, ep ≥ min_epochs 면 aborted=False 로 유효 시도) 의 기록·해석 규칙이 없다.",
+    "fix": "비용을 D2 ≈ 20~35 h, D1 ≈ 2~3 h 로 고치고 시작 가능 시각(≈ 09-24 10~13 CDT)을 적는다. §4 에 예상 일정 추가. stopped_by=max_epochs 는 01_RULES §5 (ii) 로 유효 시도로 인정하되 그대로 기록하고 max_epochs 를 늘리지 않는다고 고정."
+   },
+   {
+    "title": "학습 발산·EM 후보 누락·K=8192 거부 시 처리가 등록돼 있지 않음 (attempt 1 만)",
+    "real": true,
+    "severity": "major",
+    "reason": "확인됨. score.py:1007 은 stopped_by='diverged' 로 학습을 끝낼 수 있고(10_SPEC §3d 완료 시도), fit_gpu.py:103 은 --merge 시 후보 하나라도 없으면 `MERGE refused` sys.exit. 초안 §1 은 'attempt 1 만', §3.8 은 (a) 게이트 FAIL (b) 격차 축소 (c) K=4096 도 격자 끝 → K=8192 사용자 결정 만 다룬다. D2 발산 시 이 예산의 학습 arm 이 없는데 재시도 지위가 미등록이고, 사용자가 K=8192 를 거부했을 때 b*=K=4096(격자 끝)으로 판정하는지 여부가 없다.",
+    "fix": "§1 에 추가: (i) diverged/aborted → 기록 절에 적고 attempt 2 는 새 등록 없이는 판정 arm 이 아니다; (ii) 재시작 후보 누락 → 같은 시드의 그 재시작만 재실행(결정적)하고 기록; (iii) K=8192 거부 시 b*=K=4096(격자 끝)으로 실행하되 4e4 와 같은 '격자 끝 캐비엇' 을 표 머리말에 적는다."
+   },
+   {
+    "title": "멈춤 규칙이 500 반복 상한과 full 계열의 격자 끝을 다루지 않음",
+    "real": true,
+    "severity": "minor",
+    "reason": "확인됨. runner.py:62 `FIT_ITERS = 500`, fit_gpu.py 는 npz 에 n_iter·it_best 를 저장. 초안 §0 의 'kron 2048 ≈ 27~34 h/재시작' 은 243 s/iter × 500 이므로 상한 도달을 이미 가정하고 있는데, §1 멈춤 규칙 'll_val(최대 K) ≤ ll_val(K/2)' 는 그 '내부' 가 수렴 때문인지 상한 때문인지 구분하지 않는다. full K=512 가 kron 을 이길 때의 규칙도 없다('full 은 512 까지' 만). 판정에 직접 닿지는 않아 minor.",
+    "fix": "기록 절에 선택 K 와 이웃의 n_iter·it_best(500 도달 여부)를 넣고 상한이 묶였으면 '상한 하 내부' 로 표기. full 이 b* 가 되는 경우 처리(같은 2K 규칙 또는 격자 끝 캐비엇)를 한 줄로 고정."
+   },
+   {
+    "title": "예산 곡선 표에 들어가는 V1 이 best 인지 last 인지 미지정",
+    "real": false,
+    "severity": "minor",
+    "reason": "반박됨. 초안 §1 체크포인트 행이 'last-EMA 는 예산 곡선 비교용 보고 전용 두 번째 실행(이전 세 예산은 모두 last-EMA)' 라고 용도를 명시하므로 곡선의 4번째 점은 B32e4last 로 읽힌다. 곡선은 보고 전용이라 어떤 판정도 걸리지 않는다. 표에 best 열을 병기할지는 취향이지 결함이 아니다.",
+    "fix": "(선택) 보고 전용 행에 '곡선 V1 = B32e4last, best 값은 별도 열' 한 구절을 넣으면 더 명확해지지만 필수는 아니다."
+   },
+   {
+    "title": "테스트 집합 재사용·순차적 예산 선택에 대한 진술이 없음",
+    "real": true,
+    "severity": "minor",
+    "reason": "확인됨. 초안은 테스트 0..2559 사용과 '추세 검정 미등록(4점)' 만 적고, 3.2e5 라는 점이 1.6e5 테스트 결과를 본 뒤 추가됐다는 사실(머리말의 사용자 결정 시각이 그 증거)과 결과를 보고 예산을 더 늘릴 때의 규칙을 적지 않는다. 점별 paired 부호검정은 같은 시행 재사용에 영향받지 않으므로 통계적 결함은 아니지만, '예산 축은 자료 의존적 순차 선택' 이라는 진술이 빠지면 '어디까지 확장할 것인가' 가 사후 결정이 된다.",
+    "fix": "머리말에 한 줄: '이 예산 점은 이전 예산의 테스트 결과를 본 뒤 추가됐다. 점별 판정은 독립 사전 등록이나 예산 축은 순차 선택이며(그래서 추세 검정 없음), 이 결과를 보고 예산 점을 더 추가하려면 별도 등록이 필요하다. 같은 테스트 시행의 재사용은 점별 paired 추론에 영향이 없다.'"
+   },
+   {
+    "title": "근거 인용 오기: 01_RULES:76 은 '내부까지 확장' 규칙이 아님",
+    "real": true,
+    "severity": "minor",
+    "reason": "확인됨. 01_RULES.md:76 은 'GMM arm을 약화시키지 않는다. D2에서도 K 전 범위 적합 + shrinkage + 검증 우도 early stopping' 이고, 'b* 가 내부에 들어올 때까지 확장' 은 10_SPEC_stageC.md §6l(:657-693) 이 :76 에서 도출한 규칙이다. arms.py:59 와 run_b32e4.sh:2 도 같은 축약을 쓰므로 프로젝트 관행이지만, 초안의 괄호 설명은 :76 의 원문과 다르다. 판정 무관.",
+    "fix": "인용을 '01_RULES:76(K 전 범위 적합) + 10_SPEC §6l(내부까지 확장)' 로 고친다."
+   },
+   {
+    "title": "samplecx_D1.txt 갱신 여부 미지정 — RESULTS 가 게이트 출처로 인용하는 파일",
+    "real": false,
+    "severity": "minor",
+    "reason": "반박됨. 현재 코드에서 samplecx_D1.txt 를 쓰는 경로가 없다: grep 결과 cf_rollup.py:48·figures_stagec.py:37,:296·figures_stagec2.py:30 은 모두 주석이고 figures.py 는 samplecx.csv 만 읽는다(파일 머리말 git 5e2e77a 시점의 코드가 만든 정적 산출물). 따라서 3.2e5 행이 자동으로 들어가 :28-30 인용이 어긋날 위험이 없고, 초안 §4 가 이미 samplecx.csv·로그·DECISIONS 를 3.2e5 게이트 기록처로 명시한다.",
+    "fix": "불필요. 원하면 §4 에 'samplecx_D1.txt 는 갱신하지 않는다' 한 구절을 넣을 수 있다."
+   }
+  ]
+ }
+]
