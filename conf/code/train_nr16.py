@@ -32,6 +32,8 @@ def main():
     ap.add_argument("--ntrain", type=int, default=10000)
     ap.add_argument("--attempt", type=int, default=1)
     ap.add_argument("--n-eval", type=int, default=4096)
+    ap.add_argument("--fits-tag", default="NR16", help="GMM fits dir results/gmm_fits_D2_<tag> for the equal-budget GB' "
+                    "(default NR16 = the 1e4 fits, as before; the C6 1.6e5 point uses NR16B16e4)")
     a = ap.parse_args()
     tag = f"NR16_N{a.ntrain}_a{a.attempt}"
     ck = os.path.join(C.CONF, "ckpt", f"d2sx_{tag}.pt")
@@ -48,7 +50,7 @@ def main():
     # GB' against the equal-budget GMM b* on THIS array -- report-only, same quantity as run_d2_sx.py.
     # The Nr=16 fits live in the NR16-tagged directory (fit_gpu.py -> runner._init("NR16")); arms.D2_FITS
     # defaults to the untagged Nr=8 one, where this used to die with FileNotFoundError (review_next S7-a).
-    A.D2_FITS = os.path.join(C.CONF, "results", "gmm_fits_D2_NR16")
+    A.D2_FITS = os.path.join(C.CONF, "results", f"gmm_fits_D2_{a.fits_tag}")
     fits, llv, bstar, kron_K = A.gmm_selection("D2", PRIOR, NR, a.ntrain)
     fam, K = ("kron", kron_K) if bstar == "kron" else ("full", int(bstar[3:]))
     gp = C.GMMPriorB(NR, NT, fits[(fam, K)]["covs"], fits[(fam, K)]["pi"])

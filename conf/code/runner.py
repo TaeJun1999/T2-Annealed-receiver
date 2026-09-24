@@ -271,7 +271,9 @@ def learned_budget(sp, ckpt):
     carries no sample count the string says UNKNOWN -- it never guesses a budget."""
     st = getattr(sp, "st", None) or {}
     rung = str(st.get("rung", "?"))
-    m = re.search(r"(\d{3,})", rung)
+    # the C6 rung is f"D2SXNR{Nr}{ntrain}" (train_nr16.py): strip the array tag first, or 'D2SXNR1610000' reads as
+    # N_train=1610000 (display bug in the NR16run2 header, PAPER_MATERIALS; the rung itself stays -- it seeds training)
+    m = re.search(r"(\d{3,})", rung.replace(f"NR{st.get('Nr')}", "", 1) if st.get("Nr") is not None else rung)
     n = m.group(1) if m else f"UNKNOWN (checkpoint rung tag {rung!r} carries no sample count)"
     p = str(getattr(sp, "ckpt", None) or ckpt or "?")
     return f"N_train={n}  rung={rung}  ckpt={p}  gate: {gate_verdict(p)}"

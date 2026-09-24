@@ -1,0 +1,14 @@
+# date        : 2026-09-25 07:47:40 KST
+# git commit  : 36b12bf6
+# versions    : python 3.12.14  numpy 2.5.2  scipy 1.18.1  torch 2.14.0+cu130 (cuda_available=True)
+# device      : CPU (192 cores) | dtype: complex128 / float64 | deterministic: yes (fixed seeds, no GPU in the receiver)
+# testbed     : D2
+# seed rule   : default_rng([20260926, TBID[testbed], PID[prior], Nr, T, Tp, int(snr)+100])  (trials of a point = ONE stream)
+# code        : rate-1/2 conv (133,171)_8 nu=6 terminated, QPSK, outer iterations = 16 for EVERY arm
+# Demo/ hashes: t2_route_a.py=95a5408901ec125c  t2_trellis.py=31cd0ee9c68e972b  t2_gmm.py=d064e58c7510c769
+# content     : C6 (Nr=16) equal-budget N'=1.6e5 -- batched vs exact kron M-step, final iterate, real data; (a) N'=160000 K=512 6 it, (b) reseed-active N=10000 K=512 15 it
+(a) N'=160000 K=512: exact 288 s (48.1 s/iter), batched 19 s (3.13 s/iter, x15.4); n_iter 6/6, max|dll_t| 1.10e-12, max rel dcov 2.47e-12, max|dpi| 1.33e-14, reseeds 0/0 -> PASS
+(b) N=10000 K=512 reseed-active: exact 56 s (3.7 s/iter), batched 3 s (0.22 s/iter, x16.7); n_iter 15/15, max|dll_t| 3.12e-09, max rel dcov 6.77e-10, max|dpi| 4.78e-13, reseeds 371/371 (>= 1 required) -> PASS
+timing N'=160000 kron K=1024 batched: 19 s for 3 iterations (6.2 s/iter), reseeds 6
+timing N'=160000 kron K=2048 batched: 38 s for 3 iterations (12.7 s/iter), reseeds 202
+VERDICT: PASS (criterion in the module docstring)
