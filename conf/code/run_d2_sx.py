@@ -23,16 +23,26 @@ ap.add_argument("--ntrain", type=int, default=10000)
 ap.add_argument("--attempt", type=int, default=1)
 ap.add_argument("--gmm-ntrain", type=int, default=None)
 ap.add_argument("--n-eval", type=int, default=4096)
+ap.add_argument("--tag", default=None, help="GMM fits dir tag (runner._init: results/gmm_fits_D2_<tag>); default = the "
+                                           "untagged dir, as before (NEXT_EXPERIMENTS_B32e4: equal-budget GB' needs it)")
+ap.add_argument("--fallback", type=int, default=1, choices=(1, 2, 3),
+                help="10_SPEC §3d ladder after a DIVERGED/aborted run: 2 = grad-norm clip 1.0, 3 = + lr/3 (score.*_LADDER; "
+                     "same data stream, checkpoint suffix _fb<k>).  1 = the frozen recipe (default, unchanged)")
 a = ap.parse_args()
+if a.tag:
+    import runner
+    runner._init(a.tag)                        # A.D2_FITS -> results/gmm_fits_D2_<tag>
 gmm_n = a.gmm_ntrain or a.ntrain
 
-tag = f"N{a.ntrain}_a{a.attempt}"
+tag = f"N{a.ntrain}_a{a.attempt}" + (f"_fb{a.fallback}" if a.fallback > 1 else "")
+GRAD_CLIP = score.GRAD_CLIP_LADDER[a.fallback - 1]
+HP["lr"] = HP["lr"] / score.LR_DIV_LADDER[a.fallback - 1]
 ck = os.path.join(C.CONF, "ckpt", f"d2sx_{tag}.pt")
 lg = os.path.join(C.CONF, "logs", f"train_d2sx_{tag}.log")
 print(f"[d2sx] ntrain={a.ntrain} attempt={a.attempt} gmm_ntrain={gmm_n} n_eval={a.n_eval}", flush=True)
 res = score.train(f"D2SX{a.ntrain}", a.attempt, "D2", PRIOR, NR, NT, device="cuda", hp=HP, resume=True,
                   ntrain=a.ntrain, max_epochs=3000, patience=20, min_epochs=200, log_path=lg, ckpt=ck,
-                  verbose=False)
+                  verbose=False, **({"grad_clip": GRAD_CLIP} if a.fallback > 1 else {}))
 print(f"[d2sx] trained {res['epochs']} ep, val {res['val_loss']:.5e}, {res['wall_sec']:.0f}s", flush=True)
 
 fits, llv, bstar, kron_K = A.gmm_selection("D2", PRIOR, NR, gmm_n)

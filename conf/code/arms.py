@@ -54,7 +54,9 @@ def route_a(Nr, Nt, T, Tp, sigma2, prior, code, Xp, moduleH, clip=None, **over):
 # ----------------------------------------------------------------------------- GMM fits
 D1_FITS = os.path.join(DEMO, "exp_0925_fits")            # reused verbatim (see DECISIONS)
 D2_FITS = os.path.join(C.CONF, "results", "gmm_fits_D2")
-D1_KS, D2_KS = (16, 32, 64), (16, 32, 64, 128, 256, 512, 1024, 2048)   # 256/512: b* kept hitting the grid edge
+D1_KS, D2_KS = (16, 32, 64), (16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192)   # 256/512: b* kept hitting the grid edge
+# 4096/8192 added 2026-09-23 (NEXT_EXPERIMENTS_B32e4 §1, before any K=4096 fit exists): the §6l extension rule at
+# N'=3.2e5.  load_fits() only loads files that exist, so every existing fits directory selects exactly as before.
 # (DECISIONS); 1024/2048 added 2026-09-22 15:30 under 10_SPEC_stageC §6l -- at N=4e4 kron K=1024 beat K=512 on
 # validation log-likelihood, so the grid must extend until b* is interior (01_RULES:76).  load_fits() only loads
 # files that exist, so a directory without a K=1024 fit selects exactly as before; `runner.py fit` will now

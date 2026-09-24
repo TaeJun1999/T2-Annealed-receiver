@@ -64,7 +64,7 @@
 | 항목 | 상태 |
 |---|---|
 | GPU 큐 `run_b32e4.sh` (kron 2048·1024 재시작, D2·D1 학습, 격자 나머지) | 진행 중 (19:38 CDT~) |
-| 선행 코드: `arms.D2_KS` += 4096, 8192; `run_d2_sx.py` `--tag` + `--grad-clip`/`--lr-div`; `run_samplecx.py` `--grad-clip`/`--lr-div`; fits 링크 `gmm_fits_D2_B32e4x`·`_B32e4last` | 미구현 (Opus) |
+| 선행 코드: `arms.D2_KS` += 4096, 8192; `run_d2_sx.py` `--tag` + `--grad-clip`/`--lr-div`; `run_samplecx.py` `--grad-clip`/`--lr-div`; fits 링크 `gmm_fits_D2_B32e4x`·`_B32e4last` | **구현** (Opus, 2026-09-23 22:12 CDT). §3d 사다리 인자는 기존 관례(run_V3.py·run_d1_variant.py)대로 **`--fallback 2|3`** 한 인자로 구현(`score.GRAD_CLIP_LADDER`/`LR_DIV_LADDER` = 클리핑 1.0 / +lr/3, 같은 rung·attempt = 같은 데이터 스트림, 체크포인트 접미사 `_fb<k>`); `run_samplecx.py` 는 두 번째 위치 인자. 기본값(인자 없음)은 동작이 비트 동일(lr/1.0, grad_clip 미전달) — 큐의 7·8번 작업이 그대로 돈다. fits 링크 생성 |
 | kron K=2048 / 1024 병합 (`fit_gpu.py 8 kron K 320000 B32e4 --merge`) → ll_val 비교 → 반복 규칙(K=4096 ?) | 대기 |
 | `run_d2_sx.py --ntrain 320000 --tag B32e4` 재실행(GB′, 적합 완료 뒤; 학습은 완료 상태로 건너뜀) | 대기 |
 | §5 채우기 → 커밋 → 실행 ①②③ + `analysis` + `run_manifest` | 미실행 |
