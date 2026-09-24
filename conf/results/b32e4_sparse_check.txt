@@ -1,0 +1,14 @@
+# date        : 2026-09-25 02:42:36 KST
+# git commit  : 6770c208
+# versions    : python 3.12.14  numpy 2.5.2  scipy 1.18.1  torch 2.14.0+cu130 (cuda_available=True)
+# device      : CPU (192 cores) | dtype: complex128 / float64 | deterministic: yes (fixed seeds, no GPU in the receiver)
+# testbed     : D2
+# seed rule   : default_rng([20260926, TBID[testbed], PID[prior], Nr, T, Tp, int(snr)+100])  (trials of a point = ONE stream)
+# code        : rate-1/2 conv (133,171)_8 nu=6 terminated, QPSK, outer iterations = 16 for EVERY arm
+# Demo/ hashes: t2_route_a.py=95a5408901ec125c  t2_trellis.py=31cd0ee9c68e972b  t2_gmm.py=d064e58c7510c769
+# content     : NEXT_EXPERIMENTS_B32e4 speed-up -- sparse kron M-step vs exact EM on the real N'=320000 data, kron K=1024 restart-0 seed, 12 iterations
+exact        : 1446 s (120.5 s/iter), n_iter 12, reseeds 0, ll_val -14.111181848
+sparse 1e-12: 211 s (17.6 s/iter, x6.8), max|dll_t| 1.83e-09, |dll_val| 5.29e-10, max rel dcov 3.60e-08, max|dpi| 2.43e-11, reseeds 0, max dropped mass 3.67e-10 -> PASS
+sparse 1e-14: 241 s (20.1 s/iter, x6.0), max|dll_t| 1.56e-11, |dll_val| 7.36e-12, max rel dcov 2.51e-10, max|dpi| 1.59e-13, reseeds 0, max dropped mass 3.60e-12 -> PASS
+timing K=4096 sparse 1e-12: 454 s for 3 iterations (151.2 s/iter), max dropped mass 1.82e-09
+VERDICT: PASS (criterion in the module docstring)
