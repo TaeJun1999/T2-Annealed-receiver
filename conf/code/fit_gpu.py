@@ -30,6 +30,8 @@ from gmm_em_gpu import fit_gmm_em_gpu
 # gmm_em_gpu's sparse kron M-step for THIS process; unset = the exact path (every earlier fit).  The value used and the
 # largest dropped responsibility mass are written into every candidate / final file (sparse_tol, sparse_max_dropped).
 SPARSE_TOL = float(os.environ["FIT_SPARSE_TOL"]) if os.environ.get("FIT_SPARSE_TOL") else None
+# FIT_KRON_BATCHED=1 (opt-in, 2026-09-24): gmm_em_gpu's batched exact kron M-step (scatter matrices); recorded as kron_batched.
+KRON_BATCHED = os.environ.get("FIT_KRON_BATCHED") == "1"
 
 
 def _fit_one(X, Xv, Xt, prior, Nr, Nt, fam, K, kap, r):
@@ -37,14 +39,16 @@ def _fit_one(X, Xv, Xt, prior, Nr, Nt, fam, K, kap, r):
     rng = np.random.default_rng([C.SEED, C.TBID["D2"], 9, C.PID[prior], Nr, FAM[fam], K, kap, r])
     t = time.time()
     f = fit_gmm_em_gpu(X, K, rng, n_iter=FIT_ITERS, kappa=float(kap), struct=fam,
-                       dims=(Nr, Nt), Xval=Xv, sparse_tol=SPARSE_TOL)
+                       dims=(Nr, Nt), Xval=Xv, sparse_tol=SPARSE_TOL, batched=KRON_BATCHED)
+    f["kron_batched"] = float(KRON_BATCHED)
     f["ll_test"] = float(C.GMMPriorB(Nr, Nt, f["covs"], f["pi"]).log_pdf(Xt).mean())
     f["ll_train"] = float(f["ll"][f["it_best"]])
     f["sec"] = time.time() - t
     print(f"  ('{prior}', {Nr}, {Nt}, '{fam}', {K}, {kap}, {r}): iters {f['n_iter']} "
           f"best@{f['it_best']} reseeds {f['n_reseed']} ll_train {f['ll_train']:.3f} "
           f"ll_val {f['ll_val']:.3f} ({f['sec']:.0f} s)"
-          + (f"  sparse_tol {SPARSE_TOL:g} max dropped mass {f['sparse_max_dropped']:.2e}" if SPARSE_TOL else ""),
+          + (f"  sparse_tol {SPARSE_TOL:g} max dropped mass {f['sparse_max_dropped']:.2e}" if SPARSE_TOL else "")
+          + ("  kron_batched" if KRON_BATCHED else ""),
           flush=True)
     return f
 
@@ -64,7 +68,8 @@ def _write_final(out, rs, ref, ntrain, t0, prior, Nr, fam, K):
                         cand_ll_test=np.array([rs[c]["ll_test"] for c in cand]),
                         ntrain=ntrain, n_val=N_VAL,
                         sparse_tol=np.array([float(rs[c].get("sparse_tol", np.nan)) for c in cand]),
-                        sparse_max_dropped=np.array([float(rs[c].get("sparse_max_dropped", np.nan)) for c in cand]))
+                        sparse_max_dropped=np.array([float(rs[c].get("sparse_max_dropped", np.nan)) for c in cand]),
+                        kron_batched=np.array([float(rs[c].get("kron_batched", 0.0)) for c in cand]))
     if os.path.exists(out):                              # CPU won the race while we were fitting
         os.remove(tmp); print(f"[gpu-fit] {out} appeared meanwhile -- kept the CPU file", flush=True)
         return 0
@@ -122,7 +127,8 @@ def main(Nr, fam, K, ntrain, tag, restart=None, merge=False):
             np.savez_compressed(cp + ".tmp.npz", pi=f["pi"], covs=f["covs"], Chat=f["Chat"], ll=f["ll"],
                                 it_best=f["it_best"], n_iter=f["n_iter"], n_reseed=f["n_reseed"],
                                 ll_train=f["ll_train"], ll_val=f["ll_val"], ll_test=f["ll_test"],
-                                sec=f["sec"], sparse_tol=f["sparse_tol"], sparse_max_dropped=f["sparse_max_dropped"])
+                                sec=f["sec"], sparse_tol=f["sparse_tol"], sparse_max_dropped=f["sparse_max_dropped"],
+                                kron_batched=f["kron_batched"])
             os.replace(cp + ".tmp.npz", cp)
             print(f"[gpu-fit] candidate (kappa {kap}, restart {restart}) -> {cp}  ll_val {f['ll_val']:.3f}",
                   flush=True)
