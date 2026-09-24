@@ -76,8 +76,8 @@
 
 | 항목 | 값 (채워질 것) |
 |---|---|
-| 격자: K 별(계열별) 재시작별 ll_val · n_iter · it_best(상한 도달 여부), 병합 ll_val | [09-24 09:13 CDT] kron K=1024: r0 −10.621 (272 iter, best@270), r1 **−10.559** (341, best@300), r2 −10.941 (171, best@130); 상한 500 미도달; 병합 = r1, ll_val −10.559, ll_test −10.230, sec 합 93,569 (fit_gpu --merge, CPU). 나머지 K: 진행 중 |
-| 확장 결정(K=4096 / 8192)과 시각, `arms.D2_KS` 변경 커밋 해시 | |
+| 격자: K 별(계열별) 재시작별 ll_val · n_iter · it_best(상한 도달 여부), 병합 ll_val | [09-24 09:13 CDT] kron K=1024: r0 −10.621 (272 iter, best@270), r1 **−10.559** (341, best@300), r2 −10.941 (171, best@130); 상한 500 미도달; 병합 = r1, ll_val −10.559, ll_test −10.230, sec 합 93,569 (fit_gpu --merge, CPU). [09-24 11:19 CDT] kron K=2048: r1 −8.023 (231, best@190), r0·r2 진행 중. 나머지 K: 진행 중 |
+| 확장 결정(K=4096 / 8192)과 시각, `arms.D2_KS` 변경 커밋 해시 | [09-24 11:19 CDT] **K=4096 적합 결정** — kron K=2048 재시작 1 이 ll_val −8.023 (231 iter, best@190, 55,742 s)으로 K=1024 병합 −10.559 보다 높다; K=2048 병합값은 재시작 최댓값이라 ≥ −8.023 이므로 b\* = kron 최대 K(2048) 가 확정 → §1 반복 규칙대로 kron K=4096 재시작 0/1/2 를 큐 맨 앞에 추가. `arms.D2_KS` 에 4096·8192 추가는 b212d683 (K=4096 적합 전). 반복당 ≈ 490 s(외삽) → 재시작당 ≈ 1.3~2 일 |
 | 최종 b\*: 계열·K·ll_val, 내부 여부(또는 격자 끝 캐비엇) | |
 | D2 체크포인트: last / best 의 sha256[:16]·epoch·best_epoch·stopped_by·aborted·init sha256[:16]·`torch.initial_seed`; best.epoch == last.best_epoch 확인 | |
 | D1 형제: last 의 GA·GB·GC·GD 와 PASS/FAIL (best 는 보고 전용), stopped_by·aborted | [09-24 09:13 CDT] `sx_N320000_D1.pt` (last, epoch 200, best val @160): GA 9.52e-16, GB 0.00325, GC 0.0937, GD 0.0715 → **PASS** (`run_samplecx.py` → `samplecx.csv` 행 320000); stopped_by=patience, aborted=False, 200 epoch, 39.6 s/epoch. best 파일의 GA~GD 는 아직 재지 않음(보고 전용) |
