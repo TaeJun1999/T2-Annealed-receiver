@@ -46,8 +46,15 @@ def _loglik_t(X, logpi, covs, N, budget=1.5e9):
 
 
 def fit_gmm_em_gpu(X, K, rng, n_iter=500, tol=1e-6, floor=1e-4, kappa=0.0, struct="full", dims=None,
-                   Xval=None, val_every=10, patience=40, log=None, device="cuda"):
-    """Drop-in for t2_gmm.fit_gmm_em.  X (n,N) complex128 numpy (or torch) zero-mean samples."""
+                   Xval=None, val_every=10, patience=40, log=None, device="cuda", sparse_tol=None):
+    """Drop-in for t2_gmm.fit_gmm_em.  X (n,N) complex128 numpy (or torch) zero-mean samples.
+
+    sparse_tol (opt-in, NEXT_EXPERIMENTS_B32e4 speed-up, default None = the exact path, unchanged): in the kron
+    M-step, component k's flip-flop sweeps run only over the samples with responsibility gam[i, k] > sparse_tol
+    instead of all n.  nk (the normaliser), the E-step, reseeding, the stopping rules and the RNG draws are
+    untouched; the only change is that terms with gam < sparse_tol are left out of the weighted sums.  The largest
+    dropped responsibility mass (sum of the skipped gam / nk, over components and iterations) is returned as
+    out["sparse_max_dropped"] so the approximation is on record for every fit."""
     dev = torch.device(device)
     Xt = torch.as_tensor(np.asarray(X, np.complex128), device=dev)
     n, N = Xt.shape
@@ -72,6 +79,7 @@ def fit_gmm_em_gpu(X, K, rng, n_iter=500, tol=1e-6, floor=1e-4, kappa=0.0, struc
     logpi = torch.as_tensor(logpi_np, device=dev)
     ll = []; n_reseed = 0
     Tk = torch.eye(Nt, dtype=torch.complex128, device=dev).expand(K, Nt, Nt).clone() if struct == "kron" else None
+    max_dropped = 0.0
     best = dict(ll_val=-np.inf, it=0, pi=np.exp(logpi_np), covs=_host(covs))
     llv = []
     Xv = torch.as_tensor(np.asarray(Xval, np.complex128), device=dev) if Xval is not None else None
@@ -108,12 +116,20 @@ def fit_gmm_em_gpu(X, K, rng, n_iter=500, tol=1e-6, floor=1e-4, kappa=0.0, struc
                 covs[k] = 0.5 * (S + S.mH) + floor * cbar * I
             else:
                 T = Tk[k]
+                if sparse_tol is None:                                            # exact path (default)
+                    Hk, gk, H2ck, H3chk, m = Hs, g, H2c, H3ch, n
+                else:                                                             # opt-in: active samples only
+                    sel = torch.nonzero(g > sparse_tol).flatten()
+                    Hk, gk, m = Hs[sel], g[sel], int(sel.numel())
+                    H2ck = Hk.permute(0, 2, 1).reshape(m * Nt, Nr).conj()
+                    H3chk = Hk.reshape(m * Nr, Nt).conj().mT
+                    max_dropped = max(max_dropped, float((nk_t[k] - gk.sum()) / nk_t[k]))
                 for _ in range(3):
-                    A = (Hs @ torch.linalg.inv(T).mT) * g[:, None, None]          # g_i H_i T^-T
-                    R = A.permute(0, 2, 1).reshape(n * Nt, Nr).mT @ H2c / (nk[k] * Nt)
+                    A = (Hk @ torch.linalg.inv(T).mT) * gk[:, None, None]         # g_i H_i T^-T
+                    R = A.permute(0, 2, 1).reshape(m * Nt, Nr).mT @ H2ck / (nk[k] * Nt)
                     R = 0.5 * (R + R.mH) + floor * cbar * eyeNr
-                    B = (torch.linalg.inv(R) @ Hs) * g[:, None, None]             # g_i R^-1 H_i
-                    Tt = H3ch @ B.reshape(n * Nr, Nt) / (nk[k] * Nr)
+                    B = (torch.linalg.inv(R) @ Hk) * gk[:, None, None]            # g_i R^-1 H_i
+                    Tt = H3chk @ B.reshape(m * Nr, Nt) / (nk[k] * Nr)
                     T = Tt.mT; T = 0.5 * (T + T.mH)
                     c = torch.trace(T).real / Nt
                     T = T / c + floor * eyeNt; R = R * c
@@ -122,7 +138,8 @@ def fit_gmm_em_gpu(X, K, rng, n_iter=500, tol=1e-6, floor=1e-4, kappa=0.0, struc
         logpi = torch.as_tensor(logpi_np, device=dev)
 
     out = dict(pi=np.exp(logpi_np), covs=_host(covs), ll=np.array(ll), n_iter=len(ll),
-               n_reseed=n_reseed, Chat=_host(Chat), it_best=len(ll) - 1, ll_val=np.nan)
+               n_reseed=n_reseed, Chat=_host(Chat), it_best=len(ll) - 1, ll_val=np.nan,
+               sparse_tol=(np.nan if sparse_tol is None else float(sparse_tol)), sparse_max_dropped=max_dropped)
     if Xval is not None:
         out.update(pi=best["pi"], covs=best["covs"], it_best=best["it"], ll_val=best["ll_val"],
                    ll_val_traj=np.array(llv))
