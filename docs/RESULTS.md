@@ -3,12 +3,13 @@
 웹에서 해석할 때 가져가는 파일. 표와 수치는 반드시 EXPERIMENTS.md의 행(커밋·설정)을 가리킨다. 해석과 결론은 여기 쓰지 않는다.
 
 - 갱신: 2026-09-23 17:59 CDT (커밋 8cf4b954; 처음에 18:05 CDT 로 잘못 적었던 것을 정정), 기준 커밋 6d56404a. 절마다 초안 작성자와 별도 검증자가 원 결과 파일·EXPERIMENTS.md 행과 대조했다(워크플로 wf_6422f535-670; 검증 메모 원문 `conf/results/review_next/results_md_raw/sections_wf_6422f535.json`).
+- 추가: 2026-09-24 18:31 CDT — §1.9 N′ = 3.2e5 (B32e4) 추가(Opus). 수치는 결과 파일·raw 에서 직접 옮김; 이 절은 아직 별도 검증자 대조를 거치지 않았다.
 - 판정 문구는 사전 등록 라벨(지지 / 판정 불가 / UNDECIDED / 기각 / PASS 등) 그대로다. 수치를 인용하기 전에 **§6 인용 주의**를 먼저 읽는다.
 - 목차: §1 헤드라인(Stage C, 동일예산) · §2 review_next 진단·ablation · §3 A1 위상 augmentation · §4 P3 반복 루프 규칙 · §5 C6 (Nr=16) · §6 인용 주의
 
 ---
 
-## 1. 헤드라인: Stage C, D2 셀 C2 동일예산 비교 (N_train 1e4 / 4e4 / 1.6e5)
+## 1. 헤드라인: Stage C, D2 셀 C2 동일예산 비교 (N_train 1e4 / 4e4 / 1.6e5; 3.2e5 는 §1.9)
 
 **EXPERIMENTS.md 행**: `2026-09-21 14:00 ~ 09-22 21:45` (Stage C). 이 행에 적힌 커밋은 `8fb27f5 (마감 시점)`이다. 각 표에 붙인 커밋은 해당 결과 파일 머리말의 `git commit` 값이다.
 
@@ -176,6 +177,54 @@ C5 전 SNR의 BLER@16 (GMM / V1). SNR은 −3, +0, +3, +6, +9, +12, +15 dB 순�
   - C5: −9 0:5, −7 4:92 (8.8e-23), −6 9:238 (7.5e-59), −5 477:122 (1.6e-50)
   - 출처는 STATUS §6p 표(`STATUS.md:1416-1417`, `:1436-1439`)와 NUMBERS_PACKAGE ADDENDUM P6이다. 이 값들은 `tables_D2_B1e4lo.txt`와 `lowsnr_6p_score.txt`에는 없다.
 - §6p 예측 채점(원문): 1 빗나감, 2 빗나감, 3 맞음, 4 반만 맞음 (`STATUS.md:1446-1450`, 예측 커밋 279512b).
+
+### 1.9 N′ = 3.2e5 동일예산 재실행 (B32e4; NEXT_EXPERIMENTS_B32e4 v2 사전 등록)
+
+**EXPERIMENTS.md 행**: `2026-09-24 09:38 ~ 09-25 05:33 KST` (GPU 적합·학습, `run_b32e4.sh`), `2026-09-25 06:01 ~ 08:26 KST` (BLER, `run_b32e4_eval.sh`, 커밋 36b12bf6). 결과 파일 머리말 `git commit` = 36b12bf6. 판정·예측 채점 원문은 `conf/results/review_next/NEXT_EXPERIMENTS_B32e4.md` §6.
+
+- **인용 필드**: 전 arm N_train=320000 (동일예산). b\* = kron K=4096, ll_val −5.942083265612076, **격자 끝**(K=2048 대비 +1.851 nat; 사용자 결정으로 K=8192 미적합). 평가 가중치: 판정 태그 B32e4 = `d2sx_N320000_a1_best.pt` (sha256[:16] 035744cbe955984d, epoch 966 = best), 보고 태그 B32e4last = `d2sx_N320000_a1.pt` (last-EMA @986, f2f1eebc9894c773). D1 형제 게이트 (`sx_N320000_D1.pt` last): GA 9.52e-16, GB 0.00325, GC 0.0937, GD 0.0715 → PASS (`samplecx.csv` 행 320000); best 파일 GC 0.0907 PASS (보고 전용, `B32e4_D1best_gate.txt`). 수용 검사 `ACCEPT: OK -- B32e4, B32e4x, B32e4last` (`B32e4_accept.txt`).
+- **판정 (사전 등록 §2)**: `M-ours-bstar → M-ours-dscore-C-V1`, 태그 B32e4 → `power guard … -> POWERED`, `second arm fewer failures at 3/3 points, first arm fewer failures at 0/3 points -> significant` → 등록 문구 "동일예산 우위가 N′ = 3.2e5 에서도 유지". 헤드라인은 1.6e5 (§1.1~§1.3) 그대로.
+
+**TABLE A (C2 BLER@16, 95% Wilson CI)**
+
+| 태그 | M-ours-bstar −3 / +0 / +3 dB | V1 −3 / +0 / +3 dB | V0 −3 dB (F3 가드 발동률) | R5-genie −3 dB | 출처 |
+|---|---|---|---|---|---|
+| B32e4 (`_best`) | 0.238 (0.222,0.255) / 0.068 / 0.021 | 0.146 (0.133,0.160) / 0.032 / 0.012 | 0.595 (0.542) | 0.034 (0.028,0.042) | `tables_D2_B32e4.txt:70-76`, `guard_D2_B32e4.txt:18` |
+| B32e4last (last-EMA) | 같은 값 (b\* 실패 벡터 동일) | 0.144 (0.131,0.158) / 0.034 / 0.014 | 0.750 (0.715) | 같은 값 | `tables_D2_B32e4last.txt:70-76`, `guard_D2_B32e4last.txt:18` |
+
+**TABLE B (`M-ours-bstar → M-ours-dscore-C-V1` @16, 판정점 −3/+0/+3 dB)**
+
+| 태그 | −3 dB | +0 dB | +3 dB | pooled | power | 판정 (원문) | SNR@0.1 격차 [90%] | 출처 |
+|---|---|---|---|---|---|---|---|---|
+| **B32e4** | 285:48 (3.8e-42) | 109:17 (1.3e-17) | 27:4 (3.4e-05) | 421:69 p=1.2e-62 | POWERED | `second arm fewer failures at 3/3 points, first arm fewer failures at 0/3 points -> significant` | +1.33 dB [+1.14, +1.53] | `tables_D2_B32e4.txt:368-373` |
+| B32e4last | 290:48 (2.5e-43) | 101:14 (2e-17) | 27:9 (0.0039) | 418:71 p=7.4e-61 | POWERED | 같은 문자열 | +1.32 dB [+1.13, +1.52] | `tables_D2_B32e4last.txt:368-373` |
+
+- 필수 대조군 `M-ours-bstar → M-ours-bstar-scalar` (B32e4): 72:90 (0.18) · 23:38 (0.072) · 12:13 (1), pooled 107:141 p=0.036, POWERED, `second arm fewer failures at 0/3 points, first arm fewer failures at 0/3 points -> not significant` (`tables_D2_B32e4.txt:386-391`).
+- 실패 수 (n=2560, B32e4): b\* 610 / 173 / 53, V1 373 / 81 / 30, R5-genie 87 / 26 / 12. 격차 회수율 (b\*−V1)/(b\*−genie) = 0.453 / 0.626 / 0.561 (3점 합 0.495). 같은 셈을 헤드라인 B16e4k 에 적용: 623/184/57, 371/88/29, 87/26/12 → 0.470 / 0.608 / 0.622 (합 0.509). B32e4last: 0.463 / 0.592 / 0.439. (회수율은 사전 등록 판정 지표가 아닌 계산 수치; raw 에서 직접 셈.)
+- best 대 last V1 짝 부호검정 (C2, a = best 실패·last 성공): −3 dB 21:16 (0.51), +0 8:13 (0.38), +3 2:7 (0.18); 3점 합 31:36 p=0.63.
+
+**예산 곡선 (C2 −3 dB, last-EMA 규약; 사전 등록상 보고 전용, 추세 검정 없음)**
+
+| N_train | b\* | GMM b\* | V1 | b\*→V1 pooled | SNR@0.1 격차 [90%] | D1 형제 게이트 |
+|---|---|---|---|---|---|---|
+| 1e4 | kron 512 | 0.252 | 0.145 | 502:72 | +1.68 [+1.47, +1.94] | FAIL |
+| 4e4 | kron 2048 (끝) | 0.248 | 0.145 | 459:79 | +1.33 [+1.14, +1.53] | FAIL |
+| 1.6e5 | kron 1024 (K=2048 미적합) | 0.243 | 0.145 | 454:78 | +1.41 [+1.22, +1.64] | PASS 레시피 |
+| 3.2e5 | kron 4096 (끝) | 0.238 | 0.144 | 418:71 | +1.32 [+1.13, +1.52] | PASS |
+| 3.2e5 `_best` (별도 열) | 같음 | 0.238 | 0.146 | 421:69 | +1.33 [+1.14, +1.53] | PASS |
+
+(출처: `tables_D2_B1e4.txt:369-372`, `B4e4k.txt:369-372`, `B16e4k.txt:369-372`, `B32e4last.txt:370-373`, `B32e4.txt:370-373`.)
+
+**셀 C5 (Tp=3), C1 (Tp=2), B32e4x (`_best`, 보고 전용; 앵커 규칙 자동)**
+
+| 셀 | 판정점 | bstar→V1 a:b (p) | pooled | power | 판정 (원문) | 출처 |
+|---|---|---|---|---|---|---|
+| C5 | +6/+12/+15 | 230:157 (0.00024) · 228:225 (0.93) · 204:258 (0.014) | 662:640 p=0.56 | POWERED | `second arm fewer failures at 1/3 points, first arm fewer failures at 1/3 points -> not significant` | `tables_D2_B32e4x.txt:731-736` |
+| C1 | +6/+9/+15 | 402:505 (0.0007) · 394:583 (1.6e-09) · 372:673 (9.2e-21) | 1168:1761 p=5e-28 | POWERED | `second arm fewer failures at 0/3 points, first arm fewer failures at 3/3 points -> significant` | `tables_D2_B32e4x.txt:591-596` |
+
+- C5 BLER@16 (−3…+15 dB): GMM 0.497 / 0.255 / 0.155 / 0.141 / 0.141 / 0.138 / 0.123, V1 0.394 / 0.186 / 0.116 / 0.112 / 0.120 / 0.137 / 0.144. C1: GMM 0.749 / 0.512 / 0.399 / 0.362 / 0.355 / 0.364 / 0.355, V1 0.995 / 0.541 / 0.434 / 0.403 / 0.429 / 0.429 / 0.473. V0 F3 가드 −3 dB: C5 0.677, C1 1.000 (`guard_D2_B32e4x.txt`).
+- 동일예산 GB′ (b\* = kron 4096 기준, 보고 전용): 확산/GMM 디노이징 NMSE 비 0.453~0.879 (median 0.513), worst excess −0.121 (`results/d2_gbprime.csv` 행 320000).
+- GMM 격자 전체 (kron 16~4096, full 16~512, 재시작별 ll_val·재시드·구현 경로): NEXT_EXPERIMENTS_B32e4 §5.
 
 ---
 

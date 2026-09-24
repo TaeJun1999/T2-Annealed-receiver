@@ -67,8 +67,8 @@
 | 선행 코드: `arms.D2_KS` += 4096, 8192; `run_d2_sx.py` `--tag` + `--grad-clip`/`--lr-div`; `run_samplecx.py` `--grad-clip`/`--lr-div`; fits 링크 `gmm_fits_D2_B32e4x`·`_B32e4last` | **구현** (Opus, 2026-09-23 22:12 CDT). §3d 사다리 인자는 기존 관례(run_V3.py·run_d1_variant.py)대로 **`--fallback 2|3`** 한 인자로 구현(`score.GRAD_CLIP_LADDER`/`LR_DIV_LADDER` = 클리핑 1.0 / +lr/3, 같은 rung·attempt = 같은 데이터 스트림, 체크포인트 접미사 `_fb<k>`); `run_samplecx.py` 는 두 번째 위치 인자. 기본값(인자 없음)은 동작이 비트 동일(lr/1.0, grad_clip 미전달) — 큐의 7·8번 작업이 그대로 돈다. fits 링크 생성 |
 | kron K=2048 / 1024 병합 (`fit_gpu.py 8 kron K 320000 B32e4 --merge`) → ll_val 비교 → 반복 규칙(K=4096 ?) | **완료** — 1024·2048·4096 병합, K=4096 에서 사용자 결정으로 멈춤(§5) |
 | `run_d2_sx.py --ntrain 320000 --tag B32e4` 재실행(GB′, 적합 완료 뒤; 학습은 완료 상태로 건너뜀) | **완료** (09-24 16:00 CDT, §5) |
-| §5 채우기 → 커밋 → 실행 ①②③ + `analysis` + `run_manifest` | §5 완료·커밋(이 줄과 같은 커밋) → `code/run_b32e4_eval.sh 4096 -5.942083265612076 035744cbe955984d f2f1eebc9894c773` (tmux `b32e4eval`, 로그 `logs/run_b32e4_eval.log`) 커밋 직후 시작 |
-| 예산 곡선 표 (`docs/RESULTS.md` §1 확장), EXPERIMENTS 행 | 미작성 |
+| §5 채우기 → 커밋 → 실행 ①②③ + `analysis` + `run_manifest` | **완료** — §5 커밋 36b12bf6 → ① 16:01~16:36, ③ ~17:10, ② ~18:25 CDT, ACCEPT OK 18:26 CDT; 결과 §6 |
+| 예산 곡선 표 (`docs/RESULTS.md` §1 확장), EXPERIMENTS 행 | 작성 (§6 과 같은 커밋) |
 
 예상 일정(CDT): K=1024 종료 09-24 10~13 → D2·D1 학습 시작 → D2 종료 09-25 새벽~오전; K=2048 종료 09-25 새벽; K=4096 이 필요하면 09-27~28; 그 뒤 §5·실행·기록.
 
@@ -84,3 +84,59 @@
 | §3d 사다리 적용 여부(시행 번호) | [09-24 13:24 CDT] 적용 없음 — D2(patience, 986 epoch)와 D1 형제(patience, 200 epoch) 모두 시행 1 로 정상 종료 |
 | GB′ (동일예산, b\* 기준) worst excess | [09-24 16:00 CDT] `run_d2_sx.py --ntrain 320000 --tag B32e4` (학습은 완료 상태로 건너뜀, 986 ep): csv 행 `320000,1,320000,True,986,3.492915e-01,kron,4096,4096,0.452853,0.878976,0.512995,-0.121024` — **gmm_ntrain=320000, equal_budget=True, gmm_K=4096 = §5 최종 b\*** (§1 요건 충족). 확산/GMM 디노이징 NMSE 비 min 0.453 · max 0.879 · median 0.513, **worst excess −0.121**(σ 격자 20점 전부에서 확산이 낮음), n_eval 4096, GMM 쪽 CPU 루프. 첫 동일예산 GB′ — 1.6e5 행(gmm_ntrain=10000, equal_budget=False)과 직접 비교하지 않는다. 로그 `logs/gbprime_d2sx_N320000_B32e4.log`, 배열 `results/d2_gbprime_N320000_a1.npz` |
 | 선행 코드 커밋 해시, fits 링크 생성 시각 | 선행 코드 b212d683 (09-23 21:2x CDT, fits 링크 같은 시각). **EM 가속(사용자 결정 09-24 12:40 CDT 무렵 'EM 구현 가속')**: 6770c208 — gmm_em_gpu 희소 kron M-단계(opt-in sparse_tol; 기본 = 정확 경로, 기존 적합 전부), 검증 `results/b32e4_sparse_check.txt` (실제 3.2e5 데이터, K=1024 재시작0 시드, 12회): tol 1e-12 → max\|Δll_t\| 1.8e-9, \|Δll_val\| 5.3e-10, 공분산 상대차 3.6e-8, \|Δπ\| 2.4e-11, 버린 질량 3.7e-10, **PASS**(기준 1e-6); 속도 K=1024 ×6.8, K=4096 151 s/iter. → **kron K=4096 은 희소 경로(tol 1e-12, `fit_gpu_sparse.py`)로 적합**, K ≤ 2048 과 나머지 격자는 정확 경로 그대로(격자 안에 두 구현이 섞임 — 수치 동등성은 위 검증으로). 적합 파일마다 sparse_tol·sparse_max_dropped 기록. [09-24 13:24 CDT] K=4096 재시작 0 이 13:22 CDT 에 GPU 0 에서 시작(막 시작한 kron 128 을 중단·큐 뒤로 돌림, 그 작업은 파일을 쓰지 않았음) |
+
+## 6. 결과 (2026-09-24, `run_b32e4_eval.sh` @36b12bf6; 이 절은 추가만 한다)
+
+**실행·수용**: ① B32e4 16:01~16:36 CDT (34.4 분), ③ B32e4last ~17:10, ② B32e4x ~18:25 (192 워커, CPU complex128, 16 반복). `b32e4_accept.py` → **ACCEPT: OK -- B32e4, B32e4x, B32e4last** (`results/review_next/B32e4_accept.txt`; 청크 {(40k,40)}, meta ntrain 320000, bstar kron K=4096, ll_val|kron −5.942083265612076, 세 태그 em_sec 동일, ckpt sha/epoch/role, Demo 해시). manifest `run_manifest_B32e4{,last,x}.json` (config_hash cb3e3e2f213830a9 / 같음 / 4051c4bd49a51223). 세 태그의 b\* 실패 벡터는 C2 전 SNR 에서 B32e4 와 B32e4last 가 동일(같은 적합, 같은 시행).
+
+### 6.1 판정 (C2, 태그 B32e4 = `_best.pt`, 게이트 PASS → arm 결과)
+
+`M-ours-bstar → M-ours-dscore-C-V1` (`tables_D2_B32e4.txt:368-373`): 판정점 −3/+0/+3 dB (앵커 b\* 자동), −3 dB 285:48 (p=3.8e-42) · +0 dB 109:17 (1.3e-17) · +3 dB 27:4 (3.4e-05), pooled 421:69 (p=1.2e-62); `power guard: 3 decision points, 3 with >= 6 discordant pairs -> POWERED`; `second arm fewer failures at 3/3 points, first arm fewer failures at 0/3 points -> significant`. SNR@0.1 격차 +1.33 dB [90% +1.14, +1.53].
+→ **§2 표 첫 행: "동일예산 우위가 N′ = 3.2e5 에서도 유지"** (arm 결과, 예산 곡선의 점; 헤드라인 불변 — 헤드라인은 1.6e5 B16e4k). b\* 는 **격자 끝**(kron K=4096, §5) 캐비엇을 달고 인용한다.
+
+| C2 (n=2560) | b\* (kron 4096) 실패 (BLER) | V1 | R5-genie | 회수율 (b\*−V1)/(b\*−genie) |
+|---|---|---|---|---|
+| −3 dB | 610 (0.238) | 373 (0.146) | 87 (0.034) | 0.453 |
+| +0 dB | 173 (0.068) | 81 (0.032) | 26 (0.010) | 0.626 |
+| +3 dB | 53 (0.021) | 30 (0.012) | 12 (0.005) | 0.561 |
+| 합 (3점) | 836 | 484 | 125 | 0.495 |
+
+(회수율은 등록된 판정 지표가 아니라 보고 수치다; 1.6e5 B16e4k 같은 셈: 0.470 / 0.608 / 0.622, 합 0.509.) genie 실패 수는 두 예산에서 같다(같은 시행).
+
+필수 대조군 `M-ours-bstar → M-ours-bstar-scalar` (`:386-391`): 72:90 (0.18) · 23:38 (0.072) · 12:13 (1), pooled 107:141 (p=0.036), POWERED, `0/3 … 0/3 -> not significant` (방향은 b\* 쪽 우세 — 1.6e5 는 pooled 100:149, `0/3 … 1/3`). V4 · V4b 도 b\* 를 3/3 점에서 이긴다 (409:91, 392:90).
+
+### 6.2 보고 전용
+
+**예산 곡선 (C2, last-EMA 규약; 판정 아님, 추세 검정 없음)**
+
+| N′ | b\* | GMM b\* −3 dB | V1 −3 dB | b\*→V1 pooled (3점) | SNR@0.1 격차 [90% CI] | D1 형제 게이트 | 출처 |
+|---|---|---|---|---|---|---|---|
+| 1e4 | kron 512 | 0.252 | 0.145 | 502:72 | +1.68 [+1.47, +1.94] | FAIL | `tables_D2_B1e4.txt:369-372` |
+| 4e4 | kron 2048 (끝) | 0.248 | 0.145 | 459:79 | +1.33 [+1.14, +1.53] | FAIL | `tables_D2_B4e4k.txt:369-372` |
+| 1.6e5 | kron 1024 (끝일 수 있음) | 0.243 | 0.145 | 454:78 | +1.41 [+1.22, +1.64] | PASS | `tables_D2_B16e4k.txt:369-372` |
+| **3.2e5 (B32e4last)** | kron 4096 (끝) | 0.238 | 0.144 | 418:71 | +1.32 [+1.13, +1.52] | PASS | `tables_D2_B32e4last.txt:370-373` |
+| 3.2e5 `_best.pt` (B32e4, 별도 열) | 같음 | 0.238 | 0.146 | 421:69 | +1.33 [+1.14, +1.53] | PASS | `tables_D2_B32e4.txt:370-373` |
+
+B32e4last 표 B: −3 dB 290:48 · +0 101:14 · +3 27:9 (p=0.0039), POWERED, `3/3 … 0/3 -> significant`. B32e4last 회수율 −3/0/+3 dB 0.463 / 0.592 / 0.439.
+
+**best 대 last V1 짝 부호검정 (C2, a = best 실패·last 성공)**: −3 dB 21:16 (p=0.51), +0 8:13 (0.38), +3 2:7 (0.18), +6 3:2, +9 3:0, +12 0:1, +15 0:1; 판정점 합 31:36 (p=0.63) — 차이 없음.
+
+**셀 C5 · C1 (B32e4x, `_best.pt`, 앵커 규칙 자동)** (`tables_D2_B32e4x.txt`)
+- C5 (Tp=3): 판정점 +6/+12/+15 dB — 230:157 (p=0.00024) · 228:225 (0.93) · 204:258 (0.014), pooled 662:640 (0.56), POWERED, `second arm fewer failures at 1/3 points, first arm fewer failures at 1/3 points -> not significant` (`:732-736`). BLER@16 −3…+15 dB: GMM 0.497/0.255/0.155/0.141/0.141/0.138/0.123, V1 0.394/0.186/0.116/0.112/0.120/0.137/0.144.
+- C1 (Tp=2): 판정점 +6/+9/+15 dB — 402:505 (0.0007) · 394:583 (1.6e-09) · 372:673 (9.2e-21), pooled 1168:1761 (5e-28), POWERED, `second arm fewer failures at 0/3 points, first arm fewer failures at 3/3 points -> significant` = **GMM 우세** (`:592-596`). BLER@16: GMM 0.749/0.512/0.399/0.362/0.355/0.364/0.355, V1 0.995/0.541/0.434/0.403/0.429/0.429/0.473.
+- 대조군 b\*→b\*-scalar: C5 · C1 모두 `first arm fewer failures at 3/3` (b\* 행렬 site 우세).
+
+**F3 가드 (V0, −3 dB 발동률)**: C2 B32e4 0.542, B32e4last 0.715; C5 0.677; C1 1.000 (`guard_D2_B32e4{,last,x}.txt`). V1·V4·V4b·b\* 는 어디서도 발동 없음.
+**D1 형제 best 파일** (보고 전용, 자격은 last): GA 9.8e-16, GB 0.00259, GC 0.0907, GD 0.0718 → PASS (`results/review_next/B32e4_D1best_gate.txt`; last 는 GC 0.0937 PASS).
+**GB′ (동일예산)**: worst excess −0.121, 비 0.453~0.879 (§5).
+
+### 6.3 §3 예측 채점
+
+1. 게이트 PASS: **적중** (GB·GD 도 통과). GC ≈ 0.07 예측 → 실제 0.0937: **빗나감**(값).
+2. K=2048 이 1024 를 이김 → K=4096 적합: 적중. "K=4096 의 ll_val 이득 +1 nat 미만": **빗나감** (+1.851). 가지 = 4096 격자 끝(사용자 K=8192 거부).
+3a. 통과: **적중**. 3b. 3점 모두 유의: **적중**.
+4. V1 0.14~0.15 → 0.146 **적중**; GMM 0.235~0.245 → 0.238 **적중**; 격차 0.09~0.10 → 0.092 **적중**; pooled 같은 크기(421:69 vs 454:78) 적중; "V1 평평, GMM 완만한 개선" 적중.
+5. 대조군 GMM 쪽 우세: 방향은 같음(pooled 107:141, p=0.036), 3점 규칙으로는 `not significant` — **부분 적중**. V0 F3 발동률 "0.529 이하": **빗나감** (best 0.542, last 0.715). V4·V4b 가 V1 보다 나쁨: −3·0 dB 점추정은 그렇고(V4 0.152/0.039, V4b 0.159/0.041 vs V1 0.146/0.032), +3 dB 에서 V4b 0.009 < V1 0.012 — **대체로 적중**(검정 없음).
+6. best 대 last 판정 불가: **적중** (31:36, p=0.63).
+7. C5 혼재 1/3: **적중** (`1/3 … 1/3 -> not significant`). C1 GMM 우세: **적중** (3/3).
+8. 빗나갈 경로 (c) K=4096 격자 끝만 발생.
