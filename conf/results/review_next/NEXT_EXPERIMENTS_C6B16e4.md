@@ -66,10 +66,10 @@
 |---|---|
 | GPU 큐 `run_nr16b.sh` (학습, EM 검증, full 격자, kron 격자, kron 4096) | 진행 중 (17:47 CDT~); EM 검증 PASS 17:54; full 6 개·kron ≤ 2048 완료(§0); kron 4096 r0/1/2 실행 중 |
 | kron 1024·2048 병합 (`fit_gpu.py 16 kron K 160000 NR16B16e4 --merge`, 수동) | 완료 19:2x / 19:48 CDT (Fable) |
-| kron 4096 병합 → 반복 규칙(K=8192 는 사용자 결정) | 4096 3 재시작 종료 뒤 수동 `--merge` (Opus 담당, `logs/nr16b.log` 에 기록) |
+| kron 4096 병합 → 반복 규칙(K=8192 는 사용자 결정) | **완료** 09-24 21:20 CDT (`--merge`, `logs/nr16b.log`): 병합 ll_val 63.1751571838059 (r2, 163 iter, best@160, 재시드 85594; r0/r1 62.979/63.163); 사용자 결정 21:12 CDT **K=4096 에서 멈춤** → b\* = kron 4096, 격자 끝 캐비엇 |
 | 학습 종료 → 자동 GB′(잠정 격자, 폐기) → 격자 확정 뒤 `train_nr16.py --ntrain 160000 --fits-tag NR16B16e4` 재실행(학습은 완료 상태로 건너뜀) | 대기 (Opus) |
 | 선행 코드: `train_nr16.py --fits-tag`, `runner.learned_budget` 표시 수정 (47f46477) | 구현 |
-| 선행 코드: `train_nr16.py --fallback 2\|3`, 수용 검사 스크립트 일반화(격자 완전성·genie 비트 동일 포함), `recovery_ci.py`(paired bootstrap), fits 링크 `gmm_fits_D2_NR16B16e4last` | 미구현 (Opus; BLER 전, 커밋) |
+| 선행 코드: `train_nr16.py --fallback 2\|3`, 수용 검사 스크립트 일반화(격자 완전성·genie 비트 동일 포함), `recovery_ci.py`(paired bootstrap), fits 링크 `gmm_fits_D2_NR16B16e4last` | **구현** (Fable, 09-24 21:51 CDT 커밋): `train_nr16.py --fallback` (기본 동작 불변), `code/eval_accept.py` (B32e4 세 태그 + 격자 → OK, NR16run2 자기 참조 genie 검사 → OK 로 검증), `code/recovery_ci.py` (NR16run2 C6 −3 dB R 0.838 [0.781, 0.892], B16e4k C2 0.470 [0.427, 0.512]), 링크 생성 |
 | §5 채우기 → 커밋 → 실행 ①② + analysis + manifest + 수용 검사 → §6 결과 | 미실행 |
 
 ## 5. 평가 전 고정 기록 (실행 ①② 전에 채우고 커밋한다; 갱신 시각을 적는다)
