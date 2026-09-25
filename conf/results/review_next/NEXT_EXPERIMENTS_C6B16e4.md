@@ -79,8 +79,43 @@
 | 격자: K 별(계열별) 재시작별 ll_val · n_iter · it_best(상한 500 도달) · 재시드 · 구현 경로(정확/일괄; 일괄 검증 범위 K ≤ 512), 병합 ll_val | [09-24 22:23 CDT, 격자 완료] 병합 ll_val (선택 재시작, n_iter/best@, 재시드). **kron** (κ=0, 재시작 3, 전부 **일괄 경로**): 16 −28.834 (r2, 155/150, 0) / 32 −8.699 (r2, 127/100, 0) / 64 7.710 (r2, 114/100, 0) / 128 24.365 (r1, 132/120, 0) / 256 38.407 (r1, 190/150, 0) / 512 50.185 (r1, 331/330, 0) / 1024 **58.857** (r2, 303/270, 477; r0 57.014 241/200 rs 6, r1 57.324 234/230 rs 4) / 2048 **61.982** (r1, 244/230, 23279; r0 61.852 164/160 rs 17313, r2 61.774 193/190 rs 16695) / 4096 **63.175** (r2, 163/160, 85594; r0 62.979 169/160 rs 86007, r1 63.163 223/220 rs 118097). **full** (κ ∈ {0,16,64,256} × 재시작 3, 전부 κ=0 선택, **정확 경로**): 16 −29.634 (r1, 275/270) / 32 −10.900 (r1, 495/460) / 64 4.249 (r0, 351/310) / 128 14.735 (r0, 480/470) / 256 16.611 (r0, 500/490, **상한 도달**) / 512 13.507 (r2, 51/50, 재시드 2392 — 성분 고갈로 조기 정지). 상한 500 도달은 full 256 뿐. 일괄 경로 검증 범위는 K ≤ 512 (재시드 활성 경우 포함); kron 1024~4096 의 재시드 수백~11만 회 상황은 공통 재시드 분기(코드 검사)로만 보증. 재시작 후보 누락·재실행 없음 |
 | 확장 결정(K=4096 / 8192)과 시각 | [09-24 19:19 CDT] kron 2048 (61.85/61.98/61.77) > kron 1024 → kron 4096 r0/1/2 큐 추가 (Opus, `logs/nr16b.log`). [09-24 21:12 CDT] kron 4096 r0/r2 62.979/63.175 > 2048 병합 61.982 → 계열 최대 K; **사용자 결정: K=4096 에서 멈춤** (DECISIONS 11:12 KST) → b\* = kron 4096 병합값(r1 완료 후), 격자 끝 캐비엇 |
 | 최종 b\*: 계열·K·ll_val(정확한 float), 내부 여부 / 격자 끝 캐비엇 | [09-24 21:20 CDT] **b\* = kron K=4096, ll_val 63.1751571838059** (재시작 2, 163 iter, best@160, 재시드 85594, ll_test − ll_test(Gaussian) 186.598 nat; 수용 검사의 `ll_val\|kron` 대조값). **격자 끝** — K=2048 병합(61.982) 대비 +1.193 nat 로 아직 오르는 중에 멈춤(사용자 결정 21:12 CDT, K=8192 미적합). full 최고(K=256 16.611, 상한 도달)는 b\* 보다 46.6 nat 낮다 |
-| 체크포인트: last / best 의 sha256[:16]·epoch·best_epoch·stopped_by·aborted; best.epoch == last.best_epoch | [09-25 10:0x CDT] **§3d 시행 2** (`--fallback 2`, 기울기 클리핑 1.0, 같은 rung D2SXNR16160000·attempt 1 = 같은 데이터 스트림): `ckpt/d2sx_NR16_N160000_a1_fb2.pt` (last) sha256[:16] **bf688d605691c7f7**, epoch 1704, best_epoch 1684, role last; `ckpt/d2sx_NR16_N160000_a1_fb2_best.pt` sha **c050d611b2c714a6**, epoch 1684 = last.best_epoch ✓, role best, best val 1.784587e-01; stopped_by=patience, aborted=False; 09-24 23:49 ~ 09-25 10:04 CDT, 36,743 s, 21.6 s/epoch (`logs/train_d2sx_NR16_N160000_a1_fb2.log`) |
+| 체크포인트: last / best 의 sha256[:16]·epoch·best_epoch·stopped_by·aborted; best.epoch == last.best_epoch | [09-25 10:06 CDT] **§3d 시행 2** (`--fallback 2`, 기울기 클리핑 1.0, 같은 rung D2SXNR16160000·attempt 1 = 같은 데이터 스트림): `ckpt/d2sx_NR16_N160000_a1_fb2.pt` (last) sha256[:16] **bf688d605691c7f7**, epoch 1704, best_epoch 1684, role last; `ckpt/d2sx_NR16_N160000_a1_fb2_best.pt` sha **c050d611b2c714a6**, epoch 1684 = last.best_epoch ✓, role best, best val 1.784587e-01; stopped_by=patience, aborted=False; 09-24 23:49 ~ 09-25 10:04 CDT, 36,743 s, 21.6 s/epoch (`logs/train_d2sx_NR16_N160000_a1_fb2.log`) |
 | §3d 사다리 적용 여부 | [09-24 23:49 CDT] **시행 1 DIVERGED**: epoch 1062 best val 1.814751e-01 → epoch 1064 train 9.589e+01 / val 8.963e-01 (발산 판정: best 의 3배 초과 연속 5 epoch, 1068 에서 중단), stopped_by=diverged, aborted=False, 21,210 s (`logs/train_d2sx_NR16_N160000_a1.log`; `LADDER_C.md` 행). 시행 1 체크포인트(`d2sx_NR16_N160000_a1.pt`, `_best.pt` @1062)는 보존하되 평가하지 않는다(§1·10_SPEC §3d). → **시행 2** = 동결 레시피 + 전역 기울기 노름 클리핑 1.0 (`train_nr16.py --ntrain 160000 --fits-tag NR16B16e4 --fallback 2`, 같은 rung·attempt = 같은 데이터 스트림, 체크포인트 `d2sx_NR16_N160000_a1_fb2.pt` / `_fb2_best.pt`), GPU 0, 23:49 CDT 시작. 시행 2 도 발산하면 시행 3 (+ lr/3); 시행 3 도 실패하면 "학습 실패", BLER 없음. 평가 스크립트 `run_nr16b_eval.sh` 는 체크포인트 stem 인자를 받도록 수정(§5 가 기록한 시행을 넘긴다) **[09-25 10:04 CDT] 시행 2 정상 종료**(patience, 1704 epoch, 발산 없음) → 사다리는 시행 2 에서 멈춘다. 대기 실행 시행 3 (`--fallback 3`, GPU 3, 00:18 CDT 시작)은 DECISIONS 6953d595 규칙대로 **열어보지 않고 10:04 CDT 에 중지**(rc=143; 로그·체크포인트·GB′ 미열람, 평가·선택·보고에 쓰지 않음) |
 | σ 격자 태그·값 확인 (`NR16`, 출처 §1) | `results/sigma_grid_D2_NR16.txt` (2026-09-23 03:24:08 KST = 09-22 13:24 CDT, git 4ad41df9): 20 점 σ ∈ [3.283e-02, 4.915e-01]; 학습 로그 머리말 `sigma grid 'NR16' [3.2832e-02, 4.9152e-01] (20 pts)` 와 일치 |
 | GB′ (재실행본; 기준 b\* 계열·K·ll_val, 비 min/max/median, worst excess; 자동 첫 실행본은 폐기) | [09-25 10:06 CDT] 시행 2 끝의 자동 GB′ — 격자 확정(21:20 CDT) 뒤 계산되어 수용 검사 (e) 충족: `logs/nr16b_gpu0.log` `[nr16] GMM b* = kron (kron K=4096) @N=160000` (§5 최종 b\* 와 같음), GMM 은 GPU 경로(CPU 루프 대비 최대 상대차 1.44e-14), 확산/GMM 디노이징 NMSE 비 **min 0.261 · max 0.508 · median 0.283**, worst excess (max 비 − 1) **−0.492** (σ 격자 NR16 20 점 전부에서 확산이 낮음); `results/d2_gbprime_NR16_N160000_a1_fb2.npz`. 1e4 (b\* kron 128): 0.314~0.474, median 0.343. 시행 1 의 자동 GB′ (`d2_gbprime_NR16_N160000_a1.npz`, 발산한 last 파일) 는 폐기(§4) |
 | 선행 코드 커밋 해시, fits 링크 생성 시각, 수용 검사·CI 스크립트 | 47f46477 (`train_nr16 --fits-tag`, `learned_budget` 표시 수정, 큐·EM 검증), dad54e2e (`train_nr16 --fallback`, `eval_accept.py`, `recovery_ci.py`), e64652ed (`run_nr16b_eval.sh`). fits 링크 `gmm_fits_D2_NR16B16e4last → gmm_fits_D2_NR16B16e4` 09-24 21:50 CDT |
+
+## 6. 결과 (2026-09-25 10:07~18:27 CDT, `run_nr16b_eval.sh` @2a36737c; 이 절은 추가만 한다)
+
+**실행·수용**: ① NR16B16e4 (`_fb2_best.pt`) 10:07~14:16 CDT, ② NR16B16e4last (`_fb2.pt`) 14:16~18:27 CDT (192 워커, CPU complex128, 16 반복). `eval_accept.py` → **ACCEPT: OK -- NR16B16e4, NR16B16e4last** (`results/review_next/NR16B16e4_accept.txt`: 청크 {(40k,40)} 64 × 7 SNR, meta ntrain 160000, bstar kron / kron_K 4096 / ll_val 63.1751571838059, 두 태그 em_sec 동일, ckpt sha·role (best c050d611b2c714a6 / last bf688d605691c7f7), **R5-genie blk_err·ber·tauL_gmean·alphaD @1..16 이 raw_NR16run2 와 7 SNR 전 시행 비트 동일**, 격자 완전성 full 6 + kron 9·K≥1024 후보 3 개씩). manifest `run_manifest_NR16B16e4{,last}.json` (git 2a36737c, config_hash 51ae127c61aacdce). b\*·genie 실패 벡터는 두 태그에서 동일.
+
+### 6.1 측정 판정 (C6, 태그 NR16B16e4 = `_best`; UNGATED → 기하·예산 축 측정, arm 판정 아님)
+
+`M-ours-bstar → M-ours-dscore-C-V1` (`tables_D2_NR16B16e4.txt:368-373`): 판정점 −3/+0/+3 dB (앵커 b\* 자동), −3 dB 142:11 (p=3.5e-30) · +0 dB 45:4 (8.2e-10) · +3 dB 26:3 (1.5e-05), pooled 213:18 (p=1.8e-43); `power guard … -> POWERED`; `second arm fewer failures at 3/3 points, first arm fewer failures at 0/3 points -> significant`. SNR@0.1 격차 `n/a (<= -3 vs <= -3)` (두 arm 모두 격자 최저 SNR 에서 이미 0.1 아래; 격자는 늘리지 않는다).
+→ **§2 행 (i): "C6 동일예산 우위가 N′ = 1.6e5 에서도 유지 (기하 축 측정, UNGATED)"** — 회수율 대역과 함께:
+
+**회수율 대역 (§1, `recovery_NR16B16e4.txt`, paired bootstrap B=2000 seed 20260926)**: −3 dB **R = 0.809 [90% 0.747, 0.870]** → 대역 **R ≥ 0.70 "기하 효과 대부분 유지"**. (0 dB 0.804 [0.694, 0.903], +3 dB 0.958 [0.750, 1.188], 3 점 합 0.823 [0.771, 0.871].) 나란히: C6 1e4 (`recovery_NR16run2.txt`) 0.838 [0.781, 0.892], C2 1.6e5 헤드라인 (`recovery_B16e4k.txt`) 0.470 [0.427, 0.512]. 대역 문장은 셀·예산 한정이며 arm 주장이 아니다.
+
+| C6 −3 dB (n=2560, 테스트 0..2559) | b\* | V1 | genie | b\*→V1 pooled (3점) | 회수율 −3 dB |
+|---|---|---|---|---|---|
+| 1e4 (NR16run2, last-EMA; b\* kron 128) | 207 | 52 | 22 | 266:13 | 0.838 |
+| **1.6e5 last-EMA (NR16B16e4last; b\* kron 4096)** | 184 | 52 | 22 | 208:17 | 0.815 [0.756, 0.872] |
+| 1.6e5 `_best` (NR16B16e4, 측정 판정 태그) | 184 | 53 | 22 | 213:18 | 0.809 [0.747, 0.870] |
+
+### 6.2 보고 전용
+- 대조군 `M-ours-bstar → M-ours-bstar-scalar` (`:386-390`): 42:65 (0.033) · 11:45 (5.4e-06) · 9:15 (0.31), pooled 62:125, POWERED, `second arm fewer failures at 0/3 points, first arm fewer failures at 2/3 points -> significant` (b\* 행렬 site 우세, 1e4 와 같은 방향).
+- V4 · V4b 도 b\* 를 3/3 점에서 이긴다 (209:32, 195:35; `:374-385`). BLER@16 −3 dB: V1 0.021, V4 0.025, V4b 0.030, b\* 0.072, bstar-scalar 0.081, genie 0.009.
+- V0: −3~+9 dB BLER 1.000, +12 0.979, +15 0.911; F3 가드 −3~+9 dB 1.000, +12 0.998, +15 0.993 (`guard_D2_NR16B16e4.txt`). 가드는 V0 에서만 발동(나머지 12 arm 발동 없음).
+- best 대 last V1 짝 부호검정 (a = best 실패·last 성공): −3 dB 9:8 (p=1), 0 dB 2:6 (0.29), +3 dB 1:2 (1); 3 점 합 12:16 (p=0.57) — 판정하지 못함. B32e4last 표 B: 208:17 POWERED 3/3.
+- 동일예산 GB′ (§5): 비 0.261~0.508, median 0.283, worst excess −0.492 (1e4: 0.314~0.474, median 0.343).
+- 학습: §3d 시행 1 DIVERGED (epoch 1064), 시행 2 (클리핑 1.0) 정상 — 모든 1.6e5 C6 수치는 시행 2 가중치.
+
+### 6.3 §3 예측 채점
+1. 학습 "발산 없음": **빗나감** (시행 1 발산 → §3d 시행 2); patience 정지·epoch 900~2000 (1704)·best val < 0.19 (0.1785): **적중** (시행 2).
+2. b\* = kron, K=4096 이 2048 을 이겨 격자 끝, 재시드 급증: **적중** (K=8192 는 사용자가 멈춤 결정).
+3a. 표 B (i) 유지: **적중**. 3b. 3 점 모두 유의: **적중**.
+4. V1 실패 40~65 → 53 **적중**; b\* 100~170 → 184 **빗나감** (b\* 개선이 예측보다 작음: 207 → 184); genie 22 **적중**; 회수율 0.65~0.80 → 0.809 **빗나감(근소, 더 높음)**, 대역 "대부분 유지 또는 일부 유지" → "대부분 유지" **적중**; 판정점 −3/0/+3 **적중**.
+5. 대조군 b\* 우세 (first arm fewer ≥ 2/3): **적중** (2/3). V0 전 SNR 가드·−3~+3 dB BLER ≥ 0.9: **적중**. V4·V4b 는 V1 과 비슷하거나 나쁨: **적중**.
+6. best 대 last 판정 못함: **적중** (12:16).
+7. GB′ median 0.35~0.55 → 0.283 **빗나감** (확산 쪽이 예측보다 더 낮음).
+8. 빗나갈 경로 (c) K=4096 격자 끝 → K=8192 사용자 결정(멈춤), (d) 발산 → §3d 가 실현. (a)(b)(e) 없음.
