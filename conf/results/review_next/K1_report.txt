@@ -1,0 +1,27 @@
+# K1 (NEXT_EXPERIMENTS_K1K2 §1.2): BR-S vs V1 / b* / LO-S / genie at the same trials, @16, house sign test
+
+== C2 -3 dB trials 3200..4479 ==
+   acceptance: chunks/meta PASS; V1/b*/genie vs P3ref shared 1280/1280, max |diff| {'M-ours-dscore-C-V1': 0.0, 'M-ours-bstar': 0.0, 'R5-genie': 0.0} -> PASS; LO-S shared 1280/1280; arms ['BR-S M-ours-dscore-C-V1 M-ours-bstar R5-genie'] meta [("[('M', 16), ('burn', 100), ('eps_frac', 0.05), ('keep', 100), ('n_jac', 16)]", "[('burn', 25), ('chains', 4), ('keep', 75), ('n_ph', 48), ('n_th', 96)]", '4443921ce8d5c4a1', 'kron', '1024.0')]
+   M-ours-bstar           307 (0.2398)   gap position +0.000
+   M-ours-dscore-C-V1     173 (0.1352)   gap position +0.528
+   BR-S                   167 (0.1305)   gap position +0.551
+   LO-S-d0.001             80 (0.0625)   gap position +0.894
+   R5-genie                53 (0.0414)   gap position +1.000
+   R1'       M-ours-dscore-C-V1 -> BR-S             26:20   p=0.46
+   R2'                     BR-S -> LO-S-d0.001      95:8    p=5.1e-20
+   report                  BR-S -> R5-genie        126:12   p=3.9e-25
+   report          M-ours-bstar -> BR-S            156:16   p=5.1e-30
+   BR-S exceptions 0, F3 guard 0; chain spread (median over queries per block): median 4.95e-04, p90 8.12e-04
+
+== C5 -3 dB trials 3200..3839 ==
+   acceptance: chunks/meta PASS; V1/b*/genie vs P3ref shared 640/640, max |diff| {'M-ours-dscore-C-V1': 0.0, 'M-ours-bstar': 0.0, 'R5-genie': 0.0} -> PASS; LO-S shared 640/640; arms ['BR-S M-ours-dscore-C-V1 M-ours-bstar R5-genie'] meta [("[('M', 16), ('burn', 100), ('eps_frac', 0.05), ('keep', 100), ('n_jac', 16)]", "[('burn', 25), ('chains', 4), ('keep', 75), ('n_ph', 48), ('n_th', 96)]", '4443921ce8d5c4a1', 'kron', '1024.0')]
+   M-ours-bstar           298 (0.4656)   gap position +0.000
+   M-ours-dscore-C-V1     230 (0.3594)   gap position +0.254
+   BR-S                   229 (0.3578)   gap position +0.257
+   LO-S-d0.001             63 (0.0984)   gap position +0.877
+   R5-genie                30 (0.0469)   gap position +1.000
+   R1'       M-ours-dscore-C-V1 -> BR-S             26:25   p=1
+   R2'                     BR-S -> LO-S-d0.001     170:4    p=3.2e-45
+   report                  BR-S -> R5-genie        202:3    p=5.6e-56
+   report          M-ours-bstar -> BR-S            119:50   p=1.1e-07
+   BR-S exceptions 0, F3 guard 0; chain spread (median over queries per block): median 5.92e-04, p90 1.04e-03
