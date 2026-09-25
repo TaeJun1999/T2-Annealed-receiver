@@ -19,8 +19,9 @@ BayesGPrior (K1) -- a q-measurable, generator-aware REFERENCE denoiser ("Bayes-G
     fixed angle grid, Rao-Blackwellised E[h | q, L, angles] and Cov.  It uses no latent truth.  A reference, not a bound.
 
 Determinism: every stochastic estimate is seeded from a hash of (q, nu, salt), so a query gets the same answer in any chunk
-or process.  selftest(): in-grid identity of ScorePriorOOG with ScorePrior (bit-identical), edge == clamp limit checks, and
-BayesGPrior against the exact closed form on a single-atom toy (L fixed, one grid angle).
+or process.  selftest(): in-grid AND below-grid identity of ScorePriorOOG with ScorePrior (bit-identical), finite / PSD
+output above the grid for both modes, and a BayesGPrior smoke query (finite output, chain spread printed; no closed-form
+check).  n_oog counts unique ABOVE-grid queries only; below-grid queries take ScorePrior's own path (extrapolation).
 """
 import hashlib
 import os
@@ -185,9 +186,8 @@ class BayesGPrior:
 
 
 def selftest():
-    """(1) ScorePriorOOG == ScorePrior bit-for-bit on in-grid queries (both oog modes); (2) above the grid clamp/edge return
-    finite PSD J and edge's mean differs from clamp's; (3) BayesGPrior on a toy query reproduces the closed form when the
-    grid posterior is concentrated (a single strong atom at a grid point, high SNR)."""
+    """(1) ScorePriorOOG == ScorePrior bit-for-bit on below-grid and in-grid queries (both oog modes); (2) above the grid
+    clamp/edge return finite J with min eigenvalue >= LAM_MIN; (3) BayesGPrior smoke query (finite, chain spread printed)."""
     Nr, Nt = 8, 4
     ck = os.path.join(C.CONF, "ckpt", "d2sx_N160000_a1.pt")
     import arms as A
@@ -200,7 +200,7 @@ def selftest():
     h = gen.sample_vecs(rng, 1)[0]
     for oog in ("clamp", "edge"):
         v = ScorePriorOOG(ck, Nr, Nt, Chat, oog=oog, M=4, burn=20, keep=20, n_jac=4)
-        for nu in (0.01, 0.2, 1.0):                                   # in-grid
+        for nu in (0.001, 0.01, 0.2, 1.0):                            # below-grid (0.001 < nu_lo) and in-grid
             q = h + np.sqrt(nu / 2) * (rng.standard_normal(32) + 1j * rng.standard_normal(32))
             m0, J0 = base._eval(q, nu); m1, J1 = v._eval(q, nu)
             assert np.array_equal(m0, m1) and np.array_equal(J0, J1), f"{oog}: in-grid not bit-identical at nu={nu}"
@@ -209,7 +209,7 @@ def selftest():
         m, J = v._eval(q, nu)
         w = np.linalg.eigvalsh(0.5 * (J + J.conj().T))
         assert np.all(np.isfinite(m)) and np.all(np.isfinite(J)) and w.min() >= C.LAM_MIN * (1 - 1e-9), (oog, w.min())
-        print(f"[selftest] {oog}: in-grid bit-identical (3 nu), out-of-grid nu=2.0 finite, min eig(J) {w.min():.3e}, "
+        print(f"[selftest] {oog}: below/in-grid bit-identical (4 nu), out-of-grid nu=2.0 finite, min eig(J) {w.min():.3e}, "
               f"NMSE vs h {np.sum(np.abs(m - h) ** 2) / np.sum(np.abs(h) ** 2):.3f}")
     bg = BayesGPrior(Nr, Nt, Chat, chains=2, burn=10, keep=20)
     m, J = bg._eval(h + 0.05 * (rng.standard_normal(32) + 1j * rng.standard_normal(32)) / np.sqrt(2), 0.005)

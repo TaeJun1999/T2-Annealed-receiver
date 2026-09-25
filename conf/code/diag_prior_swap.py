@@ -15,7 +15,9 @@ guardH) plus per-trial query counters (<arm>|n_oog, BR-S|mc_disagree).
   run:    python conf/code/diag_prior_swap.py run --cell C1 --snr -3 --skip0 S --n N --arms V1-edge M-ours-bstar ... --out raw_X
   check:  python conf/code/diag_prior_swap.py check --out raw_X --ref raw_review_next_A2 --cell C2 --snr -3
           (every arm present in both: all KEYS_RAW fields bit-identical at every shared trial -- construction identity)
-  report: python conf/code/diag_prior_swap.py report --out raw_X --cell C1 --snr -3 --pairs "M-ours-bstar>V1-edge" ...
+  report: python conf/code/diag_prior_swap.py report --out raw_X --cell C1 --snr -3 --skip0 S --n N --chunk 10 --pairs ...
+          (fail-closed acceptance first: exact chunk set, run meta, one arm set, one edge_kw/bg_kw/ckpt per point)
+  check-cavity: ... --out raw_X --cell C1 --snr -3   (blk_err@16 vs the p1_cavity <arm>|fail record at shared trials)
 CPU only (receiver rule).
 """
 import argparse
@@ -108,7 +110,7 @@ def run_task(t):
                 d = rx.prior.mc_disagree[m0:]
                 mcd.append(float(np.median(d)) if d else np.nan)
     import bigamp
-    flat = {f"{k}|{q}": np.array([l[q] for l in L_]) for k, L_ in logs.items() for q in C.KEYS_RAW}
+    flat = {f"{k}|{q}": np.array([l[q] for l in L_]) for k, L_ in logs.items() for q in C.KEYS_RAW + ("nu_q",)}
     flat.update({f"{k}|failed": np.array(v) for k, v in failed.items()})
     for k in rxs:
         nm = flat[f"{k}|nmse"]
@@ -120,9 +122,14 @@ def run_task(t):
             flat[f"{k}|n_oog"] = np.array(cnt[k], float)
     if mcd:
         flat["BR-S|mc_disagree"] = np.array(mcd)
+    import score as S
+    import prior_variants as PV
+    ekw = dict(M=16, burn=100, keep=100, n_jac=16, eps_frac=0.05); ekw.update(edge_kw)          # class defaults + CLI
+    bkw = dict(chains=4, burn=25, keep=75, n_th=96, n_ph=48); bkw.update(bg_kw)
     flat.update({"meta|bstar": meta["bstar"], "meta|kron_K": float(meta["kron_K"] if meta["kron_K"] is not None else -1),
                  "meta|fits_tag": fits_tag, "meta|ntrain": float(ntrain), "meta|ckpt": ckpt,
-                 "meta|edge_kw": repr(sorted(edge_kw.items())), "meta|bg_kw": repr(sorted(bg_kw.items())),
+                 "meta|ckpt_sha": S.ckpt_identity(ckpt)["sha256_16"], "meta|arms": " ".join(rxs),
+                 "meta|edge_kw": repr(sorted(ekw.items())), "meta|bg_kw": repr(sorted(bkw.items())),
                  "run|iters": iters, "run|skip": skip, "run|n": n, "run|snr": snr, "run|seed": C.SEED})
     os.makedirs(out_dir, exist_ok=True)
     tmp = out + ".tmp.npz"
@@ -180,22 +187,61 @@ def cmd_check(a):
     return 0 if ok else 1
 
 
+def accept(out, cell, snr, skip0, n, chunk, iters=16, fits_tag="B16e4k", ntrain=160000, ckpt_sha=None):
+    """Registered acceptance of one point (fail-closed): the raw chunk set is EXACTLY {(skip0 + chunk*k, chunk)}, every chunk
+    carries run|iters / meta|fits_tag / meta|ntrain (/ meta|ckpt_sha) as registered, the SAME arm set and the SAME
+    edge_kw / bg_kw, and every registered trial is present exactly once.  -> (ok, problems, meta_summary)"""
+    want = {(s, min(chunk, skip0 + n - s)) for s in range(skip0, skip0 + n, chunk)}
+    have, prob, arms_seen, kws = {}, [], set(), set()
+    for f in glob.glob(os.path.join(C.CONF, out, f"D2_{cell}_*_snr{snr:g}_skip*_n*.npz")):
+        m = PAT.search(os.path.basename(f)); have[(int(m.group(6)), int(m.group(7)))] = f
+    if set(have) != want:
+        prob.append(f"chunk set differs from the registered {len(want)}: extra/missing {sorted(set(have) ^ want)}")
+    for (s, k), f in sorted(have.items()):
+        d = np.load(f, allow_pickle=True)
+        g = lambda key: str(d[key].item() if d[key].shape == () else d[key])
+        if int(d["run|iters"]) != iters or g("meta|fits_tag") != fits_tag or int(float(g("meta|ntrain"))) != ntrain:
+            prob.append(f"{os.path.basename(f)}: iters/fits/ntrain {int(d['run|iters'])}/{g('meta|fits_tag')}/{g('meta|ntrain')}")
+        if ckpt_sha and g("meta|ckpt_sha") != ckpt_sha:
+            prob.append(f"{os.path.basename(f)}: ckpt sha {g('meta|ckpt_sha')} != {ckpt_sha}")
+        arms_seen.add(g("meta|arms")); kws.add((g("meta|edge_kw"), g("meta|bg_kw"), g("meta|ckpt_sha"), g("meta|bstar"), g("meta|kron_K")))
+        if int(d["run|n"]) != k:
+            prob.append(f"{os.path.basename(f)}: run|n {int(d['run|n'])} != {k}")
+    if len(arms_seen) > 1:
+        prob.append(f"arm set differs between chunks: {arms_seen}")
+    if len(kws) > 1:
+        prob.append(f"edge_kw/bg_kw/ckpt/bstar differ between chunks: {kws}")
+    return (not prob), prob, (sorted(arms_seen), sorted(kws))
+
+
 def cmd_report(a):
     from analysis import sign_p
+    ok, prob, ms = accept(a.out, a.cell, a.snr, a.skip0, a.n, a.chunk, a.iters, a.fits_tag, a.ntrain, a.ckpt_sha)
+    head = (f"== {a.out} {a.cell} {a.snr:g} dB, registered trials {a.skip0}..{a.skip0 + a.n - 1} (chunk {a.chunk}) ==\n"
+            f"   acceptance: {'PASS' if ok else 'FAIL -- nothing below is read: ' + '; '.join(prob)}\n"
+            f"   arms {ms[0]}  meta(edge_kw, bg_kw, ckpt_sha, bstar, kron_K) {ms[1]}")
+    if not ok:
+        print(head)
+        if a.save:
+            open(os.path.join(C.CONF, "results", "review_next", a.save), "a").write(head + "\n")
+        return 1
     X = load(a.out, a.cell, a.snr)
     trials = sorted(X)
     arms = sorted({k.split("|")[0] for t in trials for k in X[t]})
     it = a.it - 1
     be = {k: np.array([1.0 if not np.isfinite(X[t][f"{k}|blk_err"][it]) else float(X[t][f"{k}|blk_err"][it]) for t in trials])
           for k in arms if all(f"{k}|blk_err" in X[t] for t in trials)}
-    L = [f"== {a.out} {a.cell} {a.snr:g} dB, trials {trials[0]}..{trials[-1]} (n={len(trials)}), @{a.it} =="]
+    L = [head, f"   @{a.it}, n={len(trials)}"]
     g = be.get("M-ours-bstar"); r = be.get("R5-genie")
     for k, v in be.items():
         extra = ""
         if f"{k}|n_oog" in X[trials[0]]:
             extra += f"  out-of-grid queries/block {np.mean([X[t][f'{k}|n_oog'] for t in trials]):.2f}"
         gd = [X[t].get(f"{k}|guardH", np.nan) for t in trials]
-        extra += f"  F3 guard {np.nansum(gd):.0f}  exceptions {int(sum(X[t][f'{k}|failed'] for t in trials))}"
+        extra += f"  F3 guard {np.nansum(gd):.0f}  exceptions {int(sum(X[t].get(f'{k}|failed', 0.0) for t in trials))}"
+        if f"{k}|nu_q" in X[trials[0]]:                             # above-grid queries per iteration (nu_q > nu_hi)
+            oog = np.array([np.asarray(X[t][f"{k}|nu_q"], float) > 1.4285757304853552 for t in trials])
+            extra += f"  above-grid it1 {oog[:, 0].mean():.2f} it2-16 {oog[:, 1:].mean():.3f}"
         pos = f"  gap position {(g.sum() - v.sum()) / (g.sum() - r.sum()):+.3f}" if g is not None and r is not None and g.sum() != r.sum() else ""
         L.append(f"   {k:<22} {int(v.sum()):>5} ({v.mean():.4f}){pos}{extra}")
     if "BR-S" in be:
@@ -210,6 +256,30 @@ def cmd_report(a):
     print(txt)
     if a.save:
         open(os.path.join(C.CONF, "results", "review_next", a.save), "a").write(txt + "\n")
+    return 0
+
+
+def cmd_check_cavity(a):
+    """Pre-check (a): the driver's blk_err@16 (non-finite -> 1) of every arm also present in the p1_cavity record must equal
+    the record's <arm>|fail (> 0) at every shared trial."""
+    X = load(a.out, a.cell, a.snr)
+    ref = {}
+    for f in glob.glob(os.path.join(C.CONF, "results", "review_next", "p1_cavity", f"p1_cavity_D2_{a.cell}_*_snr{a.snr:g}_skip*_n*.npz")):
+        s = int(PAT.search(os.path.basename(f)).group(6)); d = np.load(f, allow_pickle=True)
+        for k in d.files:
+            if k.endswith("|fail"):
+                for i, v in enumerate(d[k]):
+                    ref.setdefault(s + i, {})[k.split("|")[0]] = 1.0 if v > 0 else 0.0
+    shared = sorted(set(X) & set(ref)); bad = {}
+    for t in shared:
+        for arm in ref[t]:
+            if f"{arm}|blk_err" in X[t]:
+                v = X[t][f"{arm}|blk_err"][15]; x = 1.0 if not np.isfinite(v) else float(v)
+                bad[arm] = bad.get(arm, 0) + int(x != ref[t][arm])
+    ok = bool(shared) and bad and all(v == 0 for v in bad.values())
+    print(f"[check-cavity] {a.out} vs p1_cavity {a.cell} {a.snr:g} dB: shared trials {len(shared)}, mismatches per arm {bad} -> "
+          f"{'PASS' if ok else 'FAIL'}")
+    return 0 if ok else 1
 
 
 def main():
@@ -232,10 +302,16 @@ def main():
     c.add_argument("--cell", required=True); c.add_argument("--snr", type=float, required=True)
     p = sub.add_parser("report")
     p.add_argument("--out", required=True); p.add_argument("--cell", required=True); p.add_argument("--snr", type=float, required=True)
+    p.add_argument("--skip0", type=int, required=True); p.add_argument("--n", type=int, required=True)
+    p.add_argument("--chunk", type=int, default=10); p.add_argument("--iters", type=int, default=16)
+    p.add_argument("--fits-tag", default="B16e4k"); p.add_argument("--ntrain", type=int, default=160000)
+    p.add_argument("--ckpt-sha", default=None)
     p.add_argument("--it", type=int, default=16); p.add_argument("--pairs", nargs="*", default=[])
     p.add_argument("--save", default=None)
+    cc = sub.add_parser("check-cavity")
+    cc.add_argument("--out", required=True); cc.add_argument("--cell", required=True); cc.add_argument("--snr", type=float, required=True)
     a = ap.parse_args()
-    return {"run": cmd_run, "check": cmd_check, "report": cmd_report}[a.cmd](a)
+    return {"run": cmd_run, "check": cmd_check, "report": cmd_report, "check-cavity": cmd_check_cavity}[a.cmd](a)
 
 
 if __name__ == "__main__":

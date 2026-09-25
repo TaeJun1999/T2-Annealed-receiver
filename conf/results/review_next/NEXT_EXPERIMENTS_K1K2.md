@@ -1,0 +1,112 @@
+# NEXT_EXPERIMENTS_K1K2 — P4-LO 후속 두 건의 사전 등록 (v2): K2 격자 밖 질의 규칙(V1-edge / V1-clamp), K1 Bayes-G 참조 폐루프(BR-S)
+
+- 작성: 2026-09-25 08:1x CDT 초안(v1) → 적대적 검토 2건(설계·통계·공정성 critical 2·major 7·minor 11; 실행 가능성·코드 15건; 세션 에이전트 원문은 작업 로그) 반영 v2 08:5x CDT, Claude Code (Fable 5.1). 동결 시각 = 커밋 시각(`DECISIONS.md` 같은 줄). **결과 관측 전**: 세 arm(V1-edge, V1-clamp, BR-S)은 어떤 등록 시행에서도 실행되지 않았다(§4). 사용자 결정 2026-09-25 00:2x CDT ("K2 격자 밖 질의 수정 (추천)", "K1 Bayes 참조 폐루프 (추천)"; 후보 설계 워크플로 wf_7ce6424d-5d9). 커밋 뒤에는 §1~§3 을 바꾸지 않는다; 바꿔야 하면 사용자 승인 + `DECISIONS.md`.
+- 지위: **K1 = 보고 전용 참조**(판정 없음). **K2 = 새 arm 변형의 등록된 1차 검정 하나**(개발·판정 집합; 테스트 확증은 §2.6 의 조건에서만, 사용자 결정). 어느 결과도 헤드라인(C2 1.6e5 B16e4k), 셀 C1·C5 의 기존 판정(§6f, B32e4x), V1 의 정의("범위 밖 질의는 clamp 하지 않고 외삽한다", DECISIONS `[2026-09-20 12:35 KST] sigma 격자 범위 밖 질의`)를 바꾸지 않는다. V1-edge·V1-clamp 는 §6j("격자 관련 변경은 별도 등록")에 따른 **별도 arm** 이다.
+- 코드 (동결 커밋에 포함): `conf/code/prior_variants.py` (ScorePriorOOG, BayesGPrior), `conf/code/diag_prior_swap.py` (드라이버: run / check / check-cavity / report[fail-closed 수용 검사]), `conf/code/k1_report.py` (K1 병합 보고, fail-closed), `conf/code/run_k1k2.sh` (실행 명령 열). `Demo/`, `runner.py`, `arms.py`, `score.py`, `common.py` 불변 → 기존 arm·기록 비트 동일.
+
+---
+
+## 0. 출발점과 공개 (판정에 쓰지 않는다)
+
+**P4-LO 결과** (`NEXT_EXPERIMENTS_P4LO.md` §5; P3 판정 집합 3200..4479, C2 −3 dB, n=1280, @16): V1 173, b\* 307, R5-genie 53, **LO-S 80** (잠재 기하를 아는 참조; V1→LO 100:7). C5 −3 dB (3200..3839): V1 230, b\* 298, genie 30, LO 63.
+
+**후보 설계 단계의 탐색 분석 (개발 시행 2560..3199, 등록 전에 계산됨; `scratchpad/prior_design/`, 세션 임시)** — 탐색이며 이 문서의 어떤 판독에도 쓰지 않는다:
+1. V1 자신의 C2 −3 dB cavity 질의(`p1_cavity_D2_C2_*_snr-3.npz`, 반복 16, n=640)에서 평균 NMSE **V1 0.0674 vs Bayes-G 0.0679** (griddy Gibbs 2 체인; 실패 블록 88: 평균 0.1857 vs 0.1796, 중앙값 0.1605 vs 0.1633, BG 가 나은 비율 0.58), b\* 반사실 0.0987, LO 0.0289. → K1 의 예측(§1.4)은 이 숫자를 본 상태의 약한 예측이다.
+2. 데이터·최적화 레버 무효: EMA train-vs-val DSM 격차 +7.5% / +0.9% / −0.1% (1e4 / 1.6e5 / 3.2e5); TTA·앙상블·σ 보정·PSD floor·clip 규칙 모두 NMSE·BLER 변화 없음; C2 −3 dB 테스트 V1 실패 372/370/371/373/368 (1e4~3.2e5).
+3. **격자 밖 디노이저 (새 prior 표본 100 개, `mh_edge.out`)**: ν_q 1.66 / 1.998 / 2.981 에서 평균 NMSE — V1 외삽 202 / 1.75e4 / 1.02e5; **clamp 0.454 / 0.537 / 0.657; edge-split(M=8) 0.450 / 0.530 / 0.616**; Bayes-G 0.463 / 0.541 / 0.625; Chat-LMMSE 0.596 / 0.655 / 0.717. C2 −3 dB 의 V1 질의는 **개발 집합 640 블록**에서 전 반복 격자 안(exit 0.000; 테스트 집합의 격자 밖 횟수는 raw 에 기록돼 있지 않다).
+4. **C1 −3 dB 개발 2560..3199 (`p1_cavity_D2_C1_*_snr-3.txt`)**: V1 실패 623/640 (guardH 640/640, raised 64), V0 640/640, **b\* 483/640, bstar-scalar 511/640**; V1 은 반복 1 에서 격자 밖(exit 1.000, h_post NMSE 1.44e6) → 반복 2 e_t 9.57e3 → 반복 16 까지 exit 0.86~0.92. C1 0 dB 반복-1 ν_q 중앙값 1.499 > ν_hi = 1.428576. 테스트: 동일예산 1.6e5 `tables_D2_B16e4.txt` C1 −3 dB **V1 0.982 / b\* 0.760 / genie 0.037** (당시 b\* 격자 K ≤ 512; K=1024 의 C1 테스트는 미실행), 3.2e5 B32e4x V1 0.995 / b\* 0.749 / genie 0.037; C1 판정 GMM 우세 3/3 (+6/+9/+15 dB).
+5. **반대 증거 (공개)**: DECISIONS `[2026-09-22 16:05 KST] §6p 채점` — "ν_q ≈ 2.0 이 C1 −3 dB 에선 100% 붕괴, C2 −9 dB 에선 0%. **격자 밖 스칼라 질의는 붕괴의 충분조건이 아니고 Tp<Nt 영방향이 가른다**" (§6j 정정). 격자 밖 질의를 고쳐도 C1 은 Tp<Nt 기전으로 계속 붕괴할 수 있다 — §2.5 갈래 (c).
+6. 검정력: 같은 레시피 시드 쌍의 C2 −3 dB 불일치 15~18 / 640; n=1280 에서 n_d 30 / 35 / 40 / 60 / 100 → MDD 12 / 13 / 14 / 18 / 22 블록.
+
+**시행 원장** (raw 디렉터리 전수 + p1_cavity; 검토에서 검증): 테스트 0..2559 는 쓰지 않는다. C2 −3 dB: 0..2559 (13 dir), 2560..3199 개발(A1s2/A1s3/A2/H0), 3200..4479 P3 판정(P3/P3ref/LO), 4480..5119 A1C5, 6400..6403 P4-LO 스모크; **C1 −3 dB: 0..2559 (B16e4·B1e4x·B32e4x·C), 2560..3199 = p1_cavity C1 (V1·V0·b\*·bstar-scalar 결과 기록됨), 3200 부터 미사용**; **C1 0 dB: 0..2559 만, 2560 부터 미사용**; **C5 −6 dB: raw_B1e4lo 0..2559 만(등록 SNR 격자 밖, §6p 저SNR 확장 점), 2560 부터 미사용**; C5 −3 dB: 0..2559, 2560..3199, 3200..3839 (P3/P3ref/LO), 4480..5759 (A1C5), 5760 부터 미사용. 구성 동일성 검사(§4)는 이미 기록된 arm·시행만 다시 계산했다(새 정보 없음).
+
+**캠페인 수준 공개.** "V1 을 genie 쪽으로 / b\* 에서 멀리" 계열의 시도: P3 (루프 규칙; 채택·테스트 확증, 두 prior 대칭), A1 (위상 augmentation; 판정 불가로 종료), P4-LO (참조, 판정 없음), **K2 (이 문서의 유일한 1차 검정)**, K1 (참조, 판정 없음). **이 계열의 등록된 1차 검정 = 3 (P3 채택 규칙, A1, K2).** 원고는 이 수를 적고, K2 가 (i) 이면 판정 기준(p<0.05)과 함께 Holm m=3 (p<0.0167) 에서도 유지되는지를 병기한다. 이 문서 안의 판정은 K2 의 1차 검정 하나뿐이며 그 밖의 비교는 전부 보고 전용이다.
+
+---
+
+## 1. K1 — Bayes-G 참조 폐루프 (BR-S; 보고 전용)
+
+### 1.1 고정되는 것
+
+| 항목 | 값 |
+|---|---|
+| **참조 prior** | `prior_variants.BayesGPrior`: **D2 생성 모형의 구조(각도 범위 S2, 경로 전력 프로파일 `d2._P`, L~U{3..8}, 스케일 √(Nr·Nt))를 알고** 각도 격자 96 AoA × 48 AoD 중점 위에서, 경로 이득을 CN(0, p_l) 로 완화한 모형의 (L, 각도)를 **q 만으로** griddy Gibbs 로 추론(4 체인, burn 25, keep 75; 시드 = hash(q, ν))하고 Rao-Blackwell 평균·공분산을 취한 사후평균 E[h\|q]·Cov[h\|q]. 잠재 진실은 쓰지 않는다. J = Cov/ν, V1 과 같은 `project_psd`(floor LAM_MIN). 명칭: **"생성 모형을 아는 q-측정 참조"**. 유한 MCMC 이므로 BR 의 디노이징 NMSE 는 완화 모형의 정확 사후평균의 그것보다 (완화 모형 하 기대값에서) 작지 않다; 실제 D2 법칙·BLER 에 대한 순서는 함의하지 않는다. **reference 이지 bound 가 아니다** |
+| **배선** | V1 과 동일: `route_a(…, prior, code, Xp, "score", clip="eta")` (`diag_prior_swap.build`, arm `BR-S`). C·Cinv·cbar·eh2_prior 는 같은 Chat(B16e4k full K=32) |
+| **시행** | 1차 점 C2 −3 dB, **P3 판정 집합 3200..4479** (n=1280) — LO-S(`raw_review_next_LO`)와 같은 시행이라 네 참조(V1, BR, LO, genie)를 한 집합에서 비교; 보고 전용 재사용(P3·P4-LO 판정 불변). 보고 점 C5 −3 dB 3200..3839 (n=640). 테스트 0..2559 미사용 |
+| **실행** | `run_k1k2.sh` 의 K1 단계: `diag_prior_swap.py run --cell C2 --snr -3 --skip0 3200 --n 1280 --chunk 20 --arms BR-S M-ours-dscore-C-V1 M-ours-bstar R5-genie --out raw_review_next_K1` 와 `--cell C5 --snr -3 --n 640` (기본값 iters 16, fits-tag B16e4k, ntrain 160000, bg-chains 4; burn 25 / keep 75 / 격자 96×48 은 코드 기본값, `meta\|bg_kw` 에 기록). **V1·b\*·genie 를 같은 실행에서 다시 돌려**(블록당 ≈ 2 s 추가) P3ref 와의 비트 동일을 수용 검사로 쓴다. LO-S 는 `raw_review_next_LO` 의 `LO-S-d0.001` (32 반복 실행의 index 15 = @16) 을 읽는다. 보고 = `k1_report.py --save K1_report.txt` (덮어쓰기) |
+| **수용 검사 (`k1_report.py` 가 점마다 찍고, 하나라도 어긋나면 그 점의 수치를 출력하지 않는다)** | (a) raw 청크 집합 정확히 {(3200+20k, 20)} (k=0..63 / 0..31), 청크마다 `run\|iters`=16, `meta\|fits_tag`=B16e4k, `meta\|ntrain`=160000, 같은 arm 집합, 같은 `bg_kw`; (b) **V1·b\*·R5-genie 의 KEYS_RAW 전 필드 @1..16 이 `raw_review_next_P3ref` 와 모든 시행(1280 / 640)에서 비트 동일**; (c) LO-S 가 모든 시행에 존재. BR-S 예외 시행은 실패로 센다(01_RULES §4); 체인 퍼짐(`BR-S\|mc_disagree`)·예외 수·F3 가드 수는 보고만, **어떤 블록도 제외하지 않는다** |
+| 통계 | 짝 부호검정 house test (양측 p<0.05, n_d<6 → UNDECIDED), `X → Y a:b`(a = X 실패·Y 성공). 격차 위치 (b\*−X)/(b\*−genie). 라벨은 1차 점 @16 의 R1'·R2' 두 비교에만 |
+
+### 1.2 판독 (여기서 고정; 라벨은 격차의 기술이지 "최적성" 판정이 아니다)
+
+| 비교 | 갈래 → 라벨 |
+|---|---|
+| **R1' V1 → BR-S** (같은 배선, 학습 prior 대 생성 모형을 아는 q-측정 참조) | (i) a > b, p<0.05 → **"생성 모형을 아는 q-측정 참조가 V1 보다 적게 실패 (유의)"**, 크기 = V1 173 − BR. (ii) n_d<6 또는 p≥0.05 → **"V1→BR 격차를 판정하지 못함"** (n_d, MDD). (iii) b > a, p<0.05 → **"완화 모형 참조가 이 배선에서 V1 보다 많이 실패 (유의)"** |
+| **R2' BR-S → LO-S** (q-측정 참조 → 잠재를 아는 참조: 격차 중 잠재 정보 몫) | (i) a > b, p<0.05 → "잠재 정보 몫이 유의하게 남음", 크기 = BR − 80. (ii) 판정하지 못함. (iii) LO 가 더 많이 실패(기록만) |
+| 보고 | BR-S → R5-genie; b\* → BR-S; 격차 위치 (V1 0.528, LO 0.894 옆에 BR); 체인 퍼짐 중앙값·p90; 예외·가드 |
+
+**해석 한계.** R1'(i) 는 "q 와 **D2 생성 모형의 구조**를 아는 prior 가 V1 보다 덜 실패한다" 의 존재 증거다 — 생성 모형을 표본으로만 접근하는 학습 prior 가 그 몫을 얻을 수 있는지는 말하지 않는다. R1'(ii)/(iii) 는 "V1 이 이 루프·이 질의에서 그 참조와 구분되지 않는다(또는 그보다 낫다)" 까지만 말한다. "V1 이 최적이다" 나 "학습 가능한 prior 로는 더 못 간다" 는 어느 갈래로도 쓰지 않는다(BR 은 완화 모형 + 유한 MCMC; 정확한 D2 조건부 사후평균은 측정되지 않았다). §0-1 의 탐색 수치는 이 라벨의 근거로 쓰지 않는다.
+
+### 1.3 비용
+BR-S ≈ 3.0~4.5 s/질의(4 체인, 단일 스레드, 측정) × 16 반복 × 1280 블록 ≤ 25 core-h; 청크 20 → **64 워커**(태스크 64개) → 벽시계 ≈ 20~30 분; C5 점 ≈ 13 core-h, 32 워커, 벽시계 비슷. V1·b\* 추가 ≈ 1 core-h. GPU 없음.
+
+### 1.4 예측 (약한; §0-1 을 본 상태)
+1. R1' = **(ii)** (BR 실패 165~190; 하단 165 는 (i) 경계 — n_d 35 에서 24:11 이면 p≈0.04). 2. R2' = **(i)** (BR − LO ≥ 60 블록). 3. BR-S → genie: BR 이 유의하게 많이 실패. 4. 체인 퍼짐 중앙값 < 3e-3. 5. C5 −3 dB: R1' (ii), R2' (i). 빗나갈 경로: (a) R1'(i) → 생성 모형을 아는 참조도 못 넘는다는 가정이 틀린 것; prior 개선 등록의 근거 후보(사용자 결정, 동일예산·GMM 대칭 확장 의무); (b) R1'(iii) → 완화 모형(가우시안 이득)의 한계 기록, 결론 없음; (c) 수용 검사 실패 → 원인 기록·재실행.
+
+---
+
+## 2. K2 — V1 의 격자 밖 질의 규칙: V1-edge (등록된 1차 변형), V1-clamp (2차 변형)
+
+### 2.1 고정되는 것
+
+| 항목 | 값 |
+|---|---|
+| **변형 정의** | `prior_variants.ScorePriorOOG` (헤드라인 체크포인트 `ckpt/d2sx_N160000_a1.pt`, sha256[:16] **4443921ce8d5c4a1** (`meta\|ckpt_sha` 로 기록), last-EMA @1784 — p1_cavity C1·헤드라인과 같은 가중치; Chat B16e4k full K=32; `psd_project=True`). σ_t ≤ s_hi = 0.8451555 (ν_q ≤ ν_hi = 1.428576) 이면 `ScorePrior._eval` 그대로(**격자 안·아래 모두 V1 과 비트 동일**; 격자 아래는 V1 과 같은 외삽). ν_q > ν_hi 에서만: **V1-edge** = 잡음 분해 q = z + e2, z = h + e1 (e1 ~ CN(0, ν_hi I), e2 ~ CN(0, (ν_q−ν_hi) I)); z\|q 를 σ 격자 안의 학습 score 만으로 ULA 표집(M=16 체인, burn 100, keep 100, 스텝 0.05·min(ν_hi/2, (ν_q−ν_hi)/2), 시드 hash(q, ν); "격자 안" 은 σ 에 대한 것이고 x 의 지지는 보장하지 않는다 — 폭주한 질의에서는 NaN → 예외 → 실패로 분류); mean = E_z[D(z, ν_hi)], Cov = E_z[ν_hi J(z, ν_hi)] (마지막 16 표본의 jacrev) + Cov_z[D]. **V1-clamp** = mean D(q, ν_hi), Cov = ν_hi J(q, ν_hi). 둘 다 J = Cov/ν_q (site: SigH = ν_q J = Cov), `project_psd`. 상수(M, burn, keep, 0.05, n_jac; `meta\|edge_kw`)는 여기서 고정하며 탐색하지 않는다 |
+| **근거** | (F2) "prior 를 학습 지지 밖에서 조회하면 그 출력은 정의되지 않는다" (10_SPEC_stageC.md:92-95) — 정의 문제이지 BLER 이 아니다. (F2) 의 처방(격자 확장 + 재학습)이 아니라 **헤드라인 체크포인트를 고정한 채 추론 규칙만 바꾸는** 별도 arm (§6j). V1 의 정의(외삽, DECISIONS 2026-09-20 12:35)는 불변. **셀 선택은 사후**(C1·C5 저SNR 붕괴를 본 뒤; §0-4) → 새 시행·미리 적은 갈래 의무 |
+| **배선·대조군** | 모두 같은 시행에서: `M-ours-dscore-C-V1` (동결 V1, 외삽), **`V1-edge`**, `V1-clamp`, `M-ours-bstar` (b\*, 정확 EP site — GMM 은 폐형식이라 격자 문제 자체가 없다; GMM 쪽에 빚진 아날로그 없음), `M-ours-bstar-scalar`, `gmmB-scorew-eta` (b\* 를 V1 의 배선에), `R5-genie`. 각각 `diag_prior_swap.build` 의 기존 route_a 호출(§4 동일성 검사) |
+| **시행** | **1차 점 C1 −3 dB, 새 시행 3200..4479 (n=1280)**. 보고 점: **C1 0 dB 2560..3199 (n=640)**, **C5 −6 dB 2560..3199 (n=640)** (등록 SNR 격자 밖 점; 1e4 §6p 확장: V1 0.993 / b\* 0.904 / genie 0.224). 테스트 0..2559 미사용. C2 는 돌리지 않는다(개발 집합 근거로 C2 질의는 격자 안 → V1-edge·V1-clamp 가 V1 과 비트 동일, §4) |
+| **실행** | `run_k1k2.sh` 의 K2 단계: `diag_prior_swap.py run --cell C1 --snr -3 --skip0 3200 --n 1280 --chunk 10 --arms M-ours-dscore-C-V1 V1-edge V1-clamp M-ours-bstar M-ours-bstar-scalar gmmB-scorew-eta R5-genie --out raw_review_next_K2`, 보고 점 `--cell C1 --snr 0 --skip0 2560 --n 640`, `--cell C5 --snr -6 --skip0 2560 --n 640` (기본값 iters 16, edge M16/burn100/keep100/njac16/eps 0.05, ckpt·fits 위와 같음); 보고 = `diag_prior_swap.py report … --ckpt-sha 4443921ce8d5c4a1 --pairs … --save K2_report.txt` (추가 쓰기) |
+| **선행 검사 (실행 직전, `run_k1k2.sh` 가 자동 수행; 출력은 `raw_review_next_K2pre_c1/_c2` 에 보존)** | (a) C1 −3 dB 개발 2560..2599 (이미 기록된 40 시행): 드라이버의 V1·b\*·bstar-scalar `blk_err@16`(비유한→1) 이 p1_cavity 의 `<arm>\|fail` 과 40/40 동일 (`check-cavity`; 20/20 은 §4 에서 완료); (b) C2 −3 dB 개발 2560..2599: V1-edge·V1-clamp == V1 비트 동일, n_oog 0, 그리고 V1·b\*·gmmB-scorew-eta·genie 가 `raw_review_next_A2` 와 비트 동일 (`check`). 실패하면 실행하지 않는다 |
+| **수용 검사 (`report` 가 점마다 찍고, 하나라도 어긋나면 수치를 출력하지 않는다)** | 청크 집합 정확히 {(skip0+10k, 10)} (1280 → 128, 640 → 64); 청크마다 `run\|iters`=16, `meta\|fits_tag`=B16e4k, `meta\|ntrain`=160000, `meta\|ckpt_sha`=4443921ce8d5c4a1, 같은 arm 집합, 같은 `edge_kw`/`bstar`(kron)/`kron_K`(1024); 전 arm 예외 수·F3 가드 수, V1-edge/clamp 의 **격자 위쪽 고유 질의 수/블록**(`n_oog`; 격자 아래는 V1 과 같은 외삽)과 반복별 격자 위쪽 비율(`nu_q > ν_hi`, 반복 1 / 2~16) 보고; V1(동결) 실패 수를 그대로 싣는다 |
+| 통계 | 짝 부호검정 house test; 격차 위치 (b\*−X)/(b\*−genie) |
+
+### 2.2 1차 검정 (여기서 고정; C1 −3 dB, @16, n=1280)
+
+**`M-ours-bstar → V1-edge`** (V1-edge 가 b\* 보다 덜 실패하는가):
+- (i) a > b, p<0.05 → **"V1-edge(별도 arm)가 C1 −3 dB 에서 b\* 보다 적게 실패 (유의)"** — 크기, 격차 위치; Holm m=3 병기(§0).
+- (ii) n_d<6 또는 p≥0.05 → **"판정하지 못함"** (n_d, MDD).
+- (iii) b > a, p<0.05 → **"V1-edge 도 C1 −3 dB 에서 b\* 에 못 미침 (유의)"** — 크기.
+
+### 2.3 기전·대조 비교 (보고; 라벨 없음, 1차 검정의 해석에만 쓴다)
+- `M-ours-dscore-C-V1 → V1-edge`: V1-edge 가 유의하게 덜 실패해야 "격자 밖 규칙이 작동" — 아니면 1차 검정이 (i) 라도 "규칙의 효과가 아님" 으로 적는다.
+- `gmmB-scorew-eta → V1-edge` (같은 배선의 GMM), `M-ours-bstar-scalar → V1-edge`: 배선을 맞춘 대조.
+- **V1-clamp**: 같은 세 비교. **`V1-clamp ↔ V1-edge` 는 세 갈래로만 기록한다**: clamp 가 유의하게 적게 실패 / 판정하지 못함 (n_d, MDD, \|Δ\| 기재) / edge 가 유의하게 적게 실패. **원고의 "격자 밖 규칙" 표는 등록된 1차 변형 V1-edge 를 싣고 V1-clamp 를 비용 열(격자 밖 질의당 네트워크 호출 수·초)과 함께 나란히 싣는다.** edge → clamp 대체는 이 문서에서 정하지 않는다(사용자 결정; 하면 DECISIONS 에 "결과를 본 뒤의 사후 선택" 으로 명기).
+- 붕괴 지표: 각 arm 의 F3 가드 발동률, 격자 위쪽 질의(반복 1 만인지, 이후 반복에도 남는지 — `nu_q` 기록), 예외 수.
+
+### 2.4 미리 적는 수치 밴드 (개발 규모 640 기준 → 1280 으로 환산; 판정 아님)
+b\* 0.755 (483/640), bstar-scalar 0.798, V1 0.973 (623/640). **V1-edge 실패율 예측 0.80~0.92** (1024~1178 / 1280); V1-edge 의 F3 가드 발동률 < 0.5 (V1 1.000); 격자 위쪽 질의는 반복 1 에 집중(블록당 1~3).
+
+### 2.5 갈래와 예측 (약한; §0-3·§0-4·§0-5 를 본 상태). **갈래 우선순위: (d) → (c) → (a)/(b)** (조건이 겹치면 앞의 것)
+1. `V1 → V1-edge`: **(i)** (V1-edge 가 V1 보다 유의하게 덜 실패; 반복 1 의 폭주 제거).
+2. **1차 검정 = (ii) 또는 (iii)** 가 (i) 보다 가능성 높음 — 격자 밖 질의는 필요조건일 뿐 Tp<Nt 영방향 기전이 남는다(§0-5). (i) 이면 예측 빗나감(좋은 방향).
+3. `V1-clamp ↔ V1-edge`: 판정하지 못함이고 \|Δ\| ≤ 10 일 가능성이 높음(디노이저 수준에서 거의 같음).
+4. C1 0 dB (보고): 같은 방향, 크기 작음. C5 −6 dB (보고): V1-edge 가 V1 보다 덜 실패, b\* 대비는 (ii)/(iii).
+5. 갈래: (d) V1-edge 가 V1 보다 유의하게 나쁨 → 규칙 폐기, 그대로 기록; (c) V1-edge 가드 발동률 ≥ 0.5 이고 실패율 ≥ 0.9 → "격자 밖 규칙만으로는 C1 붕괴를 막지 못함(Tp<Nt 기전, DECISIONS 2026-09-22 16:05 와 일치)"; (a) 1차 (i) → §2.6; (b) 1차 (ii)/(iii) 이고 `V1→V1-edge` (i) → "격자 밖 규칙은 V1 의 붕괴를 줄이지만 C1 −3 dB 에서 b\* 를 넘지 못함" — 저SNR·파일럿 부족 셀의 범위 문장은 그대로.
+
+### 2.6 테스트 확증 (내용 고정; 실행 여부는 1차 검정 (i) 일 때만 사용자 결정)
+C1 −3 dB **테스트 0..2559** (n=2560), 같은 arm 집합, 같은 드라이버, 새 태그 `raw_review_next_K2test`; 판정 = `M-ours-bstar → V1-edge` 부호검정 하나 (p<0.05, a>b) + `V1 → V1-edge` 기전 확인. **공개**: 이 시행의 b\*·V1 은 이미 관측됐다(B16e4 C1 −3 dB V1 0.982 / b\* 0.760; B32e4x 0.995 / 0.749) — 확증의 새 정보는 V1-edge(·clamp)뿐. 통과하면 원고에 "격자 밖 규칙" 표(C1 −3 dB, 테스트)를 별도로 싣되, 셀 C1 의 등록 판정(표 B, 3.2e5: GMM 우세 3/3, 판정점 +6/+9/+15 dB)은 **불변**이며 헤드라인도 불변. 통과하지 못하면 개발 결과만 보고. 한 번만 실행한다.
+
+### 2.7 비용
+V1-edge: 격자 위쪽 질의 1 회 ≈ 6.5~7.3 s (단일 스레드; M=16, 200 스텝, jacrev 16); 블록당 최대 16 회 → C1 −3 dB 1280 블록 ≤ 42 core-h (≈ 20~30 분, 128 워커). V1-clamp ≈ V1 (+0.1 s/질의). 세 점 합 < 1.5 h. GPU 없음.
+
+---
+
+## 3. 실행 순서·일정 (C6 평가와 겹치지 않게)
+1. 동결 커밋 → `bash conf/code/run_k1k2.sh` (tmux `k1k2`): 선행 검사 (a)(b) → **K2 1차 점 → K2 보고 점 2 개 → K2 report → K1 1차 점 → K1 보고 점 → K1 report** (CPU, 총 ≈ 1.5~2.5 h; `set -o pipefail`, 단계마다 청크 수 확인, 실패 시 중단). 스크립트는 `conf/code` 가 dirty 이거나 `run_nr16b_eval.sh` 가 돌고 있으면 시작하지 않는다. **C6 §5 가 커밋된 뒤에는 K 실행을 새로 시작하지 않는다**(C6 평가 ≈ 9 h 동안 `conf/code` 수정·커밋·K 실행 금지). K 실행과 C6 학습(GPU 0/3)의 동시 진행은 CPU 경합으로 학습이 느려질 뿐 결과에 영향이 없다.
+2. 결과 기록: 이 문서 §5 (추가만), `docs/EXPERIMENTS.md` 행, `DECISIONS.md`; 원문 `results/review_next/K2_report.txt` (점별 추가), `K1_report.txt` (덮어쓰기), 로그 `logs/review_next/k*_*.log`. RESULTS.md 는 사용자 요청 시.
+
+## 4. 공개·선행 사항 (완료된 것)
+- 코드: 14b36352 (prior_variants, diag_prior_swap) → 검토 반영본(수용 검사 fail-closed, `nu_q`·`ckpt_sha`·전체 kw 기록, `check-cavity`, `k1_report.py`, `run_k1k2.sh`)은 이 문서와 같은 커밋. `prior_variants.selftest`: 격자 아래(ν=0.001)·안(0.01, 0.2, 1.0) 4 개 ν 에서 clamp·edge 모두 V1 과 비트 동일; 격자 밖(ν=2.0) 유한·min eig(J) ≥ LAM_MIN.
+- 구성 동일성 (`diag_prior_swap.py check` / `check-cavity`): C2 −3 dB 개발 2560..2599 vs `raw_review_next_A2` — V1·b\*·gmmB-scorew-eta·genie 전 필드 max\|diff\| 0, V1-clamp·V1-edge == V1 (n_oog 0); C2 −3 dB 테스트 0..39 vs `raw_B16e4k` — bstar-scalar·genie 0 (기존 arm 만 재계산); C1 −3 dB 개발 2560..2579 — V1·b\*·bstar-scalar 실패 벡터가 p1_cavity 와 동일 (20/20, 15/15, 14/14; `check-cavity` 로 2560..2569 재확인 PASS).
+- 비용 측정(개발 질의, 단일 스레드): clamp ≈ 0.1 s / 격자 위쪽 질의(V1 과 같음), edge 6.5~7.3 s, Bayes-G 4 체인 3.0~4.5 s / 질의. 검토자 재측정: C1 반복-1 질의에서 clamp·edge·Bayes-G 모두 유한·정상 site(min eig Λ > 0, 클립 없음), V1 은 같은 질의에서 α 3.86, max eig J 32, \|m\|²/N 1.2e4 (§0-4 의 폭주 재현).
+- 스모크·탐색으로 본 것: §0 의 전부. 등록 시행(C1 −3 dB ≥ 3200, C1 0 dB·C5 −6 dB ≥ 2560; K1 의 BR-S)에서 어떤 새 arm 도 실행되지 않았다.
