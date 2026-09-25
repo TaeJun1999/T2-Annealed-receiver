@@ -98,7 +98,12 @@ def main():
             "R5-genie is a known-channel receiver REFERENCE (same detector + BCJR, true H), not a bound. "
             "Panel (a) annotation: tables_D2_B16e4k.txt:367-372 (b*->V1 sign tests 302:50, 117:21, 35:7; SNR@0.1 gap "
             "+1.41 dB [+1.22, +1.64]). b* for 4e4 and 3.2e5 is at the edge of the fitted K grid (4e4: K=2048; 3.2e5: K=4096, "
-            "user-decided stop); 1.6e5 b* K=1024 with K=2048 not fitted. Headline = 1.6e5. Error bars: 95% Wilson."]
+            "user-decided stop); 1.6e5 b* K=1024 with K=2048 not fitted. Headline = 1.6e5. Error bars: 95% Wilson.",
+            "Genie curve (checked 2026-09-25, no bug; DECISIONS [2026-09-25 14:45 KST] entry): R5-genie = true H + the SAME "
+            "LMMSE-PIC / BCJR turbo loop, not a bound. Its residual failures above ~6 dB are L=3 blocks (rank H = 3 < Nt = 4, "
+            "near rank 2), a slowly decaying tail, not a flat floor; 9-15 dB points are 2/2560 each (Wilson 95% [2.1e-4, "
+            "2.8e-3]) and every SNR point uses independent channel draws, so 12 vs 9 (3 vs 6 dB) and 2/2/2 are within "
+            "binomial noise (log-linear binomial fit p = 0.18). The same tail appears in C1/C5/C6, not on full-rank D1."]
     open(os.path.join(FIG, "F16_headline_budget.txt"), "w").write("\n".join(txt) + "\n")
     print("\n".join(txt))
 
