@@ -23,7 +23,9 @@ Acceptance (in `report`): R5-genie blk_err / nmse of the first 16 iterations mus
 set at every shared trial -- else the replay is broken and nothing is read.
 
   run:    python conf/code/diag_latent_oracle.py run --cell C2 --snr -3 --skip0 3200 --n 1280 [--chunk 20]
-  report: python conf/code/diag_latent_oracle.py report
+          (a point is run once into an empty --out; refuses if raw files of the point exist, --resume to finish one)
+  report: python conf/code/diag_latent_oracle.py report   (acceptance per point: exact chunk set, run meta, shared == n,
+          every KEYS_RAW field of R5-genie @1..16 bit-identical to P3ref; per-arm exception / F3-guard counts)
   smoke:  ... run --cell C2 --snr -3 --skip0 6400 --n 2 --chunk 2 --out raw_review_next_LOsmoke   (fresh trials)
 CPU only (receiver rule), multiprocessing over chunks.  Writes raw_<out>/ and results/review_next/LO_report.txt.
 """
@@ -110,6 +112,13 @@ def run_task(t):
         raise RuntimeError(f"oracle V does not reproduce the channel: rel err {vchk:.2e}")
     flat = {f"{k}|{q}": np.array([l[q] for l in L_]) for k, L_ in logs.items() for q in C.KEYS_RAW}
     flat.update({f"{k}|failed": np.array(v) for k, v in failed.items()})
+    import bigamp                                                  # (F3) guard, runner.run_task's rule; detection only
+    for k in names:
+        nm = flat[f"{k}|nmse"]
+        if k == "R5-genie":                                        # no channel estimate -> no Module H path (guard n/a)
+            flat[f"{k}|guardH"] = np.full(len(nm), np.nan); continue
+        with np.errstate(invalid="ignore"):
+            flat[f"{k}|guardH"] = (~np.isfinite(nm) | (nm > bigamp.DIVERGE_NMSE)).any(axis=1).astype(float)
     flat.update({"L": np.array(Ls), "meta|deltas": np.array(deltas), "meta|fits_tag": fits_tag,
                  "meta|ntrain": float(ntrain), "meta|V_relerr_max": vchk,
                  "meta|definition": "LO prior = GaussianPrior(C_z + delta*tr(C_z)/N*I), C_z = V diag(|alpha|^2) V^H",
@@ -123,6 +132,11 @@ def run_task(t):
 
 def cmd_run(a):
     out_dir = os.path.join(C.CONF, a.out)
+    old = glob.glob(os.path.join(out_dir, f"D2_{a.cell}_*_snr{a.snr:g}_skip*_n*.npz"))
+    if old and not a.resume:
+        sys.exit(f"[LO] {len(old)} raw file(s) for {a.cell} {a.snr:g} dB already in {out_dir} -- a point is run ONCE into an "
+                 f"empty directory (controls-only / smoke output must use another --out); pass --resume only to finish an "
+                 f"interrupted run of the SAME arguments")
     tasks = [(a.cell, a.snr, s, min(a.chunk, a.skip0 + a.n - s), a.iters, tuple(a.deltas), a.fits_tag, a.ntrain, out_dir,
               a.controls_only) for s in range(a.skip0, a.skip0 + a.n, a.chunk)]
     jobs = min(a.jobs or os.cpu_count(), len(tasks))
@@ -151,23 +165,42 @@ def per_trial(rawdir, cell, snr, arms, it):
     return out
 
 
-def genie_identity(lo_dir, cell, snr):
-    """R5-genie blk_err and nmse, iterations 1..16, LO run vs REF16 at every shared trial: max abs difference."""
-    worst, shared = 0.0, 0
+def genie_identity(lo_dir, cell, snr, skip0, n, chunk, deltas):
+    """Acceptance of one point: the LO raw chunk set is EXACTLY {(skip0 + chunk*k, chunk)}; every chunk has run|iters 32,
+    the registered deltas / fits tag / ntrain; and every KEYS_RAW field of R5-genie, iterations 1..16, is bit-identical to
+    REF16 at ALL n trials (NaN == NaN; fields that are all-NaN on both sides -- nmse for genie -- are listed as vacuous).
+    -> (ok, shared, worst, problems, vacuous)"""
+    want = {(s, min(chunk, skip0 + n - s)) for s in range(skip0, skip0 + n, chunk)}
+    have, prob, vac = {}, [], set()
+    for f in glob.glob(os.path.join(C.CONF, lo_dir, f"D2_{cell}_*_snr{snr:g}_skip*_n*.npz")):
+        m = PAT.search(os.path.basename(f)); have[(int(m.group(6)), int(m.group(7)))] = f
+    if set(have) != want:
+        prob.append(f"chunk set {sorted(set(have) ^ want)} differs from the registered {len(want)} chunks")
     ref = {}
     for f in glob.glob(os.path.join(C.CONF, REF16, f"D2_{cell}_*_snr{snr:g}_skip*_n*.npz")):
         d = np.load(f, allow_pickle=True); s = int(PAT.search(os.path.basename(f)).group(6))
         for i in range(d["R5-genie|blk_err"].shape[0]):
-            ref[s + i] = (d["R5-genie|blk_err"][i, :16], d["R5-genie|nmse"][i, :16])
-    for f in glob.glob(os.path.join(C.CONF, lo_dir, f"D2_{cell}_*_snr{snr:g}_skip*_n*.npz")):
-        d = np.load(f, allow_pickle=True); s = int(PAT.search(os.path.basename(f)).group(6))
+            ref[s + i] = {q: d[f"R5-genie|{q}"][i, :16] for q in C.KEYS_RAW}
+    worst, shared = 0.0, 0
+    for (s, k), f in sorted(have.items()):
+        d = np.load(f, allow_pickle=True)
+        meta = (int(d["run|iters"]), tuple(float(x) for x in d["meta|deltas"]), str(d["meta|fits_tag"]), int(float(d["meta|ntrain"])))
+        if meta != (32, tuple(deltas), "B16e4k", 160000):
+            prob.append(f"{os.path.basename(f)}: run meta {meta} != (32, {tuple(deltas)}, 'B16e4k', 160000)")
         for i in range(d["R5-genie|blk_err"].shape[0]):
-            if s + i in ref:
-                shared += 1
-                for x, y in zip((d["R5-genie|blk_err"][i, :16], d["R5-genie|nmse"][i, :16]), ref[s + i]):
-                    diff = np.abs(np.nan_to_num(x, nan=1e300) - np.nan_to_num(y, nan=1e300))
-                    worst = max(worst, float(np.max(diff)))
-    return shared, worst
+            if s + i not in ref:
+                prob.append(f"trial {s + i} absent from {REF16}"); continue
+            shared += 1
+            for q in C.KEYS_RAW:
+                x, y = d[f"R5-genie|{q}"][i, :16], ref[s + i][q]
+                if np.all(np.isnan(x)) and np.all(np.isnan(y)):
+                    vac.add(q); continue
+                diff = np.abs(np.nan_to_num(x, nan=1e300) - np.nan_to_num(y, nan=1e300))
+                worst = max(worst, float(np.max(diff)))
+    if shared != n:
+        prob.append(f"shared trials {shared} != registered n {n}")
+    ok = not prob and worst == 0.0
+    return ok, shared, worst, prob, sorted(vac)
 
 
 def cmd_report(a):
@@ -175,14 +208,25 @@ def cmd_report(a):
     L = [C.header("D2", extra=["content     : review_next P4-LO latent-oracle REFERENCE receiver (report-only; a reference, "
                                "not a bound) -- " + os.path.basename(__file__)])]
     lo = lo_names(a.deltas)
-    for cell, snr in ((c.split(":")[0], float(c.split(":")[1])) for c in a.points):
-        shared, worst = genie_identity(a.out, cell, snr)
-        ok = shared > 0 and worst == 0.0
-        L += ["", f"== {cell} {snr:g} dB ==",
-              f"   acceptance: R5-genie @1..16 vs {REF16} at {shared} shared trials, max |diff| {worst:.3g} -> "
-              f"{'PASS (replay bit-identical)' if ok else 'FAIL -- nothing below is read'}"]
+    for cell, snr, skip0, n in ((c.split(":")[0], float(c.split(":")[1]), int(c.split(":")[2]), int(c.split(":")[3])) for c in a.points):
+        ok, shared, worst, prob, vac = genie_identity(a.out, cell, snr, skip0, n, a.chunk, a.deltas)
+        L += ["", f"== {cell} {snr:g} dB (trials {skip0}..{skip0 + n - 1}) ==",
+              f"   acceptance: chunk set / run meta / R5-genie {list(C.KEYS_RAW)} @1..16 vs {REF16}: shared {shared} of {n}, "
+              f"max |diff| {worst:.3g}, vacuous (all-NaN both sides) {vac} -> "
+              f"{'PASS (replay bit-identical)' if ok else 'FAIL -- nothing below is read: ' + '; '.join(prob)}"]
         if not ok:
             continue
+        # per-arm exceptions and F3 guard firings over the whole point (LO raw only; V1 / b* guard rates are in REF16)
+        fl, gd, nn = {}, {}, {}
+        for f in glob.glob(os.path.join(C.CONF, a.out, f"D2_{cell}_*_snr{snr:g}_skip*_n*.npz")):
+            d = np.load(f, allow_pickle=True)
+            for k in lo + ["R2-ours-G", "R5-genie"]:
+                if f"{k}|failed" not in d.files:
+                    continue
+                fl[k] = fl.get(k, 0) + int(d[f"{k}|failed"].sum()); gd[k] = gd.get(k, 0) + int(np.nansum(d[f"{k}|guardH"]))
+                nn[k] = nn.get(k, 0) + len(d[f"{k}|failed"])
+        L.append("   exceptions / F3 guard (nmse > 10 or non-finite at any iteration; detection only): " +
+                 ", ".join(f"{k} {fl[k]}/{gd[k]} of {nn[k]}" for k in fl))
         for it, ref in ((15, REF16), (31, REF32)):
             X = per_trial(a.out, cell, snr, lo + ["R2-ours-G", "R5-genie"], it)
             X.update(per_trial(ref, cell, snr, ["M-ours-bstar", "M-ours-dscore-C-V1"], it))
@@ -229,10 +273,13 @@ def main():
     r.add_argument("--out", default="raw_review_next_LO")
     r.add_argument("--jobs", type=int, default=None)
     r.add_argument("--controls-only", action="store_true", help="R2-ours-G and R5-genie only (replay check)")
+    r.add_argument("--resume", action="store_true", help="allow existing raw files of this point (finish an interrupted run)")
     p = sub.add_parser("report")
     p.add_argument("--out", default="raw_review_next_LO")
     p.add_argument("--deltas", type=float, nargs="+", default=list(DELTAS))
-    p.add_argument("--points", nargs="+", default=["C2:-3", "C2:6", "C5:-3"])
+    p.add_argument("--points", nargs="+", default=["C2:-3:3200:1280", "C2:6:3200:640", "C5:-3:3200:640"],
+                   help="cell:snr:skip0:n -- the registered points (NEXT_EXPERIMENTS_P4LO §1)")
+    p.add_argument("--chunk", type=int, default=20)
     p.add_argument("--report-name", default="LO_report.txt")
     a = ap.parse_args()
     return cmd_run(a) if a.cmd == "run" else cmd_report(a)
