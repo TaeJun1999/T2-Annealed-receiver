@@ -13,6 +13,9 @@ of evaluation tags against the values frozen in the pre-registration's §5.  Rea
   --points C2:-6                            (repeatable) the expected SNR set of that cell instead of C.CELLS[c]["snrs"]
                                             (Pareto tag: C2 holds the single -6 dB point)
   --ref-cells C2                            restrict the genie replay check to these cells (others have no reference raw)
+  --ref-arms all                            replay check over EVERY arm x common.KEYS_RAW instead of R5-genie x 4 keys
+                                            (receiver regression check: a re-run of already-observed trials under the
+                                            current code must reproduce every arm bit for bit; NEXT_EXPERIMENTS_PARETO §1)
   --bstar gmm256                            a full-family b*; then --kron-K may be omitted (meta|kron_K is not checked)
 """
 import argparse
@@ -52,6 +55,7 @@ def main():
     ap.add_argument("--cand-dir", default=None, help="kron K >= 1024 candidate files location (default: --fits-dir)")
     ap.add_argument("--points", action="append", default=[], help="CELL:s1,s2,... expected SNR set override (repeatable)")
     ap.add_argument("--ref-cells", nargs="+", default=None, help="cells checked against --ref-raw (default: all)")
+    ap.add_argument("--ref-arms", default="R5-genie", help="'R5-genie' (default: 4 keys) or 'all' (every arm x KEYS_RAW)")
     ap.add_argument("--prior", default="S2", help="prior in the fit file names (D3: S2c, SV: SV8e, 38.901: UMi28 / MIX3)")
     ap.add_argument("--bstar", default="kron", help="expected meta|bstar: 'kron' (default, every earlier tag) or a full-K name such as gmm256")
     a = ap.parse_args()
@@ -86,26 +90,39 @@ def main():
                     if int(z["run|iters"]) != a.iters:
                         bad.append(f"{os.path.basename(f)}: run|iters {int(z['run|iters'])}")
                     common_meta.setdefault((g("meta|bstar"), g("meta|kron_K"), g("meta|em_sec")), set()).add(tag)
-            if ref is not None and (a.ref_cells is None or key[0] in a.ref_cells):   # genie replay check, every chunk, every trial
+            if ref is not None and (a.ref_cells is None or key[0] in a.ref_cells):   # replay check, every chunk, every trial
                 if key not in ref:
                     bad.append(f"{tag} {key}: no reference point in {a.ref_raw}"); continue
+                with np.load(ref[key][0][2]) as z0:
+                    if a.ref_arms == "all":                     # every "<arm>|<key>" of the reference with a KEYS_RAW key
+                        rk = sorted(k for k in z0.files if "|" in k and k.split("|", 1)[1] in C.KEYS_RAW
+                                    and not k.startswith(("meta|", "run|")))
+                    else:
+                        rk = [f"R5-genie|{q}" for q in REF_KEYS]
+                cut = lambda v, i: v[i, :a.iters] if v.ndim == 2 else v[i]
                 rows = {}
                 for s, n, f in ref[key]:
                     with np.load(f) as z:
                         for i in range(n):
-                            rows[s + i] = {q: z[f"R5-genie|{q}"][i, :a.iters] for q in REF_KEYS}
-                worst, shared = 0.0, 0
+                            rows[s + i] = {k: cut(z[k], i) for k in rk}
+                worst, shared, missing = {}, 0, set()
                 for s, n, f in ch:
                     with np.load(f) as z:
                         for i in range(n):
                             if s + i not in rows:
                                 bad.append(f"{tag} {key}: trial {s + i} absent from {a.ref_raw}"); continue
                             shared += 1
-                            for q in REF_KEYS:
-                                x, y = z[f"R5-genie|{q}"][i, :a.iters], rows[s + i][q]
-                                worst = max(worst, float(np.max(np.abs(np.nan_to_num(x, nan=1e300) - np.nan_to_num(y, nan=1e300)))))
-                if worst != 0.0 or shared != a.n:
-                    bad.append(f"{tag} {key}: R5-genie replay vs {a.ref_raw}: shared {shared}/{a.n}, max |diff| {worst:.3g}")
+                            for k in rk:
+                                if k not in z.files:
+                                    missing.add(k); continue
+                                x, y = cut(z[k], i), rows[s + i][k]
+                                d = float(np.max(np.abs(np.nan_to_num(x, nan=1e300) - np.nan_to_num(y, nan=1e300))))
+                                if d != 0.0:
+                                    worst[k.split("|")[0]] = max(worst.get(k.split("|")[0], 0.0), d)
+                if worst or missing or shared != a.n:
+                    bad.append(f"{tag} {key}: replay vs {a.ref_raw} ({a.ref_arms}): shared {shared}/{a.n}"
+                               + (f", arms differing {sorted(worst)} (max |diff| {max(worst.values()):.3g})" if worst else "")
+                               + (f", keys missing in tag {sorted(missing)[:5]}" if missing else ""))
     if len(common_meta) != 1:
         bad.append(f"tags disagree on (bstar, kron_K, em_sec): {common_meta}")
     if a.fits_dir and a.grid:

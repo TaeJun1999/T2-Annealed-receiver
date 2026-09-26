@@ -13,8 +13,18 @@ log () { echo "[pareto $(TZ=America/Chicago date '+%m-%d %H:%M %Z')] $*" | tee -
 [ -L results/gmm_fits_D2_$TAG ] || { log "ABORT: fits link gmm_fits_D2_$TAG missing"; exit 1; }
 CK=/home/HTJ/t2/conf/ckpt/d2sx_N160000_a1.pt
 [ "$(sha256sum $CK | cut -c1-16)" = "4443921ce8d5c4a1" ] || { log "ABORT: headline checkpoint sha differs"; exit 1; }
-COMMON="--testbed D2 --prior S2 --n 2560 --chunk 40 --ntrain 160000 --stagec-ckpt $CK --tag $TAG"
 log "start (git $(git rev-parse --short HEAD))"
+# (0) receiver regression check (NEXT_EXPERIMENTS_PARETO §1): C2 -3 dB chunk 0 (trials 0..39, already observed in
+# raw_B16e4k) re-run under the CURRENT code with the headline checkpoint and fits, tag PARB16e4chk (link -> B16e4k);
+# every arm x KEYS_RAW @1..16 must be bit-identical to raw_B16e4k, otherwise nothing else runs.
+[ -L results/gmm_fits_D2_${TAG}chk ] || { log "ABORT: fits link gmm_fits_D2_${TAG}chk missing"; exit 1; }
+$P code/runner.py run --testbed D2 --prior S2 --cell C2 --snr -3 --n 40 --chunk 40 --ntrain 160000 --stagec-ckpt $CK \
+  --tag ${TAG}chk > logs/run_D2_${TAG}chk.log 2>&1 || { log "ABORT: regression run failed"; exit 1; }
+$P code/eval_accept.py --tag ${TAG}chk:legacy-last:4443921ce8d5c4a1:C2 --points C2:-3 --n 40 --ntrain 160000 --kron-K 1024 \
+  --ll-val -11.459169831224418 --ref-raw raw_B16e4k --ref-arms all > results/review_next/${TAG}chk_accept.txt 2>&1
+RC=$?; log "regression check rc=$RC ($(head -1 results/review_next/${TAG}chk_accept.txt))"
+[ $RC -eq 0 ] || { log "ABORT: receiver regression check FAILED -- no Pareto run (record the cause, decide before re-run)"; exit 1; }
+COMMON="--testbed D2 --prior S2 --n 2560 --chunk 40 --ntrain 160000 --stagec-ckpt $CK --tag $TAG"
 $P code/runner.py run $COMMON --cell C7 C8 > logs/run_D2_${TAG}.log 2>&1 || { log "ABORT: run C7 C8 failed"; exit 1; }
 log "run C7 C8 done"
 $P code/runner.py run $COMMON --cell C2 --snr -6 > logs/run_D2_${TAG}_C2m6.log 2>&1 || { log "ABORT: run C2 -6 failed"; exit 1; }
