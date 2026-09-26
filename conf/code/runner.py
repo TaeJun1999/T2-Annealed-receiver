@@ -891,6 +891,9 @@ def cmd_testbed(a):
     if prior in C.SV_PRIORS:
         sys.exit(f"prior {prior} is the SV testbed: its verification is code/testbed_sv.py -> results/testbed_SV.txt "
                  "(T2a..T2e are D2 sparse-specular tests)")
+    if prior in C.MIX3_PRIORS:
+        sys.exit(f"prior {prior} is the 38.901 MIX3 testbed: its verification is code/testbed_mix3.py -> results/testbed_MIX3.txt "
+                 "(T2a..T2e are D2 sparse-specular tests)")
     cells = a.cell or ["C1"]                                   # C1 = 8x4, Tp=2, the headline geometry
     rows = []
     for cell in cells:

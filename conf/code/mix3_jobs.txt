@@ -1,0 +1,47 @@
+# conf/code/mix3_jobs.txt -- GPU job lines for the 38.901 MIX3 (standard-model side) (prior MIX3, code/mix3.py), Nr=8, equal budget N' = 1.6e5,
+# fits tag MXB16e4.  PREPARED, NOT RUN.  Same order and syntax as the D3 queue (code/run_d3.sh -> logs/d3_queue.txt): one
+# "code/<script> <args>" per line, executed from conf/ as `CUDA_VISIBLE_DEVICES=<g> ~/miniforge3/envs/torch/bin/python <line>`.
+# '#' lines are documentation only -- strip them before using this as a queue:  grep -v '^#' code/mix3_jobs.txt > logs/tb2_queue.txt (queue: code/run_tb2.sh; replace the run_d2_sx line by "@train MIX3 MXB16e4")
+#
+# Prerequisites (done, this commit): results/testbed_MIX3.txt, results/sigma_grid_D2_MIX3.{txt,npz} (the grid the
+# training reads through --prior MIX3 -> sigma_tag MIX3, recorded in the checkpoint).
+# Outputs: ckpt/d2sx_MIX3_N160000_a1[_fb<k>].pt (+ _best.pt), logs/train_d2sx_MIX3_N160000_a1*.log, rung D2SXMIX3160000
+# (score._rung_ix 1276, distinct from D2SX (1221), D2SXS2c (1102), D2SXSV8e (1033) and the ladder indices), results/gmm_fits_D2_MXB16e4/fit_MIX3_Nr8_{full,kron}K<K>_n160000.npz.
+#
+# Training = first job line (fallback 1 = the frozen recipe).  10_SPEC §3d ladder -- NEVER queued: run the next rung only when
+# the previous checkpoint's stopped_by == "diverged" (run_d3.sh train_chain does exactly this, same GPU); anything else that is
+# not patience / max_epochs stops the chain for a manual decision:
+#   fallback 2 (grad-norm clip 1.0): code/run_d2_sx.py --prior MIX3 --ntrain 160000 --tag MXB16e4 --no-gbprime --fallback 2
+#   fallback 3 (+ lr/3):             code/run_d2_sx.py --prior MIX3 --ntrain 160000 --tag MXB16e4 --no-gbprime --fallback 3
+#   check: python -c "import torch; print(torch.load('ckpt/d2sx_MIX3_N160000_a1[_fb2].pt', map_location='cpu', weights_only=False).get('stopped_by'))"
+#
+# Post phase (after EVERY job below has finished; CPU):
+#   CUDA_VISIBLE_DEVICES= code/fit_gpu.py 8 kron 1024 160000 MXB16e4 --merge --prior MIX3
+#   b* = arms.gmm_selection("D2", "MIX3", 8, 160000) after runner._init("MXB16e4") (validation log-likelihood only); grid-edge
+#   rule (01_RULES:76; user decision 2026-09-26 DECISIONS 15:03 KST (3)): b* = largest K of its family -> merge the next K candidates
+#   (kron 2048, then 4096) and re-select; STOP at 4096 with a grid-edge caveat (no 8192):
+#     CUDA_VISIBLE_DEVICES= code/fit_gpu.py 8 kron 2048 160000 MXB16e4 --merge --prior MIX3     (and 4096 likewise)
+#   GB' once the grid is complete (training resumes -> no epoch trained):
+#     code/run_d2_sx.py --prior MIX3 --ntrain 160000 --tag MXB16e4 --fallback <k the ladder ended on>   -> results/d2_gbprime_MIX3.csv
+code/run_d2_sx.py --prior MIX3 --ntrain 160000 --tag MXB16e4 --no-gbprime
+code/fit_gpu_batched.py 8 kron 1024 160000 MXB16e4 --restart 0 --prior MIX3
+code/fit_gpu_batched.py 8 kron 1024 160000 MXB16e4 --restart 1 --prior MIX3
+code/fit_gpu_batched.py 8 kron 1024 160000 MXB16e4 --restart 2 --prior MIX3
+code/fit_gpu.py 8 full 512 160000 MXB16e4 --prior MIX3
+code/fit_gpu.py 8 full 256 160000 MXB16e4 --prior MIX3
+code/fit_gpu_batched.py 8 kron 512 160000 MXB16e4 --prior MIX3
+code/fit_gpu.py 8 full 128 160000 MXB16e4 --prior MIX3
+code/fit_gpu_batched.py 8 kron 256 160000 MXB16e4 --prior MIX3
+code/fit_gpu.py 8 full 64 160000 MXB16e4 --prior MIX3
+code/fit_gpu_batched.py 8 kron 128 160000 MXB16e4 --prior MIX3
+code/fit_gpu.py 8 full 32 160000 MXB16e4 --prior MIX3
+code/fit_gpu_batched.py 8 kron 64 160000 MXB16e4 --prior MIX3
+code/fit_gpu.py 8 full 16 160000 MXB16e4 --prior MIX3
+code/fit_gpu_batched.py 8 kron 32 160000 MXB16e4 --prior MIX3
+code/fit_gpu_batched.py 8 kron 16 160000 MXB16e4 --prior MIX3
+code/fit_gpu_batched.py 8 kron 2048 160000 MXB16e4 --restart 0 --prior MIX3
+code/fit_gpu_batched.py 8 kron 2048 160000 MXB16e4 --restart 1 --prior MIX3
+code/fit_gpu_batched.py 8 kron 2048 160000 MXB16e4 --restart 2 --prior MIX3
+code/fit_gpu_batched.py 8 kron 4096 160000 MXB16e4 --restart 0 --prior MIX3
+code/fit_gpu_batched.py 8 kron 4096 160000 MXB16e4 --restart 1 --prior MIX3
+code/fit_gpu_batched.py 8 kron 4096 160000 MXB16e4 --restart 2 --prior MIX3
