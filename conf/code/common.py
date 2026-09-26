@@ -72,10 +72,14 @@ CELLS = {                                     # 06_SPEC_runner.md §3, priority 
     # is why this and not a sparser L is the right knob: L < Nt is rank-deficient and breaks the genie
     # itself (measured: L=3 genie BLER 0.1034 vs 0.0140 at L=5, results/Lstrat_B16e4k_C2_-3dB.txt).
     "C6": dict(Nr=16, Nt=4, T=16, Tp=4, snrs=(-3, 0, 3, 6, 9, 12, 15)),
-    # (user decision 2026-09-25 CDT, Tp >= Nt Pareto cells) C2 with Tp = 6 / 8 > Nt: same array, block, code and SNR
-    # grid, so Tp is again the ONLY axis that moves (K = Nt(T-Tp)-6 = 34 / 26).  Pilots: make_pilots' Tp > Nt branch.
-    "C7": dict(Nr=8, Nt=4, T=16, Tp=6, snrs=(-3, 0, 3, 6, 9, 12, 15)),
-    "C8": dict(Nr=8, Nt=4, T=16, Tp=8, snrs=(-3, 0, 3, 6, 9, 12, 15)),
+    # (user decision 2026-09-25 CDT, Tp >= Nt Pareto cells) C2 with Tp = 6 / 8 > Nt: same array, block and
+    # code, so Tp is again the ONLY axis that moves (K = Nt(T-Tp)-6 = 34 / 26).  Pilots: make_pilots' Tp > Nt branch.
+    # SNR grid widened to -9..15 by the user decision 2026-09-26 (DECISIONS 15:03 KST (4); fixed BEFORE any C7/C8 BLER
+    # was observed): the Pareto crossings are expected below -3 dB and iteration-1 queries stay inside the frozen sigma
+    # grid down to -9.33 / -10.58 dB (results/review_next/nuq_coverage_tp.txt).  C2's own grid is unchanged; its -6 dB
+    # point is run with --snr -6 under the Pareto tag.
+    "C7": dict(Nr=8, Nt=4, T=16, Tp=6, snrs=(-9, -6, -3, 0, 3, 6, 9, 12, 15)),
+    "C8": dict(Nr=8, Nt=4, T=16, Tp=8, snrs=(-9, -6, -3, 0, 3, 6, 9, 12, 15)),
 }
 # Every DEFAULT that enumerates CELLS (runner run / sigma) keeps the pre-C7 set, so a command without --cell does
 # exactly what it did before the Tp > Nt cells existed.  C7/C8 are run only when named.
