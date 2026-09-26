@@ -22,8 +22,10 @@ Channel model (Sionna 2.1 sionna.phy.channel.tr38901, sionna-no-rt 2.1.0) [every
                H[a, b] = BS antenna a, UE antenna b;  precision 'single' (Sionna default, as the probe), then complex128;
     norm     : ENSEMBLE normalisation E||H||_F^2 = Nr Nt: H = H_raw / sqrt(P_RAW), P_RAW = mean ||H_raw||_F^2 / (Nr Nt)
                over the TRAIN stream (common.train_rng('D2', 'MIX3', Nr, 7), n = N_CAL = 160000 = the equal-budget N'),
-               measured ONCE by `python mix3.py calibrate` and frozen below as a literal (testbed_mix3.py TMXa re-derives
-               it bit for bit).  Per-drop power keeps the model's K-factor / O2I variation (probe: same);
+               measured ONCE by `python mix3.py calibrate` and frozen below as a literal.  testbed_mix3.py TMXa checks the
+               normalisation out of sample (validation stream 8); the constants themselves (P_RAW, RT, RR, TRAIN_SHA) were
+               re-derived bit for bit in a fresh process by the independent review of c02f0f17 (2026-09-26).  Per-drop power
+               keeps the model's K-factor / O2I variation (probe: same);
     vec      : h = vec(H) COLUMN-MAJOR, h[a + Nr b] = H[a, b]; complex128.
 Probe differences (conventions only, the law is the same): the probe split its sets into exact thirds per scenario, here the
 scenario is drawn per block; the probe drew the UE yaw from torch's GLOBAL generator, here from the seeded Sionna generator.

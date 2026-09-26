@@ -6,7 +6,7 @@
 # Prerequisites (done, this commit): results/testbed_MIX3.txt, results/sigma_grid_D2_MIX3.{txt,npz} (the grid the
 # training reads through --prior MIX3 -> sigma_tag MIX3, recorded in the checkpoint).
 # Outputs: ckpt/d2sx_MIX3_N160000_a1[_fb<k>].pt (+ _best.pt), logs/train_d2sx_MIX3_N160000_a1*.log, rung D2SXMIX3160000
-# (score._rung_ix 1033, distinct from every D2SX / D2SXS2c rung), results/gmm_fits_D2_MXB16e4/fit_MIX3_Nr8_{full,kron}K<K>_n160000.npz.
+# (score._rung_ix 1276, distinct from D2SX (1221), D2SXS2c (1102), D2SXSV8e (1033) and the ladder indices), results/gmm_fits_D2_MXB16e4/fit_MIX3_Nr8_{full,kron}K<K>_n160000.npz.
 #
 # Training = first job line (fallback 1 = the frozen recipe).  10_SPEC §3d ladder -- NEVER queued: run the next rung only when
 # the previous checkpoint's stopped_by == "diverged" (run_d3.sh train_chain does exactly this, same GPU); anything else that is
