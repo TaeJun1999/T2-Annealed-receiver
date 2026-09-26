@@ -53,6 +53,7 @@ def main():
     ap.add_argument("--fits-dir", default=None)
     ap.add_argument("--grid", default=None)
     ap.add_argument("--cand-dir", default=None, help="kron K >= 1024 candidate files location (default: --fits-dir)")
+    ap.add_argument("--nr", type=int, default=8, help="Nr in the fit file names checked by --grid (B16e4k also holds Nr4 files)")
     ap.add_argument("--points", action="append", default=[], help="CELL:s1,s2,... expected SNR set override (repeatable)")
     ap.add_argument("--ref-cells", nargs="+", default=None, help="cells checked against --ref-raw (default: all)")
     ap.add_argument("--ref-arms", default="R5-genie", help="'R5-genie' (default: 4 keys) or 'all' (every arm x KEYS_RAW)")
@@ -130,7 +131,7 @@ def main():
         for fam_spec in a.grid.split():
             fam, ks = fam_spec.split(":")
             for K in (int(k) for k in ks.split(",")):
-                pat = os.path.join(d, f"fit_{a.prior}_Nr*_{fam}K{K}_n{a.ntrain}.npz")
+                pat = os.path.join(d, f"fit_{a.prior}_Nr{a.nr}_{fam}K{K}_n{a.ntrain}.npz")
                 if not glob.glob(pat):
                     bad.append(f"grid: {fam} K={K} merged file missing ({pat})")
                 if fam == "kron" and K >= 1024:

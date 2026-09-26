@@ -5,16 +5,17 @@
 # sequential, then analysis + run_manifest + guard_report + recovery_ci per tag, eval_accept (chunk plan, meta, ckpt
 # identity, R5-genie replay of the last tag against the best tag, grid completeness) and the unpaired recovery
 # difference against the D2 headline (frontier_ci.py --recovery).
-# Usage: run_prior_eval.sh <prior> <TAG> <ckpt_stem> <bstar> <kron_K|-> <ll_val> <best_sha> <last_sha> [grid]
+# Usage: run_prior_eval.sh <prior> <TAG> <ckpt_stem> <bstar> <kron_K|-> <ll_val> <best_sha> <last_sha> <grid>
 #   prior  S2c | SV8e | UMi28 | MIX3         bstar  kron | gmm<K>        kron_K  '-' when bstar is a full family
-#   grid   default "full:16,32,64,128,256,512 kron:16,32,64,128,256,512,1024,2048" (append ,4096 when merged)
+#   grid   e.g. "full:16,32,64,128,256,512 kron:16,32,64,128,256,512,1024,2048[,4096]" -- REQUIRED, as registered in §1
 cd /home/HTJ/t2/conf
 P=~/miniforge3/envs/torch/bin/python
 PR=$1; TAG=$2; ST=$3; BS=$4; KK=$5; LL=$6; BSHA=$7; LSHA=$8
-GRID=${9:-"full:16,32,64,128,256,512 kron:16,32,64,128,256,512,1024,2048"}
+GRID=$9                                  # the acceptance grid is written out in the registration; no default (a weaker
+                                         # check must not pass silently -- adversarial review B, D3 finding 1)
 L=logs/run_prior_eval_$TAG.log
 log () { echo "[prior_eval $TAG $(TZ=America/Chicago date '+%m-%d %H:%M %Z')] $*" | tee -a $L >> logs/queue.log; }
-[ $# -ge 8 ] || { log "ABORT: usage"; exit 1; }
+[ $# -ge 9 ] || { log "ABORT: usage (9 arguments; the 9th is the acceptance grid string)"; exit 1; }
 [ -n "$(git -C /home/HTJ/t2 status --porcelain conf/code)" ] && { log "ABORT: conf/code dirty"; exit 1; }
 [ -L results/gmm_fits_D2_${TAG}last ] || { log "ABORT: fits link gmm_fits_D2_${TAG}last missing"; exit 1; }
 CK=/home/HTJ/t2/conf/ckpt

@@ -1,0 +1,105 @@
+# NEXT_EXPERIMENTS_PARETO — Tp ≥ Nt Pareto 셀 C7·C8 (+ C2 −6 dB) 의 사전 등록 (v2)
+
+- 작성: 2026-09-26 10:25 CDT (= 2026-09-27 00:25 KST), Claude Code (Fable 5.1), 초안 v1 → 적대적 검토 2건(A 설계·통계 13건, B 실행 가능성·코드·사실 7건; `prereg_reviews_2026-09-26/review_{A,B}_PARETO_38901.md`) 반영 v2 2026-09-26 10:39 CDT. 동결 시각 = 커밋 시각(`DECISIONS.md` 같은 줄). **결과 관측 전**: C7/C8 의 테스트 시행(0..2559)은 어느 arm 으로도 실행된 적이 없다(실행된 것은 ν_q 측정 = 개발 시행 6400..6463 의 Gaussian 수신기, 그리고 scratch 스모크 = 시행 6400..6401 뿐; `D3TP_IMPL_REPORT.md` §5-6). **공개**: C2 −6 dB 의 시행 0..2559 는 1e4 예산의 14 arm 과 R5-genie 로 이미 관측됐다(`raw_B1e4lo`, `tables_D2_B1e4lo.txt:71-86`; §0). 사용자 결정: 2026-09-25 CDT "Tp≥Nt Pareto 셀"(DECISIONS [2026-09-26 14:27 KST] 인용), 2026-09-26 15:03 KST (3) 헤드라인 1.6e5 GMM 격자 불변(K=2048 미적합, 캐비엇 유지) · (4) SNR 격자 확장(C7·C8 에 −9·−6, C2 에 −6; 결과 관측 전 고정). 커밋 뒤에는 §1~§3 을 바꾸지 않는다; 바꿔야 하면 사용자 승인 + `DECISIONS.md`.
+- 틀: `NEXT_EXPERIMENTS_C6B16e4.md`·`NEXT_EXPERIMENTS_B32e4.md` §1(동일예산·수용 검사·두 태그 관례), `08_SPEC_analysis.md` §2(판정점 3개·power guard·앵커 = baseline)·§3(표 C goodput 정의), `01_RULES.md` §4·§5·:76, review_next v3 §0(테스트 0..2559, CPU 수신기, "p ≥ 0.05 는 판정하지 못함이지 차이 없음이 아니다"), `PREREG_FACTS_2026-09-26.md` §0·§A + `_CHECK.md` 정정(1·2·3·6·9·10·11·15, "결과처럼 읽히는 문장", 금지어).
+- 목적: **파일럿 예산을 늘린 GMM 기준선(b\*, Tp=6/8)에 대해 Tp=4 의 학습 prior(V1)가 SNR@0.1 축에서 어디에 서는가**(파일럿 절감의 frontier). 학습·적합은 새로 하지 않는다 — 헤드라인 체크포인트와 B16e4k 적합을 그대로 쓰고 **셀만 바뀐다**(Nr=8·S2 이므로 학습 집합·적합이 같다, `PREREG_FACTS` A.1). 셀 안 비교(짝 있음)는 표 B 규칙으로, 셀 간 비교(짝 없음)는 §1 의 비짝 부트스트랩으로만 한다. 이 등록의 예측은 C2 값을 알고 쓰는 약한 예측이다.
+
+---
+
+## 0. 출발점 (판정에 쓰지 않는다)
+
+**C2 (Tp=4) 헤드라인 1.6e5 은 전부 알려져 있다** (`raw_B16e4k`, `results/tables_D2_B16e4k.txt`; 테스트 0..2559, n=2560, @16) [기록 `:61-76`, `:189-205`]:
+
+| C2 BLER@16 | −3 | 0 | +3 | +6 | +9 | +12 | +15 | SNR@0.1 |
+|---|---|---|---|---|---|---|---|---|
+| R2-ours-G | 0.328 | 0.102 | 0.038 | 0.022 | 0.012 | 0.011 | 0.006 | +0.06 |
+| M-ours-bstar (kron 1024) | 0.243 | 0.072 | 0.022 | 0.011 | 0.007 | 0.006 | 0.003 | −0.81 |
+| M-ours-dscore-C-V1 | 0.145 | 0.034 | 0.011 | 0.006 | 0.003 | 0.002 | 0.001 | −2.23 |
+| R5-genie | 0.034 | 0.010 | 0.005 | 0.004 | 0.001 | 0.001 | 0.001 | `n/a (<= -3)` |
+
+- 표 B `b* → V1` (C2): 판정점 −3/0/+3, 302:50 · 117:21 · 35:7, pooled 454:78 (p=1.7e-65), POWERED, 3/3; SNR@0.1 격차 +1.41 dB [90% 짝 +1.22, +1.64] (`:366-373`). 회수율 −3 dB 0.470 [0.427, 0.512], 3 점 합 0.509 [0.470, 0.545] (`recovery_B16e4k.txt`; 실패 수 b\* 623/184/57, V1 371/88/29, genie 87/26/12).
+- **C2 의 낮은 SNR 은 1e4 예산으로 관측됐다** (`raw_B1e4lo`, `tables_D2_B1e4lo.txt:71-86`; 같은 시드 규칙 → 같은 시행 0..2559) [기록]: BLER@16 at −9/−7/−6/−5 dB — genie 0.785/0.352/0.203/0.109, V1(1e4) 0.981/0.796/0.601/0.395, b\*(1e4) 0.996/0.906/0.791/0.580, R2 0.996/0.936/0.840/0.655. genie 는 예산과 무관하므로 C2 genie SNR@0.1 ≈ **−4.85 dB** [유도: −5 dB 0.109 와 −3 dB 0.034 사이 log-선형 보간]. −9 dB 의 V1 NMSE 중앙값 @1 은 1.723 (R2 0.648) — 반복 1 이 σ 격자 위에 있는 점의 붕괴 (`:92,99`; K2 와 같은 쪽) [기록].
+- Tp < Nt 셀(C1 Tp=2, C5 Tp=3)은 1.6e5(`raw_B16e4`, b\* kron **512** 로 격자가 다름)·3.2e5(`raw_B32e4x`)에서 알려져 있고 BLER 바닥이 있다(3.2e5 +15 dB: C5 GMM 0.123, C1 GMM 0.355) → frontier 에서 **제외**, 문맥으로만 (§1 보고 전용).
+- **ν_q 사실** (`results/review_next/nuq_coverage_tp.txt`, 개발 시행 6400..6463, Gaussian 수신기, BLER 미기록) [실측]: 반복 1 의 ν_q 는 모든 시행에서 정확히 σ²/Tp (prior 무관) → 반복 1 이 격자 위(σ_t > s_hi = 0.8452)가 되는 SNR 은 C2 < −7.57 / C7 < −9.33 / C8 < −10.58 dB [유도]; −9 dB 의 반복 1 σ_t 는 C7 0.8136 (안, 3.7% 여유)·C8 0.7046 (안), C2 0.9964 (위). +15 dB 에서 격자 **아래** 질의 비율은 반복 1~16 합산 C2 17.6% / C7 25.7% / C8 64.4% 이고 반복 1 은 0%, 반복 2 부터 평평하게 C2 19% / C7 27–28% / C8 **67–69%** (`_CHECK` 11). −3..+12 dB 에서 격자 밖 질의는 0. ScorePrior 는 격자 밖에서 외삽한다(clamp 아님, `score.py:1142`).
+- **goodput 지배 사실** [유도, 알려진 C2 값만]: goodput K(1−BLER@16)/T 에서 C7 이 C2 를 넘으려면 BLER_C2 > 1 − (34/42)(1 − BLER_C7) ≥ 0.190, C8 은 BLER_C2 ≥ 0.381 이어야 한다. −3 dB 에서 V1 의 C2 goodput 2.244 는 C7 의 상한 2.125 보다 크고, b\* 는 C2 1.987 이라 C7 의 b\* BLER 이 0.065 미만일 때만 C7 이 앞선다; 0 dB 이상은 두 arm 모두 BLER_C2 < 0.19. → **−3..15 에서 V1 과 b\* 포락선의 순서는 C2 값으로 정해져 있다**(`_CHECK` 15: 순서만; b\* 포락선의 −3 dB 값 자체는 C7 에서 나올 수 있다). 포락선이 정보를 갖는 곳은 −3 dB 아래이며, 그래서 격자를 −9 까지 넓혔다(사용자 결정 (4)).
+- 비용 실측 [기록 `PREREG_FACTS` §0.1]: C2 태그 하나(7 SNR, 14 arm, 192 워커, b\* kron 4096) 34.4 분; Module H 가 블록 시간의 94.5~96%, V1/b\* 호출 비용 1.35~1.39× (b\* kron 1024).
+
+## 1. 고정되는 것
+
+| 항목 | 값 |
+|---|---|
+| **셀·격자·시행** | **C7** = 8×4, T 16, Tp 6, Ns 40, K 34, Tp/T 0.375, K/T 2.125; **C8** = Tp 8, Ns 32, K 26, Tp/T 0.50, K/T 1.625 (`common.CELLS`, 301c6285; 파일럿 = `make_pilots` 의 Tp>Nt 분기: Tp 점 DFT 의 앞 Nt 행, Xp Xp^H = Tp I). SNR 격자 **C7·C8 = {−9, −6, −3, 0, 3, 6, 9, 12, 15} (9 점)** — 실행 전에 `common.CELLS` 의 `snrs` 를 고쳐 커밋한다(실행된 적 없는 셀이라 기존 경로 불변; runner·analysis·eval_accept 가 같은 격자를 본다). **C2 = 기존 7 점(`raw_B16e4k`) + −6 dB 한 점 추가**(태그 PARB16e4 로 `--snr -6`); C2 −9 는 넣지 않는다(반복 1 이 격자 위 → K2 붕괴 기전이 섞임). 모든 점 테스트 시행 **0..2559**, n=2560, chunk 40 ({(40k,40): k=0..63}), 16 반복, 수신기 CPU complex128, `arms.LOOP` 그대로. **결과 뒤 격자를 늘리지 않는다.** 시드 `trial_rng([20260926, 2, PID S2=4, 8, 16, Tp, snr+100])` 에 Tp·SNR 이 들어가므로 C7/C8 의 시행은 다른 어느 실행과도 채널·잡음·비트가 다르고(셀 간 unpaired), C2 −6 의 시행은 `raw_B1e4lo` 와 같다 |
+| **arm** | runner 기본 14 arm 전부(R0-pilot, R1-turbo, R2-ours-G, R3-bigamp, R4-scvamp, R4-llr, R5-genie, M-ours-gmm32, M-ours-bstar, M-ours-bstar-scalar, V0, V1, V4, V4b) — C2 비교 대상 `raw_B16e4k` 와 같은 구성. 필수 대조군 `b* → b*-scalar` (10_SPEC §3c) |
+| **예산·적합 (새 적합 없음)** | N′ = 160000, 채널 집합 = `arms.training_set("D2","S2",8,4,160000)` (스트림 7) — C7/C8 도 Nr=8·S2 이므로 헤드라인과 **같은 집합·같은 적합**. fits 디렉터리 = `results/gmm_fits_D2_B16e4k` 를 링크 `results/gmm_fits_D2_PARB16e4 -> gmm_fits_D2_B16e4k` 로 쓴다(`--tag` 가 fits 디렉터리도 정함; 파일명의 n160000 이 잘못된 링크를 즉시 드러냄). **b\* = kron K=1024, ll_val −11.459169831224418** [실측 npz 재확인] (n_iter 331, it_best 290, patience 정지); kron 512 −14.636106156749378, full 최고 K=512 −16.315901908631698; full 64/128/256 은 상한 500 에서 정지(it_best 490). **격자 끝 캐비엇을 그대로 물려받는다**: kron 격자 최대 K = 1024 = b\*, K=2048 미적합 — 사용자 결정 2026-09-26 15:03 KST (3) "헤드라인 1.6e5 의 K=2048 은 적합하지 않고 기존 캐비엇 유지"(적합하면 K=2048 의 ll_val 이 −11.4592 보다 높을 때 C2 헤드라인 b\* 가 바뀔 수 있다 = 헤드라인 변경, `_CHECK` 9). em_sec = 107957.18832826614 (Nr8 13 파일 합 [실측]; raw_B16e4k `meta|em_sec` 와 동일). K=1024 재시작 후보 3 개는 `results/gmm_fits_D2_K1024n160000/` 에 있다(B16e4k 디렉터리에는 병합 파일만) |
+| **체크포인트·평가 가중치** | 헤드라인 **`conf/ckpt/d2sx_N160000_a1.pt`, sha256[:16] 4443921ce8d5c4a1** [실측 재계산], rung D2SX160000 attempt 1, epoch 1784 (last-EMA), best_epoch 1764 의 가중치는 저장되지 않음(**BEST_WEIGHTS_UNAVAILABLE**, DECISIONS [2026-09-23 11:47 KST]); ckpt 에 role 키 없음 → `score.py:712` 기본값 **role = legacy-last** (raw meta `stagec_ckpt_id` 에 `role=legacy-last` 로 찍힘). **v3 §0 의 `_best.pt` 관례를 이 등록은 지킬 수 없다**(best 미저장) — 대신 C2 비교 대상 `raw_B16e4k` 와 **같은 가중치**라서 prior 가 셀 사이에서 같다(`PREREG_FACTS` D-A5 (i)). 자격 = D1 형제 `sx_N160000_D1.pt` GA~GD PASS (GB 2.66e-3 / GC 0.0999 / GD 0.0718) → "D1 형제 게이트 PASS 레시피"; 게이트는 차원(8×4)·레시피·N 에만 걸리고 셀(Tp)과 무관. σ 격자: ckpt `sigma_tag` 없음 → 동결 D2 격자 `results/sigma_grid_D2.npz` σ_t ∈ [3.306220e-02, 8.451555e-01], ν ∈ [2.1862e-03, 1.428576] [실측]. 두 번째 태그(last/best) 없음 — 가중치가 하나뿐 |
+| **지위** | C7/C8 은 같은 체크포인트·D1 형제 PASS 레시피이고 게이트가 셀과 무관하므로 **셀 안 표 B `b* → V1` 는 등록 라벨(arm 결과, §2 (A))** 로 받는다(`PREREG_FACTS` D-A6 선택지 2). 셀 간 비교는 §2 (B) 의 등록 비교 P-a·P-b 뿐. **헤드라인(C2 B16e4k) 은 어느 결과에서도 불변**; C7/C8 은 헤드라인이 되지 않는다. **Tp > Nt 에서 측정된 게이트는 없다** — 자격은 레시피(차원·N)의 이전 가정이며, (A) 는 셀 한정 arm 결과로만 쓰고 Tp 축 일반화 문장에는 쓰지 않는다(§6f). (A) 와 (B) 를 한 문장에 합치지 않는다; frontier 에 관한 문장은 (B) 만 인용한다 |
+| **실행 (테스트 집합, 전 arm)** | ① `runner.py run --testbed D2 --prior S2 --cell C7 C8 --n 2560 --chunk 40 --ntrain 160000 --stagec-ckpt /home/HTJ/t2/conf/ckpt/d2sx_N160000_a1.pt --tag PARB16e4`; ② `runner.py run --testbed D2 --prior S2 --cell C2 --snr -6 --n 2560 --chunk 40 --ntrain 160000 --stagec-ckpt … --tag PARB16e4` (같은 태그 → `raw_PARB16e4` 에 C2 −6 한 점); ③ `runner.py analysis --testbed D2 --tag PARB16e4`, `run_manifest.py --tag PARB16e4`, `guard_report.py --raw raw_PARB16e4`, `recovery_ci.py --raw raw_PARB16e4 --cell C7|C8 --snrs <판정점>`, 수용 검사, `frontier_ci.py`. 선행: fits 링크, CELLS 커밋, `code/run_pareto_eval.sh` (①→②→③ 순서, 로그 `logs/run_pareto_eval.log`, 끝 표시 `PARETO_EVAL_DONE`). **§5 가 채워져 커밋된 뒤에만 ① 을 시작한다.** GPU·학습·적합 없음; CPU 192 워커(tb2 GPU 큐의 Sionna 채널 생성이 CPU 를 함께 쓰는 동안 실행될 수 있음 — 벽시계만 늘어나고 수치는 결정적) |
+| **Frontier 정의** | **F1 (1차)**: arm·셀별 **SNR@0.1** = `exp_0925_analysis.snr_at` 규칙 — log10 max(BLER@16, 0.5/n) 을 SNR 격자에 대해 선형 보간한 첫 하향 교차; 첫 점에서 이미 0.1 아래('lo') 또는 격자 안에서 0.1 에 못 미침('hi') 은 **censored**(값 없음, `n/a` 그대로) — 을 파일럿 비율 Tp/T ∈ {0.25, 0.375, 0.50} 에 대해 놓는다(arm: b\*, V1, R2, genie; 그림은 결과 뒤 별도 스크립트, 수치는 `frontier_PARB16e4.txt`). **C2 곡선은 `raw_B16e4k` 7 점 + `raw_PARB16e4` 의 C2 −6 을 합친 8 점**으로 계산한다 — 같은 가중치·같은 적합·같은 시드 규칙(시행 = (셀, SNR) 의 스트림, 태그 무관)이므로 한 곡선이다(공개). **F3**: 같은 수에 붙이는 두 번째 축 라벨 Eb/N0 = SNR + 10log10(NtT/K) [유도; Xp Xp^H = Tp I 이면 Tp>Nt 에도 성립], 셀별 상수 **+1.829 (C2) / +2.747 (C7) / +3.912 (C8) dB** (데이터만 세면 +0.580/+0.706/+0.902) — 검정 없음. **F2 (보고 전용)**: goodput 포락선 K(1−BLER@16)/T 의 SNR 별 Tp-최댓값(`08_SPEC` §3 표 C 정의를 C2·C7·C8 로 확장; `analysis.table_C` 는 C1/C2 만 짝지으므로 `frontier_ci.py --goodput` 이 찍는다), CI 없음 |
+| **등록 비교 (셀 간, 짝 없음)** | **P-a (1차)**: Δ₆ = SNR@0.1(V1, C2) − SNR@0.1(b\*, C7). **P-b (2차)**: Δ₈ = SNR@0.1(V1, C2) − SNR@0.1(b\*, C8). **비짝 부트스트랩**: 셀마다·SNR 점마다 시행 인덱스를 독립 복원추출(한 셀 안에서는 모든 arm 이 같은 인덱스 → 셀 안 짝 유지), B = 2000, `numpy.random.default_rng(20260926)`, 복제마다 두 SNR@0.1 과 Δ 를 계산, 백분위 5/95 (90%) 와 2.5/97.5 (95%); 어느 한쪽이 censored 인 복제는 Δ 에서 제외하고 **censored 비율을 기록**한다: **점추정이 censored 이거나 censored 복제가 10% 를 넘으면 라벨 = "판정하지 못함 (격자 밖; censored p%)"**, 10% 이하면 유한 복제로 CI 를 만들고 비율을 병기한다; 격자 확장 없음. **Holm (m = 2, α = 0.10)**: 두 Δ 가운데 **부트스트랩 양측 p = 2·min(P[Δ* ≤ 0], P[Δ* ≥ 0]) 가 작은 쪽**(동률이면 P-a; `frontier_ci.py` 가 이 p 를 찍는다)을 첫째로 두고 첫째는 95% CI, 둘째는 90% CI 가 0 을 배제해야 "유의"; 첫째가 유의하지 않으면 둘째도 "판정하지 못함". 등록 문구는 §2 (B). **동등성("비긴다")은 주장하지 않는다**(여유 미등록). P-c = P-a/P-b 를 Eb/N0 로(Δ 에서 0.918 / 2.083 dB 를 뺀 값) — 보고 전용. 새 코드 `code/frontier_ci.py --pair "A=raw_B16e4k+raw_PARB16e4:C2:M-ours-dscore-C-V1" "B=raw_PARB16e4:C7:M-ours-bstar"` (P-b 는 `C8`), 출력 `results/review_next/frontier_PARB16e4.txt` (A·B 각각의 SNR@0.1 과 비짝 90% CI, Δ 의 90%·95% CI, 부트스트랩 양측 p, censored 비율). 같은 출력에 찍히는 다른 쌍(V1 C2 vs V1 C7/C8, b\* C2 vs b\* C7/C8, genie C2 vs C7/C8) 은 **보고 전용이며 라벨을 받지 않는다** |
+| **셀 안 판정 (C7, C8 각각; 태그 PARB16e4)** | `08_SPEC` §2 표 B `M-ours-bstar → M-ours-dscore-C-V1`: 판정점 = 앵커 b\* 의 BLER@16 이 [0.005, 0.9] 안에서 \|log10(BLER/0.1)\| 최소 3 SNR(9 점 격자에서 자동), 점마다 exact 양측 부호검정; **유의 = `power guard … -> POWERED` 이고 `second arm fewer failures at k/3 points` 의 k ≥ 2**. `significant` 토큰은 판정 기준이 아니다. 대조군 `M-ours-bstar → M-ours-bstar-scalar` 도 같은 형식으로 보고. 회수율 R = (b\*−V1)/(b\*−genie) 를 판정점 3 점과 −3 dB 에서 `recovery_ci.py` (짝 부트스트랩 B=2000, rng 20260926, 90%) 로 계산해 C2 의 0.470 [0.427, 0.512] 옆에 찍는다 — **보고 전용, 대역 없음**(C6 의 회수율 대역은 예산 축 질문용이었고 여기서는 등록하지 않는다) |
+| **수용 검사** | (a) 사전: `git status --porcelain conf/code` 비어 있음, CELLS 변경 커밋됨, 링크 `gmm_fits_D2_PARB16e4`·`gmm_fits_D2_PARB16e4chk` 존재, `sha256sum ckpt/d2sx_N160000_a1.pt` 앞 16 = 4443921ce8d5c4a1; (b) **수신기 회귀 검사**(코드가 301c6285 이후 SV·MIX3·UMi28·CELLS 로 바뀌었으므로): C2 −3 dB 청크 0 (skip 0, n 40 = 이미 관측된 시행) 을 검사 전용 태그 `--tag PARB16e4chk --n 40 --chunk 40` 으로 돌려 **14 arm × `common.KEYS_RAW` @1..16 이 `raw_B16e4k/D2_C2_S2_Nr8_T16_Tp4_dft_snr-3_skip0_n40.npz` 와 비트 동일**(`eval_accept.py --tag PARB16e4chk:legacy-last:4443921ce8d5c4a1:C2 --points C2:-3 --n 40 --chunk 40 --ntrain 160000 --kron-K 1024 --ll-val -11.459169831224418 --ref-raw raw_B16e4k --ref-cells C2 --ref-arms all`; 참조 쪽은 arm 키만 비교하므로 raw_B16e4k 에 `stagec_ckpt_id` 가 없어도 무관하고, chk 태그 자신의 meta·ckpt id 는 새 형식으로 검사된다; 검사 태그에도 fits 링크 `gmm_fits_D2_PARB16e4chk → gmm_fits_D2_B16e4k` 가 필요하다(09-26 10:29 CDT 생성); `run_pareto_eval.sh` 가 ① 앞에서 실행하고 실패하면 ABORT; 이 태그는 frontier·표에 쓰지 않는다); 어긋나면 ① 을 시작하지 않고 원인 기록; (c) `eval_accept.py --tag PARB16e4:legacy-last:4443921ce8d5c4a1:C2,C7,C8 --points C2:-6 --ntrain 160000 --kron-K 1024 --ll-val -11.459169831224418 --iters 16 --chunk 40 --n 2560 --fits-dir results/gmm_fits_D2_PARB16e4 --grid "full:16,32,64,128,256,512 kron:16,32,64,128,256,512,1024" --cand-dir results/gmm_fits_D2_K1024n160000 --ref-raw raw_B1e4lo --ref-cells C2` → 점 집합 = C7·C8 9 SNR + C2 −6, 청크 계획 {(40k,40)} 64, meta ntrain 160000 / bstar kron / kron_K 1024 / ll_val\|kron, `stagec_ckpt_id` sha·role=legacy-last, `run|iters` 16, **C2 −6 의 R5-genie blk_err·ber·tauL_gmean·alphaD @1..16 이 `raw_B1e4lo` 와 2560 시행 전부 비트 동일**(genie 는 예산 무관 → 스트림 동일성 검사), 격자 완전성(full 6 + kron 7 병합, K=1024 후보 3 개는 `--cand-dir`); (d) `meta|em_sec` = 107957.18832826614 (raw_B16e4k 와 같은 적합; eval_accept 의 (bstar, kron_K, em_sec) 집합 출력으로 확인); (e) analysis 머리말 `cell C7 (8x4, T=16, Tp=6, K=34)` / `C8 … K=26`, D2 경고, 표 B 의 C7·C8 블록 존재(C2 블록은 1 점이라 UNDECIDED·격차 `n/a` 로 찍히는 것이 정상이며 판정에 쓰지 않는다; 표 C 는 C1/C2 미존재 표시), `guard_D2_PARB16e4.txt`; (f) `frontier_PARB16e4.txt` 존재, censored 비율 기록; (g) `run_manifest_PARB16e4.json` (git 해시 = 동결 커밋 이후, `conf/code` 미커밋 없음). 어긋나면 그 실행 무효 → 원인 기록, 새 태그 재실행 |
+| 보고 전용 | C7·C8 전 arm 의 BLER@16 표(표 A)와 SNR@0.1; genie·R2 의 frontier 점; F2 goodput 포락선 표(C2·C7·C8 × SNR × {b\*, V1, genie}); P-c (Eb/N0); +15 dB 의 C8 V1 값은 "반복 ≥ 2 질의의 67–69% 가 학습 σ 범위 아래로 외삽(Gaussian 수신기 궤적 기준)" 캐비엇과 함께; C2 −6 dB 의 1.6e5 값(1e4 값 옆에); V0·V4·V4b, F3 가드 발동률; C1/C5 는 문맥(다른 b\* 격자 kron 512, BLER 바닥)만. **결과를 보고 셀·격자·arm 을 더하려면 별도 등록** |
+| 비용·일정 | CPU 만: C7+C8 9 SNR ≈ 2 × 40 분 [추정: C2 34.4 분 @K=4096·7 SNR 기준, K=1024 는 Module H 가 싸고 Ns 가 작음, 점 수 9/7], C2 −6 ≈ 5 분, 회귀 검사 ≈ 1 분 → **≈ 1.5 h (192 워커)**. GPU 0 |
+
+## 2. 라벨 (여기서 고정; UNDECIDED / 비유의는 "판정하지 못함" 이며 어느 쪽의 증거도 아니다)
+
+**(A) 셀 안 표 B `b\* → V1` (C7, C8 각각, PARB16e4; arm 결과, D1 형제 PASS 레시피)**
+
+| 결과 | 기록 |
+|---|---|
+| (i) POWERED 이고 second arm fewer ≥ 2/3 | "C7(또는 C8; Tp=6/8)에서 V1 이 b\* 보다 적게 실패 (1.6e5 동일예산, 헤드라인 가중치)" — SNR@0.1 짝 격차와 회수율(보고)을 함께 |
+| (ii) POWERED 이고 first arm fewer ≥ 2/3 | "C7(C8)에서 b\* 가 V1 보다 적게 실패" |
+| (iii) POWERED 이고 어느 쪽도 ≥ 2/3 아님 | "판정하지 못함 (유의 방향 없음)" |
+| (iv) UNDECIDED (판정점 < 3 또는 n_d < 6 인 점 ≥ 2) | "판정하지 못함 (검정력 미달)" — 9 점 격자에서도 일어날 수 있다; 격자를 결과 뒤 늘리지 않는다 |
+
+**(B) 셀 간 등록 비교 (비짝 부트스트랩, Holm m=2)**
+
+| 비교 | CI 가 0 아래 | CI 가 0 위 | CI 가 0 포함 |
+|---|---|---|---|
+| P-a Δ₆ = SNR@0.1(V1, C2) − SNR@0.1(b\*, C7) | "V1(Tp=4)의 SNR@0.1 이 b\*(Tp=6)보다 낮다 (등록 비교 P-a)" | "b\*(Tp=6)의 SNR@0.1 이 V1(Tp=4)보다 낮다 (P-a, 반대 유의)" | "판정하지 못함 (P-a)" |
+| P-b Δ₈ = SNR@0.1(V1, C2) − SNR@0.1(b\*, C8) | "V1(Tp=4)의 SNR@0.1 이 b\*(Tp=8)보다 낮다 (P-b)" | "b\*(Tp=8)의 SNR@0.1 이 V1(Tp=4)보다 낮다 (P-b, 반대 유의)" | "판정하지 못함 (P-b)" |
+
+- Holm: 첫째(부트스트랩 양측 p 가 작은 쪽; 동률이면 P-a)는 95% CI, 둘째는 90% CI 기준; 첫째가 0 을 포함하면 둘째는 자동으로 "판정하지 못함". 점추정이 censored 이거나 censored 복제 > 10% 이면 "판정하지 못함 (격자 밖; censored p%)".
+- **다중성**: 이 문서의 등록 검정은 (A) 2 개(C7·C8 표 B) + (B) 2 개(Holm 안) = 4 개. 이번 배치(Pareto·D3·SV8e·38.901 UMi28)의 등록 1차 검정 수는 원고에서 밝힌다; 등록 사이의 보정은 하지 않는다(서로 다른 가설).
+- 어느 결과에도 "도달·여지·bound·최적" 문구를 쓰지 않는다. "비긴다·같다" 문구를 만들지 않는다(동등성 여유 미등록). 어느 결과도 헤드라인·C2 판정을 바꾸지 않는다. Eb/N0 축(P-c)은 라벨을 받지 않고 같은 수를 옮겨 적는다.
+
+## 3. 미리 적는 예측 (빗나가면 그대로 쓴다; C2 값을 알고 쓰는 약한 예측)
+
+1. **C7/C8 의 교차점은 왼쪽으로 이동한다** [추정: 반복 1 의 파일럿 이득 10log10(Tp/4) = +1.76 (C7) / +3.01 dB (C8) 을 이동 폭의 척도로, 전부~절반 이동]: SNR@0.1 — C7: b\* −2.6~−1.7, V1 −4.0~−3.1, R2 −1.7~−0.8; C8: b\* −3.8~−2.3, V1 −5.2~−3.7, R2 −3.0~−1.4 (`PREREG_FACTS` A.5 표). 수렴한 반복 16 의 질의 잡음은 Tp 에 거의 무관(−3 dB 에서 −1.7% / −3.0%)하므로 Tp 효과는 반복 1~2 에 몰린다. K 감소(42→34/26)도 같은 방향.
+2. **판정점**(앵커 b\*): C7 {−6, −3, 0} 또는 {−3, 0, +3}; C8 {−6, −3, 0}. 두 셀 모두 표 B (i) (V1 이 적게 실패, POWERED ≥ 2/3), pooled a:b 의 비 a/b < 454/78 = 5.8 (Tp 가 크면 파일럿만으로 잡히는 몫이 늘어 prior 의 몫이 준다).
+3. **P-a 는 경계선**: b\*(C7) −2.6~−1.7 vs V1(C2) −2.23 → Δ₆ 점추정 −0.5~+0.6 dB, 90% CI 폭 ≈ 0.5 dB [추정: C2 짝 격차 CI 폭 0.42 dB 의 비짝 확대] → **예측: P-a 의 90% CI 가 0 을 포함("판정하지 못함")**. **P-b 예측: Δ₈ > 0 이고 95% CI 가 0 을 배제(반대 유의)** — b\*(C8) −3.8~−2.3 vs −2.23; Holm 첫째 = P-b. 어긋나면 그대로 채점한다(각 예측은 적중/빗나감 이분).
+4. **genie**: C7 SNR@0.1 ≈ −6~−5.5, C8 ≈ −7~−6 [추정: C2 −4.85 에서 파일럿 이득만큼]; C8 genie 의 −9 dB BLER 은 0.3~0.5. C2 −6 dB 의 genie 는 `raw_B1e4lo` 와 비트 동일(0.203) — 예측이 아니라 수용 검사 (c) 의 요구.
+5. **C2 −6 dB (1.6e5)**: V1 0.40~0.55 (1e4 0.601), b\* 0.60~0.75 (1e4 0.791), R2 0.80~0.85 (1e4 0.840; Chat 만 바뀜), V0 ≥ 0.9. 이 점은 C2 곡선의 왼쪽 끝을 채울 뿐 V1·b\* 의 C2 SNR@0.1 (−2.23 / −0.81) 을 바꾸지 않는다(보간 구간 −3..0 은 그대로).
+6. **goodput 포락선 F2**: −3 dB 이상은 C2 가 포락선을 정한다(§0 지배 사실). −6 dB 에서는 V1 의 C2 goodput 2.625(1−BLER) 이 1.18~1.58 이고, C7 V1 이 BLER 0.26~0.45 면 2.125(1−BLER) = 1.17~1.57 → **−6 dB 에서 C7 이 V1 포락선을 정할 수 있다**; −9 dB 는 C8 이 정할 가능성. b\* 포락선은 −6 dB 에서 C7 이 정할 가능성이 크다.
+7. **+15 dB 의 C8 V1**: 격자 아래 외삽에도 BLER 은 C2 +15 (0.001) 이하 수준으로 낮게 나오며 frontier·표 B 에 들어가지 않는다 [추정]; 캐비엇만 단다.
+8. 대조군 `b* → b*-scalar`: C7·C8 모두 b\* 우세(first arm fewer ≥ 2/3, C2 와 같은 방향). V0 가드 발동(−9..+3 BLER ≥ 0.9). V4·V4b 는 V1 과 비슷하거나 나쁨.
+9. 회수율(보고): C7 −3 dB R 0.35~0.55, C8 0.30~0.50 (C2 0.470; 분모 b\*−genie 가 줄어 CI 가 넓어진다).
+10. 빗나갈 경로: (a) C7/C8 의 b\* SNR@0.1 이 −9 dB 격자 안에 들어오지 않음(censored) → P-a/P-b "판정하지 못함 (격자 밖)", 격자 확장 없음(별도 등록); (b) 표 B (iv) 검정력 미달 → 그대로 기록; (c) 회귀 검사 (b) 실패 → 실행 없이 원인 기록(코드 변경 추적); (d) −9 dB 의 C7 반복 1 이 격자 위(3.7% 여유)로 나오는 시행이 있어도 ScorePrior 외삽 규칙대로 두고 비율만 보고; (e) V1 이 C7/C8 에서 C2 보다 SNR@0.1 이 **높게**(오른쪽) 나오면(Tp 증가가 학습 prior 에 손해) 그대로 기록 — 레시피·격자 탐색 없음.
+
+## 4. 선행 작업과 실행 현황 (갱신한다)
+
+| 항목 | 상태 · 담당 |
+|---|---|
+| `common.CELLS` C7/C8 `snrs=(-9,-6,-3,0,3,6,9,12,15)` | **완료** db038a10 |
+| `code/eval_accept.py` 확장: `--points CELL:s1,…`(기대 SNR 집합 덮어쓰기), `--cand-dir`(kron K≥1024 후보 위치), `--ref-cells`(genie 재현 대상 셀), `--ref-arms all`(회귀 검사 (b): 전 arm 전 KEYS_RAW 비트 동일; NR16B16e4last↔best 로 검증 — 비-Stage-C 10 arm 동일, V0/V1/V4/V4b 만 다름), `--kron-K` 선택 인자 | **완료** db038a10 + 2f6b6497 |
+| `code/frontier_ci.py` (`--pair`, `--goodput`, `--arms`; 비짝 부트스트랩 B=2000 rng 20260926, 90%·95% CI, 부트스트랩 양측 p, censored 비율; Holm 순서는 그 p 로 §6 에서 정한다) | **완료** db038a10 (+ p 출력: 동결 커밋) |
+| `code/run_pareto_eval.sh` (회귀 검사 (b) → ① C7 C8 → ② C2 −6 → analysis → manifest → guard → recovery(−3 dB + analysis 표의 판정점) → eval_accept → frontier; `PARETO_EVAL_DONE`) | **완료** db038a10·33719007·2f6b6497 |
+| fits 링크 `results/gmm_fits_D2_PARB16e4 -> gmm_fits_D2_B16e4k`, `gmm_fits_D2_PARB16e4chk -> gmm_fits_D2_B16e4k` | 완료 09-26 10:23 / 10:29 CDT |
+| 적대적 검토 2 건(`prereg_reviews_2026-09-26/review_{A,B}_PARETO_38901.md`) → v2 반영 → 동결 커밋 (DECISIONS 한 줄) | v2 반영 완료(이 커밋 = 동결) |
+| §5 → 커밋 → 회귀 검사 (b) → ①②③ → §6 | 커밋 직후 CPU 에서 시작(등록 4 건 중 가장 먼저; D3·SV8e·38.901 BLER 과 CPU 를 나눠 쓰지 않도록 순차) |
+
+## 5. 평가 전 고정 기록 (실행 ① 전에 채우고 커밋한다; 갱신 시각을 적는다)
+
+| 항목 | 값 |
+|---|---|
+| 체크포인트 | [2026-09-26 10:25 CDT] `conf/ckpt/d2sx_N160000_a1.pt` sha256[:16] **4443921ce8d5c4a1** (재계산 일치), epoch 1784, best_epoch 1764 (가중치 미저장), stopped_by 키 없음(patience 종료는 DECISIONS/EXPERIMENTS 기록), role 키 없음 → legacy-last, prior S2, rung D2SX160000, attempt 1, sigma_tag 없음 |
+| 적합 (`results/gmm_fits_D2_B16e4k`, Nr8, n160000) [실측 npz] | **b\* = kron K=1024, ll_val −11.459169831224418** (n_iter 331, it_best 290); kron 16 −39.017535 / 32 −33.022930 / 64 −27.475437 / 128 −22.573289 / 256 −18.416598 / 512 −14.636106 / 1024 −11.459170; full 16 −38.151901 / 32 −31.459661 / 64 −25.344014 (500/490, 상한) / 128 −20.205838 (500/490, 상한) / 256 −16.551650 (500/490, 상한) / 512 −16.315902 (421/380). em_sec 합(13 파일) **107957.18832826614** = raw_B16e4k `meta|em_sec`. 격자 끝 캐비엇(K=2048 미적합, 사용자 결정 (3)). K=1024 후보 `gmm_fits_D2_K1024n160000/*.k0r{0,1,2}.npz` 3 개 존재 |
+| σ 격자 | `results/sigma_grid_D2.npz` 20 점 σ_t ∈ [3.306220e-02, 8.451555e-01], ν ∈ [2.186219e-03, 1.428576] (동결 격자, sigma_tag '') |
+| C2 비교 대상 | `raw_B16e4k` (7 SNR × 64 청크, 14 arm), `results/tables_D2_B16e4k.txt`; C2 −6 genie 참조 `raw_B1e4lo` (C2 −9/−7/−6/−5 × 64 청크 확인) |
+| 코드 | 선행 코드 db038a10 (CELLS, eval_accept 인자, frontier_ci, run_pareto_eval), 33719007 (판정점 자동 읽기), 2f6b6497 (`--ref-arms all`, 회귀 검사 단계); frontier_ci 의 부트스트랩 p 출력은 동결 커밋에 포함. 동결 = 이 v2 커밋(DECISIONS 같은 줄) |
+| fits 링크 생성 시각 | `gmm_fits_D2_PARB16e4` 09-26 10:23 CDT, `gmm_fits_D2_PARB16e4chk` 09-26 10:29 CDT |
+| 회귀 검사 (b) 결과 | ① 시작 직전에 채움 (raw_PARB16e4chk vs raw_B16e4k C2 −3 청크 0: 14 arm 비트 동일 여부, 시각) |
+
+## 6. 결과 (이 절은 추가만 한다)
+
+(비어 있음 — ①②③ 뒤에 6.1 셀 안 판정(C7·C8, 태그 PARB16e4) / 6.2 등록 비교 P-a·P-b(Holm) / 6.3 보고 전용(F2 포락선·P-c·C2 −6·캐비엇) / 6.4 §3 예측 채점 / 6.5 기록 감사 순으로 채운다.)

@@ -5,7 +5,8 @@ Within ONE cell of ONE raw set the arms share their trial streams, so a replicat
 (raw set, cell, SNR) point ONCE and applies them to every arm read from that point (paired within a cell, exactly as
 analysis.gain).  Two different cells, or two different raw sets (a different prior or tag = different streams), are
 resampled independently -- an UNPAIRED comparison.  B = 2000, numpy.random.default_rng(20260926), percentiles 5/95 (90%)
-and 2.5/97.5 (95%; the Holm m=2 level of the Pareto registration).  A replicate whose SNR@0.1 is off the grid ('lo'/'hi'
+and 2.5/97.5 (95%; the Holm m=2 level of the Pareto registration); the Holm order is the bootstrap two-sided
+p = 2 min(P[D* <= 0], P[D* >= 0]) printed with each Delta.  A replicate whose SNR@0.1 is off the grid ('lo'/'hi'
 of exp_0925_analysis.snr_at) is censored and counted, never clamped.
 
     --pair "A=raw_B16e4k+raw_PARB16e4:C2:M-ours-dscore-C-V1" "B=raw_PARB16e4:C7:M-ours-bstar"   (repeatable)
@@ -114,8 +115,10 @@ def cmd_pair(pairs, nb, seed):
         (fa, fb) = est[0][1], est[1][1]
         if fa == fb == "ok":
             l90, h90 = pct(d, [5, 95]); l95, h95 = pct(d, [2.5, 97.5])
+            df = d[np.isfinite(d)]                         # bootstrap two-sided p (Holm ordering, NEXT_EXPERIMENTS_PARETO §1)
+            pb = 2 * min(np.mean(df <= 0), np.mean(df >= 0)) if len(df) else np.nan
             print(f"  Delta = {specs[0][0]} - {specs[1][0]} = {est[0][0] - est[1][0]:+.2f} dB  [90% {l90:+.2f}, {h90:+.2f}]  "
-                  f"[95% {l95:+.2f}, {h95:+.2f}]  censored replicates {100 * np.mean(~np.isfinite(d)):.1f}%")
+                  f"[95% {l95:+.2f}, {h95:+.2f}]  bootstrap two-sided p = {pb:.4f}  censored replicates {100 * np.mean(~np.isfinite(d)):.1f}%")
         else:
             print(f"  Delta = {specs[0][0]} - {specs[1][0]}: n/a (point estimate off the grid: {fmt_at(*est[0][:2]).strip()} vs "
                   f"{fmt_at(*est[1][:2]).strip()}) -- no CI is formed")
