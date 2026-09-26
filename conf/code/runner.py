@@ -1139,6 +1139,10 @@ def main(argv=None):
     if a.dtype != "complex128":
         sys.exit(f"--dtype {a.dtype} refused: there is no complex64 receiver path; 01_RULES §9.3 requires "
                  "identical precision for every arm and G1/G2 before any reduction")
+    # SV review (2026-09-26): gate / fit / run output names carry only the tag, so an UNTAGGED non-default D2 prior
+    # (S2c, SV8e, ...) would overwrite the S2 files (gate_D2.txt, gmm_fit_D2.txt, tables_D2.txt, conf/raw/).
+    if a.cmd in ("run", "fit", "gate") and getattr(a, "testbed", "D2") == "D2" and a.prior not in (None, "S2") and not a.tag:
+        sys.exit(f"--prior {a.prior} on D2 requires --tag (untagged outputs are the S2 files)")
     if a.n < 640 and a.cmd == "run" and not a.tag:
         sys.exit("n < 640 is forbidden for a real run (00_GOAL §4) -- use --tag X for a smoke run")
     if a.seed != C.SEED:

@@ -18,7 +18,8 @@
 # Post phase (after EVERY job below has finished; CPU):
 #   CUDA_VISIBLE_DEVICES= code/fit_gpu.py 8 kron 1024 160000 SVB16e4 --merge --prior SV8e
 #   b* = arms.gmm_selection("D2", "SV8e", 8, 160000) after runner._init("SVB16e4") (validation log-likelihood only); grid-edge
-#   rule (01_RULES:76): b* = largest K of its family -> MANUAL (user decision); kron 2048 / 4096 candidates are merged only then:
+#   rule (01_RULES:76; user decision 2026-09-26 DECISIONS 15:03 KST (3)): b* = largest K of its family -> merge the next K candidates
+#   (kron 2048, then 4096) and re-select; STOP at 4096 with a grid-edge caveat (no 8192):
 #     CUDA_VISIBLE_DEVICES= code/fit_gpu.py 8 kron 2048 160000 SVB16e4 --merge --prior SV8e     (and 4096 likewise)
 #   GB' once the grid is complete (training resumes -> no epoch trained):
 #     code/run_d2_sx.py --prior SV8e --ntrain 160000 --tag SVB16e4 --fallback <k the ladder ended on>   -> results/d2_gbprime_SV8e.csv
