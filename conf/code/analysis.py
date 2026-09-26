@@ -55,8 +55,9 @@ from exp_0925_analysis import snr_at, fmt_at, gain, MIN_DISC
 RESULTS = os.path.join(C.CONF, "results")
 RAW = os.path.join(C.CONF, "raw")
 
-# prior group [A-Z]\d?c?: the trailing 'c' is the D3 prior S2c (2026-09-25); every older file name parses as before
-PAT = re.compile(r"^(D1|D2)_(C\d)_([A-Z]\d?c?)_Nr(\d+)_T(\d+)_Tp(\d+)_(dft|eig)_snr(-?\d+)_skip(\d+)_n(\d+)\.npz$")
+# prior group [A-Z]\d?c?: the trailing 'c' is the D3 prior S2c (2026-09-25); every older file name parses as before.
+# |SV8e: the second testbed SV (2026-09-26), tried only after the first alternative fails, so old names are unaffected.
+PAT = re.compile(r"^(D1|D2)_(C\d)_([A-Z]\d?c?|SV8e)_Nr(\d+)_T(\d+)_Tp(\d+)_(dft|eig)_snr(-?\d+)_skip(\d+)_n(\d+)\.npz$")
 
 # ----------------------------------------------------------------------------- arm sets (06_SPEC §1)
 # D2 has NO R6-exactEP (no exact EP site for the true prior) and NO M-ours-score (no exact score).
@@ -512,15 +513,20 @@ def _echo(out, path, what):
     _p(out, "\n".join("    " + l for l in txt.split("\n")))
 
 
-def table_D(testbed, out, results_dir=None):
+def table_D(testbed, out, results_dir=None, priors=()):
     """Training quality, independent of BLER.  The gate files are echoed VERBATIM: they already hold the
     per-rung GA-GD numbers (passing AND failing rungs), the GB' held-out denoising NMSE of the GMM prior
     vs the diffusion prior on the same sigma_t grid, and the K-by-K GMM fit table with the degradation
     relative to D1.  Nothing is re-derived or filtered here -- filtering a rung out would be exactly the
-    'drop the failures' that 01_RULES §5 forbids."""
+    'drop the failures' that 01_RULES §5 forbids.
+    priors: the priors of the raw set.  An SV-only set does NOT echo the D2 (S2) files, which describe another testbed."""
     R = results_dir or RESULTS
     _p(out, "\n" + "=" * 30, "TABLE D -- training quality, independent of BLER (08_SPEC §3.5)", "=" * 30)
-    if testbed == "D1":
+    if priors and set(priors) <= set(C.SV_PRIORS):
+        _p(out, f"SV ({', '.join(sorted(priors))}): the D2 files gate_D2.txt / gmm_fit_D2.txt describe the D2 (S2) testbed and are "
+                "NOT echoed here. SV training quality: GB' in results/d2_gbprime_SV8e.csv (+ d2_gbprime_SV8e_*.npz), GMM "
+                "grid in results/gmm_fits_D2_<tag>/fit_SV8e_*, testbed verification in results/testbed_SV.txt.")
+    elif testbed == "D1":
         _p(out, "D1: per-rung GA-GD numbers of the score ladder. Rungs that FAILED a gate are shown together with"
                 " the rungs that passed (01_RULES §5: every attempt stays on the record, LADDER.md).")
         _p(out, "  GA: GA guards an INCONSISTENCY between the score path and the x0 path; it cannot catch an error"
@@ -651,10 +657,12 @@ def main(testbed, tag="", root=None, out_dir=None, results_dir=None):
     pri = {p for _, p in _groups(data)}
     if testbed == "D1":
         _p(out, D1_WARNING)
-    if testbed != "D1" and (pri - {"S2c"} or not pri):     # D2 proper: printed exactly as before
+    if testbed != "D1" and (pri - {"S2c"} - set(C.SV_PRIORS) or not pri):     # D2 proper: printed exactly as before
         _p(out, D2_WARNING)
     if testbed != "D1" and "S2c" in pri:                    # D3 = prior S2c: conditional Gaussianity RESTORED
         _p(out, D3_WARNING)
+    if testbed != "D1" and pri & set(C.SV_PRIORS):         # second testbed SV: never the 'sparse specular' banner
+        _p(out, C.SV_WARNING)
     for w in warns:
         _p(out, w)
     if not _groups(data):
@@ -666,7 +674,7 @@ def main(testbed, tag="", root=None, out_dir=None, results_dir=None):
         table_A(data, meta, testbed, out)
         table_B(data, meta, testbed, out)
         table_C(data, meta, testbed, out)
-    table_D(testbed, out, results_dir)
+    table_D(testbed, out, results_dir, priors=pri)
     txt = "\n".join(out) + "\n"
     d = out_dir or RESULTS
     os.makedirs(d, exist_ok=True)

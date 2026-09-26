@@ -6,7 +6,7 @@ Demo/t2_gmm.py :: fit_gmm_em).
 
   CUDA_VISIBLE_DEVICES=k python code/fit_gpu.py <Nr> <fam> <K> <ntrain> <tag> [--restart r | --merge] [--prior P]
 
---prior P (default common.PRIOR_OF["D2"] = S2, i.e. unchanged): the D2 prior variant, e.g. S2c = D3.  The prior is in
+--prior P (default common.PRIOR_OF["D2"] = S2, i.e. unchanged): the D2 prior variant, e.g. S2c = D3, SV8e = SV.  The prior is in
 the fit file name (arms.fit_path) and in the EM seed tuple (PID), exactly as runner.cmd_fit uses it.
 
 <tag> is runner's --tag and is REQUIRED, not optional: it routes the OUTPUT DIRECTORY.  runner._init

@@ -8,6 +8,8 @@ Testbeds
       CIRCULAR: the true prior IS a 32x32-component grid mixture, so the GMM arm is correctly specified
       and the exact score exists in closed form. Used as the INSTRUMENT (quality gates), never for a claim.
   D2  sparse specular multipath (conf/code/d2.py) -- the claim testbed.
+      Prior variants run through the same D2 pipeline (TBID 2) with their own PID: S2c = D3 (d2.py) and
+      SV8e = the second testbed SV, clustered Saleh-Valenzuela (conf/code/sv.py; make_gen / make_pilots dispatch).
 
 Seeds (conf/01_RULES.md §4: keep the existing convention, change only the experiment number).
   SEED = 20260926.  Trials of one point come from ONE stream
@@ -81,7 +83,9 @@ DEFAULT_CELLS = tuple(c for c in CELLS if CELLS[c]["Tp"] <= CELLS[c]["Nt"])
 # 4x4 grid actually used by exp_0921 A (Tp=4: 0,3,6,9) intersected with exp_0925 R -> 3/6/9 (see DECISIONS).
 
 PID = {"U": 0, "S": 1, "P": 2, "U2": 3, "S2": 4,      # prior id inside the seed
-       "S2c": 5}                                      # D3 = S2 geometry, alpha_l ~ CN(0, p_l) (d2.py): NEW streams
+       "S2c": 5,                                      # D3 = S2 geometry, alpha_l ~ CN(0, p_l) (d2.py): NEW streams
+       "SV8e": 6}                                     # SV = clustered Saleh-Valenzuela (sv.py), run as a D2 prior: NEW streams
+SV_PRIORS = ("SV8e",)                                  # priors served by sv.SVGen / sv.ensemble_sides_sv (== sv.PRIORS)
 TBID = {"D1": 1, "D2": 2}
 PRIOR_OF = {"D1": "S", "D2": "S2"}                     # primary prior per testbed (06_SPEC §2)
 
@@ -146,7 +150,8 @@ def make_pilots(testbed, prior, Nt, Tp, Nr):
         Rt, _ = ensemble_sides(prior, Nr, Nt, RHO_C, KG)
     else:
         from d2 import ensemble_sides_d2
-        Rt, _, informative = ensemble_sides_d2(prior, Nr, Nt)
+        from sv import ensemble_sides_sv                                         # SV: SV's own sides, same T2b rule
+        Rt, _, informative = (ensemble_sides_sv if prior in SV_PRIORS else ensemble_sides_d2)(prior, Nr, Nt)
         if not informative:
             return "dft", dft_pilots(Nt, Tp)
     w, U = np.linalg.eigh(Rt)
@@ -175,6 +180,9 @@ class D1Gen:
 def make_gen(testbed, prior, Nr, Nt):
     if testbed == "D1":
         return D1Gen(prior, Nr, Nt)
+    if prior in SV_PRIORS:                                                       # second testbed SV (sv.py)
+        from sv import SVGen
+        return SVGen(prior, Nr, Nt)
     from d2 import D2Gen
     return D2Gen(prior, Nr, Nt)
 
@@ -253,6 +261,22 @@ D3_WARNING = (
     "# Reference = known-channel receiver (R5-genie: same EP detector + BCJR, true H); not a bound.\n"
     "# " + "=" * 100
 )
+
+SV_WARNING = (
+    "# " + "=" * 100 + "\n"
+    "# SECOND TESTBED SV (prior SV8e) -- clustered Saleh-Valenzuela (El Ayach TWC 2014: 8 clusters x 10 rays, Laplacian 7.5 deg, CN ray\n"
+    "# gains, per-block sum|alpha|^2 = 1; code/sv.py). NOT sparse specular: given the 80 ray angles h is near-Gaussian (fourth-moment\n"
+    "# ratio 160/81, Gaussian 2; testbed_SV.txt); the angles are continuous, so a finite-K GMM is an approximation.\n"
+    "# Reference = known-channel receiver (R5-genie: same EP detector + BCJR, true H); not a bound.\n"
+    "# " + "=" * 100
+)
+
+
+def banner(testbed, prior):
+    """Testbed warning under a results header.  SV priors get SV_WARNING (never D2's 'sparse specular' text); every other
+    (testbed, prior) gets exactly what it got before SV existed (D1 -> D1_WARNING, D2 -> D2_WARNING)."""
+    return D1_WARNING if testbed == "D1" else SV_WARNING if prior in SV_PRIORS else D2_WARNING
+
 
 ARM_NOTES = {
     "R3-bigamp": "BiG-AMP prior: i.i.d. CN(0,1/Nr) -- correlated prior not supported by Table III (structural limitation)",

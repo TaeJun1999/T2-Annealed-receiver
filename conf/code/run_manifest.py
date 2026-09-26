@@ -21,6 +21,7 @@ import numpy as np
 import common as C
 import d2
 import score
+import sv
 
 
 def sha16(path):
@@ -84,9 +85,17 @@ def main():
             sort_keys=True).encode()).hexdigest()[:16],
         code_hashes=dict(Demo=C.demo_hashes(), conf_code={f: sha16(os.path.join(C.CONF, "code", f)) for f in
                                                           ("runner.py", "arms.py", "score.py", "common.py", "d2.py",
-                                                           "analysis.py", "rt_tap.py", "p3_rules.py") if os.path.isfile(os.path.join(C.CONF, "code", f))}),
+                                                           "analysis.py", "rt_tap.py", "p3_rules.py")
+                                                          + (("sv.py",) if priors & set(C.SV_PRIORS) else ())
+                                                          if os.path.isfile(os.path.join(C.CONF, "code", f))}),
         channel_model=dict(testbed=a.testbed, prior=one(meta.get("prior", set()) or priors or {"S2"}),
-                           description=(("D2 sparse specular: L ~ Unif{%d..%d} per block, continuous AoA/AoD (S2: +-pi/3), "
+                           description=(("SV = D2-pipeline prior SV8e, clustered Saleh-Valenzuela (El Ayach TWC 2014; code/sv.py): "
+                                         "%d clusters x %d rays per block, cluster-mean AoA ~ U[-60,60] deg, AoD ~ U[-180,180) deg "
+                                         "(UE yaw), Laplacian ray offsets (std %.1f deg, both sides), ray gains CN(0,1/%d) iid "
+                                         "normalised per block to sum|alpha|^2 = 1, no LOS, H = sqrt(Nr Nt) sum_cr alpha_cr a_r a_t^H "
+                                         "(unit-norm half-wavelength ULAs)" % (sv.N_CL, sv.N_RAY, np.rad2deg(sv.SPREAD), sv.P_RAYS))
+                                        if priors & set(C.SV_PRIORS) else
+                                        ("D2 sparse specular: L ~ Unif{%d..%d} per block, continuous AoA/AoD (S2: +-pi/3), "
                                          "|alpha_l| = sqrt(p_l) deterministic, p_l ∝ exp(-l/%.1f), psi_l ~ Unif[0,2pi), "
                                          "H = sqrt(Nr Nt) sum_l alpha_l a_r a_t^H" % (d2.L_MIN, d2.L_MAX, d2.TAU))
                                         if not priors & set(d2.CN_GAIN) else
