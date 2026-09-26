@@ -522,7 +522,7 @@ def run_task(task):
 def cmd_run(a):
     testbed = a.testbed
     prior = a.prior or C.PRIOR_OF[testbed]
-    cells = a.cell or list(C.CELLS)
+    cells = a.cell or list(C.DEFAULT_CELLS)            # C7/C8 (Tp > Nt) only when named with --cell
     pts = [(cell, prior, float(s)) for cell in cells for s in (a.snr or C.CELLS[cell]["snrs"])]
     for cell, p, _ in pts:                              # fail early if a GMM fit is missing
         A.load_fits(testbed, p, C.CELLS[cell]["Nr"], a.ntrain)
@@ -681,7 +681,7 @@ def cmd_sigma(a):
         sys.exit(f"refusing to overwrite {frozen}: the sigma grid is FROZEN (04_SPEC §3) and every GA-GD "
                  f"gate and every score arm reads it.  Use --tag X for a separate grid, or --force-regrid "
                  f"to replace the frozen one deliberately.")
-    cells = a.cell or [c for c in C.CELLS if C.CELLS[c]["Nr"] == 8]     # the array the score net is for
+    cells = a.cell or [c for c in C.DEFAULT_CELLS if C.CELLS[c]["Nr"] == 8]     # the array the score net is for
     n = a.n if a.n != 640 else SG.N_MEAS                                # --n's default is the RUN default
     res, prior = SG.measure(a.testbed, cells, prior=a.prior, n=n)
     nu, sig, out = SG.write(a.testbed, res, prior, tag=TAG)
@@ -1187,6 +1187,13 @@ def main(argv=None):
             sys.exit(f"--stagec-ckpt {a.stagec_ckpt} is a {cid['Nr']}x{cid['Nt']} checkpoint but no selected "
                      f"cell {cells} has that array.  Refusing: the Stage C score arms would be ABSENT from "
                      "the whole run.")
+        # D3 review R1: a checkpoint trained on one prior must not score another prior's channels silently.
+        import torch
+        ck_prior = torch.load(a.stagec_ckpt, map_location="cpu", weights_only=False).get("prior")
+        run_prior = getattr(a, "prior", None) or C.PRIOR_OF.get(getattr(a, "testbed", None) or "D2")
+        if ck_prior is not None and run_prior is not None and ck_prior != run_prior:
+            sys.exit(f"--stagec-ckpt {a.stagec_ckpt} was trained on prior {ck_prior!r} but this run is prior "
+                     f"{run_prior!r}.  Refusing.")
     _init(a.tag)
     for d in ("results", "raw", "logs", "figs", "ckpt"):
         os.makedirs(os.path.join(C.CONF, d), exist_ok=True)

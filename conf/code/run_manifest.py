@@ -75,6 +75,7 @@ def main():
                                                        train=score.SEED_TRAIN, gate=score.SEED_GATE))
     ntrain = float(one(meta.get("ntrain", {"nan"})))
     cells = sorted({p.split("_")[1] for p in points})
+    priors = {p.split("_")[2] for p in points}          # from the raw names (no meta|prior exists); {"S2"} for every D2 run
     man = dict(
         manifest_version=1, written=time.strftime("%Y-%m-%d %H:%M:%S %Z"), git_commit=C.git_commit(),
         result_tag=a.tag, testbed=a.testbed, raw_dir=raw_dir, n_raw_files=len(files),
@@ -84,10 +85,14 @@ def main():
         code_hashes=dict(Demo=C.demo_hashes(), conf_code={f: sha16(os.path.join(C.CONF, "code", f)) for f in
                                                           ("runner.py", "arms.py", "score.py", "common.py", "d2.py",
                                                            "analysis.py", "rt_tap.py", "p3_rules.py") if os.path.isfile(os.path.join(C.CONF, "code", f))}),
-        channel_model=dict(testbed=a.testbed, prior=one(meta.get("prior", set()) or {"S2"}),
-                           description=("D2 sparse specular: L ~ Unif{%d..%d} per block, continuous AoA/AoD (S2: +-pi/3), "
-                                        "|alpha_l| = sqrt(p_l) deterministic, p_l ∝ exp(-l/%.1f), psi_l ~ Unif[0,2pi), "
-                                        "H = sqrt(Nr Nt) sum_l alpha_l a_r a_t^H" % (d2.L_MIN, d2.L_MAX, d2.TAU))
+        channel_model=dict(testbed=a.testbed, prior=one(meta.get("prior", set()) or priors or {"S2"}),
+                           description=(("D2 sparse specular: L ~ Unif{%d..%d} per block, continuous AoA/AoD (S2: +-pi/3), "
+                                         "|alpha_l| = sqrt(p_l) deterministic, p_l ∝ exp(-l/%.1f), psi_l ~ Unif[0,2pi), "
+                                         "H = sqrt(Nr Nt) sum_l alpha_l a_r a_t^H" % (d2.L_MIN, d2.L_MAX, d2.TAU))
+                                        if not priors & set(d2.CN_GAIN) else
+                                        ("D3 = D2 prior S2c: L ~ Unif{%d..%d} per block, continuous AoA/AoD (+-pi/3), "
+                                         "alpha_l ~ CN(0, p_l) (complex Gaussian path gains), p_l ∝ exp(-l/%.1f), "
+                                         "H = sqrt(Nr Nt) sum_l alpha_l a_r a_t^H" % (d2.L_MIN, d2.L_MAX, d2.TAU)))
                            if a.testbed == "D2" else "D1 grid GMM (see 05_SPEC)"),
         cells={c: dict(C.CELLS[c]) for c in cells}, points={k: v for k, v in sorted(points.items())},
         trial_stream=dict(rule=f"default_rng([{C.SEED}, TBID[testbed], PID[prior], Nr, T, Tp, int(snr)+100])",

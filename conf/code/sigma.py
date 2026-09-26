@@ -18,6 +18,10 @@ import common as C
 import arms as A
 
 N_MEAS = 64                 # 04_SPEC §3: "a small n (e.g. 64)"
+# D3 (prior S2c) has no N=1e4 GMM fit, and measure_point needs only the fit file's Chat -- which t2_gmm.fit_gmm_em defines
+# as X^T X^* / n of the stream-7 training set (Demo/t2_gmm.py:145).  For these priors that same sample covariance is
+# computed directly from the same stream (arms.training_set).  Every other prior reads the fit file exactly as before.
+CHAT_FROM_TRAIN = ("S2c",)
 N_GRID = 20                 # "log-equispaced grid, 20 points recommended"
 PCT = (1.0, 99.0)           # "covering the 1-99 percentile of that distribution"
 
@@ -30,8 +34,12 @@ def measure_point(task):
     code = C.QAMCode(C.GENS, C.NU, C.M_QAM, Nt * (T - Tp))
     pil, Xp = C.make_pilots(testbed, prior, Nt, Tp, Nr)
     gen = C.make_gen(testbed, prior, Nr, Nt)
-    fits = A.load_fits(testbed, prior, Nr)
-    Cs = C.GaussianPrior(Nr, Nt, fits[("full", 32)]["Chat"])
+    if prior in CHAT_FROM_TRAIN:
+        X = A.training_set(testbed, prior, Nr, Nt)
+        Chat = X.T @ X.conj() / len(X)
+    else:
+        Chat = A.load_fits(testbed, prior, Nr)[("full", 32)]["Chat"]
+    Cs = C.GaussianPrior(Nr, Nt, Chat)
     rx = A.route_a(Nr, Nt, T, Tp, sigma2, Cs, code, Xp, "score", clip="eta")     # == M-ours-G in the score interface
     rng = C.trial_rng(testbed, prior, Nr, T, Tp, snr)
     vals = []

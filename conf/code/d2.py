@@ -52,6 +52,15 @@ self-check at the bottom of this file uses as an independent reference.
     T2d, non-Gaussian even conditionally on the angles.  Do not read Kronecker second moments as
     conditional Gaussianity. ***
 
+D3 = prior "S2c" (user decision 2026-09-25 CDT; 10_SPEC_stageC "D3 -- 조건부 가우시안 형제 testbed").  EXACTLY S2 except
+    alpha_l = sqrt(p_l) g_l,  g_l ~ CN(0, 1) i.i.d.   i.e. alpha_l ~ CN(0, p_l), independent of L and the angles.
+L, the angle sector, p_l, SCALE and the steering vectors are those of S2.  E|alpha_l|^2 = p_l and the phase of alpha_l is
+uniform, so the cross terms still vanish: E||H||_F^2 = Nr*Nt and C_ens = kron(Rt^T, Rr) are UNCHANGED (same sides -> same
+T2b decision -> same DFT pilots).  H | (L, angles) is now complex Gaussian, so the T2d fourth-moment ratio is 2 exactly
+(conf/code/testbed_d3.py, T3d).  The angles are still continuous: the ensemble is a continuous Gaussian mixture and a
+finite-K GMM is an approximation, not correctly specified (only D1 is).  S2c has its own PID, so every S2c stream is a
+NEW stream; the S2 code path below is untouched (conf/code/selftest_d3tp.py checks it bit for bit).
+
 Conventions inherited from the project (do not re-derive):
   h = vec(H) is COLUMN-MAJOR, h[i + Nr*j] = H[i,j]  -- fed straight into t2_gmm.fit_gmm_em / GMMPriorB.
   complex variances are PER COMPLEX ENTRY;  dtype is complex128 / float64 everywhere.
@@ -65,7 +74,9 @@ import common as C
 L_MIN, L_MAX = 3, 8                       # L ~ Unif{L_MIN..L_MAX}
 TAU = 2.0                                 # exponential power-delay profile p_l ∝ exp(-l/tau)
 ANGLE_RANGE = {"U2": (-np.pi / 2, np.pi / 2),        # full range
-               "S2": (-np.pi / 3, np.pi / 3)}        # standard 120-degree sector; PRIMARY prior
+               "S2": (-np.pi / 3, np.pi / 3),        # standard 120-degree sector; PRIMARY prior
+               "S2c": (-np.pi / 3, np.pi / 3)}       # D3: the S2 sector (see the module docstring)
+CN_GAIN = ("S2c",)                        # priors whose path gains are alpha_l ~ CN(0, p_l) instead of sqrt(p_l) e^{j psi}
 
 # _P[L - L_MIN, :] = the normalised profile of a block with L paths, zero-padded to L_MAX.
 _P = np.zeros((L_MAX - L_MIN + 1, L_MAX))
@@ -135,6 +146,7 @@ class D2Gen:
     def __init__(self, prior, Nr, Nt):
         assert prior in ANGLE_RANGE, f"D2 priors are {tuple(ANGLE_RANGE)}, got {prior!r}"
         self.kind = prior
+        self.cn = prior in CN_GAIN        # D3: complex Gaussian path gains
         self.lo, self.hi = ANGLE_RANGE[prior]
         self.Nr, self.Nt, self.N = Nr, Nt, Nr * Nt
         self.scale = np.sqrt(Nr * Nt)     # SCALE, see the module docstring (NOT sqrt(Nr*Nt/L))
@@ -145,6 +157,9 @@ class D2Gen:
         L = rng.integers(L_MIN, L_MAX + 1, n)                                  # Unif{3..8}, per block
         th = self.lo + (self.hi - self.lo) * rng.random((n, L_MAX))            # CONTINUOUS physical angle
         ph = self.lo + (self.hi - self.lo) * rng.random((n, L_MAX))
+        if self.cn:                                                            # D3: alpha_l = sqrt(p_l) CN(0,1)
+            g = (rng.standard_normal((n, L_MAX)) + 1j * rng.standard_normal((n, L_MAX))) / np.sqrt(2.0)
+            return th, ph, _AMP[L - L_MIN] * g, L
         psi = 2 * np.pi * rng.random((n, L_MAX))
         return th, ph, _AMP[L - L_MIN] * np.exp(1j * psi), L
 
@@ -167,7 +182,8 @@ class D2Gen:
         return self._channels(th, ph, al).transpose(0, 2, 1).reshape(n, self.N)
 
     def sample_angles(self, rng, n, angles=None):
-        """T2d: n draws with the angle set AND L held FIXED -- only the path phases vary.
+        """T2d: n draws with the angle set AND L held FIXED -- only the path phases vary (S2c: the complex
+        Gaussian path gains alpha_l = sqrt(p_l) CN(0,1) vary, T3d of testbed_d3.py).
         Returns (H (n, Nr, Nt), angles), angles = (theta (L,), phi (L,), p (L,)).  Pass `angles` back in
         to keep conditioning on the same set."""
         if angles is None:
@@ -177,7 +193,10 @@ class D2Gen:
                       _P[L - L_MIN, :L].copy())
         th, ph, p = angles
         L = len(th)
-        alpha = np.sqrt(p) * np.exp(2j * np.pi * rng.random((n, L)))           # |alpha_l| fixed, phase free
+        if self.cn:
+            alpha = np.sqrt(p) * (rng.standard_normal((n, L)) + 1j * rng.standard_normal((n, L))) / np.sqrt(2.0)
+        else:
+            alpha = np.sqrt(p) * np.exp(2j * np.pi * rng.random((n, L)))       # |alpha_l| fixed, phase free
         Hs = self._channels(np.broadcast_to(th, (n, L)), np.broadcast_to(ph, (n, L)), alpha)
         return Hs, angles
 

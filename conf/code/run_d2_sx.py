@@ -6,6 +6,15 @@
                    When the two differ the row is written with equal_budget=False and must be read as a
                    diffusion-only measurement, never as a prior-vs-prior comparison.
 
+  --prior S2c      D3 (user decision 2026-09-25 CDT): the D2 prior variant with alpha_l ~ CN(0, p_l) (d2.py).  Default S2 =
+                   every name, seed and path exactly as before.  For S2c EVERY output carries the prior, so a D3 file can
+                   never collide with a D2 one: rung D2SXS2c<N> (-> its own training seed, score._rung_ix), checkpoint
+                   ckpt/d2sx_S2c_N<N>_a<k>[_fb<j>].pt, log logs/train_d2sx_S2c_..., results/d2_gbprime_S2c_....npz and
+                   results/d2_gbprime_S2c.csv; the sigma grid is the one measured for S2c (results/sigma_grid_D2_S2c.npz,
+                   `runner.py sigma --testbed D2 --prior S2c --cell C1 C2 --tag S2c`), recorded in the checkpoint.
+  --no-gbprime     train (or resume) only, skip the GB' step -- the D3 queue (run_d3.sh) computes GB' once the GMM grid is
+                   complete, so GB' can never be taken against a partial grid.
+
 Architecture is the best-D1-gate-score configuration, copied verbatim and never re-searched (04_SPEC §6).
 Everything here is REPORT-ONLY: the pre-registered arm comparison stays at N = 1e4.
 """
@@ -25,6 +34,8 @@ ap.add_argument("--gmm-ntrain", type=int, default=None)
 ap.add_argument("--n-eval", type=int, default=4096)
 ap.add_argument("--tag", default=None, help="GMM fits dir tag (runner._init: results/gmm_fits_D2_<tag>); default = the "
                                            "untagged dir, as before (NEXT_EXPERIMENTS_B32e4: equal-budget GB' needs it)")
+ap.add_argument("--prior", default="S2", choices=("S2", "S2c"), help="S2 = D2 (default, unchanged); S2c = D3")
+ap.add_argument("--no-gbprime", action="store_true", help="train/resume only; no GB' (default: GB' as before)")
 ap.add_argument("--fallback", type=int, default=1, choices=(1, 2, 3),
                 help="10_SPEC §3d ladder after a DIVERGED/aborted run: 2 = grad-norm clip 1.0, 3 = + lr/3 (score.*_LADDER; "
                      "same data stream, checkpoint suffix _fb<k>).  1 = the frozen recipe (default, unchanged)")
@@ -33,17 +44,28 @@ if a.tag:
     import runner
     runner._init(a.tag)                        # A.D2_FITS -> results/gmm_fits_D2_<tag>
 gmm_n = a.gmm_ntrain or a.ntrain
+PRIOR = a.prior
+PT = "" if PRIOR == "S2" else PRIOR                      # "" keeps every S2 name / rung / grid exactly as before
+if PT:
+    CSV = os.path.join(C.CONF, "results", f"d2_gbprime_{PT}.csv")
 
-tag = f"N{a.ntrain}_a{a.attempt}" + (f"_fb{a.fallback}" if a.fallback > 1 else "")
+tag = (f"{PT}_" if PT else "") + f"N{a.ntrain}_a{a.attempt}" + (f"_fb{a.fallback}" if a.fallback > 1 else "")
 GRAD_CLIP = score.GRAD_CLIP_LADDER[a.fallback - 1]
 HP["lr"] = HP["lr"] / score.LR_DIV_LADDER[a.fallback - 1]
 ck = os.path.join(C.CONF, "ckpt", f"d2sx_{tag}.pt")
 lg = os.path.join(C.CONF, "logs", f"train_d2sx_{tag}.log")
-print(f"[d2sx] ntrain={a.ntrain} attempt={a.attempt} gmm_ntrain={gmm_n} n_eval={a.n_eval}", flush=True)
-res = score.train(f"D2SX{a.ntrain}", a.attempt, "D2", PRIOR, NR, NT, device="cuda", hp=HP, resume=True,
+print(f"[d2sx] ntrain={a.ntrain} attempt={a.attempt} gmm_ntrain={gmm_n} n_eval={a.n_eval}"
+      + (f" prior={PRIOR} ckpt={ck} sigma_tag={PT}" if PT else ""), flush=True)
+res = score.train(f"D2SX{PT}{a.ntrain}", a.attempt, "D2", PRIOR, NR, NT, device="cuda", hp=HP, resume=True,
                   ntrain=a.ntrain, max_epochs=3000, patience=20, min_epochs=200, log_path=lg, ckpt=ck,
-                  verbose=False, **({"grad_clip": GRAD_CLIP} if a.fallback > 1 else {}))
+                  verbose=False, **({"grad_clip": GRAD_CLIP} if a.fallback > 1 else {}),
+                  **({"sigma_tag": PT} if PT else {}))
 print(f"[d2sx] trained {res['epochs']} ep, val {res['val_loss']:.5e}, {res['wall_sec']:.0f}s", flush=True)
+if PT or a.no_gbprime:
+    print(f"[d2sx] stopped_by={res.get('stopped_by')} aborted={res.get('aborted')} best_epoch={res.get('best_epoch')}",
+          flush=True)
+if a.no_gbprime:
+    sys.exit(0)
 
 fits, llv, bstar, kron_K = A.gmm_selection("D2", PRIOR, NR, gmm_n)
 fam, K = ("kron", kron_K) if bstar == "kron" else ("full", int(bstar[3:]))

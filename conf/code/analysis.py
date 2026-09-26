@@ -47,7 +47,7 @@ import os, re, glob, sys, warnings
 import numpy as np
 
 import common as C
-from common import (ARM_NOTES, CELLS, D1_WARNING, D2_WARNING, N_ITER, NT, PRIOR_OF, header)
+from common import (ARM_NOTES, CELLS, D1_WARNING, D2_WARNING, D3_WARNING, N_ITER, NT, PRIOR_OF, header)
 
 from exp_0921_analysis import wilson, sign_p, paired, row, fail_classes          # noqa: F401
 from exp_0925_analysis import snr_at, fmt_at, gain, MIN_DISC
@@ -55,7 +55,8 @@ from exp_0925_analysis import snr_at, fmt_at, gain, MIN_DISC
 RESULTS = os.path.join(C.CONF, "results")
 RAW = os.path.join(C.CONF, "raw")
 
-PAT = re.compile(r"^(D1|D2)_(C\d)_([A-Z]\d?)_Nr(\d+)_T(\d+)_Tp(\d+)_(dft|eig)_snr(-?\d+)_skip(\d+)_n(\d+)\.npz$")
+# prior group [A-Z]\d?c?: the trailing 'c' is the D3 prior S2c (2026-09-25); every older file name parses as before
+PAT = re.compile(r"^(D1|D2)_(C\d)_([A-Z]\d?c?)_Nr(\d+)_T(\d+)_Tp(\d+)_(dft|eig)_snr(-?\d+)_skip(\d+)_n(\d+)\.npz$")
 
 # ----------------------------------------------------------------------------- arm sets (06_SPEC §1)
 # D2 has NO R6-exactEP (no exact EP site for the true prior) and NO M-ours-score (no exact score).
@@ -647,7 +648,13 @@ def main(testbed, tag="", root=None, out_dir=None, results_dir=None):
     data, meta, warns = load_raw(testbed, root)
     out = []
     _p(out, _head(testbed, data, meta))
-    _p(out, D1_WARNING if testbed == "D1" else D2_WARNING)
+    pri = {p for _, p in _groups(data)}
+    if testbed == "D1":
+        _p(out, D1_WARNING)
+    if testbed != "D1" and (pri - {"S2c"} or not pri):     # D2 proper: printed exactly as before
+        _p(out, D2_WARNING)
+    if testbed != "D1" and "S2c" in pri:                    # D3 = prior S2c: conditional Gaussianity RESTORED
+        _p(out, D3_WARNING)
     for w in warns:
         _p(out, w)
     if not _groups(data):

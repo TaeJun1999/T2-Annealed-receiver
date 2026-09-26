@@ -4,7 +4,10 @@ early stopping, same selection rule (validation log-likelihood ONLY), same field
 arms.fit_path() file.  The EM itself is code/gmm_em_gpu.py (float64 port of the READ-ONLY
 Demo/t2_gmm.py :: fit_gmm_em).
 
-  CUDA_VISIBLE_DEVICES=k python code/fit_gpu.py <Nr> <fam> <K> <ntrain> <tag>
+  CUDA_VISIBLE_DEVICES=k python code/fit_gpu.py <Nr> <fam> <K> <ntrain> <tag> [--restart r | --merge] [--prior P]
+
+--prior P (default common.PRIOR_OF["D2"] = S2, i.e. unchanged): the D2 prior variant, e.g. S2c = D3.  The prior is in
+the fit file name (arms.fit_path) and in the EM seed tuple (PID), exactly as runner.cmd_fit uses it.
 
 <tag> is runner's --tag and is REQUIRED, not optional: it routes the OUTPUT DIRECTORY.  runner._init
 sets arms.D2_FITS = d_fits_d2() = results/gmm_fits_D2_<tag>/; without it arms.D2_FITS keeps its
@@ -86,7 +89,7 @@ def _cand_path(out, kap, r):
     return out[:-4] + f".k{kap}r{r}.npz"
 
 
-def main(Nr, fam, K, ntrain, tag, restart=None, merge=False):
+def main(Nr, fam, K, ntrain, tag, restart=None, merge=False, prior=None):
     """restart=None, merge=False : the original all-in-one path (every kappa x every restart, then select).
     restart=r                   : run ONLY restart r (for every kappa) and save a per-restart CANDIDATE
                                   file beside the target -- the original protocol treats each (kappa, r)
@@ -95,7 +98,7 @@ def main(Nr, fam, K, ntrain, tag, restart=None, merge=False):
     merge=True                  : combine the candidate files (all of them must exist) into the final
                                   file with exactly the fields and selection rule of the all-in-one path."""
     _init(tag)                                           # routes arms.D2_FITS, exactly as cmd_fit does
-    prior, Nt = C.PRIOR_OF["D2"], C.NT
+    prior, Nt = prior or C.PRIOR_OF["D2"], C.NT
     out = A.fit_path("D2", prior, Nr, fam, K, ntrain)
     assert os.path.dirname(out) == d_fits_d2(), (out, d_fits_d2())
     print(f"[gpu-fit] tag={tag!r}  out={out}" + (f"  restart={restart}" if restart is not None else "")
@@ -142,6 +145,12 @@ def main(Nr, fam, K, ntrain, tag, restart=None, merge=False):
 
 if __name__ == "__main__":
     a = sys.argv[1:]
+    prior = None
+    if "--prior" in a:
+        i = a.index("--prior")
+        prior = a[i + 1]
+        assert prior in C.PID, prior
+        del a[i:i + 2]
     if len(a) < 5 or len(a) > 7:
         sys.exit("usage: CUDA_VISIBLE_DEVICES=k fit_gpu.py <Nr> <fam> <K> <ntrain> <tag> [--restart r | --merge]"
                  "   (tag routes the output dir -- see the module docstring)")
@@ -152,4 +161,4 @@ if __name__ == "__main__":
         merge = True
     elif len(a) != 5:
         sys.exit("bad trailing arguments: expected '--restart r' or '--merge'")
-    sys.exit(main(int(a[0]), a[1], int(a[2]), int(a[3]), a[4], restart=restart, merge=merge))
+    sys.exit(main(int(a[0]), a[1], int(a[2]), int(a[3]), a[4], restart=restart, merge=merge, prior=prior))

@@ -68,12 +68,20 @@ CELLS = {                                     # 06_SPEC_runner.md §3, priority 
     # is why this and not a sparser L is the right knob: L < Nt is rank-deficient and breaks the genie
     # itself (measured: L=3 genie BLER 0.1034 vs 0.0140 at L=5, results/Lstrat_B16e4k_C2_-3dB.txt).
     "C6": dict(Nr=16, Nt=4, T=16, Tp=4, snrs=(-3, 0, 3, 6, 9, 12, 15)),
+    # (user decision 2026-09-25 CDT, Tp >= Nt Pareto cells) C2 with Tp = 6 / 8 > Nt: same array, block, code and SNR
+    # grid, so Tp is again the ONLY axis that moves (K = Nt(T-Tp)-6 = 34 / 26).  Pilots: make_pilots' Tp > Nt branch.
+    "C7": dict(Nr=8, Nt=4, T=16, Tp=6, snrs=(-3, 0, 3, 6, 9, 12, 15)),
+    "C8": dict(Nr=8, Nt=4, T=16, Tp=8, snrs=(-3, 0, 3, 6, 9, 12, 15)),
 }
+# Every DEFAULT that enumerates CELLS (runner run / sigma) keeps the pre-C7 set, so a command without --cell does
+# exactly what it did before the Tp > Nt cells existed.  C7/C8 are run only when named.
+DEFAULT_CELLS = tuple(c for c in CELLS if CELLS[c]["Tp"] <= CELLS[c]["Nt"])
 # SNR grids are exp_0925_run.CELLS verbatim: H/H4 (8x4, T=16) -> -3..15 dB, R (4x4, T=28, Tp=2) -> 9/12/15.
 # C4 (4x4, Tp=4) has no exp_0925 counterpart -> 01_RULES §4 fallback "Tp=4 -> 0,3,6,9 dB" shifted onto the
 # 4x4 grid actually used by exp_0921 A (Tp=4: 0,3,6,9) intersected with exp_0925 R -> 3/6/9 (see DECISIONS).
 
-PID = {"U": 0, "S": 1, "P": 2, "U2": 3, "S2": 4}       # prior id inside the seed
+PID = {"U": 0, "S": 1, "P": 2, "U2": 3, "S2": 4,      # prior id inside the seed
+       "S2c": 5}                                      # D3 = S2 geometry, alpha_l ~ CN(0, p_l) (d2.py): NEW streams
 TBID = {"D1": 1, "D2": 2}
 PRIOR_OF = {"D1": "S", "D2": "S2"}                     # primary prior per testbed (06_SPEC §2)
 
@@ -125,7 +133,13 @@ def code_to_grid(v, perm, Nt, Td):
 def make_pilots(testbed, prior, Nt, Tp, Nr):
     """DFT unless the transmit-side ENSEMBLE covariance is informative; then sqrt(Nt) x top-Tp eigenvectors of
     R_t,ens (the exp_0921/exp_0925 'eig' rule).  Same matrix for every arm inside a cell (06_SPEC §2).
-    D2 defers to the measured effective rank (test T2b) through d2.ensemble_sides_d2."""
+    D2 defers to the measured effective rank (test T2b) through d2.ensemble_sides_d2.
+
+    Tp > Nt (cells C7/C8): rows 0..Nt-1 of the Tp-point DFT matrix, [Xp]_{b,c} = exp(-2j pi b c / Tp) -- unit
+    modulus (E_s = 1 per antenna, like dft_pilots) and Xp Xp^H = Tp I.  Neither dft_pilots (Nt columns exist) nor
+    the eig rule (Nt eigenvectors exist) has Tp > Nt columns; this branch precedes both, so Tp <= Nt is untouched."""
+    if Tp > Nt:
+        return "dft", np.exp(-2j * np.pi * np.outer(np.arange(Nt), np.arange(Tp)) / Tp)
     if testbed == "D1":
         if prior != "S":
             return "dft", dft_pilots(Nt, Tp)
@@ -229,6 +243,14 @@ D1_WARNING = (
 D2_WARNING = (
     "# " + "=" * 100 + "\n"
     "# CLAIM TESTBED -- sparse specular; conditional Gaussianity broken (see T2d). Reference = known-channel receiver (R5-genie: same EP detector + BCJR, true H); not a bound.\n"
+    "# " + "=" * 100
+)
+
+D3_WARNING = (
+    "# " + "=" * 100 + "\n"
+    "# CONTROL TESTBED D3 (prior S2c) -- D2 geometry with alpha_l ~ CN(0, p_l): conditional Gaussianity RESTORED (see testbed_D3.txt T3d);\n"
+    "# the angles are continuous, so the ensemble is a continuous Gaussian mixture and a finite-K GMM is still an approximation.\n"
+    "# Reference = known-channel receiver (R5-genie: same EP detector + BCJR, true H); not a bound.\n"
     "# " + "=" * 100
 )
 

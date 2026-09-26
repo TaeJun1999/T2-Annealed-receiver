@@ -43,6 +43,8 @@ def main():
     ap.add_argument("--ref-raw", default=None)
     ap.add_argument("--fits-dir", default=None)
     ap.add_argument("--grid", default=None)
+    ap.add_argument("--prior", default="S2", help="prior in the fit file names (D3: S2c)")
+    ap.add_argument("--bstar", default="kron", help="expected meta|bstar: 'kron' (default, every earlier tag) or a full-K name such as gmm256")
     a = ap.parse_args()
     plan = [(a.chunk * k, a.chunk) for k in range(a.n // a.chunk)]
     bad, common_meta = [], {}
@@ -61,11 +63,11 @@ def main():
             for _, _, f in ch[:1] + ch[-1:]:
                 with np.load(f) as z:
                     g = lambda k: str(z[k].item() if z[k].shape == () else z[k])
-                    if (int(float(g("meta|ntrain"))) != a.ntrain or g("meta|bstar") != "kron"
-                            or int(float(g("meta|kron_K"))) != a.kron_K):
+                    if (int(float(g("meta|ntrain"))) != a.ntrain or g("meta|bstar") != a.bstar
+                            or (a.bstar == "kron" and int(float(g("meta|kron_K"))) != a.kron_K)):
                         bad.append(f"{os.path.basename(f)}: ntrain/bstar/kron_K = {g('meta|ntrain')}/{g('meta|bstar')}/{g('meta|kron_K')}")
-                    if abs(float(g("meta|ll_val|kron")) - a.ll_val) > 1e-9:
-                        bad.append(f"{os.path.basename(f)}: ll_val|kron {g('meta|ll_val|kron')} != {a.ll_val}")
+                    if abs(float(g(f"meta|ll_val|{a.bstar}")) - a.ll_val) > 1e-9:
+                        bad.append(f"{os.path.basename(f)}: ll_val|{a.bstar} {g(f'meta|ll_val|{a.bstar}')} != {a.ll_val}")
                     ids = g("meta|stagec_ckpt_id")
                     if f"sha256[:16]={sha}" not in ids or f"role={role}" not in ids:
                         bad.append(f"{os.path.basename(f)}: ckpt id {ids[:80]} != sha {sha} role {role}")
@@ -99,7 +101,7 @@ def main():
         for fam_spec in a.grid.split():
             fam, ks = fam_spec.split(":")
             for K in (int(k) for k in ks.split(",")):
-                pat = os.path.join(d, f"fit_S2_Nr*_{fam}K{K}_n{a.ntrain}.npz")
+                pat = os.path.join(d, f"fit_{a.prior}_Nr*_{fam}K{K}_n{a.ntrain}.npz")
                 if not glob.glob(pat):
                     bad.append(f"grid: {fam} K={K} merged file missing ({pat})")
                 if fam == "kron" and K >= 1024:
