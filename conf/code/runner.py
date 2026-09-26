@@ -854,7 +854,7 @@ def cmd_gate(a):
         f"checkpoints : {len(cps)} found under {d_ckpt()}{filt}",
         f"device      : {a.device} for the gate only; the receiver stays CPU/complex128 for every arm",
         "judgement   : the ladder is judged by THESE numbers and never by a BLER (01_RULES §5).",
-    ]), C.D1_WARNING if a.testbed == "D1" else C.D2_WARNING, ""]
+    ]), C.banner(a.testbed, prior), ""]
     if a.testbed == "D1":
         L += ["GA -- STRUCTURAL ZERO.  READ THIS BEFORE READING ANY GA NUMBER BELOW.",
               "-" * 110, getattr(score, "GA_NOTE", GA_NOTE), "-" * 110, "",
@@ -888,6 +888,9 @@ def cmd_testbed(a):
     d2 = _need("d2", "it is the D2 generator and its T2a..T2e verification (05_SPEC §2)")
     import tests as TS
     prior = a.prior or C.PRIOR_OF["D2"]
+    if prior in C.SV_PRIORS:
+        sys.exit(f"prior {prior} is the SV testbed: its verification is code/testbed_sv.py -> results/testbed_SV.txt "
+                 "(T2a..T2e are D2 sparse-specular tests)")
     cells = a.cell or ["C1"]                                   # C1 = 8x4, Tp=2, the headline geometry
     rows = []
     for cell in cells:
@@ -1008,7 +1011,7 @@ def write_fit_table(prior, Nrs, ntrain):
             f"K {D2_KS} x {{full, kron}} x kappa {KAPPAS} x restarts, ntrain {ntrain}, n_val = n_test = {N_VAL}",
             "selection   : VALIDATION log-likelihood only.  BLER is never consulted (01_RULES §5).",
             f"D1 fits     : {A.D1_FITS} (prior {d1p}, K {A.D1_KS}) -- reused verbatim, see DECISIONS",
-        ]) + "\n" + C.D2_WARNING + "\n\n")
+        ]) + "\n" + C.banner("D2", prior) + "\n\n")
         for Nr in Nrs:
             f.write(f"Nr = {Nr} x Nt = {C.NT}\n")
             f.write(f"  {'fam':<5} {'K':>4} {'kappa':>6} {'ll_train':>10} {'ll_val':>10} {'gap':>8} "

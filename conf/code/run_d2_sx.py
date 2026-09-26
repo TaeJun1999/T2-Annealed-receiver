@@ -12,7 +12,11 @@
                    ckpt/d2sx_S2c_N<N>_a<k>[_fb<j>].pt, log logs/train_d2sx_S2c_..., results/d2_gbprime_S2c_....npz and
                    results/d2_gbprime_S2c.csv; the sigma grid is the one measured for S2c (results/sigma_grid_D2_S2c.npz,
                    `runner.py sigma --testbed D2 --prior S2c --cell C1 C2 --tag S2c`), recorded in the checkpoint.
-  --no-gbprime     train (or resume) only, skip the GB' step -- the D3 queue (run_d3.sh) computes GB' once the GMM grid is
+  --prior SV8e     the second testbed SV (user decision 2026-09-26 00:06 CDT; code/sv.py), same scheme with SV8e in every
+                   name: rung D2SXSV8e<N>, ckpt/d2sx_SV8e_N<N>_a<k>[_fb<j>].pt, logs/train_d2sx_SV8e_..., results/
+                   d2_gbprime_SV8e[_...].{csv,npz}, sigma grid results/sigma_grid_D2_SV8e.npz (`runner.py sigma --testbed D2
+                   --prior SV8e --cell C1 C2 --tag SV8e`).
+  --no-gbprime    train (or resume) only, skip the GB' step -- the D3 queue (run_d3.sh) computes GB' once the GMM grid is
                    complete, so GB' can never be taken against a partial grid.
 
 Architecture is the best-D1-gate-score configuration, copied verbatim and never re-searched (04_SPEC §6).
@@ -34,7 +38,8 @@ ap.add_argument("--gmm-ntrain", type=int, default=None)
 ap.add_argument("--n-eval", type=int, default=4096)
 ap.add_argument("--tag", default=None, help="GMM fits dir tag (runner._init: results/gmm_fits_D2_<tag>); default = the "
                                            "untagged dir, as before (NEXT_EXPERIMENTS_B32e4: equal-budget GB' needs it)")
-ap.add_argument("--prior", default="S2", choices=("S2", "S2c"), help="S2 = D2 (default, unchanged); S2c = D3")
+ap.add_argument("--prior", default="S2", choices=("S2", "S2c", "SV8e"),
+                help="S2 = D2 (default, unchanged); S2c = D3; SV8e = second testbed SV (sv.py)")
 ap.add_argument("--no-gbprime", action="store_true", help="train/resume only; no GB' (default: GB' as before)")
 ap.add_argument("--fallback", type=int, default=1, choices=(1, 2, 3),
                 help="10_SPEC §3d ladder after a DIVERGED/aborted run: 2 = grad-norm clip 1.0, 3 = + lr/3 (score.*_LADDER; "
