@@ -87,7 +87,7 @@
 
 ## 6. 결과 (2026-09-25 10:07~18:27 CDT, `run_nr16b_eval.sh` @2a36737c; 이 절은 추가만 한다)
 
-**실행·수용**: ① NR16B16e4 (`_fb2_best.pt`) 10:07~14:16 CDT, ② NR16B16e4last (`_fb2.pt`) 14:16~18:27 CDT (192 워커, CPU complex128, 16 반복). `eval_accept.py` → **ACCEPT: OK -- NR16B16e4, NR16B16e4last** (`results/review_next/NR16B16e4_accept.txt`: 청크 {(40k,40)} 64 × 7 SNR, meta ntrain 160000, bstar kron / kron_K 4096 / ll_val 63.1751571838059, 두 태그 em_sec 동일, ckpt sha·role (best c050d611b2c714a6 / last bf688d605691c7f7), **R5-genie blk_err·ber·tauL_gmean·alphaD @1..16 이 raw_NR16run2 와 7 SNR 전 시행 비트 동일**, 격자 완전성 full 6 + kron 9·K≥1024 후보 3 개씩). manifest `run_manifest_NR16B16e4{,last}.json` (git 2a36737c, config_hash 51ae127c61aacdce). b\*·genie 실패 벡터는 두 태그에서 동일.
+**실행·수용**: ① NR16B16e4 (`_fb2_best.pt`) 10:07~14:16 CDT, ② NR16B16e4last (`_fb2.pt`) 14:16~18:27 CDT (192 워커, CPU complex128, 16 반복). `eval_accept.py` → **ACCEPT: OK -- NR16B16e4, NR16B16e4last** (`results/review_next/NR16B16e4_accept.txt` 는 판정 한 줄이고 아래 검사 항목은 스크립트가 수행: 청크 {(40k,40)} 64 × 7 SNR, meta ntrain 160000, bstar kron / kron_K 4096 / ll_val 63.1751571838059, 두 태그 em_sec 동일, ckpt sha·role (best c050d611b2c714a6 / last bf688d605691c7f7), **R5-genie blk_err·ber·tauL_gmean·alphaD @1..16 이 raw_NR16run2 와 7 SNR 전 시행 비트 동일**, 격자 완전성 full 6 + kron 9·K≥1024 후보 3 개씩). manifest `results/review_next/run_manifest_NR16B16e4{,last}.json` (git 2a36737c, config_hash 51ae127c61aacdce). b\*·genie 실패 벡터는 두 태그에서 동일.
 
 ### 6.1 측정 판정 (C6, 태그 NR16B16e4 = `_best`; UNGATED → 기하·예산 축 측정, arm 판정 아님)
 
@@ -106,7 +106,7 @@
 - 대조군 `M-ours-bstar → M-ours-bstar-scalar` (`:386-390`): 42:65 (0.033) · 11:45 (5.4e-06) · 9:15 (0.31), pooled 62:125, POWERED, `second arm fewer failures at 0/3 points, first arm fewer failures at 2/3 points -> significant` (b\* 행렬 site 우세, 1e4 와 같은 방향).
 - V4 · V4b 도 b\* 를 3/3 점에서 이긴다 (209:32, 195:35; `:374-385`). BLER@16 −3 dB: V1 0.021, V4 0.025, V4b 0.030, b\* 0.072, bstar-scalar 0.081, genie 0.009.
 - V0: −3~+9 dB BLER 1.000, +12 0.979, +15 0.911; F3 가드 −3~+9 dB 1.000, +12 0.998, +15 0.993 (`guard_D2_NR16B16e4.txt`). 가드는 V0 에서만 발동(나머지 12 arm 발동 없음).
-- best 대 last V1 짝 부호검정 (a = best 실패·last 성공): −3 dB 9:8 (p=1), 0 dB 2:6 (0.29), +3 dB 1:2 (1); 3 점 합 12:16 (p=0.57) — 판정하지 못함. B32e4last 표 B: 208:17 POWERED 3/3.
+- best 대 last V1 짝 부호검정 (a = best 실패·last 성공): −3 dB 9:8 (p=1), 0 dB 2:6 (0.29), +3 dB 1:2 (1); 3 점 합 12:16 (p=0.57) — 판정하지 못함. NR16B16e4last 표 B: 208:17 POWERED 3/3.
 - 동일예산 GB′ (§5): 비 0.261~0.508, median 0.283, worst excess −0.492 (1e4: 0.314~0.474, median 0.343).
 - 학습: §3d 시행 1 DIVERGED (epoch 1064), 시행 2 (클리핑 1.0) 정상 — 모든 1.6e5 C6 수치는 시행 2 가중치.
 
@@ -119,3 +119,13 @@
 6. best 대 last 판정 못함: **적중** (12:16).
 7. GB′ median 0.35~0.55 → 0.283 **빗나감** (확산 쪽이 예측보다 더 낮음).
 8. 빗나갈 경로 (c) K=4096 격자 끝 → K=8192 사용자 결정(멈춤), (d) 발산 → §3d 가 실현. (a)(b)(e) 없음.
+
+### 6.4 기록 감사 (Fable, 2026-09-25 20:33 CDT = 09-26 10:33 KST; 독립 재계산 `k1k2c6_review_raw/recompute.py` → `recompute.out`)
+
+**재계산·대조 (raw npz 에서 직접, `analysis.py` 표를 거치지 않음)**: 두 태그 7 SNR 청크 집합 {(40k,40)} 64 개, meta(ntrain 160000 · bstar kron · kron_K 4096 · ll_val 63.1751571838059 · em_sec 46649.95 동일 · stagec_ckpt_id best c050d611b2c714a6 @1684 / last bf688d605691c7f7 @1704), 체크포인트 파일 sha256[:16]·epoch·best_epoch·stopped_by=patience·best val 1.784587e-01, **R5-genie 전 KEYS_RAW 필드가 NR16run2 와 7 SNR 전 시행 비트 동일**, 학습·적합과 무관한 arm 전부(b\*, bstar-scalar, gmm32, R0~R4, genie) 두 태그 간 비트 동일(Stage C 의 V0·V1·V4·V4b 만 다름), 판정점 선택 규칙(앵커 b\* BLER@16 0.0719/0.0238/0.0125 → −3/0/+3) 재현, 표 B 142:11 · 45:4 · 26:3 (pooled 213:18, p 1.8e-43) · last 142:10 · 41:4 · 25:3 (208:17) · 대조군 42:65 · 11:45 · 9:15 · V4 209:32 · V4b 195:35 · best 대 last 9:8 · 2:6 · 1:2 (12:16, p 0.57) 전부 일치(scipy 정확 이항 = house `sign_p`), 회수율 점추정·paired bootstrap 90% CI 세 태그 전부 소수 셋째 자리까지 재현(0.809 [0.747, 0.870] 등), V0 가드율 1.000/…/0.998/0.993, GB′ 비 0.2614~0.5081 median 0.2826, 격자 파일 full 6 + kron 9 + K≥1024 후보 3 개씩, kron 4096 r0/r1/r2 ll_val·n_iter·it_best·재시드, ll_test − gauss_test = 65.0305 − (−121.5679) = 186.598 nat, σ 격자 파일·학습 로그 머리말, §0~§3 은 동결 8f64c45a 이후 불변, `conf/code` 는 a7398611 이후 불변. §6.3 채점 8 항목 모두 원문과 일치.
+
+**정정 (모두 기록 위생; 수치·판정·라벨 불변)**
+1. §6.2 "B32e4last 표 B: 208:17" 은 태그 오기 → **NR16B16e4last** (C6 last-EMA 태그; B32e4last 는 C2 3.2e5 의 418:71) — 본문 수정.
+2. §5 체크포인트 행이 평가 뒤 커밋 5900d25c 에서 자리표시 "[09-25 10:0x CDT]" → "[09-25 10:06 CDT]" 로 채워졌다(그 밖의 글자 변경 없음; 2a36737c 대비 diff 로 확인). §5 는 평가 전 고정 기록이므로 여기 적어 둔다. 그 행의 시각 세 가지: 학습 wall 종료 = 23:49:47 KST 09-25 (= 09-24 23:49 CDT) + 36,743 s → **09-25 10:02 CDT** (last 파일 mtime 00:02:07 KST 09-26 과 일치); 큐 워커의 정상 종료 감지·시행 3 중지 **10:04 CDT** (`logs/nr16b.log`); 프로세스 종료(자동 GB′ 포함) **10:06 CDT** (`GPU 0 done rc=0`). 행의 "~ 10:04 CDT" 는 큐 감지 시각이다.
+3. §6 첫 단락: manifest 경로는 `results/review_next/`(본문 수정); `NR16B16e4_accept.txt` 는 판정 한 줄뿐이고 나열한 검사 항목은 `eval_accept.py` 가 수행한 것(본문 문구 수정; 항목은 위 재계산으로 독립 확인).
+4. `docs/EXPERIMENTS.md` 행 3 의 manifest 경로 같은 정정.
