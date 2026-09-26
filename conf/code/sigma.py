@@ -21,8 +21,8 @@ N_MEAS = 64                 # 04_SPEC §3: "a small n (e.g. 64)"
 # D3 (prior S2c) has no N=1e4 GMM fit, and measure_point needs only the fit file's Chat -- which t2_gmm.fit_gmm_em defines
 # as X^T X^* / n of the stream-7 training set (Demo/t2_gmm.py:145).  For these priors that same sample covariance is
 # computed directly from the same stream (arms.training_set).  Every other prior reads the fit file exactly as before.
-# SV8e (second testbed SV) likewise has no N=1e4 fit: same rule.  MIX3 (38.901) too.
-CHAT_FROM_TRAIN = ("S2c", "SV8e", "MIX3")
+# SV8e (second testbed SV) likewise has no N=1e4 fit: same rule.  MIX3 and UMi28 (38.901) too.
+CHAT_FROM_TRAIN = ("S2c", "SV8e", "MIX3", "UMi28")
 N_GRID = 20                 # "log-equispaced grid, 20 points recommended"
 PCT = (1.0, 99.0)           # "covering the 1-99 percentile of that distribution"
 

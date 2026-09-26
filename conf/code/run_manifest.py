@@ -90,7 +90,12 @@ def main():
                                                           + (("mix3.py",) if priors & set(C.MIX3_PRIORS) else ())
                                                           if os.path.isfile(os.path.join(C.CONF, "code", f))}),
         channel_model=dict(testbed=a.testbed, prior=one(meta.get("prior", set()) or priors or {"S2"}),
-                           description=(("MIX3 = D2-pipeline prior MIX3, 3GPP TR 38.901 via Sionna 2.1 (code/mix3.py): per block UMi 28 GHz / "
+                           description=(("UMi28 = D2-pipeline prior UMi28, 3GPP TR 38.901 via Sionna 2.1 (code/mix3.py): UMi 28 GHz only, "
+                                         "BS ULA Nr, UE ULA 4, half-wavelength, single V pol, omni, uplink, "
+                                         "LoS/NLoS by the model, UE yaw ~ U[-pi,pi), pathloss/shadowing off, narrowband snapshot (CIR summed at "
+                                         "the first time sample), ensemble-normalised E||H||^2 = Nr Nt")
+                                        if priors == {"UMi28"} else
+                                        ("MIX3 = D2-pipeline prior MIX3, 3GPP TR 38.901 via Sionna 2.1 (code/mix3.py): per block UMi 28 GHz / "
                                          "UMa 28 GHz / RMa 3.5 GHz (1/3 each), BS ULA Nr, UE ULA 4, half-wavelength, single V pol, omni, uplink, "
                                          "LoS/NLoS by the model, UE yaw ~ U[-pi,pi), pathloss/shadowing off, narrowband snapshot (CIR summed at "
                                          "the first time sample), ensemble-normalised E||H||^2 = Nr Nt")

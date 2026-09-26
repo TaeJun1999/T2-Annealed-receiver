@@ -10,7 +10,8 @@ Testbeds
   D2  sparse specular multipath (conf/code/d2.py) -- the claim testbed.
       Prior variants run through the same D2 pipeline (TBID 2) with their own PID: S2c = D3 (d2.py) and
       SV8e = the second testbed SV, clustered Saleh-Valenzuela (conf/code/sv.py; make_gen / make_pilots dispatch).
-      MIX3 = the second testbed's standard-model side, 3GPP TR 38.901 UMi28+UMa28+RMa3.5 (conf/code/mix3.py; same dispatch).
+      MIX3 = the second testbed's standard-model side, 3GPP TR 38.901 UMi28+UMa28+RMa3.5 (conf/code/mix3.py; same dispatch);
+      UMi28 = the same with UMi 28 GHz only (mix3.py) -- the MAIN 38.901 experiment, MIX3 report-only (user decision 2026-09-26).
 
 Seeds (conf/01_RULES.md §4: keep the existing convention, change only the experiment number).
   SEED = 20260926.  Trials of one point come from ONE stream
@@ -86,9 +87,10 @@ DEFAULT_CELLS = tuple(c for c in CELLS if CELLS[c]["Tp"] <= CELLS[c]["Nt"])
 PID = {"U": 0, "S": 1, "P": 2, "U2": 3, "S2": 4,      # prior id inside the seed
        "S2c": 5,                                      # D3 = S2 geometry, alpha_l ~ CN(0, p_l) (d2.py): NEW streams
        "SV8e": 6,                                     # SV = clustered Saleh-Valenzuela (sv.py), run as a D2 prior: NEW streams
-       "MIX3": 7}                                     # 3GPP TR 38.901 MIX3 (mix3.py), run as a D2 prior: NEW streams
+       "MIX3": 7,                                     # 3GPP TR 38.901 MIX3 (mix3.py), run as a D2 prior: NEW streams
+       "UMi28": 8}                                    # 3GPP TR 38.901 UMi 28 GHz only (mix3.py), run as a D2 prior: NEW streams
 SV_PRIORS = ("SV8e",)                                  # priors served by sv.SVGen / sv.ensemble_sides_sv (== sv.PRIORS)
-MIX3_PRIORS = ("MIX3",)                                # priors served by mix3.MIX3Gen / mix3.ensemble_sides_mix3 (== mix3.PRIORS)
+MIX3_PRIORS = ("MIX3", "UMi28")                              # priors served by mix3.MIX3Gen / mix3.ensemble_sides_mix3 (== mix3.PRIORS)
 TBID = {"D1": 1, "D2": 2}
 PRIOR_OF = {"D1": "S", "D2": "S2"}                     # primary prior per testbed (06_SPEC §2)
 
@@ -290,12 +292,21 @@ MIX3_WARNING = (
     "# Reference = known-channel receiver (R5-genie: same EP detector + BCJR, true H); not a bound.\n"
     "# " + "=" * 100
 )
+UMI28_WARNING = (
+    "# " + "=" * 100 + "\n"
+    "# SECOND TESTBED, STANDARD-MODEL SIDE (prior UMi28) -- 3GPP TR 38.901 via Sionna 2.1: UMi 28 GHz only (the main 38.901 experiment;\n"
+    "# MIX3 = report-only side point), LoS/NLoS by the model, UE yaw uniform, pathloss/shadowing off, narrowband snapshot, ensemble-normalised\n"
+    "# (code/mix3.py). NOT sparse specular. Phase-0 channel statistics predicted NO learned-prior advantage here (boundary-both-sides test).\n"
+    "# Reference = known-channel receiver (R5-genie: same EP detector + BCJR, true H); not a bound.\n"
+    "# " + "=" * 100
+)
+MIX3_WARNINGS = {"MIX3": MIX3_WARNING, "UMi28": UMI28_WARNING}
 
 
 def banner(testbed, prior):
     """Testbed warning under a results header.  SV / MIX3 priors get their own text (never D2's 'sparse specular' text); every
     other (testbed, prior) gets exactly what it got before SV existed (D1 -> D1_WARNING, D2 -> D2_WARNING)."""
-    return (D1_WARNING if testbed == "D1" else SV_WARNING if prior in SV_PRIORS else MIX3_WARNING if prior in MIX3_PRIORS
+    return (D1_WARNING if testbed == "D1" else SV_WARNING if prior in SV_PRIORS else MIX3_WARNINGS[prior] if prior in MIX3_PRIORS
             else D2_WARNING)
 
 

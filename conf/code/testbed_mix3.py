@@ -1,4 +1,6 @@
-"""conf/code/testbed_mix3.py -- verification of the 38.901 MIX3 prior (code/mix3.py) -> results/testbed_MIX3.txt.
+"""conf/code/testbed_mix3.py [MIX3|UMi28] -- verification of a 38.901 prior (code/mix3.py) -> results/testbed_<prior>.txt.
+UMi28 (added 2026-09-26, the main 38.901 experiment): same checks and tolerances against its own phase-0 probe UMi28_mix_8_seed1.json
+(same law: UMi 28 GHz, LoS by the model); its scenario share is 1 by construction.
 
 Checks (tolerances fixed here before the first run; no receiver / BLER anywhere):
   TMXa normalisation: mean ||H||_F^2 / (Nr Nt) on the VALIDATION stream (8), n = N_VAL, within 4 MC s.e. of 1 (the constant
@@ -19,21 +21,25 @@ import d2
 import mix3
 
 NR, NT, N_VAL = 8, 4, 20000
-OUT = os.path.join(C.CONF, "results", "testbed_MIX3.txt")
-PROBE = os.path.join(C.CONF, "results", "review_next", "testbed2_phase0", "phy_results", "MIX3_8_seed1.json")
+PRIOR = sys.argv[1] if len(sys.argv) > 1 else "MIX3"
+assert PRIOR in mix3.PRIORS, PRIOR
+OUT = os.path.join(C.CONF, "results", f"testbed_{PRIOR}.txt")
+PROBE = os.path.join(C.CONF, "results", "review_next", "testbed2_phase0", "phy_results",
+                     {"MIX3": "MIX3_8_seed1.json", "UMi28": "UMi28_mix_8_seed1.json"}[PRIOR])
+NS = mix3.NSCEN[PRIOR]
 
 
 def main():
     t_start = time.time()
-    g = C.make_gen("D2", "MIX3", NR, NT)
+    g = C.make_gen("D2", PRIOR, NR, NT)
     L = [f"# date        : {time.strftime('%Y-%m-%d %H:%M:%S KST')}",
          f"# git commit  : {subprocess.run(['git', '-C', C.CONF, 'rev-parse', '--short=8', 'HEAD'], capture_output=True, text=True).stdout.strip()}",
-         f"# content     : testbed_mix3.py -- 3GPP TR 38.901 MIX3 (code/mix3.py), Nr={NR} x Nt={NT}; streams from common.train_rng('D2','MIX3',...)",
-         f"# calibration : P_RAW={mix3.P_RAW[(NR, NT)]!r}  TRAIN_SHA={mix3.TRAIN_SHA.get((NR, NT))}  (n={mix3.N_CAL}, train stream 7)", ""]
+         f"# content     : testbed_mix3.py -- 3GPP TR 38.901 {PRIOR} (code/mix3.py), Nr={NR} x Nt={NT}; streams from common.train_rng('D2','{PRIOR}',...)",
+         f"# calibration : P_RAW={mix3.P_RAW[(PRIOR, NR, NT)]!r}  TRAIN_SHA={mix3.TRAIN_SHA.get((PRIOR, NR, NT))}  (n={mix3.N_CAL}, train stream 7)", ""]
     ok = True
     aux = []
     t0 = time.time()
-    H = g._draw(C.train_rng("D2", "MIX3", NR, 8), N_VAL, aux)
+    H = g._draw(C.train_rng("D2", PRIOR, NR, 8), N_VAL, aux)
     t_val = time.time() - t0
     p = np.sum(np.abs(H) ** 2, (1, 2)) / (NR * NT)
     se = p.std() / np.sqrt(len(p))
@@ -49,12 +55,12 @@ def main():
     pr = json.load(open(PROBE)) if os.path.exists(PROBE) else None
     lf = los.mean(); lp = pr["los_frac"] if pr else np.nan
     se_l = np.sqrt(lp * (1 - lp) / 1000 + lf * (1 - lf) / N_VAL)
-    shares = np.bincount(codes, minlength=3) / N_VAL
-    b = abs(lf - lp) <= 4 * se_l and np.all(np.abs(shares - 1 / 3) <= 4 * np.sqrt((1 / 3) * (2 / 3) / N_VAL))
+    shares = np.bincount(codes, minlength=NS) / N_VAL
+    b = abs(lf - lp) <= 4 * se_l and np.all(np.abs(shares - 1 / NS) <= 4 * np.sqrt((1 / NS) * (1 - 1 / NS) / N_VAL + 1e-300))
     ok &= b
-    per = ", ".join(f"{mix3.SCEN[c][0]}@{mix3.SCEN[c][1] / 1e9:g}GHz share {shares[c]:.3f} LoS {los[codes == c].mean():.3f}" for c in range(3))
+    per = ", ".join(f"{mix3.SCEN[c][0]}@{mix3.SCEN[c][1] / 1e9:g}GHz share {shares[c]:.3f} LoS {los[codes == c].mean():.3f}" for c in range(NS))
     L.append(f"TMXc LoS fraction {lf:.4f} vs probe {lp:.3f} (4 s.e. = {4 * se_l:.3f}); {per} -> {'PASS' if b else 'FAIL'}")
-    Xtr = g.sample_vecs(C.train_rng("D2", "MIX3", NR, 7), 40000)
+    Xtr = g.sample_vecs(C.train_rng("D2", PRIOR, NR, 7), 40000)
     Chat = Xtr.T @ Xtr.conj() / len(Xtr)
     s2 = 10 ** (3 / 10); nu = s2 / NT
     h = H.transpose(0, 2, 1).reshape(N_VAL, NR * NT)
@@ -66,9 +72,9 @@ def main():
     c_ = abs(nm - kp) <= 0.02
     ok &= c_
     L.append(f"TMXd pilot-stage K=1 Gaussian NMSE @ -3 dB (nu = sigma^2/Nt): {nm:.4f} vs probe {kp:.4f} (|diff| <= 0.02) -> {'PASS' if c_ else 'FAIL'}")
-    Rt, Rr, inf = mix3.ensemble_sides_mix3("MIX3", NR, NT)
+    Rt, Rr, inf = mix3.ensemble_sides_mix3(PRIOR, NR, NT)
     ev = np.linalg.eigvalsh(Chat)
-    pil, _ = C.make_pilots("D2", "MIX3", NT, 4, NR)
+    pil, _ = C.make_pilots("D2", PRIOR, NT, 4, NR)
     F = np.fft.fft(np.fft.fft(H, axis=1, norm="ortho"), axis=2, norm="ortho")
     en = np.sort((np.abs(F) ** 2).reshape(N_VAL, -1), 1)[:, ::-1]
     top4 = np.median(en[:, :4].sum(1) / en.sum(1))

@@ -46,31 +46,35 @@ no CUDA context is created).  Consequences:
                            for every n >= CHUNK j; sample(rng) == sample_vecs(rng, 1)[0] (as a matrix).
 Pilot decision: the D2 T2b rule of common.make_pilots on the transmit side Rt = E[H^H H] / Nr (and Rr = E[H H^H] / Nt),
 estimated on the same N_CAL normalised training channels and frozen below (no closed form exists for 38.901).
-Constants are calibrated for Nr = 8 x Nt = 4 only (cells C1/C2/C5/C7/C8); any other array raises -- it needs its own
+Constants are calibrated for Nr = 8 x Nt = 4 only (per prior: MIX3, UMi28) (cells C1/C2/C5/C7/C8); any other array raises -- it needs its own
 `calibrate` and a decision.  The testbed is FROZEN by the user decision: change nothing here without a new decision and a
 new prior id.
 """
 import numpy as np
 
-PRIORS = ("MIX3",)                        # == common.MIX3_PRIORS
-SCEN = (("umi", 28e9), ("uma", 28e9), ("rma", 3.5e9))   # scenario code 0 / 1 / 2, drawn with probability 1/3 each
+PRIORS = ("MIX3", "UMi28")               # == common.MIX3_PRIORS
+SCEN = (("umi", 28e9), ("uma", 28e9), ("rma", 3.5e9))   # scenario code 0 / 1 / 2, drawn with probability 1/3 each (MIX3)
+# scenario codes a prior draws from: MIX3 = all three; UMi28 (user decision 2026-09-26: UMi 28 GHz single = the MAIN 38.901
+# experiment, MIX3 = report-only side point) = code 0 only.  Everything else in this file is shared, so UMi28 is MIX3 with the
+# scenario draw restricted to UMi 28 GHz: its own PID (8), streams, calibration constants and output names.
+NSCEN = {"MIX3": 3, "UMi28": 1}
 PRECISION = "single"                      # Sionna default (the probe); cast to complex128 afterwards
 CHUNK = 4096                              # blocks per (scenario codes, seed) draw -- part of the stream definition
 N_CAL = 160000                            # calibration set = train stream 7, the equal-budget N'
 
 # ---- frozen calibration (python mix3.py calibrate, 2026-09-26; re-derived by testbed_mix3.py TMXa) ----------------------
-P_RAW = {}                                # (Nr, Nt) -> mean ||H_raw||_F^2 / (Nr Nt) over the N_CAL training channels
-RT = {}                                   # (Nr, Nt) -> Rt = mean H^H H / Nr   (normalised channels, Hermitian)
-RR = {}                                   # (Nr, Nt) -> Rr = mean H H^H / Nt
-TRAIN_SHA = {}                            # (Nr, Nt) -> sha256[:16] of sample_vecs(train stream 7, N_CAL) (determinism pin)
+P_RAW = {}                                # (prior, Nr, Nt) -> mean ||H_raw||_F^2 / (Nr Nt) over the N_CAL training channels
+RT = {}                                   # (prior, Nr, Nt) -> Rt = mean H^H H / Nr   (normalised channels, Hermitian)
+RR = {}                                   # (prior, Nr, Nt) -> Rr = mean H H^H / Nt
+TRAIN_SHA = {}                            # (prior, Nr, Nt) -> sha256[:16] of sample_vecs(train stream 7, N_CAL) (determinism pin)
 # frozen: calibrate Nr=8 x Nt=4, n=160000, 170 s  (python mix3.py calibrate 8)
-P_RAW[(8, 4)] = 0.9953569092328413
-TRAIN_SHA[(8, 4)] = '9f595676e0d1a032'
-RT[(8, 4)] = np.array([[(1.0009332727414644+0j), (-0.27054562088274087+0.0002451063646198042j), (0.17259441930429084-0.0004109801294150752j), (-0.1280194642081623-0.0008503369308294897j)],
+P_RAW[('MIX3', 8, 4)] = 0.9953569092328413
+TRAIN_SHA[('MIX3', 8, 4)] = '9f595676e0d1a032'
+RT[('MIX3', 8, 4)] = np.array([[(1.0009332727414644+0j), (-0.27054562088274087+0.0002451063646198042j), (0.17259441930429084-0.0004109801294150752j), (-0.1280194642081623-0.0008503369308294897j)],
     [(-0.27054562088274087-0.0002451063646198042j), (1.0021623842548728+0j), (-0.2719093296670437+0.002376400298380673j), (0.17522299043441894+0.0008179034956510487j)],
     [(0.17259441930429084+0.0004109801294150752j), (-0.2719093296670437-0.002376400298380673j), (0.9990340788476292+0j), (-0.27042562184651286-0.0005263201596676682j)],
     [(-0.1280194642081623+0.0008503369308294897j), (0.17522299043441894-0.0008179034956510487j), (-0.27042562184651286+0.0005263201596676682j), (0.9978702641561333+0j)]])
-RR[(8, 4)] = np.array([[(0.999736428697338+0j), (-0.007166625352446147+0.0022845227481888687j), (-0.06049177208651353-0.001348236822703462j), (0.056150877398057096+0.0016632383349925732j), (-0.04561545806741656+3.6949243885794374e-05j), (0.027018500425886015-0.0010221990199374377j), (-0.007969234443990522+0.00212636450483282j), (-0.00541527453983228-0.0005176571722800041j)],
+RR[('MIX3', 8, 4)] = np.array([[(0.999736428697338+0j), (-0.007166625352446147+0.0022845227481888687j), (-0.06049177208651353-0.001348236822703462j), (0.056150877398057096+0.0016632383349925732j), (-0.04561545806741656+3.6949243885794374e-05j), (0.027018500425886015-0.0010221990199374377j), (-0.007969234443990522+0.00212636450483282j), (-0.00541527453983228-0.0005176571722800041j)],
     [(-0.007166625352446147-0.0022845227481888687j), (1.0018114123982662+0j), (-0.007160443162139199+0.002374664803387415j), (-0.060315148137301815-0.0018782236643798186j), (0.055568584260627205+0.0010990066564992766j), (-0.044927478143429934+0.0016166213189996556j), (0.027701523730895645-0.0023362838570884907j), (-0.00808731707289564+0.0023709609831948325j)],
     [(-0.06049177208651353+0.001348236822703462j), (-0.007160443162139199-0.002374664803387415j), (1.0008532819794096+0j), (-0.007089445596257415+0.00272922598804953j), (-0.06062827018884898-0.002150175133321894j), (0.054940383227647424+0.001067699918998112j), (-0.04596725162446934+0.0013187407342104723j), (0.02770421362317646-0.0017035991055400121j)],
     [(0.056150877398057096-0.0016632383349925732j), (-0.060315148137301815+0.0018782236643798186j), (-0.007089445596257415-0.00272922598804953j), (1.0013878905050857+0j), (-0.007155686304401635+0.0034206164498523017j), (-0.060363754886187455-0.0030029087157924647j), (0.05372724893360056+0.001459122477587414j), (-0.04615551840014244+0.00019437287485746263j)],
@@ -78,6 +82,22 @@ RR[(8, 4)] = np.array([[(0.999736428697338+0j), (-0.007166625352446147+0.0022845
     [(0.027018500425886015+0.0010221990199374377j), (-0.044927478143429934-0.0016166213189996556j), (0.054940383227647424-0.001067699918998112j), (-0.060363754886187455+0.0030029087157924647j), (-0.0075764104103143185-0.0019377736118713562j), (0.9993937772859388+0j), (-0.008024582171857373+0.0017522250973352454j), (-0.05922122858649884-0.0010042538983975734j)],
     [(-0.007969234443990522-0.00212636450483282j), (0.027701523730895645+0.0023362838570884907j), (-0.04596725162446934-0.0013187407342104723j), (0.05372724893360056-0.001459122477587414j), (-0.059948396232263806+0.0008621692327185646j), (-0.008024582171857373-0.0017522250973352454j), (0.9980497979998405+0j), (-0.007974050325738936+0.0020680437482211243j)],
     [(-0.00541527453983228+0.0005176571722800041j), (-0.00808731707289564-0.0023709609831948325j), (0.02770421362317646+0.0017035991055400121j), (-0.04615551840014244-0.00019437287485746263j), (0.055235885392043466-0.0016785524909191018j), (-0.05922122858649884+0.0010042538983975734j), (-0.007974050325738936-0.0020680437482211243j), (0.9974278900667911+0j)]])
+
+# frozen: calibrate UMi28 Nr=8 x Nt=4, n=160000, 212 s  (python mix3.py calibrate 8 UMi28, 2026-09-26)
+P_RAW[('UMi28', 8, 4)] = 0.9901769449816289
+TRAIN_SHA[('UMi28', 8, 4)] = 'a2f617f3111ea64e'
+RT[('UMi28', 8, 4)] = np.array([[(1.0003961328312587+0j), (-0.2686224009014187-0.0009643954453976077j), (0.171406039607806+0.0014445866548200442j), (-0.12127370685603478-0.0008229676400565097j)],
+    [(-0.2686224009014187+0.0009643954453976077j), (0.9992844906610981+0j), (-0.2684113551288825-0.0016145913565854752j), (0.1704873483561447+0.0007879587669744631j)],
+    [(0.171406039607806-0.0014445866548200442j), (-0.2684113551288825+0.0016145913565854752j), (1.0008773186270599+0j), (-0.2687209438937448-0.001916049165887641j)],
+    [(-0.12127370685603478+0.0008229676400565097j), (0.1704873483561447-0.0007879587669744631j), (-0.2687209438937448+0.001916049165887641j), (0.999442057880558+0j)]])
+RR[('UMi28', 8, 4)] = np.array([[(1.000039928571399+0j), (-0.02646167097988044+0.0003111003565857812j), (-0.042318926522205876-0.00013687656108564756j), (0.03696418462577163-0.0007192739366643248j), (-0.02534149629792758-3.104622027898344e-05j), (0.00915015284888725-0.0022386932180064253j), (0.006188932845477577-0.0019167599083752525j), (-0.02310810813357983-0.0003482602253936063j)],
+    [(-0.02646167097988044-0.0003111003565857812j), (1.0003894112132674+0j), (-0.02590673474914516-0.0014159136220894177j), (-0.04387632544910598+0.00021970026359298506j), (0.0354808724808977-0.0009629791119311966j), (-0.02558862977393446-0.0012940581598668206j), (0.007906115221886506-0.0006213572092045581j), (0.006381107537495347-0.0016567909936138498j)],
+    [(-0.042318926522205876+0.00013687656108564756j), (-0.02590673474914516+0.0014159136220894177j), (1.0002696058547695+0j), (-0.026029530072668304-0.0018649156409124737j), (-0.0429408422681334+0.0019811660887876065j), (0.03633950559728484-0.0014889784806709496j), (-0.02674070682972203+0.00013897270285965593j), (0.007086051396903938-0.0002055345240552344j)],
+    [(0.03696418462577163+0.0007192739366643248j), (-0.04387632544910598-0.00021970026359298506j), (-0.026029530072668304+0.0018649156409124737j), (0.9988652841718971+0j), (-0.026108602199849305-0.00031735288627148065j), (-0.04225430061986634+0.0008757038561791272j), (0.036574577754492264-0.0010736407046552728j), (-0.026544512496388513-0.000668210457803723j)],
+    [(-0.02534149629792758+3.104622027898344e-05j), (0.0354808724808977+0.0009629791119311966j), (-0.0429408422681334-0.0019811660887876065j), (-0.026108602199849305+0.00031735288627148065j), (0.9999176927083474+0j), (-0.026643687752542344-0.0002074875928357849j), (-0.04348944110785486-0.00017894945203587759j), (0.035969018304352555-0.0012903460316100216j)],
+    [(0.00915015284888725+0.0022386932180064253j), (-0.02558862977393446+0.0012940581598668206j), (0.03633950559728484+0.0014889784806709496j), (-0.04225430061986634-0.0008757038561791272j), (-0.026643687752542344+0.0002074875928357849j), (0.9991270739493676+0j), (-0.02592887893765017+0.0007100916347385661j), (-0.04373249577063332-0.00040603341893112203j)],
+    [(0.006188932845477577+0.0019167599083752525j), (0.007906115221886506+0.0006213572092045581j), (-0.02674070682972203-0.00013897270285965593j), (0.036574577754492264+0.0010736407046552728j), (-0.04348944110785486+0.00017894945203587759j), (-0.02592887893765017-0.0007100916347385661j), (1.000837288916488+0j), (-0.025364315984934625-0.0009588091183233868j)],
+    [(-0.02310810813357983+0.0003482602253936063j), (0.006381107537495347+0.0016567909936138498j), (0.007086051396903938+0.0002055345240552344j), (-0.026544512496388513+0.000668210457803723j), (0.035969018304352555+0.0012903460316100216j), (-0.04373249577063332+0.00040603341893112203j), (-0.025364315984934625+0.0009588091183233868j), (1.0005537146145245+0j)]])
 
 _SL = None
 
@@ -174,19 +194,19 @@ class MIX3Gen:
 
     def __init__(self, prior, Nr, Nt, raw=False):
         assert prior in PRIORS, f"MIX3 priors are {PRIORS}, got {prior!r}"
-        if not raw and (Nr, Nt) not in P_RAW:
-            raise ValueError(f"MIX3 is calibrated for {sorted(P_RAW)} only, not Nr={Nr} x Nt={Nt}: another array needs "
-                             "`python mix3.py calibrate <Nr>` and a decision (mix3.py docstring)")
+        if not raw and (prior, Nr, Nt) not in P_RAW:
+            raise ValueError(f"{prior} is calibrated for {sorted(k for k in P_RAW if k[0] == prior)} only, not Nr={Nr} x Nt={Nt}: "
+                             "another array needs `python mix3.py calibrate <Nr> <prior>` and a decision (mix3.py docstring)")
         self.kind = prior
         self.Nr, self.Nt, self.N = Nr, Nt, Nr * Nt
-        self.s = 1.0 if raw else float(np.sqrt(P_RAW[(Nr, Nt)]))      # raw=True: calibration only
+        self.s = 1.0 if raw else float(np.sqrt(P_RAW[(prior, Nr, Nt)]))      # raw=True: calibration only
 
     def _draw(self, rng, n, aux=None):
         """n blocks (n, Nr, Nt), normalised; per CHUNK: scenario codes, then one uint64 seed, from rng."""
         out = np.empty((n, self.Nr, self.Nt), complex)
         for i in range(0, n, CHUNK):
             m = min(CHUNK, n - i)
-            codes = rng.integers(0, len(SCEN), m)
+            codes = rng.integers(0, NSCEN[self.kind], m)
             seed = int(rng.integers(0, 2 ** 64, dtype=np.uint64))
             sub = [] if aux is not None else None
             out[i:i + m] = _generate(codes, seed, self.Nr, self.Nt, sub) / self.s
@@ -207,22 +227,22 @@ def ensemble_sides_mix3(prior, Nr, Nt):
     (tr Rt = Nt, tr Rr = Nr up to the normalisation), informative = the T2b rule erank(Rt) < 0.9 Nt."""
     import d2
     assert prior in PRIORS, prior
-    if (Nr, Nt) not in RT:
-        raise ValueError(f"MIX3 ensemble sides exist for {sorted(RT)} only, not Nr={Nr} x Nt={Nt}")
-    Rt = RT[(Nr, Nt)]
-    return Rt, RR[(Nr, Nt)], bool(d2._erank(np.linalg.eigvalsh(Rt)) < d2.T2B_ERANK_FRAC * Nt)
+    if (prior, Nr, Nt) not in RT:
+        raise ValueError(f"{prior} ensemble sides exist for {sorted(RT)} only, not Nr={Nr} x Nt={Nt}")
+    Rt = RT[(prior, Nr, Nt)]
+    return Rt, RR[(prior, Nr, Nt)], bool(d2._erank(np.linalg.eigvalsh(Rt)) < d2.T2B_ERANK_FRAC * Nt)
 
 
-def calibration_set(Nr, Nt):
+def calibration_set(prior, Nr, Nt):
     """The N_CAL RAW training channels (n, Nr, Nt) of train stream 7, exactly the draws training_set(ntrain=N_CAL) makes."""
     import common as C
-    return MIX3Gen("MIX3", Nr, Nt, raw=True)._draw(C.train_rng("D2", "MIX3", Nr, 7), N_CAL)
+    return MIX3Gen(prior, Nr, Nt, raw=True)._draw(C.train_rng("D2", prior, Nr, 7), N_CAL)
 
 
-def calibrate(Nr, Nt, H=None):
+def calibrate(prior, Nr, Nt, H=None):
     """-> (P_RAW, Rt, Rr, sha) from the raw calibration set; sha is that of the NORMALISED vec set (= sample_vecs)."""
     import hashlib
-    H = calibration_set(Nr, Nt) if H is None else H
+    H = calibration_set(prior, Nr, Nt) if H is None else H
     n = len(H)
     p = float(np.mean(np.sum(H.real ** 2 + H.imag ** 2, (1, 2)))) / (Nr * Nt)
     Hn = H / float(np.sqrt(p))
@@ -240,9 +260,11 @@ if __name__ == "__main__":
     import common as C                    # noqa: F401  (thread env before numpy's BLAS is used)
     if sys.argv[1:2] == ["calibrate"]:
         Nr = int(sys.argv[2]) if len(sys.argv) > 2 else 8
+        pr = sys.argv[3] if len(sys.argv) > 3 else "MIX3"
         t0 = time.time()
-        p, Rt, Rr, sha = calibrate(Nr, C.NT)
+        p, Rt, Rr, sha = calibrate(pr, Nr, C.NT)
         lit = lambda A: "np.array([" + ",\n    ".join("[" + ", ".join(repr(complex(x)) for x in row) + "]" for row in A) + "])"
-        print(f"# calibrate Nr={Nr} x Nt={C.NT}, n={N_CAL}, {time.time() - t0:.0f} s")
-        print(f"P_RAW[({Nr}, {C.NT})] = {p!r}\nTRAIN_SHA[({Nr}, {C.NT})] = {sha!r}")
-        print(f"RT[({Nr}, {C.NT})] = {lit(Rt)}\nRR[({Nr}, {C.NT})] = {lit(Rr)}")
+        print(f"# calibrate {pr} Nr={Nr} x Nt={C.NT}, n={N_CAL}, {time.time() - t0:.0f} s")
+        k = f"({pr!r}, {Nr}, {C.NT})"
+        print(f"P_RAW[{k}] = {p!r}\nTRAIN_SHA[{k}] = {sha!r}")
+        print(f"RT[{k}] = {lit(Rt)}\nRR[{k}] = {lit(Rr)}")

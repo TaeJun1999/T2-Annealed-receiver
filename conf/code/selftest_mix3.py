@@ -122,9 +122,9 @@ def properties():
     import score
     import sigma
     import mix3
-    assert C.PID["MIX3"] == 7 and sorted(C.PID.values()) == list(range(len(C.PID))), C.PID
-    assert C.MIX3_PRIORS == mix3.PRIORS == ("MIX3",) and "MIX3" in sigma.CHAT_FROM_TRAIN
-    assert (8, 4) in mix3.P_RAW and (8, 4) in mix3.RT, "MIX3 calibration constants missing"
+    assert C.PID["MIX3"] == 7 and C.PID["UMi28"] == 8 and sorted(C.PID.values()) == list(range(len(C.PID))), C.PID
+    assert C.MIX3_PRIORS == mix3.PRIORS == ("MIX3", "UMi28") and {"MIX3", "UMi28"} <= set(sigma.CHAT_FROM_TRAIN)
+    assert all((p, 8, 4) in mix3.P_RAW and (p, 8, 4) in mix3.RT for p in mix3.PRIORS), "calibration constants missing"
     g = C.make_gen("D2", "MIX3", 8, 4)
     assert isinstance(g, mix3.MIX3Gen) and g.prior is None and g.N == 32
     nt = torch.get_num_threads()
@@ -158,7 +158,7 @@ def properties():
             assert pil == ("eig" if inf else "dft") and Xp.shape == (c["Nt"], c["Tp"])
     for p in ("S2", "U2", "S2c"):
         assert C.banner("D2", p) == C.D2_WARNING
-    assert C.banner("D2", "SV8e") == C.SV_WARNING and C.banner("D2", "MIX3") == C.MIX3_WARNING
+    assert C.banner("D2", "SV8e") == C.SV_WARNING and C.banner("D2", "MIX3") == C.MIX3_WARNING and C.banner("D2", "UMi28") == C.UMI28_WARNING
     runner.TAG = None
     for cell in CELLS8:
         f = os.path.basename(runner.raw_file("D2", cell, "MIX3", "dft", -3.0, 2560, 40))
@@ -168,8 +168,8 @@ def properties():
     out = []
     analysis.table_D("D2", out, os.path.join(REPO, "conf", "results"), priors={"MIX3"})
     assert "gate_D2.txt / gmm_fit_D2.txt describe the D2 (S2) testbed" in "\n".join(out)
-    ix = {score._rung_ix(f"D2SX{p}{n}") for p in ("", "S2c", "SV8e", "MIX3") for n in (10000, 40000, 160000, 320000)}
-    assert len(ix) == 16, "rung seed collision"
+    ix = {score._rung_ix(f"D2SX{p}{n}") for p in ("", "S2c", "SV8e", "MIX3", "UMi28") for n in (10000, 40000, 160000, 320000)}
+    assert len(ix) == 20, "rung seed collision"
     print(f"properties: PID MIX3=7, MIX3Gen column-major / deterministic across processes / new streams / threads restored, "
           f"normalisation {pw:.4f} (val stream, n=4096), pilots {'eig' if inf else 'dft'} (T2b rule; Tp>Nt DFT branch), banners, "
           "raw_file<->PAT, table_D note, rung seeds distinct -- OK")

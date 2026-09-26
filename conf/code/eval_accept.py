@@ -43,7 +43,7 @@ def main():
     ap.add_argument("--ref-raw", default=None)
     ap.add_argument("--fits-dir", default=None)
     ap.add_argument("--grid", default=None)
-    ap.add_argument("--prior", default="S2", help="prior in the fit file names (D3: S2c, SV: SV8e, 38.901: MIX3)")
+    ap.add_argument("--prior", default="S2", help="prior in the fit file names (D3: S2c, SV: SV8e, 38.901: UMi28 / MIX3)")
     ap.add_argument("--bstar", default="kron", help="expected meta|bstar: 'kron' (default, every earlier tag) or a full-K name such as gmm256")
     a = ap.parse_args()
     plan = [(a.chunk * k, a.chunk) for k in range(a.n // a.chunk)]
