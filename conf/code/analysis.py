@@ -57,7 +57,7 @@ RAW = os.path.join(C.CONF, "raw")
 
 # prior group [A-Z]\d?c?: the trailing 'c' is the D3 prior S2c (2026-09-25); every older file name parses as before.
 # |SV8e: the second testbed SV (2026-09-26), tried only after the first alternative fails, so old names are unaffected.
-PAT = re.compile(r"^(D1|D2)_(C\d)_([A-Z]\d?c?|SV8e)_Nr(\d+)_T(\d+)_Tp(\d+)_(dft|eig)_snr(-?\d+)_skip(\d+)_n(\d+)\.npz$")
+PAT = re.compile(r"^(D1|D2)_(C\d)_([A-Z]\d?c?|SV8e|MIX3)_Nr(\d+)_T(\d+)_Tp(\d+)_(dft|eig)_snr(-?\d+)_skip(\d+)_n(\d+)\.npz$")
 
 # ----------------------------------------------------------------------------- arm sets (06_SPEC §1)
 # D2 has NO R6-exactEP (no exact EP site for the true prior) and NO M-ours-score (no exact score).
@@ -522,7 +522,11 @@ def table_D(testbed, out, results_dir=None, priors=()):
     priors: the priors of the raw set.  An SV-only set does NOT echo the D2 (S2) files, which describe another testbed."""
     R = results_dir or RESULTS
     _p(out, "\n" + "=" * 30, "TABLE D -- training quality, independent of BLER (08_SPEC §3.5)", "=" * 30)
-    if priors and set(priors) <= set(C.SV_PRIORS):
+    if priors and set(priors) <= set(C.MIX3_PRIORS):
+        _p(out, f"MIX3 ({', '.join(sorted(priors))}): the D2 files gate_D2.txt / gmm_fit_D2.txt describe the D2 (S2) testbed and are "
+                "NOT echoed here. MIX3 training quality: GB' in results/d2_gbprime_MIX3.csv (+ d2_gbprime_MIX3_*.npz), GMM "
+                "grid in results/gmm_fits_D2_<tag>/fit_MIX3_*, testbed verification in results/testbed_MIX3.txt.")
+    elif priors and set(priors) <= set(C.SV_PRIORS):
         _p(out, f"SV ({', '.join(sorted(priors))}): the D2 files gate_D2.txt / gmm_fit_D2.txt describe the D2 (S2) testbed and are "
                 "NOT echoed here. SV training quality: GB' in results/d2_gbprime_SV8e.csv (+ d2_gbprime_SV8e_*.npz), GMM "
                 "grid in results/gmm_fits_D2_<tag>/fit_SV8e_*, testbed verification in results/testbed_SV.txt.")
@@ -657,12 +661,14 @@ def main(testbed, tag="", root=None, out_dir=None, results_dir=None):
     pri = {p for _, p in _groups(data)}
     if testbed == "D1":
         _p(out, D1_WARNING)
-    if testbed != "D1" and (pri - {"S2c"} - set(C.SV_PRIORS) or not pri):     # D2 proper: printed exactly as before
+    if testbed != "D1" and (pri - {"S2c"} - set(C.SV_PRIORS) - set(C.MIX3_PRIORS) or not pri):     # D2 proper: printed exactly as before
         _p(out, D2_WARNING)
     if testbed != "D1" and "S2c" in pri:                    # D3 = prior S2c: conditional Gaussianity RESTORED
         _p(out, D3_WARNING)
     if testbed != "D1" and pri & set(C.SV_PRIORS):         # second testbed SV: never the 'sparse specular' banner
         _p(out, C.SV_WARNING)
+    if testbed != "D1" and pri & set(C.MIX3_PRIORS):       # 38.901 MIX3: never the 'sparse specular' banner
+        _p(out, C.MIX3_WARNING)
     for w in warns:
         _p(out, w)
     if not _groups(data):

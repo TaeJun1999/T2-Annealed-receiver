@@ -10,6 +10,7 @@ Testbeds
   D2  sparse specular multipath (conf/code/d2.py) -- the claim testbed.
       Prior variants run through the same D2 pipeline (TBID 2) with their own PID: S2c = D3 (d2.py) and
       SV8e = the second testbed SV, clustered Saleh-Valenzuela (conf/code/sv.py; make_gen / make_pilots dispatch).
+      MIX3 = the second testbed's standard-model side, 3GPP TR 38.901 UMi28+UMa28+RMa3.5 (conf/code/mix3.py; same dispatch).
 
 Seeds (conf/01_RULES.md §4: keep the existing convention, change only the experiment number).
   SEED = 20260926.  Trials of one point come from ONE stream
@@ -84,8 +85,10 @@ DEFAULT_CELLS = tuple(c for c in CELLS if CELLS[c]["Tp"] <= CELLS[c]["Nt"])
 
 PID = {"U": 0, "S": 1, "P": 2, "U2": 3, "S2": 4,      # prior id inside the seed
        "S2c": 5,                                      # D3 = S2 geometry, alpha_l ~ CN(0, p_l) (d2.py): NEW streams
-       "SV8e": 6}                                     # SV = clustered Saleh-Valenzuela (sv.py), run as a D2 prior: NEW streams
+       "SV8e": 6,                                     # SV = clustered Saleh-Valenzuela (sv.py), run as a D2 prior: NEW streams
+       "MIX3": 7}                                     # 3GPP TR 38.901 MIX3 (mix3.py), run as a D2 prior: NEW streams
 SV_PRIORS = ("SV8e",)                                  # priors served by sv.SVGen / sv.ensemble_sides_sv (== sv.PRIORS)
+MIX3_PRIORS = ("MIX3",)                                # priors served by mix3.MIX3Gen / mix3.ensemble_sides_mix3 (== mix3.PRIORS)
 TBID = {"D1": 1, "D2": 2}
 PRIOR_OF = {"D1": "S", "D2": "S2"}                     # primary prior per testbed (06_SPEC §2)
 
@@ -151,7 +154,11 @@ def make_pilots(testbed, prior, Nt, Tp, Nr):
     else:
         from d2 import ensemble_sides_d2
         from sv import ensemble_sides_sv                                         # SV: SV's own sides, same T2b rule
-        Rt, _, informative = (ensemble_sides_sv if prior in SV_PRIORS else ensemble_sides_d2)(prior, Nr, Nt)
+        if prior in MIX3_PRIORS:                                                 # MIX3: frozen training-set sides, same rule
+            from mix3 import ensemble_sides_mix3
+            Rt, _, informative = ensemble_sides_mix3(prior, Nr, Nt)
+        else:
+            Rt, _, informative = (ensemble_sides_sv if prior in SV_PRIORS else ensemble_sides_d2)(prior, Nr, Nt)
         if not informative:
             return "dft", dft_pilots(Nt, Tp)
     w, U = np.linalg.eigh(Rt)
@@ -183,6 +190,9 @@ def make_gen(testbed, prior, Nr, Nt):
     if prior in SV_PRIORS:                                                       # second testbed SV (sv.py)
         from sv import SVGen
         return SVGen(prior, Nr, Nt)
+    if prior in MIX3_PRIORS:                                                     # second testbed, 3GPP 38.901 MIX3 (mix3.py)
+        from mix3 import MIX3Gen
+        return MIX3Gen(prior, Nr, Nt)
     from d2 import D2Gen
     return D2Gen(prior, Nr, Nt)
 
@@ -272,10 +282,21 @@ SV_WARNING = (
 )
 
 
+MIX3_WARNING = (
+    "# " + "=" * 100 + "\n"
+    "# SECOND TESTBED, STANDARD-MODEL SIDE (prior MIX3) -- 3GPP TR 38.901 via Sionna 2.1: per block UMi 28 GHz / UMa 28 GHz / RMa 3.5 GHz\n"
+    "# (1/3 each), LoS/NLoS by the model, UE yaw uniform, pathloss/shadowing off, narrowband snapshot, ensemble-normalised (code/mix3.py).\n"
+    "# NOT sparse specular. Phase-0 channel statistics predicted NO learned-prior advantage here (boundary-both-sides mechanism test).\n"
+    "# Reference = known-channel receiver (R5-genie: same EP detector + BCJR, true H); not a bound.\n"
+    "# " + "=" * 100
+)
+
+
 def banner(testbed, prior):
-    """Testbed warning under a results header.  SV priors get SV_WARNING (never D2's 'sparse specular' text); every other
-    (testbed, prior) gets exactly what it got before SV existed (D1 -> D1_WARNING, D2 -> D2_WARNING)."""
-    return D1_WARNING if testbed == "D1" else SV_WARNING if prior in SV_PRIORS else D2_WARNING
+    """Testbed warning under a results header.  SV / MIX3 priors get their own text (never D2's 'sparse specular' text); every
+    other (testbed, prior) gets exactly what it got before SV existed (D1 -> D1_WARNING, D2 -> D2_WARNING)."""
+    return (D1_WARNING if testbed == "D1" else SV_WARNING if prior in SV_PRIORS else MIX3_WARNING if prior in MIX3_PRIORS
+            else D2_WARNING)
 
 
 ARM_NOTES = {

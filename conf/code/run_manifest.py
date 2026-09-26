@@ -87,9 +87,15 @@ def main():
                                                           ("runner.py", "arms.py", "score.py", "common.py", "d2.py",
                                                            "analysis.py", "rt_tap.py", "p3_rules.py")
                                                           + (("sv.py",) if priors & set(C.SV_PRIORS) else ())
+                                                          + (("mix3.py",) if priors & set(C.MIX3_PRIORS) else ())
                                                           if os.path.isfile(os.path.join(C.CONF, "code", f))}),
         channel_model=dict(testbed=a.testbed, prior=one(meta.get("prior", set()) or priors or {"S2"}),
-                           description=(("SV = D2-pipeline prior SV8e, clustered Saleh-Valenzuela (El Ayach TWC 2014; code/sv.py): "
+                           description=(("MIX3 = D2-pipeline prior MIX3, 3GPP TR 38.901 via Sionna 2.1 (code/mix3.py): per block UMi 28 GHz / "
+                                         "UMa 28 GHz / RMa 3.5 GHz (1/3 each), BS ULA Nr, UE ULA 4, half-wavelength, single V pol, omni, uplink, "
+                                         "LoS/NLoS by the model, UE yaw ~ U[-pi,pi), pathloss/shadowing off, narrowband snapshot (CIR summed at "
+                                         "the first time sample), ensemble-normalised E||H||^2 = Nr Nt")
+                                        if priors & set(C.MIX3_PRIORS) else
+                                        ("SV = D2-pipeline prior SV8e, clustered Saleh-Valenzuela (El Ayach TWC 2014; code/sv.py): "
                                          "%d clusters x %d rays per block, cluster-mean AoA ~ U[-60,60] deg, AoD ~ U[-180,180) deg "
                                          "(UE yaw), Laplacian ray offsets (std %.1f deg, both sides), ray gains CN(0,1/%d) iid "
                                          "normalised per block to sum|alpha|^2 = 1, no LOS, H = sqrt(Nr Nt) sum_cr alpha_cr a_r a_t^H "
