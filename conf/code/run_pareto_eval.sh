@@ -22,8 +22,19 @@ log "run C2 -6 done"
 $P code/runner.py analysis --testbed D2 --tag $TAG > logs/analysis_$TAG.log 2>&1; log "analysis rc=$?"
 $P code/run_manifest.py --tag $TAG >> $L 2>&1
 $P code/guard_report.py --raw raw_$TAG --testbed D2 > results/guard_D2_$TAG.txt 2>&1
+# recovery R at -3 dB (primary) and at the pair's decision SNRs as analysis printed them per cell (anchor b*; never by hand)
 for CELL in C7 C8; do
-  $P code/recovery_ci.py --raw raw_$TAG --cell $CELL --snrs -3 0 3 > results/review_next/recovery_${TAG}_$CELL.txt 2>&1
+  DP=$($P - <<PY
+import re
+t = open("results/tables_D2_$TAG.txt").read()
+blk = t.split("--- cell $CELL  prior")[1] if "--- cell $CELL  prior" in t else ""
+m = re.search(r"M-ours-bstar -> M-ours-dscore-C-V1.*?\n\s*decision SNRs \[([^\]]*)\]", blk, re.S)
+print(" ".join(x.strip("' ") for x in m.group(1).split(",")) if m and m.group(1).strip() else "")
+PY
+)
+  log "decision SNRs $CELL (anchor b*): ${DP:-none}"
+  $P code/recovery_ci.py --raw raw_$TAG --cell $CELL --snrs -3 > results/review_next/recovery_${TAG}_$CELL.txt 2>&1
+  [ -n "$DP" ] && $P code/recovery_ci.py --raw raw_$TAG --cell $CELL --snrs $DP >> results/review_next/recovery_${TAG}_$CELL.txt 2>&1
 done
 $P code/eval_accept.py --tag $TAG:legacy-last:4443921ce8d5c4a1:C2,C7,C8 --points C2:-6 --ntrain 160000 --kron-K 1024 \
   --ll-val -11.459169831224418 --ref-raw raw_B1e4lo --ref-cells C2 --fits-dir results/gmm_fits_D2_$TAG \
