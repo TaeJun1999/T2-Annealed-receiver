@@ -144,6 +144,7 @@ def _erank(lam):
 
 # ----------------------------------------------------------------------------- generator
 class D2Gen:
+    rot = 0.0                             # NEXT_EXPERIMENTS_ROT16e4: receive-array rotation (rad) added to every AoA; 0 = exact
     """Sparse specular generator.  Same slots as common.D1Gen, except that `prior` is None: the true
     density has no closed-form EP site and no exact score, so the arms R6-exactEP / M-ours-score do not
     exist on D2 (05_SPEC §3 -- recorded as a loss, not worked around)."""
@@ -163,7 +164,7 @@ class D2Gen:
     def _draw(self, rng, n):
         """One block draw per row: (theta, phi, alpha) each (n, L_MAX), zero-amplitude beyond L."""
         L = rng.integers(L_MIN, L_MAX + 1, n)                                  # Unif{3..8}, per block
-        th = self.lo + (self.hi - self.lo) * rng.random((n, L_MAX))            # CONTINUOUS physical angle
+        th = self.lo + (self.hi - self.lo) * rng.random((n, L_MAX)) + self.rot  # CONTINUOUS physical angle (+ ROT16e4 drift)
         ph = self.lo + (self.hi - self.lo) * rng.random((n, L_MAX))
         if self.cn:                                                            # D3: alpha_l = sqrt(p_l) CN(0,1)
             g = (rng.standard_normal((n, L_MAX)) + 1j * rng.standard_normal((n, L_MAX))) / np.sqrt(2.0)
