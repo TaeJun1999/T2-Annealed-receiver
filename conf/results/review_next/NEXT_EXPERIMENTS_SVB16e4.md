@@ -96,7 +96,7 @@
 
 ## 6. 결과 (2026-09-26 13:10~13:59 CDT, `run_prior_eval.sh` @07a8935a = 동결 eee1d669 와 `conf/code` 동일; 이 절은 추가만 한다; 기록 2026-09-26 14:04 CDT, Opus 5.5 — 전사만, 해석 없음)
 
-**실행·수용**: ① `SVB16e4` (`_best.pt`, d2d78962c2846364) 13:10~13:34 CDT, ② `SVB16e4last` (last, c20ec3d6126b70b6) 13:34~13:58 CDT (192 워커, CPU complex128, 16 반복, 14 arm, 태그마다 raw 448 파일). manifest `run_manifest_SVB16e4{,last}.json` (git 07a8935a, config_hash 80f03e30d676712a). **`eval_accept.py` → ACCEPT: OK -- SVB16e4, SVB16e4last** (`SVB16e4_accept.txt`: 격자 full 6 + kron 8·K ≥ 1024 후보 3 개, 청크 {(40k,40)} × 7 SNR, meta ntrain 160000 / bstar gmm256 / ll_val|gmm256 −47.80545576704972, 두 태그 (bstar, kron_K, em_sec) 동일, ckpt sha·role, last 의 R5-genie 가 best 와 7 SNR 전 시행 비트 동일). 추가 확인: `eval_accept --ref-arms all` (last vs best) 에서 다른 arm 은 V0·V1·V4·V4b 뿐 — 비-Stage-C 10 arm 은 비트 동일. 가드(`guard_D2_SVB16e4.txt`): 발동은 V0 만(0.009–0.035), 나머지 12 arm 은 0. 판정점(앵커 b\*, 자동) **−3 / +0 dB — 2 개뿐**: b\* 의 BLER@16 이 +3 dB 에서 0.003 으로 [0.005, 0.9] 밖이다. 0단계 예측 1 일관성 검사는 동결 시점 확정대로 실행하지 않았다.
+**실행·수용**: ① `SVB16e4` (`_best.pt`, d2d78962c2846364) 13:10~13:34 CDT, ② `SVB16e4last` (last, c20ec3d6126b70b6) 13:34~13:58 CDT (192 워커, CPU complex128, 16 반복, 14 arm, 태그마다 raw 448 파일). manifest `run_manifest_SVB16e4{,last}.json` (git **5e074fe6** — 실행 시작 커밋은 07a8935a, manifest 는 실행 도중의 D3 기록 커밋 뒤에 작성됐고 두 커밋의 `conf/code` 는 동일; config_hash 80f03e30d676712a). **`eval_accept.py` → ACCEPT: OK -- SVB16e4, SVB16e4last** (`SVB16e4_accept.txt`: 격자 full 6 + kron 8·K ≥ 1024 후보 3 개, 청크 {(40k,40)} × 7 SNR, meta ntrain 160000 / bstar gmm256 / ll_val|gmm256 −47.80545576704972, 두 태그 (bstar, kron_K, em_sec) 동일, ckpt sha·role, last 의 R5-genie 가 best 와 7 SNR 전 시행 비트 동일). 추가 확인: `eval_accept --ref-arms all` (last vs best) 에서 다른 arm 은 V0·V1·V4·V4b 뿐 — 비-Stage-C 10 arm 은 비트 동일. 가드(`guard_D2_SVB16e4.txt`): 발동은 V0 만(0.009–0.035), 나머지 12 arm 은 0. 판정점(앵커 b\*, 자동) **−3 / +0 dB — 2 개뿐**: b\* 의 BLER@16 이 +3 dB 에서 0.003 으로 [0.005, 0.9] 밖이다. 0단계 예측 1 일관성 검사는 동결 시점 확정대로 실행하지 않았다.
 
 ### 6.1 측정 판정 — 표 B `b* → V1` (C2, 태그 SVB16e4 = `_best`, UNGATED)
 
@@ -116,7 +116,7 @@
 
 ### 6.3 보고 전용
 
-- **BLER@16 (best; −3 / +0 / +3 / +6 dB)**: R2 0.234 / 0.032 / 0.006 / 0.001; gmm32 0.195 / 0.024 / 0.003 / 0.000; **b\* 0.181 / 0.023 / 0.003 / 0.000**; V0 0.165 / 0.040 / 0.032 / 0.037; **V1 0.157 / 0.018 / 0.002 / 0.000**; V4 0.163 / 0.016 / 0.002; V4b 0.168 / 0.015 / 0.002; b\*-scalar 0.187 / 0.022 / 0.002 / 0.000; genie 0.012 / 0.001 / 0.000 / 0.000. +9 dB 이상은 V0 를 뺀 전 arm 0.000.
+- **BLER@16 (best; −3 / +0 / +3 / +6 dB)**: R2 0.234 / 0.032 / 0.006 / 0.001; gmm32 0.195 / 0.024 / 0.003 / 0.000; **b\* 0.181 / 0.023 / 0.003 / 0.000**; V0 0.165 / 0.040 / 0.032 / 0.037; **V1 0.157 / 0.018 / 0.002 / 0.000**; V4 0.163 / 0.016 / 0.002; V4b 0.168 / 0.015 / 0.002; b\*-scalar 0.187 / 0.022 / 0.002 / 0.000; genie 0.012 / 0.001 / 0.000 / 0.000. +9 dB 이상은 이 표의 8 arm(V0 제외) 모두 0.000 (표 밖 arm 은 0 이 아님: +9 dB R4-llr 0.044, R3-bigamp 0.007, R4-scvamp 0.002; +15 dB R4-llr 0.009, R3 0.010).
 - **SNR@0.1 (dB; best)**: R2 −1.72, gmm32 −2.04, b\* −2.13, b\*-scalar −2.12, V0 −1.93, **V1 −2.38**, V4 −2.37, V4b −2.36, genie ≤ −3 (격자 아래, `n/a`).
 - V0 가드 발동률 0.009–0.035 (D3·Pareto 의 0.2–0.95 보다 낮음); V0 −3 dB BLER 0.165.
 - **best 대 last V1 짝 부호검정**: −3 / +0 dB 16:14 · 6:1, pooled 22:15 (p 0.32) → 판정하지 못함.
@@ -131,9 +131,9 @@
 4. R2 → b\*: b\* 우세 ✓ (3/3; "한 점 판정 못함 가능성" 은 발생하지 않음).
 5. V0 가드 전 SNR 발동 ✓(0.009–0.035); −3~+3 dB BLER ≥ 0.9 ✗ (0.165 / 0.040 / 0.032); V4·V4b ≈ V1 ✓.
 6. best 대 last V1 판정하지 못함 (p 0.32) ✓.
-7. 대조군 b\* → b\*-scalar "b\* 우세" ✗ (UNDECIDED, 판정점 2).
+7. 대조군 b\* → b\*-scalar "b\* 우세": 채점 없음 (UNDECIDED, 판정점 2 — 어느 쪽 증거도 아님).
 8. 빗나갈 경로 **(b) 발동**: (iv) 검정력 미달(저-BLER 셀) → 그대로 기록, 격자 확장 없음.
 
-### 6.5 기록 감사
+### 6.5 기록 감사 (Fable 5.1, 2026-09-26 19:57 CDT; `prereg_audit_2026-09-26/recompute.py` → `recompute.out`, 감사 보고 `audit_B_SV_38901.md`)
 
-(대기 — Fable 감사 뒤 추가.)
+독립 재계산으로 §6·EXPERIMENTS 행·DECISIONS 항목의 수치 재현(표 B (iv): 판정점 −3/0 두 개, b\* +3 dB 0.003 < 0.005; 148:72; 짝 격차 +0.25; R 0.143 [0.095, 0.188]; ΔR −0.327 [−0.392, −0.262]; 2차 −0.354; SNR@0.1; BLER; V0 가드 0.009–0.035; best 대 last 22:15 p 0.324; ckpt·ll_val·em_sec; 코드 동일성; 비-Stage-C 비트 동일). 규칙 재적용 동일(예측 1 채점 없음, 공동 판독 "판정하지 못함" 행). **정정 1건(수치 서술)**: §6.3 "+9 dB 이상은 V0 를 뺀 전 arm 0.000" 은 표의 8 arm 에만 참(R4-llr +9 dB 0.044 등) → 범위를 표의 8 arm 으로 한정. **정정(위생)**: manifest git 07a8935a → 5e074fe6(실행 도중 D3 기록 커밋; `conf/code` 동일); §6.4-7 대조군 "✗" → "채점 없음 (UNDECIDED)".
