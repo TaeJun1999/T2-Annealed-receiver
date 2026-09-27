@@ -63,6 +63,6 @@
 | 항목 | 값 |
 |---|---|
 | 코드 | 브랜치 c-s2v 92cf0eca + 검토 반영 093ffa4e (pair_rot 도플러 잔재 정정·`!= 0`, selftest_rot 단언 보강 OK, docstring 순서) |
-| 병합 | main 병합 커밋과 `git diff <동결> <병합> -- conf/code Demo` 결과: [병합 뒤 채움] |
+| 병합 | main 병합 커밋 602f8971 (`git merge c-s2v`, DECISIONS.md 충돌은 두 줄 모두 시간순 유지; 기록 2026-09-27 18:35 CDT). `git diff 9c0ca1f4 602f8971 -- conf/code Demo` = **비어 있음** (rc 0) — 실행 코드는 동결 9c0ca1f4 와 같다 |
 
 ## 6. 결과 (이 절은 추가만 한다)
