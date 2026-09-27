@@ -1,8 +1,11 @@
 """conf/code/selftest_rot.py -- NEXT_EXPERIMENTS_ROT16e4 code checks; exit 1 on any failure.  GPUs hidden.
-  (1) every generator: .rot = 0 gives the same H and the same stream state as a fresh generator (the attribute path is exact);
+  (1) every generator: an explicit .rot = 0.0 gives the same H and stream state as the class default (both run the rotation
+      arithmetic -- theta + 0.0 / yaw + 0.0 are exact); bit-identity with the PRE-rotation code is the run script's 0-deg control
+      and the review's hash comparison against main 063f3bcb;
   (2) .rot > 0 changes H but leaves the stream state unchanged (every random draw is the same, only the AoA moves);
-  (3) D2 / SV8e: the rotated H equals the unrotated latents with theta + rot put through the steering by hand;
-  (4) ensemble power E||H||^2 / (Nr Nt) stays within 5% under rotation (1000 blocks; the sector moves, the gains do not).
+  (3) D2 and SV8e: the rotated H equals the generator's own steering applied to the unrotated latents with theta + rot;
+  (4) ensemble power E||H||^2 / (Nr Nt) stays within 5% under rotation for every generator incl. 38.901 (1000 blocks; for
+      38.901 the yaw change also changes the polarisation coupling, so power is not preserved by construction).
 The bit-identity of a 0-deg run with the static raw through the whole receiver is the run script's control (ROT0<suf>).
     CUDA_VISIBLE_DEVICES= python code/selftest_rot.py
 """
@@ -28,18 +31,15 @@ for prior, Nr in (("S2", 8), ("S2", 16), ("S2c", 8), ("S2v", 16), ("SV8e", 8), (
     s = [r.integers(1 << 30) for r in (r0, r1, r2)]
     if len(set(s)) != 1:
         bad.append(f"{prior}/{Nr}: stream state differs under rotation")
-    if prior in ("S2", "SV8e") and Nr == 8:                                    # (3) by hand
+    if prior in ("S2", "SV8e") and Nr == 8:                                    # (3) the generator's own steering, theta + rot
         g = C.make_gen("D2", prior, Nr, 4)
-        lat = g._draw(np.random.default_rng(4), 1)
-        th, ph, al = lat[0], lat[1], lat[2]
+        lat = g._draw(np.random.default_rng(4), 1)                             # rot = 0 latents of the same stream
         gr = C.make_gen("D2", prior, Nr, 4); gr.rot = ROT
-        got = np.stack([gr.sample(np.random.default_rng(4))])  # first block of the same stream
-        ar = np.exp(1j * np.pi * np.sin(th[:1] + ROT)[..., None] * np.arange(Nr)) / np.sqrt(Nr)
-        at = np.exp(1j * np.pi * np.sin(ph[:1])[..., None] * np.arange(4)) / np.sqrt(4)
-        ref = g.scale * np.einsum("nl,nli,nlj->nij", al[:1], ar, at.conj())
-        if prior == "S2" and not np.allclose(got, ref, rtol=1e-12, atol=1e-12):
-            bad.append(f"{prior}: rotated H != hand-computed steering with theta + rot")
-    if prior not in ("UMi28", "MIX3"):
+        got = gr.sample(np.random.default_rng(4))
+        ref = g._channels(lat[0] + ROT, lat[1], lat[2])[0]
+        if not np.allclose(got, ref, rtol=1e-12, atol=1e-12):
+            bad.append(f"{prior}: rotated H != own steering with theta + rot")
+    if True:
         rr0, rr2 = np.random.default_rng(9), np.random.default_rng(9)
         p0 = np.mean([np.sum(np.abs(g0.sample(rr0)) ** 2) for _ in range(1000)]) / (Nr * 4)
         p2 = np.mean([np.sum(np.abs(g2.sample(rr2)) ** 2) for _ in range(1000)]) / (Nr * 4)

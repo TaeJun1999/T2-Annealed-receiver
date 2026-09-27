@@ -190,9 +190,9 @@ def _generate(codes, seed, Nr, Nt, aux=None, paths=None, rot=0.0):
 
 
 class MIX3Gen:
-    rot = 0.0                             # NEXT_EXPERIMENTS_ROT16e4: BS (receive) yaw offset (rad); 0 = exact
     """MIX3 generator with the D2Gen slots the pipeline uses: .sample(rng), .sample_vecs(rng, n), .prior (None: no
     closed-form density or exact score, like D2), .name ("D2": it runs under testbed D2), .kind, .Nr/.Nt/.N."""
+    rot = 0.0                             # NEXT_EXPERIMENTS_ROT16e4: BS (receive) yaw offset (rad); 0 = exact
 
     name = "D2"
     prior = None

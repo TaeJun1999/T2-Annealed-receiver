@@ -37,8 +37,8 @@ while read NAME SUF CELL PR BF BASE CK SHA ROLE BS KK LL; do
     --ll-val $LL --ref-raw $BASE --ref-arms all > results/review_next/${CT}_accept.txt 2>&1
   RC=$?; log "$NAME control 0 deg rc=$RC ($(head -1 results/review_next/${CT}_accept.txt))"
   [ $RC -ne 0 ] && { log "$NAME INVALID: 0-deg control not bit-identical to $BASE -- no rotation runs"; FAIL=$((FAIL+2)); continue; }
-  for NU in $DEGS; do
-    TAG=ROT${NU%%:*}$SUF; V=${NU#*:}; ln -sfn gmm_fits_D2_$BF results/gmm_fits_D2_$TAG
+  for DG in $DEGS; do
+    TAG=ROT${DG%%:*}$SUF; V=${DG#*:}; ln -sfn gmm_fits_D2_$BF results/gmm_fits_D2_$TAG
     $P code/runner.py run --testbed D2 --prior $PR --cell $CELL --n 2560 --chunk 40 --ntrain 160000 --rotation $V \
       --stagec-ckpt /home/HTJ/t2/conf/$CK --arm $ARMS --tag $TAG > logs/run_D2_$TAG.log 2>&1 \
       || { log "$NAME deg=$V ABORT: run failed"; FAIL=$((FAIL+1)); continue; }

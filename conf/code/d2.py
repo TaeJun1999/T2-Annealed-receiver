@@ -144,10 +144,10 @@ def _erank(lam):
 
 # ----------------------------------------------------------------------------- generator
 class D2Gen:
-    rot = 0.0                             # NEXT_EXPERIMENTS_ROT16e4: receive-array rotation (rad) added to every AoA; 0 = exact
     """Sparse specular generator.  Same slots as common.D1Gen, except that `prior` is None: the true
     density has no closed-form EP site and no exact score, so the arms R6-exactEP / M-ours-score do not
     exist on D2 (05_SPEC §3 -- recorded as a loss, not worked around)."""
+    rot = 0.0                             # NEXT_EXPERIMENTS_ROT16e4: receive-array rotation (rad) added to every AoA; 0 = exact
 
     name = "D2"
     prior = None                          # no exact-score prior object exists for D2

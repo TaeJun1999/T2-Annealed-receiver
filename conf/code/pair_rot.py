@@ -25,7 +25,7 @@ PAIRS = (("bstar-rot", "V1-rot", "DP: b* -> V1, both under the same receive-arra
          ("bstar-rot", "M-ours-bstar", "report: b* rotated -> b* static"),
          ("M-ours-bstar", "V1-rot", "report: static b* -> V1 rotated"),
          ("R2-rot", "V1-rot", "report: Gaussian R2 -> V1, both rotated"),
-         ("genie-rot", "R5-genie", "report: genie (knows H_0) rotated -> static genie"))
+         ("genie-rot", "R5-genie", "report: genie (knows the rotated H) rotated -> static genie"))
 SHOW = ("R2-rot", "bstar-rot", "V1-rot", "genie-rot", "R2-ours-G", "M-ours-bstar", "M-ours-dscore-C-V1", "R5-genie")
 
 
@@ -62,8 +62,8 @@ def main():
     for k in keys if not bad else []:
         if not all(len(d[k][arm]["blk_err"]) == 2560 for d, arms in ((b, REN), (m, REN)) for arm in arms):
             bad.append(f"{k[2]:+.0f} dB: trial count != 2560")
-        elif a.deg > 0 and np.array_equal(np.nan_to_num(b[k]["R5-genie"]["tauL_gmean"]), np.nan_to_num(m[k]["R5-genie"]["tauL_gmean"])):
-            bad.append(f"{k[2]:+.0f} dB: genie identical to the static genie (Doppler not applied)")
+        elif a.deg != 0 and np.array_equal(np.nan_to_num(b[k]["R5-genie"]["tauL_gmean"]), np.nan_to_num(m[k]["R5-genie"]["tauL_gmean"])):
+            bad.append(f"{k[2]:+.0f} dB: genie identical to the static genie (rotation not applied)")
     n = len(m[keys[0]]["R5-genie"]["blk_err"]) if keys else 0
     raised = {REN[arm]: int(sum(np.asarray(m[k][arm].get("failed", np.zeros(1))).sum() for k in keys)) for arm in REN} if not bad else {}
     print(f"# pair_rot {a.rot} x {a.base}, deg={a.deg}, cell {a.cell}, prior {a.prior}, n={n} per SNR, git {head}; raised {raised}; "
