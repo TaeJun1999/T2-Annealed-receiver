@@ -298,11 +298,16 @@ def budget_meta(arm_names, ntrain, learned):
     return out
 
 
-def _ald_table(path, snr):
-    """NEXT_EXPERIMENTS_ALD16e4: the precomputed ALD estimates (code/ald.py estimate) for this SNR, or None."""
+def _ald_table(path, snr, ckpt):
+    """NEXT_EXPERIMENTS_ALD16e4: the precomputed ALD estimates (code/ald.py estimate) for this SNR, or None.  The file
+    must have been made with THIS checkpoint (sha checked), so a stale estimate file can never be reused silently."""
     if not path:
         return None
+    import hashlib
     z = np.load(path)
+    sha = hashlib.sha256(open(ckpt, "rb").read()).hexdigest()[:16]
+    if str(z["ckpt_sha"]) != sha:
+        raise RuntimeError(f"--ald-file {path} was made with checkpoint {z['ckpt_sha']}, this run uses {sha}")
     k = int(np.flatnonzero(np.isclose(z["snrs"], snr))[0])
     return {"hhat": z["hhat"], "b": z["b"], "v": z["v"], "skip": int(z["skip"])}, k
 
@@ -362,7 +367,7 @@ def build_point(testbed, cell, prior, snr, ntrain=C.N_TRAIN, beta=C.BETA, t_in=C
                                               score_prior_c=spc, score_prior_v1=spc1,
                                               bstar_scalar=bool(stagec_ckpt), mean_arms=mean_arms,
                                               score_prior_v1_floor=spcf, p3_arms=p3_arms, pilot_arms=pilot_arms,
-                                              ald=_ald_table(ald_file, snr))
+                                              ald=_ald_table(ald_file, snr, stagec_ckpt))
     arms.update(our)
     cfgs.update(ocfg)
     # An arm that is not built must leave a trace with the REASON, or the analysis sees a missing row and

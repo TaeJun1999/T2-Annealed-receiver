@@ -26,10 +26,16 @@ while read NAME ET RT CELL PR BF BASE PIL CK SHA ROLE BS KK LL; do
   [ -f results/ald/pilots_${ET}_test.npz ] || CUDA_VISIBLE_DEVICES= $P code/ald.py regen --tag $ET --prior $PR --cell $CELL \
     --fits-tag $BF --set test >> $L 2>&1 &
 done < <(sel); wait
-# phase 2: ALD estimates (GPU i; exclusive-process GPUs, one process each; a busy GPU fails and is logged, not retried)
+# phase 2: ALD estimates, one dataset per FREE GPU (memory.used < 100 MiB now; exclusive-process GPUs).  A dataset with no
+# free GPU is logged and left without an estimate (phase 3 then ABORTs it; resuming it later needs no approval).  An
+# estimate older than its tune record is recomputed (never reused silently); runner also checks the checkpoint sha.
+FREE=($(nvidia-smi --query-gpu=index,memory.used --format=csv,noheader,nounits | awk -F', ' '$2 < 100 {print $1}'))
 i=0
 while read NAME ET RT CELL PR BF BASE PIL CK SHA ROLE BS KK LL; do
-  [ -f results/ald/ald_${ET}.npz ] || CUDA_VISIBLE_DEVICES=$i $P code/ald.py estimate --tag $ET --ckpt $CK --set test >> $L 2>&1 &
+  E=results/ald/ald_${ET}.npz; TJ=results/ald/tune_${ET}.json
+  [ -f $E ] && [ $E -nt $TJ ] && continue
+  [ $i -lt ${#FREE[@]} ] || { log "$NAME: no free GPU for the ALD estimate (deferred)"; continue; }
+  CUDA_VISIBLE_DEVICES=${FREE[$i]} $P code/ald.py estimate --tag $ET --ckpt $CK --set test >> $L 2>&1 &
   i=$((i+1))
 done < <(sel); wait
 log "phases 1-2 done: $(ls results/ald/ald_PIL*.npz 2>/dev/null | grep -vc _dev) estimate files"

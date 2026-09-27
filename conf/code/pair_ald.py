@@ -19,8 +19,8 @@ from analysis import load_raw, decision_points, paired, gain, sign_p, MIN_DISC
 from pair_cross import same, failed
 
 PAIRS = (("ALDv-pilot", "M-ours-dscore-C-V1", "A1: ALD pilot-only (error-aware) -> loop V1"),
-         ("ALD-pilot", "M-ours-dscore-C-V1", "A2: ALD pilot-only (plug-in, as published) -> loop V1"),
-         ("ALDv-pilot", "V1-pilot", "report: ALD sample -> one-shot posterior mean, both pilot-only, same weights"),
+         ("ALD-pilot", "M-ours-dscore-C-V1", "A2: ALD pilot-only (plug-in, the authors' use of the estimate) -> loop V1"),
+         ("ALDv-pilot", "V1-pilot", "A3: ALD pilot-only -> one-shot posterior-mean pilot-only, same weights"),
          ("ALDv-pilot", "M-ours-bstar", "report: ALD pilot-only -> loop b*"),
          ("bstar-pilot", "ALDv-pilot", "report: pilot-only b* -> ALD pilot-only"),
          ("ALD-pilot", "ALDv-pilot", "report: plug-in -> error-aware"))
@@ -45,10 +45,13 @@ def main():
     pil = np.load(os.path.join(C.CONF, "results", "ald", f"pilots_{a.est}_test.npz"))
     for i, k in enumerate(keys if not bad else []):
         for q in ("blk_err", "ber", "tauL_gmean", "alphaD"):
-            if not same(b[k]["R5-genie"][q], m[k]["R5-genie"][q]):
-                bad.append(f"{k[2]:+.0f} dB R5-genie|{q} differs")
+            for src, d in (("ALD", m), ("PIL", p)):
+                if not same(b[k]["R5-genie"][q], d[k]["R5-genie"][q]):
+                    bad.append(f"{k[2]:+.0f} dB R5-genie|{q} differs ({src} raw vs base)")
         j = int(np.flatnonzero(np.isclose(est["snrs"], k[2]))[0])
         H, hh = pil["H"][j], est["hhat"][j]
+        if not (len(H) == len(hh) == len(m[k]["R5-genie"]["blk_err"]) == 2560):
+            bad.append(f"{k[2]:+.0f} dB: trial counts {len(H)}/{len(hh)}/{len(m[k]['R5-genie']['blk_err'])} != 2560")
         ref = np.sum(np.abs(hh - H) ** 2, -1) / np.sum(np.abs(H) ** 2, -1)
         for arm in ALD:
             nm = np.asarray(m[k][arm]["nmse"])
@@ -78,6 +81,8 @@ def main():
               + f"   pooled {A}:{Bn} p={sign_p(A, Bn):.2g}")
         print(f"    POWERED={powered}  second arm fewer at {wy}/{len(cand)}, first arm fewer at {wx}/{len(cand)}  -> {lab}")
         print(f"    SNR@0.1 gap ({x} minus {y}): {gain(data, a.cell, a.prior, snrs, x, y)['text']}")
+    print("report-only, test ALD NMSE (estimate file, mean over trials) " + " ".join(
+        f"{s:+.0f}:{10 * np.log10(x):.2f}dB" for s, x in zip(est["snrs"], est["nmse"])))
     print("BLER@16 failures / n per SNR " + " ".join(f"{s:+.0f}" for s in snrs) + " dB:")
     for arm in SHOW:
         print(f"    {arm:<20}" + " ".join(f"{int(np.nan_to_num(np.asarray(data[k][arm]['blk_err'])[:, -1], nan=1).sum()):5d}"
