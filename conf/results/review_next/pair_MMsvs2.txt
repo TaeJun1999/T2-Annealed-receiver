@@ -1,0 +1,41 @@
+# pair_mismatch raw_MMsvs2 x raw_B16e4k, cell C2, test prior S2, n=2560 per SNR, git 0b994cd2; raised trials {'V1-mis': 0, 'bstar-mis': 0, 'R2-mis': 0}; integrity (point set, genie identical, train-fits fingerprint, mismatch applied): OK
+MM: mismatched b* -> mismatched V1: bstar-mis -> V1-mis  [anchor bstar-mis]  decision SNRs ['-3', '+0', '+3']
+    sign test @16: -3 dB 244:34 p=2.5e-40  +0 dB 91:17 p=2.1e-13  +3 dB 54:12 p=1.7e-07   pooled 389:63 p=2.1e-58
+    POWERED=True  second arm fewer at 3/3, first arm fewer at 0/3  -> (i) second arm fewer
+    SNR@0.1 gap (bstar-mis minus V1-mis): +1.00 dB  [90% paired bootstrap +0.82, +1.19; censored replicates 0%]
+report: mismatched V1 -> matched V1: V1-mis -> M-ours-dscore-C-V1  [anchor V1-mis]  decision SNRs ['-3', '+0', '+3']
+    sign test @16: -3 dB 190:69 p=3e-14  +0 dB 80:21 p=2.7e-09  +3 dB 22:10 p=0.05   pooled 292:100 p=6.6e-23
+    POWERED=True  second arm fewer at 2/3, first arm fewer at 0/3  -> (i) second arm fewer
+    SNR@0.1 gap (V1-mis minus M-ours-dscore-C-V1): +0.85 dB  [90% paired bootstrap +0.68, +1.04; censored replicates 0%]
+report: mismatched b* -> matched b*: bstar-mis -> M-ours-bstar  [anchor bstar-mis]  decision SNRs ['-3', '+0', '+3']
+    sign test @16: -3 dB 179:100 p=2.6e-06  +0 dB 78:41 p=0.00089  +3 dB 40:14 p=0.00054   pooled 297:155 p=2.3e-11
+    POWERED=True  second arm fewer at 3/3, first arm fewer at 0/3  -> (i) second arm fewer
+    SNR@0.1 gap (bstar-mis minus M-ours-bstar): +0.43 dB  [90% paired bootstrap +0.25, +0.61; censored replicates 0%]
+report: matched b* -> mismatched V1: M-ours-bstar -> V1-mis  [anchor M-ours-bstar]  decision SNRs ['-3', '+0', '+3']
+    sign test @16: -3 dB 188:57 p=1.6e-17  +0 dB 70:33 p=0.00034  +3 dB 29:13 p=0.02   pooled 287:103 p=3.4e-21
+    POWERED=True  second arm fewer at 3/3, first arm fewer at 0/3  -> (i) second arm fewer
+    SNR@0.1 gap (M-ours-bstar minus V1-mis): +0.57 dB  [90% paired bootstrap +0.40, +0.75; censored replicates 0%]
+report: mismatched Gaussian R2 -> mismatched V1: R2-mis -> V1-mis  [anchor R2-mis]  decision SNRs ['-3', '+0', '+3']
+    sign test @16: -3 dB 398:26 p=1.1e-86  +0 dB 138:18 p=4.2e-24  +3 dB 69:8 p=3.1e-13   pooled 605:52 p=1.9e-120
+    POWERED=True  second arm fewer at 3/3, first arm fewer at 0/3  -> (i) second arm fewer
+    SNR@0.1 gap (R2-mis minus V1-mis): +1.51 dB  [90% paired bootstrap +1.27, +1.73; censored replicates 0%]
+report: mismatched Gaussian R2 -> matched R2: R2-mis -> R2-ours-G  [anchor R2-mis]  decision SNRs ['-3', '+0', '+3']
+    sign test @16: -3 dB 110:85 p=0.085  +0 dB 45:39 p=0.59  +3 dB 21:16 p=0.51   pooled 176:140 p=0.049
+    POWERED=True  second arm fewer at 0/3, first arm fewer at 0/3  -> (iii) no direction
+    SNR@0.1 gap (R2-mis minus R2-ours-G): +0.07 dB  [90% paired bootstrap -0.09, +0.23; censored replicates 0%]
+report-only, gap retention = gap(bstar-mis - V1-mis) / gap(b* - V1, matched) = +1.00 / +1.41 = 0.70
+BLER@16 failures / n per SNR -3 +0 +3 +6 +9 +12 +15 dB:
+    R2-mis                864   267   102    61    31    31    16
+    bstar-mis             702   221    83    56    30    28    14
+    V1-mis                492   147    41    26    17    17     6
+    R2-ours-G             839   261    97    57    31    29    15
+    M-ours-bstar          623   184    57    28    17    16     8
+    M-ours-dscore-C-V1    371    88    29    16     7     5     3
+    R5-genie               87    26    12     9     2     2     2
+report-only, median NMSE@16 of the channel estimate per SNR -3 +0 +3 +6 +9 +12 +15 dB:
+    R2-mis              1.43e-01 6.93e-02 3.53e-02 1.81e-02 9.01e-03 4.50e-03 2.27e-03
+    bstar-mis           1.11e-01 5.67e-02 2.99e-02 1.57e-02 8.06e-03 4.18e-03 2.14e-03
+    V1-mis              7.63e-02 3.86e-02 1.99e-02 1.05e-02 5.43e-03 2.88e-03 1.53e-03
+    R2-ours-G           1.37e-01 6.81e-02 3.49e-02 1.80e-02 8.96e-03 4.50e-03 2.27e-03
+    M-ours-bstar        9.79e-02 5.01e-02 2.67e-02 1.41e-02 7.36e-03 3.86e-03 1.96e-03
+    M-ours-dscore-C-V1  5.47e-02 2.57e-02 1.30e-02 6.43e-03 3.12e-03 1.64e-03 8.83e-04

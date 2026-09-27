@@ -1,0 +1,41 @@
+# pair_mismatch raw_MMs2sv x raw_SVB16e4, cell C2, test prior SV8e, n=2560 per SNR, git 0b994cd2; raised trials {'V1-mis': 0, 'bstar-mis': 0, 'R2-mis': 0}; integrity (point set, genie identical, train-fits fingerprint, mismatch applied): OK
+MM: mismatched b* -> mismatched V1: bstar-mis -> V1-mis  [anchor bstar-mis]  decision SNRs ['-3', '+0']
+    sign test @16: -3 dB 161:199 p=0.051  +0 dB 35:42 p=0.49   pooled 196:241 p=0.035
+    POWERED=False  second arm fewer at 0/2, first arm fewer at 0/2  -> (iv) UNDECIDED
+    SNR@0.1 gap (bstar-mis minus V1-mis): -0.11 dB  [90% paired bootstrap -0.23, +0.01; censored replicates 0%]
+report: mismatched V1 -> matched V1: V1-mis -> M-ours-dscore-C-V1  [anchor V1-mis]  decision SNRs ['-3', '+0', '+3']
+    sign test @16: -3 dB 242:49 p=7.6e-32  +0 dB 47:12 p=5.1e-06  +3 dB 8:0 p=0.0078   pooled 297:61 p=2.3e-38
+    POWERED=True  second arm fewer at 3/3, first arm fewer at 0/3  -> (i) second arm fewer
+    SNR@0.1 gap (V1-mis minus M-ours-dscore-C-V1): +0.64 dB  [90% paired bootstrap +0.53, +0.77; censored replicates 0%]
+report: mismatched b* -> matched b*: bstar-mis -> M-ours-bstar  [anchor bstar-mis]  decision SNRs ['-3', '+0']
+    sign test @16: -3 dB 168:75 p=2.3e-09  +0 dB 32:18 p=0.065   pooled 200:93 p=3.8e-10
+    POWERED=False  second arm fewer at 1/2, first arm fewer at 0/2  -> (iv) UNDECIDED
+    SNR@0.1 gap (bstar-mis minus M-ours-bstar): +0.28 dB  [90% paired bootstrap +0.19, +0.39; censored replicates 0%]
+report: matched b* -> mismatched V1: M-ours-bstar -> V1-mis  [anchor M-ours-bstar]  decision SNRs ['-3', '+0']
+    sign test @16: -3 dB 112:243 p=3e-12  +0 dB 21:42 p=0.011   pooled 133:285 p=8.1e-14
+    POWERED=False  second arm fewer at 0/2, first arm fewer at 2/2  -> (iv) UNDECIDED
+    SNR@0.1 gap (M-ours-bstar minus V1-mis): -0.40 dB  [90% paired bootstrap -0.51, -0.29; censored replicates 0%]
+report: mismatched Gaussian R2 -> mismatched V1: R2-mis -> V1-mis  [anchor R2-mis]  decision SNRs ['-3', '+0', '+3']
+    sign test @16: -3 dB 219:165 p=0.0068  +0 dB 60:38 p=0.033  +3 dB 10:7 p=0.63   pooled 289:210 p=0.00047
+    POWERED=True  second arm fewer at 2/3, first arm fewer at 0/3  -> (i) second arm fewer
+    SNR@0.1 gap (R2-mis minus V1-mis): +0.25 dB  [90% paired bootstrap +0.11, +0.38; censored replicates 0%]
+report: mismatched Gaussian R2 -> matched R2: R2-mis -> R2-ours-G  [anchor R2-mis]  decision SNRs ['-3', '+0', '+3']
+    sign test @16: -3 dB 106:56 p=0.00011  +0 dB 26:5 p=0.00019  +3 dB 5:4 p=1   pooled 137:65 p=4.5e-07
+    POWERED=True  second arm fewer at 2/3, first arm fewer at 0/3  -> (i) second arm fewer
+    SNR@0.1 gap (R2-mis minus R2-ours-G): +0.23 dB  [90% paired bootstrap +0.16, +0.31; censored replicates 0%]
+report-only, gap retention = gap(bstar-mis - V1-mis) / gap(b* - V1, matched) = -0.11 / +0.25 = -0.46
+BLER@16 failures / n per SNR -3 +0 +3 +6 +9 +12 +15 dB:
+    R2-mis                649   103    16     3     0     0     0
+    bstar-mis             557    74    11     1     0     0     0
+    V1-mis                595    81    13     1     0     0     0
+    R2-ours-G             599    82    15     2     0     0     0
+    M-ours-bstar          464    60     7     0     0     0     0
+    M-ours-dscore-C-V1    402    46     5     0     0     0     0
+    R5-genie               31     3     0     1     0     0     0
+report-only, median NMSE@16 of the channel estimate per SNR -3 +0 +3 +6 +9 +12 +15 dB:
+    R2-mis              1.41e-01 7.00e-02 3.65e-02 1.82e-02 9.19e-03 4.75e-03 2.29e-03
+    bstar-mis           1.29e-01 6.76e-02 3.61e-02 1.88e-02 9.45e-03 4.92e-03 2.37e-03
+    V1-mis              1.44e-01 8.11e-02 4.58e-02 2.49e-02 1.29e-02 6.78e-03 3.28e-03
+    R2-ours-G           1.33e-01 6.80e-02 3.57e-02 1.80e-02 9.16e-03 4.74e-03 2.29e-03
+    M-ours-bstar        1.13e-01 6.02e-02 3.22e-02 1.67e-02 8.70e-03 4.57e-03 2.26e-03
+    M-ours-dscore-C-V1  1.00e-01 5.36e-02 2.85e-02 1.50e-02 7.83e-03 4.19e-03 2.08e-03
