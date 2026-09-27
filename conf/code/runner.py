@@ -447,18 +447,30 @@ def build_point(testbed, cell, prior, snr, ntrain=C.N_TRAIN, beta=C.BETA, t_in=C
 
 # ----------------------------------------------------------------------------- run: the real grid
 DOP_SEED = 20260928
+_GIT = None
+
+
+def _git_head():
+    """HEAD and whether conf/code or Demo is dirty, written to every raw file (review_DOP16e4 #8)."""
+    global _GIT
+    if _GIT is None:
+        import subprocess
+        g = lambda *c: subprocess.run(["git", "-C", C.CONF, *c], capture_output=True, text=True).stdout.strip()
+        _GIT = g("rev-parse", "--short", "HEAD") + ("+dirty" if g("status", "--porcelain", "code", "../Demo") else "")
+    return _GIT
 
 
 def doppler_rx(H, Pp, X, Y, nu, pid, snr, tr):
     """Received block with the channel varying over the T symbols: H_t = H + sum_l P_l (exp(j 2 pi nu cos(chi_l) t) - 1),
     t = 0..T-1 (t = 0 the first pilot symbol, so H_0 = H exactly), chi_l ~ U[0, 2 pi) per path from a SEPARATE stream keyed
     by (pid, SNR, trial) -- the trial stream (H, bits, interleaver, noise) is untouched.  The noise is the block's own:
-    W = Y - H X.  The receiver still assumes one H per block (that is the point of the experiment)."""
+    W = Y - H X; written as Y + the perturbation so that nu = 0 returns Y bit for bit (the control runs THIS function).
+    The receiver still assumes one H per block (that is the point of the experiment)."""
     drng = np.random.default_rng([DOP_SEED, int(pid), int(round(10 * snr)) + 1000, int(tr)])
     w = 2 * np.pi * nu * np.cos(2 * np.pi * drng.random(Pp.shape[0]))          # rad per symbol, one per path
     T = X.shape[1]
-    Ht = H[None] + np.einsum("tl,lij->tij", np.exp(1j * np.outer(np.arange(T), w)) - 1, Pp)
-    return np.einsum("tij,jt->it", Ht, X) + (Y - H @ X)
+    D = np.einsum("tl,lij->tij", np.exp(1j * np.outer(np.arange(T), w)) - 1, Pp)   # H_t - H, exactly 0 at nu = 0
+    return Y + np.einsum("tij,jt->it", D, X)
 
 
 def run_task(task):
@@ -508,7 +520,7 @@ def run_task(task):
         X, Y = first.transmit(u, perm, H, rng)
         if tr < skip:
             continue
-        if doppler:                                     # NEXT_EXPERIMENTS_DOP16e4: per-path Clarke Doppler within the block
+        if doppler is not None:                         # NEXT_EXPERIMENTS_DOP16e4: per-path Clarke Doppler within the block
             Y = doppler_rx(H, Pp, X, Y, doppler, C.PID[prior], snr, tr)
         if k_true is not None:
             comp.append(k_true)
@@ -558,7 +570,7 @@ def run_task(task):
         flat["comp"] = np.array(comp)                   # D1 only: the true mixture component per trial
     flat.update({f"meta|{k}": np.array(v) for k, v in P["meta"].items()})
     flat.update({"run|beta": beta, "run|t_in": t_in, "run|seed": C.SEED, "run|iters": iters,
-                 "run|n": n, "run|skip": skip, "run|snr": snr, "run|dtype": "complex128/float64"})
+                 "run|n": n, "run|skip": skip, "run|snr": snr, "run|dtype": "complex128/float64", "run|git": _git_head()})
     os.makedirs(d_raw(), exist_ok=True)
     np.savez_compressed(out, **flat)
 

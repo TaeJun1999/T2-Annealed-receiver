@@ -28,6 +28,7 @@ OK=0; FAIL=0
 while read NAME SUF CELL PR BF BASE CK SHA ROLE BS KK LL; do
   [ -n "$WANT" ] && ! echo " $WANT " | grep -q " $NAME " && continue
   [ "$(sha256sum $CK | cut -c1-16)" = "$SHA" ] || { log "$NAME ABORT: ckpt sha differs"; FAIL=$((FAIL+2)); continue; }
+  [ -d $BASE ] || { log "$NAME ABORT: base raw $BASE missing"; FAIL=$((FAIL+2)); continue; }
   KARG=""; [ "$KK" != "-" ] && KARG="--kron-K $KK"
   CT=DOP0$SUF; ln -sfn gmm_fits_D2_$BF results/gmm_fits_D2_$CT
   $P code/runner.py run --testbed D2 --prior $PR --cell $CELL --snr -3 --n 40 --chunk 40 --ntrain 160000 --doppler 0 \
