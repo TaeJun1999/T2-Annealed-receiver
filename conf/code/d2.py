@@ -76,7 +76,8 @@ TAU = 2.0                                 # exponential power-delay profile p_l 
 ANGLE_RANGE = {"U2": (-np.pi / 2, np.pi / 2),        # full range
                "S2": (-np.pi / 3, np.pi / 3),        # standard 120-degree sector; PRIMARY prior
                "S2c": (-np.pi / 3, np.pi / 3),       # D3: the S2 sector (see the module docstring)
-               "S2v": (-np.pi / 3, np.pi / 3)}       # C: the S2 sector + receive-side visibility windows (D2VisGen)
+               "S2v": (-np.pi / 3, np.pi / 3),       # C: the S2 sector + receive-side visibility windows (D2VisGen)
+               "S2d": (-np.pi / 3, np.pi / 3)}       # B': the S2 sector + a per-block receive rotation (DRIFT below)
 CN_GAIN = ("S2c",)                        # priors whose path gains are alpha_l ~ CN(0, p_l) instead of sqrt(p_l) e^{j psi}
 # Spatially NON-STATIONARY variant (review_next C, user decision 2026-09-27): each path is seen by a contiguous window of the
 # RECEIVE array only (XL-MIMO visibility regions), window length w ~ Unif{Nr/4..Nr}, start ~ Unif{0..Nr-w}, independent per
@@ -85,6 +86,11 @@ CN_GAIN = ("S2c",)                        # priors whose path gains are alpha_l 
 # Rt (the pilot rule) but NOT Rr for these priors.
 VIS_PRIORS = {"S2v": "S2"}                # visibility prior -> its base sector prior
 VIS_NORM = np.sqrt(8.0 / 5.0)
+# Drift-TRAINED variant B' (review_next, user decision 2026-09-27 CDT): the ROT16e4 receive-array rotation, but drawn per block,
+# delta ~ Unif[0, DRIFT[prior]] common to every path of the block (AoA theta_l + delta), drawn AFTER every other draw of the
+# block so no other prior's stream moves.  Priors are trained/fitted on it and tested on S2 at fixed rotations.
+# ensemble_sides_d2 gives the correct Rt (the pilot rule; transmit side unchanged) but NOT Rr for these priors (as S2v).
+DRIFT = {"S2d": np.deg2rad(30.0)}
 
 # _P[L - L_MIN, :] = the normalised profile of a block with L paths, zero-padded to L_MAX.
 _P = np.zeros((L_MAX - L_MIN + 1, L_MAX))
@@ -156,6 +162,7 @@ class D2Gen:
         assert prior in ANGLE_RANGE, f"D2 priors are {tuple(ANGLE_RANGE)}, got {prior!r}"
         self.kind = prior
         self.cn = prior in CN_GAIN        # D3: complex Gaussian path gains
+        self.drift = DRIFT.get(prior, 0.0)  # B': per-block rotation range (rad); 0 = no extra draw
         self.lo, self.hi = ANGLE_RANGE[prior]
         self.Nr, self.Nt, self.N = Nr, Nt, Nr * Nt
         self.scale = np.sqrt(Nr * Nt)     # SCALE, see the module docstring (NOT sqrt(Nr*Nt/L))
@@ -168,9 +175,13 @@ class D2Gen:
         ph = self.lo + (self.hi - self.lo) * rng.random((n, L_MAX))
         if self.cn:                                                            # D3: alpha_l = sqrt(p_l) CN(0,1)
             g = (rng.standard_normal((n, L_MAX)) + 1j * rng.standard_normal((n, L_MAX))) / np.sqrt(2.0)
-            return th, ph, _AMP[L - L_MIN] * g, L
-        psi = 2 * np.pi * rng.random((n, L_MAX))
-        return th, ph, _AMP[L - L_MIN] * np.exp(1j * psi), L
+            al = _AMP[L - L_MIN] * g
+        else:
+            psi = 2 * np.pi * rng.random((n, L_MAX))
+            al = _AMP[L - L_MIN] * np.exp(1j * psi)
+        if self.drift:                                                         # B': per-block rotation, drawn last
+            th = th + self.drift * rng.random((n, 1))
+        return th, ph, al, L
 
     def _channels(self, th, ph, alpha):
         """(n, L) angles + path gains -> (n, Nr, Nt) complex128 channels."""

@@ -38,7 +38,7 @@ ap.add_argument("--gmm-ntrain", type=int, default=None)
 ap.add_argument("--n-eval", type=int, default=4096)
 ap.add_argument("--tag", default=None, help="GMM fits dir tag (runner._init: results/gmm_fits_D2_<tag>); default = the "
                                            "untagged dir, as before (NEXT_EXPERIMENTS_B32e4: equal-budget GB' needs it)")
-ap.add_argument("--prior", default="S2", choices=("S2", "S2c", "SV8e", "MIX3", "UMi28"),
+ap.add_argument("--prior", default="S2", choices=("S2", "S2c", "SV8e", "MIX3", "UMi28", "S2d"),
                 help="S2 = D2 (default, unchanged); S2c = D3; SV8e = second testbed SV (sv.py); MIX3 = 3GPP 38.901 mix; UMi28 = 38.901 UMi 28 GHz only (mix3.py)")
 ap.add_argument("--no-gbprime", action="store_true", help="train/resume only; no GB' (default: GB' as before)")
 ap.add_argument("--fallback", type=int, default=1, choices=(1, 2, 3),
