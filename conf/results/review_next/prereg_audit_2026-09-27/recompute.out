@@ -1,0 +1,481 @@
+# recompute.py -- record audit 2026-09-27 (Fable 5.1); raw/ckpt/fits/logs/git only; git HEAD 2e18e44a
+
+## 0. git claims
+  92d26757..bfe80c48 (all):
+    conf/results/review_next/NEXT_EXPERIMENTS_SEEDS16e4.md | 6 +++---
+     1 file changed, 3 insertions(+), 3 deletions(-)
+  92e31706..0b994cd2 -- conf/code Demo:
+    conf/code/figure_f22.py | 96 +++++++++++++++++++++++++++++++++++++++++++++++++
+     1 file changed, 96 insertions(+)
+  d63b26be..7c6ebcda -- runner.py (numstat):
+    20	2	conf/code/runner.py
+  c52bbdaf..92e31706 (all):
+    conf/DECISIONS.md                                  |  2 +
+     .../review_next/NEXT_EXPERIMENTS_MISMATCH16e4.md   | 90 ++++++++++++++++++++++
+     .../review_MISMATCH16e4.md                         | 41 ++++++++++
+     3 files changed, 133 insertions(+)
+  bfe80c48..92e31706 -- conf/code:
+    conf/code/pair_mismatch.py    | 99 +++++++++++++++++++++++++++++++++++++++++++
+     conf/code/run_mismatch16e4.sh | 50 ++++++++++++++++++++++
+     conf/code/runner.py           | 22 +++++++++-
+     3 files changed, 169 insertions(+), 2 deletions(-)
+  5d9a9a1a..bfe80c48 -- conf/code:
+    conf/code/arms.py           |  51 +++++++++++++-
+     conf/code/figure_f19.py     | 157 ++++++++++++++++++++++++++++++++++++++++++++
+     conf/code/figure_f20.py     | 123 ++++++++++++++++++++++++++++++++++
+     conf/code/figure_f21.py     | 107 ++++++++++++++++++++++++++++++
+     conf/code/pair_cross.py     | 101 ++++++++++++++++++++++++++++
+     conf/code/run_pilot16e4.sh  |  45 +++++++++++++
+     conf/code/runner.py         |  28 ++++++--
+     conf/code/selftest_pilot.py |  17 +++++
+     8 files changed, 621 insertions(+), 8 deletions(-)
+  5d9a9a1a..c52bbdaf -- conf/code:
+    conf/code/arms.py             |  51 +++++++++++++-
+     conf/code/figure_f19.py       | 157 ++++++++++++++++++++++++++++++++++++++++++
+     conf/code/figure_f20.py       | 123 +++++++++++++++++++++++++++++++++
+     conf/code/figure_f21.py       | 107 ++++++++++++++++++++++++++++
+     conf/code/pair_cross.py       | 101 +++++++++++++++++++++++++++
+     conf/code/pair_mismatch.py    |  99 ++++++++++++++++++++++++++
+     conf/code/run_mismatch16e4.sh |  50 ++++++++++++++
+     conf/code/run_pilot16e4.sh    |  45 ++++++++++++
+     conf/code/runner.py           |  50 +++++++++++---
+     conf/code/selftest_pilot.py   |  17 +++++
+     10 files changed, 790 insertions(+), 10 deletions(-)
+  5d9a9a1a..d04fb7c3 -- conf/code:
+    conf/code/figure_f19.py | 157 ++++++++++++++++++++++++++++++++++++++++++++++++
+     conf/code/figure_f20.py | 123 +++++++++++++++++++++++++++++++++++++
+     2 files changed, 280 insertions(+)
+  92d26757..92e31706 -- conf/code Demo:
+    conf/code/pair_mismatch.py    | 99 +++++++++++++++++++++++++++++++++++++++++++
+     conf/code/run_mismatch16e4.sh | 50 ++++++++++++++++++++++
+     conf/code/runner.py           | 22 +++++++++-
+     3 files changed, 169 insertions(+), 2 deletions(-)
+  2b27ef6a: 2026-09-27 11:55:41 +0900  (KST; CDT = KST - 14 h)
+  92d26757: 2026-09-27 12:29:35 +0900  (KST; CDT = KST - 14 h)
+  bfe80c48: 2026-09-27 12:39:11 +0900  (KST; CDT = KST - 14 h)
+  d63b26be: 2026-09-27 13:09:07 +0900  (KST; CDT = KST - 14 h)
+  7c6ebcda: 2026-09-27 13:16:50 +0900  (KST; CDT = KST - 14 h)
+  c52bbdaf: 2026-09-27 13:17:00 +0900  (KST; CDT = KST - 14 h)
+  92e31706: 2026-09-27 13:18:16 +0900  (KST; CDT = KST - 14 h)
+  f408885f: 2026-09-27 14:31:00 +0900  (KST; CDT = KST - 14 h)
+  0b994cd2: 2026-09-27 14:40:08 +0900  (KST; CDT = KST - 14 h)
+  2e18e44a: 2026-09-27 15:47:58 +0900  (KST; CDT = KST - 14 h)
+  5d9a9a1a: 2026-09-27 10:55:28 +0900  (KST; CDT = KST - 14 h)
+  d04fb7c3: 2026-09-27 11:23:45 +0900  (KST; CDT = KST - 14 h)
+  fb768181: 2026-09-27 11:56:14 +0900  (KST; CDT = KST - 14 h)
+
+## 1. checkpoints sha256[:16] (+ stored fields for the UMi28 seeds)
+  d2sx_UMi28_N160000_a2_best.pt: 0ec0973b7892d0c2 epoch=448 best_epoch=448 best_val=0.5530001521110535 stopped_by=None aborted=None prior=UMi28 sigma_tag=UMi28 rung=D2SXUMi28160000 attempt=2 split_hash=98cc168731eb922c
+  d2sx_UMi28_N160000_a2.pt: e803defb340f7d96 epoch=468 best_epoch=448 best_val=0.5530001521110535 stopped_by=patience aborted=None prior=UMi28 sigma_tag=UMi28 rung=D2SXUMi28160000 attempt=2 split_hash=98cc168731eb922c
+  d2sx_UMi28_N160000_a3_best.pt: cc48b203ab114b92 epoch=337 best_epoch=337 best_val=0.5534706115722656 stopped_by=None aborted=None prior=UMi28 sigma_tag=UMi28 rung=D2SXUMi28160000 attempt=3 split_hash=98cc168731eb922c
+  d2sx_UMi28_N160000_a3.pt: 66c8a6e362c1f43d epoch=357 best_epoch=337 best_val=0.5534706115722656 stopped_by=patience aborted=None prior=UMi28 sigma_tag=UMi28 rung=D2SXUMi28160000 attempt=3 split_hash=98cc168731eb922c
+  d2sx_N160000_a1.pt: 4443921ce8d5c4a1
+  d2sx_NR16_N160000_a1_fb2_best.pt: c050d611b2c714a6
+  d2sx_S2c_N160000_a1_best.pt: 7ebf4e6647d4413f
+  d2sx_SV8e_N160000_a1_best.pt: d2d78962c2846364
+  d2sx_UMi28_N160000_a1_best.pt: 6f3a1b9490864af1
+  d2sx_MIX3_N160000_a1_best.pt: b591ae24ae3c5f31
+  training logs (UMi28 a2/a3): header time, done line, ckpt mtime - wall:
+    a2: # ===== 2026-09-27 10:39:11 KST  D2SXUMi28160000 attempt 2   | # done        : 468 epochs, stopped_by=patience, aborted=False, best val 5.530002e-01 @ epoch 448, wall 9442.0 s, 20.175 s/epoch | last ckpt mtime 13:12:55 KST, minus wall = 10:35:33 KST
+    a3: # ===== 2026-09-27 10:39:11 KST  D2SXUMi28160000 attempt 3   | # done        : 357 epochs, stopped_by=patience, aborted=False, best val 5.534706e-01 @ epoch 337, wall 7160.9 s, 20.059 s/epoch | last ckpt mtime 12:34:54 KST, minus wall = 10:35:33 KST
+
+## 2. Chat trace / N of the training sample covariance (fit gmm32 npz of each base)
+  S2: trace/N = 1.0004 (N=32) em sec(gmm32)=376.5
+  S2c: trace/N = 1.0010 (N=32) em sec(gmm32)=338.1
+  SV8e: trace/N = 0.9996 (N=32) em sec(gmm32)=251.8
+  UMi28: trace/N = 1.0000 (N=32) em sec(gmm32)=181.5
+  MIX3: trace/N = 1.0000 (N=32) em sec(gmm32)=162.7
+
+## 3. PILOT16e4 (6 datasets; pilot raw merged with the base raw)
+
+### D2C2: raw_PILB16e4k x raw_B16e4k cell C2
+  meta pilot: 448 files: ntrain=160000.0 bstar=kron K=1024 ll_val=-11.459169831224418 ckpt='sha256[:16]=4443921ce8d5c4a1 epoch=1784 best_epoch=1764 role' iters=16 em_sec=107957.18832826614
+  meta base : 448 files: ntrain=160000.0 bstar=kron K=1024 ll_val=-11.459169831224418 ckpt='None' iters=16 em_sec=107957.18832826614
+  n per arm pilot: [2560]  base: [2560]; arms pilot ['R5-genie', 'V1-pilot', 'bstar-pilot']
+  point set pilot [-3.0, 0.0, 3.0, 6.0, 9.0, 12.0, 15.0] == base [-3.0, 0.0, 3.0, 6.0, 9.0, 12.0, 15.0]: True
+  integrity: genie 4 keys identical, @1 equal (blk_err/ber/nmse), nmse fixed over 16 iterations -> OK; raised trials {'V1-pilot': 0, 'bstar-pilot': 0}
+  §0 -3 dB failures: V1@1 1469 V1@16 371 b*@1 1848 b*@16 623 R0@1 1918 R0@16 1220 genie@16 87 | R2@1 1918 (R0@1 == R2@1 blk_err: True); b*@1 - V1@1 = 379
+  base table B b*->V1: decision ['-3', '+0', '+3'] a:b 302:50 (p 4.7e-45) · 117:21 (p 2.4e-17) · 35:7 (p 1.5e-05) pooled 454:78 (p 1.7e-65) POWERED=True wy=3 wx=0 -> (i) second fewer; gap +1.41 [+1.22, +1.64] censored 0%
+  P1 V1-pilot->V1: decision ['-3', '+0', '+3'] a:b 280:25 (p 1e-55) · 57:17 (p 3.4e-06) · 10:9 (p 1) pooled 347:51 (p 3.2e-55) POWERED=True wy=2 wx=0 -> (i) second fewer; gap +0.92 [+0.77, +1.07] censored 0%
+  P2 bstar-pilot->V1-pilot: decision ['-3', '+0', '+3'] a:b 397:45 (p 1.8e-71) · 123:23 (p 1e-17) · 31:6 (p 4.1e-05) pooled 551:74 (p 4.4e-91) POWERED=True wy=3 wx=0 -> (i) second fewer; gap +1.07 [+0.90, +1.25] censored 0%
+  rep bstar-pilot->b*: decision ['-3', '+0', '+3'] a:b 393:38 (p 1.8e-75) · 76:32 (p 2.8e-05) · 14:16 (p 0.86) pooled 483:86 (p 5.2e-68) POWERED=True wy=2 wx=0 -> (i) second fewer; gap +0.57 [+0.41, +0.73] censored 0%
+  rep V1-pilot->b*: decision ['-3', '+0', '+3'] a:b 167:164 (p 0.91) · 33:89 (p 4e-07) · 6:33 (p 1.4e-05) pooled 206:286 (p 0.00036) POWERED=True wy=0 wx=2 -> (ii) first fewer; gap -0.50 [-0.69, -0.32] censored 0%
+  -3 dB BLER@16: R0-pilot 0.477  M-ours-bstar 0.243  bstar-pilot 0.382  M-ours-dscore-C-V1 0.145  V1-pilot 0.245  R5-genie 0.034
+  -3 dB median NMSE@16 (pilot arms == @1): R0-pilot 3.18e-01  M-ours-bstar 9.79e-02  bstar-pilot 2.34e-01  M-ours-dscore-C-V1 5.47e-02  V1-pilot 1.69e-01 | @1: R0-pilot 3.18e-01  M-ours-bstar 2.34e-01  M-ours-dscore-C-V1 1.69e-01
+  F22 failures per SNR -3 +0 +3 +6 +9 +12 +15:
+    R0-pilot             1220   340   105    63    35    28    14
+    bstar-pilot           978   228    55    33    15    16    10
+    V1-pilot              626   128    30    17     6     6     3
+    M-ours-bstar          623   184    57    28    17    16     8
+    M-ours-dscore-C-V1    371    88    29    16     7     5     3
+    R5-genie               87    26    12     9     2     2     2
+    zero-failure points: none
+  §3 pred 6: V1-pilot -3 dB BLER@16 0.245 in (0.145, 0.574): True
+
+### D2C6: raw_PILNR16 x raw_NR16B16e4 cell C6
+  meta pilot: 448 files: ntrain=160000.0 bstar=kron K=4096 ll_val=63.1751571838059 ckpt='sha256[:16]=c050d611b2c714a6 epoch=1684 best_epoch=1684 role' iters=16 em_sec=46649.95333504677
+  meta base : 448 files: ntrain=160000.0 bstar=kron K=4096 ll_val=63.1751571838059 ckpt='sha256[:16]=c050d611b2c714a6 epoch=1684 best_epoch=1684 role' iters=16 em_sec=46649.95333504677
+  n per arm pilot: [2560]  base: [2560]; arms pilot ['R5-genie', 'V1-pilot', 'bstar-pilot']
+  point set pilot [-3.0, 0.0, 3.0, 6.0, 9.0, 12.0, 15.0] == base [-3.0, 0.0, 3.0, 6.0, 9.0, 12.0, 15.0]: True
+  integrity: genie 4 keys identical, @1 equal (blk_err/ber/nmse), nmse fixed over 16 iterations -> OK; raised trials {'V1-pilot': 0, 'bstar-pilot': 0}
+  §0 -3 dB failures: V1@1 464 V1@16 53 b*@1 842 b*@16 184 R0@1 1005 R0@16 376 genie@16 22 | R2@1 1005 (R0@1 == R2@1 blk_err: True); b*@1 - V1@1 = 378
+  base table B b*->V1: decision ['-3', '+0', '+3'] a:b 142:11 (p 3.5e-30) · 45:4 (p 8.2e-10) · 26:3 (p 1.5e-05) pooled 213:18 (p 1.8e-43) POWERED=True wy=3 wx=0 -> (i) second fewer; gap n/a (-3.00 lo vs -3.00 lo)
+  P1 V1-pilot->V1: decision ['-3', '+0'] a:b 38:8 (p 9.2e-06) · 5:5 (p 1) pooled 43:13 (p 7.3e-05) POWERED=False wy=1 wx=0 -> (iv) UNDECIDED; gap n/a (-3.00 lo vs -3.00 lo)
+  P2 bstar-pilot->V1-pilot: decision ['-3', '+0', '+3'] a:b 174:17 (p 5.7e-34) · 56:3 (p 1.2e-13) · 32:5 (p 7.4e-06) pooled 262:25 (p 5.5e-51) POWERED=True wy=3 wx=0 -> (i) second fewer; gap n/a (-3.00 lo vs -3.00 lo)
+  rep bstar-pilot->b*: decision ['-3', '+0', '+3'] a:b 98:42 (p 2.5e-06) · 31:19 (p 0.12) · 16:9 (p 0.23) pooled 145:70 (p 3.5e-07) POWERED=True wy=1 wx=0 -> (iii) no direction; gap n/a (-3.00 lo vs -3.00 lo)
+  rep V1-pilot->b*: decision ['-3', '+0'] a:b 24:125 (p 1.1e-17) · 5:46 (p 2.3e-09) pooled 29:171 (p 1.1e-25) POWERED=False wy=0 wx=2 -> (iv) UNDECIDED; gap n/a (-3.00 lo vs -3.00 lo)
+  -3 dB BLER@16: R0-pilot 0.147  M-ours-bstar 0.072  bstar-pilot 0.094  M-ours-dscore-C-V1 0.021  V1-pilot 0.032  R5-genie 0.009
+  -3 dB median NMSE@16 (pilot arms == @1): R0-pilot 3.11e-01  M-ours-bstar 7.53e-02  bstar-pilot 1.94e-01  M-ours-dscore-C-V1 2.55e-02  V1-pilot 1.01e-01 | @1: R0-pilot 3.11e-01  M-ours-bstar 1.94e-01  M-ours-dscore-C-V1 1.01e-01
+  F22 failures per SNR -3 +0 +3 +6 +9 +12 +15:
+    R0-pilot              376   120    70    41    22    12     8
+    bstar-pilot           240    73    39    24    16    10     5
+    V1-pilot               83    20    12     9     2     1     2
+    M-ours-bstar          184    61    32    22    14    10     5
+    M-ours-dscore-C-V1     53    20     9     6     2     2     2
+    R5-genie               22    10     8     6     1     2     0
+    zero-failure points: R5-genie +15
+
+### D3: raw_PILD3 x raw_D3B16e4 cell C2
+  meta pilot: 448 files: ntrain=160000.0 bstar=kron K=4096 ll_val=0.08879931165293979 ckpt='sha256[:16]=7ebf4e6647d4413f epoch=494 best_epoch=494 role=b' iters=16 em_sec=15862.749816656113
+  meta base : 448 files: ntrain=160000.0 bstar=kron K=4096 ll_val=0.08879931165293979 ckpt='sha256[:16]=7ebf4e6647d4413f epoch=494 best_epoch=494 role=b' iters=16 em_sec=15862.749816656113
+  n per arm pilot: [2560]  base: [2560]; arms pilot ['R5-genie', 'V1-pilot', 'bstar-pilot']
+  point set pilot [-3.0, 0.0, 3.0, 6.0, 9.0, 12.0, 15.0] == base [-3.0, 0.0, 3.0, 6.0, 9.0, 12.0, 15.0]: True
+  integrity: genie 4 keys identical, @1 equal (blk_err/ber/nmse), nmse fixed over 16 iterations -> OK; raised trials {'V1-pilot': 0, 'bstar-pilot': 0}
+  §0 -3 dB failures: V1@1 1972 V1@16 1000 b*@1 2135 b*@16 1298 R0@1 2164 R0@16 1738 genie@16 485 | R2@1 2164 (R0@1 == R2@1 blk_err: True); b*@1 - V1@1 = 163
+  base table B b*->V1: decision ['+0', '+3', '+6'] a:b 221:39 (p 4.9e-32) · 116:19 (p 3.6e-18) · 56:9 (p 2e-09) pooled 393:67 (p 3.6e-57) POWERED=True wy=3 wx=0 -> (i) second fewer; gap +1.41 [+1.19, +1.67] censored 0%
+  P1 V1-pilot->V1: decision ['+0', '+3', '+6'] a:b 160:18 (p 1.2e-29) · 65:16 (p 3.6e-08) · 22:6 (p 0.0037) pooled 247:40 (p 1.4e-37) POWERED=True wy=3 wx=0 -> (i) second fewer; gap +0.83 [+0.67, +1.01] censored 0%
+  P2 bstar-pilot->V1-pilot: decision ['+0', '+3', '+6'] a:b 207:37 (p 7.6e-30) · 126:28 (p 4.8e-16) · 62:10 (p 2.7e-10) pooled 395:75 (p 1.6e-53) POWERED=True wy=3 wx=0 -> (i) second fewer; gap +1.28 [+0.99, +1.53] censored 0%
+  rep bstar-pilot->b*: decision ['+0', '+3', '+6'] a:b 175:45 (p 2.7e-19) · 77:27 (p 9.7e-07) · 40:19 (p 0.0086) pooled 292:91 (p 1.1e-25) POWERED=True wy=3 wx=0 -> (i) second fewer; gap +0.70 [+0.46, +0.90] censored 0%
+  rep V1-pilot->b*: decision ['+0', '+3', '+6'] a:b 90:130 (p 0.0084) · 40:88 (p 2.7e-05) · 15:46 (p 8.8e-05) pooled 145:264 (p 4.2e-09) POWERED=True wy=0 wx=3 -> (ii) first fewer; gap -0.58 [-0.82, -0.36] censored 0%
+  -3 dB BLER@16: R0-pilot 0.679  M-ours-bstar 0.507  bstar-pilot 0.606  M-ours-dscore-C-V1 0.391  V1-pilot 0.521  R5-genie 0.189
+  -3 dB median NMSE@16 (pilot arms == @1): R0-pilot 3.47e-01  M-ours-bstar 1.25e-01  bstar-pilot 2.23e-01  M-ours-dscore-C-V1 6.98e-02  V1-pilot 1.70e-01 | @1: R0-pilot 3.47e-01  M-ours-bstar 2.23e-01  M-ours-dscore-C-V1 1.70e-01
+  F22 failures per SNR -3 +0 +3 +6 +9 +12 +15:
+    R0-pilot             1738   926   401   218    97    60    30
+    bstar-pilot          1552   716   276   132    62    39    12
+    V1-pilot             1333   546   178    80    31    25     7
+    M-ours-bstar         1298   586   226   111    53    36    12
+    M-ours-dscore-C-V1   1000   404   129    64    27    22     5
+    R5-genie              485   149    47    35    10    14     3
+    zero-failure points: none
+
+### SV8e: raw_PILSV x raw_SVB16e4 cell C2
+  meta pilot: 448 files: ntrain=160000.0 bstar=gmm256 K=2048 ll_val=-47.80545576704972 ckpt='sha256[:16]=d2d78962c2846364 epoch=240 best_epoch=240 role=b' iters=16 em_sec=10589.87728881836
+  meta base : 448 files: ntrain=160000.0 bstar=gmm256 K=2048 ll_val=-47.80545576704972 ckpt='sha256[:16]=d2d78962c2846364 epoch=240 best_epoch=240 role=b' iters=16 em_sec=10589.87728881836
+  n per arm pilot: [2560]  base: [2560]; arms pilot ['R5-genie', 'V1-pilot', 'bstar-pilot']
+  point set pilot [-3.0, 0.0, 3.0, 6.0, 9.0, 12.0, 15.0] == base [-3.0, 0.0, 3.0, 6.0, 9.0, 12.0, 15.0]: True
+  integrity: genie 4 keys identical, @1 equal (blk_err/ber/nmse), nmse fixed over 16 iterations -> OK; raised trials {'V1-pilot': 0, 'bstar-pilot': 0}
+  §0 -3 dB failures: V1@1 1489 V1@16 402 b*@1 1527 b*@16 464 R0@1 1616 R0@16 1010 genie@16 31 | R2@1 1616 (R0@1 == R2@1 blk_err: True); b*@1 - V1@1 = 38
+  base table B b*->V1: decision ['-3', '+0'] a:b 124:62 (p 6.4e-06) · 24:10 (p 0.024) pooled 148:72 (p 3.3e-07) POWERED=False wy=2 wx=0 -> (iv) UNDECIDED; gap +0.25 [+0.16, +0.33] censored 0%
+  P1 V1-pilot->V1: decision ['-3', '+0'] a:b 415:13 (p 6.4e-105) · 63:7 (p 2.3e-12) pooled 478:20 (p 6.3e-115) POWERED=False wy=2 wx=0 -> (iv) UNDECIDED; gap +1.04 [+0.92, +1.17] censored 0%
+  P2 bstar-pilot->V1-pilot: decision ['-3', '+0', '+3'] a:b 124:56 (p 4.4e-07) · 29:14 (p 0.032) · 5:3 (p 0.73) pooled 158:73 (p 2.3e-08) POWERED=True wy=2 wx=0 -> (i) second fewer; gap +0.17 [+0.08, +0.25] censored 0%
+  rep bstar-pilot->b*: decision ['-3', '+0', '+3'] a:b 429:21 (p 4.6e-100) · 67:10 (p 1.7e-11) · 7:1 (p 0.07) pooled 503:32 (p 5.7e-110) POWERED=True wy=2 wx=0 -> (i) second fewer; gap +0.96 [+0.84, +1.09] censored 0%
+  rep V1-pilot->b*: decision ['-3', '+0'] a:b 386:46 (p 5.3e-68) · 57:15 (p 6.5e-07) pooled 443:61 (p 1.4e-72) POWERED=False wy=2 wx=0 -> (iv) UNDECIDED; gap +0.79 [+0.67, +0.92] censored 0%
+  -3 dB BLER@16: R0-pilot 0.395  M-ours-bstar 0.181  bstar-pilot 0.341  M-ours-dscore-C-V1 0.157  V1-pilot 0.314  R5-genie 0.012
+  -3 dB median NMSE@16 (pilot arms == @1): R0-pilot 3.23e-01  M-ours-bstar 1.13e-01  bstar-pilot 2.85e-01  M-ours-dscore-C-V1 1.00e-01  V1-pilot 2.68e-01 | @1: R0-pilot 3.23e-01  M-ours-bstar 2.85e-01  M-ours-dscore-C-V1 2.68e-01
+  F22 failures per SNR -3 +0 +3 +6 +9 +12 +15:
+    R0-pilot             1010   154    23     6     1     0     0
+    bstar-pilot           872   117    13     0     0     0     0
+    V1-pilot              804   102    11     0     0     0     0
+    M-ours-bstar          464    60     7     0     0     0     0
+    M-ours-dscore-C-V1    402    46     5     0     0     0     0
+    R5-genie               31     3     0     1     0     0     0
+    zero-failure points: R0-pilot +12; R0-pilot +15; bstar-pilot +6; bstar-pilot +9; bstar-pilot +12; bstar-pilot +15; V1-pilot +6; V1-pilot +9; V1-pilot +12; V1-pilot +15; M-ours-bstar +6; M-ours-bstar +9; M-ours-bstar +12; M-ours-bstar +15; M-ours-dscore-C-V1 +6; M-ours-dscore-C-V1 +9; M-ours-dscore-C-V1 +12; M-ours-dscore-C-V1 +15; R5-genie +3; R5-genie +9; R5-genie +12; R5-genie +15
+
+### UMi28: raw_PILU28 x raw_U28B16e4 cell C2
+  meta pilot: 448 files: ntrain=160000.0 bstar=kron K=4096 ll_val=5.797910431000217 ckpt='sha256[:16]=6f3a1b9490864af1 epoch=379 best_epoch=379 role=b' iters=16 em_sec=9133.61854147911
+  meta base : 448 files: ntrain=160000.0 bstar=kron K=4096 ll_val=5.797910431000217 ckpt='sha256[:16]=6f3a1b9490864af1 epoch=379 best_epoch=379 role=b' iters=16 em_sec=9133.61854147911
+  n per arm pilot: [2560]  base: [2560]; arms pilot ['R5-genie', 'V1-pilot', 'bstar-pilot']
+  point set pilot [-3.0, 0.0, 3.0, 6.0, 9.0, 12.0, 15.0] == base [-3.0, 0.0, 3.0, 6.0, 9.0, 12.0, 15.0]: True
+  integrity: genie 4 keys identical, @1 equal (blk_err/ber/nmse), nmse fixed over 16 iterations -> OK; raised trials {'V1-pilot': 0, 'bstar-pilot': 0}
+  §0 -3 dB failures: V1@1 2099 V1@16 1228 b*@1 2119 b*@16 1270 R0@1 2152 R0@16 1781 genie@16 594 | R2@1 2152 (R0@1 == R2@1 blk_err: True); b*@1 - V1@1 = 20
+  base table B b*->V1: decision ['+3', '+6', '+9'] a:b 76:38 (p 0.00048) · 50:22 (p 0.0013) · 35:13 (p 0.0021) pooled 161:73 (p 8.7e-09) POWERED=True wy=3 wx=0 -> (i) second fewer; gap +0.60 [+0.33, +0.87] censored 0%
+  P1 V1-pilot->V1: decision ['+3', '+6', '+9'] a:b 76:19 (p 3e-09) · 28:14 (p 0.044) · 9:7 (p 0.8) pooled 113:40 (p 2.9e-09) POWERED=True wy=2 wx=0 -> (i) second fewer; gap +0.37 [+0.18, +0.57] censored 0%
+  P2 bstar-pilot->V1-pilot: decision ['+3', '+6', '+9'] a:b 67:37 (p 0.0042) · 65:30 (p 0.00042) · 39:13 (p 0.00041) pooled 171:80 (p 9.3e-09) POWERED=True wy=3 wx=0 -> (i) second fewer; gap +0.63 [+0.33, +0.86] censored 0%
+  rep bstar-pilot->b*: decision ['+3', '+6', '+9'] a:b 72:23 (p 4.8e-07) · 41:20 (p 0.0099) · 17:11 (p 0.34) pooled 130:54 (p 2e-08) POWERED=True wy=2 wx=0 -> (i) second fewer; gap +0.41 [+0.16, +0.61] censored 0%
+  rep V1-pilot->b*: decision ['+3', '+6', '+9'] a:b 71:52 (p 0.1) · 35:49 (p 0.16) · 14:34 (p 0.0055) pooled 120:135 (p 0.38) POWERED=True wy=0 wx=1 -> (iii) no direction; gap -0.22 [-0.49, +0.06] censored 0%
+  -3 dB BLER@16: R0-pilot 0.696  M-ours-bstar 0.496  bstar-pilot 0.638  M-ours-dscore-C-V1 0.480  V1-pilot 0.616  R5-genie 0.232
+  -3 dB median NMSE@16 (pilot arms == @1): R0-pilot 3.26e-01  M-ours-bstar 1.05e-01  bstar-pilot 1.87e-01  M-ours-dscore-C-V1 8.74e-02  V1-pilot 1.75e-01 | @1: R0-pilot 3.26e-01  M-ours-bstar 1.87e-01  M-ours-dscore-C-V1 1.75e-01
+  F22 failures per SNR -3 +0 +3 +6 +9 +12 +15:
+    R0-pilot             1781   990   644   371   190    92    51
+    bstar-pilot          1633   848   480   264   132    76    31
+    V1-pilot             1576   785   450   229   106    53    26
+    M-ours-bstar         1270   714   431   243   126    69    27
+    M-ours-dscore-C-V1   1228   656   393   215   104    44    24
+    R5-genie              594   302   131    58    26     8     3
+    zero-failure points: none
+
+### MIX3: raw_PILMX x raw_MXB16e4 cell C2
+  meta pilot: 448 files: ntrain=160000.0 bstar=kron K=4096 ll_val=33.7604873920761 ckpt='sha256[:16]=b591ae24ae3c5f31 epoch=464 best_epoch=464 role=b' iters=16 em_sec=6242.08159995079
+  meta base : 448 files: ntrain=160000.0 bstar=kron K=4096 ll_val=33.7604873920761 ckpt='sha256[:16]=b591ae24ae3c5f31 epoch=464 best_epoch=464 role=b' iters=16 em_sec=6242.08159995079
+  n per arm pilot: [2560]  base: [2560]; arms pilot ['R5-genie', 'V1-pilot', 'bstar-pilot']
+  point set pilot [-3.0, 0.0, 3.0, 6.0, 9.0, 12.0, 15.0] == base [-3.0, 0.0, 3.0, 6.0, 9.0, 12.0, 15.0]: True
+  integrity: genie 4 keys identical, @1 equal (blk_err/ber/nmse), nmse fixed over 16 iterations -> OK; raised trials {'V1-pilot': 0, 'bstar-pilot': 0}
+  §0 -3 dB failures: V1@1 2180 V1@16 1354 b*@1 2209 b*@16 1421 R0@1 2264 R0@16 1896 genie@16 679 | R2@1 2264 (R0@1 == R2@1 blk_err: True); b*@1 - V1@1 = 29
+  base table B b*->V1: decision ['+3', '+6', '+9'] a:b 85:39 (p 4.4e-05) · 71:21 (p 1.6e-07) · 42:11 (p 2.2e-05) pooled 198:71 (p 4.8e-15) POWERED=True wy=3 wx=0 -> (i) second fewer; gap +0.98 [+0.68, +1.31] censored 0%
+  P1 V1-pilot->V1: decision ['+3', '+6', '+9'] a:b 93:26 (p 4.9e-10) · 34:10 (p 0.00039) · 15:13 (p 0.85) pooled 142:49 (p 1.1e-11) POWERED=True wy=2 wx=0 -> (i) second fewer; gap +0.57 [+0.40, +0.77] censored 0%
+  P2 bstar-pilot->V1-pilot: decision ['+3', '+6', '+9'] a:b 92:46 (p 0.00011) · 72:23 (p 4.8e-07) · 47:9 (p 2.6e-07) pooled 211:78 (p 2.6e-15) POWERED=True wy=3 wx=0 -> (i) second fewer; gap +0.88 [+0.58, +1.12] censored 0%
+  rep bstar-pilot->b*: decision ['+3', '+6', '+9'] a:b 96:29 (p 1.4e-09) · 43:20 (p 0.0052) · 22:13 (p 0.18) pooled 161:62 (p 2.5e-11) POWERED=True wy=2 wx=0 -> (i) second fewer; gap +0.47 [+0.20, +0.69] censored 0%
+  rep V1-pilot->b*: decision ['+3', '+6', '+9'] a:b 85:64 (p 0.1) · 37:63 (p 0.012) · 13:42 (p 0.00011) pooled 135:169 (p 0.058) POWERED=True wy=0 wx=2 -> (ii) first fewer; gap -0.41 [-0.71, -0.12] censored 0%
+  -3 dB BLER@16: R0-pilot 0.741  M-ours-bstar 0.555  bstar-pilot 0.670  M-ours-dscore-C-V1 0.529  V1-pilot 0.648  R5-genie 0.265
+  -3 dB median NMSE@16 (pilot arms == @1): R0-pilot 3.35e-01  M-ours-bstar 1.05e-01  bstar-pilot 1.77e-01  M-ours-dscore-C-V1 8.78e-02  V1-pilot 1.63e-01 | @1: R0-pilot 3.35e-01  M-ours-bstar 1.77e-01  M-ours-dscore-C-V1 1.63e-01
+  F22 failures per SNR -3 +0 +3 +6 +9 +12 +15:
+    R0-pilot             1896  1227   694   408   236   113    58
+    bstar-pilot          1715  1006   492   266   144    71    19
+    V1-pilot             1659   939   446   217   106    45    20
+    M-ours-bstar         1421   844   425   243   135    58    16
+    M-ours-dscore-C-V1   1354   789   379   193   104    41    17
+    R5-genie              679   358   143    68    35    13     2
+    zero-failure points: none
+
+## 4. SEEDS16e4 UMi28 a1 / a2 / a3 (raw_U28B16e4, raw_U28B16e4s2, raw_U28B16e4s3)
+
+### a1 raw_U28B16e4: meta 448 files: ntrain=160000.0 bstar=kron K=4096 ll_val=5.797910431000217 ckpt='sha256[:16]=6f3a1b9490864af1 epoch=379 best_epoch=379 role=b' iters=16 em_sec=9133.61854147911
+  n per arm: [2560]; arms 15
+  table B b*->V1: decision ['+3', '+6', '+9'] a:b 76:38 (p 0.00048) · 50:22 (p 0.0013) · 35:13 (p 0.0021) pooled 161:73 (p 8.7e-09) POWERED=True wy=3 wx=0 -> (i) second fewer
+  gap b*-V1 2dp +0.60 [+0.33, +0.87] censored 0% | 4dp +0.5953 [+0.3279, +0.8736] censored 0%
+  -3 dB: V1 0.480 (1228)  V0 0.666 (1704)  b* 0.496 (1270)  genie 0.232 (594)  V0->V1 reduction 27.9%
+  V1 failures -3..+15: 1228 656 393 215 104 44 24 | b*: 1270 714 431 243 126 69 27 | genie: 594 302 131 58 26 8 3
+  R(-3): b*/V1/genie 1270/1228/594 R=0.062 [90% 0.033, 0.089] undefined 0 | R(decision [3.0, 6.0, 9.0]): b*/V1/genie 800/712/215 R=0.150 [90% 0.110, 0.189] undefined 0
+  V0 guard fire rate -3 dB: 0.391
+
+### a2 raw_U28B16e4s2: meta 448 files: ntrain=160000.0 bstar=kron K=4096 ll_val=5.797910431000217 ckpt='sha256[:16]=0ec0973b7892d0c2 epoch=448 best_epoch=448 role=b' iters=16 em_sec=9133.61854147911
+  n per arm: [2560]; arms 15
+  arms differing from a1 (all KEYS_RAW, 7 points): ['M-ours-dscore-C-V0', 'M-ours-dscore-C-V1', 'M-ours-dscore-C-V4', 'M-ours-dscore-C-V4b']
+  table B b*->V1: decision ['+3', '+6', '+9'] a:b 77:39 (p 0.00053) · 54:17 (p 1.3e-05) · 32:12 (p 0.0037) pooled 163:68 (p 3.5e-10) POWERED=True wy=3 wx=0 -> (i) second fewer
+  gap b*-V1 2dp +0.74 [+0.46, +1.03] censored 0% | 4dp +0.7364 [+0.4642, +1.0267] censored 0%
+  -3 dB: V1 0.480 (1230)  V0 0.684 (1751)  b* 0.496 (1270)  genie 0.232 (594)  V0->V1 reduction 29.8%
+  V1 failures -3..+15: 1230 661 393 206 106 41 25 | b*: 1270 714 431 243 126 69 27 | genie: 594 302 131 58 26 8 3
+  R(-3): b*/V1/genie 1270/1230/594 R=0.059 [90% 0.032, 0.085] undefined 0 | R(decision [3.0, 6.0, 9.0]): b*/V1/genie 800/705/215 R=0.162 [90% 0.123, 0.200] undefined 0
+  V0 guard fire rate -3 dB: 0.332
+
+### a3 raw_U28B16e4s3: meta 448 files: ntrain=160000.0 bstar=kron K=4096 ll_val=5.797910431000217 ckpt='sha256[:16]=cc48b203ab114b92 epoch=337 best_epoch=337 role=b' iters=16 em_sec=9133.61854147911
+  n per arm: [2560]; arms 15
+  arms differing from a1 (all KEYS_RAW, 7 points): ['M-ours-dscore-C-V0', 'M-ours-dscore-C-V1', 'M-ours-dscore-C-V4', 'M-ours-dscore-C-V4b']
+  table B b*->V1: decision ['+3', '+6', '+9'] a:b 81:35 (p 2.3e-05) · 55:20 (p 6.5e-05) · 36:13 (p 0.0014) pooled 172:68 (p 1.4e-11) POWERED=True wy=3 wx=0 -> (i) second fewer
+  gap b*-V1 2dp +0.74 [+0.46, +1.03] censored 0% | 4dp +0.7389 [+0.4566, +1.0259] censored 0%
+  -3 dB: V1 0.487 (1246)  V0 0.689 (1765)  b* 0.496 (1270)  genie 0.232 (594)  V0->V1 reduction 29.4%
+  V1 failures -3..+15: 1246 667 385 208 103 42 19 | b*: 1270 714 431 243 126 69 27 | genie: 594 302 131 58 26 8 3
+  R(-3): b*/V1/genie 1270/1246/594 R=0.036 [90% 0.007, 0.063] undefined 0 | R(decision [3.0, 6.0, 9.0]): b*/V1/genie 800/696/215 R=0.178 [90% 0.138, 0.217] undefined 0
+  V0 guard fire rate -3 dB: 0.371
+
+## 4b. SEEDS16e4 D2 a2 / a3 (RESULTS §10.5 rows; raw_B16e4s2, raw_B16e4s3 vs raw_B16e4k)
+  a2 raw_B16e4s2: meta 448 files: ntrain=160000.0 bstar=kron K=1024 ll_val=-11.459169831224418 ckpt='sha256[:16]=9465fbec56cbf834 epoch=1378 best_epoch=1358 role' iters=16 em_sec=107957.18832826614
+    arms differing from a1: ['M-ours-dscore-C-V0', 'M-ours-dscore-C-V1', 'M-ours-dscore-C-V4', 'M-ours-dscore-C-V4b']; table B b*->V1: decision ['-3', '+0', '+3'] a:b 303:47 (p 5.8e-47) · 117:20 (p 7.2e-18) · 34:8 (p 6.9e-05) pooled 454:75 (p 4e-67) POWERED=True wy=3 wx=0 -> (i) second fewer
+    gap +1.44 [+1.24, +1.67] censored 0%; -3 dB V1 0.143 (367) V0 0.770 (1970) b* 623 genie 87 V0->V1 reduction 81.4%; R(-3) b*/V1/genie 623/367/87 R=0.478 [90% 0.435, 0.520] undefined 0; R(-3,0,3) b*/V1/genie 864/485/125 R=0.513 [90% 0.476, 0.549] undefined 0
+  a3 raw_B16e4s3: meta 448 files: ntrain=160000.0 bstar=kron K=1024 ll_val=-11.459169831224418 ckpt='sha256[:16]=b3d3376ce0796540 epoch=1044 best_epoch=1024 role' iters=16 em_sec=107957.18832826614
+    arms differing from a1: ['M-ours-dscore-C-V0', 'M-ours-dscore-C-V1', 'M-ours-dscore-C-V4', 'M-ours-dscore-C-V4b']; table B b*->V1: decision ['-3', '+0', '+3'] a:b 304:56 (p 2.3e-42) · 125:16 (p 4e-22) · 32:5 (p 7.4e-06) pooled 461:77 (p 1.1e-67) POWERED=True wy=3 wx=0 -> (i) second fewer
+    gap +1.48 [+1.28, +1.71] censored 0%; -3 dB V1 0.146 (375) V0 0.781 (2000) b* 623 genie 87 V0->V1 reduction 81.2%; R(-3) b*/V1/genie 623/375/87 R=0.463 [90% 0.418, 0.506] undefined 0; R(-3,0,3) b*/V1/genie 864/480/125 R=0.520 [90% 0.482, 0.555] undefined 0
+
+## 5. MISMATCH16e4 §0: matched base raws (failures per SNR -3..+15; table B b*->V1; gap)
+  S2 (B16e4k): R2-ours-G 839 261 97 57 31 29 15 | M-ours-bstar 623 184 57 28 17 16 8 | M-ours-dscore-C-V1 371 88 29 16 7 5 3 | R5-genie 87 26 12 9 2 2 2
+    table B b*->V1: decision ['-3', '+0', '+3'] a:b 302:50 (p 4.7e-45) · 117:21 (p 2.4e-17) · 35:7 (p 1.5e-05) pooled 454:78 (p 1.7e-65) POWERED=True wy=3 wx=0 -> (i) second fewer; gap +1.41 [+1.22, +1.64] censored 0%
+  S2c (D3B16e4): R2-ours-G 1454 749 304 199 75 57 22 | M-ours-bstar 1298 586 226 111 53 36 12 | M-ours-dscore-C-V1 1000 404 129 64 27 22 5 | R5-genie 485 149 47 35 10 14 3
+    table B b*->V1: decision ['+0', '+3', '+6'] a:b 221:39 (p 4.9e-32) · 116:19 (p 3.6e-18) · 56:9 (p 2e-09) pooled 393:67 (p 3.6e-57) POWERED=True wy=3 wx=0 -> (i) second fewer; gap +1.41 [+1.19, +1.67] censored 0%
+  SV8e (SVB16e4): R2-ours-G 599 82 15 2 0 0 0 | M-ours-bstar 464 60 7 0 0 0 0 | M-ours-dscore-C-V1 402 46 5 0 0 0 0 | R5-genie 31 3 0 1 0 0 0
+    table B b*->V1: decision ['-3', '+0'] a:b 124:62 (p 6.4e-06) · 24:10 (p 0.024) pooled 148:72 (p 3.3e-07) POWERED=False wy=2 wx=0 -> (iv) UNDECIDED; gap +0.25 [+0.16, +0.33] censored 0%
+  UMi28 (U28B16e4): R2-ours-G 1458 861 574 334 172 80 48 | M-ours-bstar 1270 714 431 243 126 69 27 | M-ours-dscore-C-V1 1228 656 393 215 104 44 24 | R5-genie 594 302 131 58 26 8 3
+    table B b*->V1: decision ['+3', '+6', '+9'] a:b 76:38 (p 0.00048) · 50:22 (p 0.0013) · 35:13 (p 0.0021) pooled 161:73 (p 8.7e-09) POWERED=True wy=3 wx=0 -> (i) second fewer; gap +0.60 [+0.33, +0.87] censored 0%
+  MIX3 (MXB16e4): R2-ours-G 1613 1065 641 378 214 103 49 | M-ours-bstar 1421 844 425 243 135 58 16 | M-ours-dscore-C-V1 1354 789 379 193 104 41 17 | R5-genie 679 358 143 68 35 13 2
+    table B b*->V1: decision ['+3', '+6', '+9'] a:b 85:39 (p 4.4e-05) · 71:21 (p 1.6e-07) · 42:11 (p 2.2e-05) pooled 198:71 (p 4.8e-15) POWERED=True wy=3 wx=0 -> (i) second fewer; gap +0.98 [+0.68, +1.31] censored 0%
+
+## 6. MISMATCH16e4 §6.1 (8 pairs; mismatch raw merged with the TEST prior's base raw; fingerprint vs the TRAIN prior's base raw)
+
+### D2-D3 (S2 -> S2c): raw_MMs2s2c x raw_D3B16e4; train base raw_B16e4k
+  meta mis: 448 files: ntrain=160000.0 bstar=kron K=1024 ll_val=-11.459169831224418 ckpt='sha256[:16]=4443921ce8d5c4a1 epoch=1784 best_epoch=1764 role' iters=16 em_sec=107957.18832826614
+  fingerprint vs train base (8 keys em_sec + ll_val|*): EQUAL; em_sec 107957.18832826614; ckpt id mis 'sha256[:16]=4443921ce8d5c4a1 epoch=1784 best_epoch'
+  point set True n per arm [2560] arms ['M-ours-bstar', 'M-ours-dscore-C-V1', 'R2-ours-G', 'R5-genie']
+  integrity: genie identical, mismatch applied (b*/R2 nmse differ) -> OK; raised {'V1-mis': 0, 'bstar-mis': 0, 'R2-mis': 0}
+  MM bstar-mis->V1-mis: decision ['+0', '+3', '+6'] a:b 234:45 (p 5.6e-32) · 113:23 (p 1.8e-15) · 63:13 (p 5e-09) pooled 410:81 (p 5.9e-54) POWERED=True wy=3 wx=0 -> (i) second fewer; gap +1.33 [+1.11, +1.61] censored 0%
+  rep V1-mis->V1: decision ['+0', '+3', '+6'] a:b 56:35 (p 0.035) · 36:16 (p 0.0078) · 22:10 (p 0.05) pooled 114:61 (p 7.5e-05) POWERED=True wy=2 wx=0 -> (i) second fewer; gap +0.25 [+0.13, +0.38] censored 0%
+  rep bstar-mis->b*: decision ['+0', '+3', '+6'] a:b 100:72 (p 0.039) · 60:47 (p 0.25) · 40:25 (p 0.082) pooled 200:144 (p 0.003) POWERED=True wy=1 wx=0 -> (iii) no direction; gap +0.17 [-0.04, +0.40] censored 0%
+  rep b*->V1-mis: decision ['+0', '+3', '+6'] a:b 204:43 (p 2.9e-26) · 109:32 (p 5e-11) · 50:15 (p 1.6e-05) pooled 363:90 (p 6.5e-40) POWERED=True wy=3 wx=0 -> (i) second fewer; gap +1.16 [+0.94, +1.42] censored 0%
+  rep R2-mis->V1-mis: decision ['+0', '+3', '+6'] a:b 353:31 (p 2.5e-70) · 192:31 (p 1.5e-29) · 132:13 (p 5.7e-26) pooled 677:75 (p 4.4e-122) POWERED=True wy=3 wx=0 -> (i) second fewer; gap +2.79 [+2.35, +3.22] censored 0%
+  rep R2-mis->R2: decision ['+0', '+3', '+6'] a:b 24:26 (p 0.89) · 19:13 (p 0.38) · 9:13 (p 0.52) pooled 52:52 (p 1) POWERED=True wy=0 wx=0 -> (iii) no direction; gap +0.02 [-0.15, +0.21] censored 0%
+  retention = +1.33 / +1.41 = 0.94
+  -3 dB failures: mis R2/b*/V1 1455 · 1317 · 1050 | matched R2/b*/V1/genie 1454 · 1298 · 1000 · 485
+  failures per SNR: R2-mis 1455 747 310 195 74 54 23 | bstar-mis 1317 614 239 126 55 37 13 | V1-mis 1050 425 149 76 36 23 7
+
+### D3-D2 (S2c -> S2): raw_MMs2cs2 x raw_B16e4k; train base raw_D3B16e4
+  meta mis: 448 files: ntrain=160000.0 bstar=kron K=4096 ll_val=0.08879931165293979 ckpt='sha256[:16]=7ebf4e6647d4413f epoch=494 best_epoch=494 role=b' iters=16 em_sec=15862.749816656113
+  fingerprint vs train base (8 keys em_sec + ll_val|*): EQUAL; em_sec 15862.749816656113; ckpt id mis 'sha256[:16]=7ebf4e6647d4413f epoch=494 best_epoch='
+  point set True n per arm [2560] arms ['M-ours-bstar', 'M-ours-dscore-C-V1', 'R2-ours-G', 'R5-genie']
+  integrity: genie identical, mismatch applied (b*/R2 nmse differ) -> OK; raised {'V1-mis': 0, 'bstar-mis': 0, 'R2-mis': 0}
+  MM bstar-mis->V1-mis: decision ['-3', '+0', '+3'] a:b 284:58 (p 6.6e-37) · 97:19 (p 8.6e-14) · 29:9 (p 0.0017) pooled 410:86 (p 1.3e-51) POWERED=True wy=3 wx=0 -> (i) second fewer; gap +1.18 [+1.00, +1.39] censored 0%
+  rep V1-mis->V1: decision ['-3', '+0', '+3'] a:b 67:55 (p 0.32) · 21:19 (p 0.87) · 5:8 (p 0.58) pooled 93:82 (p 0.45) POWERED=True wy=0 wx=0 -> (iii) no direction; gap +0.06 [-0.04, +0.16] censored 0%
+  rep bstar-mis->b*: decision ['-3', '+0', '+3'] a:b 99:113 (p 0.37) · 35:51 (p 0.11) · 14:25 (p 0.11) pooled 148:189 (p 0.029) POWERED=True wy=0 wx=0 -> (iii) no direction; gap -0.17 [-0.32, -0.02] censored 0%
+  rep b*->V1-mis: decision ['-3', '+0', '+3'] a:b 290:50 (p 3e-42) · 110:16 (p 2e-18) · 36:5 (p 7.8e-07) pooled 436:71 (p 4.4e-65) POWERED=True wy=3 wx=0 -> (i) second fewer; gap +1.35 [+1.17, +1.57] censored 0%
+  rep R2-mis->V1-mis: decision ['-3', '+0', '+3'] a:b 500:42 (p 1.4e-100) · 189:15 (p 1.7e-39) · 82:8 (p 1.4e-16) pooled 771:65 (p 3.9e-154) POWERED=True wy=3 wx=0 -> (i) second fewer; gap +2.26 [+2.00, +2.52] censored 0%
+  rep R2-mis->R2: decision ['-3', '+0', '+3'] a:b 15:13 (p 0.85) · 19:16 (p 0.74) · 9:6 (p 0.61) pooled 43:35 (p 0.43) POWERED=True wy=0 wx=0 -> (iii) no direction; gap +0.04 [-0.07, +0.14] censored 0%
+  retention = +1.18 / +1.41 = 0.84
+  -3 dB failures: mis R2/b*/V1 841 · 609 · 383 | matched R2/b*/V1/genie 839 · 623 · 371 · 87
+  failures per SNR: R2-mis 841 264 100 62 27 32 17 | bstar-mis 609 168 46 27 20 22 10 | V1-mis 383 90 26 15 3 6 3
+
+### U28-MX (UMi28 -> MIX3): raw_MMu28mx x raw_MXB16e4; train base raw_U28B16e4
+  meta mis: 448 files: ntrain=160000.0 bstar=kron K=4096 ll_val=5.797910431000217 ckpt='sha256[:16]=6f3a1b9490864af1 epoch=379 best_epoch=379 role=b' iters=16 em_sec=9133.61854147911
+  fingerprint vs train base (8 keys em_sec + ll_val|*): EQUAL; em_sec 9133.61854147911; ckpt id mis 'sha256[:16]=6f3a1b9490864af1 epoch=379 best_epoch='
+  point set True n per arm [2560] arms ['M-ours-bstar', 'M-ours-dscore-C-V1', 'R2-ours-G', 'R5-genie']
+  integrity: genie identical, mismatch applied (b*/R2 nmse differ) -> OK; raised {'V1-mis': 0, 'bstar-mis': 0, 'R2-mis': 0}
+  MM bstar-mis->V1-mis: decision ['+3', '+6', '+9'] a:b 58:40 (p 0.085) · 59:26 (p 0.00045) · 32:13 (p 0.0066) pooled 149:79 (p 4.1e-06) POWERED=True wy=2 wx=0 -> (i) second fewer; gap +0.61 [+0.33, +0.92] censored 0%
+  rep V1-mis->V1: decision ['+3', '+6', '+9'] a:b 47:25 (p 0.013) · 26:13 (p 0.053) · 12:11 (p 1) pooled 85:49 (p 0.0024) POWERED=True wy=1 wx=0 -> (iii) no direction; gap +0.28 [+0.12, +0.46] censored 0%
+  rep bstar-mis->b*: decision ['+3', '+6', '+9'] a:b 51:57 (p 0.63) · 37:41 (p 0.73) · 19:30 (p 0.15) pooled 107:128 (p 0.19) POWERED=True wy=0 wx=0 -> (iii) no direction; gap -0.09 [-0.35, +0.19] censored 0%
+  rep b*->V1-mis: decision ['+3', '+6', '+9'] a:b 65:41 (p 0.025) · 67:30 (p 0.00022) · 44:14 (p 0.0001) pooled 176:85 (p 1.8e-08) POWERED=True wy=3 wx=0 -> (i) second fewer; gap +0.70 [+0.41, +1.01] censored 0%
+  rep R2-mis->V1-mis: decision ['+3', '+6', '+9'] a:b 269:33 (p 3.6e-47) · 188:19 (p 3.8e-36) · 125:9 (p 2.9e-27) pooled 582:61 (p 1.3e-107) POWERED=True wy=3 wx=0 -> (i) second fewer; gap +3.14 [+2.64, +3.76] censored 0%
+  rep R2-mis->R2: decision ['+3', '+6', '+9'] a:b 18:22 (p 0.64) · 19:22 (p 0.76) · 12:5 (p 0.14) pooled 49:49 (p 1) POWERED=True wy=0 wx=0 -> (iii) no direction; gap +0.11 [-0.02, +0.26] censored 0%
+  retention = +0.61 / +0.98 = 0.63
+  -3 dB failures: mis R2/b*/V1 1614 · 1420 · 1389 | matched R2/b*/V1/genie 1613 · 1421 · 1354 · 679
+  failures per SNR: R2-mis 1614 1064 637 375 221 101 48 | bstar-mis 1420 832 419 239 124 62 20 | V1-mis 1389 791 401 206 105 47 21
+
+### MX-U28 (MIX3 -> UMi28): raw_MMmxu28 x raw_U28B16e4; train base raw_MXB16e4
+  meta mis: 448 files: ntrain=160000.0 bstar=kron K=4096 ll_val=33.7604873920761 ckpt='sha256[:16]=b591ae24ae3c5f31 epoch=464 best_epoch=464 role=b' iters=16 em_sec=6242.08159995079
+  fingerprint vs train base (8 keys em_sec + ll_val|*): EQUAL; em_sec 6242.08159995079; ckpt id mis 'sha256[:16]=b591ae24ae3c5f31 epoch=464 best_epoch='
+  point set True n per arm [2560] arms ['M-ours-bstar', 'M-ours-dscore-C-V1', 'R2-ours-G', 'R5-genie']
+  integrity: genie identical, mismatch applied (b*/R2 nmse differ) -> OK; raised {'V1-mis': 0, 'bstar-mis': 0, 'R2-mis': 0}
+  MM bstar-mis->V1-mis: decision ['+3', '+6', '+9'] a:b 94:30 (p 7.1e-09) · 68:17 (p 2.2e-08) · 48:13 (p 7.7e-06) pooled 210:60 (p 1.1e-20) POWERED=True wy=3 wx=0 -> (i) second fewer; gap +1.04 [+0.73, +1.30] censored 0%
+  rep V1-mis->V1: decision ['+3', '+6', '+9'] a:b 34:35 (p 1) · 14:17 (p 0.72) · 11:13 (p 0.84) pooled 59:65 (p 0.65) POWERED=True wy=0 wx=0 -> (iii) no direction; gap -0.05 [-0.22, +0.10] censored 0%
+  rep bstar-mis->b*: decision ['+3', '+6', '+9'] a:b 65:40 (p 0.019) · 47:27 (p 0.027) · 31:20 (p 0.16) pooled 143:87 (p 0.00027) POWERED=True wy=2 wx=0 -> (i) second fewer; gap +0.40 [+0.12, +0.63] censored 0%
+  rep b*->V1-mis: decision ['+3', '+6', '+9'] a:b 79:40 (p 0.00045) · 52:21 (p 0.00037) · 39:15 (p 0.0015) pooled 170:76 (p 2e-09) POWERED=True wy=3 wx=0 -> (i) second fewer; gap +0.65 [+0.38, +0.93] censored 0%
+  rep R2-mis->V1-mis: decision ['+3', '+6', '+9'] a:b 207:29 (p 2.6e-34) · 139:15 (p 2.4e-26) · 81:9 (p 1.3e-15) pooled 427:53 (p 1.1e-73) POWERED=True wy=3 wx=0 -> (i) second fewer; gap +2.16 [+1.78, +2.53] censored 0%
+  rep R2-mis->R2: decision ['+3', '+6', '+9'] a:b 15:19 (p 0.61) · 9:7 (p 0.8) · 6:4 (p 0.75) pooled 30:30 (p 1) POWERED=True wy=0 wx=0 -> (iii) no direction; gap +0.04 [-0.04, +0.12] censored 0%
+  retention = +1.04 / +0.60 = 1.75
+  -3 dB failures: mis R2/b*/V1 1456 · 1295 · 1259 | matched R2/b*/V1/genie 1458 · 1270 · 1228 · 594
+  failures per SNR: R2-mis 1456 854 570 336 174 80 48 | bstar-mis 1295 721 456 263 137 75 34 | V1-mis 1259 651 392 212 102 42 25
+
+### D2-U28 (S2 -> UMi28): raw_MMs2u28 x raw_U28B16e4; train base raw_B16e4k
+  meta mis: 448 files: ntrain=160000.0 bstar=kron K=1024 ll_val=-11.459169831224418 ckpt='sha256[:16]=4443921ce8d5c4a1 epoch=1784 best_epoch=1764 role' iters=16 em_sec=107957.18832826614
+  fingerprint vs train base (8 keys em_sec + ll_val|*): EQUAL; em_sec 107957.18832826614; ckpt id mis 'sha256[:16]=4443921ce8d5c4a1 epoch=1784 best_epoch'
+  point set True n per arm [2560] arms ['M-ours-bstar', 'M-ours-dscore-C-V1', 'R2-ours-G', 'R5-genie']
+  integrity: genie identical, mismatch applied (b*/R2 nmse differ) -> OK; raised {'V1-mis': 0, 'bstar-mis': 0, 'R2-mis': 0}
+  MM bstar-mis->V1-mis: decision ['+3', '+6', '+9'] a:b 103:68 (p 0.0091) · 66:48 (p 0.11) · 57:37 (p 0.049) pooled 226:153 (p 0.00021) POWERED=True wy=2 wx=0 -> (i) second fewer; gap +0.35 [+0.12, +0.61] censored 0%
+  rep V1-mis->V1: decision ['+3', '+6', '+9'] a:b 129:37 (p 3.9e-13) · 98:15 (p 4.1e-16) · 55:12 (p 1e-07) pooled 282:64 (p 8.9e-34) POWERED=True wy=3 wx=0 -> (i) second fewer; gap +1.51 [+1.19, +1.81] censored 0%
+  rep bstar-mis->b*: decision ['+3', '+6', '+9'] a:b 124:35 (p 7.2e-13) · 101:28 (p 7e-11) · 55:14 (p 6.9e-07) pooled 280:77 (p 3.3e-28) POWERED=True wy=3 wx=0 -> (i) second fewer; gap +1.26 [+0.90, +1.61] censored 0%
+  rep b*->V1-mis: decision ['+3', '+6', '+9'] a:b 60:114 (p 5.2e-05) · 32:87 (p 4.7e-07) · 29:50 (p 0.024) pooled 121:251 (p 1.4e-11) POWERED=True wy=0 wx=3 -> (ii) first fewer; gap -0.92 [-1.24, -0.59] censored 0%
+  rep R2-mis->V1-mis: decision ['+3', '+6', '+9'] a:b 158:71 (p 8.9e-09) · 96:56 (p 0.0015) · 58:34 (p 0.016) pooled 312:161 (p 3.5e-12) POWERED=True wy=3 wx=0 -> (i) second fewer; gap +0.58 [+0.33, +0.87] censored 0%
+  rep R2-mis->R2: decision ['+3', '+6', '+9'] a:b 43:45 (p 0.92) · 24:20 (p 0.65) · 10:11 (p 1) pooled 77:76 (p 1) POWERED=True wy=0 wx=0 -> (iii) no direction; gap +0.02 [-0.10, +0.14] censored 0%
+  retention = +0.35 / +0.60 = 0.58
+  -3 dB failures: mis R2/b*/V1 1515 · 1407 · 1491 | matched R2/b*/V1/genie 1458 · 1270 · 1228 · 594
+  failures per SNR: R2-mis 1515 870 572 338 171 88 48 | bstar-mis 1407 813 520 316 167 87 47 | V1-mis 1491 764 485 298 147 63 38
+
+### U28-D2 (UMi28 -> S2): raw_MMu28s2 x raw_B16e4k; train base raw_U28B16e4
+  meta mis: 448 files: ntrain=160000.0 bstar=kron K=4096 ll_val=5.797910431000217 ckpt='sha256[:16]=6f3a1b9490864af1 epoch=379 best_epoch=379 role=b' iters=16 em_sec=9133.61854147911
+  fingerprint vs train base (8 keys em_sec + ll_val|*): EQUAL; em_sec 9133.61854147911; ckpt id mis 'sha256[:16]=6f3a1b9490864af1 epoch=379 best_epoch='
+  point set True n per arm [2560] arms ['M-ours-bstar', 'M-ours-dscore-C-V1', 'R2-ours-G', 'R5-genie']
+  integrity: genie identical, mismatch applied (b*/R2 nmse differ) -> OK; raised {'V1-mis': 0, 'bstar-mis': 0, 'R2-mis': 0}
+  MM bstar-mis->V1-mis: decision ['-3', '+0', '+3'] a:b 240:41 (p 2.1e-35) · 84:20 (p 1.6e-10) · 40:11 (p 5.7e-05) pooled 364:72 (p 5.1e-48) POWERED=True wy=3 wx=0 -> (i) second fewer; gap +0.82 [+0.66, +0.99] censored 0%
+  rep V1-mis->V1: decision ['-3', '+0', '+3'] a:b 230:62 (p 7.2e-24) · 81:24 (p 2.1e-08) · 26:7 (p 0.0013) pooled 337:93 (p 1.5e-33) POWERED=True wy=3 wx=0 -> (i) second fewer; gap +0.93 [+0.76, +1.12] censored 0%
+  rep bstar-mis->b*: decision ['-3', '+0', '+3'] a:b 205:90 (p 1.8e-11) · 65:40 (p 0.019) · 37:17 (p 0.0091) pooled 307:147 (p 4.7e-14) POWERED=True wy=3 wx=0 -> (i) second fewer; gap +0.33 [+0.16, +0.50] censored 0%
+  rep b*->V1-mis: decision ['-3', '+0', '+3'] a:b 158:74 (p 3.6e-08) · 69:30 (p 0.00011) · 22:13 (p 0.18) pooled 249:117 (p 4.4e-12) POWERED=True wy=2 wx=0 -> (i) second fewer; gap +0.49 [+0.33, +0.65] censored 0%
+  rep R2-mis->V1-mis: decision ['-3', '+0', '+3'] a:b 379:45 (p 6.6e-67) · 149:18 (p 7.5e-27) · 69:7 (p 6.4e-14) pooled 597:70 (p 3.5e-105) POWERED=True wy=3 wx=0 -> (i) second fewer; gap +1.54 [+1.31, +1.76] censored 0%
+  rep R2-mis->R2: decision ['-3', '+0', '+3'] a:b 121:87 (p 0.022) · 54:39 (p 0.15) · 23:10 (p 0.035) pooled 198:136 (p 0.00082) POWERED=True wy=2 wx=0 -> (i) second fewer; gap +0.19 [+0.01, +0.35] censored 0%
+  retention = +0.82 / +1.41 = 0.58
+  -3 dB failures: mis R2/b*/V1 873 · 738 · 539 | matched R2/b*/V1/genie 839 · 623 · 371 · 87
+  failures per SNR: R2-mis 873 276 110 62 32 31 14 | bstar-mis 738 209 77 38 21 21 12 | V1-mis 539 145 48 26 10 17 8
+
+### D2-SV (S2 -> SV8e): raw_MMs2sv x raw_SVB16e4; train base raw_B16e4k
+  meta mis: 448 files: ntrain=160000.0 bstar=kron K=1024 ll_val=-11.459169831224418 ckpt='sha256[:16]=4443921ce8d5c4a1 epoch=1784 best_epoch=1764 role' iters=16 em_sec=107957.18832826614
+  fingerprint vs train base (8 keys em_sec + ll_val|*): EQUAL; em_sec 107957.18832826614; ckpt id mis 'sha256[:16]=4443921ce8d5c4a1 epoch=1784 best_epoch'
+  point set True n per arm [2560] arms ['M-ours-bstar', 'M-ours-dscore-C-V1', 'R2-ours-G', 'R5-genie']
+  integrity: genie identical, mismatch applied (b*/R2 nmse differ) -> OK; raised {'V1-mis': 0, 'bstar-mis': 0, 'R2-mis': 0}
+  MM bstar-mis->V1-mis: decision ['-3', '+0'] a:b 161:199 (p 0.051) · 35:42 (p 0.49) pooled 196:241 (p 0.035) POWERED=False wy=0 wx=0 -> (iv) UNDECIDED; gap -0.11 [-0.23, +0.01] censored 0%
+  rep V1-mis->V1: decision ['-3', '+0', '+3'] a:b 242:49 (p 7.6e-32) · 47:12 (p 5.1e-06) · 8:0 (p 0.0078) pooled 297:61 (p 2.3e-38) POWERED=True wy=3 wx=0 -> (i) second fewer; gap +0.64 [+0.53, +0.77] censored 0%
+  rep bstar-mis->b*: decision ['-3', '+0'] a:b 168:75 (p 2.3e-09) · 32:18 (p 0.065) pooled 200:93 (p 3.8e-10) POWERED=False wy=1 wx=0 -> (iv) UNDECIDED; gap +0.28 [+0.19, +0.39] censored 0%
+  rep b*->V1-mis: decision ['-3', '+0'] a:b 112:243 (p 3e-12) · 21:42 (p 0.011) pooled 133:285 (p 8.1e-14) POWERED=False wy=0 wx=2 -> (iv) UNDECIDED; gap -0.40 [-0.51, -0.29] censored 0%
+  rep R2-mis->V1-mis: decision ['-3', '+0', '+3'] a:b 219:165 (p 0.0068) · 60:38 (p 0.033) · 10:7 (p 0.63) pooled 289:210 (p 0.00047) POWERED=True wy=2 wx=0 -> (i) second fewer; gap +0.25 [+0.11, +0.38] censored 0%
+  rep R2-mis->R2: decision ['-3', '+0', '+3'] a:b 106:56 (p 0.00011) · 26:5 (p 0.00019) · 5:4 (p 1) pooled 137:65 (p 4.5e-07) POWERED=True wy=2 wx=0 -> (i) second fewer; gap +0.23 [+0.16, +0.31] censored 0%
+  retention = -0.11 / +0.25 = -0.46
+  -3 dB failures: mis R2/b*/V1 649 · 557 · 595 | matched R2/b*/V1/genie 599 · 464 · 402 · 31
+  failures per SNR: R2-mis 649 103 16 3 0 0 0 | bstar-mis 557 74 11 1 0 0 0 | V1-mis 595 81 13 1 0 0 0
+
+### SV-D2 (SV8e -> S2): raw_MMsvs2 x raw_B16e4k; train base raw_SVB16e4
+  meta mis: 448 files: ntrain=160000.0 bstar=gmm256 K=2048 ll_val=-47.80545576704972 ckpt='sha256[:16]=d2d78962c2846364 epoch=240 best_epoch=240 role=b' iters=16 em_sec=10589.87728881836
+  fingerprint vs train base (8 keys em_sec + ll_val|*): EQUAL; em_sec 10589.87728881836; ckpt id mis 'sha256[:16]=d2d78962c2846364 epoch=240 best_epoch='
+  point set True n per arm [2560] arms ['M-ours-bstar', 'M-ours-dscore-C-V1', 'R2-ours-G', 'R5-genie']
+  integrity: genie identical, mismatch applied (b*/R2 nmse differ) -> OK; raised {'V1-mis': 0, 'bstar-mis': 0, 'R2-mis': 0}
+  MM bstar-mis->V1-mis: decision ['-3', '+0', '+3'] a:b 244:34 (p 2.5e-40) · 91:17 (p 2.1e-13) · 54:12 (p 1.7e-07) pooled 389:63 (p 2.1e-58) POWERED=True wy=3 wx=0 -> (i) second fewer; gap +1.00 [+0.82, +1.19] censored 0%
+  rep V1-mis->V1: decision ['-3', '+0', '+3'] a:b 190:69 (p 3e-14) · 80:21 (p 2.7e-09) · 22:10 (p 0.05) pooled 292:100 (p 6.6e-23) POWERED=True wy=2 wx=0 -> (i) second fewer; gap +0.85 [+0.68, +1.04] censored 0%
+  rep bstar-mis->b*: decision ['-3', '+0', '+3'] a:b 179:100 (p 2.6e-06) · 78:41 (p 0.00089) · 40:14 (p 0.00054) pooled 297:155 (p 2.3e-11) POWERED=True wy=3 wx=0 -> (i) second fewer; gap +0.43 [+0.25, +0.61] censored 0%
+  rep b*->V1-mis: decision ['-3', '+0', '+3'] a:b 188:57 (p 1.6e-17) · 70:33 (p 0.00034) · 29:13 (p 0.02) pooled 287:103 (p 3.4e-21) POWERED=True wy=3 wx=0 -> (i) second fewer; gap +0.57 [+0.40, +0.75] censored 0%
+  rep R2-mis->V1-mis: decision ['-3', '+0', '+3'] a:b 398:26 (p 1.1e-86) · 138:18 (p 4.2e-24) · 69:8 (p 3.1e-13) pooled 605:52 (p 1.9e-120) POWERED=True wy=3 wx=0 -> (i) second fewer; gap +1.51 [+1.27, +1.73] censored 0%
+  rep R2-mis->R2: decision ['-3', '+0', '+3'] a:b 110:85 (p 0.085) · 45:39 (p 0.59) · 21:16 (p 0.51) pooled 176:140 (p 0.049) POWERED=True wy=0 wx=0 -> (iii) no direction; gap +0.07 [-0.09, +0.23] censored 0%
+  retention = +1.00 / +1.41 = 0.70
+  -3 dB failures: mis R2/b*/V1 864 · 702 · 492 | matched R2/b*/V1/genie 839 · 623 · 371 · 87
+  failures per SNR: R2-mis 864 267 102 61 31 31 16 | bstar-mis 702 221 83 56 30 28 14 | V1-mis 492 147 41 26 17 17 6
+
+## 7. driver logs, manifests, tables headers
+  --- logs/run_pilot16e4.log
+    [pilot16e4 09-26 22:29 CDT] start (git 92d26757) datasets: all
+    [pilot16e4 09-26 22:31 CDT] D2C2 acceptance rc=0 (ACCEPT: OK -- PILB16e4k)
+    [pilot16e4 09-26 22:31 CDT] D2C2 pair_cross rc=0 (# pair_cross raw_PILB16e4k x raw_B16e4k, cell C2, prior S2, n=2560 per SNR, git 92d26757; raised tri
+    [pilot16e4 09-26 22:39 CDT] D2C6 acceptance rc=0 (ACCEPT: OK -- PILNR16)
+    [pilot16e4 09-26 22:39 CDT] D2C6 pair_cross rc=0 (# pair_cross raw_PILNR16 x raw_NR16B16e4, cell C6, prior S2, n=2560 per SNR, git bfe80c48; raised tr
+    [pilot16e4 09-26 22:44 CDT] D3 acceptance rc=0 (ACCEPT: OK -- PILD3)
+    [pilot16e4 09-26 22:44 CDT] D3 pair_cross rc=0 (# pair_cross raw_PILD3 x raw_D3B16e4, cell C2, prior S2c, n=2560 per SNR, git bfe80c48; raised trials 
+    [pilot16e4 09-26 22:48 CDT] SV8e acceptance rc=0 (ACCEPT: OK -- PILSV)
+    [pilot16e4 09-26 22:48 CDT] SV8e pair_cross rc=0 (# pair_cross raw_PILSV x raw_SVB16e4, cell C2, prior SV8e, n=2560 per SNR, git bfe80c48; raised tria
+    [pilot16e4 09-26 22:58 CDT] UMi28 acceptance rc=0 (ACCEPT: OK -- PILU28)
+    [pilot16e4 09-26 22:58 CDT] UMi28 pair_cross rc=0 (# pair_cross raw_PILU28 x raw_U28B16e4, cell C2, prior UMi28, n=2560 per SNR, git bfe80c48; raised 
+    [pilot16e4 09-26 23:07 CDT] MIX3 acceptance rc=0 (ACCEPT: OK -- PILMX)
+    [pilot16e4 09-26 23:07 CDT] MIX3 pair_cross rc=0 (# pair_cross raw_PILMX x raw_MXB16e4, cell C2, prior MIX3, n=2560 per SNR, git bfe80c48; raised tria
+    [pilot16e4 09-26 23:07 CDT] PILOT_EVAL_DONE ok=6 fail=0
+  --- logs/run_mismatch16e4.log
+    [mismatch16e4 09-26 23:18 CDT] start (git 92e31706) pairs: all
+    [mismatch16e4 09-26 23:53 CDT] D2-D3 acceptance rc=0 (ACCEPT: OK -- MMs2s2c)
+    [mismatch16e4 09-26 23:54 CDT] D2-D3 pair_mismatch rc=0 (# pair_mismatch raw_MMs2s2c x raw_D3B16e4, cell C2, test prior S2c, n=2560 per SNR, git 92e31
+    [mismatch16e4 09-27 00:22 CDT] D3-D2 acceptance rc=0 (ACCEPT: OK -- MMs2cs2)
+    [mismatch16e4 09-27 00:22 CDT] D3-D2 pair_mismatch rc=0 (# pair_mismatch raw_MMs2cs2 x raw_B16e4k, cell C2, test prior S2, n=2560 per SNR, git 92e3170
+    [mismatch16e4 09-27 00:41 CDT] U28-MX acceptance rc=0 (ACCEPT: OK -- MMu28mx)
+    [mismatch16e4 09-27 00:41 CDT] U28-MX pair_mismatch rc=0 (# pair_mismatch raw_MMu28mx x raw_MXB16e4, cell C2, test prior MIX3, n=2560 per SNR, git 0b9
+    [mismatch16e4 09-27 01:00 CDT] MX-U28 acceptance rc=0 (ACCEPT: OK -- MMmxu28)
+    [mismatch16e4 09-27 01:00 CDT] MX-U28 pair_mismatch rc=0 (# pair_mismatch raw_MMmxu28 x raw_U28B16e4, cell C2, test prior UMi28, n=2560 per SNR, git 0
+    [mismatch16e4 09-27 01:10 CDT] D2-U28 acceptance rc=0 (ACCEPT: OK -- MMs2u28)
+    [mismatch16e4 09-27 01:11 CDT] D2-U28 pair_mismatch rc=0 (# pair_mismatch raw_MMs2u28 x raw_U28B16e4, cell C2, test prior UMi28, n=2560 per SNR, git 0
+    [mismatch16e4 09-27 01:28 CDT] U28-D2 acceptance rc=0 (ACCEPT: OK -- MMu28s2)
+    [mismatch16e4 09-27 01:28 CDT] U28-D2 pair_mismatch rc=0 (# pair_mismatch raw_MMu28s2 x raw_B16e4k, cell C2, test prior S2, n=2560 per SNR, git 0b994c
+    [mismatch16e4 09-27 01:38 CDT] D2-SV acceptance rc=0 (ACCEPT: OK -- MMs2sv)
+    [mismatch16e4 09-27 01:38 CDT] D2-SV pair_mismatch rc=0 (# pair_mismatch raw_MMs2sv x raw_SVB16e4, cell C2, test prior SV8e, n=2560 per SNR, git 0b994
+    [mismatch16e4 09-27 01:46 CDT] SV-D2 acceptance rc=0 (ACCEPT: OK -- MMsvs2)
+    [mismatch16e4 09-27 01:46 CDT] SV-D2 pair_mismatch rc=0 (# pair_mismatch raw_MMsvs2 x raw_B16e4k, cell C2, test prior S2, n=2560 per SNR, git 0b994cd2
+    [mismatch16e4 09-27 01:46 CDT] MISMATCH_EVAL_DONE ok=8 fail=0
+  --- logs/run_seeds16e4_U28B16e4s2.log
+    [seeds16e4 U28B16e4s2 09-26 23:17 CDT] start (git c52bbdaf) prior=UMi28 ckpt=ckpt/d2sx_UMi28_N160000_a2_best.pt sha=0ec0973b7892d0c2 role=best bstar=k
+    [seeds16e4 U28B16e4s2 09-27 00:22 CDT] acceptance rc=0 (ACCEPT: OK -- U28B16e4s2)
+    [seeds16e4 U28B16e4s2 09-27 00:28 CDT] ref-arms all report: arms differing ['M-ours-dscore-C-V0', 'M-ours-dscore-C-V1', 'M-ours-dscore-C-V4', 'M-ours-
+    [seeds16e4 U28B16e4s2 09-27 00:28 CDT] SEEDS_EVAL_DONE
+  --- logs/run_seeds16e4_U28B16e4s3.log
+    [seeds16e4 U28B16e4s3 09-26 22:39 CDT] start (git bfe80c48) prior=UMi28 ckpt=ckpt/d2sx_UMi28_N160000_a3_best.pt sha=cc48b203ab114b92 role=best bstar=k
+    [seeds16e4 U28B16e4s3 09-26 23:58 CDT] acceptance rc=0 (ACCEPT: OK -- U28B16e4s3)
+    [seeds16e4 U28B16e4s3 09-27 00:06 CDT] ref-arms all report: arms differing ['M-ours-dscore-C-V0', 'M-ours-dscore-C-V1', 'M-ours-dscore-C-V4', 'M-ours-
+    [seeds16e4 U28B16e4s3 09-27 00:06 CDT] SEEDS_EVAL_DONE
+  manifest PILB16e4k: git 92d26757 config_hash 80f03e30d676712a n_raw 448 ckpt sha256[:16]=4443921ce8d5c4a1 epoch=1784 best_epoch=1764 role
+  manifest PILNR16: git bfe80c48 config_hash 51ae127c61aacdce n_raw 448 ckpt sha256[:16]=c050d611b2c714a6 epoch=1684 best_epoch=1684 role
+  manifest PILD3: git bfe80c48 config_hash 80f03e30d676712a n_raw 448 ckpt sha256[:16]=7ebf4e6647d4413f epoch=494 best_epoch=494 role=b
+  manifest PILSV: git bfe80c48 config_hash 80f03e30d676712a n_raw 448 ckpt sha256[:16]=d2d78962c2846364 epoch=240 best_epoch=240 role=b
+  manifest PILU28: git bfe80c48 config_hash 80f03e30d676712a n_raw 448 ckpt sha256[:16]=6f3a1b9490864af1 epoch=379 best_epoch=379 role=b
+  manifest PILMX: git bfe80c48 config_hash 80f03e30d676712a n_raw 448 ckpt sha256[:16]=b591ae24ae3c5f31 epoch=464 best_epoch=464 role=b
+  manifest MMs2s2c: git 92e31706 config_hash 80f03e30d676712a n_raw 448 ckpt sha256[:16]=4443921ce8d5c4a1 epoch=1784 best_epoch=1764 role
+  manifest MMs2cs2: git 92e31706 config_hash 80f03e30d676712a n_raw 448 ckpt sha256[:16]=7ebf4e6647d4413f epoch=494 best_epoch=494 role=b
+  manifest MMu28mx: git 0b994cd2 config_hash 80f03e30d676712a n_raw 448 ckpt sha256[:16]=6f3a1b9490864af1 epoch=379 best_epoch=379 role=b
+  manifest MMmxu28: git 0b994cd2 config_hash 80f03e30d676712a n_raw 448 ckpt sha256[:16]=b591ae24ae3c5f31 epoch=464 best_epoch=464 role=b
+  manifest MMs2u28: git 0b994cd2 config_hash 80f03e30d676712a n_raw 448 ckpt sha256[:16]=4443921ce8d5c4a1 epoch=1784 best_epoch=1764 role
+  manifest MMu28s2: git 0b994cd2 config_hash 80f03e30d676712a n_raw 448 ckpt sha256[:16]=6f3a1b9490864af1 epoch=379 best_epoch=379 role=b
+  manifest MMs2sv: git 0b994cd2 config_hash 80f03e30d676712a n_raw 448 ckpt sha256[:16]=4443921ce8d5c4a1 epoch=1784 best_epoch=1764 role
+  manifest MMsvs2: git 0b994cd2 config_hash 80f03e30d676712a n_raw 448 ckpt sha256[:16]=d2d78962c2846364 epoch=240 best_epoch=240 role=b
+  manifest U28B16e4s2: git 92e31706 config_hash 80f03e30d676712a n_raw 448 ckpt sha256[:16]=0ec0973b7892d0c2 epoch=448 best_epoch=448 role=b
+  manifest U28B16e4s3: git 92e31706 config_hash 80f03e30d676712a n_raw 448 ckpt sha256[:16]=cc48b203ab114b92 epoch=337 best_epoch=337 role=b
+  tables_D2_U28B16e4s2.txt: # date        : 2026-09-27 14:21:25 KST | # git commit  : 92e31706
+  tables_D2_U28B16e4s3.txt: # date        : 2026-09-27 13:55:44 KST | # git commit  : 92e31706
+  pair_PILB16e4k.txt: git 92d26757; (point set, genie identical, pilot-only 
+  pair_PILD3.txt: git bfe80c48; (point set, genie identical, pilot-only 
+  pair_PILMX.txt: git bfe80c48; (point set, genie identical, pilot-only 
+  pair_PILNR16.txt: git bfe80c48; (point set, genie identical, pilot-only 
+  pair_PILSV.txt: git bfe80c48; (point set, genie identical, pilot-only 
+  pair_PILU28.txt: git bfe80c48; (point set, genie identical, pilot-only 
+  pair_MMmxu28.txt: git 0b994cd2; (point set, genie identical, train-fits 
+  pair_MMs2cs2.txt: git 92e31706; (point set, genie identical, train-fits 
+  pair_MMs2s2c.txt: git 92e31706; (point set, genie identical, train-fits 
+  pair_MMs2sv.txt: git 0b994cd2; (point set, genie identical, train-fits 
+  pair_MMs2u28.txt: git 0b994cd2; (point set, genie identical, train-fits 
+  pair_MMsvs2.txt: git 0b994cd2; (point set, genie identical, train-fits 
+  pair_MMu28mx.txt: git 0b994cd2; (point set, genie identical, train-fits 
+  pair_MMu28s2.txt: git 0b994cd2; (point set, genie identical, train-fits 
+  fits link dirs mtime (KST): gmm_fits_D2_MMmxu28 12:49:02 gmm_fits_D2_MMs2cs2 12:49:01 gmm_fits_D2_MMs2s2c 12:49:00 gmm_fits_D2_MMs2sv 12:54:23 gmm_fits_D2_MMs2u28 12:49:03 gmm_fits_D2_MMsvs2 12:54:23 gmm_fits_D2_MMu28mx 12:49:01 gmm_fits_D2_MMu28s2 12:49:03 gmm_fits_D2_PILB16e4k 11:58:34 gmm_fits_D2_PILD3 11:58:34 gmm_fits_D2_PILMX 11:58:34 gmm_fits_D2_PILNR16 11:58:34 gmm_fits_D2_PILSV 11:58:34 gmm_fits_D2_PILU28 11:58:34 gmm_fits_D2_U28B16e4s2 10:51:16 gmm_fits_D2_U28B16e4s3 10:51:16
+  raw_PILchk exists: False | PILchk accept file: []
