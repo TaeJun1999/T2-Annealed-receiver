@@ -143,8 +143,11 @@ def _set_topology(m, code, B, G):
     m.set_topology(*tp, los=None, **(dict(in_car=torch.zeros_like(tp[5])) if name == "rma" else {}))
 
 
-def _snapshot(m, B, Nr, Nt):
-    return m(1, 1.0)[0][..., 0].sum(-1).reshape(B, Nr, Nt).numpy().astype(np.complex128)
+def _snapshot(m, B, Nr, Nt, paths=None):
+    a0 = m(1, 1.0)[0][..., 0]
+    if paths is not None:                       # NEXT_EXPERIMENTS_DOP16e4: per-path (B, P, Nr, Nt); H below is unchanged
+        paths.append(np.moveaxis(a0.reshape(B, Nr, Nt, -1).numpy().astype(np.complex128), -1, 1))
+    return a0.sum(-1).reshape(B, Nr, Nt).numpy().astype(np.complex128)
 
 
 class _Seeded:
@@ -169,7 +172,7 @@ class _Seeded:
         torch.set_rng_state(self.saved[2])
 
 
-def _generate(codes, seed, Nr, Nt, aux=None):
+def _generate(codes, seed, Nr, Nt, aux=None, paths=None):
     """One chunk: codes (m,) scenario codes, seed -> (m, Nr, Nt) complex128 RAW channels.  aux (list) receives
     (code, block indices, LoS flags) per scenario batch (testbed_mix3.py)."""
     out = np.empty((len(codes), Nr, Nt), complex)
@@ -179,7 +182,7 @@ def _generate(codes, seed, Nr, Nt, aux=None):
             if len(ix):
                 m = _model(code, Nr, Nt)                # FRESH model: no topology / LSP state carried between batches
                 _set_topology(m, code, len(ix), G)
-                out[ix] = _snapshot(m, len(ix), Nr, Nt)
+                out[ix] = _snapshot(m, len(ix), Nr, Nt, paths)
                 if aux is not None:
                     aux.append((code, ix, m._scenario.los.reshape(len(ix)).numpy().copy()))
     return out
@@ -216,6 +219,15 @@ class MIX3Gen:
 
     def sample(self, rng):
         return self._draw(rng, 1)[0]
+
+    def sample_paths(self, rng):
+        """(H, P): H EXACTLY as sample() (one block = one chunk of 1) and the per-path matrices P (paths, Nr, Nt), both
+        normalised (NEXT_EXPERIMENTS_DOP16e4)."""
+        codes = rng.integers(0, NSCEN[self.kind], 1)
+        seed = int(rng.integers(0, 2 ** 64, dtype=np.uint64))
+        pp = []
+        H = _generate(codes, seed, self.Nr, self.Nt, None, pp) / self.s
+        return H[0], pp[0][0] / self.s
 
     def sample_vecs(self, rng, n):
         """(n, Nr*Nt) complex128, row i = vec(H_i) column-major (== H.reshape(-1, order='F'))."""

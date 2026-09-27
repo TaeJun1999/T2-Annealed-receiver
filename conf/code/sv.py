@@ -141,6 +141,14 @@ class SVGen:
     def sample(self, rng):
         return self._channels(*self._draw(rng, 1))[0]
 
+    def sample_paths(self, rng):
+        """(H, P): H EXACTLY as sample() and the per-ray matrices P (80, Nr, Nt) (NEXT_EXPERIMENTS_DOP16e4)."""
+        th, ph, al = self._draw(rng, 1)
+        ar = np.exp(1j * np.pi * np.sin(th)[..., None] * np.arange(self.Nr)) / np.sqrt(self.Nr)
+        at = np.exp(1j * np.pi * np.sin(ph)[..., None] * np.arange(self.Nt)) / np.sqrt(self.Nt)
+        P = self.scale * np.einsum("nl,nli,nlj->nlij", al, ar, at.conj())[0]
+        return self._channels(th, ph, al)[0], P
+
     def sample_vecs(self, rng, n):
         """(n, Nr*Nt) complex128, row i = vec(H_i) column-major (== H.reshape(-1, order='F'))."""
         return self._channels(*self._draw(rng, n)).transpose(0, 2, 1).reshape(n, self.N)

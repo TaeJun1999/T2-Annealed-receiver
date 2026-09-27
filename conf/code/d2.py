@@ -175,6 +175,15 @@ class D2Gen:
         th, ph, al, _ = self._draw(rng, 1)
         return self._channels(th, ph, al)[0]
 
+    def sample_paths(self, rng):
+        """(H, P): H EXACTLY as sample() (same stream, same arithmetic) and the per-path matrices P (L_MAX, Nr, Nt) with
+        sum_l P_l = H up to rounding (zero beyond L).  NEXT_EXPERIMENTS_DOP16e4: per-path Doppler within the block."""
+        th, ph, al, _ = self._draw(rng, 1)
+        ar = np.exp(1j * np.pi * np.sin(th)[..., None] * np.arange(self.Nr)) / np.sqrt(self.Nr)
+        at = np.exp(1j * np.pi * np.sin(ph)[..., None] * np.arange(self.Nt)) / np.sqrt(self.Nt)
+        P = self.scale * np.einsum("nl,nli,nlj->nlij", al, ar, at.conj())[0]
+        return self._channels(th, ph, al)[0], P
+
     def sample_vecs(self, rng, n):
         """(n, Nr*Nt) complex128; row i = vec(H_i) COLUMN-MAJOR, i.e. H.reshape(-1, order='F').
         transpose(0,2,1) then C-order reshape gives index j*Nr + i -> H[i,j], which is exactly that."""

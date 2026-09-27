@@ -446,12 +446,27 @@ def build_point(testbed, cell, prior, snr, ntrain=C.N_TRAIN, beta=C.BETA, t_in=C
 
 
 # ----------------------------------------------------------------------------- run: the real grid
+DOP_SEED = 20260928
+
+
+def doppler_rx(H, Pp, X, Y, nu, pid, snr, tr):
+    """Received block with the channel varying over the T symbols: H_t = H + sum_l P_l (exp(j 2 pi nu cos(chi_l) t) - 1),
+    t = 0..T-1 (t = 0 the first pilot symbol, so H_0 = H exactly), chi_l ~ U[0, 2 pi) per path from a SEPARATE stream keyed
+    by (pid, SNR, trial) -- the trial stream (H, bits, interleaver, noise) is untouched.  The noise is the block's own:
+    W = Y - H X.  The receiver still assumes one H per block (that is the point of the experiment)."""
+    drng = np.random.default_rng([DOP_SEED, int(pid), int(round(10 * snr)) + 1000, int(tr)])
+    w = 2 * np.pi * nu * np.cos(2 * np.pi * drng.random(Pp.shape[0]))          # rad per symbol, one per path
+    T = X.shape[1]
+    Ht = H[None] + np.einsum("tl,lij->tij", np.exp(1j * np.outer(np.arange(T), w)) - 1, Pp)
+    return np.einsum("tij,jt->it", Ht, X) + (Y - H @ X)
+
+
 def run_task(task):
     """One (point, skip, chunk).  The trials that a previous chunk consumed are REGENERATED from the same
     common.trial_rng stream and then dropped, so chunks concatenate and every arm at a point sees the same
     (H, u, perm, Y) -- paired inside a cell (01_RULES §5, test C4)."""
     (testbed, cell, prior, snr, skip, n, ntrain, beta, t_in, iters, arm_sel, ckpt, stagec_ckpt, mean_arms,
-     p3_arms, extra_log, pilot_arms, ald_file) = task
+     p3_arms, extra_log, pilot_arms, ald_file, doppler) = task
     c = C.CELLS[cell]
     pil = C.make_pilots(testbed, prior, c["Nt"], c["Tp"], c["Nr"])[0]   # cheap; the build is not
     out = raw_file(testbed, cell, prior, pil, snr, skip, n)
@@ -459,6 +474,9 @@ def run_task(task):
         return f"exists  {os.path.basename(out)}"                      # FINISHED CHUNKS ARE SKIPPED
     t0 = time.time()
     P = build_point(testbed, cell, prior, snr, ntrain, beta, t_in, ckpt, stagec_ckpt, mean_arms, p3_arms, pilot_arms, ald_file)
+    if doppler is not None:
+        P["meta"]["doppler"] = (f"nu={doppler!r} per symbol, per-path Clarke phases (runner.doppler_rx, DOP_SEED {DOP_SEED}); "
+                                "genie knows H_0 only")
     code, gen = P["code"], P["gen"]
     first = P["arms"]["R5-genie"]                       # transmit() is arm-independent; use one object
     arms = {k: v for k, v in P["arms"].items() if (not arm_sel or k in arm_sel)}
@@ -483,13 +501,15 @@ def run_task(task):
     rng = C.trial_rng(testbed, prior, P["Nr"], P["T"], P["Tp"], snr)
     for tr in range(skip + n):
         A.CURRENT_TRIAL = tr                            # ALDSitePrior lookup (NEXT_EXPERIMENTS_ALD16e4); inert otherwise
-        H = gen.sample(rng)
+        H, Pp = gen.sample_paths(rng) if doppler is not None else (gen.sample(rng), None)   # same stream, same H
         k_true = getattr(getattr(gen, "prior", None), "last_k", None)
         u = rng.integers(0, 2, code.K)
         perm = rng.permutation(code.Ns)
         X, Y = first.transmit(u, perm, H, rng)
         if tr < skip:
             continue
+        if doppler:                                     # NEXT_EXPERIMENTS_DOP16e4: per-path Clarke Doppler within the block
+            Y = doppler_rx(H, Pp, X, Y, doppler, C.PID[prior], snr, tr)
         if k_true is not None:
             comp.append(k_true)
         for name, rx in arms.items():
@@ -584,7 +604,7 @@ def cmd_run(a):
     if a.extra_log:
         print(f"[run] --extra-log {' '.join(a.extra_log)}: extra per-iteration raw fields (NEXT_EXPERIMENTS_P3 §5)", flush=True)
     tasks = [pt + (s, m, a.ntrain, a.beta, a.tin, a.iters, a.arm, a.ckpt, a.stagec_ckpt, a.mean_arms, a.p3_arms,
-                   a.extra_log, a.pilot_arms, a.ald_file) for pt in pts for s, m in chunk_plan(a.skip0, a.n, a.chunk)]
+                   a.extra_log, a.pilot_arms, a.ald_file, a.doppler) for pt in pts for s, m in chunk_plan(a.skip0, a.n, a.chunk)]
     tasks = [(testbed,) + t for t in tasks]
     tasks.sort(key=lambda t: (t[4], -C.CELLS[t[1]]["Nr"]))   # first chunks of every point early; 8x4 first
     jobs = min(os.cpu_count(), len(tasks))
@@ -1160,6 +1180,10 @@ def main(argv=None):
                     help="NEXT_EXPERIMENTS_MISMATCH16e4, run/smoke: declare the --stagec-ckpt's TRAIN prior when it differs from "
                          "--prior -- the explicit opt-in to a train/test channel-model mismatch run (requires --tag; the tag's "
                          "fits dir must hold the train prior's fits under the test prior's names)")
+    ap.add_argument("--doppler", type=float, default=None,
+                    help="NEXT_EXPERIMENTS_DOP16e4, run: normalised Doppler nu = f_D T_s per symbol; the channel varies within "
+                         "the block (per-path Clarke phases, separate stream).  0 = the path code with a static channel "
+                         "(control: must reproduce the static raw bit for bit).  OPT-IN; requires --tag.")
     ap.add_argument("--ald-file", default=None,
                     help="NEXT_EXPERIMENTS_ALD16e4, run/smoke: ADD ALD-pilot / ALDv-pilot from this code/ald.py estimate file "
                          "(Arvinte-Tamir annealed Langevin, V1 network, precomputed).  OPT-IN; requires --stagec-ckpt, --tag.")
@@ -1209,6 +1233,7 @@ def main(argv=None):
                                      ("p3-arms", a.p3_arms),
                                      ("pilot-arms", a.pilot_arms),
                                      ("ald-file", a.ald_file is not None),
+                                     ("doppler", a.doppler is not None),
                                      ("train-prior", a.train_prior is not None),
                                      ("extra-log", a.extra_log is not None)) if v]
     if changed and a.cmd in ("run", "fit") and not a.tag:
