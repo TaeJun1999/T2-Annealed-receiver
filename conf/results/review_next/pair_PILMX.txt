@@ -1,0 +1,24 @@
+# pair_cross raw_PILMX x raw_MXB16e4, cell C2, prior MIX3, n=2560 per SNR, git bfe80c48; raised trials {'V1-pilot': 0, 'bstar-pilot': 0}; integrity (point set, genie identical, pilot-only @1 == loop @1, fixed channel estimate): OK
+P1: pilot-only V1 -> loop V1: V1-pilot -> M-ours-dscore-C-V1  [anchor V1-pilot]  decision SNRs ['+3', '+6', '+9']
+    sign test @16: +3 dB 93:26 p=4.9e-10  +6 dB 34:10 p=0.00039  +9 dB 15:13 p=0.85   pooled 142:49 p=1.1e-11
+    POWERED=True  second arm fewer at 2/3, first arm fewer at 0/3  -> (i) second arm fewer
+    SNR@0.1 gap (V1-pilot minus M-ours-dscore-C-V1): +0.57 dB  [90% paired bootstrap +0.40, +0.77; censored replicates 0%]
+P2: pilot-only b* -> pilot-only V1: bstar-pilot -> V1-pilot  [anchor bstar-pilot]  decision SNRs ['+3', '+6', '+9']
+    sign test @16: +3 dB 92:46 p=0.00011  +6 dB 72:23 p=4.8e-07  +9 dB 47:9 p=2.6e-07   pooled 211:78 p=2.6e-15
+    POWERED=True  second arm fewer at 3/3, first arm fewer at 0/3  -> (i) second arm fewer
+    SNR@0.1 gap (bstar-pilot minus V1-pilot): +0.88 dB  [90% paired bootstrap +0.58, +1.12; censored replicates 0%]
+report: pilot-only b* -> loop b*: bstar-pilot -> M-ours-bstar  [anchor bstar-pilot]  decision SNRs ['+3', '+6', '+9']
+    sign test @16: +3 dB 96:29 p=1.4e-09  +6 dB 43:20 p=0.0052  +9 dB 22:13 p=0.18   pooled 161:62 p=2.5e-11
+    POWERED=True  second arm fewer at 2/3, first arm fewer at 0/3  -> (i) second arm fewer
+    SNR@0.1 gap (bstar-pilot minus M-ours-bstar): +0.47 dB  [90% paired bootstrap +0.20, +0.69; censored replicates 0%]
+report: pilot-only V1 -> loop b*: V1-pilot -> M-ours-bstar  [anchor V1-pilot]  decision SNRs ['+3', '+6', '+9']
+    sign test @16: +3 dB 85:64 p=0.1  +6 dB 37:63 p=0.012  +9 dB 13:42 p=0.00011   pooled 135:169 p=0.058
+    POWERED=True  second arm fewer at 0/3, first arm fewer at 2/3  -> (ii) first arm fewer
+    SNR@0.1 gap (V1-pilot minus M-ours-bstar): -0.41 dB  [90% paired bootstrap -0.71, -0.12; censored replicates 0%]
+-3 dB BLER@16: R0-pilot 0.741  M-ours-bstar 0.555  bstar-pilot 0.670  M-ours-dscore-C-V1 0.529  V1-pilot 0.648  R5-genie 0.265
+report-only, median NMSE@16 of the channel estimate per SNR -3 +0 +3 +6 +9 +12 +15 dB:
+    R0-pilot            3.35e-01 2.05e-01 1.15e-01 5.99e-02 3.16e-02 1.61e-02 8.20e-03
+    M-ours-bstar        1.05e-01 5.12e-02 2.56e-02 1.28e-02 6.72e-03 3.53e-03 1.84e-03
+    bstar-pilot         1.77e-01 1.04e-01 6.17e-02 3.48e-02 1.95e-02 1.09e-02 5.82e-03
+    M-ours-dscore-C-V1  8.78e-02 4.21e-02 2.15e-02 1.06e-02 5.56e-03 2.97e-03 1.58e-03
+    V1-pilot            1.63e-01 9.43e-02 5.44e-02 2.93e-02 1.63e-02 9.07e-03 4.83e-03
