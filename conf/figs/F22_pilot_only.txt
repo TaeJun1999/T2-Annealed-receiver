@@ -1,0 +1,52 @@
+F22 -- learned prior used once on the pilots (Arvinte–Tamir-type setting, same V1 weights / GMM fits / trials) vs inside the turbo loop; NEXT_EXPERIMENTS_PILOT16e4 §6.1; BLER@16, n = 2560 per SNR.  Recomputed from raw by code/figure_f22.py (read-only).
+
+(a) D2 sparse specular, 8×4 (headline) -- raw_B16e4k + raw_PILB16e4k, cell C2, prior S2.  Failures / 2560 at SNR -3 +0 +3 +6 +9 +12 +15 dB:
+    R0-pilot             1220   340   105    63    35    28    14
+    bstar-pilot           978   228    55    33    15    16    10
+    V1-pilot              626   128    30    17     6     6     3
+    M-ours-bstar          623   184    57    28    17    16     8
+    M-ours-dscore-C-V1    371    88    29    16     7     5     3
+    R5-genie               87    26    12     9     2     2     2
+    zero-failure points (not drawn on the log axis): none
+(b) D2 sparse specular, 16×4 (C6) -- raw_NR16B16e4 + raw_PILNR16, cell C6, prior S2.  Failures / 2560 at SNR -3 +0 +3 +6 +9 +12 +15 dB:
+    R0-pilot              376   120    70    41    22    12     8
+    bstar-pilot           240    73    39    24    16    10     5
+    V1-pilot               83    20    12     9     2     1     2
+    M-ours-bstar          184    61    32    22    14    10     5
+    M-ours-dscore-C-V1     53    20     9     6     2     2     2
+    R5-genie               22    10     8     6     1     2     0
+    zero-failure points (not drawn on the log axis): R5-genie +15
+(c) D3: D2 geometry, CN path gains -- raw_D3B16e4 + raw_PILD3, cell C2, prior S2c.  Failures / 2560 at SNR -3 +0 +3 +6 +9 +12 +15 dB:
+    R0-pilot             1738   926   401   218    97    60    30
+    bstar-pilot          1552   716   276   132    62    39    12
+    V1-pilot             1333   546   178    80    31    25     7
+    M-ours-bstar         1298   586   226   111    53    36    12
+    M-ours-dscore-C-V1   1000   404   129    64    27    22     5
+    R5-genie              485   149    47    35    10    14     3
+    zero-failure points (not drawn on the log axis): none
+(d) SV8e: clustered Saleh–Valenzuela -- raw_SVB16e4 + raw_PILSV, cell C2, prior SV8e.  Failures / 2560 at SNR -3 +0 +3 +6 +9 +12 +15 dB:
+    R0-pilot             1010   154    23     6     1     0     0
+    bstar-pilot           872   117    13     0     0     0     0
+    V1-pilot              804   102    11     0     0     0     0
+    M-ours-bstar          464    60     7     0     0     0     0
+    M-ours-dscore-C-V1    402    46     5     0     0     0     0
+    R5-genie               31     3     0     1     0     0     0
+    zero-failure points (not drawn on the log axis): R0-pilot +12; R0-pilot +15; bstar-pilot +6; bstar-pilot +9; bstar-pilot +12; bstar-pilot +15; V1-pilot +6; V1-pilot +9; V1-pilot +12; V1-pilot +15; M-ours-bstar +6; M-ours-bstar +9; M-ours-bstar +12; M-ours-bstar +15; M-ours-dscore-C-V1 +6; M-ours-dscore-C-V1 +9; M-ours-dscore-C-V1 +12; M-ours-dscore-C-V1 +15; R5-genie +3; R5-genie +9; R5-genie +12; R5-genie +15
+(e) 3GPP 38.901 UMi 28 GHz -- raw_U28B16e4 + raw_PILU28, cell C2, prior UMi28.  Failures / 2560 at SNR -3 +0 +3 +6 +9 +12 +15 dB:
+    R0-pilot             1781   990   644   371   190    92    51
+    bstar-pilot          1633   848   480   264   132    76    31
+    V1-pilot             1576   785   450   229   106    53    26
+    M-ours-bstar         1270   714   431   243   126    69    27
+    M-ours-dscore-C-V1   1228   656   393   215   104    44    24
+    R5-genie              594   302   131    58    26     8     3
+    zero-failure points (not drawn on the log axis): none
+(f) 3GPP 38.901 MIX3 (side point) -- raw_MXB16e4 + raw_PILMX, cell C2, prior MIX3.  Failures / 2560 at SNR -3 +0 +3 +6 +9 +12 +15 dB:
+    R0-pilot             1896  1227   694   408   236   113    58
+    bstar-pilot          1715  1006   492   266   144    71    19
+    V1-pilot             1659   939   446   217   106    45    20
+    M-ours-bstar         1421   844   425   243   135    58    16
+    M-ours-dscore-C-V1   1354   789   379   193   104    41    17
+    R5-genie              679   358   143    68    35    13     2
+    zero-failure points (not drawn on the log axis): none
+
+Registered labels (§6.1): primary D2 C2 -- P1 V1-pilot -> loop V1 (i), P2 bstar-pilot -> V1-pilot (i); measurement: P1 (i) at D3, UMi28, MIX3, (iv) at C6, SV8e (two decision points); P2 (i) at all six.  P1 cannot separate data-aided re-estimation from repeated prior application (16 vs 1 Module H passes).  Not a reproduction of the Langevin estimator of Arvinte & Tamir.
