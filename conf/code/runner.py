@@ -478,7 +478,7 @@ def run_task(task):
     common.trial_rng stream and then dropped, so chunks concatenate and every arm at a point sees the same
     (H, u, perm, Y) -- paired inside a cell (01_RULES §5, test C4)."""
     (testbed, cell, prior, snr, skip, n, ntrain, beta, t_in, iters, arm_sel, ckpt, stagec_ckpt, mean_arms,
-     p3_arms, extra_log, pilot_arms, ald_file, doppler) = task
+     p3_arms, extra_log, pilot_arms, ald_file, doppler, rotation) = task
     c = C.CELLS[cell]
     pil = C.make_pilots(testbed, prior, c["Nt"], c["Tp"], c["Nr"])[0]   # cheap; the build is not
     out = raw_file(testbed, cell, prior, pil, snr, skip, n)
@@ -486,6 +486,10 @@ def run_task(task):
         return f"exists  {os.path.basename(out)}"                      # FINISHED CHUNKS ARE SKIPPED
     t0 = time.time()
     P = build_point(testbed, cell, prior, snr, ntrain, beta, t_in, ckpt, stagec_ckpt, mean_arms, p3_arms, pilot_arms, ald_file)
+    if rotation is not None:                            # NEXT_EXPERIMENTS_ROT16e4: receive-array rotation (distribution drift)
+        P["gen"].rot = float(np.deg2rad(rotation))
+        P["meta"]["rotation"] = (f"deg={rotation!r}: receive (BS) array rotated, every AoA + {rotation} deg (D2/D3/S2v/SV8e: "
+                                 "theta + rot; 38.901: BS yaw + rot); priors trained at 0 deg")
     if doppler is not None:
         P["meta"]["doppler"] = (f"nu={doppler!r} per symbol, per-path Clarke phases (runner.doppler_rx, DOP_SEED {DOP_SEED}); "
                                 "genie knows H_0 only")
@@ -616,7 +620,7 @@ def cmd_run(a):
     if a.extra_log:
         print(f"[run] --extra-log {' '.join(a.extra_log)}: extra per-iteration raw fields (NEXT_EXPERIMENTS_P3 §5)", flush=True)
     tasks = [pt + (s, m, a.ntrain, a.beta, a.tin, a.iters, a.arm, a.ckpt, a.stagec_ckpt, a.mean_arms, a.p3_arms,
-                   a.extra_log, a.pilot_arms, a.ald_file, a.doppler) for pt in pts for s, m in chunk_plan(a.skip0, a.n, a.chunk)]
+                   a.extra_log, a.pilot_arms, a.ald_file, a.doppler, a.rotation) for pt in pts for s, m in chunk_plan(a.skip0, a.n, a.chunk)]
     tasks = [(testbed,) + t for t in tasks]
     tasks.sort(key=lambda t: (t[4], -C.CELLS[t[1]]["Nr"]))   # first chunks of every point early; 8x4 first
     jobs = min(os.cpu_count(), len(tasks))
@@ -1192,6 +1196,10 @@ def main(argv=None):
                     help="NEXT_EXPERIMENTS_MISMATCH16e4, run/smoke: declare the --stagec-ckpt's TRAIN prior when it differs from "
                          "--prior -- the explicit opt-in to a train/test channel-model mismatch run (requires --tag; the tag's "
                          "fits dir must hold the train prior's fits under the test prior's names)")
+    ap.add_argument("--rotation", type=float, default=None,
+                    help="NEXT_EXPERIMENTS_ROT16e4, run: receive-array rotation in DEGREES added to every AoA of the test channels "
+                         "(distribution drift; the priors were trained at 0).  0 = the code path with no rotation (control: must "
+                         "reproduce the static raw bit for bit).  OPT-IN; requires --tag.")
     ap.add_argument("--doppler", type=float, default=None,
                     help="NEXT_EXPERIMENTS_DOP16e4, run: normalised Doppler nu = f_D T_s per symbol; the channel varies within "
                          "the block (per-path Clarke phases, separate stream).  0 = the path code with a static channel "
@@ -1246,6 +1254,7 @@ def main(argv=None):
                                      ("pilot-arms", a.pilot_arms),
                                      ("ald-file", a.ald_file is not None),
                                      ("doppler", a.doppler is not None),
+                                     ("rotation", a.rotation is not None),
                                      ("train-prior", a.train_prior is not None),
                                      ("extra-log", a.extra_log is not None)) if v]
     if changed and a.cmd in ("run", "fit") and not a.tag:

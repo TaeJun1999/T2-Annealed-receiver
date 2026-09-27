@@ -57,7 +57,7 @@ RAW = os.path.join(C.CONF, "raw")
 
 # prior group [A-Z]\d?c?: the trailing 'c' is the D3 prior S2c (2026-09-25); every older file name parses as before.
 # |SV8e: the second testbed SV (2026-09-26), tried only after the first alternative fails, so old names are unaffected.
-PAT = re.compile(r"^(D1|D2)_(C\d)_([A-Z]\d?c?|SV8e|MIX3|UMi28)_Nr(\d+)_T(\d+)_Tp(\d+)_(dft|eig)_snr(-?\d+)_skip(\d+)_n(\d+)\.npz$")
+PAT = re.compile(r"^(D1|D2)_(C\d)_([A-Z]\d?c?|S2v|SV8e|MIX3|UMi28)_Nr(\d+)_T(\d+)_Tp(\d+)_(dft|eig)_snr(-?\d+)_skip(\d+)_n(\d+)\.npz$")
 
 # ----------------------------------------------------------------------------- arm sets (06_SPEC §1)
 # D2 has NO R6-exactEP (no exact EP site for the true prior) and NO M-ours-score (no exact score).

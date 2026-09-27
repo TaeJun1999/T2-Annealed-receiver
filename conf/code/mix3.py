@@ -132,7 +132,7 @@ def _model(code, Nr, Nt):
     return models[name](**kw)
 
 
-def _set_topology(m, code, B, G):
+def _set_topology(m, code, B, G, rot=0.0):
     """gen_single_sector_topology + the UE orientation overwrite (yaw ~ U[-pi, pi), pitch = roll = 0), as the probe."""
     torch, sp, _, _, gsst = _sionna()
     name = SCEN[code][0]
@@ -140,6 +140,7 @@ def _set_topology(m, code, B, G):
     o = torch.zeros_like(tp[2])
     o[..., 0] = (torch.rand(o.shape[:-1], generator=G, dtype=o.dtype) * 2 - 1) * torch.pi
     tp[2] = o
+    tp[3] = tp[3] + torch.tensor([rot, 0.0, 0.0], dtype=tp[3].dtype)           # BS yaw + ROT16e4 drift (0 = exact)
     m.set_topology(*tp, los=None, **(dict(in_car=torch.zeros_like(tp[5])) if name == "rma" else {}))
 
 
@@ -172,7 +173,7 @@ class _Seeded:
         torch.set_rng_state(self.saved[2])
 
 
-def _generate(codes, seed, Nr, Nt, aux=None, paths=None):
+def _generate(codes, seed, Nr, Nt, aux=None, paths=None, rot=0.0):
     """One chunk: codes (m,) scenario codes, seed -> (m, Nr, Nt) complex128 RAW channels.  aux (list) receives
     (code, block indices, LoS flags) per scenario batch (testbed_mix3.py)."""
     out = np.empty((len(codes), Nr, Nt), complex)
@@ -181,7 +182,7 @@ def _generate(codes, seed, Nr, Nt, aux=None, paths=None):
             ix = np.flatnonzero(codes == code)
             if len(ix):
                 m = _model(code, Nr, Nt)                # FRESH model: no topology / LSP state carried between batches
-                _set_topology(m, code, len(ix), G)
+                _set_topology(m, code, len(ix), G, rot)
                 out[ix] = _snapshot(m, len(ix), Nr, Nt, paths)
                 if aux is not None:
                     aux.append((code, ix, m._scenario.los.reshape(len(ix)).numpy().copy()))
@@ -191,6 +192,7 @@ def _generate(codes, seed, Nr, Nt, aux=None, paths=None):
 class MIX3Gen:
     """MIX3 generator with the D2Gen slots the pipeline uses: .sample(rng), .sample_vecs(rng, n), .prior (None: no
     closed-form density or exact score, like D2), .name ("D2": it runs under testbed D2), .kind, .Nr/.Nt/.N."""
+    rot = 0.0                             # NEXT_EXPERIMENTS_ROT16e4: BS (receive) yaw offset (rad); 0 = exact
 
     name = "D2"
     prior = None
@@ -212,7 +214,7 @@ class MIX3Gen:
             codes = rng.integers(0, NSCEN[self.kind], m)
             seed = int(rng.integers(0, 2 ** 64, dtype=np.uint64))
             sub = [] if aux is not None else None
-            out[i:i + m] = _generate(codes, seed, self.Nr, self.Nt, sub) / self.s
+            out[i:i + m] = _generate(codes, seed, self.Nr, self.Nt, sub, None, self.rot) / self.s
             if aux is not None:
                 aux += [(c, i + ix, los) for c, ix, los in sub]
         return out
@@ -226,7 +228,7 @@ class MIX3Gen:
         codes = rng.integers(0, NSCEN[self.kind], 1)
         seed = int(rng.integers(0, 2 ** 64, dtype=np.uint64))
         pp = []
-        H = _generate(codes, seed, self.Nr, self.Nt, None, pp) / self.s
+        H = _generate(codes, seed, self.Nr, self.Nt, None, pp, self.rot) / self.s
         return H[0], pp[0][0] / self.s
 
     def sample_vecs(self, rng, n):

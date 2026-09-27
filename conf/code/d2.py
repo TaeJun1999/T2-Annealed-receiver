@@ -75,8 +75,16 @@ L_MIN, L_MAX = 3, 8                       # L ~ Unif{L_MIN..L_MAX}
 TAU = 2.0                                 # exponential power-delay profile p_l ∝ exp(-l/tau)
 ANGLE_RANGE = {"U2": (-np.pi / 2, np.pi / 2),        # full range
                "S2": (-np.pi / 3, np.pi / 3),        # standard 120-degree sector; PRIMARY prior
-               "S2c": (-np.pi / 3, np.pi / 3)}       # D3: the S2 sector (see the module docstring)
+               "S2c": (-np.pi / 3, np.pi / 3),       # D3: the S2 sector (see the module docstring)
+               "S2v": (-np.pi / 3, np.pi / 3)}       # C: the S2 sector + receive-side visibility windows (D2VisGen)
 CN_GAIN = ("S2c",)                        # priors whose path gains are alpha_l ~ CN(0, p_l) instead of sqrt(p_l) e^{j psi}
+# Spatially NON-STATIONARY variant (review_next C, user decision 2026-09-27): each path is seen by a contiguous window of the
+# RECEIVE array only (XL-MIMO visibility regions), window length w ~ Unif{Nr/4..Nr}, start ~ Unif{0..Nr-w}, independent per
+# path; transmit side unchanged.  E[w/Nr] = 5/8 for Nr divisible by 4, so the receive steering is scaled by sqrt(8/5) and
+# E||H||_F^2 = Nr Nt exactly (the random path phases kill the cross terms).  D2VisGen; ensemble_sides_d2 gives the correct
+# Rt (the pilot rule) but NOT Rr for these priors.
+VIS_PRIORS = {"S2v": "S2"}                # visibility prior -> its base sector prior
+VIS_NORM = np.sqrt(8.0 / 5.0)
 
 # _P[L - L_MIN, :] = the normalised profile of a block with L paths, zero-padded to L_MAX.
 _P = np.zeros((L_MAX - L_MIN + 1, L_MAX))
@@ -139,6 +147,7 @@ class D2Gen:
     """Sparse specular generator.  Same slots as common.D1Gen, except that `prior` is None: the true
     density has no closed-form EP site and no exact score, so the arms R6-exactEP / M-ours-score do not
     exist on D2 (05_SPEC §3 -- recorded as a loss, not worked around)."""
+    rot = 0.0                             # NEXT_EXPERIMENTS_ROT16e4: receive-array rotation (rad) added to every AoA; 0 = exact
 
     name = "D2"
     prior = None                          # no exact-score prior object exists for D2
@@ -155,7 +164,7 @@ class D2Gen:
     def _draw(self, rng, n):
         """One block draw per row: (theta, phi, alpha) each (n, L_MAX), zero-amplitude beyond L."""
         L = rng.integers(L_MIN, L_MAX + 1, n)                                  # Unif{3..8}, per block
-        th = self.lo + (self.hi - self.lo) * rng.random((n, L_MAX))            # CONTINUOUS physical angle
+        th = self.lo + (self.hi - self.lo) * rng.random((n, L_MAX)) + self.rot  # CONTINUOUS physical angle (+ ROT16e4 drift)
         ph = self.lo + (self.hi - self.lo) * rng.random((n, L_MAX))
         if self.cn:                                                            # D3: alpha_l = sqrt(p_l) CN(0,1)
             g = (rng.standard_normal((n, L_MAX)) + 1j * rng.standard_normal((n, L_MAX))) / np.sqrt(2.0)
@@ -231,6 +240,51 @@ def nmse_inf(Rt, Xp):
 # ----------------------------------------------------------------------------- T2a..T2e
 def _rec(tid, ok, resid, crit, desc):
     return (tid, ok if isinstance(ok, str) else ("PASS" if ok else "FAIL"), resid, crit, desc)
+
+
+class D2VisGen(D2Gen):
+    """S2 geometry with receive-side visibility windows (VIS_PRIORS; module constants above).  Only the public API is
+    provided -- the base class's _draw/_channels do not know the windows and raise here."""
+
+    def __init__(self, prior, Nr, Nt):
+        assert prior in VIS_PRIORS and Nr % 4 == 0, (prior, Nr)
+        super().__init__(VIS_PRIORS[prior], Nr, Nt)
+        self.kind, self.wmin = prior, Nr // 4
+
+    def _draw(self, rng, n):
+        raise NotImplementedError("D2VisGen: use sample / sample_vecs / sample_paths")
+
+    _channels = _draw
+
+    def _latents(self, rng, n):
+        th, ph, al, L = D2Gen._draw(self, rng, n)                             # the S2 draws, then the windows
+        w = rng.integers(self.wmin, self.Nr + 1, (n, L_MAX))
+        s0 = np.floor(rng.random((n, L_MAX)) * (self.Nr - w + 1)).astype(int)
+        k = np.arange(self.Nr)
+        mask = (k >= s0[..., None]) & (k < (s0 + w)[..., None])               # (n, L_MAX, Nr)
+        ar = VIS_NORM * mask * np.exp(1j * np.pi * np.sin(th)[..., None] * k) / np.sqrt(self.Nr)
+        at = np.exp(1j * np.pi * np.sin(ph)[..., None] * np.arange(self.Nt)) / np.sqrt(self.Nt)
+        return al, ar, at
+
+    def sample(self, rng):
+        al, ar, at = self._latents(rng, 1)
+        return self.scale * np.einsum("nl,nli,nlj->nij", al, ar, at.conj())[0]
+
+    def sample_paths(self, rng):
+        al, ar, at = self._latents(rng, 1)
+        return (self.scale * np.einsum("nl,nli,nlj->nij", al, ar, at.conj())[0],
+                self.scale * np.einsum("nl,nli,nlj->nlij", al, ar, at.conj())[0])
+
+    def sample_vecs(self, rng, n):
+        """(n, Nr*Nt) column-major vec rows, drawn in chunks of 20000 blocks (memory)."""
+        out = []
+        for i in range(0, n, 20000):
+            al, ar, at = self._latents(rng, min(20000, n - i))
+            out.append((self.scale * np.einsum("nl,nli,nlj->nij", al, ar, at.conj())).transpose(0, 2, 1).reshape(len(al), self.N))
+        return np.concatenate(out)
+
+    def sample_angles(self, rng, n, angles=None):
+        raise NotImplementedError("D2VisGen: T2d conditioning is not defined with visibility windows")
 
 
 def tests_T2(prior, Nr, Nt, Tp, n=100000, n_sets=8, n_phase=20000, n_boot=1000):

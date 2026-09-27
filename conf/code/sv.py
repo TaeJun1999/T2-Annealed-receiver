@@ -104,6 +104,7 @@ def ensemble_sides_sv(prior, Nr, Nt):
 class SVGen:
     """SV8e generator with the D2Gen slots the pipeline uses: .sample(rng), .sample_vecs(rng, n), .prior (None: no
     closed-form density or exact score, like D2), .name ("D2": it runs under testbed D2), .kind, .Nr/.Nt/.N."""
+    rot = 0.0                             # NEXT_EXPERIMENTS_ROT16e4: receive-array rotation (rad) added to every ray AoA
 
     name = "D2"
     prior = None
@@ -123,7 +124,7 @@ class SVGen:
         """One block per row: ray angles theta, phi (n, 80) (cluster c = columns 10c..10c+9) and gains alpha (n, 80)."""
         mA = AOA[0] + (AOA[1] - AOA[0]) * rng.random((n, N_CL))
         mD = AOD[0] + (AOD[1] - AOD[0]) * rng.random((n, N_CL))
-        th = np.repeat(mA, N_RAY, 1) + rng.laplace(0.0, LAP_B, (n, P_RAYS))
+        th = np.repeat(mA, N_RAY, 1) + rng.laplace(0.0, LAP_B, (n, P_RAYS)) + self.rot    # (+ ROT16e4 drift)
         ph = np.repeat(mD, N_RAY, 1) + rng.laplace(0.0, LAP_B, (n, P_RAYS))
         return th, ph, self._gains(rng, n)
 
