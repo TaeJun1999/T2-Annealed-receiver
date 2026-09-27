@@ -71,8 +71,8 @@ N=1e4 선례(§6g, `tables_D2_B1e4s{2,3}.txt`): 세 시드 V1 −3 dB 0.145 / 0.
 
 | 항목 | D2 a2 | D2 a3 | UMi28 a2 | UMi28 a3 |
 |---|---|---|---|---|
-| sha256[:16] · epoch · best_epoch · stopped_by · role | 9465fbec56cbf834 · 1378 · 1358 · patience(로그) · legacy-last | b3d3376ce0796540 · 1044 · 1024 · patience(로그) · legacy-last | [채워질 것] | `_best.pt` **cc48b203ab114b92** · 337 · 337 · patience (로그 `# done: 357 epochs, stopped_by=patience, aborted=False`; last `a3.pt` 66c8a6e362c1f43d epoch 357, 평가 안 함) · best |
-| best val | 0.354769229888916 | 0.3525230884552002 | [채워질 것] | 0.5534706115722656 (채움 09-26 22:39 CDT) |
+| sha256[:16] · epoch · best_epoch · stopped_by · role | 9465fbec56cbf834 · 1378 · 1358 · patience(로그) · legacy-last | b3d3376ce0796540 · 1044 · 1024 · patience(로그) · legacy-last | `_best.pt` **0ec0973b7892d0c2** · 448 · 448 · patience (로그 `# done: 468 epochs, stopped_by=patience, aborted=False`; last `a2.pt` e803defb340f7d96 epoch 468, 평가 안 함) · best | `_best.pt` **cc48b203ab114b92** · 337 · 337 · patience (로그 `# done: 357 epochs, stopped_by=patience, aborted=False`; last `a3.pt` 66c8a6e362c1f43d epoch 357, 평가 안 함) · best |
+| best val | 0.354769229888916 | 0.3525230884552002 | 0.5530001521110535 (채움 09-26 23:17 CDT) | 0.5534706115722656 (채움 09-26 22:39 CDT) |
 | b\*·ll_val·격자 | kron 1024 · −11.459169831224418 · full 16..512, kron 16..1024 (후보 `gmm_fits_D2_K1024n160000`) | 동일 | kron 4096 · 5.797910431000217 · full 16..512, kron 16..4096 | 동일 |
 | 참조 raw (genie 비트 동일) | raw_B16e4k | raw_B16e4k | raw_U28B16e4 | raw_U28B16e4 |
 | 선행 코드·링크 | 동결 커밋 5d9a9a1a (`code/run_seeds16e4.sh`, 링크 4 개) | | | |
