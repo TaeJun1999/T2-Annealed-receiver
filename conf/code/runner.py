@@ -299,7 +299,7 @@ def budget_meta(arm_names, ntrain, learned):
 
 
 def build_point(testbed, cell, prior, snr, ntrain=C.N_TRAIN, beta=C.BETA, t_in=C.T_IN, ckpt=None,
-                stagec_ckpt=None, mean_arms=False, p3_arms=False):
+                stagec_ckpt=None, mean_arms=False, p3_arms=False, pilot_arms=False):
     """Every arm of `testbed` at one (cell, prior, SNR) point, all sharing one pilot matrix (06_SPEC §2).
 
     D1: R0 R1 R2 R3 R4-scvamp R4-llr R5-genie R6-exactEP + M-ours-{gmm32,bstar,score,dscore}
@@ -352,7 +352,7 @@ def build_point(testbed, cell, prior, snr, ntrain=C.N_TRAIN, beta=C.BETA, t_in=C
     our, ocfg, meta, hp, _ = A.build_our_arms(*a, ntrain=ntrain, true_prior=true, score_prior=sp,
                                               score_prior_c=spc, score_prior_v1=spc1,
                                               bstar_scalar=bool(stagec_ckpt), mean_arms=mean_arms,
-                                              score_prior_v1_floor=spcf, p3_arms=p3_arms)
+                                              score_prior_v1_floor=spcf, p3_arms=p3_arms, pilot_arms=pilot_arms)
     arms.update(our)
     cfgs.update(ocfg)
     # An arm that is not built must leave a trace with the REASON, or the analysis sees a missing row and
@@ -410,6 +410,14 @@ def build_point(testbed, cell, prior, snr, ntrain=C.N_TRAIN, beta=C.BETA, t_in=C
                 for f in ("fit_sec", "fit_sec_note"):
                     if f"{f}|M-ours-dscore-C-V1" in meta:
                         meta[f"{f}|{k}"] = meta[f"{f}|M-ours-dscore-C-V1"]
+    if pilot_arms:                  # pilot-only arms (NEXT_EXPERIMENTS_PILOT16e4): opt-in, nothing above changes
+        meta["pilot_arms"] = "pilot-only, frozen channel belief (RouteA mode='pilot_only'): " + " ".join(
+            k for k in ("V1-pilot", "bstar-pilot") if k in arms)
+        if "V1-pilot" in arms:      # the SAME V1 weights, used once on the pilots
+            learned["V1-pilot"] = learned["M-ours-dscore-C-V1"]
+            for f in ("fit_sec", "fit_sec_note"):
+                if f"{f}|M-ours-dscore-C-V1" in meta:
+                    meta[f"{f}|V1-pilot"] = meta[f"{f}|M-ours-dscore-C-V1"]
     meta.update(budget_meta(arms, ntrain, learned))
     return dict(arms=arms, cfgs=cfgs, meta=meta, gen=gen, code=code, pil=pil, Xp=Xp, fits=fits,
                 Nr=Nr, Nt=Nt, T=T, Tp=Tp, sigma2=sigma2, dscore=why, stagec=sc_why)
@@ -421,14 +429,14 @@ def run_task(task):
     common.trial_rng stream and then dropped, so chunks concatenate and every arm at a point sees the same
     (H, u, perm, Y) -- paired inside a cell (01_RULES §5, test C4)."""
     (testbed, cell, prior, snr, skip, n, ntrain, beta, t_in, iters, arm_sel, ckpt, stagec_ckpt, mean_arms,
-     p3_arms, extra_log) = task
+     p3_arms, extra_log, pilot_arms) = task
     c = C.CELLS[cell]
     pil = C.make_pilots(testbed, prior, c["Nt"], c["Tp"], c["Nr"])[0]   # cheap; the build is not
     out = raw_file(testbed, cell, prior, pil, snr, skip, n)
     if os.path.exists(out):
         return f"exists  {os.path.basename(out)}"                      # FINISHED CHUNKS ARE SKIPPED
     t0 = time.time()
-    P = build_point(testbed, cell, prior, snr, ntrain, beta, t_in, ckpt, stagec_ckpt, mean_arms, p3_arms)
+    P = build_point(testbed, cell, prior, snr, ntrain, beta, t_in, ckpt, stagec_ckpt, mean_arms, p3_arms, pilot_arms)
     code, gen = P["code"], P["gen"]
     first = P["arms"]["R5-genie"]                       # transmit() is arm-independent; use one object
     arms = {k: v for k, v in P["arms"].items() if (not arm_sel or k in arm_sel)}
@@ -553,7 +561,7 @@ def cmd_run(a):
     if a.extra_log:
         print(f"[run] --extra-log {' '.join(a.extra_log)}: extra per-iteration raw fields (NEXT_EXPERIMENTS_P3 §5)", flush=True)
     tasks = [pt + (s, m, a.ntrain, a.beta, a.tin, a.iters, a.arm, a.ckpt, a.stagec_ckpt, a.mean_arms, a.p3_arms,
-                   a.extra_log) for pt in pts for s, m in chunk_plan(a.skip0, a.n, a.chunk)]
+                   a.extra_log, a.pilot_arms) for pt in pts for s, m in chunk_plan(a.skip0, a.n, a.chunk)]
     tasks = [(testbed,) + t for t in tasks]
     tasks.sort(key=lambda t: (t[4], -C.CELLS[t[1]]["Nr"]))   # first chunks of every point early; 8x4 first
     jobs = min(os.cpu_count(), len(tasks))
@@ -581,7 +589,7 @@ def cmd_smoke(a):
         snr = float((a.snr or [C.CELLS[cell]["snrs"][-1]])[0])
         t0 = time.time()
         P = build_point(testbed, cell, prior, snr, a.ntrain, a.beta, a.tin, a.ckpt, a.stagec_ckpt, a.mean_arms,
-                        a.p3_arms)
+                        a.p3_arms, a.pilot_arms)
         print(f"[smoke] {cell}: Stage C: {P['stagec']}", flush=True)
         print(f"[smoke] {testbed} {cell} prior={prior} snr={snr:g} pilots={P['pil']} "
               f"({P['Nr']}x{P['Nt']}, T={P['T']}, Tp={P['Tp']}): {len(P['arms'])} arms "
@@ -1125,6 +1133,10 @@ def main(argv=None):
     ap.add_argument("--p3-arms", action="store_true",
                     help="review_next P3 (NEXT_EXPERIMENTS_P3 §2.2), run/smoke: ADD V1-b05, bstar-b05 (beta 0.5) and "
                          "V1-fb05, bstar-fb05 (beta_fb 0.5).  OPT-IN; requires --stagec-ckpt and --tag.")
+    ap.add_argument("--pilot-arms", action="store_true",
+                    help="NEXT_EXPERIMENTS_PILOT16e4, run/smoke: ADD V1-pilot and bstar-pilot (the learned / b* prior used "
+                         "once on the pilots, channel belief frozen, detection-decoding only).  OPT-IN; requires "
+                         "--stagec-ckpt and --tag.")
     ap.add_argument("--extra-log", nargs="+", default=None, choices=("r_t",),
                     help="run: also store these per-iteration fields in the raw as '<arm>|<field>'.  r_t = state "
                          "residual |h_post^t - h_post^(t-1)| / |h_post^t| (conf/code/rt_tap.py; score and mixture-EP "
@@ -1165,11 +1177,15 @@ def main(argv=None):
                                      ("stagec-ckpt", a.stagec_ckpt is not None),
                                      ("mean-arms", a.mean_arms),            # adds arms, like --stagec-ckpt
                                      ("p3-arms", a.p3_arms),
+                                     ("pilot-arms", a.pilot_arms),
                                      ("extra-log", a.extra_log is not None)) if v]
     if changed and a.cmd in ("run", "fit") and not a.tag:
         sys.exit(f"refusing to write the pre-registered output with {', '.join(changed)} -- pass --tag X "
                  "(01_RULES §5: the configuration is frozen before the run and not changed afterwards, and "
                  "the diffusion arm gets no more data or budget than the GMM arm)")
+    if a.pilot_arms and not a.stagec_ckpt:
+        sys.exit("--pilot-arms needs --stagec-ckpt: V1-pilot (NEXT_EXPERIMENTS_PILOT16e4) is built from the Stage C checkpoint, "
+                 "and without it it would be silently ABSENT from the run.")
     if a.p3_arms and not a.stagec_ckpt:
         sys.exit("--p3-arms needs --stagec-ckpt: V1-b05 / V1-fb05 (NEXT_EXPERIMENTS_P3 §2.2) are built from the Stage C "
                  "checkpoint, and without it they would be silently ABSENT from the run.")

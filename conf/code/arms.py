@@ -141,10 +141,45 @@ def module_h_priors(testbed, prior, Nr, Nt, ntrain=N_TRAIN, true_prior=None):
     return out, fits, llv, bstar, kron_K
 
 
+class PilotSitePrior:
+    """Learned prior used ONCE, on the pilots only -- the pilot-only (no data-aided re-estimation) setting of score-based
+    channel estimation (Arvinte & Tamir, IEEE TWC 2023), rebuilt inside this receiver with the SAME V1 weights, data and
+    trials (review_next 2026-09-26, NEXT_EXPERIMENTS_PILOT16e4).  It is handed to RouteA's mode='pilot_only' with
+    exact_prior=True, which computes the pilot-only likelihood site (G, b), calls ep_site(G, b, lam_min) ONCE, freezes the
+    channel belief (P = Lam + G, h = P^-1 (eta + b)) and then iterates detection <-> decoding with that belief.
+    ep_site reproduces V1's iteration-0 Module H VERBATIM (MODULE_H['score']: scal='belief', n_inner=1, starting from
+    RouteA.run's nuE = cbar, hE = 0; then RouteAClip._matrix_site with clip='eta'), so the arm's iteration-1 output is
+    bit-identical to M-ours-dscore-C-V1's iteration-1 output (at iteration 0 the data columns carry xbar = 0 and add
+    nothing to (G, b)) -- checked by selftest_pilot.py.  Every other attribute (cbar, eh2_prior, C, ...) is the wrapped
+    ScorePrior's."""
+
+    def __init__(self, sp, eps):
+        self.sp, self.eps = sp, eps
+
+    def __getattr__(self, k):
+        return getattr(self.sp, k)
+
+    def ep_site(self, G, b, lam_min):
+        N = G.shape[0]; I = np.eye(N)
+        nuE = self.sp.cbar; hE = np.zeros(N, complex)                                    # RouteA.run initial state
+        SigL = np.linalg.inv(I / nuE + G); hL = SigL @ (hE / nuE + b)                     # scal='belief', n_inner=1
+        aL = float(np.clip(np.trace(SigL).real / N / nuE, self.eps, 1 - self.eps))
+        nu_q = aL / (1 - aL) * nuE; q = (hL - aL * hE) / (1 - aL)
+        self.sp.denoise(q, nu_q)                                                          # V1 calls it here too (query stats)
+        hH, J = self.sp.denoise_full(q, nu_q)                                             # RouteAClip._matrix_site, clip='eta'
+        SigH = nu_q * J; SigH = 0.5 * (SigH + SigH.conj().T)
+        SigHinv = np.linalg.inv(SigH)
+        Lam = SigHinv - I / nu_q; Lam = 0.5 * (Lam + Lam.conj().T)
+        w, V = np.linalg.eigh(Lam); eta = SigHinv @ hH - q / nu_q
+        if w.min() < lam_min:
+            Lam = (V * np.maximum(w, lam_min)) @ V.conj().T
+        return Lam, eta
+
+
 def build_our_arms(testbed, prior, Nr, Nt, T, Tp, sigma2, code, Xp, ntrain=N_TRAIN,
                    true_prior=None, score_prior=None, with_G=False, score_prior_v1=None,
                    score_prior_c=None, bstar_scalar=False, mean_arms=False,
-                   score_prior_v1_floor=None, p3_arms=False):
+                   score_prior_v1_floor=None, p3_arms=False, pilot_arms=False):
     """M-ours-gmm32 / M-ours-bstar / M-ours-score (D1 only) / M-ours-dscore / M-ours-G (test M2 only).
 
     score_prior_v1: a SECOND score.ScorePrior built with psd_project=True (Stage C V1, spec 10 §3b / (F1)).
@@ -175,7 +210,12 @@ def build_our_arms(testbed, prior, Nr, Nt, T, Tp, sigma2, code, Xp, ntrain=N_TRA
                       of the extrinsic pair (rD, tauD); v1 value 0.7), V1-fb05 / bstar-fb05 = the same with beta_fb =
                       P3_BETA (damping of the posterior feedback (xbar, v); D-15 value None).  Everything else is the
                       base arm's route_a() call verbatim; each bstar variant gets its OWN .view("eta") (own clip
-                      counters, and a per-arm object for instance hooks).  Existing arms are untouched."""
+                      counters, and a per-arm object for instance hooks).  Existing arms are untouched.
+
+    review_next pilot-only, OPT-IN (NEXT_EXPERIMENTS_PILOT16e4, 2026-09-26):
+      pilot_arms    : V1-pilot = the V1 weights used once on the pilots (PilotSitePrior) with the channel belief frozen,
+                      then detection <-> decoding only (RouteA mode='pilot_only'); bstar-pilot = the same for the b* GMM
+                      (its own .view("eta"); exact mixture EP site on the pilots only).  Existing arms are untouched."""
     hp, fits, llv, bstar, kron_K = module_h_priors(testbed, prior, Nr, Nt, ntrain)
     Cs = GaussianPrior(Nr, Nt, fits[("full", 32)]["Chat"])
     a = (Nr, Nt, T, Tp, sigma2)
@@ -224,6 +264,13 @@ def build_our_arms(testbed, prior, Nr, Nt, T, Tp, sigma2, code, Xp, ntrain=N_TRA
             if score_prior_v1 is not None:
                 arms[f"V1-{sfx}"] = route_a(*a, score_prior_v1, code, Xp, "score", clip="eta", **over)
             arms[f"bstar-{sfx}"] = route_a(*a, hp[bstar].view("eta"), code, Xp, "gmm_site", **over)
+    if pilot_arms:                  # pilot-only estimate, frozen channel belief (no data-aided re-estimation)
+        if score_prior_v1 is not None:
+            arms["V1-pilot"] = route_a(*a, PilotSitePrior(score_prior_v1, LOOP["eps"]), code, Xp, "score", clip="eta",
+                                       mode="pilot_only", exact_prior=True)
+            assert arms["V1-pilot"].exact_prior and arms["V1-pilot"].mode == "pilot_only"
+        arms["bstar-pilot"] = route_a(*a, hp[bstar].view("eta"), code, Xp, "gmm_site", mode="pilot_only")
+        assert arms["bstar-pilot"].exact_prior and arms["bstar-pilot"].mode == "pilot_only"
     if with_G:
         arms["M-ours-G"] = route_a(*a, Cs, code, Xp, "gaussian")
 
