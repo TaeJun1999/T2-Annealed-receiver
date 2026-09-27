@@ -1133,6 +1133,10 @@ def main(argv=None):
     ap.add_argument("--p3-arms", action="store_true",
                     help="review_next P3 (NEXT_EXPERIMENTS_P3 §2.2), run/smoke: ADD V1-b05, bstar-b05 (beta 0.5) and "
                          "V1-fb05, bstar-fb05 (beta_fb 0.5).  OPT-IN; requires --stagec-ckpt and --tag.")
+    ap.add_argument("--train-prior", default=None, choices=list(C.PID),
+                    help="NEXT_EXPERIMENTS_MISMATCH16e4, run/smoke: declare the --stagec-ckpt's TRAIN prior when it differs from "
+                         "--prior -- the explicit opt-in to a train/test channel-model mismatch run (requires --tag; the tag's "
+                         "fits dir must hold the train prior's fits under the test prior's names)")
     ap.add_argument("--pilot-arms", action="store_true",
                     help="NEXT_EXPERIMENTS_PILOT16e4, run/smoke: ADD V1-pilot and bstar-pilot (the learned / b* prior used "
                          "once on the pilots, channel belief frozen, detection-decoding only).  OPT-IN; requires "
@@ -1178,11 +1182,14 @@ def main(argv=None):
                                      ("mean-arms", a.mean_arms),            # adds arms, like --stagec-ckpt
                                      ("p3-arms", a.p3_arms),
                                      ("pilot-arms", a.pilot_arms),
+                                     ("train-prior", a.train_prior is not None),
                                      ("extra-log", a.extra_log is not None)) if v]
     if changed and a.cmd in ("run", "fit") and not a.tag:
         sys.exit(f"refusing to write the pre-registered output with {', '.join(changed)} -- pass --tag X "
                  "(01_RULES §5: the configuration is frozen before the run and not changed afterwards, and "
                  "the diffusion arm gets no more data or budget than the GMM arm)")
+    if a.train_prior and not a.stagec_ckpt:
+        sys.exit("--train-prior needs --stagec-ckpt: it declares that checkpoint's train prior (NEXT_EXPERIMENTS_MISMATCH16e4).")
     if a.pilot_arms and not a.stagec_ckpt:
         sys.exit("--pilot-arms needs --stagec-ckpt: V1-pilot (NEXT_EXPERIMENTS_PILOT16e4) is built from the Stage C checkpoint, "
                  "and without it it would be silently ABSENT from the run.")
@@ -1217,10 +1224,21 @@ def main(argv=None):
         import torch
         ck_prior = torch.load(a.stagec_ckpt, map_location="cpu", weights_only=False).get("prior")
         run_prior = getattr(a, "prior", None) or C.PRIOR_OF.get(getattr(a, "testbed", None) or "D2")
+        mis = getattr(a, "train_prior", None)
+        if mis is not None and (mis != ck_prior or ck_prior == run_prior):
+            sys.exit(f"--train-prior {mis!r} must name the checkpoint's own prior ({ck_prior!r}) and differ from this run's "
+                     f"prior ({run_prior!r}).  Refusing.")
         if ck_prior is not None and run_prior is not None and ck_prior != run_prior:
-            sys.exit(f"--stagec-ckpt {a.stagec_ckpt} was trained on prior {ck_prior!r} but this run is prior "
-                     f"{run_prior!r}.  Refusing.")
+            if mis != ck_prior:
+                sys.exit(f"--stagec-ckpt {a.stagec_ckpt} was trained on prior {ck_prior!r} but this run is prior "
+                         f"{run_prior!r}.  Refusing (a registered mismatch run declares it with --train-prior {ck_prior}).")
+            print(f"[run] MISMATCH (NEXT_EXPERIMENTS_MISMATCH16e4): checkpoint trained on {ck_prior!r}, evaluated on {run_prior!r} "
+                  "channels; GMM fits / Chat are whatever the tag's fits dir holds", flush=True)
     _init(a.tag)
+    if getattr(a, "train_prior", None):                 # the tag's fits must BE the train prior's (renamed links)
+        fp = os.path.realpath(A.fit_path(a.testbed, a.prior, 8, "full", 32, a.ntrain))
+        if not os.path.basename(fp).startswith(f"fit_{a.train_prior}_"):
+            sys.exit(f"--train-prior {a.train_prior}: the tag's full K=32 fit resolves to {fp}, not a {a.train_prior} fit.  Refusing.")
     for d in ("results", "raw", "logs", "figs", "ckpt"):
         os.makedirs(os.path.join(C.CONF, d), exist_ok=True)
     os.makedirs(d_raw(), exist_ok=True)
