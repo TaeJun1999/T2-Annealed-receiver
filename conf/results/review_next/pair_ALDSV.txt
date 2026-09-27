@@ -1,0 +1,43 @@
+# pair_ald raw_ALDSV x raw_PILSV x raw_SVB16e4, cell C2, prior SV8e, n=2560 per SNR, git 7e64f5cc; integrity (point sets, genie identical, no raised ALD trial, estimate = precomputed ALD, fixed): OK
+A1: ALD pilot-only (error-aware) -> loop V1: ALDv-pilot -> M-ours-dscore-C-V1  [anchor ALDv-pilot]  decision SNRs ['-3', '+0', '+3']
+    sign test @16: -3 dB 523:13 p=3.8e-136  +0 dB 63:11 p=5.3e-10  +3 dB 9:1 p=0.021   pooled 595:25 p=1.2e-142
+    POWERED=True  second arm fewer at 3/3, first arm fewer at 0/3  -> (i) second arm fewer
+    SNR@0.1 gap (ALDv-pilot minus M-ours-dscore-C-V1): +1.08 dB  [90% paired bootstrap +0.96, +1.22; censored replicates 0%]
+A2: ALD pilot-only (plug-in, the authors' use of the estimate) -> loop V1: ALD-pilot -> M-ours-dscore-C-V1  [anchor ALD-pilot]  decision SNRs ['-3', '+0', '+3']
+    sign test @16: -3 dB 477:24 p=1.9e-110  +0 dB 88:7 p=6e-19  +3 dB 16:0 p=3.1e-05   pooled 581:31 p=1.7e-132
+    POWERED=True  second arm fewer at 3/3, first arm fewer at 0/3  -> (i) second arm fewer
+    SNR@0.1 gap (ALD-pilot minus M-ours-dscore-C-V1): +1.27 dB  [90% paired bootstrap +1.13, +1.41; censored replicates 0%]
+A3: ALD pilot-only -> one-shot posterior-mean pilot-only, same weights: ALDv-pilot -> V1-pilot  [anchor ALDv-pilot]  decision SNRs ['-3', '+0', '+3']
+    sign test @16: -3 dB 161:53 p=7.5e-14  +0 dB 20:24 p=0.65  +3 dB 6:4 p=0.75   pooled 187:81 p=8.1e-11
+    POWERED=True  second arm fewer at 1/3, first arm fewer at 0/3  -> (iii) no direction
+    SNR@0.1 gap (ALDv-pilot minus V1-pilot): +0.05 dB  [90% paired bootstrap -0.04, +0.13; censored replicates 0%]
+report: ALD pilot-only -> loop b*: ALDv-pilot -> M-ours-bstar  [anchor ALDv-pilot]  decision SNRs ['-3', '+0', '+3']
+    sign test @16: -3 dB 483:35 p=7.5e-102  +0 dB 53:15 p=4.1e-06  +3 dB 8:2 p=0.11   pooled 544:52 p=2.2e-104
+    POWERED=True  second arm fewer at 2/3, first arm fewer at 0/3  -> (i) second arm fewer
+    SNR@0.1 gap (ALDv-pilot minus M-ours-bstar): +0.84 dB  [90% paired bootstrap +0.72, +0.96; censored replicates 0%]
+report: pilot-only b* -> ALD pilot-only: bstar-pilot -> ALDv-pilot  [anchor bstar-pilot]  decision SNRs ['-3', '+0', '+3']
+    sign test @16: -3 dB 102:142 p=0.012  +0 dB 38:19 p=0.016  +3 dB 4:4 p=1   pooled 144:165 p=0.26
+    POWERED=True  second arm fewer at 1/3, first arm fewer at 1/3  -> (iii) no direction
+    SNR@0.1 gap (bstar-pilot minus ALDv-pilot): +0.12 dB  [90% paired bootstrap +0.03, +0.22; censored replicates 0%]
+report: plug-in -> error-aware: ALD-pilot -> ALDv-pilot  [anchor ALD-pilot]  decision SNRs ['-3', '+0', '+3']
+    sign test @16: -3 dB 30:87 p=1.3e-07  +0 dB 38:9 p=2.5e-05  +3 dB 9:1 p=0.021   pooled 77:97 p=0.15
+    POWERED=True  second arm fewer at 2/3, first arm fewer at 1/3  -> (i) second arm fewer
+    SNR@0.1 gap (ALD-pilot minus ALDv-pilot): +0.19 dB  [90% paired bootstrap +0.10, +0.28; censored replicates 0%]
+report-only, test ALD NMSE (estimate file, mean over trials) -3:-5.17dB +0:-7.59dB +3:-10.13dB +6:-12.73dB +9:-15.53dB +12:-18.28dB +15:-21.22dB
+BLER@16 failures / n per SNR -3 +0 +3 +6 +9 +12 +15 dB:
+    R0-pilot             1010   154    23     6     1     0     0
+    bstar-pilot           872   117    13     0     0     0     0
+    ALD-pilot             855   127    21     1     0     0     0
+    ALDv-pilot            912    98    13     1     0     0     0
+    V1-pilot              804   102    11     0     0     0     0
+    M-ours-bstar          464    60     7     0     0     0     0
+    M-ours-dscore-C-V1    402    46     5     0     0     0     0
+    R5-genie               31     3     0     1     0     0     0
+report-only, median NMSE@16 of the channel estimate per SNR -3 +0 +3 +6 +9 +12 +15 dB:
+    R0-pilot            3.23e-01 1.97e-01 1.11e-01 5.97e-02 3.08e-02 1.61e-02 7.93e-03
+    bstar-pilot         2.85e-01 1.71e-01 9.68e-02 5.36e-02 2.82e-02 1.50e-02 7.61e-03
+    ALD-pilot           2.94e-01 1.64e-01 9.18e-02 4.94e-02 2.60e-02 1.40e-02 7.06e-03
+    ALDv-pilot          2.94e-01 1.64e-01 9.18e-02 4.94e-02 2.60e-02 1.40e-02 7.06e-03
+    V1-pilot            2.68e-01 1.55e-01 8.78e-02 4.77e-02 2.51e-02 1.36e-02 6.91e-03
+    M-ours-bstar        1.13e-01 6.02e-02 3.22e-02 1.67e-02 8.70e-03 4.57e-03 2.26e-03
+    M-ours-dscore-C-V1  1.00e-01 5.36e-02 2.85e-02 1.50e-02 7.83e-03 4.19e-03 2.08e-03
