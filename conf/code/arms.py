@@ -176,10 +176,37 @@ class PilotSitePrior:
         return Lam, eta
 
 
+CURRENT_TRIAL = None                # runner.run_task sets the trial index before every trial (ALDSitePrior lookup)
+
+
+class ALDSitePrior:
+    """Arvinte & Tamir (IEEE TWC 2023) pilot-only estimate by annealed Langevin posterior sampling with the V1 network,
+    PRECOMPUTED by code/ald.py (GPU; NEXT_EXPERIMENTS_ALD16e4) and handed to RouteA's mode='pilot_only' (exact_prior=True)
+    as a frozen channel belief N(hhat, v I): ep_site returns Lam = I/v - G, eta = hhat/v - b, so P = Lam + G = I/v and
+    hpost = hhat.  v = V_PLUGIN (the authors' plug-in use of the estimate) or the dev-set MSE per entry (error-aware
+    variant).  The trial is found by CURRENT_TRIAL and CHECKED: the stored pilot site b must equal the receiver's b."""
+    V_PLUGIN = 1e-8
+
+    def __init__(self, sp, table, k, v):
+        self.sp, self.hhat, self.b, self.v = sp, table["hhat"][k], table["b"][k], float(v)
+        self.skip = int(table["skip"])                  # the table's first trial (0 = test set)
+
+    def __getattr__(self, k):
+        return getattr(self.sp, k)
+
+    def ep_site(self, G, b, lam_min):
+        tr = CURRENT_TRIAL - self.skip
+        ref = self.b[tr]
+        if not np.allclose(b, ref, rtol=1e-9, atol=1e-12 * np.max(np.abs(ref))):
+            raise RuntimeError(f"ALDSitePrior: pilot site of trial {tr} differs from the precomputed one")
+        N = G.shape[0]
+        return np.eye(N) / self.v - G, self.hhat[tr] / self.v - b
+
+
 def build_our_arms(testbed, prior, Nr, Nt, T, Tp, sigma2, code, Xp, ntrain=N_TRAIN,
                    true_prior=None, score_prior=None, with_G=False, score_prior_v1=None,
                    score_prior_c=None, bstar_scalar=False, mean_arms=False,
-                   score_prior_v1_floor=None, p3_arms=False, pilot_arms=False):
+                   score_prior_v1_floor=None, p3_arms=False, pilot_arms=False, ald=None):
     """M-ours-gmm32 / M-ours-bstar / M-ours-score (D1 only) / M-ours-dscore / M-ours-G (test M2 only).
 
     score_prior_v1: a SECOND score.ScorePrior built with psd_project=True (Stage C V1, spec 10 §3b / (F1)).
@@ -271,6 +298,12 @@ def build_our_arms(testbed, prior, Nr, Nt, T, Tp, sigma2, code, Xp, ntrain=N_TRA
             assert arms["V1-pilot"].exact_prior and arms["V1-pilot"].mode == "pilot_only"
         arms["bstar-pilot"] = route_a(*a, hp[bstar].view("eta"), code, Xp, "gmm_site", mode="pilot_only")
         assert arms["bstar-pilot"].exact_prior and arms["bstar-pilot"].mode == "pilot_only"
+    if ald is not None and score_prior_v1 is not None:     # (table, SNR index k): NEXT_EXPERIMENTS_ALD16e4
+        tab, k = ald
+        for name, v in (("ALD-pilot", ALDSitePrior.V_PLUGIN), ("ALDv-pilot", tab["v"][k])):
+            arms[name] = route_a(*a, ALDSitePrior(score_prior_v1, tab, k, v), code, Xp, "score", clip="eta",
+                                 mode="pilot_only", exact_prior=True)
+            assert arms[name].exact_prior and arms[name].mode == "pilot_only"
     if with_G:
         arms["M-ours-G"] = route_a(*a, Cs, code, Xp, "gaussian")
 

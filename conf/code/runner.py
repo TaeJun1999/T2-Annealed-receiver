@@ -298,8 +298,17 @@ def budget_meta(arm_names, ntrain, learned):
     return out
 
 
+def _ald_table(path, snr):
+    """NEXT_EXPERIMENTS_ALD16e4: the precomputed ALD estimates (code/ald.py estimate) for this SNR, or None."""
+    if not path:
+        return None
+    z = np.load(path)
+    k = int(np.flatnonzero(np.isclose(z["snrs"], snr))[0])
+    return {"hhat": z["hhat"], "b": z["b"], "v": z["v"], "skip": int(z["skip"])}, k
+
+
 def build_point(testbed, cell, prior, snr, ntrain=C.N_TRAIN, beta=C.BETA, t_in=C.T_IN, ckpt=None,
-                stagec_ckpt=None, mean_arms=False, p3_arms=False, pilot_arms=False):
+                stagec_ckpt=None, mean_arms=False, p3_arms=False, pilot_arms=False, ald_file=None):
     """Every arm of `testbed` at one (cell, prior, SNR) point, all sharing one pilot matrix (06_SPEC §2).
 
     D1: R0 R1 R2 R3 R4-scvamp R4-llr R5-genie R6-exactEP + M-ours-{gmm32,bstar,score,dscore}
@@ -352,7 +361,8 @@ def build_point(testbed, cell, prior, snr, ntrain=C.N_TRAIN, beta=C.BETA, t_in=C
     our, ocfg, meta, hp, _ = A.build_our_arms(*a, ntrain=ntrain, true_prior=true, score_prior=sp,
                                               score_prior_c=spc, score_prior_v1=spc1,
                                               bstar_scalar=bool(stagec_ckpt), mean_arms=mean_arms,
-                                              score_prior_v1_floor=spcf, p3_arms=p3_arms, pilot_arms=pilot_arms)
+                                              score_prior_v1_floor=spcf, p3_arms=p3_arms, pilot_arms=pilot_arms,
+                                              ald=_ald_table(ald_file, snr))
     arms.update(our)
     cfgs.update(ocfg)
     # An arm that is not built must leave a trace with the REASON, or the analysis sees a missing row and
@@ -418,6 +428,13 @@ def build_point(testbed, cell, prior, snr, ntrain=C.N_TRAIN, beta=C.BETA, t_in=C
             for f in ("fit_sec", "fit_sec_note"):
                 if f"{f}|M-ours-dscore-C-V1" in meta:
                     meta[f"{f}|V1-pilot"] = meta[f"{f}|M-ours-dscore-C-V1"]
+    if ald_file:                    # NEXT_EXPERIMENTS_ALD16e4: the estimate file and its frozen tuning record
+        import hashlib, json
+        meta["ald_file"] = f"{ald_file} sha256[:16]={hashlib.sha256(open(ald_file, 'rb').read()).hexdigest()[:16]}"
+        meta["ald_tune"] = str(np.load(ald_file)["tune"])
+        for k in ("ALD-pilot", "ALDv-pilot"):
+            if k in arms:           # the SAME V1 weights (sampled by annealed Langevin on the pilots)
+                learned[k] = learned["M-ours-dscore-C-V1"]
     meta.update(budget_meta(arms, ntrain, learned))
     return dict(arms=arms, cfgs=cfgs, meta=meta, gen=gen, code=code, pil=pil, Xp=Xp, fits=fits,
                 Nr=Nr, Nt=Nt, T=T, Tp=Tp, sigma2=sigma2, dscore=why, stagec=sc_why)
@@ -429,14 +446,14 @@ def run_task(task):
     common.trial_rng stream and then dropped, so chunks concatenate and every arm at a point sees the same
     (H, u, perm, Y) -- paired inside a cell (01_RULES §5, test C4)."""
     (testbed, cell, prior, snr, skip, n, ntrain, beta, t_in, iters, arm_sel, ckpt, stagec_ckpt, mean_arms,
-     p3_arms, extra_log, pilot_arms) = task
+     p3_arms, extra_log, pilot_arms, ald_file) = task
     c = C.CELLS[cell]
     pil = C.make_pilots(testbed, prior, c["Nt"], c["Tp"], c["Nr"])[0]   # cheap; the build is not
     out = raw_file(testbed, cell, prior, pil, snr, skip, n)
     if os.path.exists(out):
         return f"exists  {os.path.basename(out)}"                      # FINISHED CHUNKS ARE SKIPPED
     t0 = time.time()
-    P = build_point(testbed, cell, prior, snr, ntrain, beta, t_in, ckpt, stagec_ckpt, mean_arms, p3_arms, pilot_arms)
+    P = build_point(testbed, cell, prior, snr, ntrain, beta, t_in, ckpt, stagec_ckpt, mean_arms, p3_arms, pilot_arms, ald_file)
     code, gen = P["code"], P["gen"]
     first = P["arms"]["R5-genie"]                       # transmit() is arm-independent; use one object
     arms = {k: v for k, v in P["arms"].items() if (not arm_sel or k in arm_sel)}
@@ -460,6 +477,7 @@ def run_task(task):
     comp = []
     rng = C.trial_rng(testbed, prior, P["Nr"], P["T"], P["Tp"], snr)
     for tr in range(skip + n):
+        A.CURRENT_TRIAL = tr                            # ALDSitePrior lookup (NEXT_EXPERIMENTS_ALD16e4); inert otherwise
         H = gen.sample(rng)
         k_true = getattr(getattr(gen, "prior", None), "last_k", None)
         u = rng.integers(0, 2, code.K)
@@ -561,7 +579,7 @@ def cmd_run(a):
     if a.extra_log:
         print(f"[run] --extra-log {' '.join(a.extra_log)}: extra per-iteration raw fields (NEXT_EXPERIMENTS_P3 §5)", flush=True)
     tasks = [pt + (s, m, a.ntrain, a.beta, a.tin, a.iters, a.arm, a.ckpt, a.stagec_ckpt, a.mean_arms, a.p3_arms,
-                   a.extra_log, a.pilot_arms) for pt in pts for s, m in chunk_plan(a.skip0, a.n, a.chunk)]
+                   a.extra_log, a.pilot_arms, a.ald_file) for pt in pts for s, m in chunk_plan(a.skip0, a.n, a.chunk)]
     tasks = [(testbed,) + t for t in tasks]
     tasks.sort(key=lambda t: (t[4], -C.CELLS[t[1]]["Nr"]))   # first chunks of every point early; 8x4 first
     jobs = min(os.cpu_count(), len(tasks))
@@ -589,7 +607,7 @@ def cmd_smoke(a):
         snr = float((a.snr or [C.CELLS[cell]["snrs"][-1]])[0])
         t0 = time.time()
         P = build_point(testbed, cell, prior, snr, a.ntrain, a.beta, a.tin, a.ckpt, a.stagec_ckpt, a.mean_arms,
-                        a.p3_arms, a.pilot_arms)
+                        a.p3_arms, a.pilot_arms, a.ald_file)
         print(f"[smoke] {cell}: Stage C: {P['stagec']}", flush=True)
         print(f"[smoke] {testbed} {cell} prior={prior} snr={snr:g} pilots={P['pil']} "
               f"({P['Nr']}x{P['Nt']}, T={P['T']}, Tp={P['Tp']}): {len(P['arms'])} arms "
@@ -1137,6 +1155,9 @@ def main(argv=None):
                     help="NEXT_EXPERIMENTS_MISMATCH16e4, run/smoke: declare the --stagec-ckpt's TRAIN prior when it differs from "
                          "--prior -- the explicit opt-in to a train/test channel-model mismatch run (requires --tag; the tag's "
                          "fits dir must hold the train prior's fits under the test prior's names)")
+    ap.add_argument("--ald-file", default=None,
+                    help="NEXT_EXPERIMENTS_ALD16e4, run/smoke: ADD ALD-pilot / ALDv-pilot from this code/ald.py estimate file "
+                         "(Arvinte-Tamir annealed Langevin, V1 network, precomputed).  OPT-IN; requires --stagec-ckpt, --tag.")
     ap.add_argument("--pilot-arms", action="store_true",
                     help="NEXT_EXPERIMENTS_PILOT16e4, run/smoke: ADD V1-pilot and bstar-pilot (the learned / b* prior used "
                          "once on the pilots, channel belief frozen, detection-decoding only).  OPT-IN; requires "
@@ -1182,12 +1203,15 @@ def main(argv=None):
                                      ("mean-arms", a.mean_arms),            # adds arms, like --stagec-ckpt
                                      ("p3-arms", a.p3_arms),
                                      ("pilot-arms", a.pilot_arms),
+                                     ("ald-file", a.ald_file is not None),
                                      ("train-prior", a.train_prior is not None),
                                      ("extra-log", a.extra_log is not None)) if v]
     if changed and a.cmd in ("run", "fit") and not a.tag:
         sys.exit(f"refusing to write the pre-registered output with {', '.join(changed)} -- pass --tag X "
                  "(01_RULES §5: the configuration is frozen before the run and not changed afterwards, and "
                  "the diffusion arm gets no more data or budget than the GMM arm)")
+    if a.ald_file and not a.stagec_ckpt:
+        sys.exit("--ald-file needs --stagec-ckpt: ALD-pilot wraps the V1 score prior (cbar, eh2) built from it.")
     if a.train_prior and not a.stagec_ckpt:
         sys.exit("--train-prior needs --stagec-ckpt: it declares that checkpoint's train prior (NEXT_EXPERIMENTS_MISMATCH16e4).")
     if a.pilot_arms and not a.stagec_ckpt:
