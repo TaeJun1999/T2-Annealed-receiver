@@ -45,7 +45,7 @@ OUT = os.path.join(C.CONF, "results", "ald")
 
 def _regen_one(args):
     """One SNR: the runner's trial loop (runner.run_task) up to the pilot site; nothing else consumes the stream."""
-    testbed, prior, cell, snr, skip, n, fits_tag = args
+    testbed, prior, cell, snr, skip, n, fits_tag, rotation, train_prior = args
     import arms as A
     A.D2_FITS = os.path.join(C.CONF, "results", f"gmm_fits_D2_{fits_tag}")
     c = C.CELLS[cell]
@@ -54,6 +54,9 @@ def _regen_one(args):
     code = C.QAMCode(C.GENS, C.NU, C.M_QAM, Nt * (T - Tp))
     _, Xp = C.make_pilots(testbed, prior, Nt, Tp, Nr)
     gen = C.make_gen(testbed, prior, Nr, Nt)
+    if rotation is not None:                        # ROTMIX16e4: the same receive-array rotation as runner.py --rotation
+        assert hasattr(gen, "rot"), f"{prior}: generator has no .rot"
+        gen.rot = float(np.deg2rad(rotation))       # radians, added to every AoA of the block; the stream is unchanged
     arms, _, _, _ = A.build_baseline_arms(testbed, prior, Nr, Nt, T, Tp, sigma2, code, Xp, ntrain=160000)
     first = arms["R5-genie"]
     Td = T - Tp
@@ -76,8 +79,14 @@ def _regen_one(args):
 def cmd_regen(a):
     import multiprocessing as mp
     snrs = [float(s) for s in C.CELLS[a.cell]["snrs"]]
+    if a.fits_tag:                                  # ROTMIX16e4 §1: the fits must BE the train prior's (runner's guard)
+        fp = os.path.realpath(os.path.join(C.CONF, "results", f"gmm_fits_D2_{a.fits_tag}",
+                                           f"fit_{a.prior}_Nr{C.CELLS[a.cell]['Nr']}_fullK32_n160000.npz"))
+        want = a.train_prior or a.prior
+        if not os.path.basename(fp).startswith(f"fit_{want}_"):
+            raise SystemExit(f"--fits-tag {a.fits_tag}: full K=32 resolves to {fp}, not a {want} fit (--train-prior {a.train_prior})")
     skip, n = (C.DEV_SKIP0, a.n_dev) if a.set == "dev" else (0, 2560)
-    jobs = [(a.testbed, a.prior, a.cell, s, skip, n, a.fits_tag) for s in snrs]
+    jobs = [(a.testbed, a.prior, a.cell, s, skip, n, a.fits_tag, a.rotation, a.train_prior) for s in snrs]
     t0 = time.time()
     with mp.Pool(len(jobs)) as pool:
         res = pool.map(_regen_one, jobs)
@@ -86,8 +95,10 @@ def cmd_regen(a):
     out = os.path.join(OUT, f"pilots_{a.tag}_{a.set}.npz")
     np.savez(out, snrs=np.array(snrs), skip=skip, n=n, b=np.stack([r[1] for r in res]), H=np.stack([r[2] for r in res]),
              G=np.stack([r[3] for r in res]), sigma2=np.array([r[4] for r in res]), testbed=a.testbed, prior=a.prior,
-             cell=a.cell, fits_tag=a.fits_tag)
-    print(f"[ald regen] {a.tag} {a.set}: {len(snrs)} SNR x {n} trials (skip {skip}) -> {out}  {time.time() - t0:.0f} s")
+             cell=a.cell, fits_tag=a.fits_tag, rotation=-1.0 if a.rotation is None else float(a.rotation),
+             train_prior=a.train_prior or a.prior)
+    print(f"[ald regen] {a.tag} {a.set}: {len(snrs)} SNR x {n} trials (skip {skip}) rotation={a.rotation} -> {out}  "
+          f"{time.time() - t0:.0f} s")
 
 
 def ald_run(model, b, G, sigma2, smin, smax, c, beta, H=None, gen=None, keep=None):
@@ -149,11 +160,20 @@ def _model(ckpt, device):
     return m, float(sg.min()), float(sg.max()), st
 
 
+def _guard(z, st, a):
+    """ROTMIX16e4 §1: the checkpoint's prior must be the pilots' train prior (= --train-prior, else the channel prior)."""
+    tp = a.train_prior or (str(z["train_prior"]) if "train_prior" in z.files else str(z["prior"]))
+    if st.get("prior") != tp:
+        raise SystemExit(f"checkpoint prior {st.get('prior')!r} != train prior {tp!r} of the pilots file (--train-prior {a.train_prior})")
+    return dict(rotation=float(z["rotation"]) if "rotation" in z.files else -1.0, train_prior=tp)
+
+
 def cmd_tune(a):
     import torch
     _det()
-    m, smin, smax, _ = _model(a.ckpt, "cuda")
+    m, smin, smax, st = _model(a.ckpt, "cuda")
     z = np.load(os.path.join(OUT, f"pilots_{a.tag}_dev.npz"))
+    src = _guard(z, st, a)
     snrs = z["snrs"]
     res = {}
     t0 = time.time()
@@ -212,7 +232,7 @@ def cmd_tune(a):
                dev_nmse_db=dict(zip([float(s) for s in snrs], [float(10 * np.log10(np.nanmin(cv))) for cv in curves])),
                grid={f"c={c:g},beta={b:g}": r[0] for (c, b), r in res.items()}, extended=[f"{n}={x:g}" for n, x in ext],
                optimum_at_edge_after_extension=edge, selection_rule=rule, n_dev=int(z["n"]), dev_skip=int(z["skip"]), seed=SEED,
-               **_prov(a.ckpt))
+               **src, **_prov(a.ckpt))
     json.dump(rec, open(os.path.join(OUT, f"tune_{a.tag}.json"), "w"), indent=1)
     np.savez(os.path.join(OUT, f"tune_{a.tag}_curves.npz"), **{f"c{c:g}_b{b:g}": r[1] for (c, b), r in res.items()})
     print(json.dumps({k: rec[k] for k in ("c", "beta", "selection_rule", "optimum_at_edge_after_extension", "stop", "dev_nmse_db")}))
@@ -222,10 +242,15 @@ def cmd_estimate(a):
     import torch
     _det()
     rec = json.load(open(os.path.join(OUT, f"tune_{a.tag}.json")))
-    m, smin, smax, _ = _model(a.ckpt, "cuda")
+    m, smin, smax, st = _model(a.ckpt, "cuda")
     prov = _prov(a.ckpt)
     assert (smin, smax) == (rec["smin"], rec["smax"]) and a.ckpt == rec["ckpt"] and prov["ckpt_sha"] == rec["ckpt_sha"]
     z = np.load(os.path.join(OUT, f"pilots_{a.tag}_{a.set}.npz"))
+    src = _guard(z, st, a)
+    dev = _guard(np.load(os.path.join(OUT, f"pilots_{a.tag}_dev.npz")), st, a)
+    if src != dev:                                   # the tuning record's channels (rotation, train prior) = the test channels'
+        raise SystemExit(f"test pilots {src} != dev pilots {dev} (tuning record {a.tag})")
+    prov.update(src)
     hh, nm = [], []
     for k, s in enumerate(z["snrs"]):
         gen = torch.Generator(device="cuda").manual_seed(SEED + 1000 + 17 * k)
@@ -243,7 +268,7 @@ def cmd_estimate(a):
     v = np.array([rec["v"][str(float(s))] for s in z["snrs"]])
     out = os.path.join(OUT, f"ald_{a.tag}" + ("" if a.set == "test" else f"_{a.set}") + ".npz")
     np.savez(out, snrs=z["snrs"], skip=int(z["skip"]), b=z["b"], hhat=np.stack(hh), v=v, nmse=np.array(nm), tune=json.dumps(rec),
-             prov=json.dumps(prov), ckpt_sha=prov["ckpt_sha"])
+             prov=json.dumps(prov), ckpt_sha=prov["ckpt_sha"], rotation=src["rotation"], train_prior=src["train_prior"])
     print(f"[ald estimate] {a.tag} {a.set} -> {out} (NMSE stored, not printed)")
 
 
@@ -254,6 +279,13 @@ def main():
     ap.add_argument("--prior", default="S2"); ap.add_argument("--cell", default="C2")
     ap.add_argument("--fits-tag"); ap.add_argument("--set", choices=("dev", "test"), default="dev")
     ap.add_argument("--n-dev", type=int, default=512); ap.add_argument("--ckpt")
+    ap.add_argument("--rotation", type=float, default=None,
+                    help="regen: receive-array rotation in DEGREES of the TEST channels (NEXT_EXPERIMENTS_ROTMIX16e4; the "
+                         "same meaning as runner.py --rotation; 0 = the rotation code path with no rotation).  Stored in the npz.")
+    ap.add_argument("--train-prior", default=None,
+                    help="ROTMIX16e4: the checkpoint / fits are trained on this prior while the channels are --prior "
+                         "(runner.py --train-prior).  regen: the --fits-tag full32 must resolve to fit_<train_prior>_; "
+                         "tune/estimate: the checkpoint's prior must equal it.")
     a = ap.parse_args()
     {"regen": cmd_regen, "tune": cmd_tune, "estimate": cmd_estimate}[a.cmd](a)
 

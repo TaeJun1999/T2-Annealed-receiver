@@ -93,7 +93,8 @@ PID = {"U": 0, "S": 1, "P": 2, "U2": 3, "S2": 4,      # prior id inside the seed
        "SV8e": 6,                                     # SV = clustered Saleh-Valenzuela (sv.py), run as a D2 prior: NEW streams
        "MIX3": 7,                                     # 3GPP TR 38.901 MIX3 (mix3.py), run as a D2 prior: NEW streams
        "UMi28": 8,                                    # 3GPP TR 38.901 UMi 28 GHz only (mix3.py), run as a D2 prior: NEW streams
-       "S2v": 9}                                      # C: S2 + receive-side visibility windows (d2.D2VisGen): NEW streams
+       "S2v": 9,                                      # C: S2 + receive-side visibility windows (d2.D2VisGen): NEW streams
+       "S2d": 10}                                     # B': S2 + per-block receive rotation U[0, 30 deg] (d2.DRIFT): NEW streams
 SV_PRIORS = ("SV8e",)                                  # priors served by sv.SVGen / sv.ensemble_sides_sv (== sv.PRIORS)
 MIX3_PRIORS = ("MIX3", "UMi28")                              # priors served by mix3.MIX3Gen / mix3.ensemble_sides_mix3 (== mix3.PRIORS)
 TBID = {"D1": 1, "D2": 2}
