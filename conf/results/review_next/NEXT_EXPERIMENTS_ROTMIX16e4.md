@@ -71,7 +71,7 @@
 |---|---|
 | 학습·격자·b\* (worktree `~/t2_wtB`, `logs/s2d.log`) | 완료 09-27 22:11 CDT; kron 2048·4096 병합·b\* 22:13 CDT |
 | ALD δ 별 개발 조정 (GPU 3/4/5, `logs/ald_tune_RMX<δ>ALD.log`) | 완료 23:23~23:25 CDT (§5) |
-| GB′ (`run_d2_sx.py --prior S2d --ntrain 160000 --tag S2dB16e4 --fallback 1`, GPU 1, tmux `s2dgb`) | 실행 중 → §5 (설계 동결 뒤 커밋) |
+| GB′ (`run_d2_sx.py --prior S2d --ntrain 160000 --tag S2dB16e4 --fallback 1`, GPU 1, tmux `s2dgb`) | 완료 09-28 00:21 CDT (§5; 이 §5 커밋) |
 | **설계 동결 커밋(c-rotmix)** = 이 문서 v2 + S2V v2 + 검토 2 건 + `ald.py --rotation` + DECISIONS 줄 | 이 커밋 |
 | 선행 코드(브랜치, 병합 전; 별도 커밋): `ald.py --train-prior` 가드·rotation prov 전파, runner `--ald-file` rotation 대조 + `meta\|train_prior`, `run_rotmix16e4.sh` (15 태그, 링크 생성·검사, 수용 (a)~(g)), `pair_baselines.py` (S2V 와 공용; X 별 표 B·R_X·X\*), `pair_rotmix.py` (DT·DD: 기준 raw ↔ RMX raw, 무결성 목록 §1 (c)~(g)), 스모크(`runner.py smoke … --train-prior S2d --rotation 15 --pilot-arms --tag RMXsmoke`, n = 2; 가드 4 경우: 플래그 없음 거부 / S2 가중치 + `--train-prior S2d` 거부 / 링크 없는 태그 거부 / 등록형 통과; raw 삭제) | 대기 |
 | ROT 종료 → c-rotmix 병합 → 병합 diff → 산출물 이동(ckpt 2·fits 24·σ 격자·GB′·`results/ald/*RMX*`·로그; sha 재확인) → `git worktree remove ~/t2_wtB` | 대기 |
@@ -87,8 +87,8 @@
 | 체크포인트 | last **98bc88f7333f19ee** ep 1368 (patience, aborted False, fallback 1 = 클리핑 없음), best **ceec0222e0912a1c** ep 1348 = last.best_epoch ✓, best val 3.482288e-01; 둘 다 `prior='S2d'`, `sigma_tag='S2d'` (`logs/train_d2sx_S2d_N160000_a1.log`; 학습은 재부팅으로 끊겨 21:48 CDT 원자적 체크포인트에서 재개, 22:11 종료) |
 | σ 격자 | `sigma_grid_D2_S2d.txt` 2026-09-28 03:45:06 KST, git 2640bb87, C1·C2; 학습 로그 σ 범위 [3.2509e-02, 8.4930e-01] = 격자 1–99 백분위 |
 | **ALD δ 별 조정 (`results/ald/tune_RMX<δ>ALD.json`, 09-27 23:0x~23:25 CDT, git dca8d19c, ald.py sha 5cc14d94b32e5c9a, ckpt ceec0222e0912a1c, float32 deterministic TF32 off, seed 20260927, 개발 2560..3071)** | 세 δ 모두 c = **0.01**, β = **0.005** (β 축 두 번 확장 1e-4, 1e-5; 개발 최적 β = 1e-5 가 β = 0.005 보다 0.1 dB 이내 → 저자 기본값 유지; 격자 끝 없음). 멈춤 단계 (−3..+15): 0° 288 295 353 447 546 600 600 / 15° 289 308 359 445 546 600 600 / 30° 300 314 369 460 560 600 600. 개발 NMSE dB: 0° −6.4 −8.9 −11.7 −14.7 −18.0 −21.6 −24.4 / 15° −6.3 −9.1 −11.7 −14.7 −18.1 −21.6 −24.3 / 30° −6.5 −9.1 −11.9 −14.9 −18.2 −21.5 −24.4. v (−3..+15): 0° 0.2231 0.1222 0.0661 0.0328 0.0157 0.0067 0.0035 / 15° 0.2237 0.1177 0.0651 0.0334 0.0152 0.0067 0.0036 / 30° 0.2151 0.1169 0.0627 0.0320 0.0147 0.0067 0.0035. 캐비엇: +12/+15 dB 멈춤 600(스케줄 끝; ALD16e4 §0 과 같음) |
-| GB′ (격자 확정 뒤; last 파일 기준) | [설계 동결 뒤 채움] |
+| GB′ (격자 확정 뒤 22:13 CDT 실행 → 00:21 CDT; last 파일 기준, run_d2_sx 관례; GPU 1) | `logs/s2d_post.log`: `GMM b* = kron (kron K=4096) @N=160000` (= §5 b*), held-out 디노이징 NMSE 비 확산/GMM **min 0.4533 · max 0.8877 · median 0.5186**, worst excess −0.112, equal_budget=True; `results/d2_gbprime_S2d_N160000_a1.npz`, `d2_gbprime_S2d.csv`. 참고(같은 척도): D3 0.559, S2v C6 0.570, D2 C2 1.6e5 헤드라인 비동일예산 0.46 |
 | ROT pair 파일 수 (설계 동결 시각) | 3 (`pair_ROTaB16e4k`, `pair_ROTbB16e4k`, `pair_ROTaNR16`; 내용 미열람) |
-| 설계 동결 커밋 / 선행 코드 커밋 / 병합 커밋 / 병합 diff / 링크 mtime | [이 커밋 해시] / [뒤] / [ROT 뒤] / [ROT 뒤] / [뒤] |
+| 설계 동결 커밋 / §5 GB′ 커밋 / 선행 코드 커밋 / 병합 커밋 / 병합 diff / 링크 mtime | **389e23f4** / [이 커밋] / [뒤] / [ROT 뒤] / [ROT 뒤] / [뒤] |
 
 ## 6. 결과 (이 절은 추가만 한다)

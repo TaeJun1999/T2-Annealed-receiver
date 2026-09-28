@@ -89,7 +89,7 @@
 | GB′ (격자 확정 뒤 실행본; last 파일 기준, run_d2_sx/train_nr16 관례) | `logs/s2v_gb.log` 22:16~22:46 CDT: `GMM b* = kron (kron K=4096) @N=160000`, GPU GMM 대 CPU 루프 상대차 8.31e-15, 비 min 0.5186 · max 0.6912 · median 0.5699, worst excess −0.309, equal_budget=True; `results/d2_gbprime_S2vNR16_N160000_a1.npz` |
 | ALD 개발 조정 (`results/ald/tune_S2vALD.json`, 09-27 22:5x~23:24 CDT, GPU 2, git 9c0ca1f4, ald.py sha 865261522ca7eade, ckpt fef34e13133004fc, float32 deterministic TF32 off, seed 20260927, 개발 2560..3071) | c = **0.03**, β = **0.005** (β 축 두 번 확장 1e-4, 1e-5; 개발 최적 c=0.03, β=1e-5 −14.294 dB 가 β=0.005 의 −14.276 dB 보다 0.1 dB 이내 → 저자 기본값 유지; 격자 끝 없음). σ 범위 [0.03266, 0.49941]. 멈춤 단계 (−3..+15): 125 127 194 289 378 501 580. 개발 NMSE dB: −5.9 −8.5 −11.2 −14.3 −17.1 −20.2 −22.8. v: 0.2448 0.1282 0.0702 0.0349 0.0179 0.0090 0.0049. 캐비엇: 멈춤 600 인 SNR 없음(S2 C6 은 +12/+15 에서 600) |
 | ROT pair 파일 수 (동결 커밋 시각) | 3 (`pair_ROTaB16e4k`, `pair_ROTbB16e4k`, `pair_ROTaNR16`; 내용 미열람) |
-| 동결 커밋 / 병합 커밋 / 병합 diff | [채움] / [ROT 뒤] / [ROT 뒤] |
+| 동결 커밋 / 병합 커밋 / 병합 diff | **389e23f4** (설계 동결; 이 행은 뒤 커밋에서 채움) / [ROT 뒤] / [ROT 뒤] |
 | 선행 코드 커밋, 링크 생성 시각 | [병합 뒤] |
 
 ## 6. 결과 (이 절은 추가만 한다)
