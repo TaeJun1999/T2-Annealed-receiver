@@ -68,12 +68,17 @@ def main():
     for k in ("--base", "--pil", "--ald", "--est", "--cell", "--prior"):
         ap.add_argument(k, required=True)
     ap.add_argument("--ref", default=None, help="an external raw of the same trials whose R5-genie must match (ROTMIX)")
+    ap.add_argument("--extra", action="append", default=[], help="SUPP16e4: further raws of the SAME trials holding more loop "
+                    "arms (merged into the base after the genie / meta / commit checks; an arm may not appear twice)")
     ap.add_argument("--legacy", action="store_true", help="VALIDATION ONLY on raws older than run|git (DOP/ROT code): skip "
                     "the one-clean-commit check.  Never used for a registered tag.")
     a = ap.parse_args()
     roots = {k: os.path.join(C.CONF, getattr(a, k)) for k in ("base", "pil", "ald")}
     if a.ref:
         roots["ref"] = os.path.join(C.CONF, a.ref)
+    for i, e in enumerate(a.extra):
+        roots[f"extra{i}"] = os.path.join(C.CONF, e)
+    EXTRA = [f"extra{i}" for i in range(len(a.extra))]
     raws = {k: load_raw("D2", root=r) for k, r in roots.items()}
     b, p, m = raws["base"][0], raws["pil"][0], raws["ald"][0]
     sel = lambda d: sorted((k for k in d if k[:2] == (a.cell, a.prior)), key=lambda k: k[2])
@@ -81,14 +86,16 @@ def main():
     grid = [float(s) for s in C.CELLS[a.cell]["snrs"]]
     bad = [f"{n}: point set {[k[2] for k in sel(raws[n][0])]} != grid {grid}" for n in raws if [k[2] for k in sel(raws[n][0])] != grid]
     bad += [f"{n}: load_raw warning: {w.strip()}" for n in raws for w in raws[n][2]]
-    for n in ("base", "pil", "ald"):
+    for n in ["base", "pil", "ald"] + EXTRA:
         g = chunk_meta(roots[n], a.cell, "run|git")
         if not a.legacy and (len(g) != 1 or any(x.endswith("+dirty") or x == "(none)" for x in g)):
             bad.append(f"{n}: code version across chunks {sorted(g)} (one clean commit expected)")
-    rot = {n: chunk_meta(roots[n], a.cell, "meta|rotation") for n in ("base", "pil", "ald")}
-    if len(rot["base"]) != 1 or rot["pil"] != rot["base"] or rot["ald"] != rot["base"]:
-        bad.append(f"meta|rotation differs across raws: {rot}")
-    deg = next(iter(rot["base"]))
+    for mk in ("meta|rotation", "meta|doppler"):
+        mv = {n: chunk_meta(roots[n], a.cell, mk) for n in ["base", "pil", "ald"] + EXTRA}
+        if len(mv["base"]) != 1 or any(mv[n] != mv["base"] for n in mv):
+            bad.append(f"{mk} differs across raws: {mv}")
+    deg = next(iter(chunk_meta(roots["base"], a.cell, "meta|rotation")))
+    dop = next(iter(chunk_meta(roots["base"], a.cell, "meta|doppler")))
     est = np.load(os.path.join(C.CONF, "results", "ald", f"ald_{a.est}.npz"), allow_pickle=True)
     pil = np.load(os.path.join(C.CONF, "results", "ald", f"pilots_{a.est}_test.npz"), allow_pickle=True)
     bm = raws["base"][1].get((a.cell, a.prior), {})
@@ -100,12 +107,16 @@ def main():
     brot = float(deg.split(":")[0].replace("deg=", "")) if deg.startswith("deg=") else -1.0
     if erot != brot:
         bad.append(f"ALD pilots rotation {erot} != base rotation {brot}")
+    edop = float(pil["doppler"]) if "doppler" in pil.files else -1.0
+    bdop = float(dop.split(" ")[0].replace("nu=", "")) if dop.startswith("nu=") else -1.0
+    if edop != bdop:
+        bad.append(f"ALD pilots doppler {edop} != base doppler {bdop}")
     for k in keys if not bad else []:
         for q in KEYS4:
-            for n in [x for x in ("pil", "ald", "ref") if x in raws]:
+            for n in [x for x in ["pil", "ald", "ref"] + EXTRA if x in raws]:
                 if not same(b[k][GENIE][q], raws[n][0][k][GENIE][q]):
                     bad.append(f"{k[2]:+.0f} dB R5-genie|{q} differs ({n} vs base)")
-        if not all(len(d[k][GENIE]["blk_err"]) == 2560 for d in (b, p, m)):
+        if not all(len(d[k][GENIE]["blk_err"]) == 2560 for d in [b, p, m] + [raws[n][0] for n in EXTRA]):
             bad.append(f"{k[2]:+.0f} dB: trial count != 2560")
         for arm, d in [(x, p) for x in PIL] + [(x, m) for x in ALD]:
             if failed(d[k], arm).any():
@@ -121,11 +132,20 @@ def main():
             nm = np.asarray(m[k][arm]["nmse"])
             if not same(nm, np.repeat(nm[:, :1], nm.shape[1], axis=1)) or not np.allclose(nm[:, 0], ref, rtol=1e-9, atol=0):
                 bad.append(f"{k[2]:+.0f} dB {arm}: channel estimate not the precomputed ALD estimate")
-    print(f"# pair_baselines {a.base} + {a.pil} + {a.ald}" + (f" (genie ref {a.ref})" if a.ref else "")
-          + f", cell {a.cell}, prior {a.prior}, rotation {deg}, git {sorted(chunk_meta(roots['base'], a.cell, 'run|git'))}; "
+    print(f"# pair_baselines {a.base} + {a.pil} + {a.ald}" + "".join(f" + {e}" for e in a.extra) + (f" (genie ref {a.ref})" if a.ref else "")
+          + f", cell {a.cell}, prior {a.prior}, rotation {deg[:12]}, doppler {dop[:12]}, git {sorted(chunk_meta(roots['base'], a.cell, 'run|git'))}; "
           f"integrity: " + ("OK" if not bad else "FAILED: " + "; ".join(bad[:10])))
     if bad:
         sys.exit(1)                                     # an invalid tag gets no label (registrations §1)
+    for n in EXTRA:                                   # SUPP16e4: more loop arms of the same trials; never overwrite an arm
+        dup = sorted((set(raws[n][0][keys[0]]) & set(b[keys[0]])) - {GENIE})
+        if dup:
+            print(f"# extra raw {n} repeats arms {dup} -- refusing"); sys.exit(1)
+        for k in keys:
+            b[k] = {**b[k], **{x: v for x, v in raws[n][0][k].items() if x != GENIE}}
+    miss = [x for x in (BSTAR, V1) + BASELINES if x not in b[keys[0]] and x not in PIL + ALD]
+    if miss:
+        print(f"# arms missing after the merge: {miss} -- refusing"); sys.exit(1)
     data = {k: {**b[k], **{x: p[k][x] for x in PIL}, **{x: m[k][x] for x in ALD}} for k in keys}
     snrs = [k[2] for k in keys]
     k3 = (a.cell, a.prior, -3.0)

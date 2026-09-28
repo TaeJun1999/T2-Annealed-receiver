@@ -494,6 +494,9 @@ def run_task(task):
         er = float(np.load(ald_file)["rotation"]) if "rotation" in np.load(ald_file).files else -1.0
         if er != (-1.0 if rotation is None else float(rotation)):
             raise RuntimeError(f"--ald-file {ald_file} was estimated at rotation {er}, this run uses --rotation {rotation}")
+        ed = float(np.load(ald_file)["doppler"]) if "doppler" in np.load(ald_file).files else -1.0   # SUPP16e4
+        if ed != (-1.0 if doppler is None else float(doppler)):
+            raise RuntimeError(f"--ald-file {ald_file} was estimated at doppler {ed}, this run uses --doppler {doppler}")
     if train_prior:                                     # NEXT_EXPERIMENTS_ROTMIX16e4 §1 수용: the raw names its train prior
         P["meta"]["train_prior"] = f"{train_prior}: checkpoint and GMM fits trained on prior {train_prior}, test channels {prior}"
     if doppler is not None:

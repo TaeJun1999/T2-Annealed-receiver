@@ -45,7 +45,7 @@ OUT = os.path.join(C.CONF, "results", "ald")
 
 def _regen_one(args):
     """One SNR: the runner's trial loop (runner.run_task) up to the pilot site; nothing else consumes the stream."""
-    testbed, prior, cell, snr, skip, n, fits_tag, rotation, train_prior = args
+    testbed, prior, cell, snr, skip, n, fits_tag, rotation, train_prior, doppler = args
     import arms as A
     A.D2_FITS = os.path.join(C.CONF, "results", f"gmm_fits_D2_{fits_tag}")
     c = C.CELLS[cell]
@@ -63,11 +63,15 @@ def _regen_one(args):
     Xbar = np.hstack([Xp, np.zeros((Nt, Td))]); Tau = np.hstack([np.zeros((Nt, Tp)), np.ones((Nt, Td))])
     rng = C.trial_rng(testbed, prior, Nr, T, Tp, snr)
     bs, Hs, G = [], [], None
+    if doppler is not None:                         # SUPP16e4: runner.run_task's Doppler path (same stream, same H_0)
+        from runner import doppler_rx
     for tr in range(skip + n):
-        H = gen.sample(rng)
+        H, Pp = gen.sample_paths(rng) if doppler is not None else (gen.sample(rng), None)
         u = rng.integers(0, 2, code.K)
         perm = rng.permutation(code.Ns)
         X, Y = first.transmit(u, perm, H, rng)
+        if doppler is not None:                     # the pilots see H_t (t = 0..Tp-1); H stored = H_0 (the genie's H)
+            Y = doppler_rx(H, Pp, X, Y, doppler, C.PID[prior], snr, tr)
         if tr < skip:
             continue
         _, Asite, Bsite = first._sites(Y, Xbar, Tau, first.prior.eh2_prior.copy())
@@ -86,7 +90,7 @@ def cmd_regen(a):
         if not os.path.basename(fp).startswith(f"fit_{want}_"):
             raise SystemExit(f"--fits-tag {a.fits_tag}: full K=32 resolves to {fp}, not a {want} fit (--train-prior {a.train_prior})")
     skip, n = (C.DEV_SKIP0, a.n_dev) if a.set == "dev" else (0, 2560)
-    jobs = [(a.testbed, a.prior, a.cell, s, skip, n, a.fits_tag, a.rotation, a.train_prior) for s in snrs]
+    jobs = [(a.testbed, a.prior, a.cell, s, skip, n, a.fits_tag, a.rotation, a.train_prior, a.doppler) for s in snrs]
     t0 = time.time()
     with mp.Pool(len(jobs)) as pool:
         res = pool.map(_regen_one, jobs)
@@ -96,8 +100,9 @@ def cmd_regen(a):
     np.savez(out, snrs=np.array(snrs), skip=skip, n=n, b=np.stack([r[1] for r in res]), H=np.stack([r[2] for r in res]),
              G=np.stack([r[3] for r in res]), sigma2=np.array([r[4] for r in res]), testbed=a.testbed, prior=a.prior,
              cell=a.cell, fits_tag=a.fits_tag, rotation=-1.0 if a.rotation is None else float(a.rotation),
+             doppler=-1.0 if a.doppler is None else float(a.doppler),
              train_prior=a.train_prior or a.prior)
-    print(f"[ald regen] {a.tag} {a.set}: {len(snrs)} SNR x {n} trials (skip {skip}) rotation={a.rotation} -> {out}  "
+    print(f"[ald regen] {a.tag} {a.set}: {len(snrs)} SNR x {n} trials (skip {skip}) rotation={a.rotation} doppler={a.doppler} -> {out}  "
           f"{time.time() - t0:.0f} s")
 
 
@@ -165,7 +170,8 @@ def _guard(z, st, a):
     tp = a.train_prior or (str(z["train_prior"]) if "train_prior" in z.files else str(z["prior"]))
     if st.get("prior") != tp:
         raise SystemExit(f"checkpoint prior {st.get('prior')!r} != train prior {tp!r} of the pilots file (--train-prior {a.train_prior})")
-    return dict(rotation=float(z["rotation"]) if "rotation" in z.files else -1.0, train_prior=tp)
+    return dict(rotation=float(z["rotation"]) if "rotation" in z.files else -1.0, train_prior=tp,
+                doppler=float(z["doppler"]) if "doppler" in z.files else -1.0)
 
 
 def cmd_tune(a):
@@ -268,7 +274,8 @@ def cmd_estimate(a):
     v = np.array([rec["v"][str(float(s))] for s in z["snrs"]])
     out = os.path.join(OUT, f"ald_{a.tag}" + ("" if a.set == "test" else f"_{a.set}") + ".npz")
     np.savez(out, snrs=z["snrs"], skip=int(z["skip"]), b=z["b"], hhat=np.stack(hh), v=v, nmse=np.array(nm), tune=json.dumps(rec),
-             prov=json.dumps(prov), ckpt_sha=prov["ckpt_sha"], rotation=src["rotation"], train_prior=src["train_prior"])
+             prov=json.dumps(prov), ckpt_sha=prov["ckpt_sha"], rotation=src["rotation"], train_prior=src["train_prior"],
+             doppler=src["doppler"])
     print(f"[ald estimate] {a.tag} {a.set} -> {out} (NMSE stored, not printed)")
 
 
@@ -279,6 +286,9 @@ def main():
     ap.add_argument("--prior", default="S2"); ap.add_argument("--cell", default="C2")
     ap.add_argument("--fits-tag"); ap.add_argument("--set", choices=("dev", "test"), default="dev")
     ap.add_argument("--n-dev", type=int, default=512); ap.add_argument("--ckpt")
+    ap.add_argument("--doppler", type=float, default=None,
+                    help="regen: normalised Doppler nu per symbol of the TEST channels (NEXT_EXPERIMENTS_SUPP16e4; runner.py "
+                         "--doppler, runner.doppler_rx: the pilot site sees H_t; H stored = H_0).  Stored in the npz.")
     ap.add_argument("--rotation", type=float, default=None,
                     help="regen: receive-array rotation in DEGREES of the TEST channels (NEXT_EXPERIMENTS_ROTMIX16e4; the "
                          "same meaning as runner.py --rotation; 0 = the rotation code path with no rotation).  Stored in the npz.")
