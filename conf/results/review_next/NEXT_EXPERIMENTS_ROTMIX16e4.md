@@ -77,7 +77,7 @@
 | ROT 종료 → c-rotmix 병합 → 병합 diff → 산출물 이동(ckpt 2·fits 24·σ 격자·GB′·`results/ald/*RMX*`·로그; sha 재확인) → `git worktree remove ~/t2_wtB` | 대기 |
 | ALD 테스트 추정 3 개 (GPU) → `run_rotmix16e4.sh` → §6 (15 pair 파일 뒤) | 대기 |
 
-- 선행 코드 검증 (09-28 00:51 CDT, Opus 5.5; ): runner 스모크 5 경우 — (1) S2d 가중치·플래그 없음 거부, (2) S2 가중치 +  거부, (3) 링크 없는 태그 거부, (4) 등록형(, −3 dB 시행 0..39) 통과: · 기록, R5-genie 4 키가  청크 0 과 비트 동일,  = S2d kron 4096 (raw 삭제), (5) 회전 없는 ALD 추정 파일 +  거부.  가드(S2d 적합에  없으면 거부) 확인, 새 코드의 개발 파일럿이 조정 파일과 비트 동일.  는 기록된 C6 raw(NR16B16e4·PILNR16·ALDNR16)로 C6B16e4 §6.1 수치(213:18, 판정점 합 R 0.823 [0.771, 0.871])와 PILOT 의 V1-pilot (iv) 를 재현;  라벨부는 같은 raw 를 네 자리에 넣어(무결성 끈 임시 사본) 불일치 0·DD 0·정적 R 0.470 (헤드라인 기록값) 확인.
+- 선행 코드 검증 (09-28 00:51 CDT, Opus 5.5; `results/review_next/smoke_rotmix16e4.txt`): runner 스모크 5 경우 — (1) S2d 가중치·플래그 없음 거부, (2) S2 가중치 + `--train-prior S2d` 거부, (3) 링크 없는 태그 거부, (4) 등록형(`--train-prior S2d --rotation 15 --pilot-arms`, −3 dB 시행 0..39) 통과: `meta|train_prior`·`meta|rotation` 기록, R5-genie 4 키가 `raw_ROTaB16e4k` 청크 0 과 비트 동일, `ll_val|kron` = S2d kron 4096 (raw 삭제), (5) 회전 없는 ALD 추정 파일 + `--rotation 15` 거부. `ald.py regen` 가드(S2d 적합에 `--train-prior` 없으면 거부) 확인, 새 코드의 개발 파일럿이 조정 파일과 비트 동일. `pair_baselines.py` 는 기록된 C6 raw(NR16B16e4·PILNR16·ALDNR16)로 C6B16e4 §6.1 수치(213:18, 판정점 합 R 0.823 [0.771, 0.871])와 PILOT 의 V1-pilot (iv) 를 재현; `pair_rotmix.py` 라벨부는 같은 raw(`raw_B16e4k`)를 네 자리에 넣어(무결성 끈 임시 사본) 불일치 0·DD 0·정적 R 0.470 (헤드라인 기록값) 확인.
 
 ## 5. 평가 전 고정 기록
 
