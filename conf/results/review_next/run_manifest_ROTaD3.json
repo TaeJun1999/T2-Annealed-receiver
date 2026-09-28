@@ -1,0 +1,171 @@
+{
+ "manifest_version": 1,
+ "written": "2026-09-28 14:04:27 KST",
+ "git_commit": "a4cbd184",
+ "result_tag": "ROTaD3",
+ "testbed": "D2",
+ "raw_dir": "/home/HTJ/t2/conf/raw_ROTaD3",
+ "n_raw_files": 448,
+ "config_hash": "ab454aa6a5561c86",
+ "code_hashes": {
+  "Demo": {
+   "t2_route_a.py": "95a5408901ec125c",
+   "t2_trellis.py": "31cd0ee9c68e972b",
+   "t2_gmm.py": "d064e58c7510c769"
+  },
+  "conf_code": {
+   "runner.py": "88eb95996821f97c",
+   "arms.py": "4d85793abfc69248",
+   "score.py": "f5379bdf8a085fc9",
+   "common.py": "5575adcb69678e56",
+   "d2.py": "5c3dd6269f3d02b1",
+   "analysis.py": "fb71c1639725d447",
+   "rt_tap.py": "5d97dc7124150423",
+   "p3_rules.py": "a06e952b1eddf3ad"
+  }
+ },
+ "channel_model": {
+  "testbed": "D2",
+  "prior": "S2c",
+  "description": "D3 = D2 prior S2c: L ~ Unif{3..8} per block, continuous AoA/AoD (+-pi/3), alpha_l ~ CN(0, p_l) (complex Gaussian path gains), p_l ∝ exp(-l/2.0), H = sqrt(Nr Nt) sum_l alpha_l a_r a_t^H"
+ },
+ "cells": {
+  "C2": {
+   "Nr": 8,
+   "Nt": 4,
+   "T": 16,
+   "Tp": 4,
+   "snrs": [
+    -3,
+    0,
+    3,
+    6,
+    9,
+    12,
+    15
+   ]
+  }
+ },
+ "points": {
+  "D2_C2_S2c_Nr8_T16_Tp4_dft_snr-3": 2560,
+  "D2_C2_S2c_Nr8_T16_Tp4_dft_snr0": 2560,
+  "D2_C2_S2c_Nr8_T16_Tp4_dft_snr12": 2560,
+  "D2_C2_S2c_Nr8_T16_Tp4_dft_snr15": 2560,
+  "D2_C2_S2c_Nr8_T16_Tp4_dft_snr3": 2560,
+  "D2_C2_S2c_Nr8_T16_Tp4_dft_snr6": 2560,
+  "D2_C2_S2c_Nr8_T16_Tp4_dft_snr9": 2560
+ },
+ "trial_stream": {
+  "rule": "default_rng([20260926, TBID[testbed], PID[prior], Nr, T, Tp, int(snr)+100])",
+  "skip_min": 0,
+  "skip_max_end": 2560,
+  "split": "TEST set (trials from 0; paired across arms)"
+ },
+ "run_params": {
+  "beta": "0.7",
+  "dtype": "complex128/float64",
+  "git": "a4cbd184",
+  "iters": "16",
+  "n": "40",
+  "seed": "20260926",
+  "snr": [
+   "-3.0",
+   "0.0",
+   "12.0",
+   "15.0",
+   "3.0",
+   "6.0",
+   "9.0"
+  ],
+  "t_in": "5",
+  "n_chunks": 448
+ },
+ "receiver": {
+  "outer_iterations": 16,
+  "beta": 0.7,
+  "arm_overrides": "(none)",
+  "t_in_bigamp": 5,
+  "n_inner_routeA": 1,
+  "dtype": "complex128/float64",
+  "device": "CPU, one thread per worker",
+  "code": "conv (133,171)_8 nu=6 terminated, QPSK"
+ },
+ "gmm": {
+  "bstar": "kron",
+  "kron_K": "4096",
+  "ntrain": 160000.0,
+  "selection": "validation log-likelihood over the pre-registered K grid (BLER never consulted)",
+  "fits_dir": "/home/HTJ/t2/conf/results/gmm_fits_D2_ROTaD3",
+  "em_sec": "15862.749816656113"
+ },
+ "sample_counts": {
+  "train_channels": 160000,
+  "score_train": 144000,
+  "score_val": 16000,
+  "test_trials_per_point": [
+   2560
+  ]
+ },
+ "stagec_checkpoint": {
+  "path": "/home/HTJ/t2/conf/ckpt/d2sx_S2c_N160000_a1_best.pt",
+  "sha256_16": "7ebf4e6647d4413f",
+  "stored_epoch": 494,
+  "best_epoch": 494,
+  "best_val": 0.3534156382083893,
+  "role": "best",
+  "evaluated_weights": "best EMA @494",
+  "best_pt": null,
+  "hp": {
+   "arch": "dit",
+   "param": "vp",
+   "domain": "angle",
+   "lr": 0.002238046051591068,
+   "ema": 0.999,
+   "batch": 256,
+   "emb": 256,
+   "width": 64,
+   "depth": 6,
+   "heads": 8,
+   "patch": 1
+  },
+  "params": 479426,
+  "rung": "D2SXS2c160000",
+  "attempt": 1,
+  "Nr": 8,
+  "Nt": 4,
+  "split_hash": "5c098ecb6185bcc6",
+  "sigma_tag": "S2c",
+  "train_epochs": 494,
+  "stopped_by": null,
+  "train_wall_sec": 10501.27137684822,
+  "train_device": "cuda:0 NVIDIA RTX PRO 6000 Blackwell Server Edition",
+  "val_frac": 0.1,
+  "seeds": {
+   "split": 20260926,
+   "val": 20260927,
+   "train": 20260928,
+   "gate": 20260929
+  }
+ },
+ "stagec_status": "built from explicit ckpt /home/HTJ/t2/conf/ckpt/d2sx_S2c_N160000_a1_best.pt -- caller override, NOT verified against the gate record here (recorded PASS rows: none) | V1 (psd_project=True): built from explicit ckpt /home/HTJ/t2/conf/ckpt/d2sx_S2c_N160000_a1_best.pt -- caller override, NOT verified against the gate record here (recorded PASS rows: none)",
+ "stagec_gate": "NO GATE RECORD mentions d2sx_S2c_N160000_a1_best.pt -- UNVERIFIED here.  (GA-GD are measurable on D1 only, 10_SPEC §5: a D2 re-train is qualified by its D1 sibling's gate row, which this string cannot prove.)",
+ "stagec_ckpt_id": "sha256[:16]=7ebf4e6647d4413f epoch=494 best_epoch=494 role=best 8x4",
+ "arms": [
+  "M-ours-bstar",
+  "M-ours-dscore-C-V1",
+  "R2-ours-G",
+  "R5-genie"
+ ],
+ "versions": {
+  "python": "3.12.14",
+  "numpy": "2.5.2",
+  "torch": "2.14.0+cu130",
+  "host": "9000babdde68",
+  "cpu_count": 192
+ },
+ "output_paths": {
+  "tables": "/home/HTJ/t2/conf/results/tables_D2_ROTaD3.txt",
+  "guard": "/home/HTJ/t2/conf/results/guard_D2_ROTaD3.txt",
+  "log": "/home/HTJ/t2/conf/logs/run_D2_ROTaD3.log"
+ }
+}

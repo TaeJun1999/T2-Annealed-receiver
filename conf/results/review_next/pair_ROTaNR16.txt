@@ -1,0 +1,35 @@
+# pair_rot raw_ROTaNR16 x raw_NR16B16e4, deg=15.0, cell C6, prior S2, n=2560 per SNR, git a4cbd184; raised {'V1-rot': 0, 'bstar-rot': 0, 'R2-rot': 0, 'genie-rot': 0}; integrity (point sets, meta angle, one clean code version, fits/ckpt fingerprint, trial counts, rotation applied): OK
+DP: b* -> V1, both under the same receive-array rotation: bstar-rot -> V1-rot  [anchor bstar-rot]  decision SNRs ['-3', '+0', '+3']
+    sign test @16: -3 dB 165:12 p=1.5e-35  +0 dB 80:7 p=8.3e-17  +3 dB 37:1 p=2.8e-10   pooled 282:20 p=2.3e-60
+    POWERED=True  second arm fewer at 3/3, first arm fewer at 0/3  -> (i) second arm fewer
+    SNR@0.1 gap (bstar-rot minus V1-rot): n/a (<=  -3 vs <=  -3) — extend the SNR grid
+report: V1 rotated -> V1 static: V1-rot -> M-ours-dscore-C-V1  [anchor V1-rot]  decision SNRs ['-3', '+0']
+    sign test @16: -3 dB 36:29 p=0.46  +0 dB 12:10 p=0.83   pooled 48:39 p=0.39
+    POWERED=False  second arm fewer at 0/2, first arm fewer at 0/2  -> (iv) UNDECIDED
+    SNR@0.1 gap (V1-rot minus M-ours-dscore-C-V1): n/a (<=  -3 vs <=  -3) — extend the SNR grid
+report: b* rotated -> b* static: bstar-rot -> M-ours-bstar  [anchor bstar-rot]  decision SNRs ['-3', '+0', '+3']
+    sign test @16: -3 dB 113:84 p=0.046  +0 dB 60:26 p=0.00032  +3 dB 33:19 p=0.07   pooled 206:129 p=3.1e-05
+    POWERED=True  second arm fewer at 2/3, first arm fewer at 0/3  -> (i) second arm fewer
+    SNR@0.1 gap (bstar-rot minus M-ours-bstar): n/a (<=  -3 vs <=  -3) — extend the SNR grid
+report: static b* -> V1 rotated: M-ours-bstar -> V1-rot  [anchor M-ours-bstar]  decision SNRs ['-3', '+0', '+3']
+    sign test @16: -3 dB 144:20 p=2.4e-24  +0 dB 45:6 p=1.8e-08  +3 dB 27:5 p=0.00011   pooled 216:31 p=2.6e-35
+    POWERED=True  second arm fewer at 3/3, first arm fewer at 0/3  -> (i) second arm fewer
+    SNR@0.1 gap (M-ours-bstar minus V1-rot): n/a (<=  -3 vs <=  -3) — extend the SNR grid
+report: Gaussian R2 -> V1, both rotated: R2-rot -> V1-rot  [anchor R2-rot]  decision SNRs ['-3', '+0', '+3']
+    sign test @16: -3 dB 262:7 p=4e-68  +0 dB 123:5 p=1.6e-30  +3 dB 71:2 p=5.7e-19   pooled 456:14 p=1.6e-115
+    POWERED=True  second arm fewer at 3/3, first arm fewer at 0/3  -> (i) second arm fewer
+    SNR@0.1 gap (R2-rot minus V1-rot): >= +0.77 dB (V1-rot is already below 0.1 at the lowest grid SNR)
+report: genie (knows the rotated H) rotated -> static genie: genie-rot -> R5-genie  [anchor genie-rot]  decision SNRs ['-3']
+    sign test @16: -3 dB 16:14 p=0.86   pooled 16:14 p=0.86
+    POWERED=False  second arm fewer at 0/1, first arm fewer at 0/1  -> (iv) UNDECIDED
+    SNR@0.1 gap (genie-rot minus R5-genie): n/a (<=  -3 vs <=  -3) — extend the SNR grid
+report-only, gap retention = gap(bstar-rot - V1-rot) / gap(b* - V1, static) = n/a
+BLER@16 failures / n per SNR -3 +0 +3 +6 +9 +12 +15 dB:
+    R2-rot                315   140    79    48    25    22    14
+    bstar-rot             213    95    46    26    18    13     8
+    V1-rot                 60    22    10     6     2     2     1
+    genie-rot              24    11     2     6     3     2     1
+    R2-ours-G             295   107    66    35    22    10     8
+    M-ours-bstar          184    61    32    22    14    10     5
+    M-ours-dscore-C-V1     53    20     9     6     2     2     2
+    R5-genie               22    10     8     6     1     2     0
