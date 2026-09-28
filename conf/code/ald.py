@@ -45,7 +45,7 @@ OUT = os.path.join(C.CONF, "results", "ald")
 
 def _regen_one(args):
     """One SNR: the runner's trial loop (runner.run_task) up to the pilot site; nothing else consumes the stream."""
-    testbed, prior, cell, snr, skip, n, fits_tag = args
+    testbed, prior, cell, snr, skip, n, fits_tag, rotation = args
     import arms as A
     A.D2_FITS = os.path.join(C.CONF, "results", f"gmm_fits_D2_{fits_tag}")
     c = C.CELLS[cell]
@@ -54,6 +54,9 @@ def _regen_one(args):
     code = C.QAMCode(C.GENS, C.NU, C.M_QAM, Nt * (T - Tp))
     _, Xp = C.make_pilots(testbed, prior, Nt, Tp, Nr)
     gen = C.make_gen(testbed, prior, Nr, Nt)
+    if rotation is not None:                        # ROTMIX16e4: the same receive-array rotation as runner.py --rotation
+        assert hasattr(gen, "rot"), f"{prior}: generator has no .rot"
+        gen.rot = float(np.deg2rad(rotation))       # radians, added to every AoA of the block; the stream is unchanged
     arms, _, _, _ = A.build_baseline_arms(testbed, prior, Nr, Nt, T, Tp, sigma2, code, Xp, ntrain=160000)
     first = arms["R5-genie"]
     Td = T - Tp
@@ -77,7 +80,7 @@ def cmd_regen(a):
     import multiprocessing as mp
     snrs = [float(s) for s in C.CELLS[a.cell]["snrs"]]
     skip, n = (C.DEV_SKIP0, a.n_dev) if a.set == "dev" else (0, 2560)
-    jobs = [(a.testbed, a.prior, a.cell, s, skip, n, a.fits_tag) for s in snrs]
+    jobs = [(a.testbed, a.prior, a.cell, s, skip, n, a.fits_tag, a.rotation) for s in snrs]
     t0 = time.time()
     with mp.Pool(len(jobs)) as pool:
         res = pool.map(_regen_one, jobs)
@@ -86,8 +89,9 @@ def cmd_regen(a):
     out = os.path.join(OUT, f"pilots_{a.tag}_{a.set}.npz")
     np.savez(out, snrs=np.array(snrs), skip=skip, n=n, b=np.stack([r[1] for r in res]), H=np.stack([r[2] for r in res]),
              G=np.stack([r[3] for r in res]), sigma2=np.array([r[4] for r in res]), testbed=a.testbed, prior=a.prior,
-             cell=a.cell, fits_tag=a.fits_tag)
-    print(f"[ald regen] {a.tag} {a.set}: {len(snrs)} SNR x {n} trials (skip {skip}) -> {out}  {time.time() - t0:.0f} s")
+             cell=a.cell, fits_tag=a.fits_tag, rotation=-1.0 if a.rotation is None else float(a.rotation))
+    print(f"[ald regen] {a.tag} {a.set}: {len(snrs)} SNR x {n} trials (skip {skip}) rotation={a.rotation} -> {out}  "
+          f"{time.time() - t0:.0f} s")
 
 
 def ald_run(model, b, G, sigma2, smin, smax, c, beta, H=None, gen=None, keep=None):
@@ -254,6 +258,9 @@ def main():
     ap.add_argument("--prior", default="S2"); ap.add_argument("--cell", default="C2")
     ap.add_argument("--fits-tag"); ap.add_argument("--set", choices=("dev", "test"), default="dev")
     ap.add_argument("--n-dev", type=int, default=512); ap.add_argument("--ckpt")
+    ap.add_argument("--rotation", type=float, default=None,
+                    help="regen: receive-array rotation in DEGREES of the TEST channels (NEXT_EXPERIMENTS_ROTMIX16e4; the "
+                         "same meaning as runner.py --rotation; 0 = the rotation code path with no rotation).  Stored in the npz.")
     a = ap.parse_args()
     {"regen": cmd_regen, "tune": cmd_tune, "estimate": cmd_estimate}[a.cmd](a)
 
