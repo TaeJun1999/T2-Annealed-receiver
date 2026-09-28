@@ -31,6 +31,8 @@ CONDS () {   # prints: TAG FLAG VALUE NAME SUF CELL PR BF CK SHA ROLE BS KK LL  
     done
   done < <(echo "$DS")
 }
+# the b* -> V1 labels recorded by DOP16e4 / ROT16e4 §6.1 (SUPP16e4 §0); pair_baselines re-derives them as a drift check
+blab () { case $1 in DOPbB16e4k|DOPbNR16|DOPbU28) echo "(iii)";; DOPaSV|ROTaSV) echo "(iv)";; *) echo "(i)";; esac; }
 WANT=" $* "
 sel () { CONDS | while read T REST; do [ "$WANT" = "  " ] || echo "$WANT" | grep -q " $T " && echo "$T $REST"; done; }
 FREE=($(nvidia-smi --query-gpu=index,memory.used --format=csv,noheader,nounits | awk -F', ' '$2 < 100 {print $1}'))
@@ -50,6 +52,13 @@ if [ "$MODE" = tune ]; then
   exit 0
 fi
 [ "$MODE" = eval ] || { echo "usage: run_supp16e4.sh tune|eval [cond ...]"; exit 1; }
+# preconditions (review_SUPP16e4 반드시 5): a failed precondition is a RESOURCE / ORDER problem -> ABORT, resume WITHOUT approval
+DOC=results/review_next/NEXT_EXPERIMENTS_SUPP16e4.md
+[ -n "$(git -C /home/HTJ/t2 ls-files conf/$DOC)" ] && [ -z "$(git -C /home/HTJ/t2 status --porcelain conf/$DOC)" ] \
+  || { log "ABORT (precondition): the registration $DOC is not committed clean (freeze first)"; exit 1; }
+NT=$(sel | while read T REST; do [ -f results/ald/tune_XA$T.json ] && echo x; done | wc -l); NS=$(sel | wc -l)
+[ "$NT" -eq "$NS" ] || { log "ABORT (precondition): ALD tuning records $NT/$NS (run 'tune' first; resume without approval)"; exit 1; }
+[ ${#FREE[@]} -gt 0 ] || { log "ABORT (precondition): no free GPU for the ALD estimates (resume without approval)"; exit 1; }
 log "eval start (git $(git rev-parse --short HEAD))"
 # phase 0: fits links, ALD test pilots (CPU) and estimates (GPU, parallel over free GPUs)
 i=0
@@ -87,8 +96,8 @@ while read T FL V NAME SUF CELL PR BF CK SHA ROLE BS KK LL; do
   RC=$?; log "$T acceptance rc=$RC ($(head -1 $A | cut -c1-90))"
   [ $RC -ne 0 ] && { log "$T INVALID: acceptance failed, no pair_baselines"; FAIL=$((FAIL+1)); continue; }
   $P code/pair_baselines.py --base $R --extra raw_XL$T --pil raw_XP$T --ald raw_XA$T --est XA$T --cell $CELL --prior $PR \
-    > results/review_next/pairB_X$T.txt 2>&1
-  RC=$?; log "$T pair_baselines rc=$RC ($(grep -E '^SUMMARY|condition' results/review_next/pairB_X$T.txt | tr '\n' ' ' | cut -c1-40))"
+    --r0 at1 --expect-bstar "$(blab $T)" > results/review_next/pairB_X$T.txt 2>&1
+  RC=$?; log "$T pair_baselines rc=$RC ($(grep -E '^SUMMARY-B|condition' results/review_next/pairB_X$T.txt | tr '\n' ' ' | cut -c1-120))"
   [ $RC -eq 0 ] && OK=$((OK+1)) || { log "$T INVALID: integrity failed"; FAIL=$((FAIL+1)); }
 done < <(sel)
 log "SUPP_EVAL_DONE ok=$OK fail=$FAIL"

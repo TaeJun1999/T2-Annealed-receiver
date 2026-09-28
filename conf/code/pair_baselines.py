@@ -68,6 +68,11 @@ def main():
     for k in ("--base", "--pil", "--ald", "--est", "--cell", "--prior"):
         ap.add_argument(k, required=True)
     ap.add_argument("--ref", default=None, help="an external raw of the same trials whose R5-genie must match (ROTMIX)")
+    ap.add_argument("--r0", choices=("at16", "at1"), default="at16", help="R0-pilot reading: at16 = the 16-iteration trajectory "
+                    "(S2V16e4 / ROTMIX16e4 records); at1 = the 1-pass reading 08_SPEC §1 calls R0-pilot (SUPP16e4, load_raw alias "
+                    "'R0-pilot@1')")
+    ap.add_argument("--expect-bstar", default=None, help="SUPP16e4: the b* -> V1 label the original registration recorded "
+                    "('(i)', '(iii)', ...); a different recomputed label is code drift -> exit 1")
     ap.add_argument("--extra", action="append", default=[], help="SUPP16e4: further raws of the SAME trials holding more loop "
                     "arms (merged into the base after the genie / meta / commit checks; an arm may not appear twice)")
     ap.add_argument("--legacy", action="store_true", help="VALIDATION ONLY on raws older than run|git (DOP/ROT code): skip "
@@ -133,24 +138,32 @@ def main():
             if not same(nm, np.repeat(nm[:, :1], nm.shape[1], axis=1)) or not np.allclose(nm[:, 0], ref, rtol=1e-9, atol=0):
                 bad.append(f"{k[2]:+.0f} dB {arm}: channel estimate not the precomputed ALD estimate")
     print(f"# pair_baselines {a.base} + {a.pil} + {a.ald}" + "".join(f" + {e}" for e in a.extra) + (f" (genie ref {a.ref})" if a.ref else "")
-          + f", cell {a.cell}, prior {a.prior}, rotation {deg[:12]}, doppler {dop[:12]}, git {sorted(chunk_meta(roots['base'], a.cell, 'run|git'))}; "
+          + f", cell {a.cell}, prior {a.prior}, rotation {deg[:12]}, doppler {dop[:12]}, git "
+          + " ".join(f"{n}={','.join(sorted(chunk_meta(roots[n], a.cell, 'run|git')))}" for n in ["base"] + EXTRA + ["pil", "ald"]) + "; "
           f"integrity: " + ("OK" if not bad else "FAILED: " + "; ".join(bad[:10])))
     if bad:
         sys.exit(1)                                     # an invalid tag gets no label (registrations §1)
     for n in EXTRA:                                   # SUPP16e4: more loop arms of the same trials; never overwrite an arm
-        dup = sorted((set(raws[n][0][keys[0]]) & set(b[keys[0]])) - {GENIE})
+        dup = sorted((set(raws[n][0][keys[0]]) & set(b[keys[0]])) - {GENIE, "run", "meta"})
         if dup:
             print(f"# extra raw {n} repeats arms {dup} -- refusing"); sys.exit(1)
         for k in keys:
-            b[k] = {**b[k], **{x: v for x, v in raws[n][0][k].items() if x != GENIE}}
+            b[k] = {**b[k], **{x: v for x, v in raws[n][0][k].items() if x not in (GENIE, "run", "meta")}}
     miss = [x for x in (BSTAR, V1) + BASELINES if x not in b[keys[0]] and x not in PIL + ALD]
     if miss:
         print(f"# arms missing after the merge: {miss} -- refusing"); sys.exit(1)
     data = {k: {**b[k], **{x: p[k][x] for x in PIL}, **{x: m[k][x] for x in ALD}} for k in keys}
+    BL = tuple("R0-pilot@1" if (x == "R0-pilot" and a.r0 == "at1") else x for x in BASELINES)
+    if a.r0 == "at1":
+        print("# R0-pilot read at @1 (1-pass, 08_SPEC §1; load_raw alias 'R0-pilot@1'), SUPP16e4 §1")
     snrs = [k[2] for k in keys]
     k3 = (a.cell, a.prior, -3.0)
     rows, labs = [], {}
-    for x in (BSTAR,) + BASELINES:
+    fv3, fg3 = (fails(data[k3], arm) for arm in (V1, GENIE))
+    vg = fg3.sum() >= fv3.sum()                         # SUPP16e4 §1: the genie fails at least as often as V1 (DOP nu = 0.01)
+    if vg:
+        print(f"# genie -3 dB failures {int(fg3.sum())} >= V1 {int(fv3.sum())}: R_X undefined for every X at -3 dB (SUPP16e4 §1 guard)")
+    for x in (BSTAR,) + BL:
         cand, res, powered, wy, wx, lab = table_b(data, a.cell, a.prior, snrs, x, V1)
         labs[x] = lab
         A, Bn = sum(r[0] for r in res), sum(r[1] for r in res)
@@ -161,24 +174,34 @@ def main():
         print(f"    SNR@0.1 gap ({x} minus V1): {gain(data, a.cell, a.prior, snrs, x, V1)['text']}")
         fx, fv, fg = (fails(data[k3], arm) for arm in (x, V1, GENIE))
         bl = fx.mean()
-        if not (0.005 <= bl <= 0.9) or fx.sum() <= fg.sum():
+        if vg:
+            r1 = "undefined (the genie fails at least as often as V1 at -3 dB)"
+        elif not (0.005 <= bl <= 0.9) or fx.sum() <= fg.sum():
             r1 = "undefined (out of range: -3 dB BLER %.4f, F_X %d, F_genie %d)" % (bl, fx.sum(), fg.sum())
         else:
             R, lo, hi, nn = recovery([(fx, fv, fg)])
             r1 = (f"{R:.3f} [90% {lo:.3f}, {hi:.3f}]" + (f" ({nn} undefined replicates)" if nn else "")
                   + (" -> 정의 불가 (>5% undefined)" if nn > 0.05 * B_BOOT else ""))
-        if cand:
-            R2, lo2, hi2, nn2 = recovery([tuple(fails(data[(a.cell, a.prior, s)], arm) for arm in (x, V1, GENIE)) for s in cand])
+        cols2 = [tuple(fails(data[(a.cell, a.prior, s)], arm) for arm in (x, V1, GENIE)) for s in cand]
+        if cand and sum(c[2].sum() for c in cols2) >= sum(c[1].sum() for c in cols2):
+            r2 = "undefined (the genie fails at least as often as V1 over the decision points)"
+        elif cand:
+            R2, lo2, hi2, nn2 = recovery(cols2)
             r2 = f"{R2:.3f} [90% {lo2:.3f}, {hi2:.3f}] over {len(cand)} point(s)" + (f" ({nn2} undefined)" if nn2 else "")
         else:
             r2 = "undefined (no decision point)"
+        print(f"    absolute gap -3 dB: F_X - F_V1 = {int(fx.sum() - fv.sum())} blocks of {len(fx)}")
         print(f"    R_X -3 dB (primary): {r1}")
         print(f"    R_X decision points (secondary): {r2}")
         rows.append((x, int(fx.sum()), lab, r1))
     k = sum(1 for x in labs if labs[x] == "(i)"); mm = sum(1 for x in labs if labs[x] == "(ii)")
+    kB = k - (labs[BSTAR] == "(i)"); mB = mm - (labs[BSTAR] == "(ii)")
+    print(f"SUMMARY-B (baselines without b*, {len(BL)}): (i) {kB}, (ii) {mB}, not decided {len(BL) - kB - mB}; b* -> V1 {labs[BSTAR]}")
+    if a.expect_bstar and labs[BSTAR] != a.expect_bstar:
+        print(f"# b* -> V1 recomputed {labs[BSTAR]} != recorded {a.expect_bstar}: code drift -- no summary sentence"); sys.exit(1)
     xs = min(rows, key=lambda r: (r[1], r[0]))
     fx, fv, fg = (fails(data[k3], arm) for arm in (xs[0], V1, GENIE))
-    ok_range = 0.005 <= fx.mean() <= 0.9 and fx.sum() > fg.sum()
+    ok_range = 0.005 <= fx.mean() <= 0.9 and fx.sum() > fg.sum() and not vg
     R, lo, hi, nn = recovery([(fx, fv, fg)]) if ok_range else (np.nan, np.nan, np.nan, 0)
     print(f"\nSUMMARY registered baselines {len(labs)} (b* + 𝔅 {len(BASELINES)}): (i) {k}, (ii) {mm}, "
           f"not decided {len(labs) - k - mm}")
@@ -188,11 +211,11 @@ def main():
     cond = k == len(labs) and mm == 0 and ok_range and lo > 0
     print(f"'등록된 baseline 전부와 멀어진다' condition (k = {len(labs)}, (ii) = 0, R_X* CI lower > 0): {'MET' if cond else 'NOT met'}")
     print("BLER@16 failures / n per SNR " + " ".join(f"{s:+.0f}" for s in snrs) + " dB:")
-    for arm in (GENIE, V1, BSTAR) + BASELINES + ("M-ours-dscore-C-V0", "M-ours-dscore-C-V4", "M-ours-dscore-C-V4b"):
+    for arm in dict.fromkeys((GENIE, V1, BSTAR) + BL + ("R0-pilot", "M-ours-dscore-C-V0", "M-ours-dscore-C-V4", "M-ours-dscore-C-V4b")):
         if arm in data[keys[0]]:
             print(f"    {arm:<20}" + " ".join(f"{int(fails(data[k], arm).sum()):5d}" for k in keys))
     print("report-only, median NMSE@16 of the channel estimate per SNR:")
-    for arm in (V1, BSTAR) + BASELINES:
+    for arm in (V1, BSTAR) + BL:
         if arm in data[keys[0]] and "nmse" in data[keys[0]][arm]:
             print(f"    {arm:<20}" + " ".join(f"{np.nanmedian(np.asarray(data[k][arm]['nmse'])[:, -1]):.2e}" for k in keys))
 
