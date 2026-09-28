@@ -1,0 +1,642 @@
+# recompute.py -- record audit ALD/DOP/ROT/ROTMIX (Fable 5.1, 2026-09-29); raw/ckpt/fits/ald/csv/logs/git only; git HEAD 22370276
+
+## G. git / documents / logs
+  HEAD 22370276 | dirty conf/code Demo: ''
+  ALD16e4 vs freeze 7e64f5cc: hunks ['@@ -69,7 +69,7 @@', '@@ -79,3 +79,38 @@']; removed lines 1: ['-| 적대적 검토 1건(Fable) → v2 → 동결 → `run_ald16e4.sh` → §6 | v2 반영 완료(이 커밋 ']
+      vs HEAD: hunks []; removed []
+      section lines at freeze: ## 0. @12, ## 1. @30, ## 2. @44, ## 3. @56, ## 4. @65, ## 5. @74, ## 6. @81
+  DOP16e4 vs freeze 063f3bcb: hunks ['@@ -65,3 +65,50 @@']; removed lines 0: []
+      vs HEAD: hunks []; removed []
+      section lines at freeze: ## 0. @10, ## 1. @18, ## 2. @32, ## 3. @45, ## 4. @53, ## 5. @60, ## 6. @67
+  ROT16e4 vs freeze 9c0ca1f4: hunks ['@@ -63,6 +63,53 @@']; removed lines 1: ['-| 병합 | main 병합 커밋과 `git diff <동결> <병합> -- conf/code Demo` 결과: [병합 뒤 채']
+      vs HEAD: hunks ['@@ -66,3 +66,50 @@']; removed []
+      section lines at freeze: ## 0. @10, ## 1. @16, ## 2. @30, ## 3. @44, ## 4. @53, ## 5. @61, ## 6. @68
+  ROTMIX16e4 vs freeze 389e23f4: hunks ['@@ -71,12 +71,14 @@', '@@ -87,8 +89,66 @@']; removed lines 4: ['-| GB′ (`run_d2_sx.py --prior S2d --ntrain 160000 --tag S2dB16e4 --fal', '-| 선행 코드(브랜치, 병합 전; 별도 커밋): `ald.py --train-prior` 가드·rotation prov 전파', '-| GB′ (격자 확정 뒤; last 파일 기준) | [설계 동결 뒤 채움] |', '-| 설계 동결 커밋 / 선행 코드 커밋 / 병합 커밋 / 병합 diff / 링크 mtime | [이 커밋 해시] / [뒤] ']
+      vs HEAD: hunks ['@@ -91,6 +91,64 @@']; removed ['-| 설계 동결 커밋 / §5 GB′ 커밋 / 선행 코드 커밋 / 병합 커밋 / 병합 diff / 링크 mtime | **38']
+      section lines at freeze: ## 0. @10, ## 1. @18, ## 2. @39, ## 3. @57, ## 4. @68, ## 5. @80, ## 6. @94
+  diff 389e23f4..22370276 --stat -- conf/code Demo:
+    conf/code/ald.py              |  39 +++++++--
+     conf/code/pair_baselines.py   | 181 ++++++++++++++++++++++++++++++++++++++++++
+     conf/code/pair_rotmix.py      | 160 +++++++++++++++++++++++++++++++++++++
+     conf/code/run_rotmix16e4.sh   |  83 +++++++++++++++++++
+     conf/code/run_s2v16e4_eval.sh |  76 ++++++++++++++++++
+     conf/code/runner.py           |  11 ++-
+     conf/code/testbed_s2v.py      |  51 ++++++++++++
+     7 files changed, 592 insertions(+), 9 deletions(-)
+  diff 9c0ca1f4..602f8971 -- conf/code Demo: ''
+  diff 9c0ca1f4..a4cbd184 -- conf/code Demo: ''
+  diff 22370276..HEAD -- conf/code Demo: ''
+  22370276 parents: dac312b0 bcc80d3b | a4cbd184 parent: 602f8971 | merge-base main/c-rotmix: 9c0ca1f4
+  7e64f5cc: 2026-09-28 00:43:48 KST conf: 사전 등록 동결 — NEXT_EXPERIMENTS_ALD16e4 v2 (Arvinte–Tamir annealed-Langevin 파일럿 추정 ×
+  1be29323: 2026-09-28 00:55:51 KST conf: ALD 결과 (ALD16e4, 6 데이터셋) — 주 D2 C2: 루프 V1 < ALD 파일럿 추정 실패 (A1 +1.54 dB, A2 +1.82
+  063f3bcb: 2026-09-28 01:26:51 KST conf: 사전 등록 동결 — NEXT_EXPERIMENTS_DOP16e4 v2 (블록 안 경로별 Clarke 도플러 ν 0.005/0.01 × 6 데이터
+  cf9eb419: 2026-09-28 08:34:59 KST conf: DOP 결과 (DOP16e4, 6 데이터셋 × ν 0.005/0.01) — 주 D2 C2: ν=0.005 (i) +1.49 dB, ν=0.01 
+  9c0ca1f4: 2026-09-28 02:19:17 KST conf (branch c-s2v): 사전 등록 동결 — NEXT_EXPERIMENTS_ROT16e4 v2 (수신 배열 회전 15°/30° × 6 데이터셋
+  602f8971: 2026-09-28 08:35:16 KST Merge branch 'c-s2v'
+  a4cbd184: 2026-09-28 08:35:30 KST conf: ROT16e4 §5 병합 칸 — 병합 602f8971, git diff 9c0ca1f4..602f8971 -- conf/code Demo 비어 
+  389e23f4: 2026-09-28 13:30:37 KST conf (branch c-rotmix): 사전 등록 v2 설계 동결 — S2V16e4 (C, 공간 비정상 16×4; baseline 13 개·X* 규칙)
+  e2ed3445: 2026-09-28 14:23:52 KST conf (branch c-rotmix): ROTMIX16e4 §5 GB′ 기록 (S2d b* kron 4096, 비 median 0.5186, 00:21
+  b233c3a2: 2026-09-28 14:51:22 KST conf (branch c-rotmix): ROTMIX16e4·S2V16e4 선행 코드 — ald.py --train-prior 가드·rotation/tr
+  dac312b0: 2026-09-28 16:08:49 KST conf: ROT16e4 실행 산출물 (pair 12·accept·manifest; ROT_EVAL_DONE) + 인수인계 b/c·재부팅 복구·복사·체인 
+  22370276: 2026-09-28 16:08:51 KST Merge branch 'c-rotmix'
+  DECISIONS.md in merge 22370276: lines added vs main parent dac312b0: ['+`[2026-09-28 13:30 KST] 사전 등록 v2 설계 동결 — S2V16e4 (C: 공간 비정상', '+`[2026-09-28 13:30 KST] 사전 등록 v2 설계 동결 — ROTMIX16e4 (B′: 표류']
+    lines added vs branch parent bcc80d3b: ['+`[2026-09-28 08:34 KST] DOP16e4 결과 기록 (Opus 5.5; 텍사스 09-27 ', '+`[2026-09-28 11:38 KST] S2v GMM 격자 kron K=512 계산 경로 교체 (Opu']
+  after_rot_chain.log merge lines:
+    [chain 09-28 02:08 CDT] ROT done: 12/12 pair files with integrity OK
+    [chain 09-28 02:08 CDT] main commit dac312b0
+    CONFLICT (content): Merge conflict in conf/DECISIONS.md
+    Automatic merge failed; fix conflicts and then commit the result.
+    [chain 09-28 02:08 CDT] DECISIONS.md conflict resolved by union (both sides' lines kept)
+    [chain 09-28 02:08 CDT] merge commit 22370276; diff 389e23f4..HEAD -- conf/code Demo:  7 files changed, 592 insertions(+), 9 deletions(-)
+    [chain 09-28 02:08 CDT] B' start: code/run_rotmix16e4.sh
+    [chain 09-28 04:34 CDT] B' exit 0 ([rotmix 09-28 04:34 CDT] ROTMIX_EVAL_DONE ok=3 fail=0)
+  logs/run_ald16e4.log:
+    [ald16e4 09-27 10:43 CDT] start (git 7e64f5cc) datasets: all
+    [ald estimate] PILD3 test -> /home/HTJ/t2/conf/results/ald/ald_PILD3.npz (NMSE stored, not printed)
+    [ald estimate] PILB16e4k test -> /home/HTJ/t2/conf/results/ald/ald_PILB16e4k.npz (NMSE stored, not printed)
+    [ald estimate] PILSV test -> /home/HTJ/t2/conf/results/ald/ald_PILSV.npz (NMSE stored, not printed)
+    [ald estimate] PILMX test -> /home/HTJ/t2/conf/results/ald/ald_PILMX.npz (NMSE stored, not printed)
+    [ald estimate] PILU28 test -> /home/HTJ/t2/conf/results/ald/ald_PILU28.npz (NMSE stored, not printed)
+    [ald estimate] PILNR16 test -> /home/HTJ/t2/conf/results/ald/ald_PILNR16.npz (NMSE stored, not printed)
+    [ald16e4 09-27 10:46 CDT] phases 1-2 done: 6 estimate files
+    [ald16e4 09-27 10:54 CDT] ALD_EVAL_DONE ok=6 fail=0
+  logs/run_dop16e4.log:
+    [dop16e4 09-27 11:26 CDT] start (git 063f3bcb) datasets: all
+    [dop16e4 09-27 18:32 CDT] DOP_EVAL_DONE ok=12 fail=0
+  logs/run_rot16e4.log:
+    [rot16e4 09-27 18:35 CDT] start (git a4cbd184) datasets: all
+    [rot16e4 09-27 18:39 CDT] D2C2 control 0 deg rc=0 (ACCEPT: OK -- ROT0B16e4k)
+    [rot16e4 09-27 19:33 CDT] D2C6 control 0 deg rc=0 (ACCEPT: OK -- ROT0NR16)
+    [rot16e4 09-27 21:48 CDT] resume re-run after reboot: D2C6 D3 SV8e UMi28 MIX3
+    [rot16e4 09-27 21:48 CDT] start (git a4cbd184) datasets: D2C6 D3 SV8e UMi28 MIX3
+    [rot16e4 09-27 21:49 CDT] D2C6 control 0 deg rc=0 (ACCEPT: OK -- ROT0NR16)
+    [rot16e4 09-27 23:47 CDT] D3 control 0 deg rc=0 (ACCEPT: OK -- ROT0D3)
+    [rot16e4 09-28 00:25 CDT] SV8e control 0 deg rc=0 (ACCEPT: OK -- ROT0SV)
+    [rot16e4 09-28 00:47 CDT] UMi28 control 0 deg rc=0 (ACCEPT: OK -- ROT0U28)
+    [rot16e4 09-28 01:30 CDT] MIX3 control 0 deg rc=0 (ACCEPT: OK -- ROT0MX)
+    [rot16e4 09-28 02:07 CDT] ROT_EVAL_DONE ok=10 fail=0
+  logs/run_rotmix16e4.log:
+    [rotmix 09-28 02:08 CDT] start (git 22370276) angles: 0 15 30
+    [rotmix 09-28 02:09 CDT] phase 0 done: links + ALD estimates 3/3
+    [rotmix 09-28 02:57 CDT] d=0 acceptance rc=0/0 (ACCEPT: OK -- RMX0, RMX0PIL, RMX0ALD, RMX0last ACCEPT: OK -- RMX0k1 )
+    [rotmix 09-28 03:45 CDT] d=15 acceptance rc=0/0 (ACCEPT: OK -- RMX15, RMX15PIL, RMX15ALD, RMX15last ACCEPT: OK -- RMX15k1 )
+    [rotmix 09-28 04:34 CDT] d=30 acceptance rc=0/0 (ACCEPT: OK -- RMX30, RMX30PIL, RMX30ALD, RMX30last ACCEPT: OK -- RMX30k1 )
+    [rotmix 09-28 04:34 CDT] ROTMIX_EVAL_DONE ok=3 fail=0
+  pair_ROT*.txt mtimes vs ROTMIX design freeze 389e23f4 (09-28 13:30:37 KST):
+    pair_ROTaB16e4k.txt    09-28 08:48:35 KST BEFORE freeze
+    pair_ROTbB16e4k.txt    09-28 08:58:01 KST BEFORE freeze
+    pair_ROTaNR16.txt      09-28 11:49:32 KST BEFORE freeze
+    pair_ROTbNR16.txt      09-28 13:41:25 KST after freeze
+    pair_ROTaD3.txt        09-28 14:04:43 KST after freeze
+    pair_ROTbD3.txt        09-28 14:22:22 KST after freeze
+    pair_ROTaSV.txt        09-28 14:33:54 KST after freeze
+    pair_ROTbSV.txt        09-28 14:41:58 KST after freeze
+    pair_ROTaU28.txt       09-28 15:06:13 KST after freeze
+    pair_ROTbU28.txt       09-28 15:24:39 KST after freeze
+    pair_ROTaMX.txt        09-28 15:48:52 KST after freeze
+    pair_ROTbMX.txt        09-28 16:07:25 KST after freeze
+  run_manifest_RMX0.json           git 22370276 n_raw_files 448 config_hash 1c97f23538ea6cc0 arms 14
+  run_manifest_RMX0ALD.json        git 22370276 n_raw_files 448 config_hash 1c97f23538ea6cc0 arms 3
+  run_manifest_RMX0PIL.json        git 22370276 n_raw_files 448 config_hash 1c97f23538ea6cc0 arms 3
+  run_manifest_RMX0k1.json         git 22370276 n_raw_files 448 config_hash 1c97f23538ea6cc0 arms 2
+  run_manifest_RMX0last.json       git 22370276 n_raw_files 448 config_hash 1c97f23538ea6cc0 arms 2
+  run_manifest_RMX15.json          git 22370276 n_raw_files 448 config_hash 1c97f23538ea6cc0 arms 14
+  run_manifest_RMX15ALD.json       git 22370276 n_raw_files 448 config_hash 1c97f23538ea6cc0 arms 3
+  run_manifest_RMX15PIL.json       git 22370276 n_raw_files 448 config_hash 1c97f23538ea6cc0 arms 3
+  run_manifest_RMX15k1.json        git 22370276 n_raw_files 448 config_hash 1c97f23538ea6cc0 arms 2
+  run_manifest_RMX15last.json      git 22370276 n_raw_files 448 config_hash 1c97f23538ea6cc0 arms 2
+  run_manifest_RMX30.json          git 22370276 n_raw_files 448 config_hash 1c97f23538ea6cc0 arms 14
+  run_manifest_RMX30ALD.json       git 22370276 n_raw_files 448 config_hash 1c97f23538ea6cc0 arms 3
+  run_manifest_RMX30PIL.json       git 22370276 n_raw_files 448 config_hash 1c97f23538ea6cc0 arms 3
+  run_manifest_RMX30k1.json        git 22370276 n_raw_files 448 config_hash 1c97f23538ea6cc0 arms 2
+  run_manifest_RMX30last.json      git 22370276 n_raw_files 448 config_hash 1c97f23538ea6cc0 arms 2
+  run_manifest_ROTaB16e4k.json     git a4cbd184 n_raw_files 448 config_hash ab454aa6a5561c86 arms 4
+  run_manifest_ROTaD3.json         git a4cbd184 n_raw_files 448 config_hash ab454aa6a5561c86 arms 4
+  run_manifest_ROTaMX.json         git a4cbd184 n_raw_files 448 config_hash ab454aa6a5561c86 arms 4
+  run_manifest_ROTaNR16.json       git a4cbd184 n_raw_files 448 config_hash 5eaf35ab2323dfe6 arms 4
+  run_manifest_ROTaSV.json         git a4cbd184 n_raw_files 448 config_hash ab454aa6a5561c86 arms 4
+  run_manifest_ROTaU28.json        git a4cbd184 n_raw_files 448 config_hash ab454aa6a5561c86 arms 4
+  run_manifest_ROTbB16e4k.json     git a4cbd184 n_raw_files 448 config_hash ab454aa6a5561c86 arms 4
+  run_manifest_ROTbD3.json         git a4cbd184 n_raw_files 448 config_hash ab454aa6a5561c86 arms 4
+  run_manifest_ROTbMX.json         git a4cbd184 n_raw_files 448 config_hash ab454aa6a5561c86 arms 4
+  run_manifest_ROTbNR16.json       git a4cbd184 n_raw_files 448 config_hash 5eaf35ab2323dfe6 arms 4
+  run_manifest_ROTbSV.json         git a4cbd184 n_raw_files 448 config_hash ab454aa6a5561c86 arms 4
+  run_manifest_ROTbU28.json        git a4cbd184 n_raw_files 448 config_hash ab454aa6a5561c86 arms 4
+  run_manifest_ALDB16e4k.json      git 7e64f5cc n_raw_files 448 arms 3
+  run_manifest_ALDD3.json          git 7e64f5cc n_raw_files 448 arms 3
+  run_manifest_ALDMX.json          git 7e64f5cc n_raw_files 448 arms 3
+  run_manifest_ALDNR16.json        git 7e64f5cc n_raw_files 448 arms 3
+  run_manifest_ALDSV.json          git 7e64f5cc n_raw_files 448 arms 3
+  run_manifest_ALDU28.json         git 7e64f5cc n_raw_files 448 arms 3
+  run_manifest_DOPaB16e4k.json     git 063f3bcb n_raw_files 448 arms 4
+  run_manifest_DOPaD3.json         git 063f3bcb n_raw_files 448 arms 4
+  run_manifest_DOPaMX.json         git 063f3bcb n_raw_files 448 arms 4
+  run_manifest_DOPaNR16.json       git 063f3bcb n_raw_files 448 arms 4
+  run_manifest_DOPaSV.json         git 063f3bcb n_raw_files 448 arms 4
+  run_manifest_DOPaU28.json        git 063f3bcb n_raw_files 448 arms 4
+  run_manifest_DOPbB16e4k.json     git 063f3bcb n_raw_files 448 arms 4
+  run_manifest_DOPbD3.json         git 063f3bcb n_raw_files 448 arms 4
+  run_manifest_DOPbMX.json         git 063f3bcb n_raw_files 448 arms 4
+  run_manifest_DOPbNR16.json       git 063f3bcb n_raw_files 448 arms 4
+  run_manifest_DOPbSV.json         git 063f3bcb n_raw_files 448 arms 4
+  run_manifest_DOPbU28.json        git 063f3bcb n_raw_files 448 arms 4
+  link dirs (count, all resolve to fit_S2d_Nr8_*, dir mtime CDT):
+    RMX0       15 links ok=True k0r=0 mtime 09-28 02:08:51 CDT
+    RMX0PIL    15 links ok=True k0r=0 mtime 09-28 02:08:52 CDT
+    RMX0ALD    15 links ok=True k0r=0 mtime 09-28 02:08:52 CDT
+    RMX0last   15 links ok=True k0r=0 mtime 09-28 02:08:52 CDT
+    RMX0k1     13 links ok=True k0r=0 mtime 09-28 02:08:52 CDT
+    RMX15      15 links ok=True k0r=0 mtime 09-28 02:08:55 CDT
+    RMX15PIL   15 links ok=True k0r=0 mtime 09-28 02:08:55 CDT
+    RMX15ALD   15 links ok=True k0r=0 mtime 09-28 02:08:55 CDT
+    RMX15last  15 links ok=True k0r=0 mtime 09-28 02:08:56 CDT
+    RMX15k1    13 links ok=True k0r=0 mtime 09-28 02:08:56 CDT
+    RMX30      15 links ok=True k0r=0 mtime 09-28 02:08:59 CDT
+    RMX30PIL   15 links ok=True k0r=0 mtime 09-28 02:08:59 CDT
+    RMX30ALD   15 links ok=True k0r=0 mtime 09-28 02:08:59 CDT
+    RMX30last  15 links ok=True k0r=0 mtime 09-28 02:08:59 CDT
+    RMX30k1    13 links ok=True k0r=0 mtime 09-28 02:08:59 CDT
+
+## 0. own reader vs analysis.load_raw (one raw set) + a hand count from the chunk files with no reader at all
+  ROTaB16e4k: 448 files, points [('C2', -3.0), ('C2', 0.0), ('C2', 3.0), ('C2', 6.0), ('C2', 9.0), ('C2', 12.0), ('C2', 15.0)], load_raw warnings 0, fields disagreeing 0
+  hand count ROTaB16e4k C2 -3 dB b*->V1 a:b = 309:57  (exact two-sided binomial p = 5.28e-43; house sign_p = 5.28e-43)
+  table_b (own) same point: decision ['-3', '+0', '+3'] a:b 309:57 (p 5.3e-43) · 106:15 (p 4.7e-18) · 33:8 (p 0.00011) pooled 448:80 (p 4.5e-63) -> (i) 3/3
+
+## 1. ALD16e4 -- 6 datasets (A1 ALDv->V1, A2 ALD->V1, A3 ALDv->V1-pilot; report pairs; -3 dB failures; test NMSE)
+
+  [D2C2] base raw_B16e4k (448 files) PIL raw_PILB16e4k (448) ALD raw_ALDB16e4k (448)
+    integrity (grid, holes, genie == base in ALD & PIL, n = 2560, ALD raised 0, estimate fixed == precomputed): OK
+    est file sha256[:16] 91275158a7723aac; prov '{"ckpt_sha": "4443921ce8d5c4a1", "ald_py_sha": "865261522ca7eade", "git": "7e64f5cc", "device": "NVIDIA RTX PRO 6000 Blackwell Server Edition", "preci'
+    base ckpt id ''; ALD raw ckpt id same as base: False; ALD raw run|git ['(none)']; base run|git ['(none)']
+    ALD raw meta|ald_file: LB16e4k.npz sha256[:16]=91275158a7723aac; em_sec ALD==base: True
+    test ALD NMSE dB (recomputed from hhat/H): -6.27 -9.17 -11.77 -14.75 -18.26 -21.49 -24.32; est['nmse'] field: -6.27 -9.17 -11.77 -14.75 -18.26 -21.49 -24.32
+    dev NMSE dB (tune json): -6.5 -9.0 -11.8 -14.8 -18.1 -21.6 -24.3; max |test - dev| = 0.22 dB; tune c=0.01 beta=0.005 stop=[297, 302, 360, 461, 569, 600, 600]
+    A1                       ALDv-pilot -> M-ours-dscore-C-V1: decision ['-3', '+0', '+3'] a:b 506:25 (p 1.5e-117) · 108:17 (p 2.2e-17) · 30:8 (p 0.00047) pooled 644:50 (p 1.7e-132) -> (i) 3/3; gap +1.54 [+1.37, +1.74]
+    A2                       ALD-pilot -> M-ours-dscore-C-V1: decision ['-3', '+0', '+3'] a:b 492:30 (p 8.5e-109) · 140:15 (p 1.3e-26) · 46:9 (p 4.3e-07) pooled 678:54 (p 2.7e-138) -> (i) 3/3; gap +1.82 [+1.62, +2.05]
+    A3                       ALDv-pilot -> V1-pilot: decision ['-3', '+0', '+3'] a:b 276:50 (p 5.1e-39) · 70:19 (p 5e-08) · 30:9 (p 0.0011) pooled 376:78 (p 7.6e-48) -> (i) 3/3; gap +0.62 [+0.49, +0.75]
+    rep ALDv->b*             ALDv-pilot -> M-ours-bstar: decision ['-3', '+0', '+3'] a:b 344:115 (p 1.4e-27) · 59:64 (p 0.72) · 22:28 (p 0.48) pooled 425:207 (p 2.8e-18) -> (iii) 1/3; gap +0.12 [-0.05, +0.29]
+    rep bstar-pilot->ALDv    bstar-pilot -> ALDv-pilot: decision ['-3', '+0', '+3'] a:b 250:124 (p 6.8e-11) · 85:36 (p 9.8e-06) · 29:25 (p 0.68) pooled 364:185 (p 1.8e-14) -> (i) 2/3; gap +0.45 [+0.29, +0.60]
+    rep ALD->ALDv            ALD-pilot -> ALDv-pilot: decision ['-3', '+0', '+3'] a:b 45:64 (p 0.084) · 63:29 (p 0.00051) · 24:9 (p 0.014) pooled 132:102 (p 0.058) -> (i) 2/3; gap +0.28 [+0.15, +0.43]
+    -3 dB failures (R0-pilot · bstar-pilot · ALD-pilot · ALDv-pilot · V1-pilot · bstar · dscore-C-V1 · R5-genie): 1220 · 978 · 833 · 852 · 626 · 623 · 371 · 87
+    -3 dB failures R0-pilot@1 (house 08_SPEC reading of R0-pilot): 1918
+
+  [D2C6] base raw_NR16B16e4 (448 files) PIL raw_PILNR16 (448) ALD raw_ALDNR16 (448)
+    integrity (grid, holes, genie == base in ALD & PIL, n = 2560, ALD raised 0, estimate fixed == precomputed): OK
+    est file sha256[:16] 8fa4bbae3b6a7206; prov '{"ckpt_sha": "c050d611b2c714a6", "ald_py_sha": "865261522ca7eade", "git": "7e64f5cc", "device": "NVIDIA RTX PRO 6000 Blackwell Server Edition", "preci'
+    base ckpt id 'sha256[:16]=c050d611b2c714a6 epoch=1684 best_epoch=1684 role'; ALD raw ckpt id same as base: True; ALD raw run|git ['(none)']; base run|git ['(none)']
+    ALD raw meta|ald_file: PILNR16.npz sha256[:16]=8fa4bbae3b6a7206; em_sec ALD==base: True
+    test ALD NMSE dB (recomputed from hhat/H): -6.61 -9.94 -12.59 -15.98 -20.07 -24.12 -27.20; est['nmse'] field: -6.61 -9.94 -12.59 -15.98 -20.07 -24.12 -27.20
+    dev NMSE dB (tune json): -6.6 -10.3 -12.5 -16.3 -19.9 -24.0 -27.2; max |test - dev| = 0.35 dB; tune c=0.03 beta=0.005 stop=[150, 184, 216, 351, 473, 600, 600]
+    A1                       ALDv-pilot -> M-ours-dscore-C-V1: decision ['-3', '+0', '+3'] a:b 176:7 (p 2.1e-43) · 41:6 (p 1.8e-07) · 26:3 (p 1.5e-05) pooled 243:16 (p 2.8e-53) -> (i) 3/3; gap n/a (-3.00 lo vs -3.00 lo)
+    A2                       ALD-pilot -> M-ours-dscore-C-V1: decision ['-3', '+0', '+3'] a:b 202:6 (p 5.2e-52) · 63:4 (p 1.1e-14) · 44:3 (p 2.5e-10) pooled 309:13 (p 1.2e-74) -> (i) 3/3; gap n/a (-3.00 lo vs -3.00 lo)
+    A3                       ALDv-pilot -> V1-pilot: decision ['-3', '+0', '+3'] a:b 153:14 (p 1e-30) · 39:4 (p 3.1e-08) · 26:6 (p 0.00054) pooled 218:24 (p 2.6e-40) -> (i) 3/3; gap n/a (-3.00 lo vs -3.00 lo)
+    rep ALDv->b*             ALDv-pilot -> M-ours-bstar: decision ['-3', '+0', '+3'] a:b 112:74 (p 0.0065) · 28:34 (p 0.53) · 21:21 (p 1) pooled 161:129 (p 0.069) -> (iii) 1/3; gap n/a (-3.00 lo vs -3.00 lo)
+    rep bstar-pilot->ALDv    bstar-pilot -> ALDv-pilot: decision ['-3', '+0', '+3'] a:b 103:85 (p 0.21) · 44:26 (p 0.041) · 21:14 (p 0.31) pooled 168:125 (p 0.014) -> (iii) 1/3; gap n/a (-3.00 lo vs -3.00 lo)
+    rep ALD->ALDv            ALD-pilot -> ALDv-pilot: decision ['-3', '+0', '+3'] a:b 47:20 (p 0.0013) · 34:10 (p 0.00039) · 24:6 (p 0.0014) pooled 105:36 (p 5.1e-09) -> (i) 3/3; gap n/a (-3.00 lo vs -3.00 lo)
+    -3 dB failures (R0-pilot · bstar-pilot · ALD-pilot · ALDv-pilot · V1-pilot · bstar · dscore-C-V1 · R5-genie): 376 · 240 · 249 · 222 · 83 · 184 · 53 · 22
+    -3 dB failures R0-pilot@1 (house 08_SPEC reading of R0-pilot): 1005
+
+  [D3] base raw_D3B16e4 (448 files) PIL raw_PILD3 (448) ALD raw_ALDD3 (448)
+    integrity (grid, holes, genie == base in ALD & PIL, n = 2560, ALD raised 0, estimate fixed == precomputed): OK
+    est file sha256[:16] 764dc9e83c6c7382; prov '{"ckpt_sha": "7ebf4e6647d4413f", "ald_py_sha": "865261522ca7eade", "git": "7e64f5cc", "device": "NVIDIA RTX PRO 6000 Blackwell Server Edition", "preci'
+    base ckpt id 'sha256[:16]=7ebf4e6647d4413f epoch=494 best_epoch=494 role=b'; ALD raw ckpt id same as base: True; ALD raw run|git ['(none)']; base run|git ['(none)']
+    ALD raw meta|ald_file: d_PILD3.npz sha256[:16]=764dc9e83c6c7382; em_sec ALD==base: True
+    test ALD NMSE dB (recomputed from hhat/H): -5.84 -8.63 -11.32 -13.93 -17.06 -19.85 -22.72; est['nmse'] field: -5.84 -8.63 -11.32 -13.93 -17.06 -19.85 -22.72
+    dev NMSE dB (tune json): -5.7 -8.7 -11.5 -14.0 -16.8 -19.7 -22.6; max |test - dev| = 0.22 dB; tune c=0.01 beta=0.005 stop=[364, 383, 441, 503, 574, 600, 600]
+    A1                       ALDv-pilot -> M-ours-dscore-C-V1: decision ['+0', '+3', '+6'] a:b 243:26 (p 2.5e-45) · 108:22 (p 8e-15) · 45:12 (p 1.3e-05) pooled 396:60 (p 9e-62) -> (i) 3/3; gap +1.31 [+1.10, +1.56]
+    A2                       ALD-pilot -> M-ours-dscore-C-V1: decision ['+0', '+3', '+6'] a:b 259:21 (p 2.5e-53) · 126:22 (p 6.5e-19) · 57:11 (p 1.3e-08) pooled 442:54 (p 8.7e-77) -> (i) 3/3; gap +1.52 [+1.29, +1.81]
+    A3                       ALDv-pilot -> V1-pilot: decision ['+0', '+3', '+6'] a:b 115:40 (p 1.3e-09) · 61:24 (p 7.4e-05) · 33:16 (p 0.021) pooled 209:80 (p 1.9e-14) -> (i) 3/3; gap +0.48 [+0.32, +0.66]
+    rep ALDv->b*             ALDv-pilot -> M-ours-bstar: decision ['+0', '+3', '+6'] a:b 145:110 (p 0.033) · 57:68 (p 0.37) · 23:37 (p 0.092) pooled 225:215 (p 0.67) -> (iii) 1/3; gap -0.10 [-0.32, +0.11]
+    rep bstar-pilot->ALDv    bstar-pilot -> ALDv-pilot: decision ['+0', '+3', '+6'] a:b 170:75 (p 1.2e-09) · 99:38 (p 1.9e-07) · 52:17 (p 2.9e-05) pooled 321:130 (p 1e-19) -> (i) 3/3; gap +0.80 [+0.52, +1.03]
+    rep ALD->ALDv            ALD-pilot -> ALDv-pilot: decision ['+0', '+3', '+6'] a:b 56:35 (p 0.035) · 36:18 (p 0.02) · 24:11 (p 0.041) pooled 116:64 (p 0.00013) -> (i) 3/3; gap +0.22 [+0.07, +0.36]
+    -3 dB failures (R0-pilot · bstar-pilot · ALD-pilot · ALDv-pilot · V1-pilot · bstar · dscore-C-V1 · R5-genie): 1738 · 1552 · 1429 · 1484 · 1333 · 1298 · 1000 · 485
+    -3 dB failures R0-pilot@1 (house 08_SPEC reading of R0-pilot): 2164
+
+  [SV8e] base raw_SVB16e4 (448 files) PIL raw_PILSV (448) ALD raw_ALDSV (448)
+    integrity (grid, holes, genie == base in ALD & PIL, n = 2560, ALD raised 0, estimate fixed == precomputed): OK
+    est file sha256[:16] cdc0f0b7a6d03b19; prov '{"ckpt_sha": "d2d78962c2846364", "ald_py_sha": "865261522ca7eade", "git": "7e64f5cc", "device": "NVIDIA RTX PRO 6000 Blackwell Server Edition", "preci'
+    base ckpt id 'sha256[:16]=d2d78962c2846364 epoch=240 best_epoch=240 role=b'; ALD raw ckpt id same as base: True; ALD raw run|git ['(none)']; base run|git ['(none)']
+    ALD raw meta|ald_file: d_PILSV.npz sha256[:16]=cdc0f0b7a6d03b19; em_sec ALD==base: True
+    test ALD NMSE dB (recomputed from hhat/H): -5.17 -7.59 -10.13 -12.73 -15.53 -18.28 -21.22; est['nmse'] field: -5.17 -7.59 -10.13 -12.73 -15.53 -18.28 -21.22
+    dev NMSE dB (tune json): -5.2 -7.6 -10.1 -12.7 -15.4 -18.4 -21.1; max |test - dev| = 0.14 dB; tune c=0.01 beta=0.005 stop=[312, 347, 378, 475, 573, 600, 600]
+    A1                       ALDv-pilot -> M-ours-dscore-C-V1: decision ['-3', '+0', '+3'] a:b 523:13 (p 3.8e-136) · 63:11 (p 5.3e-10) · 9:1 (p 0.021) pooled 595:25 (p 1.2e-142) -> (i) 3/3; gap +1.08 [+0.96, +1.22]
+    A2                       ALD-pilot -> M-ours-dscore-C-V1: decision ['-3', '+0', '+3'] a:b 477:24 (p 1.9e-110) · 88:7 (p 6e-19) · 16:0 (p 3.1e-05) pooled 581:31 (p 1.7e-132) -> (i) 3/3; gap +1.27 [+1.13, +1.41]
+    A3                       ALDv-pilot -> V1-pilot: decision ['-3', '+0', '+3'] a:b 161:53 (p 7.5e-14) · 20:24 (p 0.65) · 6:4 (p 0.75) pooled 187:81 (p 8.1e-11) -> (iii) 1/3; gap +0.05 [-0.04, +0.13]
+    rep ALDv->b*             ALDv-pilot -> M-ours-bstar: decision ['-3', '+0', '+3'] a:b 483:35 (p 7.5e-102) · 53:15 (p 4.1e-06) · 8:2 (p 0.11) pooled 544:52 (p 2.2e-104) -> (i) 2/3; gap +0.84 [+0.72, +0.96]
+    rep bstar-pilot->ALDv    bstar-pilot -> ALDv-pilot: decision ['-3', '+0', '+3'] a:b 102:142 (p 0.012) · 38:19 (p 0.016) · 4:4 (p 1) pooled 144:165 (p 0.26) -> (iii) 1/3; gap +0.12 [+0.03, +0.22]
+    rep ALD->ALDv            ALD-pilot -> ALDv-pilot: decision ['-3', '+0', '+3'] a:b 30:87 (p 1.3e-07) · 38:9 (p 2.5e-05) · 9:1 (p 0.021) pooled 77:97 (p 0.15) -> (i) 2/3; gap +0.19 [+0.10, +0.28]
+    -3 dB failures (R0-pilot · bstar-pilot · ALD-pilot · ALDv-pilot · V1-pilot · bstar · dscore-C-V1 · R5-genie): 1010 · 872 · 855 · 912 · 804 · 464 · 402 · 31
+    -3 dB failures R0-pilot@1 (house 08_SPEC reading of R0-pilot): 1616
+
+  [UMi28] base raw_U28B16e4 (448 files) PIL raw_PILU28 (448) ALD raw_ALDU28 (448)
+    integrity (grid, holes, genie == base in ALD & PIL, n = 2560, ALD raised 0, estimate fixed == precomputed): OK
+    est file sha256[:16] 2e40e8acb25a4994; prov '{"ckpt_sha": "6f3a1b9490864af1", "ald_py_sha": "865261522ca7eade", "git": "7e64f5cc", "device": "NVIDIA RTX PRO 6000 Blackwell Server Edition", "preci'
+    base ckpt id 'sha256[:16]=6f3a1b9490864af1 epoch=379 best_epoch=379 role=b'; ALD raw ckpt id same as base: True; ALD raw run|git ['(none)']; base run|git ['(none)']
+    ALD raw meta|ald_file: _PILU28.npz sha256[:16]=2e40e8acb25a4994; em_sec ALD==base: True
+    test ALD NMSE dB (recomputed from hhat/H): -6.39 -8.65 -11.17 -13.77 -16.46 -19.16 -21.89; est['nmse'] field: -6.39 -8.65 -11.17 -13.77 -16.46 -19.16 -21.89
+    dev NMSE dB (tune json): -6.4 -8.6 -11.3 -13.8 -16.6 -19.1 -21.9; max |test - dev| = 0.15 dB; tune c=0.01 beta=0.005 stop=[314, 362, 460, 560, 600, 600, 600]
+    A1                       ALDv-pilot -> M-ours-dscore-C-V1: decision ['+3', '+6', '+9'] a:b 114:22 (p 3.6e-16) · 53:16 (p 9.1e-06) · 25:12 (p 0.047) pooled 192:50 (p 8.4e-21) -> (i) 3/3; gap +0.80 [+0.53, +1.02]
+    A2                       ALD-pilot -> M-ours-dscore-C-V1: decision ['+3', '+6', '+9'] a:b 128:26 (p 2.2e-17) · 52:17 (p 2.9e-05) · 30:11 (p 0.0043) pooled 210:54 (p 6.7e-23) -> (i) 3/3; gap +0.76 [+0.50, +1.00]
+    A3                       ALDv-pilot -> V1-pilot: decision ['+3', '+6', '+9'] a:b 68:33 (p 0.00064) · 39:16 (p 0.0027) · 23:12 (p 0.09) pooled 130:61 (p 6.6e-07) -> (i) 2/3; gap +0.42 [+0.21, +0.60]
+    rep ALDv->b*             ALDv-pilot -> M-ours-bstar: decision ['+3', '+6', '+9'] a:b 100:46 (p 9.2e-06) · 50:41 (p 0.4) · 17:26 (p 0.22) pooled 167:113 (p 0.0015) -> (iii) 1/3; gap +0.20 [-0.08, +0.46]
+    rep bstar-pilot->ALDv    bstar-pilot -> ALDv-pilot: decision ['+3', '+6', '+9'] a:b 60:65 (p 0.72) · 48:36 (p 0.23) · 30:15 (p 0.036) pooled 138:116 (p 0.19) -> (iii) 1/3; gap +0.21 [-0.03, +0.43]
+    rep ALD->ALDv            ALD-pilot -> ALDv-pilot: decision ['+3', '+6', '+9'] a:b 43:33 (p 0.3) · 23:25 (p 0.89) · 16:10 (p 0.33) pooled 82:68 (p 0.29) -> (iii) 0/3; gap -0.03 [-0.20, +0.14]
+    -3 dB failures (R0-pilot · bstar-pilot · ALD-pilot · ALDv-pilot · V1-pilot · bstar · dscore-C-V1 · R5-genie): 1781 · 1633 · 1660 · 1703 · 1576 · 1270 · 1228 · 594
+    -3 dB failures R0-pilot@1 (house 08_SPEC reading of R0-pilot): 2152
+
+  [MIX3] base raw_MXB16e4 (448 files) PIL raw_PILMX (448) ALD raw_ALDMX (448)
+    integrity (grid, holes, genie == base in ALD & PIL, n = 2560, ALD raised 0, estimate fixed == precomputed): OK
+    est file sha256[:16] 52db6fe9a0afcd24; prov '{"ckpt_sha": "b591ae24ae3c5f31", "ald_py_sha": "865261522ca7eade", "git": "7e64f5cc", "device": "NVIDIA RTX PRO 6000 Blackwell Server Edition", "preci'
+    base ckpt id 'sha256[:16]=b591ae24ae3c5f31 epoch=464 best_epoch=464 role=b'; ALD raw ckpt id same as base: True; ALD raw run|git ['(none)']; base run|git ['(none)']
+    ALD raw meta|ald_file: d_PILMX.npz sha256[:16]=52db6fe9a0afcd24; em_sec ALD==base: True
+    test ALD NMSE dB (recomputed from hhat/H): -6.27 -8.65 -11.26 -14.17 -16.88 -19.51 -22.19; est['nmse'] field: -6.27 -8.65 -11.26 -14.17 -16.88 -19.51 -22.19
+    dev NMSE dB (tune json): -6.4 -8.6 -11.3 -13.9 -16.8 -19.4 -22.1; max |test - dev| = 0.26 dB; tune c=0.01 beta=0.005 stop=[327, 356, 450, 564, 600, 600, 600]
+    A1                       ALDv-pilot -> M-ours-dscore-C-V1: decision ['+3', '+6', '+9'] a:b 127:31 (p 5.4e-15) · 63:12 (p 1.7e-09) · 26:13 (p 0.053) pooled 216:56 (p 2.4e-23) -> (i) 2/3; gap +1.04 [+0.80, +1.32]
+    A2                       ALD-pilot -> M-ours-dscore-C-V1: decision ['+3', '+6', '+9'] a:b 141:32 (p 1.6e-17) · 84:14 (p 2.5e-13) · 42:10 (p 9.1e-06) pooled 267:56 (p 4.3e-34) -> (i) 3/3; gap +1.38 [+1.08, +1.66]
+    A3                       ALDv-pilot -> V1-pilot: decision ['+3', '+6', '+9'] a:b 73:44 (p 0.0093) · 42:15 (p 0.00046) · 23:12 (p 0.09) pooled 138:71 (p 4.2e-06) -> (i) 2/3; gap +0.47 [+0.26, +0.68]
+    rep ALDv->b*             ALDv-pilot -> M-ours-bstar: decision ['+3', '+6', '+9'] a:b 107:57 (p 0.00012) · 55:54 (p 1) · 17:35 (p 0.018) pooled 179:146 (p 0.076) -> (iii) 1/3; gap +0.06 [-0.25, +0.36]
+    rep bstar-pilot->ALDv    bstar-pilot -> ALDv-pilot: decision ['+3', '+6', '+9'] a:b 80:63 (p 0.18) · 60:38 (p 0.033) · 41:14 (p 0.00036) pooled 181:115 (p 0.00015) -> (i) 2/3; gap +0.40 [+0.12, +0.66]
+    rep ALD->ALDv            ALD-pilot -> ALDv-pilot: decision ['+3', '+6', '+9'] a:b 64:51 (p 0.26) · 39:20 (p 0.018) · 28:9 (p 0.0026) pooled 131:80 (p 0.00055) -> (i) 2/3; gap +0.34 [+0.11, +0.53]
+    -3 dB failures (R0-pilot · bstar-pilot · ALD-pilot · ALDv-pilot · V1-pilot · bstar · dscore-C-V1 · R5-genie): 1896 · 1715 · 1796 · 1836 · 1659 · 1421 · 1354 · 679
+    -3 dB failures R0-pilot@1 (house 08_SPEC reading of R0-pilot): 2264
+
+## 2. DOP16e4 -- 6 datasets x 2 levels + 6 zero-controls
+
+  [D2C2] control DOP0B16e4k: 1 file, 14 arms x KEYS_RAW over 40 trials vs raw_B16e4k: differing []; run|git ['063f3bcb']; meta|doppler ['nu=0.0 per s']
+    static -3 dB failures (R2 · b* · V1 · genie): 839 · 623 · 371 · 87
+    [DOPaB16e4k] 448 files; run|git ['063f3bcb']; meta|doppler ['nu=0.005 per s']; ckpt id == base False; raised {'V1-dop': 0, 'bstar-dop': 0, 'R2-dop': 0, 'genie-dop': 0}; integrity (grid, meta, one clean commit, fingerprint, n, applied): OK
+      MAIN                 bstar-dop -> V1-dop: decision ['-3', '+0', '+3'] a:b 361:63 (p 7.4e-52) · 135:23 (p 1.8e-20) · 44:17 (p 0.00073) pooled 540:103 (p 2.1e-72) -> (i) 3/3; gap +1.49 [+1.27, +1.71]
+      rep V1-x->V1         V1-dop -> M-ours-dscore-C-V1: decision ['-3', '+0', '+3'] a:b 126:55 (p 1.4e-07) · 48:17 (p 0.00015) · 22:7 (p 0.0081) pooled 196:79 (p 1.2e-12) -> (i) 3/3; gap +0.48 [+0.35, +0.61]
+      rep b*-x->b*         bstar-dop -> M-ours-bstar: decision ['-3', '+0', '+3'] a:b 183:66 (p 6.7e-14) · 80:33 (p 1.1e-05) · 34:20 (p 0.076) pooled 297:119 (p 1.2e-18) -> (i) 2/3; gap +0.55 [+0.37, +0.73]
+      rep b*->V1-x         M-ours-bstar -> V1-dop: decision ['-3', '+0', '+3'] a:b 277:96 (p 1.8e-21) · 101:36 (p 2.5e-08) · 33:20 (p 0.098) pooled 411:152 (p 1.6e-28) -> (i) 2/3; gap +0.94 [+0.74, +1.15]
+      rep R2-x->V1-x       R2-dop -> V1-dop: decision ['+0', '+3', '+6'] a:b 229:15 (p 2.4e-50) · 87:12 (p 3.4e-15) · 62:6 (p 8.2e-13) pooled 378:33 (p 2.3e-75) -> (i) 3/3; gap +2.52 [+2.29, +2.73]
+      rep genie-x->genie   genie-dop -> R5-genie: decision ['-3', '+0', '+15'] a:b 109:13 (p 4.7e-20) · 40:5 (p 7.9e-08) · 41:2 (p 2.2e-10) pooled 190:20 (p 6.1e-36) -> (i) 3/3; gap n/a (-3.00 lo vs -3.00 lo)
+      gap retention = +1.49 / +1.41 = 1.05
+      -3 dB failures (R2-dop · bstar-dop · V1-dop · genie-dop): 950 · 740 · 442 · 183
+    [DOPbB16e4k] 448 files; run|git ['063f3bcb']; meta|doppler ['nu=0.01 per sy']; ckpt id == base False; raised {'V1-dop': 0, 'bstar-dop': 0, 'R2-dop': 0, 'genie-dop': 0}; integrity (grid, meta, one clean commit, fingerprint, n, applied): OK
+      MAIN                 bstar-dop -> V1-dop: decision ['+3', '+12', '+15'] a:b 119:36 (p 1.4e-11) · 68:60 (p 0.54) · 101:92 (p 0.56) pooled 288:188 (p 5.3e-06) -> (iii) 1/3; gap +1.61 [+1.29, +2.04]
+      rep V1-x->V1         V1-dop -> M-ours-dscore-C-V1: decision ['+0', '+12', '+15'] a:b 252:20 (p 2.8e-52) · 172:0 (p 3.3e-52) · 182:0 (p 3.3e-55) pooled 606:20 (p 1.9e-151) -> (i) 3/3; gap +3.05 [+2.76, +3.33]
+      rep b*-x->b*         bstar-dop -> M-ours-bstar: decision ['+3', '+12', '+15'] a:b 173:5 (p 7.6e-45) · 171:2 (p 2.5e-48) · 187:1 (p 9.6e-55) pooled 531:8 (p 1.9e-145) -> (i) 3/3; gap +3.25 [+2.85, +3.70]
+      rep b*->V1-x         M-ours-bstar -> V1-dop: decision ['-3', '+0', '+3'] a:b 179:312 (p 2.1e-09) · 65:201 (p 2.4e-17) · 19:104 (p 2.2e-15) pooled 263:617 (p 1.6e-33) -> (ii) 3/3; gap -1.64 [-1.89, -1.35]
+      rep R2-x->V1-x       R2-dop -> V1-dop: decision ['+3', '+6', '+15'] a:b 168:39 (p 2.8e-20) · 133:27 (p 5e-18) · 103:83 (p 0.16) pooled 404:149 (p 3.6e-28) -> (i) 2/3; gap +3.09 [+2.04, +4.33]
+      rep genie-x->genie   genie-dop -> R5-genie: decision ['+3', '+6', '+9'] a:b 385:3 (p 3.1e-110) · 374:1 (p 9.8e-111) · 354:0 (p 5.5e-107) pooled 1113:4 (p 0) -> (i) 3/3; gap n/a (15.00 hi vs -3.00 lo)
+      gap retention = +1.61 / +1.41 = 1.14
+      -3 dB failures (R2-dop · bstar-dop · V1-dop · genie-dop): 1316 · 1133 · 756 · 846
+
+  [D2C6] control DOP0NR16: 1 file, 14 arms x KEYS_RAW over 40 trials vs raw_NR16B16e4: differing []; run|git ['063f3bcb']; meta|doppler ['nu=0.0 per s']
+    static -3 dB failures (R2 · b* · V1 · genie): 295 · 184 · 53 · 22
+    [DOPaNR16] 448 files; run|git ['063f3bcb']; meta|doppler ['nu=0.005 per s']; ckpt id == base True; raised {'V1-dop': 0, 'bstar-dop': 0, 'R2-dop': 0, 'genie-dop': 0}; integrity (grid, meta, one clean commit, fingerprint, n, applied): OK
+      MAIN                 bstar-dop -> V1-dop: decision ['-3', '+0', '+3'] a:b 159:15 (p 1.5e-31) · 62:6 (p 8.2e-13) · 37:4 (p 1e-07) pooled 258:25 (p 6.1e-50) -> (i) 3/3; gap n/a (-3.00 lo vs -3.00 lo)
+      rep V1-x->V1         V1-dop -> M-ours-dscore-C-V1: decision ['-3', '+0', '+15'] a:b 38:11 (p 0.00014) · 12:6 (p 0.24) · 31:1 (p 1.5e-08) pooled 81:18 (p 1e-10) -> (i) 2/3; gap n/a (-3.00 lo vs -3.00 lo)
+      rep b*-x->b*         bstar-dop -> M-ours-bstar: decision ['-3', '+0', '+3'] a:b 71:31 (p 9.3e-05) · 39:18 (p 0.0075) · 33:12 (p 0.0025) pooled 143:61 (p 9e-09) -> (i) 3/3; gap n/a (-3.00 lo vs -3.00 lo)
+      rep b*->V1-x         M-ours-bstar -> V1-dop: decision ['-3', '+0', '+3'] a:b 124:20 (p 1.6e-19) · 40:5 (p 7.9e-08) · 22:10 (p 0.05) pooled 186:35 (p 4.6e-26) -> (i) 2/3; gap n/a (-3.00 lo vs -3.00 lo)
+      rep R2-x->V1-x       R2-dop -> V1-dop: decision ['-3', '+0', '+3'] a:b 277:8 (p 3.2e-71) · 118:4 (p 3.4e-30) · 66:6 (p 7.3e-14) pooled 461:18 (p 2.7e-112) -> (i) 3/3; gap >= +1.02 (V1-dop already < 0.1 at lowest SNR)
+      rep genie-x->genie   genie-dop -> R5-genie: decision ['-3', '+12', '+15'] a:b 26:6 (p 0.00054) · 33:0 (p 2.3e-10) · 51:0 (p 8.9e-16) pooled 110:6 (p 7.5e-26) -> (i) 3/3; gap n/a (-3.00 lo vs -3.00 lo)
+      gap retention = +nan / +nan = nan
+      -3 dB failures (R2-dop · bstar-dop · V1-dop · genie-dop): 349 · 224 · 80 · 42
+    [DOPbNR16] 448 files; run|git ['063f3bcb']; meta|doppler ['nu=0.01 per sy']; ckpt id == base True; raised {'V1-dop': 0, 'bstar-dop': 0, 'R2-dop': 0, 'genie-dop': 0}; integrity (grid, meta, one clean commit, fingerprint, n, applied): OK
+      MAIN                 bstar-dop -> V1-dop: decision ['+0', '+12', '+15'] a:b 129:29 (p 3e-16) · 92:79 (p 0.36) · 99:82 (p 0.23) pooled 320:190 (p 9.3e-09) -> (iii) 1/3; gap >= +2.15 (V1-dop already < 0.1 at lowest SNR)
+      rep V1-x->V1         V1-dop -> M-ours-dscore-C-V1: decision ['-3', '+12', '+15'] a:b 131:5 (p 8.6e-33) · 178:1 (p 4.7e-52) · 205:1 (p 4e-60) pooled 514:7 (p 5.9e-142) -> (i) 3/3; gap n/a (-3.00 lo vs -3.00 lo)
+      rep b*-x->b*         bstar-dop -> M-ours-bstar: decision ['+0', '+12', '+15'] a:b 160:11 (p 4.7e-35) · 183:1 (p 1.5e-53) · 219:1 (p 2.6e-64) pooled 562:13 (p 1.7e-147) -> (i) 3/3; gap >= +2.15 (M-ours-bstar already < 0.1 at lowest SNR)
+      rep b*->V1-x         M-ours-bstar -> V1-dop: decision ['-3', '+0', '+3'] a:b 97:92 (p 0.77) · 30:79 (p 3e-06) · 19:78 (p 1.2e-09) pooled 146:249 (p 2.5e-07) -> (ii) 2/3; gap n/a (-3.00 lo vs -3.00 lo)
+      rep R2-x->V1-x       R2-dop -> V1-dop: decision ['+0', '+3', '+15'] a:b 206:22 (p 1.2e-38) · 145:26 (p 3.1e-21) · 91:91 (p 1) pooled 442:139 (p 9.6e-38) -> (i) 2/3; gap >= +4.23 (V1-dop already < 0.1 at lowest SNR)
+      rep genie-x->genie   genie-dop -> R5-genie: decision ['+0', '+6', '+9'] a:b 271:1 (p 7.2e-80) · 267:0 (p 8.4e-81) · 263:0 (p 1.3e-79) pooled 801:1 (p 6e-239) -> (i) 3/3; gap n/a (15.00 hi vs -3.00 lo)
+      gap retention = +2.15 / +nan = nan
+      -3 dB failures (R2-dop · bstar-dop · V1-dop · genie-dop): 572 · 422 · 179 · 415
+
+  [D3] control DOP0D3: 1 file, 14 arms x KEYS_RAW over 40 trials vs raw_D3B16e4: differing []; run|git ['063f3bcb']; meta|doppler ['nu=0.0 per s']
+    static -3 dB failures (R2 · b* · V1 · genie): 1454 · 1298 · 1000 · 485
+    [DOPaD3] 448 files; run|git ['063f3bcb']; meta|doppler ['nu=0.005 per s']; ckpt id == base True; raised {'V1-dop': 0, 'bstar-dop': 0, 'R2-dop': 0, 'genie-dop': 0}; integrity (grid, meta, one clean commit, fingerprint, n, applied): OK
+      MAIN                 bstar-dop -> V1-dop: decision ['+0', '+3', '+6'] a:b 234:34 (p 6.8e-38) · 137:29 (p 5.5e-18) · 75:14 (p 3e-11) pooled 446:77 (p 3.5e-64) -> (i) 3/3; gap +1.72 [+1.31, +2.08]
+      rep V1-x->V1         V1-dop -> M-ours-dscore-C-V1: decision ['+0', '+3', '+6'] a:b 95:31 (p 9.6e-09) · 68:23 (p 2.5e-06) · 49:8 (p 2.7e-08) pooled 212:62 (p 2.3e-20) -> (i) 3/3; gap +0.63 [+0.47, +0.82]
+      rep b*-x->b*         bstar-dop -> M-ours-bstar: decision ['+0', '+3', '+6'] a:b 131:49 (p 8e-10) · 81:25 (p 4.5e-08) · 65:10 (p 5.2e-11) pooled 277:84 (p 3.4e-25) -> (i) 3/3; gap +0.94 [+0.62, +1.22]
+      rep b*->V1-x         M-ours-bstar -> V1-dop: decision ['+0', '+3', '+6'] a:b 179:61 (p 1.2e-14) · 96:44 (p 1.3e-05) · 40:34 (p 0.56) pooled 315:139 (p 8.9e-17) -> (i) 2/3; gap +0.78 [+0.55, +1.03]
+      rep R2-x->V1-x       R2-dop -> V1-dop: decision ['+3', '+6', '+9'] a:b 240:31 (p 3.3e-41) · 124:16 (p 7e-22) · 81:3 (p 1e-20) pooled 445:50 (p 3e-80) -> (i) 3/3; gap +3.23 [+2.83, +3.69]
+      rep genie-x->genie   genie-dop -> R5-genie: decision ['-3', '+0', '+3'] a:b 184:25 (p 4.1e-31) · 104:10 (p 7.2e-21) · 58:2 (p 3.2e-15) pooled 346:37 (p 5.2e-64) -> (i) 3/3; gap +1.22 [+1.02, +1.45]
+      gap retention = +1.72 / +1.41 = 1.22
+      -3 dB failures (R2-dop · bstar-dop · V1-dop · genie-dop): 1552 · 1392 · 1102 · 644
+    [DOPbD3] 448 files; run|git ['063f3bcb']; meta|doppler ['nu=0.01 per sy']; ckpt id == base True; raised {'V1-dop': 0, 'bstar-dop': 0, 'R2-dop': 0, 'genie-dop': 0}; integrity (grid, meta, one clean commit, fingerprint, n, applied): OK
+      MAIN                 bstar-dop -> V1-dop: decision ['+9', '+12', '+15'] a:b 110:46 (p 3.2e-07) · 91:47 (p 0.00023) · 98:58 (p 0.0017) pooled 299:151 (p 2.7e-12) -> (i) 3/3; gap +2.18 [+1.53, +4.00]
+      rep V1-x->V1         V1-dop -> M-ours-dscore-C-V1: decision ['+6', '+9', '+12'] a:b 210:1 (p 1.3e-61) · 158:4 (p 9.7e-42) · 171:2 (p 2.5e-48) pooled 539:7 (p 2.4e-149) -> (i) 3/3; gap +5.27 [+4.53, +5.83]
+      rep b*-x->b*         bstar-dop -> M-ours-bstar: decision ['+9', '+12', '+15'] a:b 198:6 (p 7.5e-51) · 203:4 (p 7.4e-55) · 204:2 (p 4.1e-58) pooled 605:12 (p 2.1e-161) -> (i) 3/3; gap +6.04 [+5.33, +7.85]
+      rep b*->V1-x         M-ours-bstar -> V1-dop: decision ['+0', '+3', '+6'] a:b 115:308 (p 2e-21) · 60:215 (p 1.2e-21) · 26:188 (p 1.7e-31) pooled 201:711 (p 2e-67) -> (ii) 3/3; gap -3.86 [-4.44, -3.09]
+      rep R2-x->V1-x       R2-dop -> V1-dop: decision ['+9', '+12', '+15'] a:b 143:53 (p 9.6e-11) · 128:52 (p 1.4e-08) · 114:48 (p 2.3e-07) pooled 385:153 (p 4.4e-24) -> (i) 3/3; gap +6.71 [+2.29, +8.12] censored 10%
+      rep genie-x->genie   genie-dop -> R5-genie: decision ['+9', '+12', '+15'] a:b 483:0 (p 8e-146) · 515:0 (p 1.9e-155) · 481:1 (p 7.7e-143) pooled 1479:1 (p 0) -> (i) 3/3; gap >= +16.38 (genie-dop never reaches 0.1)
+      gap retention = +2.18 / +1.41 = 1.55
+      -3 dB failures (R2-dop · bstar-dop · V1-dop · genie-dop): 1789 · 1671 · 1418 · 1406
+
+  [SV8e] control DOP0SV: 1 file, 14 arms x KEYS_RAW over 40 trials vs raw_SVB16e4: differing []; run|git ['063f3bcb']; meta|doppler ['nu=0.0 per s']
+    static -3 dB failures (R2 · b* · V1 · genie): 599 · 464 · 402 · 31
+    [DOPaSV] 448 files; run|git ['063f3bcb']; meta|doppler ['nu=0.005 per s']; ckpt id == base True; raised {'V1-dop': 0, 'bstar-dop': 0, 'R2-dop': 0, 'genie-dop': 0}; integrity (grid, meta, one clean commit, fingerprint, n, applied): OK
+      MAIN                 bstar-dop -> V1-dop: decision ['-3', '+0'] a:b 130:61 (p 6.6e-07) · 22:12 (p 0.12) pooled 152:73 (p 1.5e-07) -> (iv) (POWERED=False, 2 pts); gap +0.21 [+0.13, +0.30]
+      rep V1-x->V1         V1-dop -> M-ours-dscore-C-V1: decision ['-3', '+0'] a:b 131:61 (p 4.8e-07) · 32:12 (p 0.0037) pooled 163:73 (p 4.5e-09) -> (iv) (POWERED=False, 2 pts); gap +0.31 [+0.21, +0.41]
+      rep b*-x->b*         bstar-dop -> M-ours-bstar: decision ['-3', '+0'] a:b 144:67 (p 1.2e-07) · 32:16 (p 0.029) pooled 176:83 (p 7.6e-09) -> (iv) (POWERED=False, 2 pts); gap +0.27 [+0.18, +0.37]
+      rep b*->V1-x         M-ours-bstar -> V1-dop: decision ['-3', '+0'] a:b 124:132 (p 0.66) · 21:27 (p 0.47) pooled 145:159 (p 0.46) -> (iv) (POWERED=False, 2 pts); gap -0.06 [-0.16, +0.04]
+      rep R2-x->V1-x       R2-dop -> V1-dop: decision ['-3', '+0', '+3'] a:b 273:59 (p 4.9e-34) · 62:19 (p 1.8e-06) · 13:3 (p 0.021) pooled 348:81 (p 1.7e-40) -> (i) 3/3; gap +0.67 [+0.55, +0.80]
+      rep genie-x->genie   genie-dop -> R5-genie: decision ['-3'] a:b 41:7 (p 6.2e-07) pooled 41:7 (p 6.2e-07) -> (iv) (POWERED=False, 1 pts); gap n/a (-3.00 lo vs -3.00 lo)
+      gap retention = +0.21 / +0.25 = 0.85
+      -3 dB failures (R2-dop · bstar-dop · V1-dop · genie-dop): 686 · 541 · 472 · 65
+    [DOPbSV] 448 files; run|git ['063f3bcb']; meta|doppler ['nu=0.01 per sy']; ckpt id == base True; raised {'V1-dop': 0, 'bstar-dop': 0, 'R2-dop': 0, 'genie-dop': 0}; integrity (grid, meta, one clean commit, fingerprint, n, applied): OK
+      MAIN                 bstar-dop -> V1-dop: decision ['-3', '+0', '+15'] a:b 162:70 (p 1.4e-09) · 65:31 (p 0.00067) · 47:48 (p 1) pooled 274:149 (p 1.3e-09) -> (i) 2/3; gap +0.36 [+0.22, +0.51]
+      rep V1-x->V1         V1-dop -> M-ours-dscore-C-V1: decision ['-3', '+0', '+15'] a:b 371:62 (p 1e-54) · 140:13 (p 4.6e-28) · 99:0 (p 3.2e-30) pooled 610:75 (p 4.1e-105) -> (i) 3/3; gap +1.54 [+1.37, +1.74]
+      rep b*-x->b*         bstar-dop -> M-ours-bstar: decision ['-3', '+0', '+15'] a:b 416:77 (p 2.8e-57) · 159:12 (p 6.3e-34) · 98:0 (p 6.3e-30) pooled 673:89 (p 8.5e-112) -> (i) 3/3; gap +1.66 [+1.47, +1.87]
+      rep b*->V1-x         M-ours-bstar -> V1-dop: decision ['-3', '+0'] a:b 99:346 (p 3.8e-33) · 16:129 (p 3.9e-23) pooled 115:475 (p 6.7e-53) -> (iv) (POWERED=False, 2 pts); gap -1.30 [-1.48, -1.12]
+      rep R2-x->V1-x       R2-dop -> V1-dop: decision ['+0', '+3', '+15'] a:b 132:34 (p 7.8e-15) · 51:12 (p 7.5e-07) · 34:50 (p 0.1) pooled 217:96 (p 6.5e-12) -> (i) 2/3; gap +0.99 [+0.79, +1.17]
+      rep genie-x->genie   genie-dop -> R5-genie: decision ['-3', '+0', '+15'] a:b 423:3 (p 1.5e-121) · 211:1 (p 6.5e-62) · 148:0 (p 5.6e-45) pooled 782:4 (p 7.8e-227) -> (i) 3/3; gap >= +2.26 (R5-genie already < 0.1 at lowest SNR)
+      gap retention = +0.36 / +0.25 = 1.46
+      -3 dB failures (R2-dop · bstar-dop · V1-dop · genie-dop): 957 · 803 · 711 · 451
+
+  [UMi28] control DOP0U28: 1 file, 14 arms x KEYS_RAW over 40 trials vs raw_U28B16e4: differing []; run|git ['063f3bcb']; meta|doppler ['nu=0.0 per s']
+    static -3 dB failures (R2 · b* · V1 · genie): 1458 · 1270 · 1228 · 594
+    [DOPaU28] 448 files; run|git ['063f3bcb']; meta|doppler ['nu=0.005 per s']; ckpt id == base True; raised {'V1-dop': 0, 'bstar-dop': 0, 'R2-dop': 0, 'genie-dop': 0}; integrity (grid, meta, one clean commit, fingerprint, n, applied): OK
+      MAIN                 bstar-dop -> V1-dop: decision ['+3', '+6', '+9'] a:b 74:36 (p 0.00037) · 52:23 (p 0.0011) · 35:15 (p 0.0066) pooled 161:74 (p 1.4e-08) -> (i) 3/3; gap +0.53 [+0.27, +0.79]
+      rep V1-x->V1         V1-dop -> M-ours-dscore-C-V1: decision ['+3', '+6', '+9'] a:b 96:27 (p 2.9e-10) · 56:18 (p 1.1e-05) · 38:9 (p 2.5e-05) pooled 190:54 (p 6.2e-19) -> (i) 3/3; gap +0.81 [+0.53, +1.06]
+      rep b*-x->b*         bstar-dop -> M-ours-bstar: decision ['+3', '+6', '+9'] a:b 97:28 (p 4.2e-10) · 57:18 (p 7.2e-06) · 40:13 (p 0.00027) pooled 194:59 (p 5.5e-18) -> (i) 3/3; gap +0.75 [+0.47, +0.99]
+      rep b*->V1-x         M-ours-bstar -> V1-dop: decision ['+3', '+6', '+9'] a:b 62:93 (p 0.016) · 38:48 (p 0.33) · 26:33 (p 0.43) pooled 126:174 (p 0.0066) -> (iii) 0/3; gap -0.21 [-0.47, +0.08]
+      rep R2-x->V1-x       R2-dop -> V1-dop: decision ['+6', '+9', '+12'] a:b 161:16 (p 2.6e-31) · 109:7 (p 1.2e-24) · 72:8 (p 5.4e-14) pooled 342:31 (p 2e-67) -> (i) 3/3; gap +2.57 [+2.03, +3.23]
+      rep genie-x->genie   genie-dop -> R5-genie: decision ['+0', '+3', '+6'] a:b 143:10 (p 2.7e-31) · 96:6 (p 5.7e-22) · 57:3 (p 6.3e-14) pooled 296:19 (p 4.4e-65) -> (i) 3/3; gap +1.76 [+1.44, +2.19]
+      gap retention = +0.53 / +0.60 = 0.90
+      -3 dB failures (R2-dop · bstar-dop · V1-dop · genie-dop): 1542 · 1371 · 1324 · 755
+    [DOPbU28] 448 files; run|git ['063f3bcb']; meta|doppler ['nu=0.01 per sy']; ckpt id == base True; raised {'V1-dop': 0, 'bstar-dop': 0, 'R2-dop': 0, 'genie-dop': 0}; integrity (grid, meta, one clean commit, fingerprint, n, applied): OK
+      MAIN                 bstar-dop -> V1-dop: decision ['+9', '+12', '+15'] a:b 64:51 (p 0.26) · 70:46 (p 0.032) · 58:50 (p 0.5) pooled 192:147 (p 0.017) -> (iii) 1/3; gap +2.16 [+0.17, +2.92] censored 27%
+      rep V1-x->V1         V1-dop -> M-ours-dscore-C-V1: decision ['+9', '+12', '+15'] a:b 247:5 (p 2.3e-66) · 215:4 (p 2.3e-58) · 217:2 (p 5.7e-62) pooled 679:11 (p 1.5e-184) -> (i) 3/3; gap +6.83 [+5.95, +9.04] censored 5%
+      rep b*-x->b*         bstar-dop -> M-ours-bstar: decision ['+9', '+12', '+15'] a:b 240:7 (p 9.3e-62) · 214:4 (p 4.4e-58) · 224:4 (p 5.2e-61) pooled 678:15 (p 1.3e-178) -> (i) 3/3; gap +8.39 [+6.12, +9.21] censored 25%
+      rep b*->V1-x         M-ours-bstar -> V1-dop: decision ['+3', '+6', '+9'] a:b 24:330 (p 6.4e-70) · 21:271 (p 1.5e-56) · 15:235 (p 5.5e-52) pooled 60:836 (p 8.9e-176) -> (ii) 3/3; gap -6.23 [-8.43, -5.32] censored 5%
+      rep R2-x->V1-x       R2-dop -> V1-dop: decision ['+9', '+12', '+15'] a:b 141:32 (p 1.6e-17) · 115:56 (p 7.6e-06) · 95:62 (p 0.01) pooled 351:150 (p 1.3e-19) -> (i) 3/3; gap >= +3.04 (R2-dop never reaches 0.1)
+      rep genie-x->genie   genie-dop -> R5-genie: decision ['+9', '+12', '+15'] a:b 547:1 (p 1.2e-162) · 494:1 (p 9.7e-147) · 517:0 (p 4.7e-156) pooled 1558:2 (p 0) -> (i) 3/3; gap >= +14.41 (genie-dop never reaches 0.1)
+      gap retention = +2.16 / +0.60 = 3.62
+      -3 dB failures (R2-dop · bstar-dop · V1-dop · genie-dop): 1767 · 1638 · 1614 · 1342
+
+  [MIX3] control DOP0MX: 1 file, 14 arms x KEYS_RAW over 40 trials vs raw_MXB16e4: differing []; run|git ['063f3bcb']; meta|doppler ['nu=0.0 per s']
+    static -3 dB failures (R2 · b* · V1 · genie): 1613 · 1421 · 1354 · 679
+    [DOPaMX] 448 files; run|git ['063f3bcb']; meta|doppler ['nu=0.005 per s']; ckpt id == base True; raised {'V1-dop': 0, 'bstar-dop': 0, 'R2-dop': 0, 'genie-dop': 0}; integrity (grid, meta, one clean commit, fingerprint, n, applied): OK
+      MAIN                 bstar-dop -> V1-dop: decision ['+3', '+6', '+9'] a:b 99:51 (p 0.00011) · 71:18 (p 1.3e-08) · 63:21 (p 5e-06) pooled 233:90 (p 9.3e-16) -> (i) 3/3; gap +1.17 [+0.82, +1.68]
+      rep V1-x->V1         V1-dop -> M-ours-dscore-C-V1: decision ['+3', '+6', '+9'] a:b 129:39 (p 1.9e-12) · 101:21 (p 9.7e-14) · 67:10 (p 1.7e-11) pooled 297:70 (p 2.1e-34) -> (i) 3/3; gap +1.62 [+1.21, +1.97]
+      rep b*-x->b*         bstar-dop -> M-ours-bstar: decision ['+3', '+6', '+9'] a:b 129:37 (p 3.9e-13) · 102:19 (p 6.4e-15) · 81:13 (p 3.6e-13) pooled 312:69 (p 5.2e-38) -> (i) 3/3; gap +1.81 [+1.33, +2.34]
+      rep b*->V1-x         M-ours-bstar -> V1-dop: decision ['+3', '+6', '+9'] a:b 77:121 (p 0.0022) · 53:83 (p 0.013) · 38:64 (p 0.013) pooled 168:268 (p 1.9e-06) -> (ii) 3/3; gap -0.64 [-0.97, -0.25]
+      rep R2-x->V1-x       R2-dop -> V1-dop: decision ['+6', '+9', '+12'] a:b 201:19 (p 1.6e-39) · 142:20 (p 7.4e-24) · 100:15 (p 1.4e-16) pooled 443:54 (p 4.9e-77) -> (i) 3/3; gap +3.24 [+2.60, +3.90]
+      rep genie-x->genie   genie-dop -> R5-genie: decision ['+0', '+3', '+6'] a:b 176:13 (p 1.1e-37) · 132:13 (p 5.7e-26) · 108:8 (p 1.6e-23) pooled 416:34 (p 1.1e-84) -> (i) 3/3; gap +2.06 [+1.66, +2.54]
+      gap retention = +1.17 / +0.98 = 1.19
+      -3 dB failures (R2-dop · bstar-dop · V1-dop · genie-dop): 1688 · 1501 · 1431 · 891
+    [DOPbMX] 448 files; run|git ['063f3bcb']; meta|doppler ['nu=0.01 per sy']; ckpt id == base True; raised {'V1-dop': 0, 'bstar-dop': 0, 'R2-dop': 0, 'genie-dop': 0}; integrity (grid, meta, one clean commit, fingerprint, n, applied): OK
+      MAIN                 bstar-dop -> V1-dop: decision ['+9', '+12', '+15'] a:b 94:51 (p 0.00045) · 89:46 (p 0.00027) · 78:67 (p 0.41) pooled 261:164 (p 2.9e-06) -> (i) 2/3; gap n/a (15.00 hi vs 15.00 hi)
+      rep V1-x->V1         V1-dop -> M-ours-dscore-C-V1: decision ['+9', '+12', '+15'] a:b 386:4 (p 7.6e-109) · 359:4 (p 7.7e-101) · 346:1 (p 2.4e-102) pooled 1091:9 (p 0) -> (i) 3/3; gap >= +10.26 (V1-dop never reaches 0.1)
+      rep b*-x->b*         bstar-dop -> M-ours-bstar: decision ['+9', '+12', '+15'] a:b 403:9 (p 1.7e-106) · 389:8 (p 9e-104) · 358:1 (p 6.1e-106) pooled 1150:18 (p 0) -> (i) 3/3; gap >= +9.28 (bstar-dop never reaches 0.1)
+      rep b*->V1-x         M-ours-bstar -> V1-dop: decision ['+3', '+6', '+9'] a:b 45:446 (p 4.6e-84) · 32:383 (p 1.7e-77) · 22:373 (p 1.7e-83) pooled 99:1202 (p 2.4e-241) -> (ii) 3/3; gap n/a (5.72 ok vs 15.00 hi)
+      rep R2-x->V1-x       R2-dop -> V1-dop: decision ['+9', '+12', '+15'] a:b 183:74 (p 7.9e-12) · 157:61 (p 6.1e-11) · 146:78 (p 6.5e-06) pooled 486:213 (p 1.9e-25) -> (i) 3/3; gap n/a (15.00 hi vs 15.00 hi)
+      rep genie-x->genie   genie-dop -> R5-genie: decision ['+9', '+12', '+15'] a:b 760:1 (p 1.3e-226) · 695:0 (p 1.2e-209) · 734:0 (p 2.2e-221) pooled 2189:1 (p 0) -> (i) 3/3; gap >= +13.90 (genie-dop never reaches 0.1)
+      gap retention = +nan / +0.98 = nan
+      -3 dB failures (R2-dop · bstar-dop · V1-dop · genie-dop): 1899 · 1749 · 1697 · 1483
+
+## 3. ROT16e4 -- 6 datasets x 2 levels + 6 zero-controls
+
+  [D2C2] control ROT0B16e4k: 1 file, 14 arms x KEYS_RAW over 40 trials vs raw_B16e4k: differing []; run|git ['a4cbd184']; meta|rotation ['deg=0.0: rec']
+    static -3 dB failures (R2 · b* · V1 · genie): 839 · 623 · 371 · 87
+    [ROTaB16e4k] 448 files; run|git ['a4cbd184']; meta|rotation ['deg=15.0: rece']; ckpt id == base False; raised {'V1-rot': 0, 'bstar-rot': 0, 'R2-rot': 0, 'genie-rot': 0}; integrity (grid, meta, one clean commit, fingerprint, n, applied): OK
+      MAIN                 bstar-rot -> V1-rot: decision ['-3', '+0', '+3'] a:b 309:57 (p 5.3e-43) · 106:15 (p 4.7e-18) · 33:8 (p 0.00011) pooled 448:80 (p 4.5e-63) -> (i) 3/3; gap +1.29 [+1.10, +1.49]
+      rep V1-x->V1         V1-rot -> M-ours-dscore-C-V1: decision ['-3', '+0', '+3'] a:b 195:162 (p 0.09) · 50:45 (p 0.68) · 14:16 (p 0.86) pooled 259:223 (p 0.11) -> (iii) 0/3; gap +0.16 [+0.00, +0.31]
+      rep b*-x->b*         bstar-rot -> M-ours-bstar: decision ['-3', '+0', '+3'] a:b 263:230 (p 0.15) · 94:94 (p 1) · 26:31 (p 0.6) pooled 383:355 (p 0.32) -> (iii) 0/3; gap +0.03 [-0.19, +0.25]
+      rep b*->V1-x         M-ours-bstar -> V1-rot: decision ['-3', '+0', '+3'] a:b 347:128 (p 2.2e-24) · 120:29 (p 2.4e-14) · 40:10 (p 2.4e-05) pooled 507:167 (p 1e-40) -> (i) 3/3; gap +1.26 [+1.06, +1.48]
+      rep R2-x->V1-x       R2-rot -> V1-rot: decision ['-3', '+0', '+3'] a:b 487:37 (p 3.2e-101) · 190:6 (p 1.5e-48) · 81:5 (p 9.6e-19) pooled 758:48 (p 3.1e-165) -> (i) 3/3; gap +2.31 [+2.04, +2.53]
+      rep genie-x->genie   genie-rot -> R5-genie: decision ['-3', '+0'] a:b 71:47 (p 0.034) · 18:9 (p 0.12) pooled 89:56 (p 0.0077) -> (iv) (POWERED=False, 2 pts); gap n/a (-3.00 lo vs -3.00 lo)
+      gap retention = +1.29 / +1.41 = 0.91
+      -3 dB failures (R2-rot · bstar-rot · V1-rot · genie-rot): 854 · 656 · 404 · 111
+    [ROTbB16e4k] 448 files; run|git ['a4cbd184']; meta|rotation ['deg=30.0: rece']; ckpt id == base False; raised {'V1-rot': 0, 'bstar-rot': 0, 'R2-rot': 0, 'genie-rot': 0}; integrity (grid, meta, one clean commit, fingerprint, n, applied): OK
+      MAIN                 bstar-rot -> V1-rot: decision ['-3', '+0', '+3'] a:b 346:84 (p 7.9e-39) · 134:29 (p 2.5e-17) · 49:11 (p 7.6e-07) pooled 529:124 (p 1.9e-60) -> (i) 3/3; gap +1.25 [+1.05, +1.45]
+      rep V1-x->V1         V1-rot -> M-ours-dscore-C-V1: decision ['-3', '+0', '+3'] a:b 301:153 (p 3.4e-12) · 83:48 (p 0.0028) · 28:14 (p 0.044) pooled 412:215 (p 3e-15) -> (i) 3/3; gap +0.70 [+0.52, +0.89]
+      rep b*-x->b*         bstar-rot -> M-ours-bstar: decision ['-3', '+0', '+3'] a:b 374:216 (p 7.9e-11) · 133:89 (p 0.0038) · 56:32 (p 0.014) pooled 563:337 (p 4.7e-14) -> (i) 3/3; gap +0.53 [+0.28, +0.77]
+      rep b*->V1-x         M-ours-bstar -> V1-rot: decision ['-3', '+0', '+3'] a:b 324:220 (p 9.5e-06) · 128:67 (p 1.5e-05) · 37:23 (p 0.092) pooled 489:310 (p 2.6e-10) -> (i) 2/3; gap +0.72 [+0.50, +0.95]
+      rep R2-x->V1-x       R2-rot -> V1-rot: decision ['+0', '+3', '+6'] a:b 239:18 (p 1.9e-50) · 95:6 (p 1.1e-21) · 53:4 (p 5.9e-12) pooled 387:28 (p 6.6e-82) -> (i) 3/3; gap +2.45 [+2.23, +2.68]
+      rep genie-x->genie   genie-rot -> R5-genie: decision ['-3', '+0', '+3'] a:b 75:49 (p 0.024) · 24:12 (p 0.065) · 14:7 (p 0.19) pooled 113:68 (p 0.001) -> (iii) 1/3; gap n/a (-3.00 lo vs -3.00 lo)
+      gap retention = +1.25 / +1.41 = 0.88
+      -3 dB failures (R2-rot · bstar-rot · V1-rot · genie-rot): 996 · 781 · 519 · 113
+
+  [D2C6] control ROT0NR16: 1 file, 14 arms x KEYS_RAW over 40 trials vs raw_NR16B16e4: differing []; run|git ['a4cbd184']; meta|rotation ['deg=0.0: rec']
+    static -3 dB failures (R2 · b* · V1 · genie): 295 · 184 · 53 · 22
+    [ROTaNR16] 448 files; run|git ['a4cbd184']; meta|rotation ['deg=15.0: rece']; ckpt id == base True; raised {'V1-rot': 0, 'bstar-rot': 0, 'R2-rot': 0, 'genie-rot': 0}; integrity (grid, meta, one clean commit, fingerprint, n, applied): OK
+      MAIN                 bstar-rot -> V1-rot: decision ['-3', '+0', '+3'] a:b 165:12 (p 1.5e-35) · 80:7 (p 8.3e-17) · 37:1 (p 2.8e-10) pooled 282:20 (p 2.3e-60) -> (i) 3/3; gap n/a (-3.00 lo vs -3.00 lo)
+      rep V1-x->V1         V1-rot -> M-ours-dscore-C-V1: decision ['-3', '+0'] a:b 36:29 (p 0.46) · 12:10 (p 0.83) pooled 48:39 (p 0.39) -> (iv) (POWERED=False, 2 pts); gap n/a (-3.00 lo vs -3.00 lo)
+      rep b*-x->b*         bstar-rot -> M-ours-bstar: decision ['-3', '+0', '+3'] a:b 113:84 (p 0.046) · 60:26 (p 0.00032) · 33:19 (p 0.07) pooled 206:129 (p 3.1e-05) -> (i) 2/3; gap n/a (-3.00 lo vs -3.00 lo)
+      rep b*->V1-x         M-ours-bstar -> V1-rot: decision ['-3', '+0', '+3'] a:b 144:20 (p 2.4e-24) · 45:6 (p 1.8e-08) · 27:5 (p 0.00011) pooled 216:31 (p 2.6e-35) -> (i) 3/3; gap n/a (-3.00 lo vs -3.00 lo)
+      rep R2-x->V1-x       R2-rot -> V1-rot: decision ['-3', '+0', '+3'] a:b 262:7 (p 4e-68) · 123:5 (p 1.6e-30) · 71:2 (p 5.7e-19) pooled 456:14 (p 1.6e-115) -> (i) 3/3; gap >= +0.77 (V1-rot already < 0.1 at lowest SNR)
+      rep genie-x->genie   genie-rot -> R5-genie: decision ['-3'] a:b 16:14 (p 0.86) pooled 16:14 (p 0.86) -> (iv) (POWERED=False, 1 pts); gap n/a (-3.00 lo vs -3.00 lo)
+      gap retention = +nan / +nan = nan
+      -3 dB failures (R2-rot · bstar-rot · V1-rot · genie-rot): 315 · 213 · 60 · 24
+    [ROTbNR16] 448 files; run|git ['a4cbd184']; meta|rotation ['deg=30.0: rece']; ckpt id == base True; raised {'V1-rot': 0, 'bstar-rot': 0, 'R2-rot': 0, 'genie-rot': 0}; integrity (grid, meta, one clean commit, fingerprint, n, applied): OK
+      MAIN                 bstar-rot -> V1-rot: decision ['-3', '+0', '+3'] a:b 297:8 (p 5.3e-77) · 137:6 (p 2e-33) · 84:4 (p 1.6e-20) pooled 518:18 (p 1.4e-128) -> (i) 3/3; gap >= +1.22 (V1-rot already < 0.1 at lowest SNR)
+      rep V1-x->V1         V1-rot -> M-ours-dscore-C-V1: decision ['-3', '+0', '+3'] a:b 63:30 (p 0.00081) · 11:15 (p 0.56) · 16:4 (p 0.012) pooled 90:49 (p 0.00064) -> (i) 2/3; gap n/a (-3.00 lo vs -3.00 lo)
+      rep b*-x->b*         bstar-rot -> M-ours-bstar: decision ['-3', '+0', '+3'] a:b 259:68 (p 2.1e-27) · 117:31 (p 5.9e-13) · 84:15 (p 8.2e-13) pooled 460:114 (p 3.3e-50) -> (i) 3/3; gap >= +1.22 (M-ours-bstar already < 0.1 at lowest SNR)
+      rep b*->V1-x         M-ours-bstar -> V1-rot: decision ['-3', '+0', '+3'] a:b 142:44 (p 3.1e-13) · 54:9 (p 6.1e-09) · 26:15 (p 0.12) pooled 222:68 (p 3.1e-20) -> (i) 2/3; gap n/a (-3.00 lo vs -3.00 lo)
+      rep R2-x->V1-x       R2-rot -> V1-rot: decision ['-3', '+0', '+3'] a:b 410:9 (p 1.5e-108) · 172:3 (p 3.7e-47) · 111:5 (p 4e-27) pooled 693:17 (p 2.6e-180) -> (i) 3/3; gap >= +1.99 (V1-rot already < 0.1 at lowest SNR)
+      rep genie-x->genie   genie-rot -> R5-genie: decision ['-3'] a:b 13:14 (p 1) pooled 13:14 (p 1) -> (iv) (POWERED=False, 1 pts); gap n/a (-3.00 lo vs -3.00 lo)
+      gap retention = +1.22 / +nan = nan
+      -3 dB failures (R2-rot · bstar-rot · V1-rot · genie-rot): 487 · 375 · 86 · 21
+
+  [D3] control ROT0D3: 1 file, 14 arms x KEYS_RAW over 40 trials vs raw_D3B16e4: differing []; run|git ['a4cbd184']; meta|rotation ['deg=0.0: rec']
+    static -3 dB failures (R2 · b* · V1 · genie): 1454 · 1298 · 1000 · 485
+    [ROTaD3] 448 files; run|git ['a4cbd184']; meta|rotation ['deg=15.0: rece']; ckpt id == base True; raised {'V1-rot': 0, 'bstar-rot': 0, 'R2-rot': 0, 'genie-rot': 0}; integrity (grid, meta, one clean commit, fingerprint, n, applied): OK
+      MAIN                 bstar-rot -> V1-rot: decision ['+0', '+3', '+6'] a:b 227:58 (p 8.6e-25) · 116:16 (p 6.7e-20) · 74:16 (p 4.4e-10) pooled 417:90 (p 2.6e-51) -> (i) 3/3; gap +1.50 [+1.24, +1.82]
+      rep V1-x->V1         V1-rot -> M-ours-dscore-C-V1: decision ['+0', '+3', '+6'] a:b 129:114 (p 0.37) · 78:51 (p 0.022) · 37:25 (p 0.16) pooled 244:190 (p 0.011) -> (iii) 1/3; gap +0.30 [+0.10, +0.51]
+      rep b*-x->b*         bstar-rot -> M-ours-bstar: decision ['+0', '+3', '+6'] a:b 185:183 (p 0.96) · 102:72 (p 0.028) · 65:42 (p 0.033) pooled 352:297 (p 0.034) -> (i) 2/3; gap +0.39 [+0.11, +0.71]
+      rep b*->V1-x         M-ours-bstar -> V1-rot: decision ['+0', '+3', '+6'] a:b 250:83 (p 1.4e-20) · 117:47 (p 4.5e-08) · 64:29 (p 0.00037) pooled 431:159 (p 6e-30) -> (i) 3/3; gap +1.11 [+0.85, +1.40]
+      rep R2-x->V1-x       R2-rot -> V1-rot: decision ['+3', '+6', '+9'] a:b 225:17 (p 1.6e-47) · 123:13 (p 1.2e-23) · 65:1 (p 1.8e-18) pooled 413:31 (p 2.3e-86) -> (i) 3/3; gap +3.08 [+2.74, +3.43]
+      rep genie-x->genie   genie-rot -> R5-genie: decision ['-3', '+0', '+3'] a:b 143:168 (p 0.17) · 58:60 (p 0.93) · 37:21 (p 0.048) pooled 238:249 (p 0.65) -> (iii) 1/3; gap -0.08 [-0.26, +0.11]
+      gap retention = +1.50 / +1.41 = 1.07
+      -3 dB failures (R2-rot · bstar-rot · V1-rot · genie-rot): 1512 · 1303 · 1056 · 460
+    [ROTbD3] 448 files; run|git ['a4cbd184']; meta|rotation ['deg=30.0: rece']; ckpt id == base True; raised {'V1-rot': 0, 'bstar-rot': 0, 'R2-rot': 0, 'genie-rot': 0}; integrity (grid, meta, one clean commit, fingerprint, n, applied): OK
+      MAIN                 bstar-rot -> V1-rot: decision ['+0', '+3', '+6'] a:b 241:42 (p 4.2e-35) · 130:28 (p 6.5e-17) · 74:15 (p 1.5e-10) pooled 445:85 (p 7.3e-60) -> (i) 3/3; gap +1.52 [+1.22, +1.78]
+      rep V1-x->V1         V1-rot -> M-ours-dscore-C-V1: decision ['+0', '+3', '+6'] a:b 182:118 (p 0.00026) · 107:52 (p 1.5e-05) · 40:25 (p 0.082) pooled 329:195 (p 5.2e-09) -> (i) 2/3; gap +0.74 [+0.50, +1.00]
+      rep b*-x->b*         bstar-rot -> M-ours-bstar: decision ['+0', '+3', '+6'] a:b 229:148 (p 3.5e-05) · 136:76 (p 4.6e-05) · 67:40 (p 0.012) pooled 432:264 (p 2e-10) -> (i) 3/3; gap +0.85 [+0.52, +1.14]
+      rep b*->V1-x         M-ours-bstar -> V1-rot: decision ['+0', '+3', '+6'] a:b 239:121 (p 4.9e-10) · 118:76 (p 0.0031) · 62:30 (p 0.0011) pooled 419:227 (p 3.7e-14) -> (i) 3/3; gap +0.67 [+0.40, +0.95]
+      rep R2-x->V1-x       R2-rot -> V1-rot: decision ['+3', '+6', '+9'] a:b 233:29 (p 9.4e-41) · 138:12 (p 2.6e-28) · 68:2 (p 4.2e-18) pooled 439:43 (p 1e-83) -> (i) 3/3; gap +3.02 [+2.64, +3.44]
+      rep genie-x->genie   genie-rot -> R5-genie: decision ['-3', '+0', '+3'] a:b 183:148 (p 0.061) · 68:50 (p 0.12) · 34:16 (p 0.015) pooled 285:214 (p 0.0017) -> (iii) 1/3; gap +0.25 [+0.06, +0.44]
+      gap retention = +1.52 / +1.41 = 1.08
+      -3 dB failures (R2-rot · bstar-rot · V1-rot · genie-rot): 1614 · 1430 · 1142 · 520
+
+  [SV8e] control ROT0SV: 1 file, 14 arms x KEYS_RAW over 40 trials vs raw_SVB16e4: differing []; run|git ['a4cbd184']; meta|rotation ['deg=0.0: rec']
+    static -3 dB failures (R2 · b* · V1 · genie): 599 · 464 · 402 · 31
+    [ROTaSV] 448 files; run|git ['a4cbd184']; meta|rotation ['deg=15.0: rece']; ckpt id == base True; raised {'V1-rot': 0, 'bstar-rot': 0, 'R2-rot': 0, 'genie-rot': 0}; integrity (grid, meta, one clean commit, fingerprint, n, applied): OK
+      MAIN                 bstar-rot -> V1-rot: decision ['-3', '+0'] a:b 130:57 (p 9.7e-08) · 24:11 (p 0.041) pooled 154:68 (p 7.6e-09) -> (iv) (POWERED=False, 2 pts); gap +0.25 [+0.17, +0.34]
+      rep V1-x->V1         V1-rot -> M-ours-dscore-C-V1: decision ['-3', '+0'] a:b 214:178 (p 0.077) · 38:31 (p 0.47) pooled 252:209 (p 0.05) -> (iv) (POWERED=False, 2 pts); gap +0.14 [+0.01, +0.26]
+      rep b*-x->b*         bstar-rot -> M-ours-bstar: decision ['-3', '+0'] a:b 241:194 (p 0.027) · 45:39 (p 0.59) pooled 286:233 (p 0.022) -> (iv) (POWERED=False, 2 pts); gap +0.14 [+0.01, +0.28]
+      rep b*->V1-x         M-ours-bstar -> V1-rot: decision ['-3', '+0'] a:b 218:192 (p 0.22) · 45:38 (p 0.51) pooled 263:230 (p 0.15) -> (iv) (POWERED=False, 2 pts); gap +0.11 [-0.02, +0.24]
+      rep R2-x->V1-x       R2-rot -> V1-rot: decision ['-3', '+0', '+3'] a:b 239:53 (p 2.3e-29) · 57:8 (p 3.2e-10) · 12:1 (p 0.0034) pooled 308:62 (p 2.5e-40) -> (i) 3/3; gap +0.71 [+0.60, +0.84]
+      rep genie-x->genie   genie-rot -> R5-genie: decision ['-3'] a:b 28:21 (p 0.39) pooled 28:21 (p 0.39) -> (iv) (POWERED=False, 1 pts); gap n/a (-3.00 lo vs -3.00 lo)
+      gap retention = +0.25 / +0.25 = 1.01
+      -3 dB failures (R2-rot · bstar-rot · V1-rot · genie-rot): 624 · 511 · 438 · 38
+    [ROTbSV] 448 files; run|git ['a4cbd184']; meta|rotation ['deg=30.0: rece']; ckpt id == base True; raised {'V1-rot': 0, 'bstar-rot': 0, 'R2-rot': 0, 'genie-rot': 0}; integrity (grid, meta, one clean commit, fingerprint, n, applied): OK
+      MAIN                 bstar-rot -> V1-rot: decision ['-3', '+0', '+3'] a:b 135:71 (p 9.7e-06) · 37:9 (p 4.1e-05) · 7:3 (p 0.34) pooled 179:83 (p 2.9e-09) -> (i) 2/3; gap +0.33 [+0.24, +0.43]
+      rep V1-x->V1         V1-rot -> M-ours-dscore-C-V1: decision ['-3', '+0'] a:b 268:164 (p 6.4e-07) · 53:24 (p 0.0013) pooled 321:188 (p 4e-09) -> (iv) (POWERED=False, 2 pts); gap +0.45 [+0.32, +0.57]
+      rep b*-x->b*         bstar-rot -> M-ours-bstar: decision ['-3', '+0', '+3'] a:b 289:183 (p 1.2e-06) · 74:31 (p 3.3e-05) · 10:4 (p 0.18) pooled 373:218 (p 1.9e-10) -> (i) 2/3; gap +0.53 [+0.39, +0.69]
+      rep b*->V1-x         M-ours-bstar -> V1-rot: decision ['-3', '+0'] a:b 206:248 (p 0.054) · 35:50 (p 0.13) pooled 241:298 (p 0.016) -> (iv) (POWERED=False, 2 pts); gap -0.20 [-0.34, -0.06]
+      rep R2-x->V1-x       R2-rot -> V1-rot: decision ['-3', '+0', '+3'] a:b 260:63 (p 1.4e-29) · 72:11 (p 3.9e-12) · 13:3 (p 0.021) pooled 345:77 (p 1.4e-41) -> (i) 3/3; gap +0.77 [+0.65, +0.91]
+      rep genie-x->genie   genie-rot -> R5-genie: decision ['-3'] a:b 49:21 (p 0.0011) pooled 49:21 (p 0.0011) -> (iv) (POWERED=False, 1 pts); gap n/a (-3.00 lo vs -3.00 lo)
+      gap retention = +0.33 / +0.25 = 1.34
+      -3 dB failures (R2-rot · bstar-rot · V1-rot · genie-rot): 703 · 570 · 506 · 59
+
+  [UMi28] control ROT0U28: 1 file, 14 arms x KEYS_RAW over 40 trials vs raw_U28B16e4: differing []; run|git ['a4cbd184']; meta|rotation ['deg=0.0: rec']
+    static -3 dB failures (R2 · b* · V1 · genie): 1458 · 1270 · 1228 · 594
+    [ROTaU28] 448 files; run|git ['a4cbd184']; meta|rotation ['deg=15.0: rece']; ckpt id == base True; raised {'V1-rot': 0, 'bstar-rot': 0, 'R2-rot': 0, 'genie-rot': 0}; integrity (grid, meta, one clean commit, fingerprint, n, applied): OK
+      MAIN                 bstar-rot -> V1-rot: decision ['+3', '+6', '+9'] a:b 90:20 (p 8.6e-12) · 54:31 (p 0.017) · 40:8 (p 3.3e-06) pooled 184:59 (p 3.9e-16) -> (i) 3/3; gap +0.53 [+0.21, +0.82]
+      rep V1-x->V1         V1-rot -> M-ours-dscore-C-V1: decision ['+3', '+6', '+9'] a:b 92:92 (p 1) · 74:51 (p 0.049) · 39:35 (p 0.73) pooled 205:178 (p 0.18) -> (iii) 1/3; gap +0.43 [+0.07, +0.81]
+      rep b*-x->b*         bstar-rot -> M-ours-bstar: decision ['+3', '+6', '+9'] a:b 122:90 (p 0.033) · 87:69 (p 0.17) · 49:35 (p 0.16) pooled 258:194 (p 0.003) -> (iii) 1/3; gap +0.37 [-0.03, +0.70]
+      rep b*->V1-x         M-ours-bstar -> V1-rot: decision ['+3', '+6', '+9'] a:b 112:74 (p 0.0065) · 69:64 (p 0.73) · 51:33 (p 0.063) pooled 232:171 (p 0.0028) -> (iii) 1/3; gap +0.16 [-0.22, +0.56]
+      rep R2-x->V1-x       R2-rot -> V1-rot: decision ['+3', '+6', '+9'] a:b 209:15 (p 6.8e-45) · 129:16 (p 3.9e-23) · 100:9 (p 1.4e-20) pooled 438:40 (p 9.7e-86) -> (i) 3/3; gap +2.10 [+1.60, +2.62]
+      rep genie-x->genie   genie-rot -> R5-genie: decision ['-3', '+0', '+3'] a:b 156:120 (p 0.035) · 96:93 (p 0.88) · 69:49 (p 0.08) pooled 321:262 (p 0.016) -> (iii) 1/3; gap +0.15 [-0.11, +0.42]
+      gap retention = +0.53 / +0.60 = 0.89
+      -3 dB failures (R2-rot · bstar-rot · V1-rot · genie-rot): 1504 · 1317 · 1261 · 630
+    [ROTbU28] 448 files; run|git ['a4cbd184']; meta|rotation ['deg=30.0: rece']; ckpt id == base True; raised {'V1-rot': 0, 'bstar-rot': 0, 'R2-rot': 0, 'genie-rot': 0}; integrity (grid, meta, one clean commit, fingerprint, n, applied): OK
+      MAIN                 bstar-rot -> V1-rot: decision ['+3', '+6', '+9'] a:b 100:24 (p 3.2e-12) · 90:26 (p 1.9e-09) · 55:24 (p 0.00064) pooled 245:74 (p 1.5e-22) -> (i) 3/3; gap +1.03 [+0.72, +1.42]
+      rep V1-x->V1         V1-rot -> M-ours-dscore-C-V1: decision ['+3', '+6', '+9'] a:b 161:99 (p 0.00014) · 105:58 (p 0.00029) · 68:30 (p 0.00016) pooled 334:187 (p 1.2e-10) -> (i) 3/3; gap +0.98 [+0.55, +1.34]
+      rep b*-x->b*         bstar-rot -> M-ours-bstar: decision ['+3', '+6', '+9'] a:b 185:85 (p 1.1e-09) · 145:62 (p 7.6e-09) · 87:40 (p 3.7e-05) pooled 417:187 (p 3.9e-21) -> (i) 3/3; gap +1.42 [+0.99, +1.84]
+      rep b*->V1-x         M-ours-bstar -> V1-rot: decision ['+3', '+6', '+9'] a:b 126:150 (p 0.17) · 82:101 (p 0.18) · 43:59 (p 0.14) pooled 251:310 (p 0.014) -> (iii) 0/3; gap -0.39 [-0.77, +0.05]
+      rep R2-x->V1-x       R2-rot -> V1-rot: decision ['+6', '+9', '+12'] a:b 167:19 (p 9.6e-31) · 105:15 (p 8.3e-18) · 60:5 (p 4.9e-13) pooled 332:39 (p 4.7e-59) -> (i) 3/3; gap +2.37 [+1.86, +3.06]
+      rep genie-x->genie   genie-rot -> R5-genie: decision ['-3', '+0', '+3'] a:b 244:117 (p 2.1e-11) · 151:93 (p 0.00025) · 87:48 (p 0.001) pooled 482:258 (p 1.4e-16) -> (i) 3/3; gap +0.77 [+0.49, +1.10]
+      gap retention = +1.03 / +0.60 = 1.73
+      -3 dB failures (R2-rot · bstar-rot · V1-rot · genie-rot): 1596 · 1389 · 1364 · 721
+
+  [MIX3] control ROT0MX: 1 file, 14 arms x KEYS_RAW over 40 trials vs raw_MXB16e4: differing []; run|git ['a4cbd184']; meta|rotation ['deg=0.0: rec']
+    static -3 dB failures (R2 · b* · V1 · genie): 1613 · 1421 · 1354 · 679
+    [ROTaMX] 448 files; run|git ['a4cbd184']; meta|rotation ['deg=15.0: rece']; ckpt id == base True; raised {'V1-rot': 0, 'bstar-rot': 0, 'R2-rot': 0, 'genie-rot': 0}; integrity (grid, meta, one clean commit, fingerprint, n, applied): OK
+      MAIN                 bstar-rot -> V1-rot: decision ['+3', '+6', '+9'] a:b 90:26 (p 1.9e-09) · 70:23 (p 1.1e-06) · 44:18 (p 0.0013) pooled 204:67 (p 2.9e-17) -> (i) 3/3; gap +0.97 [+0.64, +1.26]
+      rep V1-x->V1         V1-rot -> M-ours-dscore-C-V1: decision ['+3', '+6', '+9'] a:b 127:104 (p 0.15) · 74:52 (p 0.061) · 59:36 (p 0.023) pooled 260:192 (p 0.0016) -> (iii) 1/3; gap +0.42 [+0.12, +0.74]
+      rep b*-x->b*         bstar-rot -> M-ours-bstar: decision ['+3', '+6', '+9'] a:b 156:115 (p 0.015) · 93:74 (p 0.16) · 68:50 (p 0.12) pooled 317:239 (p 0.0011) -> (iii) 1/3; gap +0.41 [-0.01, +0.80]
+      rep b*->V1-x         M-ours-bstar -> V1-rot: decision ['+3', '+6', '+9'] a:b 141:118 (p 0.17) · 93:65 (p 0.031) · 62:54 (p 0.52) pooled 296:237 (p 0.012) -> (iii) 1/3; gap +0.56 [+0.19, +0.95]
+      rep R2-x->V1-x       R2-rot -> V1-rot: decision ['+6', '+9', '+12'] a:b 210:16 (p 2.6e-44) · 134:16 (p 2.2e-24) · 97:1 (p 6.2e-28) pooled 441:33 (p 3.3e-92) -> (i) 3/3; gap +3.58 [+2.99, +4.18]
+      rep genie-x->genie   genie-rot -> R5-genie: decision ['-3', '+0', '+3'] a:b 173:181 (p 0.71) · 133:82 (p 0.00062) · 76:59 (p 0.17) pooled 382:322 (p 0.026) -> (iii) 1/3; gap +0.40 [+0.18, +0.62]
+      gap retention = +0.97 / +0.98 = 0.99
+      -3 dB failures (R2-rot · bstar-rot · V1-rot · genie-rot): 1692 · 1460 · 1400 · 671
+    [ROTbMX] 448 files; run|git ['a4cbd184']; meta|rotation ['deg=30.0: rece']; ckpt id == base True; raised {'V1-rot': 0, 'bstar-rot': 0, 'R2-rot': 0, 'genie-rot': 0}; integrity (grid, meta, one clean commit, fingerprint, n, applied): OK
+      MAIN                 bstar-rot -> V1-rot: decision ['+6', '+9', '+12'] a:b 85:27 (p 3.6e-08) · 53:20 (p 0.00014) · 58:10 (p 2.4e-09) pooled 196:57 (p 4.9e-19) -> (i) 3/3; gap +1.16 [+0.80, +1.74]
+      rep V1-x->V1         V1-rot -> M-ours-dscore-C-V1: decision ['+3', '+6', '+9'] a:b 211:111 (p 2.7e-08) · 147:57 (p 2.4e-10) · 113:37 (p 3.8e-10) pooled 471:205 (p 5.2e-25) -> (i) 3/3; gap +1.92 [+1.38, +2.37]
+      rep b*-x->b*         bstar-rot -> M-ours-bstar: decision ['+6', '+9', '+12'] a:b 176:78 (p 7.2e-10) · 131:53 (p 8.3e-09) · 96:22 (p 3.3e-12) pooled 403:153 (p 6e-27) -> (i) 3/3; gap +2.11 [+1.54, +2.80]
+      rep b*->V1-x         M-ours-bstar -> V1-rot: decision ['+3', '+6', '+9'] a:b 146:200 (p 0.0043) · 90:130 (p 0.0084) · 61:106 (p 0.00062) pooled 297:436 (p 3.2e-07) -> (ii) 3/3; gap -0.94 [-1.43, -0.40]
+      rep R2-x->V1-x       R2-rot -> V1-rot: decision ['+6', '+9', '+12'] a:b 245:22 (p 8.2e-49) · 144:8 (p 2.2e-33) · 113:14 (p 2.1e-20) pooled 502:44 (p 1.6e-99) -> (i) 3/3; gap +3.49 [+2.98, +4.17]
+      rep genie-x->genie   genie-rot -> R5-genie: decision ['+0', '+3', '+6'] a:b 233:88 (p 2.8e-16) · 151:49 (p 2.7e-13) · 80:33 (p 1.1e-05) pooled 464:170 (p 1.9e-32) -> (i) 3/3; gap +1.72 [+1.38, +2.08]
+      gap retention = +1.16 / +0.98 = 1.19
+      -3 dB failures (R2-rot · bstar-rot · V1-rot · genie-rot): 1738 · 1540 · 1495 · 802
+
+## 4. ROTMIX16e4 (B') -- 3 angles x 5 tags: RB, 13 baselines + R_X + X*, DT, DD, integrity (a)-(g), §5 artifacts
+  §5 fits (merged ll_val, n_iter, it_best, n_reseed | candidates r0/r1/r2):
+    full K=256: ll_val -14.093572211507613 n_iter 500 it_best 490 n_reseed 0 restart 1 sec 2122.1
+    full K=512: ll_val -13.496468885523354 n_iter 458 it_best 450 n_reseed 820 restart 2 sec 2131.9
+    kron K=256: ll_val -15.86332540559393 n_iter 241 it_best 240 n_reseed 0 restart 2 sec 311.2
+    kron K=512: ll_val -11.961051907793204 n_iter 311 it_best 270 n_reseed 0 restart 2 sec 639.7
+    kron K=1024: ll_val -8.988496590420036 n_iter 320 it_best 310 n_reseed 315 restart 2 sec 1570.2 | ['k0r0 -9.0127 271/245', 'k0r1 -9.0561 309/0', 'k0r2 -8.9885 320/315']
+    kron K=2048: ll_val -6.8464024185560675 n_iter 288 it_best 280 n_reseed 1455 restart 1 sec 3009.6 | ['k0r0 -6.9026 310/2406', 'k0r1 -6.8464 288/1455', 'k0r2 -6.8634 251/1984']
+    kron K=4096: ll_val -5.574511189627533 n_iter 197 it_best 190 n_reseed 46019 restart 2 sec 3769.8 | ['k0r0 -5.8960 159/41331', 'k0r1 -5.7654 182/51113', 'k0r2 -5.5745 197/46019']
+    sec sum 15 files 16019.9; 13 files (<= kron 1024) 9240.5; kron 4096 sec 3769.8; +2048-1024 +2.14 +4096-2048 +1.27 nat
+    ckpt d2sx_S2d_N160000_a1_best.pt: sha256[:16] ceec0222e0912a1c {'epoch': 1348, 'best_val': 0.34822878241539, 'best_epoch': 1348, 'prior': 'S2d', 'sigma_tag': 'S2d', 'stopped_by': None} {'rung': 'D2SXS2d160000', 'attempt': 1, 'testbed': 'D2', 'Nr': 8, 'Nt': 4, 'split_hash': '87bcc6244a61049d', 'wall_sec': 1101.890380859375, 'jac_reg': 0.0, 'grad_clip': 0.0, 'phase_aug': False, 'devic
+    ckpt d2sx_S2d_N160000_a1.pt: sha256[:16] 98bc88f7333f19ee {'epoch': 1368, 'best_val': 0.34822878241539, 'best_epoch': 1348, 'prior': 'S2d', 'sigma_tag': 'S2d', 'stopped_by': 'patience'} {'rung': 'D2SXS2d160000', 'attempt': 1, 'testbed': 'D2', 'Nr': 8, 'Nt': 4, 'split_hash': '87bcc6244a61049d', 'wall_sec': 1326.0419178009033, 'jac_reg': 0.0, 'grad_clip': 0.0, 'phase_aug': False, 'devi
+    GB' npz ratio min 0.4533 max 0.8877 median 0.5186 n 20; csv: 160000,1,160000,True,1368,3.482288e-01,kron,4096,4096,0.453269,0.887659,0.518614,-0.112341
+    sigma grid header: # date        : 2026-09-28 03:45:06 KST | # git commit  : 2640bb87
+    tune_RMX0ALD.json sha d9a7557d6cdfa547: c 0.01 beta 0.005 stop [288, 295, 353, 447, 546, 600, 600] dev dB [-6.4, -8.9, -11.7, -14.7, -18.0, -21.6, -24.4] v [0.2231, 0.1222, 0.0661, 0.0328, 0.0157, 0.0067, 0.0035] edge [] ext ['beta=0.0001', 'beta=1e-05'] ckpt ceec0222e0912a1c ald.py 5cc14d94b32e5c9a git dca8d19c rule "dev optimum c=0.01, beta=1e-05 (-15.108 dB); authors' defaul"
+    tune_RMX15ALD.json sha 844b30655e1c5967: c 0.01 beta 0.005 stop [289, 308, 359, 445, 546, 600, 600] dev dB [-6.3, -9.1, -11.7, -14.7, -18.1, -21.6, -24.3] v [0.2237, 0.1177, 0.0651, 0.0334, 0.0152, 0.0067, 0.0036] edge [] ext ['beta=0.0001', 'beta=1e-05'] ckpt ceec0222e0912a1c ald.py 5cc14d94b32e5c9a git dca8d19c rule "dev optimum c=0.01, beta=1e-05 (-15.145 dB); authors' defaul"
+    tune_RMX30ALD.json sha c13534c74bc91bfe: c 0.01 beta 0.005 stop [300, 314, 369, 460, 560, 600, 600] dev dB [-6.5, -9.1, -11.9, -14.9, -18.2, -21.5, -24.4] v [0.2151, 0.1169, 0.0627, 0.032, 0.0147, 0.0067, 0.0035] edge [] ext ['beta=0.0001', 'beta=1e-05'] ckpt ceec0222e0912a1c ald.py 5cc14d94b32e5c9a git dca8d19c rule "dev optimum c=0.01, beta=1e-05 (-15.227 dB); authors' defaul"
+
+  [delta = 0 deg] ref raw_B16e4k; files ref 448, rmx 448, pil 448, ald 448, last 448, k1 448
+    run|git ['22370276']; meta|rotation ['deg=0.0:']; meta|train_prior {'ref': ['(none)'], 'rmx': ['S2d: checkpoint and GMM fits trained on prior S2d, test channels S2'], 'pil': ['S2d: checkpoint and GMM fits trained on prior S2d, test channels S2'], 'ald': ['S2d: checkpoint and GMM fits trained on prior S2d, test channels S2'], 'last': ['S2d: checkpoint and GMM fits trained on prior S2d, test channels S2'], 'k1': ['S2d: checkpoint and GMM fits trained on prior S2d, test channels S2']}
+    est ald_RMX0ALD.npz sha 912e54dfd5a0b158; prov '{"ckpt_sha": "ceec0222e0912a1c", "ald_py_sha": "14121bf8a02d2e01", "git": "22370276", "device": "NVIDIA RTX PRO 6000 Bla'; pilots rotation 0.0; test NMSE dB -6.18 -9.05 -11.63 -14.59 -18.15 -21.48 -24.35
+    ckpt ids: rmx sha256[:16]=ceec0222e0912a1c epoch=1348 best_; pil sha256[:16]=ceec0222e0912a1c epoch=1348 best_; ald sha256[:16]=ceec0222e0912a1c epoch=1348 best_; last sha256[:16]=98bc88f7333f19ee epoch=1368 best_; k1 sha256[:16]=ceec0222e0912a1c epoch=1348 best_
+    rmx arms (14): ['M-ours-bstar', 'M-ours-bstar-scalar', 'M-ours-dscore-C-V0', 'M-ours-dscore-C-V1', 'M-ours-dscore-C-V4', 'M-ours-dscore-C-V4b', 'M-ours-gmm32', 'R0-pilot', 'R1-turbo', 'R2-ours-G', 'R3-bigamp', 'R4-llr', 'R4-scvamp', 'R5-genie']
+    integrity (a)-(g) + one clean commit + train_prior: FAILED rmx: meta|train_prior ['S2d: checkpoint and GMM fits trained on prior S2d, test channels S2']; pil: meta|train_prior ['S2d: checkpoint and GMM fits trained on prior S2d, test channels S2']; ald: meta|train_prior ['S2d: checkpoint and GMM fits trained on prior S2d, test channels S2']; last: meta|train_prior ['S2d: checkpoint and GMM fits trained on prior S2d, test channels S2']; k1: meta|train_prior ['S2d: checkpoint and GMM fits trained on prior S2d, test channels S2']
+    pairB: X -> V1 (13 registered baselines), R_X -3 dB primary [90%] | secondary (decision points):
+      M-ours-bstar         decision ['-3', '+0', '+3'] a:b 280:64 (p 2.4e-33) · 98:20 (p 1.5e-13) · 44:5 (p 7.6e-09) pooled 422:89 (p 7.4e-53) -> (i) 3/3; gap +1.17 [+0.98, +1.37]; R_X 0.415 [0.371, 0.460] | 0.463 [0.425, 0.499] (3 pts)
+      M-ours-bstar-scalar  decision ['-3', '+0', '+3'] a:b 298:54 (p 5.2e-42) · 111:23 (p 5e-15) · 54:5 (p 1.9e-11) pooled 463:82 (p 1.7e-65) -> (i) 3/3; gap +1.29 [+1.10, +1.51]; R_X 0.445 [0.404, 0.488] | 0.496 [0.462, 0.530] (3 pts)
+      M-ours-gmm32         decision ['-3', '+0', '+3'] a:b 387:40 (p 2e-72) · 147:22 (p 6.9e-24) · 62:6 (p 8.2e-13) pooled 596:68 (p 2.7e-106) -> (i) 3/3; gap +1.73 [+1.51, +1.97]; R_X 0.533 [0.498, 0.571] | 0.577 [0.547, 0.607] (3 pts)
+      R0-pilot             decision ['+0', '+3', '+6'] a:b 260:11 (p 6.5e-63) · 97:5 (p 3.5e-23) · 56:4 (p 9.1e-13) pooled 413:20 (p 1.3e-96) -> (i) 3/3; gap +2.93 [+2.70, +3.15]; R_X 0.744 [0.722, 0.766] | 0.817 [0.784, 0.849] (3 pts)
+      R1-turbo             decision ['+0', '+3', '+6'] a:b 472:7 (p 1.4e-129) · 199:3 (p 4.3e-55) · 96:3 (p 5.1e-25) pooled 767:13 (p 1.8e-207) -> (i) 3/3; gap +4.64 [+4.34, +4.99]; R_X 0.770 [0.751, 0.791] | 0.895 [0.876, 0.914] (3 pts)
+      R2-ours-G            decision ['-3', '+0', '+3'] a:b 504:41 (p 1.9e-102) · 185:12 (p 5.4e-41) · 84:5 (p 1.4e-19) pooled 773:58 (p 1.8e-160) -> (i) 3/3; gap +2.25 [+1.98, +2.52]; R_X 0.604 [0.573, 0.636] | 0.649 [0.623, 0.675] (3 pts)
+      R3-bigamp            decision ['+3', '+12', '+15'] a:b 181:2 (p 2.7e-51) · 140:1 (p 1e-40) · 138:0 (p 5.7e-42) pooled 459:3 (p 2.8e-132) -> (i) 3/3; gap +4.41 [+4.13, +4.74]; R_X 0.767 [0.747, 0.788] | 0.954 [0.934, 0.973] (3 pts)
+      R4-llr               decision ['+9', '+12', '+15'] a:b 702:1 (p 3.3e-209) · 488:1 (p 6.1e-145) · 421:1 (p 7.8e-125) pooled 1611:3 (p 0) -> (i) 3/3; gap >= +17.10 (R4-llr never reaches 0.1); R_X 0.858 [0.846, 0.872] | 0.993 [0.989, 0.997] (3 pts)
+      R4-scvamp            decision ['+3', '+6', '+9'] a:b 368:2 (p 5.7e-107) · 225:0 (p 3.7e-68) · 168:1 (p 4.5e-49) pooled 761:3 (p 1.5e-222) -> (i) 3/3; gap +7.69 [+7.19, +8.33]; R_X 0.801 [0.784, 0.819] | 0.972 [0.959, 0.984] (3 pts)
+      bstar-pilot          decision ['-3', '+0', '+3'] a:b 601:23 (p 1.5e-146) · 149:19 (p 3.3e-26) · 35:6 (p 4.9e-06) pooled 785:48 (p 1.2e-172) -> (i) 3/3; gap +1.84 [+1.64, +2.05]; R_X 0.655 [0.627, 0.684] | 0.656 [0.631, 0.680] (3 pts)
+      V1-pilot             decision ['-3', '+0', '+3'] a:b 281:34 (p 1.6e-49) · 65:14 (p 5.2e-09) · 14:5 (p 0.064) pooled 360:53 (p 3.5e-57) -> (i) 2/3; gap +0.96 [+0.82, +1.12]; R_X 0.448 [0.410, 0.488] | 0.442 [0.407, 0.477] (3 pts)
+      ALD-pilot            decision ['-3', '+0', '+3'] a:b 470:34 (p 3.4e-99) · 133:16 (p 3.9e-24) · 49:8 (p 2.7e-08) pooled 652:58 (p 3.7e-128) -> (i) 3/3; gap +1.69 [+1.50, +1.90]; R_X 0.589 [0.556, 0.623] | 0.606 [0.577, 0.633] (3 pts)
+      ALDv-pilot           decision ['-3', '+0', '+3'] a:b 491:31 (p 1.3e-107) · 112:17 (p 2.4e-18) · 30:9 (p 0.0011) pooled 633:57 (p 6.4e-124) -> (i) 3/3; gap +1.51 [+1.33, +1.70]; R_X 0.602 [0.571, 0.634] | 0.598 [0.569, 0.626] (3 pts)
+      R0-pilot@1 (house 08_SPEC reading; NOT what pair_baselines used): decision ['+3', '+6', '+9'] a:b 442:1 (p 3.9e-131) · 246:0 (p 1.8e-74) · 159:1 (p 2.2e-46) pooled 847:2 (p 1.9e-250) -> (i) 3/3; F -3 dB 1951; R_X 0.837 [0.823, 0.852]
+    SUMMARY 13 baselines: (i) 13, (ii) 0, undecided 0; X* = M-ours-bstar (F 607; runner-up ('M-ours-bstar-scalar', 635)); R_X* 0.415 lower 0.371; sentence condition (k=13, (ii)=0, lower > 0): MET
+    DT-V1                  V1-static -> V1-drift-last: decision ['-3', '+0', '+3'] a:b 50:49 (p 1) · 20:15 (p 0.5) · 6:7 (p 1) pooled 76:71 (p 0.74) -> (iii) 0/3; gap +0.03 [-0.06, +0.12]
+    DT-b*                  bstar-static -> bstar-drift-1024: decision ['-3', '+0', '+3'] a:b 87:95 (p 0.6) · 41:37 (p 0.73) · 20:15 (p 0.5) pooled 148:147 (p 1) -> (iii) 0/3; gap +0.03 [-0.11, +0.18]
+    rep best->last         V1-drift-best -> V1-drift-last: decision ['-3', '+0', '+3'] a:b 33:12 (p 0.0025) · 17:5 (p 0.017) · 3:7 (p 0.34) pooled 53:24 (p 0.0013) -> (i) 2/3; gap +0.16 [+0.09, +0.23]
+    rep 1024->4096         bstar-drift-1024 -> bstar-drift-4096: decision ['-3', '+0', '+3'] a:b 90:66 (p 0.065) · 47:40 (p 0.52) · 11:24 (p 0.041) pooled 148:130 (p 0.31) -> (iii) 0/3; gap +0.09 [-0.05, +0.24]
+    rep V1 static->best    V1-static -> V1-drift-best: decision ['-3', '+0', '+3'] a:b 39:59 (p 0.054) · 19:26 (p 0.37) · 10:7 (p 0.63) pooled 68:92 (p 0.069) -> (iii) 0/3; gap -0.12 [-0.22, -0.03]
+    rep b* 1024->S2d 4096  bstar-static -> bstar-drift-4096: decision ['-3', '+0', '+3'] a:b 101:85 (p 0.27) · 48:37 (p 0.28) · 13:21 (p 0.23) pooled 162:143 (p 0.3) -> (iii) 0/3; gap +0.12 [-0.02, +0.28]
+    rep R2                 R2-static -> R2-drift: decision ['-3', '+0', '+3'] a:b 61:76 (p 0.23) · 40:47 (p 0.52) · 15:23 (p 0.26) pooled 116:146 (p 0.073) -> (iii) 0/3; gap -0.09 [-0.24, +0.08]
+    DD registered (S2d b* 4096 + V1 last): guard OK (b* BLER 0.237/0.243); R_S2d 0.456 - R_static 0.470 = -0.014 [-0.050, +0.021] -> contains 0
+      secondary (decision points of bstar-drift-4096 ['-3', '+0', '+3'], pooled): -0.006 [-0.038, +0.027]
+    DD same-K report (S2d b* 1024 + V1 last): guard OK (b* BLER 0.246/0.243); R_S2d 0.480 - R_static 0.470 = +0.010 [-0.027, +0.045] -> contains 0
+      secondary (decision points of bstar-drift-1024 ['-3', '+0', '+3'], pooled): +0.006 [-0.025, +0.039]
+    -3 dB failures (genie · V1 S2d best · V1 S2d last · b* S2d 4096 · b* S2d 1024 · V1 static · b* static 1024 · R2 S2d · R2 static): 87 · 391 · 370 · 607 · 631 · 371 · 623 · 854 · 839
+
+  [delta = 15 deg] ref raw_ROTaB16e4k; files ref 448, rmx 448, pil 448, ald 448, last 448, k1 448
+    run|git ['22370276']; meta|rotation ['deg=15.0']; meta|train_prior {'ref': ['(none)'], 'rmx': ['S2d: checkpoint and GMM fits trained on prior S2d, test channels S2'], 'pil': ['S2d: checkpoint and GMM fits trained on prior S2d, test channels S2'], 'ald': ['S2d: checkpoint and GMM fits trained on prior S2d, test channels S2'], 'last': ['S2d: checkpoint and GMM fits trained on prior S2d, test channels S2'], 'k1': ['S2d: checkpoint and GMM fits trained on prior S2d, test channels S2']}
+    est ald_RMX15ALD.npz sha 1bd887a8dc3e7d33; prov '{"ckpt_sha": "ceec0222e0912a1c", "ald_py_sha": "14121bf8a02d2e01", "git": "22370276", "device": "NVIDIA RTX PRO 6000 Bla'; pilots rotation 15.0; test NMSE dB -6.25 -9.19 -11.75 -14.73 -18.22 -21.55 -24.38
+    ckpt ids: rmx sha256[:16]=ceec0222e0912a1c epoch=1348 best_; pil sha256[:16]=ceec0222e0912a1c epoch=1348 best_; ald sha256[:16]=ceec0222e0912a1c epoch=1348 best_; last sha256[:16]=98bc88f7333f19ee epoch=1368 best_; k1 sha256[:16]=ceec0222e0912a1c epoch=1348 best_
+    rmx arms (14): ['M-ours-bstar', 'M-ours-bstar-scalar', 'M-ours-dscore-C-V0', 'M-ours-dscore-C-V1', 'M-ours-dscore-C-V4', 'M-ours-dscore-C-V4b', 'M-ours-gmm32', 'R0-pilot', 'R1-turbo', 'R2-ours-G', 'R3-bigamp', 'R4-llr', 'R4-scvamp', 'R5-genie']
+    integrity (a)-(g) + one clean commit + train_prior: FAILED rmx: meta|train_prior ['S2d: checkpoint and GMM fits trained on prior S2d, test channels S2']; pil: meta|train_prior ['S2d: checkpoint and GMM fits trained on prior S2d, test channels S2']; ald: meta|train_prior ['S2d: checkpoint and GMM fits trained on prior S2d, test channels S2']; last: meta|train_prior ['S2d: checkpoint and GMM fits trained on prior S2d, test channels S2']; k1: meta|train_prior ['S2d: checkpoint and GMM fits trained on prior S2d, test channels S2']
+    pairB: X -> V1 (13 registered baselines), R_X -3 dB primary [90%] | secondary (decision points):
+      M-ours-bstar         decision ['-3', '+0', '+3'] a:b 289:54 (p 5.8e-40) · 86:19 (p 2.3e-11) · 31:8 (p 0.00029) pooled 406:81 (p 4.6e-53) -> (i) 3/3; gap +1.08 [+0.92, +1.26]; R_X 0.457 [0.415, 0.503] | 0.477 [0.438, 0.517] (3 pts)
+      M-ours-bstar-scalar  decision ['-3', '+0', '+3'] a:b 291:50 (p 1.8e-42) · 114:16 (p 2.1e-19) · 49:7 (p 7.5e-09) pooled 454:73 (p 3.2e-68) -> (i) 3/3; gap +1.38 [+1.18, +1.59]; R_X 0.463 [0.420, 0.507] | 0.517 [0.482, 0.553] (3 pts)
+      M-ours-gmm32         decision ['-3', '+0', '+3'] a:b 373:45 (p 2.2e-65) · 131:21 (p 1.3e-20) · 48:7 (p 1.3e-08) pooled 552:73 (p 5.8e-92) -> (i) 3/3; gap +1.57 [+1.35, +1.78]; R_X 0.540 [0.502, 0.579] | 0.574 [0.542, 0.607] (3 pts)
+      R0-pilot             decision ['+0', '+3', '+6'] a:b 267:11 (p 6.7e-65) · 95:4 (p 1.2e-23) · 56:3 (p 1.2e-13) pooled 418:18 (p 4.2e-100) -> (i) 3/3; gap +3.00 [+2.76, +3.22]; R_X 0.751 [0.729, 0.774] | 0.821 [0.788, 0.851] (3 pts)
+      R1-turbo             decision ['+0', '+3', '+6'] a:b 486:2 (p 3e-142) · 191:2 (p 3e-54) · 100:2 (p 2.1e-27) pooled 777:6 (p 1.2e-221) -> (i) 3/3; gap +4.64 [+4.34, +4.97]; R_X 0.781 [0.762, 0.802] | 0.899 [0.880, 0.916] (3 pts)
+      R2-ours-G            decision ['-3', '+0', '+3'] a:b 479:38 (p 3.1e-98) · 202:13 (p 9.4e-45) · 77:5 (p 1.2e-17) pooled 758:56 (p 4e-158) -> (i) 3/3; gap +2.40 [+2.12, +2.64]; R_X 0.613 [0.580, 0.646] | 0.664 [0.637, 0.690] (3 pts)
+      R3-bigamp            decision ['+3', '+12', '+15'] a:b 189:4 (p 9.1e-51) · 138:0 (p 5.7e-42) · 143:0 (p 1.8e-43) pooled 470:4 (p 8.6e-134) -> (i) 3/3; gap +4.56 [+4.26, +4.90]; R_X 0.786 [0.767, 0.806] | 0.961 [0.943, 0.978] (3 pts)
+      R4-llr               decision ['+9', '+12', '+15'] a:b 679:0 (p 8e-205) · 512:1 (p 3.8e-152) · 414:0 (p 4.7e-125) pooled 1605:1 (p 0) -> (i) 3/3; gap >= +17.13 (R4-llr never reaches 0.1); R_X 0.868 [0.856, 0.881] | 0.999 [0.996, 1.003] (3 pts)
+      R4-scvamp            decision ['+3', '+6', '+9'] a:b 383:1 (p 2e-113) · 226:1 (p 2.1e-66) · 160:0 (p 1.4e-48) pooled 769:2 (p 4.8e-227) -> (i) 3/3; gap +7.85 [+7.37, +8.48]; R_X 0.807 [0.790, 0.826] | 0.960 [0.948, 0.972] (3 pts)
+      bstar-pilot          decision ['-3', '+0', '+3'] a:b 591:26 (p 2e-140) · 149:19 (p 3.3e-26) · 41:8 (p 2e-06) pooled 781:53 (p 5.4e-167) -> (i) 3/3; gap +1.83 [+1.63, +2.04]; R_X 0.669 [0.641, 0.699] | 0.672 [0.647, 0.698] (3 pts)
+      V1-pilot             decision ['-3', '+0', '+3'] a:b 265:31 (p 1.7e-47) · 51:20 (p 0.0003) · 11:4 (p 0.12) pooled 327:55 (p 3.3e-48) -> (i) 2/3; gap +0.77 [+0.64, +0.92]; R_X 0.456 [0.416, 0.498] | 0.433 [0.394, 0.472] (3 pts)
+      ALD-pilot            decision ['-3', '+0', '+3'] a:b 488:33 (p 5.8e-105) · 152:16 (p 5.5e-29) · 48:8 (p 4.7e-08) pooled 688:57 (p 1.7e-138) -> (i) 3/3; gap +1.86 [+1.65, +2.08]; R_X 0.620 [0.589, 0.653] | 0.639 [0.612, 0.668] (3 pts)
+      ALDv-pilot           decision ['-3', '+0', '+3'] a:b 505:24 (p 2.6e-118) · 115:20 (p 2.1e-17) · 25:12 (p 0.047) pooled 645:56 (p 7e-128) -> (i) 3/3; gap +1.51 [+1.34, +1.70]; R_X 0.633 [0.603, 0.664] | 0.623 [0.595, 0.652] (3 pts)
+      R0-pilot@1 (house 08_SPEC reading; NOT what pair_baselines used): decision ['+3', '+6', '+9'] a:b 452:0 (p 1.7e-136) · 232:1 (p 3.4e-68) · 181:0 (p 6.5e-55) pooled 865:1 (p 3.5e-258) -> (i) 3/3; F -3 dB 1929; R_X 0.847 [0.833, 0.861]
+    SUMMARY 13 baselines: (i) 13, (ii) 0, undecided 0; X* = V1-pilot (F 624; runner-up ('M-ours-bstar', 625)); R_X* 0.456 lower 0.416; sentence condition (k=13, (ii)=0, lower > 0): MET
+    DT-V1                  V1-static -> V1-drift-last: decision ['-3', '+0', '+3'] a:b 65:48 (p 0.13) · 20:22 (p 0.88) · 7:10 (p 0.63) pooled 92:80 (p 0.4) -> (iii) 0/3; gap +0.05 [-0.05, +0.15]
+    DT-b*                  bstar-static -> bstar-drift-1024: decision ['-3', '+0', '+3'] a:b 118:97 (p 0.17) · 44:43 (p 1) · 14:21 (p 0.31) pooled 176:161 (p 0.45) -> (iii) 0/3; gap +0.03 [-0.12, +0.17]
+    rep best->last         V1-drift-best -> V1-drift-last: decision ['-3', '+0', '+3'] a:b 27:24 (p 0.78) · 9:12 (p 0.66) · 3:3 (p 1) pooled 39:39 (p 1) -> (iii) 0/3; gap -0.01 [-0.08, +0.06]
+    rep 1024->4096         bstar-drift-1024 -> bstar-drift-4096: decision ['-3', '+0', '+3'] a:b 91:81 (p 0.49) · 47:23 (p 0.0056) · 15:9 (p 0.31) pooled 153:113 (p 0.017) -> (iii) 1/3; gap +0.23 [+0.10, +0.37]
+    rep V1 static->best    V1-static -> V1-drift-best: decision ['-3', '+0', '+3'] a:b 70:56 (p 0.25) · 19:18 (p 1) · 9:12 (p 0.66) pooled 98:86 (p 0.42) -> (iii) 0/3; gap +0.06 [-0.04, +0.15]
+    rep b* 1024->S2d 4096  bstar-static -> bstar-drift-4096: decision ['-3', '+0', '+3'] a:b 124:93 (p 0.041) · 62:37 (p 0.015) · 13:14 (p 1) pooled 199:144 (p 0.0035) -> (i) 2/3; gap +0.26 [+0.11, +0.42]
+    rep R2                 R2-static -> R2-drift: decision ['-3', '+0', '+3'] a:b 91:68 (p 0.081) · 37:41 (p 0.73) · 22:21 (p 1) pooled 150:130 (p 0.26) -> (iii) 0/3; gap -0.04 [-0.19, +0.11]
+    DD registered (S2d b* 4096 + V1 last): guard OK (b* BLER 0.244/0.256); R_S2d 0.463 - R_static 0.462 = +0.001 [-0.040, +0.039] -> contains 0
+      secondary (decision points of bstar-drift-4096 ['-3', '+0', '+3'], pooled): -0.023 [-0.059, +0.013]
+    DD same-K report (S2d b* 1024 + V1 last): guard OK (b* BLER 0.248/0.256); R_S2d 0.473 - R_static 0.462 = +0.011 [-0.028, +0.050] -> contains 0
+      secondary (decision points of bstar-drift-1024 ['-3', '+0', '+3'], pooled): +0.006 [-0.029, +0.041]
+    -3 dB failures (genie · V1 S2d best · V1 S2d last · b* S2d 4096 · b* S2d 1024 · V1 static · b* static 1024 · R2 S2d · R2 static): 111 · 390 · 387 · 625 · 635 · 404 · 656 · 831 · 854
+
+  [delta = 30 deg] ref raw_ROTbB16e4k; files ref 448, rmx 448, pil 448, ald 448, last 448, k1 448
+    run|git ['22370276']; meta|rotation ['deg=30.0']; meta|train_prior {'ref': ['(none)'], 'rmx': ['S2d: checkpoint and GMM fits trained on prior S2d, test channels S2'], 'pil': ['S2d: checkpoint and GMM fits trained on prior S2d, test channels S2'], 'ald': ['S2d: checkpoint and GMM fits trained on prior S2d, test channels S2'], 'last': ['S2d: checkpoint and GMM fits trained on prior S2d, test channels S2'], 'k1': ['S2d: checkpoint and GMM fits trained on prior S2d, test channels S2']}
+    est ald_RMX30ALD.npz sha fc8669abb59680a7; prov '{"ckpt_sha": "ceec0222e0912a1c", "ald_py_sha": "14121bf8a02d2e01", "git": "22370276", "device": "NVIDIA RTX PRO 6000 Bla'; pilots rotation 30.0; test NMSE dB -6.35 -9.28 -11.81 -14.81 -18.22 -21.52 -24.35
+    ckpt ids: rmx sha256[:16]=ceec0222e0912a1c epoch=1348 best_; pil sha256[:16]=ceec0222e0912a1c epoch=1348 best_; ald sha256[:16]=ceec0222e0912a1c epoch=1348 best_; last sha256[:16]=98bc88f7333f19ee epoch=1368 best_; k1 sha256[:16]=ceec0222e0912a1c epoch=1348 best_
+    rmx arms (14): ['M-ours-bstar', 'M-ours-bstar-scalar', 'M-ours-dscore-C-V0', 'M-ours-dscore-C-V1', 'M-ours-dscore-C-V4', 'M-ours-dscore-C-V4b', 'M-ours-gmm32', 'R0-pilot', 'R1-turbo', 'R2-ours-G', 'R3-bigamp', 'R4-llr', 'R4-scvamp', 'R5-genie']
+    integrity (a)-(g) + one clean commit + train_prior: FAILED rmx: meta|train_prior ['S2d: checkpoint and GMM fits trained on prior S2d, test channels S2']; pil: meta|train_prior ['S2d: checkpoint and GMM fits trained on prior S2d, test channels S2']; ald: meta|train_prior ['S2d: checkpoint and GMM fits trained on prior S2d, test channels S2']; last: meta|train_prior ['S2d: checkpoint and GMM fits trained on prior S2d, test channels S2']; k1: meta|train_prior ['S2d: checkpoint and GMM fits trained on prior S2d, test channels S2']
+    pairB: X -> V1 (13 registered baselines), R_X -3 dB primary [90%] | secondary (decision points):
+      M-ours-bstar         decision ['-3', '+0', '+3'] a:b 298:77 (p 8.6e-32) · 115:31 (p 1.5e-12) · 37:14 (p 0.0018) pooled 450:122 (p 4e-45) -> (i) 3/3; gap +1.17 [+0.96, +1.37]; R_X 0.415 [0.369, 0.462] | 0.454 [0.413, 0.496] (3 pts)
+      M-ours-bstar-scalar  decision ['-3', '+0', '+3'] a:b 320:70 (p 2.7e-39) · 131:22 (p 4.4e-20) · 44:11 (p 8.7e-06) pooled 495:103 (p 2.2e-62) -> (i) 3/3; gap +1.44 [+1.22, +1.67]; R_X 0.446 [0.404, 0.489] | 0.498 [0.462, 0.536] (3 pts)
+      M-ours-gmm32         decision ['-3', '+0', '+3'] a:b 378:56 (p 9.1e-60) · 142:21 (p 2.9e-23) · 64:10 (p 9e-11) pooled 584:87 (p 2.8e-91) -> (i) 3/3; gap +1.59 [+1.38, +1.81]; R_X 0.509 [0.471, 0.547] | 0.557 [0.525, 0.591] (3 pts)
+      R0-pilot             decision ['+0', '+3', '+6'] a:b 315:7 (p 1.6e-83) · 117:10 (p 2.7e-24) · 64:4 (p 5.9e-15) pooled 496:21 (p 6.1e-119) -> (i) 3/3; gap +3.31 [+3.08, +3.54]; R_X 0.737 [0.715, 0.759] | 0.829 [0.798, 0.859] (3 pts)
+      R1-turbo             decision ['+0', '+3', '+6'] a:b 536:6 (p 4.8e-150) · 231:2 (p 4e-66) · 101:1 (p 4.1e-29) pooled 868:9 (p 1.6e-243) -> (i) 3/3; gap +5.12 [+4.74, +5.49]; R_X 0.766 [0.746, 0.786] | 0.898 [0.879, 0.916] (3 pts)
+      R2-ours-G            decision ['+0', '+3', '+6'] a:b 219:17 (p 6.7e-46) · 92:8 (p 3.2e-19) · 51:4 (p 2e-11) pooled 362:29 (p 2.5e-74) -> (i) 3/3; gap +2.51 [+2.25, +2.74]; R_X 0.609 [0.577, 0.640] | 0.773 [0.732, 0.813] (3 pts)
+      R3-bigamp            decision ['+3', '+6', '+12'] a:b 222:7 (p 1.4e-56) · 150:4 (p 2e-39) · 167:1 (p 9e-49) pooled 539:12 (p 4e-142) -> (i) 3/3; gap +4.91 [+4.57, +5.51]; R_X 0.775 [0.756, 0.795] | 0.933 [0.911, 0.955] (3 pts)
+      R4-llr               decision ['+9', '+12', '+15'] a:b 772:0 (p 8.1e-233) · 583:1 (p 1.8e-173) · 469:1 (p 3.1e-139) pooled 1824:2 (p 0) -> (i) 3/3; gap >= +16.94 (R4-llr never reaches 0.1); R_X 0.852 [0.838, 0.865] | 0.996 [0.993, 0.999] (3 pts)
+      R4-scvamp            decision ['+6', '+9', '+12'] a:b 263:1 (p 1.8e-77) · 203:0 (p 1.6e-61) · 138:1 (p 4e-40) pooled 604:2 (p 1.4e-177) -> (i) 3/3; gap +9.08 [+8.26, +9.75]; R_X 0.796 [0.778, 0.813] | 0.968 [0.955, 0.980] (3 pts)
+      bstar-pilot          decision ['-3', '+0', '+3'] a:b 635:35 (p 1.4e-143) · 186:19 (p 1.3e-35) · 50:9 (p 5.3e-08) pooled 871:63 (p 1.2e-182) -> (i) 3/3; gap +2.06 [+1.83, +2.27]; R_X 0.659 [0.631, 0.686] | 0.672 [0.647, 0.697] (3 pts)
+      V1-pilot             decision ['-3', '+0', '+3'] a:b 321:25 (p 1.2e-66) · 68:14 (p 1.1e-09) · 12:10 (p 0.83) pooled 401:49 (p 8.7e-70) -> (i) 2/3; gap +0.97 [+0.83, +1.12]; R_X 0.488 [0.453, 0.524] | 0.471 [0.437, 0.507] (3 pts)
+      ALD-pilot            decision ['-3', '+0', '+3'] a:b 513:31 (p 1.2e-113) · 167:14 (p 2e-34) · 51:11 (p 2.8e-07) pooled 731:56 (p 7.5e-151) -> (i) 3/3; gap +1.93 [+1.72, +2.14]; R_X 0.608 [0.577, 0.638] | 0.631 [0.603, 0.658] (3 pts)
+      ALDv-pilot           decision ['-3', '+0', '+3'] a:b 532:32 (p 6e-118) · 142:17 (p 9.5e-26) · 37:12 (p 0.00047) pooled 711:61 (p 2.1e-141) -> (i) 3/3; gap +1.68 [+1.49, +1.89]; R_X 0.617 [0.586, 0.646] | 0.622 [0.594, 0.649] (3 pts)
+      R0-pilot@1 (house 08_SPEC reading; NOT what pair_baselines used): decision ['+6', '+9', '+12'] a:b 285:0 (p 3.2e-86) · 192:0 (p 3.2e-58) · 134:0 (p 9.2e-41) pooled 611:0 (p 2.4e-184) -> (i) 3/3; F -3 dB 1996; R_X 0.835 [0.820, 0.849]
+    SUMMARY 13 baselines: (i) 13, (ii) 0, undecided 0; X* = M-ours-bstar (F 645; runner-up ('M-ours-bstar-scalar', 674)); R_X* 0.415 lower 0.369; sentence condition (k=13, (ii)=0, lower > 0): MET
+    DT-V1                  V1-static -> V1-drift-last: decision ['-3', '+0', '+3'] a:b 153:55 (p 7.1e-12) · 48:19 (p 0.00052) · 14:11 (p 0.69) pooled 215:85 (p 3.8e-14) -> (i) 2/3; gap +0.48 [+0.36, +0.61]
+    DT-b*                  bstar-static -> bstar-drift-1024: decision ['-3', '+0', '+3'] a:b 203:96 (p 5.8e-10) · 89:54 (p 0.0043) · 36:18 (p 0.02) pooled 328:168 (p 6e-13) -> (i) 3/3; gap +0.40 [+0.21, +0.59]
+    rep best->last         V1-drift-best -> V1-drift-last: decision ['-3', '+0', '+3'] a:b 27:24 (p 0.78) · 13:5 (p 0.096) · 3:4 (p 1) pooled 43:33 (p 0.3) -> (iii) 0/3; gap +0.07 [+0.00, +0.13]
+    rep 1024->4096         bstar-drift-1024 -> bstar-drift-4096: decision ['-3', '+0', '+3'] a:b 101:72 (p 0.033) · 37:30 (p 0.46) · 13:12 (p 1) pooled 151:114 (p 0.027) -> (iii) 1/3; gap +0.09 [-0.04, +0.23]
+    rep V1 static->best    V1-static -> V1-drift-best: decision ['-3', '+0', '+3'] a:b 144:49 (p 4.9e-12) · 44:23 (p 0.014) · 14:10 (p 0.54) pooled 202:82 (p 7.5e-13) -> (i) 2/3; gap +0.41 [+0.29, +0.54]
+    rep b* 1024->S2d 4096  bstar-static -> bstar-drift-4096: decision ['-3', '+0', '+3'] a:b 214:78 (p 8.2e-16) · 88:46 (p 0.00036) · 33:14 (p 0.0079) pooled 335:138 (p 5.8e-20) -> (i) 3/3; gap +0.49 [+0.30, +0.67]
+    rep R2                 R2-static -> R2-drift: decision ['+0', '+3', '+6'] a:b 83:43 (p 0.00046) · 25:16 (p 0.21) · 20:16 (p 0.62) pooled 128:75 (p 0.00024) -> (iii) 1/3; gap +0.36 [+0.20, +0.55]
+    DD registered (S2d b* 4096 + V1 last): guard OK (b* BLER 0.252/0.305); R_S2d 0.421 - R_static 0.392 = +0.029 [-0.018, +0.075] -> contains 0
+      secondary (decision points of bstar-drift-4096 ['-3', '+0', '+3'], pooled): +0.027 [-0.015, +0.068]
+    DD same-K report (S2d b* 1024 + V1 last): guard OK (b* BLER 0.263/0.305); R_S2d 0.451 - R_static 0.392 = +0.059 [+0.014, +0.104] -> CI > 0
+      secondary (decision points of bstar-drift-1024 ['-3', '+0', '+3'], pooled): +0.053 [+0.014, +0.093]
+    -3 dB failures (genie · V1 S2d best · V1 S2d last · b* S2d 4096 · b* S2d 1024 · V1 static · b* static 1024 · R2 S2d · R2 static): 113 · 424 · 421 · 645 · 674 · 519 · 781 · 909 · 996
+
+# done

@@ -96,7 +96,7 @@
 
 ### 6.1 결과 (기록 2026-09-28 16:06 CDT, Opus 5.5 — 전사만, 해석 없음; 원본 `results/review_next/pairB_S2vB16e4.txt`, `recovery_S2vB16e4{,last}.txt`, `recovery_diff_S2vB16e4.txt`, `S2vB16e4_accept.txt`, `results/tables_D2_S2vB16e4.txt`, `results/guard_D2_S2vB16e4.txt`, `run_manifest_S2v*.json`)
 
-**실행·수용**: 야간 무인 체인이 B′ 뒤 `bash code/run_s2v16e4_eval.sh` 2026-09-28 04:34 ~ 13:48 CDT (git 22370276 = 병합, §5). phase 0: 링크 3 개, ALD 테스트 파일럿 재생성(CPU) + 추정(GPU, float32 결정론). ① S2vB16e4 04:36 ~ 09:05, ③ S2vPIL ~ 09:13, ④ S2vALD ~ 09:14, ② S2vB16e4last ~ 13:43 CDT, 끝 `S2V_EVAL_DONE ok=1 fail=0`. eval_accept (네 태그, 격자 full 6 + kron 9·K ≥ 1024 후보 3 개, ckpt id, genie 재생 대조 vs ①) **ACCEPT: OK**; ② 대 ① `--ref-arms all`: 다른 arm = M-ours-dscore-C-V0/V1/V4/V4b 뿐(비-Stage-C 10 arm 비트 동일). pair_baselines 무결성(점 집합, 한 개의 깨끗한 커밋, genie 4 키 ③④ = ①, raised 0, V1-pilot@1 = V1@1·bstar-pilot@1 = b\*@1, ALD 추정 고정·사전 계산값, ALD ckpt = ① `_best`) **OK**. 판정점(앵커 b\*, ①) −3/+0/+3.
+**실행·수용**: 야간 무인 체인이 B′ 뒤 `bash code/run_s2v16e4_eval.sh` 2026-09-28 04:34 ~ 13:48 CDT (git 22370276 = 병합, §5). phase 0: 링크 3 개, ALD 테스트 파일럿 재생성(CPU) + 추정(GPU, float32 결정론). ① S2vB16e4 04:36 ~ 09:05, ③ S2vPIL ~ 09:13, ④ S2vALD ~ 09:14, ② S2vB16e4last ~ 13:43 CDT, 끝 `S2V_EVAL_DONE ok=1 fail=0`. eval_accept (네 태그, 격자 full 6 + kron 9·K ≥ 1024 후보 3 개, ckpt id, genie 재생 대조 vs ①) **ACCEPT: OK**; ② 대 ① `--ref-arms all` 은 문자 그대로 `ACCEPT: FAILED` 를 출력한다 — 다른 arm = M-ours-dscore-C-V0/V1/V4/V4b 뿐(가중치가 다르므로 등록 §1 이 예정한 차이); 비-Stage-C 10 arm 은 비트 동일이며, 이 판독은 `run_s2v16e4_eval.sh` 의 필터("non-Stage-C arms differing: none")와 기록 감사의 독립 재계산으로 확인 [기록 감사 표현 정정]. pair_baselines 무결성(점 집합, 한 개의 깨끗한 커밋, genie 4 키 ③④ = ①, raised 0, V1-pilot@1 = V1@1·bstar-pilot@1 = b\*@1, ALD 추정 고정·사전 계산값, ALD ckpt = ① `_best`) **OK**. 판정점(앵커 b\*, ①) −3/+0/+3.
 
 **판정 1 (표 B `M-ours-bstar → M-ours-dscore-C-V1`, C6, S2vB16e4)**: −3 dB 133:25 · +0 dB 48:2 · +3 dB 21:5, pooled 202:32; POWERED; second arm fewer 3/3, first arm fewer 0/3 → **(i) "공간 비정상(가시 창) S2v 에서 V1 이 b\* 보다 적게 실패 (측정, UNGATED)"**. SNR@0.1 격차 n/a (≤ −3 vs ≤ −3; 격자 확장 없음).
 - **R_b\*** (−3 dB, 1차) **0.603 [90% 0.523, 0.675]** (b\* 202, V1 94, genie 23); 2차(판정점 합) 0.646 [0.581, 0.704]. last-EMA: 0.564 [0.483, 0.640] / 0.612 [0.550, 0.671].
@@ -109,7 +109,7 @@
 | M-ours-bstar | −3/+0/+3 | 133:25 · 48:2 · 21:5 | 202:32 | (i) 3/3 | 0.603 [0.523, 0.675] | 0.646 [0.581, 0.704] |
 | M-ours-bstar-scalar | −3/+0/+3 | 152:25 · 54:4 · 27:5 | 233:34 | (i) 3/3 | 0.641 [0.569, 0.706] | 0.682 [0.623, 0.737] |
 | M-ours-gmm32 | −3/+0/+3 | 149:25 · 60:7 · 31:3 | 240:35 | (i) 3/3 | 0.636 [0.560, 0.703] | 0.688 [0.630, 0.742] |
-| R0-pilot | −3/+0/+3 | 382:9 · 131:3 · 67:3 | 580:15 | (i) 3/3 | 0.840 [0.807, 0.870] | 0.859 [0.833, 0.883] |
+| R0-pilot (@16) | −3/+0/+3 | 382:9 · 131:3 · 67:3 | 580:15 | (i) 3/3 | 0.840 [0.807, 0.870] | 0.859 [0.833, 0.883] |
 | R1-turbo | −3/+0/+3 | 686:4 · 289:0 · 126:2 | 1101:6 | (i) 3/3 | 0.906 [0.886, 0.924] | 0.922 [0.908, 0.935] |
 | R2-ours-G | −3/+0/+3 | 250:11 · 108:1 · 51:3 | 409:15 | (i) 3/3 | 0.771 [0.726, 0.814] | 0.809 [0.774, 0.841] |
 | R3-bigamp | +3/+9/+12 | 228:1 · 152:1 · 190:0 | 570:2 | (i) 3/3 | 0.941 [0.929, 0.953] | 0.981 [0.969, 0.992] |
@@ -124,4 +124,10 @@ SNR@0.1 격차(보고): b\*·b\*-scalar·gmm32·V1-pilot n/a (≤ −3 vs ≤ �
 
 **보고 전용**: −3 dB BLER@16 실패 수 / 2560 — genie 23, V1 94 (last 101), V4 93, V4b 116, V0 2158, b\* 202, b\*-scalar 221, gmm32 218, R0 467, R1 776, R2 333, R3 1228, R4-llr 2180, R4-scvamp 930, bstar-pilot 287, V1-pilot 152, ALD 359, ALDv 332. 대조군 `M-ours-bstar → M-ours-bstar-scalar` 44:63 · 16:20 · 5:11, pooled 65:94, POWERED, 어느 쪽도 유의 점 없음 → (iii). `b* → V4` 133:24 · 49:4 · 21:5 (i) 3/3; `b* → V4b` 119:33 · 47:7 · 22:5 (i) 3/3; `b* → V0` 5:1961 · 1:1925 · 0:1671 (b\* 가 적게 실패 3/3). best 대 last V1 짝 부호검정 (a = best 실패·last 성공): −3 dB 9:16 · +0 dB 2:1 · +3 dB 0:3, pooled 11:20 p = 0.15 → 판정하지 못함. F3 가드: V0 만 발동(−3 dB 0.863 … +15 dB 0.239), 나머지 12 arm 발동 없음, genie 해당 없음. GB′ (§5) median 0.5699 (S2 C6 0.283).
 
-**§3 예측 채점**: 0 사전 실현(채점 안 함). 1 판정 1 = (i) ✓, 판정점 −3/0/+3 ✓. 2a R_b\*(−3 dB) 0.60–0.85 ✓ (0.603). 2b ΔR CI 가 0 을 걸침 ✗ — CI < 0 (−0.303, −0.110). 3 판정 2 (i) ≥ 10 ✓ (13); 8 개(R0·R1·R3·R4-llr·R4-scvamp·bstar-pilot·ALD·ALDv) 전부 (i) ✓; gmm32·b\*-scalar·R2 중 (i) 아님 ≤ 1 ✓ (0); V1-pilot = (iv)/(iii) ✗ — (i) 2/3. 4 X\* ∈ {ALDv-pilot, V1-pilot} ✓ (V1-pilot); R_X\* 0.3–0.8 ✓ (0.450). 5 genie −3 dB 10–60 ✓ (23). 6 빗나갈 경로 (a)–(d) 없음(ALD 조정 격자 끝 없음, §5).
+**§3 예측 채점**: 0 사전 실현(채점 안 함). 1 판정 1 = (i) ✓, 판정점 −3/0/+3 ✓. 2a R_b\*(−3 dB) 0.60–0.85 ✓ (0.603, 하한 경계값). 2b ΔR CI 가 0 을 걸침 ✗ — CI < 0 (−0.303, −0.110). 3 판정 2 (i) ≥ 10 ✓ (13); 8 개(R0·R1·R3·R4-llr·R4-scvamp·bstar-pilot·ALD·ALDv) 전부 (i) ✓; gmm32·b\*-scalar·R2 중 (i) 아님 ≤ 1 ✓ (0); V1-pilot = (iv)/(iii) ✗ — (i) 2/3. 4 X\* ∈ {ALDv-pilot, V1-pilot} ✓ (V1-pilot); R_X\* 0.3–0.8 ✓ (0.450). 5 genie −3 dB 10–60 ✓ (23). 6 빗나갈 경로 (a)–(d) 없음(ALD 조정 격자 끝 없음, §5).
+
+### 6.2 기록 감사 (Fable 5.1 서브에이전트, 2026-09-28 16:27 CDT = 09-29 06:27 KST; `prereg_audit_2026-09-28/audit_ALD_DOP_ROT_RMX_S2V.md` (`recompute.py` → `recompute.out`); raw npz 에서 독립 재계산 — pair 스크립트 출력 미사용)
+
+정정 없음(수치·라벨·문장·채점 재현). 표현 정정 1 건(본문 반영): ② 대 ① `--ref-arms all` 의 수용 파일 문자열은 `ACCEPT: FAILED` (Stage-C 4 arm 만 다름) — "OK" 는 스크립트 필터 판독.
+
+메모: (1) 2a 는 경계값(0.603 vs 하한 0.60). (2) 판정 2 의 `R0-pilot` 은 @16 판독; @1 판독이면 (i) 3/3 (판정점 +0/+3/+6, 502:0 · 240:2 · 128:1, pooled 870:3), F(−3 dB) 1111, R_X 0.935 [0.921, 0.947] — k = 13·X\* = V1-pilot·문장 조건 불변. (3) 테스트 ALD NMSE(추정 파일 평균, dB, −3..+15): −5.98 −8.73 −11.30 −14.24 −17.14 −20.20 −22.95, 개발(§5) 대비 최대 |차| 0.22 dB; 추정 파일 prov ald.py sha 14121bf8a02d2e01 (조정 때 865261522ca7eade 와 다름 — b233c3a2 의 prov 필드 확장; 알고리즘 상수는 tune json 과 동일).

@@ -91,13 +91,13 @@
 | **ALD δ 별 조정 (`results/ald/tune_RMX<δ>ALD.json`, 09-27 23:0x~23:25 CDT, git dca8d19c, ald.py sha 5cc14d94b32e5c9a, ckpt ceec0222e0912a1c, float32 deterministic TF32 off, seed 20260927, 개발 2560..3071)** | 세 δ 모두 c = **0.01**, β = **0.005** (β 축 두 번 확장 1e-4, 1e-5; 개발 최적 β = 1e-5 가 β = 0.005 보다 0.1 dB 이내 → 저자 기본값 유지; 격자 끝 없음). 멈춤 단계 (−3..+15): 0° 288 295 353 447 546 600 600 / 15° 289 308 359 445 546 600 600 / 30° 300 314 369 460 560 600 600. 개발 NMSE dB: 0° −6.4 −8.9 −11.7 −14.7 −18.0 −21.6 −24.4 / 15° −6.3 −9.1 −11.7 −14.7 −18.1 −21.6 −24.3 / 30° −6.5 −9.1 −11.9 −14.9 −18.2 −21.5 −24.4. v (−3..+15): 0° 0.2231 0.1222 0.0661 0.0328 0.0157 0.0067 0.0035 / 15° 0.2237 0.1177 0.0651 0.0334 0.0152 0.0067 0.0036 / 30° 0.2151 0.1169 0.0627 0.0320 0.0147 0.0067 0.0035. 캐비엇: +12/+15 dB 멈춤 600(스케줄 끝; ALD16e4 §0 과 같음) |
 | GB′ (격자 확정 뒤 22:13 CDT 실행 → 00:21 CDT; last 파일 기준, run_d2_sx 관례; GPU 1) | `logs/s2d_post.log`: `GMM b* = kron (kron K=4096) @N=160000` (= §5 b*), held-out 디노이징 NMSE 비 확산/GMM **min 0.4533 · max 0.8877 · median 0.5186**, worst excess −0.112, equal_budget=True; `results/d2_gbprime_S2d_N160000_a1.npz`, `d2_gbprime_S2d.csv`. 참고(같은 척도): D3 0.559, S2v C6 0.570, D2 C2 1.6e5 헤드라인 비동일예산 0.46 |
 | ROT pair 파일 수 (설계 동결 시각) | 3 (`pair_ROTaB16e4k`, `pair_ROTbB16e4k`, `pair_ROTaNR16`; 내용 미열람) |
-| 설계 동결 커밋 / §5 GB′ 커밋 / 선행 코드 커밋 / 병합 커밋 / 병합 diff / 링크 mtime | **389e23f4** / e2ed3445 / b233c3a2 (+ f6e467db §4 문단, bcc80d3b testbed_s2v) / **22370276** (`git merge c-rotmix`, 2026-09-28 02:08 CDT, 야간 체인 — BLER 시작 전; DECISIONS 충돌 없음) / `git diff 389e23f4 22370276 --stat -- conf/code Demo` = 7 파일 +592 −9 (ald.py, pair_baselines.py, pair_rotmix.py, run_rotmix16e4.sh, run_s2v16e4_eval.sh, runner.py, testbed_s2v.py — 전부 §4 선행 코드; `after_rot_chain.log`) / 링크 디렉터리는 `run_rotmix16e4.sh` phase 0 이 02:08~02:09 CDT 에 생성(ln -sfn, 매 실행 재생성) |
+| 설계 동결 커밋 / §5 GB′ 커밋 / 선행 코드 커밋 / 병합 커밋 / 병합 diff / 링크 mtime | **389e23f4** / e2ed3445 / b233c3a2 (+ f6e467db §4 문단, bcc80d3b testbed_s2v) / **22370276** (`git merge c-rotmix`, 2026-09-28 02:08 CDT, 야간 체인 — BLER 시작 전; `conf/DECISIONS.md` 충돌 1 건 → 체인이 union 으로 해소(양쪽 줄 유지; 다른 파일 충돌 없음) [기록 감사 정정]) / `git diff 389e23f4 22370276 --stat -- conf/code Demo` = 7 파일 +592 −9 (ald.py, pair_baselines.py, pair_rotmix.py, run_rotmix16e4.sh, run_s2v16e4_eval.sh, runner.py, testbed_s2v.py — 전부 §4 선행 코드; `after_rot_chain.log`) / 링크 디렉터리는 `run_rotmix16e4.sh` phase 0 이 02:08~02:09 CDT 에 생성(ln -sfn, 매 실행 재생성) |
 
 ## 6. 결과 (이 절은 추가만 한다)
 
 ### 6.1 결과 (기록 2026-09-28 13:23 CDT, Opus 5.5 — 전사만, 해석 없음; 원본 `results/review_next/pair_RMX{0,15,30}.txt` (DT·DD), `pairB_RMX{0,15,30}.txt` (RB·판정 3), `RMX*_accept.txt`, `run_manifest_RMX*.json`)
 
-**실행·수용**: 야간 무인 체인(`~/t2/after_rot_chain.sh`, 사용자 허가; 로그 `results/review_next/after_rot_chain.log`)이 ROT16e4 종료(12/12) 뒤 main 커밋 dac312b0 → `git merge c-rotmix` = **22370276** (DECISIONS 충돌 없음) → `git diff 389e23f4 22370276 --stat -- conf/code Demo` = 선행 코드 7 파일(ald.py, pair_baselines.py, pair_rotmix.py, run_rotmix16e4.sh, run_s2v16e4_eval.sh, runner.py, testbed_s2v.py; +592 −9; §4 의 b233c3a2·bcc80d3b 그대로) → `bash code/run_rotmix16e4.sh` 2026-09-28 02:08 ~ 04:34 CDT (git 22370276), 끝 `ROTMIX_EVAL_DONE ok=3 fail=0`. 링크 디렉터리 15 개 수용 (a) OK, ALD 테스트 추정 3 개(GPU). 15 태그 모두 eval_accept **ACCEPT: OK** (δ 마다 "RMX<δ>, RMX<δ>PIL, RMX<δ>ALD, RMX<δ>last" + "RMX<δ>k1"; 격자는 S2d 원본 디렉터리, genie 는 δ 별 기준 raw 로 재생 대조); pair_rotmix 무결성(점 집합, 한 개의 깨끗한 커밋 22370276, meta 각, genie == 기준 raw, S2d 적합 지문, ckpt id; δ = 0 에서 R3-bigamp 비트 동일·S2d 적합 적용) **OK** ×3; pair_baselines 무결성 **OK** ×3.
+**실행·수용**: 야간 무인 체인(`~/t2/after_rot_chain.sh`, 사용자 허가; 로그 `results/review_next/after_rot_chain.log`)이 ROT16e4 종료(12/12) 뒤 main 커밋 dac312b0 → `git merge c-rotmix` = **22370276** (`conf/DECISIONS.md` 충돌 1 건 → union 해소, 양쪽 줄 유지; `after_rot_chain.log`) [기록 감사 정정] → `git diff 389e23f4 22370276 --stat -- conf/code Demo` = 선행 코드 7 파일(ald.py, pair_baselines.py, pair_rotmix.py, run_rotmix16e4.sh, run_s2v16e4_eval.sh, runner.py, testbed_s2v.py; +592 −9; §4 의 b233c3a2·bcc80d3b 그대로) → `bash code/run_rotmix16e4.sh` 2026-09-28 02:08 ~ 04:34 CDT (git 22370276), 끝 `ROTMIX_EVAL_DONE ok=3 fail=0`. 링크 디렉터리 15 개 수용 (a) OK, ALD 테스트 추정 3 개(GPU). 15 태그 모두 eval_accept **ACCEPT: OK** (δ 마다 "RMX<δ>, RMX<δ>PIL, RMX<δ>ALD, RMX<δ>last" + "RMX<δ>k1"; 격자는 S2d 원본 디렉터리, genie 는 δ 별 기준 raw 로 재생 대조); pair_rotmix 무결성(점 집합, 한 개의 깨끗한 커밋 22370276, meta 각, genie == 기준 raw, S2d 적합 지문, ckpt id; δ = 0 에서 R3-bigamp 비트 동일·S2d 적합 적용) **OK** ×3; pair_baselines 무결성 **OK** ×3.
 
 **판정 1 — RB (표 B `M-ours-bstar → M-ours-dscore-C-V1`, 둘 다 S2d `_best`·kron 4096, 같은 회전; pairB_RMX)**
 
@@ -134,7 +134,7 @@
 | M-ours-bstar | 422:89; 0.415 [0.371, 0.460] | 406:81; 0.457 [0.415, 0.503] | 450:122; 0.415 [0.369, 0.462] |
 | M-ours-bstar-scalar | 463:82; 0.445 [0.404, 0.488] | 454:73; 0.463 [0.420, 0.507] | 495:103; 0.446 [0.404, 0.489] |
 | M-ours-gmm32 | 596:68; 0.533 [0.498, 0.571] | 552:73; 0.540 [0.502, 0.579] | 584:87; 0.509 [0.471, 0.547] |
-| R0-pilot | 413:20; 0.744 [0.722, 0.766] | 418:18; 0.751 [0.729, 0.774] | 496:21; 0.737 [0.715, 0.759] |
+| R0-pilot (@16) | 413:20; 0.744 [0.722, 0.766] | 418:18; 0.751 [0.729, 0.774] | 496:21; 0.737 [0.715, 0.759] |
 | R1-turbo | 767:13; 0.770 [0.751, 0.791] | 777:6; 0.781 [0.762, 0.802] | 868:9; 0.766 [0.746, 0.786] |
 | R2-ours-G | 773:58; 0.604 [0.573, 0.636] | 758:56; 0.613 [0.580, 0.646] | 362:29; 0.609 [0.577, 0.640] |
 | R3-bigamp | 459:3; 0.767 [0.747, 0.788] | 470:4; 0.786 [0.767, 0.806] | 539:12; 0.775 [0.756, 0.795] |
@@ -145,10 +145,18 @@
 | ALD-pilot | 652:58; 0.589 [0.556, 0.623] | 688:57; 0.620 [0.589, 0.653] | 731:56; 0.608 [0.577, 0.638] |
 | ALDv-pilot | 633:57; 0.602 [0.571, 0.634] | 645:56; 0.633 [0.603, 0.664] | 711:61; 0.617 [0.586, 0.646] |
 
-라벨은 모두 (i) (V1-pilot 은 세 각도 모두 2/3, 나머지는 3/3). 판정점은 X 별 자동(예: R0/R1 +0/+3/+6, R3 +3/+12/+15, R4-llr +9/+12/+15, 30° 의 R2 +0/+3/+6); 2차 R_X 와 SNR@0.1 격차는 pairB 파일.
+라벨은 모두 (i) (V1-pilot 은 세 각도 모두 2/3, 나머지는 3/3). 판정점은 X 별 자동(예: R0/R1 +0/+3/+6, R3 +3/+12/+15 (0°·15°) · +3/+6/+12 (30°), R4-scvamp +3/+6/+9 (0°·15°) · +6/+9/+12 (30°), R4-llr +9/+12/+15, 30° 의 R2 +0/+3/+6) [기록 감사 정정]. R0-pilot 행은 16 반복 궤적(@16) 판독이다(아래 6.2); 2차 R_X 와 SNR@0.1 격차는 pairB 파일.
 
 −3 dB BLER@16 실패 수 / 2560 (genie · V1(S2d best) · V1(S2d last) · b\*(S2d 4096) · b\*(S2d 1024) · V1(정적) · b\*(정적 1024) · R2(S2d) · R2(정적)): 0° 87 · 391 · 370 · 607 · 631 · 371 · 623 · 854 · 839; 15° 111 · 390 · 387 · 625 · 635 · 404 · 656 · 831 · 854; 30° 113 · 424 · 421 · 645 · 674 · 519 · 781 · 909 · 996.
 
 보고 전용 (pair_RMX): `V1(S2d best) → V1(S2d last)` 0° (i) 2/3 (53:24, 격차 +0.16), 15°·30° (iii); `b*(S2d 1024) → b*(S2d 4096)` 세 각도 (iii); `V1(정적) → V1(S2d best)` 0° (iii) (격차 −0.12 [−0.22, −0.03]), 15° (iii), 30° (i) 2/3 (+0.41); `b*(정적 1024) → b*(S2d 4096)` 0° (iii), 15° (i) 2/3 (+0.26), 30° (i) 3/3 (+0.49); `R2(정적) → R2(S2d)` 세 각도 (iii) (30° 격차 +0.36 [+0.20, +0.55]).
 
 **§3 예측 채점**: 1 RB-15 (i) ✓, RB-30 (i) ✓; 2 RB-0 (i) ✓; 3 DT-V1(30°) (i) ✓, DT-V1(0°) (ii)/(iii) ✓ ((iii)); 4 DT-b\*(30°) (i) ✓; 5 DD-30 CI > 0 ✗ — 0 포함("판정하지 못함"); 6 판정 3 각 δ 에서 (i) ≥ 10: 0° ✓ (13), 15° ✓ (13), 30° ✓ (13); 7 빗나갈 경로(RB (ii), 무결성 실패) 없음. 예측 없음(기록만): DT-V1(15°) (iii), DT-b\*(0°/15°) (iii)/(iii), DD-15 판정하지 못함.
+
+### 6.2 기록 감사 (Fable 5.1 서브에이전트, 2026-09-28 16:27 CDT = 09-29 06:27 KST; `prereg_audit_2026-09-28/audit_ALD_DOP_ROT_RMX_S2V.md` (`recompute.py` → `recompute.out`); raw npz 에서 독립 재계산 — pair 스크립트 출력 미사용)
+
+다섯 등록 공통: §6.1 수치·라벨·문장 규칙·§3 채점, EXPERIMENTS 행, DECISIONS 줄 전부 재현; 무결성 주장(수용 파일, genie 비트 동일, 청크 `run|git` 단일 깨끗한 커밋, meta rotation/train_prior, ckpt id, S2d 적합 지문·em_sec, δ = 0 R3 비트 동일·적합 적용 음성 검사, ALD 추정 고정) raw 에서 직접 확인; §1~§3 동결 이후 불변. 규칙 위반 없음.
+
+정정(기록 위생; 수치·라벨 불변, 본문 반영): (1) §5 병합 행과 §6.1 첫 문단의 "DECISIONS 충돌 없음" → `after_rot_chain.log` 는 `CONFLICT (content): Merge conflict in conf/DECISIONS.md` 뒤 union 해소를 기록(main 쪽 2 줄 + 브랜치 쪽 2 줄 모두 유지). (2) 판정 3 의 판정점 예시를 각도별로(R3·R4-scvamp 는 30° 에서 다름).
+
+메모: 판정 3 표의 `R0-pilot` 은 `pair_baselines.py` 가 16 반복 궤적(@16)을 읽은 값이며 08_SPEC §1 의 1-pass 판독(@1)이 아니다. 등록 §1 은 판독 인덱스를 지정하지 않았고 스크립트는 BLER 전(b233c3a2)에 작성됐다. @1 로 다시 매겨도 (i) 3/3 (0° 847:2, 15° 865:1, 30° 611:0), F(−3 dB) 1951/1929/1996, R_X 0.837/0.847/0.835 — 판정 3 개수·X\*·문장 조건 불변. DD 포화 가드 값: 두 b\* 의 −3 dB BLER (S2d 4096 / 정적 1024) 0° 0.237/0.243, 15° 0.244/0.256, 30° 0.252/0.305.

@@ -69,7 +69,7 @@
 
 ### 6.1 결과 (기록 2026-09-28 13:22 CDT, Opus 5.5 — 전사만, 해석 없음; 원본 `results/review_next/pair_ROT*.txt`, `ROT*_accept.txt`, `run_manifest_ROT*.json`)
 
-**실행·수용**: `bash code/run_rot16e4.sh` 2026-09-27 18:35 CDT 시작(tmux `rot`; git a4cbd184 = 병합 602f8971 + §5 기록 커밋, `conf/code`·`Demo` 는 동결 9c0ca1f4 와 같음). D2 C2 두 태그 18:48·18:58 CDT 완료 뒤 서버 재부팅(21:4x CDT) → `resume_after_reboot.sh` 가 나머지 5 데이터셋을 21:48 CDT 재실행(끝난 청크 건너뜀; 같은 커밋) → `ROT_EVAL_DONE ok=10 fail=0` 09-28 02:07 CDT; 합계 12/12. 0° 대조 6 개(ROT0B16e4k, ROT0NR16, ROT0D3, ROT0SV, ROT0U28, ROT0MX) 모두 **ACCEPT: OK** (14 arm 비트 동일; C6 대조는 재실행 때 한 번 더 OK); 12 태그 모두 eval_accept **ACCEPT: OK**, pair_rot 무결성(점 집합, meta 각, 한 개의 깨끗한 커밋 a4cbd184, 적합·체크포인트 지문, 시행 수 2560, 회전 적용) **OK**; 예외 시행 raised 0 (네 arm, 12 태그 모두).
+**실행·수용**: `bash code/run_rot16e4.sh` 2026-09-27 18:35 CDT 시작(tmux `rot`; git a4cbd184 = 병합 602f8971 + §5 기록 커밋, `conf/code`·`Demo` 는 동결 9c0ca1f4 와 같음). D2 C2 두 태그 18:48·18:58 CDT, D2 C6 15° 21:25 CDT 완료 뒤 서버 재부팅(21:44 CDT = `who -b` 11:44 KST) [기록 감사 정정] → `resume_after_reboot.sh` 가 나머지 5 데이터셋을 21:48 CDT 재실행(끝난 청크 건너뜀; 같은 커밋) → `ROT_EVAL_DONE ok=10 fail=0` 09-28 02:07 CDT; 합계 12/12. 0° 대조 6 개(ROT0B16e4k, ROT0NR16, ROT0D3, ROT0SV, ROT0U28, ROT0MX) 모두 **ACCEPT: OK** (14 arm 비트 동일; C6 대조는 재실행 때 한 번 더 OK); 12 태그 모두 eval_accept **ACCEPT: OK**, pair_rot 무결성(점 집합, meta 각, 한 개의 깨끗한 커밋 a4cbd184, 적합·체크포인트 지문, 시행 수 2560, 회전 적용) **OK**; 예외 시행 raised 0 (네 arm, 12 태그 모두).
 
 | 데이터셋 | δ | 판정점 | RT `bstar-rot → V1-rot` a:b | pooled | 라벨 | SNR@0.1 격차 (90%) | 격차 보존율 (보고) |
 |---|---|---|---|---|---|---|---|
@@ -113,3 +113,7 @@
 −3 dB BLER@16 실패 수 / 2560 (R2-rot · bstar-rot · V1-rot · genie-rot): D2 C2 15° 854 · 656 · 404 · 111, 30° 996 · 781 · 519 · 113; C6 315 · 213 · 60 · 24, 487 · 375 · 86 · 21; D3 1512 · 1303 · 1056 · 460, 1614 · 1430 · 1142 · 520; SV8e 624 · 511 · 438 · 38, 703 · 570 · 506 · 59; UMi28 1504 · 1317 · 1261 · 630, 1596 · 1389 · 1364 · 721; MIX3 1692 · 1460 · 1400 · 671, 1738 · 1540 · 1495 · 802. (정적 −3 dB: D2 C2 839 · 623 · 371 · 87, C6 295 · 184 · 53 · 22, D3 1454 · 1298 · 1000 · 485, SV8e 599 · 464 · 402 · 31, UMi28 1458 · 1270 · 1228 · 594, MIX3 1613 · 1421 · 1354 · 679.)
 
 **§3 예측 채점**: 1 (RT D2 C2 15° (i)) ✓, (30° (i)) ✓; 2 (15° 나머지 5 중 (i) ≥ 3) ✓ (4/5); 3 (30° 나머지 5 중 (i) ≥ 2) ✓ (5/5); 4 (`V1-rot → V1(정적)` 30° 6 태그 모두 (i)) ✗ — 5/6, SV8e 30° (iv); 5 빗나갈 경로: RT (ii) 없음, 0° 대조 실패 없음.
+
+### 6.2 기록 감사 (Fable 5.1 서브에이전트, 2026-09-28 16:27 CDT = 09-29 06:27 KST; `prereg_audit_2026-09-28/audit_ALD_DOP_ROT_RMX_S2V.md` (`recompute.py` → `recompute.out`); raw npz 에서 독립 재계산 — pair 스크립트 출력 미사용)
+
+정정(기록 위생, 본문 반영): 재부팅 시각 자리표시 "21:4x" → 21:44 CDT (`docs/EXPERIMENTS.md` ROT 행도). 재부팅 전에 D2 C6 15° 도 끝나 있었다(pair_rot rc=0 21:25 CDT); 재실행이 끝난 청크를 건너뛰고 pair 파일을 다시 썼다(21:49 CDT; 같은 커밋·같은 수치). 합계 12/12 = 첫 실행 2 + 재실행 10. 그 밖의 수치·라벨·채점 전부 재현.
