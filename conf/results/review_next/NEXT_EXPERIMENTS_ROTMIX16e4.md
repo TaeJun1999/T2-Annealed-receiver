@@ -73,9 +73,11 @@
 | ALD δ 별 개발 조정 (GPU 3/4/5, `logs/ald_tune_RMX<δ>ALD.log`) | 완료 23:23~23:25 CDT (§5) |
 | GB′ (`run_d2_sx.py --prior S2d --ntrain 160000 --tag S2dB16e4 --fallback 1`, GPU 1, tmux `s2dgb`) | 완료 09-28 00:21 CDT (§5; 이 §5 커밋) |
 | **설계 동결 커밋(c-rotmix)** = 이 문서 v2 + S2V v2 + 검토 2 건 + `ald.py --rotation` + DECISIONS 줄 | 이 커밋 |
-| 선행 코드(브랜치, 병합 전; 별도 커밋): `ald.py --train-prior` 가드·rotation prov 전파, runner `--ald-file` rotation 대조 + `meta\|train_prior`, `run_rotmix16e4.sh` (15 태그, 링크 생성·검사, 수용 (a)~(g)), `pair_baselines.py` (S2V 와 공용; X 별 표 B·R_X·X\*), `pair_rotmix.py` (DT·DD: 기준 raw ↔ RMX raw, 무결성 목록 §1 (c)~(g)), 스모크(`runner.py smoke … --train-prior S2d --rotation 15 --pilot-arms --tag RMXsmoke`, n = 2; 가드 4 경우: 플래그 없음 거부 / S2 가중치 + `--train-prior S2d` 거부 / 링크 없는 태그 거부 / 등록형 통과; raw 삭제) | 대기 |
+| **[09-28 00:51 CDT 완료, 이 커밋]** 선행 코드(브랜치, 병합 전; 별도 커밋): `ald.py --train-prior` 가드·rotation prov 전파, runner `--ald-file` rotation 대조 + `meta\|train_prior`, `run_rotmix16e4.sh` (15 태그, 링크 생성·검사, 수용 (a)~(g)), `pair_baselines.py` (S2V 와 공용; X 별 표 B·R_X·X\*), `pair_rotmix.py` (DT·DD: 기준 raw ↔ RMX raw, 무결성 목록 §1 (c)~(g)), 스모크(`runner.py smoke … --train-prior S2d --rotation 15 --pilot-arms --tag RMXsmoke`, n = 2; 가드 4 경우: 플래그 없음 거부 / S2 가중치 + `--train-prior S2d` 거부 / 링크 없는 태그 거부 / 등록형 통과; raw 삭제) | 대기 |
 | ROT 종료 → c-rotmix 병합 → 병합 diff → 산출물 이동(ckpt 2·fits 24·σ 격자·GB′·`results/ald/*RMX*`·로그; sha 재확인) → `git worktree remove ~/t2_wtB` | 대기 |
 | ALD 테스트 추정 3 개 (GPU) → `run_rotmix16e4.sh` → §6 (15 pair 파일 뒤) | 대기 |
+
+- 선행 코드 검증 (09-28 00:51 CDT, Opus 5.5; ): runner 스모크 5 경우 — (1) S2d 가중치·플래그 없음 거부, (2) S2 가중치 +  거부, (3) 링크 없는 태그 거부, (4) 등록형(, −3 dB 시행 0..39) 통과: · 기록, R5-genie 4 키가  청크 0 과 비트 동일,  = S2d kron 4096 (raw 삭제), (5) 회전 없는 ALD 추정 파일 +  거부.  가드(S2d 적합에  없으면 거부) 확인, 새 코드의 개발 파일럿이 조정 파일과 비트 동일.  는 기록된 C6 raw(NR16B16e4·PILNR16·ALDNR16)로 C6B16e4 §6.1 수치(213:18, 판정점 합 R 0.823 [0.771, 0.871])와 PILOT 의 V1-pilot (iv) 를 재현;  라벨부는 같은 raw 를 네 자리에 넣어(무결성 끈 임시 사본) 불일치 0·DD 0·정적 R 0.470 (헤드라인 기록값) 확인.
 
 ## 5. 평가 전 고정 기록
 

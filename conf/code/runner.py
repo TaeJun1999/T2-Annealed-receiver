@@ -478,7 +478,7 @@ def run_task(task):
     common.trial_rng stream and then dropped, so chunks concatenate and every arm at a point sees the same
     (H, u, perm, Y) -- paired inside a cell (01_RULES §5, test C4)."""
     (testbed, cell, prior, snr, skip, n, ntrain, beta, t_in, iters, arm_sel, ckpt, stagec_ckpt, mean_arms,
-     p3_arms, extra_log, pilot_arms, ald_file, doppler, rotation) = task
+     p3_arms, extra_log, pilot_arms, ald_file, doppler, rotation, train_prior) = task
     c = C.CELLS[cell]
     pil = C.make_pilots(testbed, prior, c["Nt"], c["Tp"], c["Nr"])[0]   # cheap; the build is not
     out = raw_file(testbed, cell, prior, pil, snr, skip, n)
@@ -490,6 +490,12 @@ def run_task(task):
         P["gen"].rot = float(np.deg2rad(rotation))
         P["meta"]["rotation"] = (f"deg={rotation!r}: receive (BS) array rotated, every AoA + {rotation} deg (D2/D3/S2v/SV8e: "
                                  "theta + rot; 38.901: BS yaw + rot); priors trained at 0 deg")
+    if ald_file:                                        # NEXT_EXPERIMENTS_ROTMIX16e4: the estimate's channels must be this run's
+        er = float(np.load(ald_file)["rotation"]) if "rotation" in np.load(ald_file).files else -1.0
+        if er != (-1.0 if rotation is None else float(rotation)):
+            raise RuntimeError(f"--ald-file {ald_file} was estimated at rotation {er}, this run uses --rotation {rotation}")
+    if train_prior:                                     # NEXT_EXPERIMENTS_ROTMIX16e4 §1 수용: the raw names its train prior
+        P["meta"]["train_prior"] = f"{train_prior}: checkpoint and GMM fits trained on prior {train_prior}, test channels {prior}"
     if doppler is not None:
         P["meta"]["doppler"] = (f"nu={doppler!r} per symbol, per-path Clarke phases (runner.doppler_rx, DOP_SEED {DOP_SEED}); "
                                 "genie knows H_0 only")
@@ -620,7 +626,8 @@ def cmd_run(a):
     if a.extra_log:
         print(f"[run] --extra-log {' '.join(a.extra_log)}: extra per-iteration raw fields (NEXT_EXPERIMENTS_P3 §5)", flush=True)
     tasks = [pt + (s, m, a.ntrain, a.beta, a.tin, a.iters, a.arm, a.ckpt, a.stagec_ckpt, a.mean_arms, a.p3_arms,
-                   a.extra_log, a.pilot_arms, a.ald_file, a.doppler, a.rotation) for pt in pts for s, m in chunk_plan(a.skip0, a.n, a.chunk)]
+                   a.extra_log, a.pilot_arms, a.ald_file, a.doppler, a.rotation, a.train_prior)
+             for pt in pts for s, m in chunk_plan(a.skip0, a.n, a.chunk)]
     tasks = [(testbed,) + t for t in tasks]
     tasks.sort(key=lambda t: (t[4], -C.CELLS[t[1]]["Nr"]))   # first chunks of every point early; 8x4 first
     jobs = min(os.cpu_count(), len(tasks))

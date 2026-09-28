@@ -74,7 +74,7 @@
 | ALD 개발 조정 (worktree, GPU 2, `logs/ald_tune_S2vALD.log`) | 완료 23:24 CDT (§5) |
 | 적대적 검토(Fable 서브에이전트) → v2 → §5 채움 → **동결 커밋(c-rotmix)** | 이 커밋 |
 | ROT 종료 → c-rotmix 병합 → 병합 diff → worktree 산출물 이동(ckpt 2·fits 28·σ 격자·GB′ npz·로그; sha 재확인) → `git worktree remove ~/t2_wtC` | 대기 |
-| 선행 코드(브랜치, 병합 뒤 실행): `code/run_s2v16e4_eval.sh` (C6, ①③④② 순, 수용·판독 명령 §1), `code/pair_baselines.py` (X ∈ 𝔅 의 표 B·R_X paired bootstrap; 다른 raw 의 arm 을 시행 인덱스로 짝, genie 4 키 비트 동일 전제 검사, ALD·pilot 예외 0·nmse@1 검사, X\* 규칙), `code/testbed_s2v.py`, fits 링크 3 개 | 대기 |
+| **[09-28 00:51 CDT 완료 — c-rotmix 커밋, testbed_s2v.py 는 BLER 중 작성]** 선행 코드(브랜치, 병합 뒤 실행): `code/run_s2v16e4_eval.sh` (C6, ①③④② 순, 수용·판독 명령 §1), `code/pair_baselines.py` (X ∈ 𝔅 의 표 B·R_X paired bootstrap; 다른 raw 의 arm 을 시행 인덱스로 짝, genie 4 키 비트 동일 전제 검사, ALD·pilot 예외 0·nmse@1 검사, X\* 규칙), `code/testbed_s2v.py`, fits 링크 3 개 | 대기 |
 | ALD 테스트 추정(regen test → estimate, GPU) | 병합 뒤, ④ 직전 |
 
 ## 5. 평가 전 고정 기록

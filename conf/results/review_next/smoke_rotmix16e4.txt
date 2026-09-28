@@ -1,0 +1,42 @@
+== case 1 (expect refuse)
+--stagec-ckpt /home/HTJ/t2_wtB/conf/ckpt/d2sx_S2d_N160000_a1_best.pt was trained on prior 'S2d' but this run is prior 'S2'.  Refusing (a registered mismatch run declares it with --train-prior S2d).
+rc=1
+== case 2 (expect refuse)
+--train-prior 'S2d' must name the checkpoint's own prior ('S2') and differ from this run's prior ('S2').  Refusing.
+rc=1
+== case 3 (expect refuse)
+[run] MISMATCH (NEXT_EXPERIMENTS_MISMATCH16e4): checkpoint trained on 'S2d', evaluated on 'S2' channels; GMM fits / Chat are whatever the tag's fits dir holds
+--train-prior S2d: the tag's full K=32 fit resolves to /home/HTJ/t2_wtB/conf/results/gmm_fits_D2_RMXnolink/fit_S2_Nr8_fullK32_n160000.npz, not a S2d fit.  Refusing.
+rc=1
+== case 4 (expect pass)
+[run] MISMATCH (NEXT_EXPERIMENTS_MISMATCH16e4): checkpoint trained on 'S2d', evaluated on 'S2' channels; GMM fits / Chat are whatever the tag's fits dir holds
+[run] M-ours-dscore: ABSENT -- no GATE-PASSING checkpoint (04_SPEC §5 gates GA-GD): no gate-passing checkpoint for D2; recorded PASS rows: none (searched conf/results/gate_D2.txt and LADDER.md)
+[run] M-ours-dscore is NOT in this run.  The reason is written to every raw file as 'meta|dscore_status', so analysis.py reports its slot as BLOCKED / FAILED-VERIFICATION instead of quietly printing a table without it (01_RULES §6).
+[run] Stage C arms (10_SPEC §3b/§3c): M-ours-dscore-C-{V0,V1,V4} + the mandatory GMM control M-ours-bstar-scalar, from /home/HTJ/t2_wtB/conf/ckpt/d2sx_S2d_N160000_a1_best.pt (8x4) -- ON for ['C2'], ABSENT for []
+[run] Stage C checkpoint: sha256[:16]=ceec0222e0912a1c epoch=1348 best_epoch=1348 role=best 8x4
+[run] Stage C gate record: NO GATE RECORD mentions d2sx_S2d_N160000_a1_best.pt -- UNVERIFIED here.  (GA-GD are measurable on D1 only, 10_SPEC §5: a D2 re-train is qualified by its D1 sibling's gate row, which this string cannot prove.)
+[run] D2 1 points x n=40 -> 1 tasks on 1 workers (prior S2, cells ['C2'], chunk 40) -> /home/HTJ/t2_wtB/conf/raw_RMXsmoke
+1/1 done    D2_C2_S2_Nr8_T16_Tp4_dft_snr-3_skip0_n40.npz  (51 s)  BLER16: R5-genie=0.05
+[run] finished in 0.9 min -> python runner.py analysis --testbed D2 --tag RMXsmoke
+rc=0
+== case 5 (expect refuse-ald-rotation)
+[run] M-ours-dscore: ABSENT -- no GATE-PASSING checkpoint (04_SPEC §5 gates GA-GD): no gate-passing checkpoint for D2; recorded PASS rows: none (searched conf/results/gate_D2.txt and LADDER.md)
+[run] M-ours-dscore is NOT in this run.  The reason is written to every raw file as 'meta|dscore_status', so analysis.py reports its slot as BLOCKED / FAILED-VERIFICATION instead of quietly printing a table without it (01_RULES §6).
+[run] Stage C arms (10_SPEC §3b/§3c): M-ours-dscore-C-{V0,V1,V4} + the mandatory GMM control M-ours-bstar-scalar, from /home/HTJ/t2/conf/ckpt/d2sx_N160000_a1.pt (8x4) -- ON for ['C2'], ABSENT for []
+[run] Stage C checkpoint: sha256[:16]=4443921ce8d5c4a1 epoch=1784 best_epoch=1764 role=legacy-last 8x4 | BEST_WEIGHTS_UNAVAILABLE: evaluated = last-epoch EMA, reported best_val belongs to best_epoch
+[run] Stage C gate record: NO GATE RECORD mentions d2sx_N160000_a1.pt -- UNVERIFIED here.  (GA-GD are measurable on D1 only, 10_SPEC §5: a D2 re-train is qualified by its D1 sibling's gate row, which this string cannot prove.)
+[run] D2 1 points x n=40 -> 1 tasks on 1 workers (prior S2, cells ['C2'], chunk 40) -> /home/HTJ/t2_wtB/conf/raw_SMK5
+Traceback (most recent call last):
+  File "/home/HTJ/t2_wtB/conf/code/runner.py", line 1331, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/home/HTJ/t2_wtB/conf/code/runner.py", line 1327, in main
+    return CMDS[a.cmd](a) or 0
+           ^^^^^^^^^^^^^^
+  File "/home/HTJ/t2_wtB/conf/code/runner.py", line 639, in cmd_run
+    print(f"{i + 1}/{len(tasks)} {run_task(t)}", flush=True)
+                                  ^^^^^^^^^^^
+  File "/home/HTJ/t2_wtB/conf/code/runner.py", line 496, in run_task
+    raise RuntimeError(f"--ald-file {ald_file} was estimated at rotation {er}, this run uses --rotation {rotation}")
+RuntimeError: --ald-file /home/HTJ/t2/conf/results/ald/ald_PILB16e4k.npz was estimated at rotation -1.0, this run uses --rotation 15.0
+rc=1
