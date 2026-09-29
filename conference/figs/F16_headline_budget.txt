@@ -1,0 +1,17 @@
+F16 -- representative result.  Numbers recomputed from the raw files by code/figure_f16.py.
+
+(a) D2 C2 (8x4, T=16, Tp=4), N_train=1.6e5 equal budget (raw_B16e4k), n=2560 per SNR, BLER@16:
+  R2-ours-G            839/2560 261/2560 97/2560 57/2560 31/2560 29/2560 15/2560
+  M-ours-bstar         623/2560 184/2560 57/2560 28/2560 17/2560 16/2560 8/2560
+  M-ours-dscore-C-V1   371/2560 88/2560 29/2560 16/2560 7/2560 5/2560 3/2560
+  R5-genie             87/2560 26/2560 12/2560 9/2560 2/2560 2/2560 2/2560
+
+(b) C2 -3 dB, BLER@16 vs equal budget (last-EMA weights; GMM fit and score net on the same N_train channels):
+  N=1.0e+04 B1e4       b*=kron 512  D1-sibling gate FAIL (budget-axis measurement): M-ours-bstar 646/2560, M-ours-dscore-C-V1 372/2560, R5-genie 87/2560
+  N=4.0e+04 B4e4k      b*=kron 2048 D1-sibling gate FAIL (budget-axis measurement): M-ours-bstar 635/2560, M-ours-dscore-C-V1 370/2560, R5-genie 87/2560
+  N=1.6e+05 B16e4k     b*=kron 1024 D1-sibling gate PASS: M-ours-bstar 623/2560, M-ours-dscore-C-V1 371/2560, R5-genie 87/2560
+  N=3.2e+05 B32e4last  b*=kron 4096 D1-sibling gate PASS: M-ours-bstar 610/2560, M-ours-dscore-C-V1 368/2560, R5-genie 87/2560
+  N=3.2e5 B32e4 (_best.pt, judging run): M-ours-dscore-C-V1 373/2560
+
+Caption notes: equal budget = GMM EM fit and diffusion-prior training use the same N_train channel set. R5-genie is a known-channel receiver REFERENCE (same detector + BCJR, true H), not a bound. Panel (a) annotation: tables_D2_B16e4k.txt:367-372 (b*->V1 sign tests 302:50, 117:21, 35:7; SNR@0.1 gap +1.41 dB, 90% paired bootstrap CI [+1.22, +1.64]). b* for 4e4 and 3.2e5 is at the edge of the fitted K grid (4e4: K=2048; 3.2e5: K=4096, user-decided stop); 1.6e5 b* K=1024 with K=2048 not fitted. Headline = 1.6e5. Error bars: 95% Wilson. Colours: learned diffusion prior V1 blue squares (hollow blue square = best-val weights at 3.2e5), GMM b* orange diamonds, Gaussian prior (R2) grey circles dashed (panel a only), known-channel reference R5 ink stars dash-dot; light shading = budgets whose recipe failed the D1-sibling gate; all annotation text in ink.
+Genie curve (checked 2026-09-25, no bug; DECISIONS [2026-09-25 14:45 KST] entry): R5-genie = true H + the SAME LMMSE-PIC / BCJR turbo loop, not a bound. Its residual failures above ~6 dB are L=3 blocks (rank H = 3 < Nt = 4, near rank 2), a slowly decaying tail, not a flat floor; 9-15 dB points are 2/2560 each (Wilson 95% [2.1e-4, 2.8e-3]) and every SNR point uses independent channel draws, so 12 vs 9 (3 vs 6 dB) and 2/2/2 are within binomial noise (log-linear binomial fit p = 0.18). The same tail appears in C1/C5/C6, not on full-rank D1.
