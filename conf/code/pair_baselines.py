@@ -47,6 +47,43 @@ def chunk_meta(root, cell, key):
     return vals
 
 
+MAN = {}                                               # raw role -> manifest git_commit (--provenance manifest only)
+
+
+def manifest_check(root, bad, role):
+    """--provenance manifest (STATIC16e4 §1): for a raw written before run|git.  The manifest's git_commit is the HEAD when the
+    MANIFEST was written (run_manifest.py), not the run commit -- printed as 'manifest-head:' only.  Checks: manifest exists, is
+    git-tracked and clean; n_raw_files == chunks; its point list == the raw's point set; every chunk mtime <= manifest 'written';
+    a git-tracked raw dir must be clean.  Returns the header string incl. sha256 over the sorted per-chunk sha256 list."""
+    import hashlib, json, subprocess, datetime
+    tag = os.path.basename(os.path.normpath(root))[len("raw_"):]
+    f = os.path.join(C.CONF, "results", "review_next", f"run_manifest_{tag}.json")
+    git = lambda *x: subprocess.run(["git", "-C", C.CONF, *x], capture_output=True, text=True).stdout.strip()
+    if not os.path.exists(f):
+        bad.append(f"{role}: no run manifest {os.path.basename(f)} (--provenance manifest)")
+        return "(none)"
+    if not git("ls-files", f) or git("status", "--porcelain", f):
+        bad.append(f"{role}: manifest {os.path.basename(f)} not tracked / not clean")
+    m = json.load(open(f)); chunks = sorted(glob.glob(os.path.join(root, "*.npz")))
+    if m.get("n_raw_files") != len(chunks) or not m.get("git_commit"):
+        bad.append(f"{role}: manifest n_raw_files {m.get('n_raw_files')} vs {len(chunks)} chunks, git {m.get('git_commit')}")
+    pts = {os.path.basename(c).rsplit("_skip", 1)[0] for c in chunks}
+    if set(m.get("points", [])) != pts:
+        bad.append(f"{role}: manifest point list != raw point set ({len(m.get('points', []))} vs {len(pts)})")
+    w = datetime.datetime.strptime(m["written"][:19], "%Y-%m-%d %H:%M:%S").timestamp()   # KST = the container clock (TZ=Asia/Seoul)
+    late = [c for c in chunks if os.path.getmtime(c) > w]
+    if late:
+        bad.append(f"{role}: {len(late)} chunks newer than the manifest ({os.path.basename(late[0])})")
+    if git("ls-files", root) and git("status", "--porcelain", root):
+        bad.append(f"{role}: git-tracked raw dir has uncommitted changes")
+    digest = hashlib.sha256("".join(hashlib.sha256(open(c, "rb").read()).hexdigest() for c in chunks).encode()).hexdigest()[:16]
+    MANI[role] = m
+    return f"manifest-head:{m.get('git_commit')}/chunks-sha:{digest}"
+
+
+MANI = {}                                              # raw role -> manifest dict (--provenance manifest only)
+
+
 def table_b(data, cell, prior, snrs, x, y):
     cand = decision_points(data, cell, prior, snrs, x)          # anchor = the first member (08_SPEC §2)
     res = [paired(data[(cell, prior, s)], x, y) for s in cand]
@@ -71,10 +108,17 @@ def main():
     ap.add_argument("--r0", choices=("at16", "at1"), default="at16", help="R0-pilot reading: at16 = the 16-iteration trajectory "
                     "(S2V16e4 / ROTMIX16e4 records); at1 = the 1-pass reading 08_SPEC §1 calls R0-pilot (SUPP16e4, load_raw alias "
                     "'R0-pilot@1')")
+    ap.add_argument("--expect", action="append", default=[], help="STATIC16e4: ARM=LABEL recorded before this run, e.g. "
+                    "'V1-pilot=(i)'; a different recomputed label is code drift -> exit 1 (repeatable)")
     ap.add_argument("--expect-bstar", default=None, help="SUPP16e4: the b* -> V1 label the original registration recorded "
                     "('(i)', '(iii)', ...); a different recomputed label is code drift -> exit 1")
     ap.add_argument("--extra", action="append", default=[], help="SUPP16e4: further raws of the SAME trials holding more loop "
                     "arms (merged into the base after the genie / meta / commit checks; an arm may not appear twice)")
+    ap.add_argument("--provenance", choices=("run-git", "manifest"), default="run-git",
+                    help="run-git (default, unchanged) = one clean run|git commit per raw.  manifest (STATIC16e4, user decision "
+                         "2026-09-29 CDT) = for raws written BEFORE run|git existed (no chunk carries the key): each raw must have "
+                         "results/review_next/run_manifest_<tag>.json with n_raw_files == its chunk count and a git_commit, printed "
+                         "in the header; a raw that DOES carry run|git is still held to the one-clean-commit rule")
     ap.add_argument("--legacy", action="store_true", help="VALIDATION ONLY on raws older than run|git (DOP/ROT code): skip "
                     "the one-clean-commit check.  Never used for a registered tag.")
     a = ap.parse_args()
@@ -93,7 +137,9 @@ def main():
     bad += [f"{n}: load_raw warning: {w.strip()}" for n in raws for w in raws[n][2]]
     for n in ["base", "pil", "ald"] + EXTRA:
         g = chunk_meta(roots[n], a.cell, "run|git")
-        if not a.legacy and (len(g) != 1 or any(x.endswith("+dirty") or x == "(none)" for x in g)):
+        if a.provenance == "manifest" and g == {"(none)"}:
+            MAN[n] = manifest_check(roots[n], bad, n)
+        elif not a.legacy and (len(g) != 1 or any(x.endswith("+dirty") or x == "(none)" for x in g)):
             bad.append(f"{n}: code version across chunks {sorted(g)} (one clean commit expected)")
     for mk in ("meta|rotation", "meta|doppler"):
         mv = {n: chunk_meta(roots[n], a.cell, mk) for n in ["base", "pil", "ald"] + EXTRA}
@@ -105,7 +151,17 @@ def main():
     pil = np.load(os.path.join(C.CONF, "results", "ald", f"pilots_{a.est}_test.npz"), allow_pickle=True)
     bm = raws["base"][1].get((a.cell, a.prior), {})
     prov = str(est["prov"]) if "prov" in est.files else ""
-    sha = str(bm.get("stagec_ckpt_id", "")).split()[0].replace("sha256[:16]=", "")
+    sid = str(bm.get("stagec_ckpt_id", "")).split()
+    sha = sid[0].replace("sha256[:16]=", "") if sid else ""
+    if not sha and a.provenance == "manifest" and bm.get("stagec_ckpt"):   # raws older than meta|stagec_ckpt_id
+        import hashlib
+        fsha = hashlib.sha256(open(str(bm["stagec_ckpt"]), "rb").read()).hexdigest()[:16]
+        msid = str(MANI.get("base", {}).get("stagec_ckpt_id", "")).split()
+        msha = msid[0].replace("sha256[:16]=", "") if msid and msid[0] != "(none)" else ""
+        if msha and msha != fsha:
+            bad.append(f"base V1 checkpoint: manifest id {msha} != file {os.path.basename(str(bm['stagec_ckpt']))} sha {fsha}")
+        sha = msha or fsha
+        print(f"# base V1 checkpoint id: manifest {msha or '(none)'}, file {os.path.basename(str(bm['stagec_ckpt']))} {fsha}")
     if sha and sha not in prov + str(est["ckpt_sha"] if "ckpt_sha" in est.files else ""):
         bad.append(f"ALD estimate checkpoint (prov {prov[:80]!r}) is not the base's V1 checkpoint {sha}")
     erot = float(pil["rotation"]) if "rotation" in pil.files else -1.0
@@ -139,7 +195,7 @@ def main():
                 bad.append(f"{k[2]:+.0f} dB {arm}: channel estimate not the precomputed ALD estimate")
     print(f"# pair_baselines {a.base} + {a.pil} + {a.ald}" + "".join(f" + {e}" for e in a.extra) + (f" (genie ref {a.ref})" if a.ref else "")
           + f", cell {a.cell}, prior {a.prior}, rotation {deg[:12]}, doppler {dop[:12]}, git "
-          + " ".join(f"{n}={','.join(sorted(chunk_meta(roots[n], a.cell, 'run|git')))}" for n in ["base"] + EXTRA + ["pil", "ald"]) + "; "
+          + " ".join(f"{n}={MAN.get(n) or ','.join(sorted(chunk_meta(roots[n], a.cell, 'run|git')))}" for n in ["base"] + EXTRA + ["pil", "ald"]) + "; "
           f"integrity: " + ("OK" if not bad else "FAILED: " + "; ".join(bad[:10])))
     if bad:
         sys.exit(1)                                     # an invalid tag gets no label (registrations §1)
@@ -199,6 +255,10 @@ def main():
     print(f"SUMMARY-B (baselines without b*, {len(BL)}): (i) {kB}, (ii) {mB}, not decided {len(BL) - kB - mB}; b* -> V1 {labs[BSTAR]}")
     if a.expect_bstar and labs[BSTAR] != a.expect_bstar:
         print(f"# b* -> V1 recomputed {labs[BSTAR]} != recorded {a.expect_bstar}: code drift -- no summary sentence"); sys.exit(1)
+    for e in a.expect:
+        arm, lab = e.split("=", 1)
+        if labs.get(arm) != lab:
+            print(f"# {arm} -> V1 recomputed {labs.get(arm)} != recorded {lab}: code drift -- no summary sentence"); sys.exit(1)
     xs = min(rows, key=lambda r: (r[1], r[0]))
     fx, fv, fg = (fails(data[k3], arm) for arm in (xs[0], V1, GENIE))
     ok_range = 0.005 <= fx.mean() <= 0.9 and fx.sum() > fg.sum() and not vg
