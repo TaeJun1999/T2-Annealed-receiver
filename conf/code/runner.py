@@ -312,6 +312,9 @@ def _ald_table(path, snr, ckpt):
     return {"hhat": z["hhat"], "b": z["b"], "v": z["v"], "skip": int(z["skip"])}, k
 
 
+SPARSE = None     # NEXT_EXPERIMENTS_SPARSE16e4: dict(rho, n_em, L) from --sparse-arms (set in main before the pool forks)
+
+
 def build_point(testbed, cell, prior, snr, ntrain=C.N_TRAIN, beta=C.BETA, t_in=C.T_IN, ckpt=None,
                 stagec_ckpt=None, mean_arms=False, p3_arms=False, pilot_arms=False, ald_file=None):
     """Every arm of `testbed` at one (cell, prior, SNR) point, all sharing one pilot matrix (06_SPEC §2).
@@ -367,7 +370,7 @@ def build_point(testbed, cell, prior, snr, ntrain=C.N_TRAIN, beta=C.BETA, t_in=C
                                               score_prior_c=spc, score_prior_v1=spc1,
                                               bstar_scalar=bool(stagec_ckpt), mean_arms=mean_arms,
                                               score_prior_v1_floor=spcf, p3_arms=p3_arms, pilot_arms=pilot_arms,
-                                              ald=_ald_table(ald_file, snr, stagec_ckpt))
+                                              ald=_ald_table(ald_file, snr, stagec_ckpt), sparse=SPARSE)
     arms.update(our)
     cfgs.update(ocfg)
     # An arm that is not built must leave a trace with the REASON, or the analysis sees a missing row and
@@ -433,6 +436,8 @@ def build_point(testbed, cell, prior, snr, ntrain=C.N_TRAIN, beta=C.BETA, t_in=C
             for f in ("fit_sec", "fit_sec_note"):
                 if f"{f}|M-ours-dscore-C-V1" in meta:
                     meta[f"{f}|V1-pilot"] = meta[f"{f}|M-ours-dscore-C-V1"]
+    if SPARSE is not None:          # NEXT_EXPERIMENTS_SPARSE16e4: the tuned sparse-baseline hyper-parameters
+        meta["sparse"] = __import__("json").dumps(SPARSE, sort_keys=True)
     if ald_file:                    # NEXT_EXPERIMENTS_ALD16e4: the estimate file and its frozen tuning record
         import hashlib, json
         meta["ald_file"] = f"{ald_file} sha256[:16]={hashlib.sha256(open(ald_file, 'rb').read()).hexdigest()[:16]}"
@@ -1214,6 +1219,8 @@ def main(argv=None):
                     help="NEXT_EXPERIMENTS_DOP16e4, run: normalised Doppler nu = f_D T_s per symbol; the channel varies within "
                          "the block (per-path Clarke phases, separate stream).  0 = the path code with a static channel "
                          "(control: must reproduce the static raw bit for bit).  OPT-IN; requires --tag.")
+    ap.add_argument("--sparse-arms", default=None, metavar="RHO,N_EM,L",
+                    help="NEXT_EXPERIMENTS_SPARSE16e4, run/smoke: ADD SBL-loop / SBL-pilot / OMP-pilot (model-based sparse baselines, same EP receiver as b*) with dictionary oversampling RHO, SBL EM steps N_EM, OMP atoms L.  OPT-IN; requires --tag.")
     ap.add_argument("--ald-file", default=None,
                     help="NEXT_EXPERIMENTS_ALD16e4, run/smoke: ADD ALD-pilot / ALDv-pilot from this code/ald.py estimate file "
                          "(Arvinte-Tamir annealed Langevin, V1 network, precomputed).  OPT-IN; requires --stagec-ckpt, --tag.")
@@ -1263,6 +1270,7 @@ def main(argv=None):
                                      ("p3-arms", a.p3_arms),
                                      ("pilot-arms", a.pilot_arms),
                                      ("ald-file", a.ald_file is not None),
+                                     ("sparse-arms", a.sparse_arms is not None),
                                      ("doppler", a.doppler is not None),
                                      ("rotation", a.rotation is not None),
                                      ("train-prior", a.train_prior is not None),
@@ -1271,6 +1279,10 @@ def main(argv=None):
         sys.exit(f"refusing to write the pre-registered output with {', '.join(changed)} -- pass --tag X "
                  "(01_RULES §5: the configuration is frozen before the run and not changed afterwards, and "
                  "the diffusion arm gets no more data or budget than the GMM arm)")
+    if a.sparse_arms:
+        global SPARSE
+        r, ne, L = (int(x) for x in a.sparse_arms.split(","))
+        SPARSE = dict(rho=r, n_em=ne, L=L)
     if a.ald_file and not a.stagec_ckpt:
         sys.exit("--ald-file needs --stagec-ckpt: ALD-pilot wraps the V1 score prior (cbar, eh2) built from it.")
     if a.train_prior and not a.stagec_ckpt:
