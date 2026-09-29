@@ -129,3 +129,9 @@ D2 C2 의 `X → V1` (판정점 · pooled a:b · 라벨; 전체 수치는 `pairB
 **보고 전용**: 데이터셋 × X 의 R_X (1차·2차)·절대 격차·SNR@0.1 격차, 전 arm −3..+15 dB 실패 수 (R0 @16 포함), NMSE@16 중앙값 → 각 `pairB_ST<TAG>.txt`. C6 의 R_{V1-pilot} (−3 dB) 0.492 [0.355, 0.630] 은 이 계산에서 처음 나온 값이다.
 
 - 원고 명칭 (사용자 결정 09-29 17:48 CDT): **"규칙 고정 사후 계산"** — DECISIONS 같은 시각 줄.
+
+### 6.2 기록 감사 (Fable 5.1 서브에이전트, 2026-09-29 17:57 CDT = 09-30 07:57 KST; `prereg_audit_2026-09-29/audit_STATIC16e4.md` (`recompute_static.py` → `recompute_static.out`); raw npz 18 디렉터리에서 독립 재계산 — pair_baselines·analysis 미호출)
+
+정정 없음. 무결성 6/6, 출처 검사 18/18 raw (manifest tracked·clean, 청크 수·점 목록, 청크 mtime ≤ written, raw_B16e4k git-clean), 머리말의 manifest-head 18·chunks-sha 18 개, 표 B 78 라벨 전부, X\*·R_{X\*}·문장 조건, §0 과의 대조(드리프트 0), 집계와 §3 채점 8/8 이 재현됐다. 동결 뒤 문서 diff 는 추가만, `conf/code`·`Demo` diff 없음.
+
+메모: (1) §0 (동결 본문) 의 "ALD16e4 §6.1, TABLE A" 는 표 이름이 아니라 `NEXT_EXPERIMENTS_ALD16e4.md` 112 행 산문의 수치다 (값은 일치; 동결 본문이라 고치지 않는다). (2) 원고 명칭 결정 줄은 §6.1 끝에 추가됐다 (추가만). (3) 보고 전용: R_X 1차가 포화 가드로 정의되지 않는 것은 D3·UMi28·MIX3 의 R4-llr 세 개뿐. (4) pairB_ST 의 condition 줄은 재계산 b\* 기준이고 §1 문장 조건은 원 b\* 기준 — 드리프트 0 이라 결과 동일. (5) B16e4k manifest 는 마지막 청크보다 10 시간 뒤에 쓰였다 (§1 에 미리 적은 대로; raw 가 git-tracked clean).
