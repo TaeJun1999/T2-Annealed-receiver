@@ -1,0 +1,57 @@
+# date        : 2026-09-30 00:59:51 KST
+# git commit  : bafdf46a
+# versions    : python 3.12.14  numpy 2.5.2  scipy 1.18.1  torch 2.14.0+cu130 (cuda_available=False)
+# device      : CPU (192 cores) | dtype: complex128 / float64 | deterministic: yes (fixed seeds, no GPU in the receiver)
+# testbed     : D2
+# seed rule   : default_rng([20260926, TBID[testbed], PID[prior], Nr, T, Tp, int(snr)+100])  (trials of a point = ONE stream)
+# code        : rate-1/2 conv (133,171)_8 nu=6 terminated, QPSK, outer iterations = 16 for EVERY arm
+# Demo/ hashes: t2_route_a.py=95a5408901ec125c  t2_trellis.py=31cd0ee9c68e972b  t2_gmm.py=d064e58c7510c769
+# content     : conf/04_SPEC_diffusion.md §3 -- the sigma_t grid MEASURED from the receiver's own queries
+# measured by : the D-13(belief)+D-14(matrix site) one-shot interface with Module H = Gaussian sample
+#               covariance (= M-ours-G); this is the interface M-ours-score / M-ours-dscore use.
+# prior       : S2   cells: ['C9']   n = 64 trials/point  x  16 iterations  x  11 points  =  11264 samples
+# convention  : nu_q = per-complex-entry cavity variance (q = h + CN(0, nu_q I));  sigma_t = sqrt(nu_q/2) = per-real-dimension std
+
+empirical distribution of nu_q (pooled over iterations, SNRs, cells)
+  percentile       0.1         1         5        10        25        50        75        90        95        99      99.9
+  nu_q       2.072e-03 2.153e-03 2.307e-03 4.304e-03 9.620e-03 7.158e-02 5.487e-01 2.223e+00 4.671e+00 6.058e+00 7.906e+00
+  sigma_t    3.219e-02 3.281e-02 3.396e-02 4.639e-02 6.936e-02 1.892e-01 5.238e-01 1.054e+00 1.528e+00 1.740e+00 1.988e+00
+  min 2.0724e-03  max 7.9057e+00  non-finite/non-positive dropped: 0
+
+per cell x SNR: median nu_q per iteration (iterations 1, 2, 4, 8, 16)
+  C9 -15.0 dB  it1 =7.906e+00 it2 =6.067e+00 it4 =4.967e+00 it8 =4.580e+00 it16=4.417e+00
+  C9 -12.0 dB  it1 =3.962e+00 it2 =2.264e+00 it4 =1.757e+00 it8 =1.420e+00 it16=1.317e+00
+  C9  -9.0 dB  it1 =1.986e+00 it2 =8.406e-01 it4 =5.946e-01 it8 =5.579e-01 it16=5.513e-01
+  C9  -6.0 dB  it1 =9.953e-01 it2 =3.144e-01 it4 =2.753e-01 it8 =2.743e-01 it16=2.743e-01
+  C9  -3.0 dB  it1 =4.988e-01 it2 =1.437e-01 it4 =1.413e-01 it8 =1.409e-01 it16=1.409e-01
+  C9   0.0 dB  it1 =2.500e-01 it2 =7.171e-02 it4 =7.007e-02 it8 =7.007e-02 it16=7.007e-02
+  C9   3.0 dB  it1 =1.253e-01 it2 =3.578e-02 it4 =3.539e-02 it8 =3.539e-02 it16=3.539e-02
+  C9   6.0 dB  it1 =6.280e-02 it2 =1.799e-02 it4 =1.777e-02 it8 =1.777e-02 it16=1.777e-02
+  C9   9.0 dB  it1 =3.147e-02 it2 =9.092e-03 it4 =9.036e-03 it8 =9.036e-03 it16=9.023e-03
+  C9  12.0 dB  it1 =1.577e-02 it2 =4.563e-03 it4 =4.524e-03 it8 =4.524e-03 it16=4.524e-03
+  C9  15.0 dB  it1 =7.906e-03 it2 =2.277e-03 it4 =2.266e-03 it8 =2.266e-03 it16=2.266e-03
+
+CHOSEN GRID  (20 log-equispaced points covering the 1.0-99.0 percentile [2.1534e-03, 6.0581e+00] of nu_q)
+  k    nu_q          sigma_t
+  0    2.153404e-03  3.281314e-02
+  1    3.270867e-03  4.044049e-02
+  2    4.968212e-03  4.984081e-02
+  3    7.546358e-03  6.142621e-02
+  4    1.146238e-02  7.570461e-02
+  5    1.741053e-02  9.330201e-02
+  6    2.644535e-02  1.149899e-01
+  7    4.016859e-02  1.417191e-01
+  8    6.101320e-02  1.746614e-01
+  9    9.267468e-02  2.152611e-01
+  10   1.407662e-01  2.652981e-01
+  11   2.138138e-01  3.269662e-01
+  12   3.247678e-01  4.029689e-01
+  13   4.932990e-01  4.966382e-01
+  14   7.492859e-01  6.120808e-01
+  15   1.138112e+00  7.543579e-01
+  16   1.728710e+00  9.297069e-01
+  17   2.625786e+00  1.145816e+00
+  18   3.988381e+00  1.412158e+00
+  19   6.058066e+00  1.740412e+00
+
+This grid is FROZEN from here on (04_SPEC §3).  Training, the GA-GD gates and GB' all use it.

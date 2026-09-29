@@ -44,7 +44,13 @@ ap.add_argument("--no-gbprime", action="store_true", help="train/resume only; no
 ap.add_argument("--fallback", type=int, default=1, choices=(1, 2, 3),
                 help="10_SPEC §3d ladder after a DIVERGED/aborted run: 2 = grad-norm clip 1.0, 3 = + lr/3 (score.*_LADDER; "
                      "same data stream, checkpoint suffix _fb<k>).  1 = the frozen recipe (default, unchanged)")
+ap.add_argument("--arch", default="frozen", choices=("frozen", "cap", "cap2"),
+                help="EXPLORATORY architecture diagnostic (user decision 2026-09-30, array-scaling stage 0; GB' only, never a "
+                     "registered arm): cap = width 128 / heads 4 / depth 8, cap2 = width 256 / heads 8 / depth 8; same rung "
+                     "(seed), data, sigma grid and training rule.  frozen = the recipe (default, every name unchanged)")
 a = ap.parse_args()
+ARCH = dict(frozen={}, cap=dict(width=128, heads=4, depth=8), cap2=dict(width=256, heads=8, depth=8))[a.arch]
+HP.update(ARCH)
 if a.tag:
     import runner
     runner._init(a.tag)                        # A.D2_FITS -> results/gmm_fits_D2_<tag>
@@ -54,7 +60,8 @@ PT = "" if PRIOR == "S2" else PRIOR                      # "" keeps every S2 nam
 if PT:
     CSV = os.path.join(C.CONF, "results", f"d2_gbprime_{PT}.csv")
 
-tag = (f"{PT}_" if PT else "") + f"N{a.ntrain}_a{a.attempt}" + (f"_fb{a.fallback}" if a.fallback > 1 else "")
+tag = (f"{PT}_" if PT else "") + f"N{a.ntrain}_a{a.attempt}" + (f"_fb{a.fallback}" if a.fallback > 1 else "") \
+    + ("" if a.arch == "frozen" else f"_{a.arch}")
 GRAD_CLIP = score.GRAD_CLIP_LADDER[a.fallback - 1]
 HP["lr"] = HP["lr"] / score.LR_DIV_LADDER[a.fallback - 1]
 ck = os.path.join(C.CONF, "ckpt", f"d2sx_{tag}.pt")

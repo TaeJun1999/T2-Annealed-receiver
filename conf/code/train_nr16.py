@@ -30,24 +30,28 @@ NR, NT, PRIOR, STAG = 16, 4, "S2", "NR16"
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--ntrain", type=int, default=10000)
+    ap.add_argument("--nr", type=int, default=16, choices=(16, 32),
+                    help="receive array (default 16 = C6, every name unchanged); 32 = the array-scaling cell C9 (user decision 2026-09-29 CDT): names carry NR32, default sigma/fits tags NR32")
     ap.add_argument("--attempt", type=int, default=1)
     ap.add_argument("--n-eval", type=int, default=4096)
     ap.add_argument("--fallback", type=int, default=1, choices=(1, 2, 3),
                     help="10_SPEC §3d ladder after a DIVERGED/aborted run (NEXT_EXPERIMENTS_C6B16e4 §1): 2 = grad-norm clip "
                          "1.0, 3 = + lr/3 (score.*_LADDER; same rung/attempt = same data stream, checkpoint suffix _fb<k>). "
                          "1 = the frozen recipe (default, unchanged)")
-    ap.add_argument("--prior", default="S2", choices=("S2", "S2v"),
+    ap.add_argument("--prior", default="S2", choices=("S2", "S2v", "UMi28"),
                     help="S2 = the C6 prior (default, every name unchanged); S2v = review_next C, S2 + receive-side visibility "
                          "windows (d2.D2VisGen): names carry the prior (ckpt d2sx_S2vNR16_..., rung D2SXS2vNR16<N>)")
-    ap.add_argument("--sigma-tag", default="NR16", help="measured sigma grid (default NR16; S2v uses S2vNR16)")
+    ap.add_argument("--sigma-tag", default=None, help="measured sigma grid (default NR<nr>; S2v uses S2vNR16)")
     ap.add_argument("--no-gbprime", action="store_true", help="train/resume only (GB' after the GMM grid is complete)")
-    ap.add_argument("--fits-tag", default="NR16", help="GMM fits dir results/gmm_fits_D2_<tag> for the equal-budget GB' "
+    ap.add_argument("--fits-tag", default=None, help="GMM fits dir results/gmm_fits_D2_<tag> for the equal-budget GB' "
                     "(default NR16 = the 1e4 fits, as before; the C6 1.6e5 point uses NR16B16e4)")
     a = ap.parse_args()
-    global PRIOR, STAG
-    PRIOR, STAG = a.prior, a.sigma_tag
+    global PRIOR, STAG, NR
+    NR = a.nr
+    PRIOR, STAG = a.prior, a.sigma_tag or f"NR{NR}"
+    a.fits_tag = a.fits_tag or f"NR{NR}"
     pre = "" if PRIOR == "S2" else PRIOR
-    tag = f"{pre}NR16_N{a.ntrain}_a{a.attempt}" + (f"_fb{a.fallback}" if a.fallback > 1 else "")
+    tag = f"{pre}NR{NR}_N{a.ntrain}_a{a.attempt}" + (f"_fb{a.fallback}" if a.fallback > 1 else "")
     grad_clip = score.GRAD_CLIP_LADDER[a.fallback - 1]
     hp = dict(HP, lr=HP["lr"] / score.LR_DIV_LADDER[a.fallback - 1])
     ck = os.path.join(C.CONF, "ckpt", f"d2sx_{tag}.pt")
@@ -55,7 +59,7 @@ def main():
     nu, sg = __import__("sigma").load("D2", STAG)
     print(f"[nr16] ntrain={a.ntrain} attempt={a.attempt} Nr={NR} dim={2*NR*NT} "
           f"sigma grid '{STAG}' [{sg.min():.4e}, {sg.max():.4e}] ({len(sg)} pts)", flush=True)
-    res = score.train(f"D2SX{pre}NR16{a.ntrain}", a.attempt, "D2", PRIOR, NR, NT, device="cuda", hp=hp,
+    res = score.train(f"D2SX{pre}NR{NR}{a.ntrain}", a.attempt, "D2", PRIOR, NR, NT, device="cuda", hp=hp,
                       resume=True, ntrain=a.ntrain, max_epochs=3000, patience=20, min_epochs=200,
                       log_path=lg, ckpt=ck, verbose=False, sigma_tag=STAG,
                       **({"grad_clip": grad_clip} if a.fallback > 1 else {}))
