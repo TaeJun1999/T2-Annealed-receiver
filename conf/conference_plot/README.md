@@ -1,4 +1,4 @@
-# 학회용 그림 (F16~F26)
+# 학회용 그림 (F16~F29)
 
 `conf/figs/` 에 있는 학회용 그림의 사본이다. 각 그림은 `conf/code/figure_f*.py` 가 raw npz 에서 다시 계산해 그리고, 기록된 실패 수를 assert 로 대조한다. `.txt` 에는 그림의 수치 전부와 캡션용 캐비엇이 있다.
 
@@ -14,9 +14,12 @@
 | F21 `F21_all_baselines` | 6 데이터셋 × 핵심 baseline 곡선 | `figure_f21.py` | (위 등록들) |
 | F22 `F22_pilot_only` | 파일럿 전용 prior 대 루프 | `figure_f22.py` | PILOT16e4 |
 | F23 `F23_mismatch` | 학습/평가 채널 모델 불일치 8 쌍 | `figure_f23.py` | MISMATCH16e4 |
-| F24 `F24_nonstationary_D2C2` | D2 C2 블록 안 도플러 ν = 0.005/0.01, 수신 배열 회전 15°/30° — 등록 baseline (ALD·V1-pilot 포함) 곡선 | `figure_f24.py` | DOP16e4, ROT16e4, SUPP16e4 |
+| F24 `F24_nonstationary_D2C2` | D2 C2 블록 안 도플러 ν = 0.005/0.01, 수신 배열 회전 15°/30° — 등록 baseline (ALD plug-in·V1-pilot 포함) 곡선 | `figure_f24.py` | DOP16e4, ROT16e4, SUPP16e4 |
 | F25 `F25_nonstationary_all` | 24 조건 (6 데이터셋 × 4) −3 dB BLER: V1, 가장 가까운 baseline X\*, genie | `figure_f24.py` | SUPP16e4 |
 | F26 `F26_drift_spatial` | 표류 학습 prior (B′, 15°/30°)와 공간 비정상 S2v (C, 16×4) 곡선 | `figure_f24.py` | ROTMIX16e4, S2V16e4 |
+| F27 `F27_nonstationary_gap_recovery` | 6 데이터셋 × {정적, 도플러 2, 회전 2}: (a) SNR@0.1 격차 b\*−V1 [dB], (b) 회수율 R (−3 dB), 90% CI; 속 빈 점 = 등록 라벨 (iii)/(iv). 기록 파일 전사 | `figure_f27.py` | F20·F17 기록, SUPP16e4 |
+| F28 `F28_nonstationary_C6` | D2 C6 (16×4) 도플러·회전 네 조건 곡선 (F24 와 같은 arm) | `figure_f27.py` | DOP16e4, ROT16e4, SUPP16e4 |
+| F29 `F29_label_grid` | SUPP16e4 등록 라벨 격자 24 조건 × 13 baseline: (i) 301, (iii) 5, (iv) 6, (ii) 0 | `figure_f27.py` | SUPP16e4 |
 
 인용 주의:
 - D2 C2 헤드라인 외의 체크포인트(C6, D3, SV8e, 38.901, S2v, S2d)는 UNGATED 측정이다.

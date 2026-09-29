@@ -35,7 +35,7 @@ GREY, ALD = "#52514e", "#4a3aa7"
 ARMS = [("R3-bigamp", -1, "BiG-AMP, i.i.d. prior (R3)", GREY, "v", "--", 1.0, False),
         ("R1-turbo", -1, "turbo receiver, LMMSE (R1)", GREY, "^", "-", 1.0, False),
         ("R2-ours-G", -1, "same EP receiver, Gaussian prior (R2)", GAUSS["color"], "o", "--", 1.1, True),
-        ("ALD-pilot", -1, "annealed Langevin, pilot-only (ALD)", ALD, "P", ":", 1.1, True),
+        ("ALD-pilot", -1, "annealed Langevin, pilot-only, plug-in (ALD)", ALD, "P", ":", 1.1, True),
         ("V1-pilot", -1, "diffusion prior V1, pilot-only", V1["color"], "s", "--", 1.1, False),
         ("M-ours-bstar", -1, r"GMM prior $b^*$ (validation-selected K)", GMM["color"], "D", "-", 1.3, True),
         ("M-ours-dscore-C-V1", -1, "diffusion prior V1 (proposed)", V1["color"], "s", "-", 1.8, True),

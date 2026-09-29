@@ -1,0 +1,34 @@
+F27 -- SNR@0.1 gap b* - V1 [dB] and recovery R at -3 dB (90% paired-bootstrap CIs), static vs the four non-stationary conditions.  Transcribed from the record files (static: F20 / F17 .txt; non-stationary: pairB_X<T>.txt, b* block).
+
+    D2 C2  static             label (i)   gap +1.41 dB                                                     R 0.470
+    D2 C6  static             label (i)   gap censored (V1 below 0.1 at the lowest grid SNR)               R 0.809
+    D3     static             label (i)   gap +1.41 dB                                                     R 0.367
+    SV8e   static             label (iv)  gap +0.25 dB                                                     R 0.143
+    UMi28  static             label (i)   gap +0.60 dB                                                     R 0.062
+    MIX3   static             label (i)   gap +0.98 dB                                                     R 0.090
+    D2 C2  Doppler ν = 0.005  label (i)   gap +1.49 dB  [90% paired bootstrap +1.27, +1.71; censored repli R 0.535 [90% 0.491, 0.578]
+    D2 C6  Doppler ν = 0.005  label (i)   gap n/a (<=  -3 vs <=  -3) — extend the SNR grid                 R 0.791 [90% 0.724, 0.859]
+    D3     Doppler ν = 0.005  label (i)   gap +1.72 dB  [90% paired bootstrap +1.31, +2.08; censored repli R 0.388 [90% 0.352, 0.425]
+    SV8e   Doppler ν = 0.005  label (iv)  gap +0.21 dB  [90% paired bootstrap +0.13, +0.30; censored repli R 0.145 [90% 0.100, 0.189]
+    UMi28  Doppler ν = 0.005  label (i)   gap +0.53 dB  [90% paired bootstrap +0.27, +0.79; censored repli R 0.076 [90% 0.046, 0.106]
+    MIX3   Doppler ν = 0.005  label (i)   gap +1.17 dB  [90% paired bootstrap +0.82, +1.68; censored repli R 0.115 [90% 0.081, 0.149]
+    D2 C2  Doppler ν = 0.01   label (iii) gap +1.61 dB  [90% paired bootstrap +1.29, +2.04; censored repli R undefined (the genie fails at least as often as V1 at -3 dB)
+    D2 C6  Doppler ν = 0.01   label (iii) gap >= +2.15 dB (M-ours-dscore-C-V1 is already below 0.1 at the  R undefined (the genie fails at least as often as V1 at -3 dB)
+    D3     Doppler ν = 0.01   label (i)   gap +2.18 dB  [90% paired bootstrap +1.53, +4.00; censored repli R 0.955 [90% 0.826, 1.107]
+    SV8e   Doppler ν = 0.01   label (i)   gap +0.36 dB  [90% paired bootstrap +0.22, +0.51; censored repli R 0.261 [90% 0.199, 0.328]
+    UMi28  Doppler ν = 0.01   label (iii) gap +2.16 dB  [90% paired bootstrap +0.17, +2.92; censored repli R 0.081 [90% 0.019, 0.140]
+    MIX3   Doppler ν = 0.01   label (i)   gap n/a (>  15 vs >  15) — extend the SNR grid                   R 0.195 [90% 0.119, 0.277]
+    D2 C2  rotation 15°       label (i)   gap +1.29 dB  [90% paired bootstrap +1.10, +1.49; censored repli R 0.462 [90% 0.419, 0.507]
+    D2 C6  rotation 15°       label (i)   gap n/a (<=  -3 vs <=  -3) — extend the SNR grid                 R 0.810 [90% 0.750, 0.866]
+    D3     rotation 15°       label (i)   gap +1.50 dB  [90% paired bootstrap +1.24, +1.82; censored repli R 0.293 [90% 0.260, 0.324]
+    SV8e   rotation 15°       label (iv)  gap +0.25 dB  [90% paired bootstrap +0.17, +0.34; censored repli R 0.154 [90% 0.110, 0.197]
+    UMi28  rotation 15°       label (i)   gap +0.53 dB  [90% paired bootstrap +0.21, +0.82; censored repli R 0.082 [90% 0.052, 0.109]
+    MIX3   rotation 15°       label (i)   gap +0.97 dB  [90% paired bootstrap +0.64, +1.26; censored repli R 0.076 [90% 0.050, 0.100]
+    D2 C2  rotation 30°       label (i)   gap +1.25 dB  [90% paired bootstrap +1.05, +1.45; censored repli R 0.392 [90% 0.353, 0.432]
+    D2 C6  rotation 30°       label (i)   gap >= +1.22 dB (M-ours-dscore-C-V1 is already below 0.1 at the  R 0.816 [90% 0.778, 0.851]
+    D3     rotation 30°       label (i)   gap +1.52 dB  [90% paired bootstrap +1.22, +1.78; censored repli R 0.316 [90% 0.286, 0.346]
+    SV8e   rotation 30°       label (i)   gap +0.33 dB  [90% paired bootstrap +0.24, +0.43; censored repli R 0.125 [90% 0.081, 0.168]
+    UMi28  rotation 30°       label (i)   gap +1.03 dB  [90% paired bootstrap +0.72, +1.42; censored repli R 0.037 [90% 0.008, 0.066]
+    MIX3   rotation 30°       label (i)   gap +1.16 dB  [90% paired bootstrap +0.80, +1.74; censored repli R 0.061 [90% 0.034, 0.087]
+
+Not drawn: censored gaps (V1 or b* outside the SNR grid at 0.1) and R left undefined by the genie >= V1 guard (Doppler nu = 0.01, D2 C2 and C6: genie holds only H_0 of the block).  A hollow marker's value is report-only: its registered decision points were not significant.  D2 C2 is the headline (gate PASS recipe); every other dataset is an UNGATED measurement.
