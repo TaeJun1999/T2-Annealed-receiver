@@ -1,0 +1,131 @@
+# pair_baselines raw_ROTaMX + raw_XPROTaMX + raw_XAROTaMX + raw_XLROTaMX, cell C2, prior MIX3, rotation deg=15.0: re, doppler (none), git base=a4cbd184 extra0=e7c9f4a7 pil=e7c9f4a7 ald=e7c9f4a7; integrity: OK
+# R0-pilot read at @1 (1-pass, 08_SPEC §1; load_raw alias 'R0-pilot@1'), SUPP16e4 §1
+M-ours-bstar -> M-ours-dscore-C-V1  [anchor M-ours-bstar]  decision SNRs ['+3', '+6', '+9']
+    sign test @16: +3 dB 90:26 p=1.9e-09  +6 dB 70:23 p=1.1e-06  +9 dB 44:18 p=0.0013   pooled 204:67 p=2.9e-17
+    POWERED=True  second arm fewer at 3/3, first arm fewer at 0/3  -> (i)
+    SNR@0.1 gap (M-ours-bstar minus V1): +0.97 dB  [90% paired bootstrap +0.64, +1.26; censored replicates 0%]
+    absolute gap -3 dB: F_X - F_V1 = 60 blocks of 2560
+    R_X -3 dB (primary): 0.076 [90% 0.050, 0.100]
+    R_X decision points (secondary): 0.233 [90% 0.190, 0.272] over 3 point(s)
+M-ours-bstar-scalar -> M-ours-dscore-C-V1  [anchor M-ours-bstar-scalar]  decision SNRs ['+3', '+6', '+9']
+    sign test @16: +3 dB 108:32 p=7.8e-11  +6 dB 80:24 p=3.2e-08  +9 dB 45:21 p=0.0043   pooled 233:77 p=2.2e-19
+    POWERED=True  second arm fewer at 3/3, first arm fewer at 0/3  -> (i)
+    SNR@0.1 gap (M-ours-bstar-scalar minus V1): +1.13 dB  [90% paired bootstrap +0.79, +1.40; censored replicates 0%]
+    absolute gap -3 dB: F_X - F_V1 = 72 blocks of 2560
+    R_X -3 dB (primary): 0.090 [90% 0.062, 0.118]
+    R_X decision points (secondary): 0.257 [90% 0.213, 0.298] over 3 point(s)
+M-ours-gmm32 -> M-ours-dscore-C-V1  [anchor M-ours-gmm32]  decision SNRs ['+3', '+6', '+9']
+    sign test @16: +3 dB 136:41 p=4.2e-13  +6 dB 104:26 p=3e-12  +9 dB 71:19 p=3.1e-08   pooled 311:86 p=5.3e-31
+    POWERED=True  second arm fewer at 3/3, first arm fewer at 0/3  -> (i)
+    SNR@0.1 gap (M-ours-gmm32 minus V1): +1.66 dB  [90% paired bootstrap +1.24, +2.04; censored replicates 0%]
+    absolute gap -3 dB: F_X - F_V1 = 104 blocks of 2560
+    R_X -3 dB (primary): 0.125 [90% 0.098, 0.153]
+    R_X decision points (secondary): 0.333 [90% 0.290, 0.373] over 3 point(s)
+R0-pilot@1 -> M-ours-dscore-C-V1  [anchor R0-pilot@1]  decision SNRs ['+9', '+12', '+15']
+    sign test @16: +9 dB 539:2 p=4.1e-158  +12 dB 404:0 p=4.8e-122  +15 dB 226:0 p=1.9e-68   pooled 1169:2 p=0
+    POWERED=True  second arm fewer at 3/3, first arm fewer at 0/3  -> (i)
+    SNR@0.1 gap (R0-pilot@1 minus V1): +9.63 dB  [90% paired bootstrap +9.02, +9.99; censored replicates 24%]
+    absolute gap -3 dB: F_X - F_V1 = 882 blocks of 2560
+    R_X -3 dB (primary): 0.547 [90% 0.527, 0.568]
+    R_X decision points (secondary): 0.905 [90% 0.890, 0.920] over 3 point(s)
+R1-turbo -> M-ours-dscore-C-V1  [anchor R1-turbo]  decision SNRs ['+6', '+9', '+12']
+    sign test @16: +6 dB 346:11 p=1.8e-87  +9 dB 214:15 p=3e-46  +12 dB 134:1 p=6.2e-39   pooled 694:27 p=1.5e-168
+    POWERED=True  second arm fewer at 3/3, first arm fewer at 0/3  -> (i)
+    SNR@0.1 gap (R1-turbo minus V1): +4.97 dB  [90% paired bootstrap +4.45, +5.46; censored replicates 0%]
+    absolute gap -3 dB: F_X - F_V1 = 583 blocks of 2560
+    R_X -3 dB (primary): 0.444 [90% 0.420, 0.469]
+    R_X decision points (secondary): 0.740 [90% 0.713, 0.765] over 3 point(s)
+R2-ours-G -> M-ours-dscore-C-V1  [anchor R2-ours-G]  decision SNRs ['+6', '+9', '+12']
+    sign test @16: +6 dB 210:16 p=2.6e-44  +9 dB 134:16 p=2.2e-24  +12 dB 97:1 p=6.2e-28   pooled 441:33 p=3.3e-92
+    POWERED=True  second arm fewer at 3/3, first arm fewer at 0/3  -> (i)
+    SNR@0.1 gap (R2-ours-G minus V1): +3.58 dB  [90% paired bootstrap +2.99, +4.18; censored replicates 0%]
+    absolute gap -3 dB: F_X - F_V1 = 292 blocks of 2560
+    R_X -3 dB (primary): 0.286 [90% 0.259, 0.313]
+    R_X decision points (secondary): 0.636 [90% 0.600, 0.669] over 3 point(s)
+R3-bigamp -> M-ours-dscore-C-V1  [anchor R3-bigamp]  decision SNRs ['+6', '+9', '+15']
+    sign test @16: +6 dB 616:1 p=2.3e-183  +9 dB 686:2 p=3.7e-202  +15 dB 795:1 p=3.8e-237   pooled 2097:4 p=0
+    POWERED=True  second arm fewer at 3/3, first arm fewer at 0/3  -> (i)
+    SNR@0.1 gap (R3-bigamp minus V1): >= +9.84 dB (R3-bigamp never reaches 0.1 on the grid)
+    absolute gap -3 dB: F_X - F_V1 = 637 blocks of 2560
+    R_X -3 dB (primary): 0.466 [90% 0.442, 0.490]
+    R_X decision points (secondary): 0.903 [90% 0.893, 0.913] over 3 point(s)
+R4-llr -> M-ours-dscore-C-V1  [anchor R4-llr]  decision SNRs ['+9', '+12', '+15']
+    sign test @16: +9 dB 1144:5 p=0  +12 dB 954:2 p=1.5e-282  +15 dB 735:0 p=1.1e-221   pooled 2833:7 p=0
+    POWERED=True  second arm fewer at 3/3, first arm fewer at 0/3  -> (i)
+    SNR@0.1 gap (R4-llr minus V1): >= +9.84 dB (R4-llr never reaches 0.1 on the grid)
+    absolute gap -3 dB: F_X - F_V1 = 990 blocks of 2560
+    R_X -3 dB (primary): undefined (out of range: -3 dB BLER 0.9336, F_X 2390, F_genie 671)
+    R_X decision points (secondary): 0.959 [90% 0.952, 0.965] over 3 point(s)
+R4-scvamp -> M-ours-dscore-C-V1  [anchor R4-scvamp]  decision SNRs ['+9', '+12', '+15']
+    sign test @16: +9 dB 524:4 p=7.3e-150  +12 dB 392:1 p=3.9e-116  +15 dB 261:0 p=5.4e-79   pooled 1177:5 p=0
+    POWERED=True  second arm fewer at 3/3, first arm fewer at 0/3  -> (i)
+    SNR@0.1 gap (R4-scvamp minus V1): >= +9.84 dB (R4-scvamp never reaches 0.1 on the grid)
+    absolute gap -3 dB: F_X - F_V1 = 714 blocks of 2560
+    R_X -3 dB (primary): 0.495 [90% 0.473, 0.517]
+    R_X decision points (secondary): 0.906 [90% 0.891, 0.920] over 3 point(s)
+bstar-pilot -> M-ours-dscore-C-V1  [anchor bstar-pilot]  decision SNRs ['+3', '+6', '+9']
+    sign test @16: +3 dB 160:27 p=3.4e-24  +6 dB 95:23 p=1.4e-11  +9 dB 53:15 p=4.1e-06   pooled 308:65 p=6.1e-39
+    POWERED=True  second arm fewer at 3/3, first arm fewer at 0/3  -> (i)
+    SNR@0.1 gap (bstar-pilot minus V1): +1.46 dB  [90% paired bootstrap +1.10, +1.77; censored replicates 0%]
+    absolute gap -3 dB: F_X - F_V1 = 374 blocks of 2560
+    R_X -3 dB (primary): 0.339 [90% 0.314, 0.363]
+    R_X decision points (secondary): 0.350 [90% 0.313, 0.387] over 3 point(s)
+V1-pilot -> M-ours-dscore-C-V1  [anchor V1-pilot]  decision SNRs ['+3', '+6', '+9']
+    sign test @16: +3 dB 91:17 p=2.1e-13  +6 dB 41:7 p=6.2e-07  +9 dB 21:11 p=0.11   pooled 153:35 p=8.6e-19
+    POWERED=True  second arm fewer at 2/3, first arm fewer at 0/3  -> (i)
+    SNR@0.1 gap (V1-pilot minus V1): +0.71 dB  [90% paired bootstrap +0.50, +0.93; censored replicates 0%]
+    absolute gap -3 dB: F_X - F_V1 = 309 blocks of 2560
+    R_X -3 dB (primary): 0.298 [90% 0.273, 0.321]
+    R_X decision points (secondary): 0.207 [90% 0.172, 0.244] over 3 point(s)
+ALD-pilot -> M-ours-dscore-C-V1  [anchor ALD-pilot]  decision SNRs ['+3', '+6', '+9']
+    sign test @16: +3 dB 150:27 p=7.1e-22  +6 dB 86:18 p=8.2e-12  +9 dB 50:20 p=0.00044   pooled 286:65 p=3.4e-34
+    POWERED=True  second arm fewer at 3/3, first arm fewer at 0/3  -> (i)
+    SNR@0.1 gap (ALD-pilot minus V1): +1.35 dB  [90% paired bootstrap +1.02, +1.65; censored replicates 0%]
+    absolute gap -3 dB: F_X - F_V1 = 400 blocks of 2560
+    R_X -3 dB (primary): 0.354 [90% 0.328, 0.380]
+    R_X decision points (secondary): 0.329 [90% 0.289, 0.366] over 3 point(s)
+ALDv-pilot -> M-ours-dscore-C-V1  [anchor ALDv-pilot]  decision SNRs ['+3', '+6', '+9']
+    sign test @16: +3 dB 122:24 p=5.3e-17  +6 dB 64:16 p=5.9e-08  +9 dB 30:14 p=0.023   pooled 216:54 p=4e-24
+    POWERED=True  second arm fewer at 3/3, first arm fewer at 0/3  -> (i)
+    SNR@0.1 gap (ALDv-pilot minus V1): +0.97 dB  [90% paired bootstrap +0.70, +1.22; censored replicates 0%]
+    absolute gap -3 dB: F_X - F_V1 = 468 blocks of 2560
+    R_X -3 dB (primary): 0.391 [90% 0.366, 0.415]
+    R_X decision points (secondary): 0.264 [90% 0.223, 0.303] over 3 point(s)
+SUMMARY-B (baselines without b*, 12): (i) 12, (ii) 0, not decided 0; b* -> V1 (i)
+
+SUMMARY registered baselines 13 (b* + 𝔅 12): (i) 13, (ii) 0, not decided 0
+    M-ours-bstar=(i)  M-ours-bstar-scalar=(i)  M-ours-gmm32=(i)  R0-pilot@1=(i)  R1-turbo=(i)  R2-ours-G=(i)  R3-bigamp=(i)  R4-llr=(i)  R4-scvamp=(i)  bstar-pilot=(i)  V1-pilot=(i)  ALD-pilot=(i)  ALDv-pilot=(i)
+X* (fewest -3 dB failures, ties by name) = M-ours-bstar (F=1460); R_X* -3 dB = 0.076 [90% 0.050, 0.100]
+'등록된 baseline 전부와 멀어진다' condition (k = 13, (ii) = 0, R_X* CI lower > 0): MET
+BLER@16 failures / n per SNR -3 +0 +3 +6 +9 +12 +15 dB:
+    R5-genie              671   409   160    87    46    14     4
+    M-ours-dscore-C-V1   1400   822   402   215   127    39    20
+    M-ours-bstar         1460   901   466   262   153    60    33
+    M-ours-bstar-scalar  1472   916   478   271   151    67    37
+    M-ours-gmm32         1504   948   497   293   179    89    39
+    R0-pilot@1           2282  1818  1298   951   664   443   246
+    R1-turbo             1983  1418   907   550   326   172    96
+    R2-ours-G            1692  1118   644   409   245   135    61
+    R3-bigamp            2037  1482  1006   830   811   832   814
+    R4-llr               2390  2261  1933  1521  1266   991   755
+    R4-scvamp            2114  1668  1196   900   647   430   281
+    bstar-pilot          1774  1044   535   287   165    73    41
+    V1-pilot             1709   991   476   249   137    45    19
+    ALD-pilot            1800  1057   525   283   157    82    44
+    ALDv-pilot           1868  1072   500   263   143    62    31
+    R0-pilot             1938  1259   727   440   253   135    77
+report-only, median NMSE@16 of the channel estimate per SNR:
+    M-ours-dscore-C-V1  9.09e-02 4.28e-02 2.11e-02 1.06e-02 5.70e-03 2.95e-03 1.58e-03
+    M-ours-bstar        1.09e-01 5.21e-02 2.62e-02 1.30e-02 6.91e-03 3.55e-03 1.86e-03
+    M-ours-bstar-scalar 1.08e-01 5.17e-02 2.56e-02 1.26e-02 6.65e-03 3.41e-03 1.77e-03
+    M-ours-gmm32        1.35e-01 6.35e-02 2.93e-02 1.46e-02 7.63e-03 3.91e-03 1.96e-03
+    R0-pilot@1          3.40e-01 2.07e-01 1.16e-01 6.01e-02 3.17e-02 1.60e-02 8.14e-03
+    R1-turbo            2.88e-01 1.50e-01 4.86e-02 2.10e-02 1.00e-02 4.94e-03 2.41e-03
+    R2-ours-G           2.38e-01 1.03e-01 4.32e-02 2.03e-02 9.82e-03 4.90e-03 2.39e-03
+    R3-bigamp           3.92e-01 2.28e-01 9.11e-02 3.76e-02 1.63e-02 7.63e-03 3.51e-03
+    R4-llr              3.77e-01 3.10e-01 2.49e-01 1.58e-01 2.47e-02 6.66e-03 2.94e-03
+    R4-scvamp           3.03e-01 1.84e-01 6.58e-02 2.47e-02 1.11e-02 5.27e-03 2.51e-03
+    bstar-pilot         1.78e-01 1.07e-01 6.18e-02 3.51e-02 1.97e-02 1.10e-02 5.90e-03
+    V1-pilot            1.61e-01 9.33e-02 5.36e-02 2.91e-02 1.61e-02 8.93e-03 4.85e-03
+    ALD-pilot           2.01e-01 1.10e-01 5.91e-02 3.18e-02 1.75e-02 9.65e-03 5.31e-03
+    ALDv-pilot          2.01e-01 1.10e-01 5.91e-02 3.18e-02 1.75e-02 9.65e-03 5.31e-03
