@@ -1,0 +1,34 @@
+# date        : 2026-09-23 08:26:05 KST
+# git commit  : b7fca4b1
+# versions    : python 3.12.14  numpy 2.5.2  scipy 1.18.1  torch 2.14.0+cu130 (cuda_available=True)
+# device      : CPU (192 cores) | dtype: complex128 / float64 | deterministic: yes (fixed seeds, no GPU in the receiver)
+# testbed     : D2
+# seed rule   : default_rng([20260926, TBID[testbed], PID[prior], Nr, T, Tp, int(snr)+100])  (trials of a point = ONE stream)
+# code        : rate-1/2 conv (133,171)_8 nu=6 terminated, QPSK, outer iterations = 16 for EVERY arm
+# Demo/ hashes: t2_route_a.py=95a5408901ec125c  t2_trellis.py=31cd0ee9c68e972b  t2_gmm.py=d064e58c7510c769
+# script      : conf/code/pair_tags.py rule3  (NEXT_EXPERIMENTS v3 §3.1 step 4)
+# points      : testbed D2  cell C2  prior S2  SNR ['-3', '+0', '+3'] dB
+# house test  : exact two-sided sign test on discordant pairs (exp_0921_analysis.sign_p), p < 0.05; n_d < 6 -> UNDECIDED; MDD = smallest net |a-b| with p < 0.05 at the observed n_d (report only)
+# failure     : blk_err[:, -1] (BLER@16) via analysis.load_raw; a trial whose arm RAISED is a failure and is kept
+# split       : DEVELOPMENT = skip >= C.DEV_SKIP0 = 2560 (§0 acceptance = exactly 16 chunks (2560+40k, 40)), TEST = skip < 2560
+# tag         : 'B16e4k'         -> /home/HTJ/t2/conf/raw_B16e4k
+# member      : B16e4k:M-ours-dscore-C-V1
+# member      : B16e4k:M-ours-bstar
+# point -3 dB: TEST        skip [0, 2560) in 64 chunks, n=2560  §0 test set OK; identical (skip, n) chunk list in all 1 tag(s)
+# point +0 dB: TEST        skip [0, 2560) in 64 chunks, n=2560  §0 test set OK; identical (skip, n) chunk list in all 1 tag(s)
+# point +3 dB: TEST        skip [0, 2560) in 64 chunks, n=2560  §0 test set OK; identical (skip, n) chunk list in all 1 tag(s)
+# run params  : seed=20260926  iters=16  beta=0.7  t_in=5  dtype=complex128/float64  (every chunk, every tag)
+# stage C ckpt: [B16e4k] /home/HTJ/t2/conf/ckpt/d2sx_N160000_a1.pt
+
+RULE3 (§3.1 step 4)  aug = B16e4k:M-ours-dscore-C-V1   ctrl = B16e4k:M-ours-bstar   decision points ['-3', '+0', '+3']
+  a = only aug fails, b = only ctrl fails
+ -3 dB  failures B16e4k:M-ours-dscore-C-V1=371/2560 (0.1449)  B16e4k:M-ours-bstar=623/2560 (0.2434)
+   a:b=50:302  net(a-b)=-252  n_d=352  p=4.71e-45  MDD@n_d=38  -> p < 0.05: aug fewer failures
+ +0 dB  failures B16e4k:M-ours-dscore-C-V1=88/2560 (0.0344)  B16e4k:M-ours-bstar=184/2560 (0.0719)
+   a:b=21:117  net(a-b)=-96  n_d=138  p=2.38e-17  MDD@n_d=24  -> p < 0.05: aug fewer failures
+ +3 dB  failures B16e4k:M-ours-dscore-C-V1=29/2560 (0.0113)  B16e4k:M-ours-bstar=57/2560 (0.0223)
+   a:b=7:35  net(a-b)=-28  n_d=42  p=1.51e-05  MDD@n_d=14  -> p < 0.05: aug fewer failures
+  pooled (REPORT ONLY) a:b=78:454  p=1.67e-65
+  power guard: 3/3 points present (needs all 3), discordant counts [352, 138, 42] (needs >= 6 at >= 2) -> POWERED
+  aug fewer failures with p < 0.05 at 3/3 points; ctrl fewer failures with p < 0.05 at 0/3 points
+  §3.1 step 4 verdict: PASS
