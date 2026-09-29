@@ -63,3 +63,67 @@ SUPP16e4 §2 표 그대로 (k𝔅 = 12·m𝔅 = 0 → "V1 이 𝔅 12 개 전부
 | 동결 커밋 | 이 문서를 담은 커밋 (해시는 §6 첫 줄) |
 
 ## 6. 결과 (이 절은 추가만 한다)
+
+### 6.1 결과 (기록 2026-09-29 17:36 CDT (= 09-30 07:36 KST), Opus 5.5 — 전사만, 해석 없음; 원본 `results/review_next/pairB_ST<TAG>.txt` 6 개, 로그 `logs/run_static16e4.log`)
+
+**동결 커밋**: 2139f082. **실행**: `bash code/run_static16e4.sh` 2026-09-29 17:31 ~ 17:33 CDT (git 2139f082; 전제 검사 통과), `STATIC_DONE ok=6 fail=0`. 무결성 6/6 OK (`--provenance manifest` 검사 포함), `--expect` 다섯 라벨 (b\*, V1-pilot, ALD-pilot, ALDv-pilot, R2) 6/6 일치 — 코드 드리프트 없음. 새 BLER 없음.
+
+**주 라벨 (D2 C2)**: k𝔅 = 12, m𝔅 = 0 → **(A) "V1 이 𝔅 12 개 전부보다 적게 실패"**; 원 b\* (i), R_{X\*} 하한 0.427 > 0 → **"D2 C2 헤드라인에서 등록된 baseline 전부(13 개)와 멀어진다 (이 셀·예산·prior 한정; 이미 본 곡선 위의 규칙 고정 사후 계산)"**.
+
+**데이터셋별 (각 pairB_ST 파일의 `SUMMARY-B`·X\*·문장 줄 그대로)**:
+
+| 데이터셋 | 원 b\* | k𝔅 · m𝔅 · 판정 못함 | (i) 아닌 X (𝔅) | X\* (F −3 dB) · R_{X\*} [90%] | "전부" 문장 조건 |
+|---|---|---|---|---|---|
+| D2 C2 (헤드라인) | (i) | 12 · 0 · 0 | — | M-ours-bstar (623) · 0.470 [0.427, 0.512] | 충족 |
+| D2 C6 | (i) | 11 · 0 · 1 | V1-pilot (iv) | V1-pilot (83) · 0.492 [0.355, 0.630] | 불충족 |
+| D3 | (i) | 12 · 0 · 0 | — | M-ours-bstar (1298) · 0.367 [0.335, 0.399] | 충족 |
+| SV8e | (iv) | 9 · 0 · 3 | M-ours-bstar-scalar (iv), M-ours-gmm32 (iv), V1-pilot (iv) | M-ours-bstar (464) · 0.143 [0.095, 0.188] | 불충족 |
+| UMi28 | (i) | 12 · 0 · 0 | — | M-ours-bstar (1270) · 0.062 [0.033, 0.089] | 충족 |
+| MIX3 (보고 전용) | (i) | 12 · 0 · 0 | — | M-ours-bstar (1421) · 0.090 [0.062, 0.117] | 충족 |
+
+D2 C2 의 `X → V1` (판정점 · pooled a:b · 라벨; 전체 수치는 `pairB_STB16e4k.txt`):
+
+| X | 판정점 | pooled | 라벨 |
+|---|---|---|---|
+| M-ours-bstar | -3/+0/+3 | 454:78 | (i) 3/3 |
+| M-ours-bstar-scalar | -3/+0/+3 | 498:73 | (i) 3/3 |
+| M-ours-gmm32 | -3/+0/+3 | 565:78 | (i) 3/3 |
+| R0-pilot@1 | +3/+6/+9 | 832:0 | (i) 3/3 |
+| R1-turbo | +0/+3/+6 | 724:12 | (i) 3/3 |
+| R2-ours-G | -3/+0/+3 | 778:69 | (i) 3/3 |
+| R3-bigamp | +3/+12/+15 | 461:4 | (i) 3/3 |
+| R4-llr | +9/+12/+15 | 1623:2 | (i) 3/3 |
+| R4-scvamp | +3/+6/+9 | 759:2 | (i) 3/3 |
+| bstar-pilot | -3/+0/+3 | 814:41 | (i) 3/3 |
+| V1-pilot | -3/+0/+3 | 347:51 | (i) 2/3 |
+| ALD-pilot | -3/+0/+3 | 678:54 | (i) 3/3 |
+| ALDv-pilot | -3/+0/+3 | 644:50 | (i) 3/3 |
+
+머리말 출처 (`manifest-head` = 매니페스트 작성 시점 HEAD — 실행 커밋 아님; `chunks-sha` = raw 별 청크 sha256 목록의 sha256[:16]):
+
+- D2 C2 (헤드라인): base=manifest-head:cd241b7e/chunks-sha:78cbb59fc01ce520 pil=manifest-head:92d26757/chunks-sha:e1ff7ae11ab9eda1 ald=manifest-head:7e64f5cc/chunks-sha:d7a8d327661b00b5
+- D2 C6: base=manifest-head:2a36737c/chunks-sha:279cdea5c7a4f054 pil=manifest-head:bfe80c48/chunks-sha:f3eced0a9aa7c393 ald=manifest-head:7e64f5cc/chunks-sha:8b4b4bf4755b0b58
+- D3: base=manifest-head:07a8935a/chunks-sha:8777a3522b9ca2e8 pil=manifest-head:bfe80c48/chunks-sha:c02bf6d734e54309 ald=manifest-head:7e64f5cc/chunks-sha:4c15ac9e03fe9906
+- SV8e: base=manifest-head:5e074fe6/chunks-sha:6abcfe3dca147362 pil=manifest-head:bfe80c48/chunks-sha:2fa74014713dd514 ald=manifest-head:7e64f5cc/chunks-sha:a207f60d1535131c
+- UMi28: base=manifest-head:344d084c/chunks-sha:213dd3a3a3226fa6 pil=manifest-head:bfe80c48/chunks-sha:16528b7b3d370102 ald=manifest-head:7e64f5cc/chunks-sha:e9bf7e57af506811
+- MIX3 (보고 전용): base=manifest-head:344d084c/chunks-sha:2d948d75b20605f9 pil=manifest-head:bfe80c48/chunks-sha:33db9f82f3908d76 ald=manifest-head:7e64f5cc/chunks-sha:7d1d2d08045d7133
+
+**집계 (개수 서술만, 보정 없음)**: 새 48 라벨 중 (i) 46, (iv) 2 (SV8e 의 b\*-scalar·gmm32), (ii) 0. 72 라벨 전체 (인용 24 포함) 중 (ii) 0. k𝔅 = 12 인 데이터셋 4/6 (D2 C2·D3·UMi28·MIX3). "등록된 baseline 전부와 멀어진다" 문장 **4/6 충족** — 문장이 가능하던 4 곳 모두 (C6·SV8e 는 §0 에서 불가).
+
+**§3 예측 채점**:
+
+| # | 예측 | 결과 | 채점 |
+|---|---|---|---|
+| 0 | 이미 실현된 것 | b\*·R2·P1·A1·A2·X\*·R_{X\*} 모두 §0 과 같음 (`--expect` 통과, X\*·R 은 §0 값 그대로) | 채점 안 함 |
+| 1 | 주 라벨 D2 C2 (A) | (A) | ✓ |
+| 2 | D3 새 8 arm 모두 (i) | 8/8 (i) | ✓ |
+| 3 | UMi28 새 8 arm 모두 (i) | 8/8 (i) | ✓ |
+| 4 | MIX3 새 8 arm 모두 (i) | 8/8 (i) | ✓ |
+| 5 | C6 새 8 arm 모두 (i) (k𝔅 = 11) | 8/8 (i), k𝔅 = 11 | ✓ |
+| 6a | SV8e b\*-scalar·gmm32 둘 다 (iv) | 둘 다 (iv) | ✓ |
+| 6b | SV8e 나머지 새 6 arm 모두 (i) | 6/6 (i) | ✓ |
+| 7 | 새 48 라벨 중 (ii) 0 | 0 | ✓ |
+
+합계: 적중 8, 빗나감 0.
+
+**보고 전용**: 데이터셋 × X 의 R_X (1차·2차)·절대 격차·SNR@0.1 격차, 전 arm −3..+15 dB 실패 수 (R0 @16 포함), NMSE@16 중앙값 → 각 `pairB_ST<TAG>.txt`. C6 의 R_{V1-pilot} (−3 dB) 0.492 [0.355, 0.630] 은 이 계산에서 처음 나온 값이다.
