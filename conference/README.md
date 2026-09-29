@@ -1,6 +1,6 @@
 # 학회 원고용 결과 모음
 
-스냅샷 기준 커밋 `e7c9f4a7` (2026-09-28 CDT). 이 폴더는 **색인과 사본**만 담는다. 원본은 다음과 같다.
+스냅샷 기준: SUPP16e4 결과·감사까지 (2026-09-29 CDT). 이 폴더는 **색인과 사본**만 담는다. 원본은 다음과 같다.
 - 수치: `conf/results/`
 - 실행 기록: `docs/EXPERIMENTS.md`
 - 결정: `conf/DECISIONS.md`
@@ -9,7 +9,7 @@
 
 | 파일 | 내용 |
 |---|---|
-| `figs/` | 그림 F16~F23 (`conf/figs/` 사본). `.txt`에 수치 전부와 캡션용 캐비엇이 있다 |
+| [`conf/conference_plot/`](../conf/conference_plot/) | 학회용 그림 F16~F26 (pdf·png·txt). F24~F26 은 비정상 실험. `.txt` 에 수치 전부와 캡션용 캐비엇이 있다 |
 | `RESULTS_snapshot.md` | `docs/RESULTS.md` 사본. §1~§10.7과 그림 목록 §11이 들어 있다. 09-27까지의 결과만 담는다 |
 
 공통 조건 (따로 적은 곳 외):
@@ -37,16 +37,16 @@
 
 ## 2. 09-27 이후 결과 (RESULTS.md 미반영, 등록 문서 §6.1과 DECISIONS가 원본)
 
-| 실험 | 등록 문서 | 기록된 결과 (DECISIONS 결과 줄 그대로 요약) |
-|---|---|---|
-| ALD (annealed Langevin, 같은 V1 가중치) | [ALD16e4](../conf/results/review_next/NEXT_EXPERIMENTS_ALD16e4.md) | D2 C2: A1 (i) +1.54 dB, A2 (i) +1.82 dB, "루프 V1 이 ALD 파일럿 추정(오차 인지·plug-in 모두)보다 적게 실패". A1·A2 5/5 (i), A3 6 중 5 (i)·SV8e (iii) |
-| 블록 안 도플러 | [DOP16e4](../conf/results/review_next/NEXT_EXPERIMENTS_DOP16e4.md) | D2 C2: ν=0.005 (i), ν=0.01 (iii). 측정 ν=0.005 5/6 (i), ν=0.01 3/6 (i) |
-| 수신 배열 회전 | [ROT16e4](../conf/results/review_next/NEXT_EXPERIMENTS_ROT16e4.md) | D2 C2: 15° (i) 448:80, 30° (i) 529:124, "수신 배열 회전 15°·30° 모두에서 V1 이 b* 보다 적게 실패". 측정 15° 5/6 (SV8e (iv)), 30° 6/6 |
-| 표류 학습 prior (B′) | [ROTMIX16e4](../conf/results/review_next/NEXT_EXPERIMENTS_ROTMIX16e4.md) | RB 15° (i) 406:81, 30° (i) 450:122. DD-15·DD-30 판정하지 못함. 판정 3: 세 각도 모두 13/13 (i) |
-| 공간 비정상 S2v (C) | [S2V16e4](../conf/results/review_next/NEXT_EXPERIMENTS_S2V16e4.md) | 판정 1 (i) 202:32, R_b\* 0.603, ΔR −0.205 (S2 C6보다 낮음). 판정 2: 13/13 (i) |
-| DOP·ROT 보충 (등록 baseline 전부) | [SUPP16e4](../conf/results/review_next/NEXT_EXPERIMENTS_SUPP16e4.md) | **실행 중** (스냅샷 시점 24 조건 중 20 완료). §6 기록 전 |
+| 실험 | 등록 문서 | 기록된 결과 (DECISIONS 결과 줄 그대로 요약) | 그림 |
+|---|---|---|---|
+| ALD (annealed Langevin, 같은 V1 가중치) | [ALD16e4](../conf/results/review_next/NEXT_EXPERIMENTS_ALD16e4.md) | D2 C2: A1 (i) +1.54 dB, A2 (i) +1.82 dB, "루프 V1 이 ALD 파일럿 추정(오차 인지·plug-in 모두)보다 적게 실패". A1·A2 5/5 (i), A3 6 중 5 (i)·SV8e (iii) | — |
+| 블록 안 도플러 | [DOP16e4](../conf/results/review_next/NEXT_EXPERIMENTS_DOP16e4.md) | D2 C2: ν=0.005 (i), ν=0.01 (iii). 측정 ν=0.005 5/6 (i), ν=0.01 3/6 (i) | F24, F25 |
+| 수신 배열 회전 | [ROT16e4](../conf/results/review_next/NEXT_EXPERIMENTS_ROT16e4.md) | D2 C2: 15° (i) 448:80, 30° (i) 529:124, "수신 배열 회전 15°·30° 모두에서 V1 이 b* 보다 적게 실패". 측정 15° 5/6 (SV8e (iv)), 30° 6/6 | F24, F25 |
+| 표류 학습 prior (B′) | [ROTMIX16e4](../conf/results/review_next/NEXT_EXPERIMENTS_ROTMIX16e4.md) | RB 15° (i) 406:81, 30° (i) 450:122. DD-15·DD-30 판정하지 못함. 판정 3: 세 각도 모두 13/13 (i) | F26 (a)(b) |
+| 공간 비정상 S2v (C) | [S2V16e4](../conf/results/review_next/NEXT_EXPERIMENTS_S2V16e4.md) | 판정 1 (i) 202:32, R_b\* 0.603, ΔR −0.205 (S2 C6보다 낮음). 판정 2: 13/13 (i) | F26 (c) |
+| DOP·ROT 보충 (등록 baseline 전부) | [SUPP16e4](../conf/results/review_next/NEXT_EXPERIMENTS_SUPP16e4.md) | 24/24 수용·무결성 OK. D2 C2 네 조건 모두 (A) "V1 이 𝔅 12 개 전부보다 적게 실패" (DOP ν=0.01 은 원 b\* (iii)). (ii) 0/288, k𝔅 = 12 21/24, "등록된 baseline 전부와 멀어진다" 18/24 | F24, F25 |
 
-2절의 기록 감사(Fable)는 ALD·DOP·ROT·ROTMIX·S2V에 대해 완료됐다 (`5b5c8f4a`, 전부 재현). SUPP는 §6 기록 뒤에 감사한다.
+2절의 기록 감사(Fable)는 모두 완료됐다: ALD·DOP·ROT·ROTMIX·S2V (`5b5c8f4a`, 전부 재현), SUPP16e4 (§6.2, 정정 없음).
 
 ## 3. 인용 주의 (RESULTS_snapshot §6 요약)
 

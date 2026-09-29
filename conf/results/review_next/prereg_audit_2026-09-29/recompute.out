@@ -1,0 +1,568 @@
+# recompute.py -- record audit SUPP16e4 (Fable 5.1, 2026-09-29); raw npz / ald files / log / git only; git HEAD 64f422c3
+  doc parsed: D2 C2 X-table rows 13, 24-condition rows 24, §5 rows 24
+
+## G. git / documents / log / container
+  HEAD 64f422c3 | dirty conf/code Demo: '' | dirty records: ''
+  d17f3d65: d17f3d65 5b5c8f4a 2026-09-29 06:27:58 KST conf: SUPP16e4 선행 코드 (DOP·ROT 보충, baseline 전부; 사용자 결정 09-29) — ald.py --dopple
+  e7c9f4a7: e7c9f4a7 d17f3d65 2026-09-29 07:14:05 KST conf: 사전 등록 동결 — SUPP16e4 v2 (DOP·ROT 보충: 24 조건 × 등록 baseline 전부; R2 인용·새 11 a
+  6730bc1d: 6730bc1d e7c9f4a7 2026-09-29 14:37:54 KST conf: SUPP16e4 결과 기록 §6.1 (전사만) + EXPERIMENTS 행·DECISIONS 줄 + pairB/accept/man
+  063f3bcb: 063f3bcb c34aba49 2026-09-28 01:26:51 KST conf: 사전 등록 동결 — NEXT_EXPERIMENTS_DOP16e4 v2 (블록 안 경로별 Clarke 도플러 ν 0.005/0.01
+  a4cbd184: a4cbd184 602f8971 2026-09-28 08:35:30 KST conf: ROT16e4 §5 병합 칸 — 병합 602f8971, git diff 9c0ca1f4..602f8971 -- conf/code 
+  doc freeze e7c9f4a7 -> HEAD: hunks ['@@ -110,3 +110,109 @@']; removed lines []
+    section lines at freeze: ## 0. @10, ## 1. @26, ## 2. @44, ## 3. @55, ## 4. @66, ## 5. @75, ## 6. @112; freeze doc lines 112
+  diff e7c9f4a7..HEAD -- conf/code Demo: ''
+  diff d17f3d65..e7c9f4a7 --stat -- conf/code Demo:
+    conf/code/pair_baselines.py | 43 +++++++++++++++++++++++++++++++++----------
+     conf/code/run_supp16e4.sh   | 13 +++++++++++--
+     2 files changed, 44 insertions(+), 12 deletions(-)
+  files in 6730bc1d: 123
+  container PID 1 start (KST): 화  9월 29 09:48:21 2026; host boot (who -b): system boot  2026-09-28 11:44
+  logs/run_supp16e4.log milestones:
+    [supp 09-28 16:27 CDT] tune start (git d17f3d65) free GPUs: 0 1 2 3 4 5
+    [supp 09-28 17:12 CDT] SUPP_TUNE_DONE 24/24 tune records
+    [supp 09-28 17:14 CDT] eval start (git e7c9f4a7)
+    [supp 09-28 17:22 CDT] phase 0 done: ALD estimates 24
+    [supp 09-28 19:47 CDT] ROTaMX pair_baselines rc=0 (SUMMARY-B (baselines without b*, 12): (i) 12, (ii) 0, not decided 0; b* -> V1 (
+    [supp 09-28 22:45 CDT] resume re-run after reboot: ROTbMX DOPaNR16 DOPbNR16 ROTaNR16 ROTbNR16
+    [supp 09-28 22:45 CDT] eval start (git e7c9f4a7)
+    [supp 09-28 22:45 CDT] phase 0 done: ALD estimates 24
+    [supp 09-28 22:57 CDT] ROTbMX acceptance rc=0 (ACCEPT: OK -- XLROTbMX, XPROTbMX, XAROTbMX)
+    [supp 09-29 00:32 CDT] SUPP_EVAL_DONE ok=5 fail=0
+  raw_XLROTbMX: 448 chunks, mtime first 09-28 22:47 last 09-28 22:51 CDT
+  raw_XLDOPaNR16: 448 chunks, mtime first 09-28 23:03 last 09-28 23:11 CDT
+  raw_XAROTbNR16: 448 chunks, mtime first 09-29 00:31 last 09-29 00:32 CDT
+  ALD estimates: 24 files, mtime first 09-28 17:14 last 09-28 17:22 CDT (all before the resume -> reused)
+  run_manifest_X*.json: {('e7c9f4a7', 448): 72}
+  X<T>_accept.txt: 24 files, 'ACCEPT: OK' in 24, 'FAILED' in 0
+  resume_after_reboot.sh mentions SUPP: False
+
+## 5. §5 ALD tuning table vs results/ald/tune_XA<T>.json
+  DOPaB16e4k   line 83: git d17f3d65 ald.py f1da04d1e91e0baf seed 20260927 n_dev 512 dev_skip 2560 ext ['beta=0.0001', 'beta=1e-05'] -> OK
+  DOPbB16e4k   line 89: git d17f3d65 ald.py f1da04d1e91e0baf seed 20260927 n_dev 512 dev_skip 2560 ext ['beta=0.0001', 'beta=1e-05'] -> OK
+  ROTaB16e4k   line 95: git d17f3d65 ald.py f1da04d1e91e0baf seed 20260927 n_dev 512 dev_skip 2560 ext ['beta=0.0001', 'beta=1e-05'] -> OK
+  ROTbB16e4k   line 101: git d17f3d65 ald.py f1da04d1e91e0baf seed 20260927 n_dev 512 dev_skip 2560 ext ['beta=0.0001', 'beta=1e-05'] -> OK
+  DOPaNR16     line 86: git d17f3d65 ald.py f1da04d1e91e0baf seed 20260927 n_dev 512 dev_skip 2560 ext ['beta=0.0001', 'beta=1e-05'] -> OK
+  DOPbNR16     line 92: git d17f3d65 ald.py f1da04d1e91e0baf seed 20260927 n_dev 512 dev_skip 2560 ext ['beta=0.0001'] -> OK
+  ROTaNR16     line 98: git d17f3d65 ald.py f1da04d1e91e0baf seed 20260927 n_dev 512 dev_skip 2560 ext ['beta=0.0001', 'beta=1e-05'] -> OK
+  ROTbNR16     line 104: git d17f3d65 ald.py f1da04d1e91e0baf seed 20260927 n_dev 512 dev_skip 2560 ext ['beta=0.0001', 'beta=1e-05'] -> OK
+  DOPaD3       line 84: git d17f3d65 ald.py f1da04d1e91e0baf seed 20260927 n_dev 512 dev_skip 2560 ext ['beta=0.0001', 'beta=1e-05'] -> OK
+  DOPbD3       line 90: git d17f3d65 ald.py f1da04d1e91e0baf seed 20260927 n_dev 512 dev_skip 2560 ext ['beta=0.0001', 'beta=1e-05'] -> OK
+  ROTaD3       line 96: git d17f3d65 ald.py f1da04d1e91e0baf seed 20260927 n_dev 512 dev_skip 2560 ext ['beta=0.0001', 'beta=1e-05'] -> OK
+  ROTbD3       line 102: git d17f3d65 ald.py f1da04d1e91e0baf seed 20260927 n_dev 512 dev_skip 2560 ext ['beta=0.0001', 'beta=1e-05'] -> OK
+  DOPaSV       line 87: git d17f3d65 ald.py f1da04d1e91e0baf seed 20260927 n_dev 512 dev_skip 2560 ext ['beta=0.0001', 'beta=1e-05'] -> OK
+  DOPbSV       line 93: git d17f3d65 ald.py f1da04d1e91e0baf seed 20260927 n_dev 512 dev_skip 2560 ext ['beta=0.0001', 'beta=1e-05'] -> OK
+  ROTaSV       line 99: git d17f3d65 ald.py f1da04d1e91e0baf seed 20260927 n_dev 512 dev_skip 2560 ext ['beta=0.0001', 'beta=1e-05'] -> OK
+  ROTbSV       line 105: git d17f3d65 ald.py f1da04d1e91e0baf seed 20260927 n_dev 512 dev_skip 2560 ext ['beta=0.0001', 'beta=1e-05'] -> OK
+  DOPaU28      line 88: git d17f3d65 ald.py f1da04d1e91e0baf seed 20260927 n_dev 512 dev_skip 2560 ext ['beta=0.0001', 'beta=1e-05'] -> OK
+  DOPbU28      line 94: git d17f3d65 ald.py f1da04d1e91e0baf seed 20260927 n_dev 512 dev_skip 2560 ext ['beta=0.0001', 'beta=1e-05'] -> OK
+  ROTaU28      line 100: git d17f3d65 ald.py f1da04d1e91e0baf seed 20260927 n_dev 512 dev_skip 2560 ext ['beta=0.0001', 'beta=1e-05'] -> OK
+  ROTbU28      line 106: git d17f3d65 ald.py f1da04d1e91e0baf seed 20260927 n_dev 512 dev_skip 2560 ext ['beta=0.0001', 'beta=1e-05'] -> OK
+  DOPaMX       line 85: git d17f3d65 ald.py f1da04d1e91e0baf seed 20260927 n_dev 512 dev_skip 2560 ext ['beta=0.0001', 'beta=1e-05'] -> OK
+  DOPbMX       line 91: git d17f3d65 ald.py f1da04d1e91e0baf seed 20260927 n_dev 512 dev_skip 2560 ext ['beta=0.0001', 'beta=1e-05'] -> OK
+  ROTaMX       line 97: git d17f3d65 ald.py f1da04d1e91e0baf seed 20260927 n_dev 512 dev_skip 2560 ext ['beta=0.0001', 'beta=1e-05'] -> OK
+  ROTbMX       line 103: git d17f3d65 ald.py f1da04d1e91e0baf seed 20260927 n_dev 512 dev_skip 2560 ext ['beta=0.0001', 'beta=1e-05'] -> OK
+  §5 table: 24/24 rows match
+
+## 1. 24 conditions: integrity, 13 x table B, R_X, X*, sentence
+
+  [DOPaB16e4k] files base 448 XL 448 XP 448 XA 448; run|git base ['063f3bcb'] XL ['e7c9f4a7'] XP ['e7c9f4a7'] XA ['e7c9f4a7']; meta|doppler 'nu=0.005 per symbol, p'; ckpt id (base) 4443921ce8d5c4a1; meta fingerprint equal {'meta|ntrain': True, 'meta|bstar': True, 'meta|kron_K': True, 'meta|em_sec': True, 'meta|ll_val|kron': True, 'meta|stagec_ckpt_id': True}
+    ALD est prov git e7c9f4a7 ald.py f1da04d1e91e0baf ckpt 4443921ce8d5c4a1; est sha256[:16] 8207ee28e984e503; test NMSE dB -6.25 -9.11 -11.66 -14.54 -17.79 -20.59 -22.74; dev -6.5 -9.0 -11.7 -14.7 -17.6 -20.6 -22.7; max |test - dev| 0.21 dB
+    integrity (grid, holes, one clean commit per raw [orig 063f3bcb / new e7c9f4a7], meta doppler/rotation = base, fingerprint, arm sets disjoint, genie 4 keys XL/XP/XA = base, n 2560, PIL/ALD raised 0, pilot@1 = loop@1, ALD estimate fixed = precomputed, ALD ckpt/condition = base): OK
+    -3 dB genie 183 · V1 442 -> genie >= V1 guard not fired
+      M-ours-bstar         -3/+0/+3     361:63 (p 7.4e-52) · 135:23 (p 1.8e-20) · 44:17 (p 0.00073)  pooled 540:103 -> (i) 3/3 (powered True); F -3 dB 740; abs gap 298; R_X 0.535 [0.491, 0.578]
+      M-ours-bstar-scalar  -3/+0/+3     367:48 (p 6e-62) · 153:23 (p 9.4e-25) · 55:14 (p 6.9e-07)  pooled 575:85 -> (i) 3/3 (powered True); F -3 dB 761; abs gap 319; R_X 0.552 [0.511, 0.592]
+      M-ours-gmm32         -3/+0/+3     396:56 (p 3.9e-64) · 167:28 (p 2.7e-25) · 79:17 (p 9.9e-11)  pooled 642:101 -> (i) 3/3 (powered True); F -3 dB 782; abs gap 340; R_X 0.568 [0.526, 0.609]
+      R0-pilot@1           +9/+12/+15   232:1 (p 3.4e-68) · 172:1 (p 2.9e-50) · 171:2 (p 2.5e-48)  pooled 575:4 -> (i) 3/3 (powered True); F -3 dB 2017; abs gap 1575; R_X 0.859 [0.845, 0.874]
+      R1-turbo             +0/+3/+6     562:3 (p 5e-163) · 243:3 (p 4.4e-68) · 140:4 (p 1.6e-36)  pooled 945:10 -> (i) 3/3 (powered True); F -3 dB 1497; abs gap 1055; R_X 0.803 [0.783, 0.823]
+      R2-ours-G            +0/+3/+6     229:15 (p 2.4e-50) · 87:12 (p 3.4e-15) · 62:6 (p 8.2e-13)  pooled 378:33 -> (i) 3/3 (powered True); F -3 dB 950; abs gap 508; R_X 0.662 [0.629, 0.696]
+      R3-bigamp            +3/+6/+15    212:5 (p 3.7e-56) · 154:4 (p 1.4e-40) · 155:11 (p 1.1e-33)  pooled 521:20 -> (i) 3/3 (powered True); F -3 dB 1517; abs gap 1075; R_X 0.806 [0.786, 0.826]
+      R4-llr               +9/+12/+15   831:0 (p 1.4e-250) · 629:1 (p 2.8e-187) · 593:2 (p 2.7e-174)  pooled 2053:3 -> (i) 3/3 (powered True); F -3 dB 2229; abs gap 1787; R_X 0.873 [0.860, 0.887]
+      R4-scvamp            +6/+9/+12    311:1 (p 7.5e-92) · 237:1 (p 1.1e-69) · 198:1 (p 5e-58)  pooled 746:3 -> (i) 3/3 (powered True); F -3 dB 1673; abs gap 1231; R_X 0.826 [0.808, 0.845]
+      bstar-pilot          +0/+3/+6     212:14 (p 1.4e-46) · 57:16 (p 1.5e-06) · 46:7 (p 4e-08)  pooled 315:37 -> (i) 3/3 (powered True); F -3 dB 1174; abs gap 732; R_X 0.739 [0.714, 0.766]
+      V1-pilot             -3/+0/+3     372:25 (p 1.8e-80) · 111:13 (p 1.5e-20) · 25:8 (p 0.0046)  pooled 508:46 -> (i) 3/3 (powered True); F -3 dB 789; abs gap 347; R_X 0.573 [0.535, 0.611]
+      ALD-pilot            +0/+3/+6     204:16 (p 1.1e-42) · 76:11 (p 4.2e-13) · 45:1 (p 1.3e-12)  pooled 325:28 -> (i) 3/3 (powered True); F -3 dB 1030; abs gap 588; R_X 0.694 [0.664, 0.725]
+      ALDv-pilot           -3/+0/+3     616:25 (p 1.4e-148) · 165:19 (p 3.1e-30) · 52:12 (p 4.6e-07)  pooled 833:56 -> (i) 3/3 (powered True); F -3 dB 1033; abs gap 591; R_X 0.695 [0.666, 0.725]
+    SUMMARY-B: k𝔅 12, m𝔅 0, undecided 0; b* -> V1 recomputed (i) vs §0 (i) same; X* = M-ours-bstar (F 740; runner-up M-ours-bstar-scalar F 761); R_X* 0.535 [0.491, 0.578]; '전부' sentence (orig b* (i), k𝔅 = 12, m𝔅 = 0, R_X* defined & lower > 0): MET; main label (D2 C2 only) (A)
+
+  [DOPbB16e4k] files base 448 XL 448 XP 448 XA 448; run|git base ['063f3bcb'] XL ['e7c9f4a7'] XP ['e7c9f4a7'] XA ['e7c9f4a7']; meta|doppler 'nu=0.01 per symbol, pe'; ckpt id (base) 4443921ce8d5c4a1; meta fingerprint equal {'meta|ntrain': True, 'meta|bstar': True, 'meta|kron_K': True, 'meta|em_sec': True, 'meta|ll_val|kron': True, 'meta|stagec_ckpt_id': True}
+    ALD est prov git e7c9f4a7 ald.py f1da04d1e91e0baf ckpt 4443921ce8d5c4a1; est sha256[:16] 03f616c7db7a8f46; test NMSE dB -6.18 -8.96 -11.37 -13.96 -16.66 -18.67 -19.89; dev -6.4 -8.9 -11.4 -14.1 -16.5 -18.6 -19.9; max |test - dev| 0.20 dB
+    integrity (grid, holes, one clean commit per raw [orig 063f3bcb / new e7c9f4a7], meta doppler/rotation = base, fingerprint, arm sets disjoint, genie 4 keys XL/XP/XA = base, n 2560, PIL/ALD raised 0, pilot@1 = loop@1, ALD estimate fixed = precomputed, ALD ckpt/condition = base): OK
+    -3 dB genie 846 · V1 756 -> genie >= V1 guard FIRED (R_X undefined for every X)
+      M-ours-bstar         +3/+12/+15   119:36 (p 1.4e-11) · 68:60 (p 0.54) · 101:92 (p 0.56)  pooled 288:188 -> (iii) 1/3 (powered True); F -3 dB 1133; abs gap 377; R_X undefined; abs 377
+      M-ours-bstar-scalar  +3/+6/+15    150:38 (p 6.1e-17) · 107:19 (p 4.5e-16) · 123:73 (p 0.00044)  pooled 380:130 -> (i) 3/3 (powered True); F -3 dB 1143; abs gap 387; R_X undefined; abs 387
+      M-ours-gmm32         +3/+12/+15   130:32 (p 3.3e-15) · 88:55 (p 0.0072) · 104:86 (p 0.22)  pooled 322:173 -> (i) 2/3 (powered True); F -3 dB 1161; abs gap 405; R_X undefined; abs 405
+      R0-pilot@1           +9/+12/+15   536:2 (p 3.2e-157) · 461:6 (p 7.4e-128) · 557:18 (p 9.4e-140)  pooled 1554:26 -> (i) 3/3 (powered True); F -3 dB 2260; abs gap 1504; R_X undefined; abs 1504
+      R1-turbo             +9/+12/+15   255:21 (p 2.9e-52) · 195:32 (p 1e-29) · 264:57 (p 5.5e-33)  pooled 714:110 -> (i) 3/3 (powered True); F -3 dB 1840; abs gap 1084; R_X undefined; abs 1084
+      R2-ours-G            +3/+6/+15    168:39 (p 2.8e-20) · 133:27 (p 5e-18) · 103:83 (p 0.16)  pooled 404:149 -> (i) 2/3 (powered True); F -3 dB 1316; abs gap 560; R_X undefined; abs 560
+      R3-bigamp            +6/+9/+15    229:29 (p 9.4e-40) · 240:40 (p 6.2e-36) · 227:96 (p 2.2e-13)  pooled 696:165 -> (i) 3/3 (powered True); F -3 dB 1827; abs gap 1071; R_X undefined; abs 1071
+      R4-llr               +9/+12/+15   1215:9 (p 0) · 980:18 (p 9.8e-263) · 944:11 (p 9.5e-263)  pooled 3139:38 -> (i) 3/3 (powered True); F -3 dB 2335; abs gap 1579; R_X undefined; abs 1579
+      R4-scvamp            +6/+9/+12    559:2 (p 4.2e-164) · 490:6 (p 2e-136) · 425:13 (p 8.5e-108)  pooled 1474:21 -> (i) 3/3 (powered True); F -3 dB 2001; abs gap 1245; R_X undefined; abs 1245
+      bstar-pilot          +6/+9/+12    185:27 (p 3.7e-30) · 157:33 (p 1.5e-20) · 115:52 (p 1.2e-06)  pooled 457:112 -> (i) 3/3 (powered True); F -3 dB 1759; abs gap 1003; R_X undefined; abs 1003
+      V1-pilot             +3/+6/+12    180:15 (p 4.3e-37) · 106:21 (p 7.5e-15) · 79:56 (p 0.058)  pooled 365:92 -> (i) 2/3 (powered True); F -3 dB 1380; abs gap 624; R_X undefined; abs 624
+      ALD-pilot            +9/+12/+15   151:28 (p 1.4e-21) · 144:50 (p 9.5e-12) · 161:78 (p 8.5e-08)  pooled 456:156 -> (i) 3/3 (powered True); F -3 dB 1630; abs gap 874; R_X undefined; abs 874
+      ALDv-pilot           +6/+12/+15   159:24 (p 1.3e-25) · 100:57 (p 0.00075) · 113:90 (p 0.12)  pooled 372:171 -> (i) 2/3 (powered True); F -3 dB 1652; abs gap 896; R_X undefined; abs 896
+    SUMMARY-B: k𝔅 12, m𝔅 0, undecided 0; b* -> V1 recomputed (iii) vs §0 (iii) same; X* = M-ours-bstar (F 1133; runner-up M-ours-bstar-scalar F 1143); R_X* undefined; abs 377; '전부' sentence (orig b* (i), k𝔅 = 12, m𝔅 = 0, R_X* defined & lower > 0): NOT met; main label (D2 C2 only) (A)
+
+  [ROTaB16e4k] files base 448 XL 448 XP 448 XA 448; run|git base ['a4cbd184'] XL ['e7c9f4a7'] XP ['e7c9f4a7'] XA ['e7c9f4a7']; meta|rotation 'deg=15.0: receive (BS)'; ckpt id (base) 4443921ce8d5c4a1; meta fingerprint equal {'meta|ntrain': True, 'meta|bstar': True, 'meta|kron_K': True, 'meta|em_sec': True, 'meta|ll_val|kron': True, 'meta|stagec_ckpt_id': True}
+    ALD est prov git e7c9f4a7 ald.py f1da04d1e91e0baf ckpt 4443921ce8d5c4a1; est sha256[:16] 4d053e3e69cea6ce; test NMSE dB -6.10 -8.96 -11.55 -14.47 -17.83 -21.09 -23.96; dev -6.1 -8.9 -11.5 -14.5 -17.8 -21.0 -23.9; max |test - dev| 0.08 dB
+    integrity (grid, holes, one clean commit per raw [orig a4cbd184 / new e7c9f4a7], meta doppler/rotation = base, fingerprint, arm sets disjoint, genie 4 keys XL/XP/XA = base, n 2560, PIL/ALD raised 0, pilot@1 = loop@1, ALD estimate fixed = precomputed, ALD ckpt/condition = base): OK
+    -3 dB genie 111 · V1 404 -> genie >= V1 guard not fired
+      M-ours-bstar         -3/+0/+3     309:57 (p 5.3e-43) · 106:15 (p 4.7e-18) · 33:8 (p 0.00011)  pooled 448:80 -> (i) 3/3 (powered True); F -3 dB 656; abs gap 252; R_X 0.462 [0.419, 0.507]
+      M-ours-bstar-scalar  -3/+0/+3     321:45 (p 1.7e-52) · 126:10 (p 1.1e-26) · 42:7 (p 3.6e-07)  pooled 489:62 -> (i) 3/3 (powered True); F -3 dB 680; abs gap 276; R_X 0.485 [0.443, 0.527]
+      M-ours-gmm32         -3/+0/+3     382:55 (p 2.5e-61) · 146:11 (p 3e-31) · 58:7 (p 4.3e-11)  pooled 586:73 -> (i) 3/3 (powered True); F -3 dB 731; abs gap 327; R_X 0.527 [0.488, 0.568]
+      R0-pilot@1           +3/+6/+9     466:0 (p 1e-140) · 233:1 (p 1.7e-68) · 178:0 (p 5.2e-54)  pooled 877:1 -> (i) 3/3 (powered True); F -3 dB 1958; abs gap 1554; R_X 0.841 [0.827, 0.857]
+      R1-turbo             +0/+3/+6     498:0 (p 2.4e-150) · 198:4 (p 2.1e-53) · 104:3 (p 2.5e-27)  pooled 800:7 -> (i) 3/3 (powered True); F -3 dB 1390; abs gap 986; R_X 0.771 [0.751, 0.792]
+      R2-ours-G            -3/+0/+3     487:37 (p 3.2e-101) · 190:6 (p 1.5e-48) · 81:5 (p 9.6e-19)  pooled 758:48 -> (i) 3/3 (powered True); F -3 dB 854; abs gap 450; R_X 0.606 [0.572, 0.640]
+      R3-bigamp            +3/+12/+15   192:4 (p 1.2e-51) · 136:0 (p 2.3e-41) · 142:0 (p 3.6e-43)  pooled 470:4 -> (i) 3/3 (powered True); F -3 dB 1414; abs gap 1010; R_X 0.775 [0.755, 0.796]
+      R4-llr               +9/+12/+15   666:1 (p 2.2e-198) · 510:1 (p 1.5e-151) · 405:0 (p 2.4e-122)  pooled 1581:2 -> (i) 3/3 (powered True); F -3 dB 2214; abs gap 1810; R_X 0.861 [0.848, 0.874]
+      R4-scvamp            +3/+6/+9     398:1 (p 6.2e-118) · 233:1 (p 1.7e-68) · 162:0 (p 3.4e-49)  pooled 793:2 -> (i) 3/3 (powered True); F -3 dB 1615; abs gap 1211; R_X 0.805 [0.787, 0.823]
+      bstar-pilot          -3/+0/+3     643:26 (p 3.7e-155) · 168:13 (p 1.6e-35) · 45:7 (p 7e-08)  pooled 856:46 -> (i) 3/3 (powered True); F -3 dB 1021; abs gap 617; R_X 0.678 [0.650, 0.706]
+      V1-pilot             -3/+0/+3     293:28 (p 7.7e-57) · 68:15 (p 3.2e-09) · 19:6 (p 0.015)  pooled 380:49 -> (i) 3/3 (powered True); F -3 dB 669; abs gap 265; R_X 0.475 [0.435, 0.516]
+      ALD-pilot            -3/+0/+3     518:34 (p 2.9e-112) · 159:9 (p 1.3e-36) · 57:11 (p 1.3e-08)  pooled 734:54 -> (i) 3/3 (powered True); F -3 dB 888; abs gap 484; R_X 0.623 [0.592, 0.655]
+      ALDv-pilot           -3/+0/+3     534:31 (p 1.9e-119) · 122:11 (p 7.6e-25) · 33:11 (p 0.0013)  pooled 689:53 -> (i) 3/3 (powered True); F -3 dB 907; abs gap 503; R_X 0.632 [0.601, 0.663]
+    SUMMARY-B: k𝔅 12, m𝔅 0, undecided 0; b* -> V1 recomputed (i) vs §0 (i) same; X* = M-ours-bstar (F 656; runner-up V1-pilot F 669); R_X* 0.462 [0.419, 0.507]; '전부' sentence (orig b* (i), k𝔅 = 12, m𝔅 = 0, R_X* defined & lower > 0): MET; main label (D2 C2 only) (A)
+
+  [ROTbB16e4k] files base 448 XL 448 XP 448 XA 448; run|git base ['a4cbd184'] XL ['e7c9f4a7'] XP ['e7c9f4a7'] XA ['e7c9f4a7']; meta|rotation 'deg=30.0: receive (BS)'; ckpt id (base) 4443921ce8d5c4a1; meta fingerprint equal {'meta|ntrain': True, 'meta|bstar': True, 'meta|kron_K': True, 'meta|em_sec': True, 'meta|ll_val|kron': True, 'meta|stagec_ckpt_id': True}
+    ALD est prov git e7c9f4a7 ald.py f1da04d1e91e0baf ckpt 4443921ce8d5c4a1; est sha256[:16] 1ea34f2fb53df32c; test NMSE dB -5.82 -8.56 -11.10 -14.01 -17.17 -20.40 -23.38; dev -5.9 -8.4 -11.2 -14.0 -17.3 -20.4 -23.5; max |test - dev| 0.12 dB
+    integrity (grid, holes, one clean commit per raw [orig a4cbd184 / new e7c9f4a7], meta doppler/rotation = base, fingerprint, arm sets disjoint, genie 4 keys XL/XP/XA = base, n 2560, PIL/ALD raised 0, pilot@1 = loop@1, ALD estimate fixed = precomputed, ALD ckpt/condition = base): OK
+    -3 dB genie 113 · V1 519 -> genie >= V1 guard not fired
+      M-ours-bstar         -3/+0/+3     346:84 (p 7.9e-39) · 134:29 (p 2.5e-17) · 49:11 (p 7.6e-07)  pooled 529:124 -> (i) 3/3 (powered True); F -3 dB 781; abs gap 262; R_X 0.392 [0.353, 0.432]
+      M-ours-bstar-scalar  -3/+0/+3     388:80 (p 1.5e-49) · 153:23 (p 9.4e-25) · 57:12 (p 3.7e-08)  pooled 598:115 -> (i) 3/3 (powered True); F -3 dB 827; abs gap 308; R_X 0.431 [0.393, 0.468]
+      M-ours-gmm32         -3/+0/+3     406:69 (p 3.9e-59) · 174:25 (p 1.1e-28) · 72:12 (p 1.4e-11)  pooled 652:106 -> (i) 3/3 (powered True); F -3 dB 856; abs gap 337; R_X 0.454 [0.418, 0.490]
+      R0-pilot@1           +6/+9/+12    285:0 (p 3.2e-86) · 195:0 (p 4e-59) · 134:0 (p 9.2e-41)  pooled 614:0 -> (i) 3/3 (powered True); F -3 dB 2053; abs gap 1534; R_X 0.791 [0.775, 0.807]
+      R1-turbo             +0/+3/+6     563:3 (p 2.5e-163) · 232:2 (p 2e-66) · 102:3 (p 9.5e-27)  pooled 897:8 -> (i) 3/3 (powered True); F -3 dB 1507; abs gap 988; R_X 0.709 [0.687, 0.730]
+      R2-ours-G            +0/+3/+6     239:18 (p 1.9e-50) · 95:6 (p 1.1e-21) · 53:4 (p 5.9e-12)  pooled 387:28 -> (i) 3/3 (powered True); F -3 dB 996; abs gap 477; R_X 0.540 [0.508, 0.571]
+      R3-bigamp            +3/+6/+12    216:5 (p 2.5e-57) · 148:4 (p 7.7e-39) · 165:0 (p 4.3e-50)  pooled 529:9 -> (i) 3/3 (powered True); F -3 dB 1497; abs gap 978; R_X 0.707 [0.686, 0.728]
+      R4-llr               +9/+12/+15   761:0 (p 1.6e-229) · 579:0 (p 1e-174) · 471:1 (p 7.8e-140)  pooled 1811:1 -> (i) 3/3 (powered True); F -3 dB 2250; abs gap 1731; R_X 0.810 [0.795, 0.825]
+      R4-scvamp            +6/+9/+12    256:2 (p 1.4e-73) · 195:0 (p 4e-59) · 139:1 (p 2e-40)  pooled 590:3 -> (i) 3/3 (powered True); F -3 dB 1714; abs gap 1195; R_X 0.746 [0.728, 0.765]
+      bstar-pilot          +0/+3/+6     245:25 (p 1.5e-46) · 69:10 (p 5.5e-12) · 38:7 (p 3.1e-06)  pooled 352:42 -> (i) 3/3 (powered True); F -3 dB 1171; abs gap 652; R_X 0.616 [0.589, 0.642]
+      V1-pilot             -3/+0/+3     359:41 (p 1.5e-64) · 76:23 (p 8.5e-08) · 16:11 (p 0.44)  pooled 451:75 -> (i) 2/3 (powered True); F -3 dB 837; abs gap 318; R_X 0.439 [0.404, 0.473]
+      ALD-pilot            -3/+0/+3     505:47 (p 5.7e-98) · 185:22 (p 2.8e-33) · 68:14 (p 1.1e-09)  pooled 758:83 -> (i) 3/3 (powered True); F -3 dB 977; abs gap 458; R_X 0.530 [0.499, 0.561]
+      ALDv-pilot           -3/+0/+3     565:41 (p 7.3e-119) · 148:25 (p 1.9e-22) · 45:15 (p 0.00013)  pooled 758:81 -> (i) 3/3 (powered True); F -3 dB 1043; abs gap 524; R_X 0.563 [0.535, 0.593]
+    SUMMARY-B: k𝔅 12, m𝔅 0, undecided 0; b* -> V1 recomputed (i) vs §0 (i) same; X* = M-ours-bstar (F 781; runner-up M-ours-bstar-scalar F 827); R_X* 0.392 [0.353, 0.432]; '전부' sentence (orig b* (i), k𝔅 = 12, m𝔅 = 0, R_X* defined & lower > 0): MET; main label (D2 C2 only) (A)
+
+  [DOPaNR16] files base 448 XL 448 XP 448 XA 448; run|git base ['063f3bcb'] XL ['e7c9f4a7'] XP ['e7c9f4a7'] XA ['e7c9f4a7']; meta|doppler 'nu=0.005 per symbol, p'; ckpt id (base) c050d611b2c714a6; meta fingerprint equal {'meta|ntrain': True, 'meta|bstar': True, 'meta|kron_K': True, 'meta|em_sec': True, 'meta|ll_val|kron': True, 'meta|stagec_ckpt_id': True}
+    ALD est prov git e7c9f4a7 ald.py f1da04d1e91e0baf ckpt c050d611b2c714a6; est sha256[:16] ae57551358bbc90f; test NMSE dB -6.58 -9.87 -12.46 -15.71 -19.44 -22.60 -24.57; dev -6.6 -10.2 -12.4 -16.0 -19.3 -22.6 -24.5; max |test - dev| 0.33 dB
+    integrity (grid, holes, one clean commit per raw [orig 063f3bcb / new e7c9f4a7], meta doppler/rotation = base, fingerprint, arm sets disjoint, genie 4 keys XL/XP/XA = base, n 2560, PIL/ALD raised 0, pilot@1 = loop@1, ALD estimate fixed = precomputed, ALD ckpt/condition = base): OK
+    -3 dB genie 42 · V1 80 -> genie >= V1 guard not fired
+      M-ours-bstar         -3/+0/+3     159:15 (p 1.5e-31) · 62:6 (p 8.2e-13) · 37:4 (p 1e-07)  pooled 258:25 -> (i) 3/3 (powered True); F -3 dB 224; abs gap 144; R_X 0.791 [0.724, 0.859]
+      M-ours-bstar-scalar  -3/+0/+3     215:12 (p 2.9e-49) · 99:5 (p 9.5e-24) · 58:4 (p 2.6e-13)  pooled 372:21 -> (i) 3/3 (powered True); F -3 dB 283; abs gap 203; R_X 0.842 [0.791, 0.896]
+      M-ours-gmm32         -3/+0/+3     210:11 (p 7.5e-49) · 86:3 (p 3.8e-22) · 47:8 (p 8.1e-08)  pooled 343:22 -> (i) 3/3 (powered True); F -3 dB 279; abs gap 199; R_X 0.840 [0.788, 0.893]
+      R0-pilot@1           +3/+6/+9     301:1 (p 7.4e-89) · 189:1 (p 2.4e-55) · 135:0 (p 4.6e-41)  pooled 625:2 -> (i) 3/3 (powered True); F -3 dB 1150; abs gap 1070; R_X 0.966 [0.954, 0.978]
+      R1-turbo             +0/+3/+6     302:2 (p 2.8e-87) · 157:3 (p 9.3e-43) · 88:1 (p 2.9e-25)  pooled 547:6 -> (i) 3/3 (powered True); F -3 dB 800; abs gap 720; R_X 0.950 [0.933, 0.967]
+      R2-ours-G            -3/+0/+3     277:8 (p 3.2e-71) · 118:4 (p 3.4e-30) · 66:6 (p 7.3e-14)  pooled 461:18 -> (i) 3/3 (powered True); F -3 dB 349; abs gap 269; R_X 0.876 [0.835, 0.918]
+      R3-bigamp            +3/+6/+12    245:4 (p 3.5e-67) · 159:1 (p 2.2e-46) · 169:7 (p 2e-41)  pooled 573:12 -> (i) 3/3 (powered True); F -3 dB 1151; abs gap 1071; R_X 0.966 [0.954, 0.978]
+      R4-llr               +9/+12/+15   401:4 (p 2.7e-113) · 332:2 (p 3.2e-96) · 438:0 (p 2.8e-132)  pooled 1171:6 -> (i) 3/3 (powered True); F -3 dB 2216; abs gap 2136; R_X 0.983 [0.976, 0.989]
+      R4-scvamp            +3/+6/+9     290:3 (p 5.3e-82) · 180:1 (p 1.2e-52) · 147:3 (p 7.9e-40)  pooled 617:7 -> (i) 3/3 (powered True); F -3 dB 935; abs gap 855; R_X 0.957 [0.943, 0.972]
+      bstar-pilot          -3/+0/+3     250:13 (p 4.9e-58) · 76:4 (p 2.8e-18) · 39:6 (p 5.4e-07)  pooled 365:23 -> (i) 3/3 (powered True); F -3 dB 317; abs gap 237; R_X 0.862 [0.817, 0.908]
+      V1-pilot             -3/+0/+12    67:18 (p 8.4e-08) · 14:4 (p 0.031) · 13:8 (p 0.38)  pooled 94:30 -> (i) 2/3 (powered True); F -3 dB 129; abs gap 49; R_X 0.563 [0.430, 0.693]
+      ALD-pilot            -3/+0/+3     268:8 (p 1.3e-68) · 92:5 (p 8.6e-22) · 67:4 (p 8.7e-16)  pooled 427:17 -> (i) 3/3 (powered True); F -3 dB 340; abs gap 260; R_X 0.872 [0.830, 0.915]
+      ALDv-pilot           -3/+0/+3     246:13 (p 6.4e-57) · 61:7 (p 7.4e-12) · 45:7 (p 7e-08)  pooled 352:27 -> (i) 3/3 (powered True); F -3 dB 313; abs gap 233; R_X 0.860 [0.814, 0.907]
+    SUMMARY-B: k𝔅 12, m𝔅 0, undecided 0; b* -> V1 recomputed (i) vs §0 (i) same; X* = V1-pilot (F 129; runner-up M-ours-bstar F 224); R_X* 0.563 [0.430, 0.693]; '전부' sentence (orig b* (i), k𝔅 = 12, m𝔅 = 0, R_X* defined & lower > 0): MET; main label (D2 C2 only) (A)
+
+  [DOPbNR16] files base 448 XL 448 XP 448 XA 448; run|git base ['063f3bcb'] XL ['e7c9f4a7'] XP ['e7c9f4a7'] XA ['e7c9f4a7']; meta|doppler 'nu=0.01 per symbol, pe'; ckpt id (base) c050d611b2c714a6; meta fingerprint equal {'meta|ntrain': True, 'meta|bstar': True, 'meta|kron_K': True, 'meta|em_sec': True, 'meta|ll_val|kron': True, 'meta|stagec_ckpt_id': True}
+    ALD est prov git e7c9f4a7 ald.py f1da04d1e91e0baf ckpt c050d611b2c714a6; est sha256[:16] 5748f1dd30271da1; test NMSE dB -6.51 -9.68 -12.12 -15.00 -17.93 -19.85 -20.83; dev -6.5 -10.0 -12.0 -15.2 -17.8 -20.0 -20.7; max |test - dev| 0.33 dB
+    integrity (grid, holes, one clean commit per raw [orig 063f3bcb / new e7c9f4a7], meta doppler/rotation = base, fingerprint, arm sets disjoint, genie 4 keys XL/XP/XA = base, n 2560, PIL/ALD raised 0, pilot@1 = loop@1, ALD estimate fixed = precomputed, ALD ckpt/condition = base): OK
+    -3 dB genie 415 · V1 179 -> genie >= V1 guard FIRED (R_X undefined for every X)
+      M-ours-bstar         +0/+12/+15   129:29 (p 3e-16) · 92:79 (p 0.36) · 99:82 (p 0.23)  pooled 320:190 -> (iii) 1/3 (powered True); F -3 dB 422; abs gap 243; R_X undefined; abs 243
+      M-ours-bstar-scalar  +3/+12/+15   155:18 (p 2.3e-28) · 133:57 (p 3.5e-08) · 124:74 (p 0.00047)  pooled 412:149 -> (i) 3/3 (powered True); F -3 dB 535; abs gap 356; R_X undefined; abs 356
+      M-ours-gmm32         +0/+3/+15    166:18 (p 3.5e-31) · 131:28 (p 4e-17) · 87:95 (p 0.6)  pooled 384:141 -> (i) 2/3 (powered True); F -3 dB 482; abs gap 303; R_X undefined; abs 303
+      R0-pilot@1           +6/+9/+12    381:5 (p 8.9e-106) · 338:7 (p 3.1e-90) · 342:17 (p 9.4e-80)  pooled 1061:29 -> (i) 3/3 (powered True); F -3 dB 1546; abs gap 1367; R_X undefined; abs 1367
+      R1-turbo             +6/+9/+12    223:18 (p 3.8e-46) · 197:31 (p 9.8e-31) · 175:41 (p 6.6e-21)  pooled 595:90 -> (i) 3/3 (powered True); F -3 dB 1193; abs gap 1014; R_X undefined; abs 1014
+      R2-ours-G            +0/+3/+15    206:22 (p 1.2e-38) · 145:26 (p 3.1e-21) · 91:91 (p 1)  pooled 442:139 -> (i) 2/3 (powered True); F -3 dB 572; abs gap 393; R_X undefined; abs 393
+      R3-bigamp            +6/+9/+15    233:37 (p 6.2e-36) · 214:74 (p 6.2e-17) · 172:111 (p 0.00034)  pooled 619:222 -> (i) 3/3 (powered True); F -3 dB 1489; abs gap 1310; R_X undefined; abs 1310
+      R4-llr               +6/+9/+12    856:11 (p 1e-236) · 704:13 (p 5.6e-189) · 610:23 (p 4.1e-149)  pooled 2170:47 -> (i) 3/3 (powered True); F -3 dB 2324; abs gap 2145; R_X undefined; abs 2145
+      R4-scvamp            +6/+9/+12    369:7 (p 2.6e-99) · 327:17 (p 1.5e-75) · 323:26 (p 2.3e-66)  pooled 1019:50 -> (i) 3/3 (powered True); F -3 dB 1375; abs gap 1196; R_X undefined; abs 1196
+      bstar-pilot          +3/+6/+15    184:32 (p 3.9e-27) · 117:30 (p 2.5e-13) · 83:100 (p 0.24)  pooled 384:162 -> (i) 2/3 (powered True); F -3 dB 789; abs gap 610; R_X undefined; abs 610
+      V1-pilot             +0/+12/+15   117:19 (p 2.1e-18) · 64:67 (p 0.86) · 70:99 (p 0.031)  pooled 251:185 -> (iii) 1/3 (powered True); F -3 dB 491; abs gap 312; R_X undefined; abs 312
+      ALD-pilot            +3/+12/+15   222:15 (p 2e-48) · 106:67 (p 0.0037) · 112:105 (p 0.68)  pooled 440:187 -> (i) 2/3 (powered True); F -3 dB 869; abs gap 690; R_X undefined; abs 690
+      ALDv-pilot           +0/+3/+6     251:23 (p 1.3e-49) · 175:23 (p 3.9e-30) · 104:35 (p 3.9e-09)  pooled 530:81 -> (i) 3/3 (powered True); F -3 dB 804; abs gap 625; R_X undefined; abs 625
+    SUMMARY-B: k𝔅 11, m𝔅 0, undecided 1; b* -> V1 recomputed (iii) vs §0 (iii) same; X* = M-ours-bstar (F 422; runner-up M-ours-gmm32 F 482); R_X* undefined; abs 243; '전부' sentence (orig b* (i), k𝔅 = 12, m𝔅 = 0, R_X* defined & lower > 0): NOT met; main label (D2 C2 only) (B)
+
+  [ROTaNR16] files base 448 XL 448 XP 448 XA 448; run|git base ['a4cbd184'] XL ['e7c9f4a7'] XP ['e7c9f4a7'] XA ['e7c9f4a7']; meta|rotation 'deg=15.0: receive (BS)'; ckpt id (base) c050d611b2c714a6; meta fingerprint equal {'meta|ntrain': True, 'meta|bstar': True, 'meta|kron_K': True, 'meta|em_sec': True, 'meta|ll_val|kron': True, 'meta|stagec_ckpt_id': True}
+    ALD est prov git e7c9f4a7 ald.py f1da04d1e91e0baf ckpt c050d611b2c714a6; est sha256[:16] ca8dcd6f7d7a36de; test NMSE dB -6.38 -9.61 -12.33 -15.76 -19.83 -23.67 -26.83; dev -6.3 -9.8 -12.3 -16.0 -19.6 -23.7 -26.8; max |test - dev| 0.28 dB
+    integrity (grid, holes, one clean commit per raw [orig a4cbd184 / new e7c9f4a7], meta doppler/rotation = base, fingerprint, arm sets disjoint, genie 4 keys XL/XP/XA = base, n 2560, PIL/ALD raised 0, pilot@1 = loop@1, ALD estimate fixed = precomputed, ALD ckpt/condition = base): OK
+    -3 dB genie 24 · V1 60 -> genie >= V1 guard not fired
+      M-ours-bstar         -3/+0/+3     165:12 (p 1.5e-35) · 80:7 (p 8.3e-17) · 37:1 (p 2.8e-10)  pooled 282:20 -> (i) 3/3 (powered True); F -3 dB 213; abs gap 153; R_X 0.810 [0.750, 0.866]
+      M-ours-bstar-scalar  -3/+0/+3     221:9 (p 5.1e-54) · 98:7 (p 1.2e-21) · 49:3 (p 1e-11)  pooled 368:19 -> (i) 3/3 (powered True); F -3 dB 272; abs gap 212; R_X 0.855 [0.811, 0.897]
+      M-ours-gmm32         -3/+0/+3     209:8 (p 1.1e-51) · 100:6 (p 4.5e-23) · 55:2 (p 2.3e-14)  pooled 364:16 -> (i) 3/3 (powered True); F -3 dB 261; abs gap 201; R_X 0.848 [0.802, 0.893]
+      R0-pilot@1           +0/+3/+6     490:0 (p 6.3e-148) · 269:0 (p 2.1e-81) · 160:0 (p 1.4e-48)  pooled 919:0 -> (i) 3/3 (powered True); F -3 dB 1108; abs gap 1048; R_X 0.967 [0.956, 0.977]
+      R1-turbo             -3/+0/+3     690:3 (p 2.7e-201) · 300:0 (p 9.8e-91) · 153:2 (p 5.3e-43)  pooled 1143:5 -> (i) 3/3 (powered True); F -3 dB 747; abs gap 687; R_X 0.950 [0.935, 0.965]
+      R2-ours-G            -3/+0/+3     262:7 (p 4e-68) · 123:5 (p 1.6e-30) · 71:2 (p 5.7e-19)  pooled 456:14 -> (i) 3/3 (powered True); F -3 dB 315; abs gap 255; R_X 0.876 [0.839, 0.913]
+      R3-bigamp            +3/+6/+12    228:0 (p 4.6e-69) · 138:0 (p 5.7e-42) · 175:0 (p 4.2e-53)  pooled 541:0 -> (i) 3/3 (powered True); F -3 dB 1083; abs gap 1023; R_X 0.966 [0.955, 0.977]
+      R4-llr               +9/+12/+15   323:0 (p 1.2e-97) · 278:0 (p 4.1e-84) · 188:0 (p 5.1e-57)  pooled 789:0 -> (i) 3/3 (powered True); F -3 dB 2209; abs gap 2149; R_X 0.984 [0.978, 0.989]
+      R4-scvamp            +0/+3/+6     429:0 (p 1.4e-129) · 249:0 (p 2.2e-75) · 159:0 (p 2.7e-48)  pooled 837:0 -> (i) 3/3 (powered True); F -3 dB 926; abs gap 866; R_X 0.960 [0.947, 0.972]
+      bstar-pilot          -3/+0/+3     267:12 (p 7.9e-64) · 79:6 (p 2.4e-17) · 41:2 (p 2.2e-10)  pooled 387:20 -> (i) 3/3 (powered True); F -3 dB 315; abs gap 255; R_X 0.876 [0.838, 0.914]
+      V1-pilot             -3/+0/+3     61:13 (p 1.4e-08) · 14:5 (p 0.064) · 9:6 (p 0.61)  pooled 84:24 -> (iii) 1/3 (powered True); F -3 dB 108; abs gap 48; R_X 0.571 [0.451, 0.686]
+      ALD-pilot            -3/+0/+3     223:13 (p 1.6e-50) · 76:7 (p 9.4e-16) · 56:2 (p 1.2e-14)  pooled 355:22 -> (i) 3/3 (powered True); F -3 dB 270; abs gap 210; R_X 0.854 [0.808, 0.897]
+      ALDv-pilot           -3/+0/+3     200:11 (p 4.6e-46) · 52:7 (p 1.4e-09) · 29:4 (p 1.1e-05)  pooled 281:22 -> (i) 3/3 (powered True); F -3 dB 249; abs gap 189; R_X 0.840 [0.792, 0.888]
+    SUMMARY-B: k𝔅 11, m𝔅 0, undecided 1; b* -> V1 recomputed (i) vs §0 (i) same; X* = V1-pilot (F 108; runner-up M-ours-bstar F 213); R_X* 0.571 [0.451, 0.686]; '전부' sentence (orig b* (i), k𝔅 = 12, m𝔅 = 0, R_X* defined & lower > 0): NOT met; main label (D2 C2 only) (B)
+
+  [ROTbNR16] files base 448 XL 448 XP 448 XA 448; run|git base ['a4cbd184'] XL ['e7c9f4a7'] XP ['e7c9f4a7'] XA ['e7c9f4a7']; meta|rotation 'deg=30.0: receive (BS)'; ckpt id (base) c050d611b2c714a6; meta fingerprint equal {'meta|ntrain': True, 'meta|bstar': True, 'meta|kron_K': True, 'meta|em_sec': True, 'meta|ll_val|kron': True, 'meta|stagec_ckpt_id': True}
+    ALD est prov git e7c9f4a7 ald.py f1da04d1e91e0baf ckpt c050d611b2c714a6; est sha256[:16] 5c0776b830a8f17b; test NMSE dB -6.17 -9.48 -12.33 -15.79 -19.59 -23.28 -26.23; dev -6.1 -9.7 -12.3 -16.2 -19.4 -23.1 -26.2; max |test - dev| 0.37 dB
+    integrity (grid, holes, one clean commit per raw [orig a4cbd184 / new e7c9f4a7], meta doppler/rotation = base, fingerprint, arm sets disjoint, genie 4 keys XL/XP/XA = base, n 2560, PIL/ALD raised 0, pilot@1 = loop@1, ALD estimate fixed = precomputed, ALD ckpt/condition = base): OK
+    -3 dB genie 21 · V1 86 -> genie >= V1 guard not fired
+      M-ours-bstar         -3/+0/+3     297:8 (p 5.3e-77) · 137:6 (p 2e-33) · 84:4 (p 1.6e-20)  pooled 518:18 -> (i) 3/3 (powered True); F -3 dB 375; abs gap 289; R_X 0.816 [0.778, 0.851]
+      M-ours-bstar-scalar  -3/+0/+3     370:6 (p 5e-101) · 170:3 (p 1.4e-46) · 85:4 (p 8.3e-21)  pooled 625:13 -> (i) 3/3 (powered True); F -3 dB 450; abs gap 364; R_X 0.848 [0.816, 0.878]
+      M-ours-gmm32         -3/+0/+3     340:8 (p 1.8e-89) · 158:2 (p 1.8e-44) · 97:6 (p 3e-22)  pooled 595:16 -> (i) 3/3 (powered True); F -3 dB 418; abs gap 332; R_X 0.836 [0.804, 0.869]
+      R0-pilot@1           +3/+6/+9     350:0 (p 8.7e-106) · 256:0 (p 1.7e-77) · 194:1 (p 7.8e-57)  pooled 800:1 -> (i) 3/3 (powered True); F -3 dB 1405; abs gap 1319; R_X 0.953 [0.943, 0.963]
+      R1-turbo             +0/+3/+6     395:0 (p 2.5e-119) · 224:2 (p 4.8e-64) · 128:0 (p 5.9e-39)  pooled 747:2 -> (i) 3/3 (powered True); F -3 dB 1032; abs gap 946; R_X 0.936 [0.921, 0.949]
+      R2-ours-G            -3/+0/+3     410:9 (p 1.5e-108) · 172:3 (p 3.7e-47) · 111:5 (p 4e-27)  pooled 693:17 -> (i) 3/3 (powered True); F -3 dB 487; abs gap 401; R_X 0.861 [0.832, 0.888]
+      R3-bigamp            +3/+12/+15   239:1 (p 2.7e-70) · 199:0 (p 2.5e-60) · 170:0 (p 1.3e-51)  pooled 608:1 -> (i) 3/3 (powered True); F -3 dB 1137; abs gap 1051; R_X 0.942 [0.929, 0.954]
+      R4-llr               +9/+12/+15   453:1 (p 2e-134) · 356:0 (p 1.4e-107) · 264:0 (p 6.7e-80)  pooled 1073:1 -> (i) 3/3 (powered True); F -3 dB 2255; abs gap 2169; R_X 0.971 [0.964, 0.977]
+      R4-scvamp            +3/+6/+9     320:2 (p 1.2e-92) · 207:0 (p 9.7e-63) · 178:0 (p 5.2e-54)  pooled 705:2 -> (i) 3/3 (powered True); F -3 dB 1242; abs gap 1156; R_X 0.947 [0.935, 0.958]
+      bstar-pilot          -3/+0/+3     481:7 (p 3.2e-132) · 158:5 (p 1.6e-40) · 80:4 (p 2.1e-19)  pooled 719:16 -> (i) 3/3 (powered True); F -3 dB 560; abs gap 474; R_X 0.879 [0.854, 0.903]
+      V1-pilot             -3/+0/+3     84:11 (p 4.5e-15) · 11:1 (p 0.0063) · 4:6 (p 0.75)  pooled 99:18 -> (i) 2/3 (powered True); F -3 dB 159; abs gap 73; R_X 0.529 [0.445, 0.609]
+      ALD-pilot            -3/+0/+3     242:13 (p 8.3e-56) · 79:2 (p 2.7e-21) · 42:7 (p 3.6e-07)  pooled 363:22 -> (i) 3/3 (powered True); F -3 dB 315; abs gap 229; R_X 0.779 [0.737, 0.822]
+      ALDv-pilot           -3/+0/+3     229:14 (p 3e-51) · 59:3 (p 1.7e-14) · 28:9 (p 0.0026)  pooled 316:26 -> (i) 3/3 (powered True); F -3 dB 301; abs gap 215; R_X 0.768 [0.721, 0.812]
+    SUMMARY-B: k𝔅 12, m𝔅 0, undecided 0; b* -> V1 recomputed (i) vs §0 (i) same; X* = V1-pilot (F 159; runner-up ALDv-pilot F 301); R_X* 0.529 [0.445, 0.609]; '전부' sentence (orig b* (i), k𝔅 = 12, m𝔅 = 0, R_X* defined & lower > 0): MET; main label (D2 C2 only) (A)
+
+  [DOPaD3] files base 448 XL 448 XP 448 XA 448; run|git base ['063f3bcb'] XL ['e7c9f4a7'] XP ['e7c9f4a7'] XA ['e7c9f4a7']; meta|doppler 'nu=0.005 per symbol, p'; ckpt id (base) 7ebf4e6647d4413f; meta fingerprint equal {'meta|ntrain': True, 'meta|bstar': True, 'meta|kron_K': True, 'meta|em_sec': True, 'meta|ll_val|kron': True, 'meta|stagec_ckpt_id': True}
+    ALD est prov git e7c9f4a7 ald.py f1da04d1e91e0baf ckpt 7ebf4e6647d4413f; est sha256[:16] 5ba642e58e4fbdac; test NMSE dB -5.82 -8.59 -11.23 -13.77 -16.71 -19.23 -21.57; dev -5.7 -8.6 -11.4 -13.8 -16.5 -19.1 -21.5; max |test - dev| 0.19 dB
+    integrity (grid, holes, one clean commit per raw [orig 063f3bcb / new e7c9f4a7], meta doppler/rotation = base, fingerprint, arm sets disjoint, genie 4 keys XL/XP/XA = base, n 2560, PIL/ALD raised 0, pilot@1 = loop@1, ALD estimate fixed = precomputed, ALD ckpt/condition = base): OK
+    -3 dB genie 644 · V1 1102 -> genie >= V1 guard not fired
+      M-ours-bstar         +0/+3/+6     234:34 (p 6.8e-38) · 137:29 (p 5.5e-18) · 75:14 (p 3e-11)  pooled 446:77 -> (i) 3/3 (powered True); F -3 dB 1392; abs gap 290; R_X 0.388 [0.352, 0.425]
+      M-ours-bstar-scalar  +0/+3/+6     252:36 (p 4.4e-41) · 150:25 (p 6.3e-23) · 75:16 (p 2.7e-10)  pooled 477:77 -> (i) 3/3 (powered True); F -3 dB 1396; abs gap 294; R_X 0.391 [0.356, 0.427]
+      M-ours-gmm32         +3/+6/+9     189:25 (p 2.4e-32) · 107:19 (p 4.5e-16) · 60:6 (p 2.7e-12)  pooled 356:50 -> (i) 3/3 (powered True); F -3 dB 1458; abs gap 356; R_X 0.437 [0.404, 0.472]
+      R0-pilot@1           +9/+12/+15   371:0 (p 4.2e-112) · 276:0 (p 1.6e-83) · 226:0 (p 1.9e-68)  pooled 873:0 -> (i) 3/3 (powered True); F -3 dB 2231; abs gap 1129; R_X 0.711 [0.691, 0.732]
+      R1-turbo             +6/+9/+12    252:10 (p 9.9e-62) · 152:5 (p 8.4e-39) · 100:4 (p 4.7e-25)  pooled 504:19 -> (i) 3/3 (powered True); F -3 dB 1899; abs gap 797; R_X 0.635 [0.611, 0.660]
+      R2-ours-G            +3/+6/+9     240:31 (p 3.3e-41) · 124:16 (p 7e-22) · 81:3 (p 1e-20)  pooled 445:50 -> (i) 3/3 (powered True); F -3 dB 1552; abs gap 450; R_X 0.496 [0.465, 0.528]
+      R3-bigamp            +9/+12/+15   329:4 (p 5.8e-92) · 372:4 (p 1.1e-104) · 397:4 (p 4.2e-112)  pooled 1098:12 -> (i) 3/3 (powered True); F -3 dB 1974; abs gap 872; R_X 0.656 [0.632, 0.680]
+      R4-llr               +9/+12/+15   1097:0 (p 0) · 891:0 (p 1.2e-268) · 708:1 (p 5.3e-211)  pooled 2696:1 -> (i) 3/3 (powered True); F -3 dB 2357; abs gap 1255; R_X undefined; abs 1255
+      R4-scvamp            +9/+12/+15   343:1 (p 1.9e-101) · 262:0 (p 2.7e-79) · 228:2 (p 3.1e-65)  pooled 833:3 -> (i) 3/3 (powered True); F -3 dB 2000; abs gap 898; R_X 0.662 [0.639, 0.685]
+      bstar-pilot          +3/+6/+9     237:24 (p 3.2e-45) · 95:12 (p 3.5e-17) · 69:6 (p 1.2e-14)  pooled 401:42 -> (i) 3/3 (powered True); F -3 dB 1683; abs gap 581; R_X 0.559 [0.531, 0.588]
+      V1-pilot             +0/+3/+6     214:17 (p 1.5e-44) · 85:22 (p 6.4e-10) · 28:10 (p 0.0051)  pooled 327:49 -> (i) 3/3 (powered True); F -3 dB 1488; abs gap 386; R_X 0.457 [0.426, 0.490]
+      ALD-pilot            +0/+3/+6     323:19 (p 1.6e-72) · 169:22 (p 2.8e-29) · 66:16 (p 2.3e-08)  pooled 558:57 -> (i) 3/3 (powered True); F -3 dB 1575; abs gap 473; R_X 0.508 [0.478, 0.539]
+      ALDv-pilot           +0/+3/+6     322:18 (p 3.4e-73) · 149:19 (p 3.3e-26) · 47:15 (p 5.8e-05)  pooled 518:52 -> (i) 3/3 (powered True); F -3 dB 1615; abs gap 513; R_X 0.528 [0.498, 0.558]
+    SUMMARY-B: k𝔅 12, m𝔅 0, undecided 0; b* -> V1 recomputed (i) vs §0 (i) same; X* = M-ours-bstar (F 1392; runner-up M-ours-bstar-scalar F 1396); R_X* 0.388 [0.352, 0.425]; '전부' sentence (orig b* (i), k𝔅 = 12, m𝔅 = 0, R_X* defined & lower > 0): MET; main label (D2 C2 only) (A)
+
+  [DOPbD3] files base 448 XL 448 XP 448 XA 448; run|git base ['063f3bcb'] XL ['e7c9f4a7'] XP ['e7c9f4a7'] XA ['e7c9f4a7']; meta|doppler 'nu=0.01 per symbol, pe'; ckpt id (base) 7ebf4e6647d4413f; meta fingerprint equal {'meta|ntrain': True, 'meta|bstar': True, 'meta|kron_K': True, 'meta|em_sec': True, 'meta|ll_val|kron': True, 'meta|stagec_ckpt_id': True}
+    ALD est prov git e7c9f4a7 ald.py f1da04d1e91e0baf ckpt 7ebf4e6647d4413f; est sha256[:16] 780d4a2f17cbfd0f; test NMSE dB -5.77 -8.48 -10.98 -13.32 -15.82 -17.75 -19.26; dev -5.6 -8.5 -11.1 -13.4 -15.7 -17.7 -19.2; max |test - dev| 0.16 dB
+    integrity (grid, holes, one clean commit per raw [orig 063f3bcb / new e7c9f4a7], meta doppler/rotation = base, fingerprint, arm sets disjoint, genie 4 keys XL/XP/XA = base, n 2560, PIL/ALD raised 0, pilot@1 = loop@1, ALD estimate fixed = precomputed, ALD ckpt/condition = base): OK
+    -3 dB genie 1406 · V1 1418 -> genie >= V1 guard not fired
+      M-ours-bstar         +9/+12/+15   110:46 (p 3.2e-07) · 91:47 (p 0.00023) · 98:58 (p 0.0017)  pooled 299:151 -> (i) 3/3 (powered True); F -3 dB 1671; abs gap 253; R_X 0.955 [0.826, 1.107]
+      M-ours-bstar-scalar  +9/+12/+15   125:36 (p 1e-12) · 119:52 (p 3.2e-07) · 121:46 (p 5.7e-09)  pooled 365:134 -> (i) 3/3 (powered True); F -3 dB 1693; abs gap 275; R_X 0.958 [0.838, 1.097]
+      M-ours-gmm32         +9/+12/+15   135:45 (p 1.2e-11) · 109:57 (p 6.6e-05) · 106:51 (p 1.4e-05)  pooled 350:153 -> (i) 3/3 (powered True); F -3 dB 1726; abs gap 308; R_X 0.963 [0.854, 1.086]
+      R0-pilot@1           +9/+12/+15   633:2 (p 2.8e-186) · 572:1 (p 3.7e-170) · 557:3 (p 1.6e-161)  pooled 1762:6 -> (i) 3/3 (powered True); F -3 dB 2386; abs gap 968; R_X undefined; abs 968
+      R1-turbo             +9/+12/+15   291:24 (p 2e-59) · 249:31 (p 1.9e-43) · 250:31 (p 1e-43)  pooled 790:86 -> (i) 3/3 (powered True); F -3 dB 2144; abs gap 726; R_X 0.984 [0.934, 1.036]
+      R2-ours-G            +9/+12/+15   143:53 (p 9.6e-11) · 128:52 (p 1.4e-08) · 114:48 (p 2.3e-07)  pooled 385:153 -> (i) 3/3 (powered True); F -3 dB 1789; abs gap 371; R_X 0.969 [0.875, 1.071]
+      R3-bigamp            +9/+12/+15   489:36 (p 1.3e-102) · 524:41 (p 8.3e-108) · 542:44 (p 3.8e-110)  pooled 1555:121 -> (i) 3/3 (powered True); F -3 dB 2170; abs gap 752; R_X 0.984 [0.936, 1.034]
+      R4-llr               +9/+12/+15   1354:10 (p 0) · 1153:6 (p 0) · 1027:7 (p 2.7e-294)  pooled 3534:23 -> (i) 3/3 (powered True); F -3 dB 2399; abs gap 981; R_X undefined; abs 981
+      R4-scvamp            +9/+12/+15   588:10 (p 2.9e-159) · 544:11 (p 6e-145) · 523:9 (p 1.3e-141)  pooled 1655:30 -> (i) 3/3 (powered True); F -3 dB 2218; abs gap 800; R_X 0.985 [0.940, 1.032]
+      bstar-pilot          +9/+12/+15   234:35 (p 2.6e-37) · 205:46 (p 3.9e-25) · 179:48 (p 5.9e-19)  pooled 618:129 -> (i) 3/3 (powered True); F -3 dB 2050; abs gap 632; R_X 0.981 [0.925, 1.041]
+      V1-pilot             +9/+12/+15   143:28 (p 8.7e-20) · 130:37 (p 2.5e-13) · 141:43 (p 2.3e-13)  pooled 414:108 -> (i) 3/3 (powered True); F -3 dB 1861; abs gap 443; R_X 0.974 [0.895, 1.058]
+      ALD-pilot            +9/+12/+15   220:30 (p 6.8e-37) · 196:39 (p 2.3e-26) · 197:44 (p 2.7e-24)  pooled 613:113 -> (i) 3/3 (powered True); F -3 dB 1923; abs gap 505; R_X 0.977 [0.906, 1.052]
+      ALDv-pilot           +9/+12/+15   177:30 (p 1.5e-26) · 170:56 (p 1.5e-14) · 135:54 (p 3.4e-09)  pooled 482:140 -> (i) 3/3 (powered True); F -3 dB 1960; abs gap 542; R_X 0.978 [0.913, 1.048]
+    SUMMARY-B: k𝔅 12, m𝔅 0, undecided 0; b* -> V1 recomputed (i) vs §0 (i) same; X* = M-ours-bstar (F 1671; runner-up M-ours-bstar-scalar F 1693); R_X* 0.955 [0.826, 1.107]; '전부' sentence (orig b* (i), k𝔅 = 12, m𝔅 = 0, R_X* defined & lower > 0): MET; main label (D2 C2 only) (A)
+
+  [ROTaD3] files base 448 XL 448 XP 448 XA 448; run|git base ['a4cbd184'] XL ['e7c9f4a7'] XP ['e7c9f4a7'] XA ['e7c9f4a7']; meta|rotation 'deg=15.0: receive (BS)'; ckpt id (base) 7ebf4e6647d4413f; meta fingerprint equal {'meta|ntrain': True, 'meta|bstar': True, 'meta|kron_K': True, 'meta|em_sec': True, 'meta|ll_val|kron': True, 'meta|stagec_ckpt_id': True}
+    ALD est prov git e7c9f4a7 ald.py f1da04d1e91e0baf ckpt 7ebf4e6647d4413f; est sha256[:16] fb6507f96f251668; test NMSE dB -5.61 -8.31 -10.95 -13.51 -16.65 -19.48 -22.42; dev -5.6 -8.5 -11.3 -13.7 -16.4 -19.4 -22.2; max |test - dev| 0.32 dB
+    integrity (grid, holes, one clean commit per raw [orig a4cbd184 / new e7c9f4a7], meta doppler/rotation = base, fingerprint, arm sets disjoint, genie 4 keys XL/XP/XA = base, n 2560, PIL/ALD raised 0, pilot@1 = loop@1, ALD estimate fixed = precomputed, ALD ckpt/condition = base): OK
+    -3 dB genie 460 · V1 1056 -> genie >= V1 guard not fired
+      M-ours-bstar         +0/+3/+6     227:58 (p 8.6e-25) · 116:16 (p 6.7e-20) · 74:16 (p 4.4e-10)  pooled 417:90 -> (i) 3/3 (powered True); F -3 dB 1303; abs gap 247; R_X 0.293 [0.260, 0.324]
+      M-ours-bstar-scalar  +0/+3/+6     248:51 (p 3.1e-32) · 120:14 (p 3.5e-22) · 87:17 (p 1.7e-12)  pooled 455:82 -> (i) 3/3 (powered True); F -3 dB 1331; abs gap 275; R_X 0.316 [0.285, 0.346]
+      M-ours-gmm32         +0/+3/+6     303:38 (p 2e-52) · 155:15 (p 1.7e-30) · 92:11 (p 4.5e-17)  pooled 550:64 -> (i) 3/3 (powered True); F -3 dB 1395; abs gap 339; R_X 0.363 [0.333, 0.391]
+      R0-pilot@1           +9/+12/+15   296:0 (p 1.6e-89) · 207:0 (p 9.7e-63) · 149:0 (p 2.8e-45)  pooled 652:0 -> (i) 3/3 (powered True); F -3 dB 2212; abs gap 1156; R_X 0.660 [0.641, 0.678]
+      R1-turbo             +3/+6/+9     435:7 (p 1.1e-118) · 258:9 (p 1.4e-64) · 118:1 (p 3.6e-34)  pooled 811:17 -> (i) 3/3 (powered True); F -3 dB 1842; abs gap 786; R_X 0.569 [0.547, 0.591]
+      R2-ours-G            +3/+6/+9     225:17 (p 1.6e-47) · 123:13 (p 1.2e-23) · 65:1 (p 1.8e-18)  pooled 413:31 -> (i) 3/3 (powered True); F -3 dB 1512; abs gap 456; R_X 0.433 [0.405, 0.460]
+      R3-bigamp            +9/+12/+15   300:1 (p 1.5e-88) · 345:1 (p 4.8e-102) · 382:0 (p 2e-115)  pooled 1027:2 -> (i) 3/3 (powered True); F -3 dB 1930; abs gap 874; R_X 0.595 [0.574, 0.617]
+      R4-llr               +9/+12/+15   1005:0 (p 5.8e-303) · 741:0 (p 1.7e-223) · 551:0 (p 2.7e-166)  pooled 2297:0 -> (i) 3/3 (powered True); F -3 dB 2331; abs gap 1275; R_X undefined; abs 1275
+      R4-scvamp            +9/+12/+15   273:0 (p 1.3e-82) · 198:0 (p 5e-60) · 154:0 (p 8.8e-47)  pooled 625:0 -> (i) 3/3 (powered True); F -3 dB 1965; abs gap 909; R_X 0.604 [0.583, 0.626]
+      bstar-pilot          +0/+3/+6     375:29 (p 8.1e-78) · 168:14 (p 1.1e-34) · 90:14 (p 9.2e-15)  pooled 633:57 -> (i) 3/3 (powered True); F -3 dB 1594; abs gap 538; R_X 0.474 [0.449, 0.500]
+      V1-pilot             +0/+3/+6     199:22 (p 7.6e-37) · 59:10 (p 1.4e-09) · 28:14 (p 0.044)  pooled 286:46 -> (i) 3/3 (powered True); F -3 dB 1371; abs gap 315; R_X 0.346 [0.319, 0.373]
+      ALD-pilot            +0/+3/+6     270:36 (p 1.7e-45) · 105:16 (p 3.2e-17) · 61:15 (p 9.8e-08)  pooled 436:67 -> (i) 3/3 (powered True); F -3 dB 1470; abs gap 414; R_X 0.410 [0.383, 0.437]
+      ALDv-pilot           +0/+3/+6     261:34 (p 1.6e-44) · 88:13 (p 7.5e-15) · 39:13 (p 0.00041)  pooled 388:60 -> (i) 3/3 (powered True); F -3 dB 1524; abs gap 468; R_X 0.440 [0.414, 0.466]
+    SUMMARY-B: k𝔅 12, m𝔅 0, undecided 0; b* -> V1 recomputed (i) vs §0 (i) same; X* = M-ours-bstar (F 1303; runner-up M-ours-bstar-scalar F 1331); R_X* 0.293 [0.260, 0.324]; '전부' sentence (orig b* (i), k𝔅 = 12, m𝔅 = 0, R_X* defined & lower > 0): MET; main label (D2 C2 only) (A)
+
+  [ROTbD3] files base 448 XL 448 XP 448 XA 448; run|git base ['a4cbd184'] XL ['e7c9f4a7'] XP ['e7c9f4a7'] XA ['e7c9f4a7']; meta|rotation 'deg=30.0: receive (BS)'; ckpt id (base) 7ebf4e6647d4413f; meta fingerprint equal {'meta|ntrain': True, 'meta|bstar': True, 'meta|kron_K': True, 'meta|em_sec': True, 'meta|ll_val|kron': True, 'meta|stagec_ckpt_id': True}
+    ALD est prov git e7c9f4a7 ald.py f1da04d1e91e0baf ckpt 7ebf4e6647d4413f; est sha256[:16] 500d33b584c4a5eb; test NMSE dB -5.25 -7.83 -10.40 -12.93 -15.91 -18.88 -21.91; dev -5.1 -8.0 -10.6 -13.0 -15.7 -18.8 -21.8; max |test - dev| 0.20 dB
+    integrity (grid, holes, one clean commit per raw [orig a4cbd184 / new e7c9f4a7], meta doppler/rotation = base, fingerprint, arm sets disjoint, genie 4 keys XL/XP/XA = base, n 2560, PIL/ALD raised 0, pilot@1 = loop@1, ALD estimate fixed = precomputed, ALD ckpt/condition = base): OK
+    -3 dB genie 520 · V1 1142 -> genie >= V1 guard not fired
+      M-ours-bstar         +0/+3/+6     241:42 (p 4.2e-35) · 130:28 (p 6.5e-17) · 74:15 (p 1.5e-10)  pooled 445:85 -> (i) 3/3 (powered True); F -3 dB 1430; abs gap 288; R_X 0.316 [0.286, 0.346]
+      M-ours-bstar-scalar  +0/+3/+6     259:50 (p 3.7e-35) · 148:29 (p 2e-20) · 82:12 (p 5.6e-14)  pooled 489:91 -> (i) 3/3 (powered True); F -3 dB 1461; abs gap 319; R_X 0.339 [0.309, 0.368]
+      M-ours-gmm32         +0/+3/+6     328:41 (p 1e-56) · 174:35 (p 2.3e-23) · 110:11 (p 1.1e-21)  pooled 612:87 -> (i) 3/3 (powered True); F -3 dB 1495; abs gap 353; R_X 0.362 [0.332, 0.391]
+      R0-pilot@1           +9/+12/+15   337:0 (p 7.1e-102) · 243:0 (p 1.4e-73) · 164:1 (p 7.1e-48)  pooled 744:1 -> (i) 3/3 (powered True); F -3 dB 2256; abs gap 1114; R_X 0.642 [0.622, 0.661]
+      R1-turbo             +6/+9/+12    252:7 (p 3.2e-65) · 132:3 (p 1.9e-35) · 95:0 (p 5e-29)  pooled 479:10 -> (i) 3/3 (powered True); F -3 dB 1962; abs gap 820; R_X 0.569 [0.546, 0.590]
+      R2-ours-G            +3/+6/+9     233:29 (p 9.4e-41) · 138:12 (p 2.6e-28) · 68:2 (p 4.2e-18)  pooled 439:43 -> (i) 3/3 (powered True); F -3 dB 1614; abs gap 472; R_X 0.431 [0.404, 0.457]
+      R3-bigamp            +9/+12/+15   349:0 (p 1.7e-105) · 403:1 (p 2e-119) · 404:1 (p 9.8e-120)  pooled 1156:2 -> (i) 3/3 (powered True); F -3 dB 1996; abs gap 854; R_X 0.579 [0.557, 0.600]
+      R4-llr               +9/+12/+15   1086:1 (p 0) · 837:0 (p 2.2e-252) · 625:0 (p 1.4e-188)  pooled 2548:1 -> (i) 3/3 (powered True); F -3 dB 2366; abs gap 1224; R_X undefined; abs 1224
+      R4-scvamp            +9/+12/+15   313:0 (p 1.2e-94) · 211:0 (p 6.1e-64) · 159:1 (p 2.2e-46)  pooled 683:1 -> (i) 3/3 (powered True); F -3 dB 2052; abs gap 910; R_X 0.594 [0.573, 0.614]
+      bstar-pilot          +0/+3/+6     406:24 (p 1e-90) · 205:24 (p 5.2e-37) · 108:15 (p 1.5e-18)  pooled 719:63 -> (i) 3/3 (powered True); F -3 dB 1713; abs gap 571; R_X 0.479 [0.453, 0.503]
+      V1-pilot             +0/+3/+6     210:21 (p 2.1e-40) · 86:22 (p 4e-10) · 34:13 (p 0.0031)  pooled 330:56 -> (i) 3/3 (powered True); F -3 dB 1480; abs gap 338; R_X 0.352 [0.326, 0.378]
+      ALD-pilot            +0/+3/+6     302:37 (p 8e-53) · 141:29 (p 7.2e-19) · 80:15 (p 6.8e-12)  pooled 523:81 -> (i) 3/3 (powered True); F -3 dB 1587; abs gap 445; R_X 0.417 [0.390, 0.442]
+      ALDv-pilot           +0/+3/+6     290:27 (p 8.2e-57) · 117:35 (p 1.6e-11) · 63:12 (p 1.7e-09)  pooled 470:74 -> (i) 3/3 (powered True); F -3 dB 1623; abs gap 481; R_X 0.436 [0.410, 0.462]
+    SUMMARY-B: k𝔅 12, m𝔅 0, undecided 0; b* -> V1 recomputed (i) vs §0 (i) same; X* = M-ours-bstar (F 1430; runner-up M-ours-bstar-scalar F 1461); R_X* 0.316 [0.286, 0.346]; '전부' sentence (orig b* (i), k𝔅 = 12, m𝔅 = 0, R_X* defined & lower > 0): MET; main label (D2 C2 only) (A)
+
+  [DOPaSV] files base 448 XL 448 XP 448 XA 448; run|git base ['063f3bcb'] XL ['e7c9f4a7'] XP ['e7c9f4a7'] XA ['e7c9f4a7']; meta|doppler 'nu=0.005 per symbol, p'; ckpt id (base) d2d78962c2846364; meta fingerprint equal {'meta|ntrain': True, 'meta|bstar': True, 'meta|kron_K': True, 'meta|em_sec': True, 'meta|ll_val|kron': True, 'meta|stagec_ckpt_id': True}
+    ALD est prov git e7c9f4a7 ald.py f1da04d1e91e0baf ckpt d2d78962c2846364; est sha256[:16] 83d9910e70c30e8c; test NMSE dB -5.16 -7.57 -10.08 -12.65 -15.35 -17.92 -20.55; dev -5.2 -7.6 -10.0 -12.6 -15.2 -18.0 -20.4; max |test - dev| 0.14 dB
+    integrity (grid, holes, one clean commit per raw [orig 063f3bcb / new e7c9f4a7], meta doppler/rotation = base, fingerprint, arm sets disjoint, genie 4 keys XL/XP/XA = base, n 2560, PIL/ALD raised 0, pilot@1 = loop@1, ALD estimate fixed = precomputed, ALD ckpt/condition = base): OK
+    -3 dB genie 65 · V1 472 -> genie >= V1 guard not fired
+      M-ours-bstar         -3/+0        130:61 (p 6.6e-07) · 22:12 (p 0.12)  pooled 152:73 -> (iv) 1/2 (powered False); F -3 dB 541; abs gap 69; R_X 0.145 [0.100, 0.189]
+      M-ours-bstar-scalar  -3/+0/+3     138:62 (p 8e-08) · 29:13 (p 0.02) · 15:4 (p 0.019)  pooled 182:79 -> (i) 3/3 (powered True); F -3 dB 548; abs gap 76; R_X 0.157 [0.113, 0.201]
+      M-ours-gmm32         -3/+0/+3     176:60 (p 2.1e-14) · 37:16 (p 0.0055) · 12:1 (p 0.0034)  pooled 225:77 -> (i) 3/3 (powered True); F -3 dB 588; abs gap 116; R_X 0.222 [0.178, 0.265]
+      R0-pilot@1           +0/+3/+6     618:0 (p 1.8e-186) · 193:0 (p 1.6e-58) · 60:0 (p 1.7e-18)  pooled 871:0 -> (i) 3/3 (powered True); F -3 dB 1735; abs gap 1263; R_X 0.756 [0.738, 0.774]
+      R1-turbo             -3/+0/+3     694:13 (p 4.8e-186) · 261:6 (p 4.1e-69) · 73:1 (p 7.9e-21)  pooled 1028:20 -> (i) 3/3 (powered True); F -3 dB 1153; abs gap 681; R_X 0.626 [0.601, 0.650]
+      R2-ours-G            -3/+0/+3     273:59 (p 4.9e-34) · 62:19 (p 1.8e-06) · 13:3 (p 0.021)  pooled 348:81 -> (i) 3/3 (powered True); F -3 dB 686; abs gap 214; R_X 0.345 [0.304, 0.383]
+      R3-bigamp            -3/+0/+3     816:35 (p 2.3e-194) · 276:10 (p 1.4e-68) · 75:2 (p 4e-20)  pooled 1167:47 -> (i) 3/3 (powered True); F -3 dB 1253; abs gap 781; R_X 0.657 [0.633, 0.680]
+      R4-llr               +6/+9/+12    493:0 (p 7.8e-149) · 226:0 (p 1.9e-68) · 148:0 (p 5.6e-45)  pooled 867:0 -> (i) 3/3 (powered True); F -3 dB 2183; abs gap 1711; R_X 0.808 [0.793, 0.822]
+      R4-scvamp            +0/+3/+6     442:5 (p 8.1e-124) · 175:0 (p 4.2e-53) · 75:0 (p 5.3e-23)  pooled 692:5 -> (i) 3/3 (powered True); F -3 dB 1354; abs gap 882; R_X 0.684 [0.662, 0.706]
+      bstar-pilot          -3/+0/+3     552:18 (p 2.6e-138) · 119:10 (p 7.9e-25) · 27:2 (p 1.6e-06)  pooled 698:30 -> (i) 3/3 (powered True); F -3 dB 1006; abs gap 534; R_X 0.567 [0.540, 0.596]
+      V1-pilot             -3/+0/+3     476:12 (p 8.5e-124) · 89:9 (p 1.1e-17) · 19:2 (p 0.00022)  pooled 584:23 -> (i) 3/3 (powered True); F -3 dB 936; abs gap 464; R_X 0.533 [0.504, 0.561]
+      ALD-pilot            -3/+0/+3     528:19 (p 2.8e-130) · 120:13 (p 7.3e-23) · 37:2 (p 2.8e-09)  pooled 685:34 -> (i) 3/3 (powered True); F -3 dB 981; abs gap 509; R_X 0.556 [0.528, 0.584]
+      ALDv-pilot           -3/+0/+3     573:13 (p 1.1e-150) · 105:13 (p 4.8e-19) · 15:2 (p 0.0023)  pooled 693:28 -> (i) 3/3 (powered True); F -3 dB 1032; abs gap 560; R_X 0.579 [0.553, 0.606]
+    SUMMARY-B: k𝔅 12, m𝔅 0, undecided 0; b* -> V1 recomputed (iv) vs §0 (iv) same; X* = M-ours-bstar (F 541; runner-up M-ours-bstar-scalar F 548); R_X* 0.145 [0.100, 0.189]; '전부' sentence (orig b* (i), k𝔅 = 12, m𝔅 = 0, R_X* defined & lower > 0): NOT met; main label (D2 C2 only) (A)
+
+  [DOPbSV] files base 448 XL 448 XP 448 XA 448; run|git base ['063f3bcb'] XL ['e7c9f4a7'] XP ['e7c9f4a7'] XA ['e7c9f4a7']; meta|doppler 'nu=0.01 per symbol, pe'; ckpt id (base) d2d78962c2846364; meta fingerprint equal {'meta|ntrain': True, 'meta|bstar': True, 'meta|kron_K': True, 'meta|em_sec': True, 'meta|ll_val|kron': True, 'meta|stagec_ckpt_id': True}
+    ALD est prov git e7c9f4a7 ald.py f1da04d1e91e0baf ckpt d2d78962c2846364; est sha256[:16] 9eb63384cabe9667; test NMSE dB -5.14 -7.50 -9.95 -12.38 -14.86 -17.00 -19.01; dev -5.2 -7.5 -9.9 -12.4 -14.7 -17.1 -18.8; max |test - dev| 0.20 dB
+    integrity (grid, holes, one clean commit per raw [orig 063f3bcb / new e7c9f4a7], meta doppler/rotation = base, fingerprint, arm sets disjoint, genie 4 keys XL/XP/XA = base, n 2560, PIL/ALD raised 0, pilot@1 = loop@1, ALD estimate fixed = precomputed, ALD ckpt/condition = base): OK
+    -3 dB genie 451 · V1 711 -> genie >= V1 guard not fired
+      M-ours-bstar         -3/+0/+15    162:70 (p 1.4e-09) · 65:31 (p 0.00067) · 47:48 (p 1)  pooled 274:149 -> (i) 2/3 (powered True); F -3 dB 803; abs gap 92; R_X 0.261 [0.199, 0.328]
+      M-ours-bstar-scalar  -3/+0/+15    189:73 (p 5e-13) · 69:35 (p 0.0011) · 38:47 (p 0.39)  pooled 296:155 -> (i) 2/3 (powered True); F -3 dB 827; abs gap 116; R_X 0.309 [0.249, 0.375]
+      M-ours-gmm32         -3/+0/+15    206:75 (p 2.7e-15) · 71:28 (p 1.8e-05) · 36:47 (p 0.27)  pooled 313:150 -> (i) 2/3 (powered True); F -3 dB 842; abs gap 131; R_X 0.335 [0.271, 0.400]
+      R0-pilot@1           +6/+9/+12    285:1 (p 4.6e-84) · 250:2 (p 8.8e-72) · 235:4 (p 3.1e-64)  pooled 770:7 -> (i) 3/3 (powered True); F -3 dB 2003; abs gap 1292; R_X 0.832 [0.811, 0.855]
+      R1-turbo             +3/+6/+15    211:5 (p 7.3e-56) · 116:6 (p 1.6e-27) · 134:33 (p 1.2e-15)  pooled 461:44 -> (i) 3/3 (powered True); F -3 dB 1491; abs gap 780; R_X 0.750 [0.721, 0.781]
+      R2-ours-G            +0/+3/+15    132:34 (p 7.8e-15) · 51:12 (p 7.5e-07) · 34:50 (p 0.1)  pooled 217:96 -> (i) 2/3 (powered True); F -3 dB 957; abs gap 246; R_X 0.486 [0.435, 0.541]
+      R3-bigamp            +0/+3/+15    374:28 (p 2.2e-78) · 122:23 (p 1.7e-17) · 44:71 (p 0.015)  pooled 540:122 -> (i) 2/3 (powered True); F -3 dB 1516; abs gap 805; R_X 0.756 [0.727, 0.786]
+      R4-llr               +9/+12/+15   700:0 (p 3.8e-211) · 549:6 (p 6.8e-154) · 485:9 (p 1.8e-130)  pooled 1734:15 -> (i) 3/3 (powered True); F -3 dB 2259; abs gap 1548; R_X 0.856 [0.838, 0.875]
+      R4-scvamp            +6/+9/+12    280:2 (p 1e-80) · 285:2 (p 3.3e-82) · 251:4 (p 6e-69)  pooled 816:8 -> (i) 3/3 (powered True); F -3 dB 1690; abs gap 979; R_X 0.790 [0.765, 0.817]
+      bstar-pilot          +0/+3/+6     336:17 (p 4.5e-78) · 144:4 (p 1.1e-37) · 69:9 (p 1.4e-12)  pooled 549:30 -> (i) 3/3 (powered True); F -3 dB 1458; abs gap 747; R_X 0.742 [0.710, 0.774]
+      V1-pilot             +0/+3/+6     325:17 (p 5.3e-75) · 122:10 (p 1.2e-25) · 65:8 (p 3.2e-12)  pooled 512:35 -> (i) 3/3 (powered True); F -3 dB 1387; abs gap 676; R_X 0.722 [0.690, 0.756]
+      ALD-pilot            +0/+3/+6     407:16 (p 3.6e-99) · 189:6 (p 2.9e-48) · 93:8 (p 1.7e-19)  pooled 689:30 -> (i) 3/3 (powered True); F -3 dB 1456; abs gap 745; R_X 0.741 [0.710, 0.773]
+      ALDv-pilot           +0/+3/+6     350:14 (p 3.5e-85) · 142:9 (p 6.6e-32) · 64:12 (p 1e-09)  pooled 556:35 -> (i) 3/3 (powered True); F -3 dB 1476; abs gap 765; R_X 0.746 [0.716, 0.778]
+    SUMMARY-B: k𝔅 12, m𝔅 0, undecided 0; b* -> V1 recomputed (i) vs §0 (i) same; X* = M-ours-bstar (F 803; runner-up M-ours-bstar-scalar F 827); R_X* 0.261 [0.199, 0.328]; '전부' sentence (orig b* (i), k𝔅 = 12, m𝔅 = 0, R_X* defined & lower > 0): MET; main label (D2 C2 only) (A)
+
+  [ROTaSV] files base 448 XL 448 XP 448 XA 448; run|git base ['a4cbd184'] XL ['e7c9f4a7'] XP ['e7c9f4a7'] XA ['e7c9f4a7']; meta|rotation 'deg=15.0: receive (BS)'; ckpt id (base) d2d78962c2846364; meta fingerprint equal {'meta|ntrain': True, 'meta|bstar': True, 'meta|kron_K': True, 'meta|em_sec': True, 'meta|ll_val|kron': True, 'meta|stagec_ckpt_id': True}
+    ALD est prov git e7c9f4a7 ald.py f1da04d1e91e0baf ckpt d2d78962c2846364; est sha256[:16] cd0eef64b2614a43; test NMSE dB -5.19 -7.58 -10.13 -12.73 -15.54 -18.28 -21.21; dev -5.1 -7.6 -10.0 -12.8 -15.4 -18.3 -21.1; max |test - dev| 0.11 dB
+    integrity (grid, holes, one clean commit per raw [orig a4cbd184 / new e7c9f4a7], meta doppler/rotation = base, fingerprint, arm sets disjoint, genie 4 keys XL/XP/XA = base, n 2560, PIL/ALD raised 0, pilot@1 = loop@1, ALD estimate fixed = precomputed, ALD ckpt/condition = base): OK
+    -3 dB genie 38 · V1 438 -> genie >= V1 guard not fired
+      M-ours-bstar         -3/+0        130:57 (p 9.7e-08) · 24:11 (p 0.041)  pooled 154:68 -> (iv) 2/2 (powered False); F -3 dB 511; abs gap 73; R_X 0.154 [0.110, 0.197]
+      M-ours-bstar-scalar  -3/+0        151:60 (p 3.1e-10) · 22:14 (p 0.24)  pooled 173:74 -> (iv) 1/2 (powered False); F -3 dB 529; abs gap 91; R_X 0.185 [0.140, 0.228]
+      M-ours-gmm32         -3/+0        155:59 (p 3.9e-11) · 34:14 (p 0.0055)  pooled 189:73 -> (iv) 2/2 (powered False); F -3 dB 534; abs gap 96; R_X 0.194 [0.151, 0.233]
+      R0-pilot@1           -3/+0/+3     1204:2 (p 0) · 546:0 (p 8.7e-165) · 132:0 (p 3.7e-40)  pooled 1882:2 -> (i) 3/3 (powered True); F -3 dB 1640; abs gap 1202; R_X 0.750 [0.733, 0.768]
+      R1-turbo             -3/+0/+3     646:20 (p 6.1e-163) · 214:3 (p 1.6e-59) · 43:0 (p 2.3e-13)  pooled 903:23 -> (i) 3/3 (powered True); F -3 dB 1064; abs gap 626; R_X 0.610 [0.585, 0.635]
+      R2-ours-G            -3/+0/+3     239:53 (p 2.3e-29) · 57:8 (p 3.2e-10) · 12:1 (p 0.0034)  pooled 308:62 -> (i) 3/3 (powered True); F -3 dB 624; abs gap 186; R_X 0.317 [0.277, 0.356]
+      R3-bigamp            -3/+0/+3     774:18 (p 1.5e-202) · 251:6 (p 3.3e-66) · 62:1 (p 1.4e-17)  pooled 1087:25 -> (i) 3/3 (powered True); F -3 dB 1194; abs gap 756; R_X 0.654 [0.631, 0.678]
+      R4-llr               +3/+6/+9     1008:0 (p 7.3e-304) · 363:0 (p 1.1e-109) · 118:0 (p 6e-36)  pooled 1489:0 -> (i) 3/3 (powered True); F -3 dB 2190; abs gap 1752; R_X 0.814 [0.800, 0.828]
+      R4-scvamp            -3/+0/+3     848:11 (p 2.3e-234) · 366:3 (p 1.4e-104) · 107:0 (p 1.2e-32)  pooled 1321:14 -> (i) 3/3 (powered True); F -3 dB 1275; abs gap 837; R_X 0.677 [0.655, 0.699]
+      bstar-pilot          -3/+0/+3     520:15 (p 9.7e-133) · 76:8 (p 5e-15) · 10:0 (p 0.002)  pooled 606:23 -> (i) 3/3 (powered True); F -3 dB 943; abs gap 505; R_X 0.558 [0.530, 0.585]
+      V1-pilot             -3/+0        424:18 (p 8.4e-102) · 53:7 (p 7.7e-10)  pooled 477:25 -> (iv) 2/2 (powered False); F -3 dB 844; abs gap 406; R_X 0.504 [0.474, 0.534]
+      ALD-pilot            -3/+0/+3     482:28 (p 6.3e-108) · 79:7 (p 1.5e-16) · 13:2 (p 0.0074)  pooled 574:37 -> (i) 3/3 (powered True); F -3 dB 892; abs gap 454; R_X 0.532 [0.501, 0.561]
+      ALDv-pilot           -3/+0        519:19 (p 1.1e-127) · 63:10 (p 1.6e-10)  pooled 582:29 -> (iv) 2/2 (powered False); F -3 dB 938; abs gap 500; R_X 0.556 [0.528, 0.583]
+    SUMMARY-B: k𝔅 8, m𝔅 0, undecided 4; b* -> V1 recomputed (iv) vs §0 (iv) same; X* = M-ours-bstar (F 511; runner-up M-ours-bstar-scalar F 529); R_X* 0.154 [0.110, 0.197]; '전부' sentence (orig b* (i), k𝔅 = 12, m𝔅 = 0, R_X* defined & lower > 0): NOT met; main label (D2 C2 only) (B)
+
+  [ROTbSV] files base 448 XL 448 XP 448 XA 448; run|git base ['a4cbd184'] XL ['e7c9f4a7'] XP ['e7c9f4a7'] XA ['e7c9f4a7']; meta|rotation 'deg=30.0: receive (BS)'; ckpt id (base) d2d78962c2846364; meta fingerprint equal {'meta|ntrain': True, 'meta|bstar': True, 'meta|kron_K': True, 'meta|em_sec': True, 'meta|ll_val|kron': True, 'meta|stagec_ckpt_id': True}
+    ALD est prov git e7c9f4a7 ald.py f1da04d1e91e0baf ckpt d2d78962c2846364; est sha256[:16] c03c77630bd95a71; test NMSE dB -5.15 -7.60 -10.17 -12.79 -15.57 -18.36 -21.28; dev -5.2 -7.6 -10.1 -12.7 -15.5 -18.4 -21.2; max |test - dev| 0.10 dB
+    integrity (grid, holes, one clean commit per raw [orig a4cbd184 / new e7c9f4a7], meta doppler/rotation = base, fingerprint, arm sets disjoint, genie 4 keys XL/XP/XA = base, n 2560, PIL/ALD raised 0, pilot@1 = loop@1, ALD estimate fixed = precomputed, ALD ckpt/condition = base): OK
+    -3 dB genie 59 · V1 506 -> genie >= V1 guard not fired
+      M-ours-bstar         -3/+0/+3     135:71 (p 9.7e-06) · 37:9 (p 4.1e-05) · 7:3 (p 0.34)  pooled 179:83 -> (i) 2/3 (powered True); F -3 dB 570; abs gap 64; R_X 0.125 [0.081, 0.168]
+      M-ours-bstar-scalar  -3/+0/+3     145:68 (p 1.4e-07) · 45:10 (p 2.1e-06) · 8:2 (p 0.11)  pooled 198:80 -> (i) 2/3 (powered True); F -3 dB 583; abs gap 77; R_X 0.147 [0.104, 0.189]
+      M-ours-gmm32         -3/+0/+3     158:72 (p 1.4e-08) · 46:10 (p 1.2e-06) · 13:1 (p 0.0018)  pooled 217:83 -> (i) 3/3 (powered True); F -3 dB 592; abs gap 86; R_X 0.161 [0.118, 0.204]
+      R0-pilot@1           +0/+3/+6     631:0 (p 2.2e-190) · 185:0 (p 4.1e-56) · 45:0 (p 5.7e-14)  pooled 861:0 -> (i) 3/3 (powered True); F -3 dB 1808; abs gap 1302; R_X 0.744 [0.728, 0.762]
+      R1-turbo             -3/+0/+3     714:12 (p 2.4e-193) · 275:1 (p 4.6e-81) · 61:1 (p 2.7e-17)  pooled 1050:14 -> (i) 3/3 (powered True); F -3 dB 1208; abs gap 702; R_X 0.611 [0.587, 0.636]
+      R2-ours-G            -3/+0/+3     260:63 (p 1.4e-29) · 72:11 (p 3.9e-12) · 13:3 (p 0.021)  pooled 345:77 -> (i) 3/3 (powered True); F -3 dB 703; abs gap 197; R_X 0.306 [0.269, 0.343]
+      R3-bigamp            -3/+0/+3     780:24 (p 1.2e-196) · 286:5 (p 8.6e-78) · 91:2 (p 8.8e-25)  pooled 1157:31 -> (i) 3/3 (powered True); F -3 dB 1262; abs gap 756; R_X 0.628 [0.605, 0.653]
+      R4-llr               +6/+9/+12    476:0 (p 1e-143) · 163:0 (p 1.7e-49) · 82:0 (p 4.1e-25)  pooled 721:0 -> (i) 3/3 (powered True); F -3 dB 2186; abs gap 1680; R_X 0.790 [0.775, 0.805]
+      R4-scvamp            +0/+3/+6     457:1 (p 1.2e-135) · 155:2 (p 1.4e-43) · 47:0 (p 1.4e-14)  pooled 659:3 -> (i) 3/3 (powered True); F -3 dB 1435; abs gap 929; R_X 0.675 [0.654, 0.697]
+      bstar-pilot          -3/+0/+3     566:17 (p 1.5e-143) · 102:9 (p 4.3e-21) · 14:1 (p 0.00098)  pooled 682:27 -> (i) 3/3 (powered True); F -3 dB 1055; abs gap 549; R_X 0.551 [0.524, 0.579]
+      V1-pilot             -3/+0/+3     481:14 (p 1e-122) · 75:11 (p 7.4e-13) · 6:0 (p 0.031)  pooled 562:25 -> (i) 3/3 (powered True); F -3 dB 973; abs gap 467; R_X 0.511 [0.484, 0.541]
+      ALD-pilot            -3/+0/+3     506:24 (p 1.4e-118) · 103:10 (p 1.3e-20) · 18:1 (p 7.6e-05)  pooled 627:35 -> (i) 3/3 (powered True); F -3 dB 988; abs gap 482; R_X 0.519 [0.490, 0.548]
+      ALDv-pilot           -3/+0/+3     545:19 (p 3.9e-135) · 91:9 (p 3.3e-18) · 12:0 (p 0.00049)  pooled 648:28 -> (i) 3/3 (powered True); F -3 dB 1032; abs gap 526; R_X 0.541 [0.513, 0.569]
+    SUMMARY-B: k𝔅 12, m𝔅 0, undecided 0; b* -> V1 recomputed (i) vs §0 (i) same; X* = M-ours-bstar (F 570; runner-up M-ours-bstar-scalar F 583); R_X* 0.125 [0.081, 0.168]; '전부' sentence (orig b* (i), k𝔅 = 12, m𝔅 = 0, R_X* defined & lower > 0): MET; main label (D2 C2 only) (A)
+
+  [DOPaU28] files base 448 XL 448 XP 448 XA 448; run|git base ['063f3bcb'] XL ['e7c9f4a7'] XP ['e7c9f4a7'] XA ['e7c9f4a7']; meta|doppler 'nu=0.005 per symbol, p'; ckpt id (base) 6f3a1b9490864af1; meta fingerprint equal {'meta|ntrain': True, 'meta|bstar': True, 'meta|kron_K': True, 'meta|em_sec': True, 'meta|ll_val|kron': True, 'meta|stagec_ckpt_id': True}
+    ALD est prov git e7c9f4a7 ald.py f1da04d1e91e0baf ckpt 6f3a1b9490864af1; est sha256[:16] 7f4862bb011b965b; test NMSE dB -6.38 -8.62 -11.11 -13.65 -16.23 -18.73 -21.13; dev -6.3 -8.6 -11.2 -13.7 -16.4 -18.7 -21.1; max |test - dev| 0.14 dB
+    integrity (grid, holes, one clean commit per raw [orig 063f3bcb / new e7c9f4a7], meta doppler/rotation = base, fingerprint, arm sets disjoint, genie 4 keys XL/XP/XA = base, n 2560, PIL/ALD raised 0, pilot@1 = loop@1, ALD estimate fixed = precomputed, ALD ckpt/condition = base): OK
+    -3 dB genie 755 · V1 1324 -> genie >= V1 guard not fired
+      M-ours-bstar         +3/+6/+9     74:36 (p 0.00037) · 52:23 (p 0.0011) · 35:15 (p 0.0066)  pooled 161:74 -> (i) 3/3 (powered True); F -3 dB 1371; abs gap 47; R_X 0.076 [0.046, 0.106]
+      M-ours-bstar-scalar  +3/+6/+9     85:41 (p 0.00011) · 70:21 (p 2.5e-07) · 40:15 (p 0.001)  pooled 195:77 -> (i) 3/3 (powered True); F -3 dB 1388; abs gap 64; R_X 0.101 [0.069, 0.134]
+      M-ours-gmm32         +3/+6/+9     146:33 (p 3.7e-18) · 90:21 (p 2.3e-11) · 59:10 (p 1.4e-09)  pooled 295:64 -> (i) 3/3 (powered True); F -3 dB 1412; abs gap 88; R_X 0.134 [0.103, 0.168]
+      R0-pilot@1           +9/+12/+15   377:0 (p 6.5e-114) · 275:1 (p 4.6e-81) · 184:0 (p 8.2e-56)  pooled 836:1 -> (i) 3/3 (powered True); F -3 dB 2216; abs gap 892; R_X 0.611 [0.589, 0.633]
+      R1-turbo             +6/+9/+12    267:13 (p 8.5e-63) · 174:4 (p 2.2e-46) · 100:6 (p 4.5e-23)  pooled 541:23 -> (i) 3/3 (powered True); F -3 dB 1896; abs gap 572; R_X 0.501 [0.475, 0.527]
+      R2-ours-G            +6/+9/+12    161:16 (p 2.6e-31) · 109:7 (p 1.2e-24) · 72:8 (p 5.4e-14)  pooled 342:31 -> (i) 3/3 (powered True); F -3 dB 1542; abs gap 218; R_X 0.277 [0.244, 0.310]
+      R3-bigamp            +9/+12/+15   614:3 (p 1.4e-178) · 722:2 (p 5.9e-213) · 742:1 (p 3.2e-221)  pooled 2078:6 -> (i) 3/3 (powered True); F -3 dB 1949; abs gap 625; R_X 0.523 [0.498, 0.550]
+      R4-llr               +9/+12/+15   930:1 (p 1e-277) · 720:1 (p 1.3e-214) · 541:2 (p 1e-158)  pooled 2191:4 -> (i) 3/3 (powered True); F -3 dB 2372; abs gap 1048; R_X undefined; abs 1048
+      R4-scvamp            +9/+12/+15   356:2 (p 2.2e-103) · 270:1 (p 1.4e-79) · 200:3 (p 2.2e-55)  pooled 826:6 -> (i) 3/3 (powered True); F -3 dB 2040; abs gap 716; R_X 0.557 [0.534, 0.582]
+      bstar-pilot          +3/+6/+9     145:24 (p 2.7e-22) · 93:17 (p 7.2e-14) · 64:14 (p 8.6e-09)  pooled 302:55 -> (i) 3/3 (powered True); F -3 dB 1740; abs gap 416; R_X 0.422 [0.395, 0.450]
+      V1-pilot             +3/+6/+9     91:17 (p 2.1e-13) · 51:10 (p 9.6e-08) · 27:8 (p 0.0019)  pooled 169:35 -> (i) 3/3 (powered True); F -3 dB 1709; abs gap 385; R_X 0.404 [0.376, 0.432]
+      ALD-pilot            +3/+6/+9     162:21 (p 3.6e-28) · 97:18 (p 2.8e-14) · 61:13 (p 1.4e-08)  pooled 320:52 -> (i) 3/3 (powered True); F -3 dB 1794; abs gap 470; R_X 0.452 [0.425, 0.480]
+      ALDv-pilot           +3/+6/+9     145:19 (p 3.3e-25) · 78:15 (p 1.9e-11) · 36:13 (p 0.0014)  pooled 259:47 -> (i) 3/3 (powered True); F -3 dB 1829; abs gap 505; R_X 0.470 [0.444, 0.498]
+    SUMMARY-B: k𝔅 12, m𝔅 0, undecided 0; b* -> V1 recomputed (i) vs §0 (i) same; X* = M-ours-bstar (F 1371; runner-up M-ours-bstar-scalar F 1388); R_X* 0.076 [0.046, 0.106]; '전부' sentence (orig b* (i), k𝔅 = 12, m𝔅 = 0, R_X* defined & lower > 0): MET; main label (D2 C2 only) (A)
+
+  [DOPbU28] files base 448 XL 448 XP 448 XA 448; run|git base ['063f3bcb'] XL ['e7c9f4a7'] XP ['e7c9f4a7'] XA ['e7c9f4a7']; meta|doppler 'nu=0.01 per symbol, pe'; ckpt id (base) 6f3a1b9490864af1; meta fingerprint equal {'meta|ntrain': True, 'meta|bstar': True, 'meta|kron_K': True, 'meta|em_sec': True, 'meta|ll_val|kron': True, 'meta|stagec_ckpt_id': True}
+    ALD est prov git e7c9f4a7 ald.py f1da04d1e91e0baf ckpt 6f3a1b9490864af1; est sha256[:16] 6cf312b09a56ddfc; test NMSE dB -6.34 -8.53 -10.93 -13.29 -15.60 -17.64 -19.41; dev -6.3 -8.5 -11.1 -13.3 -15.7 -17.6 -19.4; max |test - dev| 0.13 dB
+    integrity (grid, holes, one clean commit per raw [orig 063f3bcb / new e7c9f4a7], meta doppler/rotation = base, fingerprint, arm sets disjoint, genie 4 keys XL/XP/XA = base, n 2560, PIL/ALD raised 0, pilot@1 = loop@1, ALD estimate fixed = precomputed, ALD ckpt/condition = base): OK
+    -3 dB genie 1342 · V1 1614 -> genie >= V1 guard not fired
+      M-ours-bstar         +9/+12/+15   64:51 (p 0.26) · 70:46 (p 0.032) · 58:50 (p 0.5)  pooled 192:147 -> (iii) 1/3 (powered True); F -3 dB 1638; abs gap 24; R_X 0.081 [0.019, 0.140]
+      M-ours-bstar-scalar  +9/+12/+15   90:43 (p 5.6e-05) · 90:41 (p 2.2e-05) · 81:50 (p 0.0085)  pooled 261:134 -> (i) 3/3 (powered True); F -3 dB 1643; abs gap 29; R_X 0.096 [0.027, 0.163]
+      M-ours-gmm32         +9/+12/+15   100:38 (p 1.3e-07) · 84:38 (p 3.8e-05) · 65:50 (p 0.19)  pooled 249:126 -> (i) 2/3 (powered True); F -3 dB 1680; abs gap 66; R_X 0.195 [0.139, 0.252]
+      R0-pilot@1           +9/+12/+15   566:2 (p 3.3e-166) · 510:3 (p 1.7e-147) · 446:5 (p 5.3e-125)  pooled 1522:10 -> (i) 3/3 (powered True); F -3 dB 2353; abs gap 739; R_X undefined; abs 739
+      R1-turbo             +9/+12/+15   266:17 (p 1.1e-58) · 208:25 (p 4.3e-37) · 186:36 (p 1.4e-25)  pooled 660:78 -> (i) 3/3 (powered True); F -3 dB 2101; abs gap 487; R_X 0.642 [0.604, 0.680]
+      R2-ours-G            +9/+12/+15   141:32 (p 1.6e-17) · 115:56 (p 7.6e-06) · 95:62 (p 0.01)  pooled 351:150 -> (i) 3/3 (powered True); F -3 dB 1767; abs gap 153; R_X 0.360 [0.302, 0.415]
+      R3-bigamp            +9/+12/+15   604:16 (p 8.8e-156) · 734:26 (p 4.4e-181) · 778:40 (p 1.8e-178)  pooled 2116:82 -> (i) 3/3 (powered True); F -3 dB 2093; abs gap 479; R_X 0.638 [0.600, 0.676]
+      R4-llr               +9/+12/+15   1069:5 (p 1.2e-310) · 984:5 (p 3e-285) · 878:8 (p 3.6e-248)  pooled 2931:18 -> (i) 3/3 (powered True); F -3 dB 2429; abs gap 815; R_X undefined; abs 815
+      R4-scvamp            +9/+12/+15   560:5 (p 7.9e-159) · 471:9 (p 2.3e-126) · 453:12 (p 4e-117)  pooled 1484:26 -> (i) 3/3 (powered True); F -3 dB 2218; abs gap 604; R_X 0.689 [0.656, 0.723]
+      bstar-pilot          +9/+12/+15   252:32 (p 1.5e-43) · 235:28 (p 6.5e-42) · 238:46 (p 2.2e-32)  pooled 725:106 -> (i) 3/3 (powered True); F -3 dB 2055; abs gap 441; R_X 0.619 [0.578, 0.659]
+      V1-pilot             +9/+12/+15   214:21 (p 1.9e-41) · 202:29 (p 4.3e-33) · 188:37 (p 1.6e-25)  pooled 604:87 -> (i) 3/3 (powered True); F -3 dB 2036; abs gap 422; R_X 0.608 [0.568, 0.649]
+      ALD-pilot            +9/+12/+15   275:19 (p 2.4e-59) · 260:24 (p 3.2e-51) · 260:35 (p 1.2e-43)  pooled 795:78 -> (i) 3/3 (powered True); F -3 dB 2083; abs gap 469; R_X 0.633 [0.593, 0.671]
+      ALDv-pilot           +9/+12/+15   246:29 (p 5e-44) · 220:43 (p 8.4e-30) · 210:48 (p 2.4e-25)  pooled 676:120 -> (i) 3/3 (powered True); F -3 dB 2115; abs gap 501; R_X 0.648 [0.610, 0.686]
+    SUMMARY-B: k𝔅 12, m𝔅 0, undecided 0; b* -> V1 recomputed (iii) vs §0 (iii) same; X* = M-ours-bstar (F 1638; runner-up M-ours-bstar-scalar F 1643); R_X* 0.081 [0.019, 0.140]; '전부' sentence (orig b* (i), k𝔅 = 12, m𝔅 = 0, R_X* defined & lower > 0): NOT met; main label (D2 C2 only) (A)
+
+  [ROTaU28] files base 448 XL 448 XP 448 XA 448; run|git base ['a4cbd184'] XL ['e7c9f4a7'] XP ['e7c9f4a7'] XA ['e7c9f4a7']; meta|rotation 'deg=15.0: receive (BS)'; ckpt id (base) 6f3a1b9490864af1; meta fingerprint equal {'meta|ntrain': True, 'meta|bstar': True, 'meta|kron_K': True, 'meta|em_sec': True, 'meta|ll_val|kron': True, 'meta|stagec_ckpt_id': True}
+    ALD est prov git e7c9f4a7 ald.py f1da04d1e91e0baf ckpt 6f3a1b9490864af1; est sha256[:16] 894813b99bc1208b; test NMSE dB -6.38 -8.65 -11.18 -13.77 -16.50 -19.22 -21.94; dev -6.4 -8.6 -11.4 -13.8 -16.7 -19.1 -21.9; max |test - dev| 0.17 dB
+    integrity (grid, holes, one clean commit per raw [orig a4cbd184 / new e7c9f4a7], meta doppler/rotation = base, fingerprint, arm sets disjoint, genie 4 keys XL/XP/XA = base, n 2560, PIL/ALD raised 0, pilot@1 = loop@1, ALD estimate fixed = precomputed, ALD ckpt/condition = base): OK
+    -3 dB genie 630 · V1 1261 -> genie >= V1 guard not fired
+      M-ours-bstar         +3/+6/+9     90:20 (p 8.6e-12) · 54:31 (p 0.017) · 40:8 (p 3.3e-06)  pooled 184:59 -> (i) 3/3 (powered True); F -3 dB 1317; abs gap 56; R_X 0.082 [0.052, 0.109]
+      M-ours-bstar-scalar  +3/+6/+9     106:22 (p 2.2e-14) · 62:26 (p 0.00016) · 51:5 (p 1.2e-10)  pooled 219:53 -> (i) 3/3 (powered True); F -3 dB 1324; abs gap 63; R_X 0.091 [0.061, 0.117]
+      M-ours-gmm32         +3/+6/+9     142:17 (p 9.5e-26) · 82:20 (p 4.3e-10) · 66:10 (p 3e-11)  pooled 290:47 -> (i) 3/3 (powered True); F -3 dB 1358; abs gap 97; R_X 0.133 [0.101, 0.161]
+      R0-pilot@1           +9/+12/+15   357:0 (p 6.8e-108) · 220:1 (p 1.3e-64) · 125:0 (p 4.7e-38)  pooled 702:1 -> (i) 3/3 (powered True); F -3 dB 2182; abs gap 921; R_X 0.593 [0.572, 0.614]
+      R1-turbo             +6/+9/+12    236:11 (p 3.9e-56) · 149:8 (p 8.8e-35) · 74:8 (p 1.6e-14)  pooled 459:27 -> (i) 3/3 (powered True); F -3 dB 1832; abs gap 571; R_X 0.475 [0.450, 0.498]
+      R2-ours-G            +3/+6/+9     209:15 (p 6.8e-45) · 129:16 (p 3.9e-23) · 100:9 (p 1.4e-20)  pooled 438:40 -> (i) 3/3 (powered True); F -3 dB 1504; abs gap 243; R_X 0.278 [0.248, 0.306]
+      R3-bigamp            +6/+9/+12    544:1 (p 9.5e-162) · 607:1 (p 1.1e-180) · 742:0 (p 8.6e-224)  pooled 1893:2 -> (i) 3/3 (powered True); F -3 dB 1893; abs gap 632; R_X 0.500 [0.476, 0.524]
+      R4-llr               +9/+12/+15   865:0 (p 8.1e-261) · 651:0 (p 2.1e-196) · 495:0 (p 2e-149)  pooled 2011:0 -> (i) 3/3 (powered True); F -3 dB 2347; abs gap 1086; R_X undefined; abs 1086
+      R4-scvamp            +9/+12/+15   321:0 (p 4.7e-97) · 201:0 (p 6.2e-61) · 123:0 (p 1.9e-37)  pooled 645:0 -> (i) 3/3 (powered True); F -3 dB 1975; abs gap 714; R_X 0.531 [0.507, 0.553]
+      bstar-pilot          +3/+6/+9     142:13 (p 1.4e-28) · 77:23 (p 5.5e-08) · 51:10 (p 9.6e-08)  pooled 270:46 -> (i) 3/3 (powered True); F -3 dB 1636; abs gap 375; R_X 0.373 [0.345, 0.398]
+      V1-pilot             +3/+6/+9     78:13 (p 1.8e-12) · 38:11 (p 0.00014) · 17:4 (p 0.0072)  pooled 133:28 -> (i) 3/3 (powered True); F -3 dB 1596; abs gap 335; R_X 0.347 [0.319, 0.372]
+      ALD-pilot            +3/+6/+9     149:15 (p 6.3e-29) · 65:19 (p 4.7e-07) · 40:13 (p 0.00027)  pooled 254:47 -> (i) 3/3 (powered True); F -3 dB 1689; abs gap 428; R_X 0.404 [0.376, 0.431]
+      ALDv-pilot           +3/+6/+9     128:16 (p 7e-23) · 64:16 (p 5.9e-08) · 32:10 (p 0.00094)  pooled 224:42 -> (i) 3/3 (powered True); F -3 dB 1741; abs gap 480; R_X 0.432 [0.405, 0.457]
+    SUMMARY-B: k𝔅 12, m𝔅 0, undecided 0; b* -> V1 recomputed (i) vs §0 (i) same; X* = M-ours-bstar (F 1317; runner-up M-ours-bstar-scalar F 1324); R_X* 0.082 [0.052, 0.109]; '전부' sentence (orig b* (i), k𝔅 = 12, m𝔅 = 0, R_X* defined & lower > 0): MET; main label (D2 C2 only) (A)
+
+  [ROTbU28] files base 448 XL 448 XP 448 XA 448; run|git base ['a4cbd184'] XL ['e7c9f4a7'] XP ['e7c9f4a7'] XA ['e7c9f4a7']; meta|rotation 'deg=30.0: receive (BS)'; ckpt id (base) 6f3a1b9490864af1; meta fingerprint equal {'meta|ntrain': True, 'meta|bstar': True, 'meta|kron_K': True, 'meta|em_sec': True, 'meta|ll_val|kron': True, 'meta|stagec_ckpt_id': True}
+    ALD est prov git e7c9f4a7 ald.py f1da04d1e91e0baf ckpt 6f3a1b9490864af1; est sha256[:16] 3dcefb8d3d880677; test NMSE dB -6.48 -8.78 -11.31 -13.92 -16.58 -19.35 -22.02; dev -6.4 -8.7 -11.4 -13.9 -16.7 -19.2 -22.0; max |test - dev| 0.15 dB
+    integrity (grid, holes, one clean commit per raw [orig a4cbd184 / new e7c9f4a7], meta doppler/rotation = base, fingerprint, arm sets disjoint, genie 4 keys XL/XP/XA = base, n 2560, PIL/ALD raised 0, pilot@1 = loop@1, ALD estimate fixed = precomputed, ALD ckpt/condition = base): OK
+    -3 dB genie 721 · V1 1364 -> genie >= V1 guard not fired
+      M-ours-bstar         +3/+6/+9     100:24 (p 3.2e-12) · 90:26 (p 1.9e-09) · 55:24 (p 0.00064)  pooled 245:74 -> (i) 3/3 (powered True); F -3 dB 1389; abs gap 25; R_X 0.037 [0.008, 0.066]
+      M-ours-bstar-scalar  +3/+6/+9     111:35 (p 2.1e-10) · 105:14 (p 2e-18) · 56:22 (p 0.00015)  pooled 272:71 -> (i) 3/3 (powered True); F -3 dB 1422; abs gap 58; R_X 0.083 [0.055, 0.110]
+      M-ours-gmm32         +3/+6/+9     146:26 (p 1.8e-21) · 117:23 (p 2.3e-16) · 68:21 (p 6e-07)  pooled 331:70 -> (i) 3/3 (powered True); F -3 dB 1437; abs gap 73; R_X 0.102 [0.071, 0.132]
+      R0-pilot@1           +9/+12/+15   403:0 (p 9.7e-122) · 286:0 (p 1.6e-86) · 183:1 (p 1.5e-53)  pooled 872:1 -> (i) 3/3 (powered True); F -3 dB 2193; abs gap 829; R_X 0.563 [0.542, 0.585]
+      R1-turbo             +6/+9/+12    286:9 (p 1.3e-72) · 166:13 (p 5.6e-35) · 87:2 (p 1.3e-23)  pooled 539:24 -> (i) 3/3 (powered True); F -3 dB 1897; abs gap 533; R_X 0.453 [0.428, 0.479]
+      R2-ours-G            +6/+9/+12    167:19 (p 9.6e-31) · 105:15 (p 8.3e-18) · 60:5 (p 4.9e-13)  pooled 332:39 -> (i) 3/3 (powered True); F -3 dB 1596; abs gap 232; R_X 0.265 [0.236, 0.295]
+      R3-bigamp            +6/+9/+12    614:7 (p 1.6e-171) · 645:2 (p 7.2e-190) · 789:0 (p 6.1e-238)  pooled 2048:9 -> (i) 3/3 (powered True); F -3 dB 1942; abs gap 578; R_X 0.473 [0.448, 0.498]
+      R4-llr               +9/+12/+15   959:3 (p 7.6e-282) · 786:3 (p 5e-230) · 597:0 (p 3.9e-180)  pooled 2342:6 -> (i) 3/3 (powered True); F -3 dB 2377; abs gap 1013; R_X undefined; abs 1013
+      R4-scvamp            +9/+12/+15   388:4 (p 1.9e-109) · 292:2 (p 2.7e-84) · 203:1 (p 1.6e-59)  pooled 883:7 -> (i) 3/3 (powered True); F -3 dB 2042; abs gap 678; R_X 0.513 [0.490, 0.537]
+      bstar-pilot          +3/+6/+9     147:18 (p 2.4e-26) · 120:25 (p 4.4e-16) · 61:25 (p 0.00013)  pooled 328:68 -> (i) 3/3 (powered True); F -3 dB 1700; abs gap 336; R_X 0.343 [0.316, 0.371]
+      V1-pilot             +3/+6/+9     91:11 (p 8e-17) · 43:19 (p 0.0032) · 19:6 (p 0.015)  pooled 153:36 -> (i) 3/3 (powered True); F -3 dB 1664; abs gap 300; R_X 0.318 [0.291, 0.346]
+      ALD-pilot            +3/+6/+9     146:22 (p 1.2e-23) · 85:20 (p 1e-10) · 45:11 (p 5.4e-06)  pooled 276:53 -> (i) 3/3 (powered True); F -3 dB 1743; abs gap 379; R_X 0.371 [0.343, 0.399]
+      ALDv-pilot           +3/+6/+9     128:29 (p 4.8e-16) · 70:19 (p 5e-08) · 28:12 (p 0.017)  pooled 226:60 -> (i) 3/3 (powered True); F -3 dB 1787; abs gap 423; R_X 0.397 [0.370, 0.424]
+    SUMMARY-B: k𝔅 12, m𝔅 0, undecided 0; b* -> V1 recomputed (i) vs §0 (i) same; X* = M-ours-bstar (F 1389; runner-up M-ours-bstar-scalar F 1422); R_X* 0.037 [0.008, 0.066]; '전부' sentence (orig b* (i), k𝔅 = 12, m𝔅 = 0, R_X* defined & lower > 0): MET; main label (D2 C2 only) (A)
+
+  [DOPaMX] files base 448 XL 448 XP 448 XA 448; run|git base ['063f3bcb'] XL ['e7c9f4a7'] XP ['e7c9f4a7'] XA ['e7c9f4a7']; meta|doppler 'nu=0.005 per symbol, p'; ckpt id (base) b591ae24ae3c5f31; meta fingerprint equal {'meta|ntrain': True, 'meta|bstar': True, 'meta|kron_K': True, 'meta|em_sec': True, 'meta|ll_val|kron': True, 'meta|stagec_ckpt_id': True}
+    ALD est prov git e7c9f4a7 ald.py f1da04d1e91e0baf ckpt b591ae24ae3c5f31; est sha256[:16] 8d17e254a9ae45b8; test NMSE dB -6.26 -8.62 -11.20 -14.02 -16.61 -19.01 -21.32; dev -6.4 -8.6 -11.2 -13.8 -16.5 -18.9 -21.2; max |test - dev| 0.26 dB
+    integrity (grid, holes, one clean commit per raw [orig 063f3bcb / new e7c9f4a7], meta doppler/rotation = base, fingerprint, arm sets disjoint, genie 4 keys XL/XP/XA = base, n 2560, PIL/ALD raised 0, pilot@1 = loop@1, ALD estimate fixed = precomputed, ALD ckpt/condition = base): OK
+    -3 dB genie 891 · V1 1431 -> genie >= V1 guard not fired
+      M-ours-bstar         +3/+6/+9     99:51 (p 0.00011) · 71:18 (p 1.3e-08) · 63:21 (p 5e-06)  pooled 233:90 -> (i) 3/3 (powered True); F -3 dB 1501; abs gap 70; R_X 0.115 [0.081, 0.149]
+      M-ours-bstar-scalar  +6/+9/+12    93:25 (p 2.1e-10) · 64:19 (p 7.4e-07) · 59:15 (p 2.6e-07)  pooled 216:59 -> (i) 3/3 (powered True); F -3 dB 1521; abs gap 90; R_X 0.143 [0.110, 0.178]
+      M-ours-gmm32         +6/+9/+12    127:20 (p 3.1e-20) · 88:21 (p 6.1e-11) · 53:15 (p 4.1e-06)  pooled 268:56 -> (i) 3/3 (powered True); F -3 dB 1549; abs gap 118; R_X 0.179 [0.144, 0.214]
+      R0-pilot@1           +9/+12/+15   596:1 (p 2.3e-177) · 452:2 (p 4.4e-132) · 318:1 (p 6e-94)  pooled 1366:4 -> (i) 3/3 (powered True); F -3 dB 2320; abs gap 889; R_X undefined; abs 889
+      R1-turbo             +9/+12/+15   235:15 (p 5.5e-52) · 155:13 (p 4.9e-32) · 107:8 (p 3.1e-23)  pooled 497:36 -> (i) 3/3 (powered True); F -3 dB 2012; abs gap 581; R_X 0.518 [0.494, 0.544]
+      R2-ours-G            +6/+9/+12    201:19 (p 1.6e-39) · 142:20 (p 7.4e-24) · 100:15 (p 1.4e-16)  pooled 443:54 -> (i) 3/3 (powered True); F -3 dB 1688; abs gap 257; R_X 0.322 [0.291, 0.355]
+      R3-bigamp            +9/+12/+15   685:11 (p 2.7e-186) · 767:4 (p 2.4e-222) · 803:5 (p 3.3e-231)  pooled 2255:20 -> (i) 3/3 (powered True); F -3 dB 2053; abs gap 622; R_X 0.535 [0.511, 0.562]
+      R4-llr               +9/+12/+15   1216:2 (p 0) · 1048:5 (p 2.2e-304) · 830:2 (p 2.4e-245)  pooled 3094:9 -> (i) 3/3 (powered True); F -3 dB 2387; abs gap 956; R_X undefined; abs 956
+      R4-scvamp            +9/+12/+15   576:2 (p 3.4e-169) · 457:3 (p 1.1e-131) · 354:3 (p 5.2e-101)  pooled 1387:8 -> (i) 3/3 (powered True); F -3 dB 2143; abs gap 712; R_X 0.569 [0.545, 0.593]
+      bstar-pilot          +6/+9/+12    137:21 (p 4.7e-22) · 87:27 (p 1.5e-08) · 83:12 (p 3.2e-14)  pooled 307:60 -> (i) 3/3 (powered True); F -3 dB 1850; abs gap 419; R_X 0.437 [0.409, 0.466]
+      V1-pilot             +6/+9/+12    66:15 (p 8.6e-09) · 45:9 (p 7.3e-07) · 36:3 (p 3.6e-08)  pooled 147:27 -> (i) 3/3 (powered True); F -3 dB 1798; abs gap 367; R_X 0.405 [0.377, 0.434]
+      ALD-pilot            +6/+9/+12    128:15 (p 1.5e-23) · 79:12 (p 3e-13) · 88:10 (p 9.9e-17)  pooled 295:37 -> (i) 3/3 (powered True); F -3 dB 1917; abs gap 486; R_X 0.474 [0.447, 0.502]
+      ALDv-pilot           +6/+9/+12    100:21 (p 1.6e-13) · 64:16 (p 5.9e-08) · 55:7 (p 2.4e-10)  pooled 219:44 -> (i) 3/3 (powered True); F -3 dB 1951; abs gap 520; R_X 0.491 [0.465, 0.518]
+    SUMMARY-B: k𝔅 12, m𝔅 0, undecided 0; b* -> V1 recomputed (i) vs §0 (i) same; X* = M-ours-bstar (F 1501; runner-up M-ours-bstar-scalar F 1521); R_X* 0.115 [0.081, 0.149]; '전부' sentence (orig b* (i), k𝔅 = 12, m𝔅 = 0, R_X* defined & lower > 0): MET; main label (D2 C2 only) (A)
+
+  [DOPbMX] files base 448 XL 448 XP 448 XA 448; run|git base ['063f3bcb'] XL ['e7c9f4a7'] XP ['e7c9f4a7'] XA ['e7c9f4a7']; meta|doppler 'nu=0.01 per symbol, pe'; ckpt id (base) b591ae24ae3c5f31; meta fingerprint equal {'meta|ntrain': True, 'meta|bstar': True, 'meta|kron_K': True, 'meta|em_sec': True, 'meta|ll_val|kron': True, 'meta|stagec_ckpt_id': True}
+    ALD est prov git e7c9f4a7 ald.py f1da04d1e91e0baf ckpt b591ae24ae3c5f31; est sha256[:16] d67c75250b12f2ab; test NMSE dB -6.22 -8.53 -11.00 -13.64 -15.89 -17.82 -19.44; dev -6.4 -8.5 -11.0 -13.4 -15.8 -17.7 -19.3; max |test - dev| 0.26 dB
+    integrity (grid, holes, one clean commit per raw [orig 063f3bcb / new e7c9f4a7], meta doppler/rotation = base, fingerprint, arm sets disjoint, genie 4 keys XL/XP/XA = base, n 2560, PIL/ALD raised 0, pilot@1 = loop@1, ALD estimate fixed = precomputed, ALD ckpt/condition = base): OK
+    -3 dB genie 1483 · V1 1697 -> genie >= V1 guard not fired
+      M-ours-bstar         +9/+12/+15   94:51 (p 0.00045) · 89:46 (p 0.00027) · 78:67 (p 0.41)  pooled 261:164 -> (i) 2/3 (powered True); F -3 dB 1749; abs gap 52; R_X 0.195 [0.119, 0.277]
+      M-ours-bstar-scalar  +9/+12/+15   123:49 (p 1.6e-08) · 131:47 (p 2.3e-10) · 123:75 (p 0.00079)  pooled 377:171 -> (i) 3/3 (powered True); F -3 dB 1789; abs gap 92; R_X 0.301 [0.230, 0.376]
+      M-ours-gmm32         +9/+12/+15   123:63 (p 1.3e-05) · 120:61 (p 1.4e-05) · 107:70 (p 0.0066)  pooled 350:194 -> (i) 3/3 (powered True); F -3 dB 1781; abs gap 84; R_X 0.282 [0.207, 0.359]
+      R0-pilot@1           +9/+12/+15   766:3 (p 4.9e-224) · 668:6 (p 3.3e-189) · 641:4 (p 9.8e-185)  pooled 2075:13 -> (i) 3/3 (powered True); F -3 dB 2426; abs gap 729; R_X undefined; abs 729
+      R1-turbo             +9/+12/+15   351:33 (p 3e-68) · 298:30 (p 1.2e-56) · 289:35 (p 7.1e-51)  pooled 938:98 -> (i) 3/3 (powered True); F -3 dB 2184; abs gap 487; R_X 0.695 [0.655, 0.738]
+      R2-ours-G            +9/+12/+15   183:74 (p 7.9e-12) · 157:61 (p 6.1e-11) · 146:78 (p 6.5e-06)  pooled 486:213 -> (i) 3/3 (powered True); F -3 dB 1899; abs gap 202; R_X 0.486 [0.428, 0.550]
+      R3-bigamp            +6/+9/+12    572:31 (p 5.5e-130) · 672:34 (p 6.8e-155) · 750:34 (p 8.6e-177)  pooled 1994:99 -> (i) 3/3 (powered True); F -3 dB 2210; abs gap 513; R_X 0.706 [0.665, 0.749]
+      R4-llr               +9/+12/+15   1248:12 (p 0) · 1116:9 (p 0) · 1072:15 (p 0)  pooled 3436:36 -> (i) 3/3 (powered True); F -3 dB 2448; abs gap 751; R_X undefined; abs 751
+      R4-scvamp            +9/+12/+15   739:11 (p 3.4e-202) · 646:11 (p 7.7e-175) · 621:10 (p 5.9e-169)  pooled 2006:32 -> (i) 3/3 (powered True); F -3 dB 2278; abs gap 581; R_X 0.731 [0.694, 0.770]
+      bstar-pilot          +9/+12/+15   300:24 (p 7.7e-62) · 279:34 (p 5.1e-49) · 286:56 (p 2.7e-38)  pooled 865:114 -> (i) 3/3 (powered True); F -3 dB 2133; abs gap 436; R_X 0.671 [0.630, 0.717]
+      V1-pilot             +9/+12/+15   262:29 (p 4.3e-48) · 229:22 (p 1.3e-44) · 262:49 (p 2.5e-36)  pooled 753:100 -> (i) 3/3 (powered True); F -3 dB 2089; abs gap 392; R_X 0.647 [0.604, 0.694]
+      ALD-pilot            +9/+12/+15   338:28 (p 9.9e-69) · 320:21 (p 7.7e-70) · 355:45 (p 7e-61)  pooled 1013:94 -> (i) 3/3 (powered True); F -3 dB 2172; abs gap 475; R_X 0.689 [0.649, 0.734]
+      ALDv-pilot           +9/+12/+15   289:31 (p 1.3e-53) · 247:28 (p 5.9e-45) · 284:52 (p 7.9e-40)  pooled 820:111 -> (i) 3/3 (powered True); F -3 dB 2192; abs gap 495; R_X 0.698 [0.659, 0.742]
+    SUMMARY-B: k𝔅 12, m𝔅 0, undecided 0; b* -> V1 recomputed (i) vs §0 (i) same; X* = M-ours-bstar (F 1749; runner-up M-ours-gmm32 F 1781); R_X* 0.195 [0.119, 0.277]; '전부' sentence (orig b* (i), k𝔅 = 12, m𝔅 = 0, R_X* defined & lower > 0): MET; main label (D2 C2 only) (A)
+
+  [ROTaMX] files base 448 XL 448 XP 448 XA 448; run|git base ['a4cbd184'] XL ['e7c9f4a7'] XP ['e7c9f4a7'] XA ['e7c9f4a7']; meta|rotation 'deg=15.0: receive (BS)'; ckpt id (base) b591ae24ae3c5f31; meta fingerprint equal {'meta|ntrain': True, 'meta|bstar': True, 'meta|kron_K': True, 'meta|em_sec': True, 'meta|ll_val|kron': True, 'meta|stagec_ckpt_id': True}
+    ALD est prov git e7c9f4a7 ald.py f1da04d1e91e0baf ckpt b591ae24ae3c5f31; est sha256[:16] 780c608b0068b1a6; test NMSE dB -6.22 -8.70 -11.35 -14.15 -16.86 -19.55 -22.24; dev -6.4 -8.5 -11.4 -14.0 -16.8 -19.5 -22.1; max |test - dev| 0.21 dB
+    integrity (grid, holes, one clean commit per raw [orig a4cbd184 / new e7c9f4a7], meta doppler/rotation = base, fingerprint, arm sets disjoint, genie 4 keys XL/XP/XA = base, n 2560, PIL/ALD raised 0, pilot@1 = loop@1, ALD estimate fixed = precomputed, ALD ckpt/condition = base): OK
+    -3 dB genie 671 · V1 1400 -> genie >= V1 guard not fired
+      M-ours-bstar         +3/+6/+9     90:26 (p 1.9e-09) · 70:23 (p 1.1e-06) · 44:18 (p 0.0013)  pooled 204:67 -> (i) 3/3 (powered True); F -3 dB 1460; abs gap 60; R_X 0.076 [0.050, 0.100]
+      M-ours-bstar-scalar  +3/+6/+9     108:32 (p 7.8e-11) · 80:24 (p 3.2e-08) · 45:21 (p 0.0043)  pooled 233:77 -> (i) 3/3 (powered True); F -3 dB 1472; abs gap 72; R_X 0.090 [0.062, 0.118]
+      M-ours-gmm32         +3/+6/+9     136:41 (p 4.2e-13) · 104:26 (p 3e-12) · 71:19 (p 3.1e-08)  pooled 311:86 -> (i) 3/3 (powered True); F -3 dB 1504; abs gap 104; R_X 0.125 [0.098, 0.153]
+      R0-pilot@1           +9/+12/+15   539:2 (p 4.1e-158) · 404:0 (p 4.8e-122) · 226:0 (p 1.9e-68)  pooled 1169:2 -> (i) 3/3 (powered True); F -3 dB 2282; abs gap 882; R_X 0.547 [0.527, 0.568]
+      R1-turbo             +6/+9/+12    346:11 (p 1.8e-87) · 214:15 (p 3e-46) · 134:1 (p 6.2e-39)  pooled 694:27 -> (i) 3/3 (powered True); F -3 dB 1983; abs gap 583; R_X 0.444 [0.420, 0.469]
+      R2-ours-G            +6/+9/+12    210:16 (p 2.6e-44) · 134:16 (p 2.2e-24) · 97:1 (p 6.2e-28)  pooled 441:33 -> (i) 3/3 (powered True); F -3 dB 1692; abs gap 292; R_X 0.286 [0.259, 0.313]
+      R3-bigamp            +6/+9/+15    616:1 (p 2.3e-183) · 686:2 (p 3.7e-202) · 795:1 (p 3.8e-237)  pooled 2097:4 -> (i) 3/3 (powered True); F -3 dB 2037; abs gap 637; R_X 0.466 [0.442, 0.490]
+      R4-llr               +9/+12/+15   1144:5 (p 0) · 954:2 (p 1.5e-282) · 735:0 (p 1.1e-221)  pooled 2833:7 -> (i) 3/3 (powered True); F -3 dB 2390; abs gap 990; R_X undefined; abs 990
+      R4-scvamp            +9/+12/+15   524:4 (p 7.3e-150) · 392:1 (p 3.9e-116) · 261:0 (p 5.4e-79)  pooled 1177:5 -> (i) 3/3 (powered True); F -3 dB 2114; abs gap 714; R_X 0.495 [0.473, 0.517]
+      bstar-pilot          +3/+6/+9     160:27 (p 3.4e-24) · 95:23 (p 1.4e-11) · 53:15 (p 4.1e-06)  pooled 308:65 -> (i) 3/3 (powered True); F -3 dB 1774; abs gap 374; R_X 0.339 [0.314, 0.363]
+      V1-pilot             +3/+6/+9     91:17 (p 2.1e-13) · 41:7 (p 6.2e-07) · 21:11 (p 0.11)  pooled 153:35 -> (i) 2/3 (powered True); F -3 dB 1709; abs gap 309; R_X 0.298 [0.273, 0.321]
+      ALD-pilot            +3/+6/+9     150:27 (p 7.1e-22) · 86:18 (p 8.2e-12) · 50:20 (p 0.00044)  pooled 286:65 -> (i) 3/3 (powered True); F -3 dB 1800; abs gap 400; R_X 0.354 [0.328, 0.380]
+      ALDv-pilot           +3/+6/+9     122:24 (p 5.3e-17) · 64:16 (p 5.9e-08) · 30:14 (p 0.023)  pooled 216:54 -> (i) 3/3 (powered True); F -3 dB 1868; abs gap 468; R_X 0.391 [0.366, 0.415]
+    SUMMARY-B: k𝔅 12, m𝔅 0, undecided 0; b* -> V1 recomputed (i) vs §0 (i) same; X* = M-ours-bstar (F 1460; runner-up M-ours-bstar-scalar F 1472); R_X* 0.076 [0.050, 0.100]; '전부' sentence (orig b* (i), k𝔅 = 12, m𝔅 = 0, R_X* defined & lower > 0): MET; main label (D2 C2 only) (A)
+
+  [ROTbMX] files base 448 XL 448 XP 448 XA 448; run|git base ['a4cbd184'] XL ['e7c9f4a7'] XP ['e7c9f4a7'] XA ['e7c9f4a7']; meta|rotation 'deg=30.0: receive (BS)'; ckpt id (base) b591ae24ae3c5f31; meta fingerprint equal {'meta|ntrain': True, 'meta|bstar': True, 'meta|kron_K': True, 'meta|em_sec': True, 'meta|ll_val|kron': True, 'meta|stagec_ckpt_id': True}
+    ALD est prov git e7c9f4a7 ald.py f1da04d1e91e0baf ckpt b591ae24ae3c5f31; est sha256[:16] d7c8ac1ae57d8fe0; test NMSE dB -6.32 -8.79 -11.51 -14.31 -16.97 -19.68 -22.33; dev -6.5 -8.6 -11.5 -14.0 -16.9 -19.6 -22.2; max |test - dev| 0.26 dB
+    integrity (grid, holes, one clean commit per raw [orig a4cbd184 / new e7c9f4a7], meta doppler/rotation = base, fingerprint, arm sets disjoint, genie 4 keys XL/XP/XA = base, n 2560, PIL/ALD raised 0, pilot@1 = loop@1, ALD estimate fixed = precomputed, ALD ckpt/condition = base): OK
+    -3 dB genie 802 · V1 1495 -> genie >= V1 guard not fired
+      M-ours-bstar         +6/+9/+12    85:27 (p 3.6e-08) · 53:20 (p 0.00014) · 58:10 (p 2.4e-09)  pooled 196:57 -> (i) 3/3 (powered True); F -3 dB 1540; abs gap 45; R_X 0.061 [0.034, 0.087]
+      M-ours-bstar-scalar  +6/+9/+12    101:25 (p 5e-12) · 75:18 (p 1.9e-09) · 65:10 (p 5.2e-11)  pooled 241:53 -> (i) 3/3 (powered True); F -3 dB 1540; abs gap 45; R_X 0.061 [0.032, 0.088]
+      M-ours-gmm32         +6/+9/+12    146:29 (p 5.6e-20) · 88:17 (p 1e-12) · 72:13 (p 4.6e-11)  pooled 306:59 -> (i) 3/3 (powered True); F -3 dB 1599; abs gap 104; R_X 0.130 [0.102, 0.157]
+      R0-pilot@1           +9/+12/+15   589:1 (p 2.9e-175) · 453:0 (p 8.6e-137) · 319:0 (p 1.9e-96)  pooled 1361:1 -> (i) 3/3 (powered True); F -3 dB 2285; abs gap 790; R_X 0.533 [0.511, 0.554]
+      R1-turbo             +9/+12/+15   261:9 (p 2e-65) · 182:10 (p 5e-42) · 98:3 (p 1.4e-25)  pooled 541:22 -> (i) 3/3 (powered True); F -3 dB 1996; abs gap 501; R_X 0.420 [0.396, 0.443]
+      R2-ours-G            +6/+9/+12    245:22 (p 8.2e-49) · 144:8 (p 2.2e-33) · 113:14 (p 2.1e-20)  pooled 502:44 -> (i) 3/3 (powered True); F -3 dB 1738; abs gap 243; R_X 0.260 [0.231, 0.286]
+      R3-bigamp            +6/+9/+15    624:4 (p 1.2e-179) · 710:4 (p 2.5e-205) · 878:0 (p 9.9e-265)  pooled 2212:8 -> (i) 3/3 (powered True); F -3 dB 2079; abs gap 584; R_X 0.457 [0.434, 0.481]
+      R4-llr               +9/+12/+15   1220:2 (p 0) · 1017:2 (p 1.9e-301) · 816:0 (p 4.6e-246)  pooled 3053:4 -> (i) 3/3 (powered True); F -3 dB 2397; abs gap 902; R_X undefined; abs 902
+      R4-scvamp            +9/+12/+15   577:2 (p 1.7e-169) · 432:3 (p 3.1e-124) · 329:1 (p 3e-97)  pooled 1338:6 -> (i) 3/3 (powered True); F -3 dB 2110; abs gap 615; R_X 0.470 [0.447, 0.493]
+      bstar-pilot          +6/+9/+12    116:25 (p 3.3e-15) · 80:17 (p 6e-11) · 70:10 (p 3.2e-12)  pooled 266:52 -> (i) 3/3 (powered True); F -3 dB 1788; abs gap 293; R_X 0.297 [0.272, 0.322]
+      V1-pilot             +3/+6/+9     93:16 (p 2.2e-14) · 41:15 (p 0.00069) · 17:12 (p 0.46)  pooled 151:43 -> (i) 2/3 (powered True); F -3 dB 1737; abs gap 242; R_X 0.259 [0.233, 0.283]
+      ALD-pilot            +6/+9/+12    87:27 (p 1.5e-08) · 58:12 (p 2.2e-08) · 53:20 (p 0.00014)  pooled 198:59 -> (i) 3/3 (powered True); F -3 dB 1829; abs gap 334; R_X 0.325 [0.299, 0.351]
+      ALDv-pilot           +3/+6/+9     139:37 (p 4.2e-15) · 71:32 (p 0.00015) · 33:18 (p 0.049)  pooled 243:87 -> (i) 3/3 (powered True); F -3 dB 1859; abs gap 364; R_X 0.344 [0.319, 0.369]
+    SUMMARY-B: k𝔅 12, m𝔅 0, undecided 0; b* -> V1 recomputed (i) vs §0 (i) same; X* = M-ours-bstar (F 1540; runner-up M-ours-bstar-scalar F 1540); R_X* 0.061 [0.034, 0.087]; '전부' sentence (orig b* (i), k𝔅 = 12, m𝔅 = 0, R_X* defined & lower > 0): MET; main label (D2 C2 only) (A)
+
+## 2. doc §6.1 D2 C2 X-table (13 x 4) vs recomputation
+  D2 C2 X-table: 52/52 cells match
+
+## 3. main labels (D2 C2)
+  DOPaB16e4k: k𝔅 12 · m𝔅 0 -> (A); orig b* (i); X* M-ours-bstar (740) · R_X* 0.535 [0.491, 0.578]; sentence 충족
+  DOPbB16e4k: k𝔅 12 · m𝔅 0 -> (A); orig b* (iii); X* M-ours-bstar (1133) · R_X* undefined; abs 377; sentence 불가 (b* not (i))
+  ROTaB16e4k: k𝔅 12 · m𝔅 0 -> (A); orig b* (i); X* M-ours-bstar (656) · R_X* 0.462 [0.419, 0.507]; sentence 충족
+  ROTbB16e4k: k𝔅 12 · m𝔅 0 -> (A); orig b* (i); X* M-ours-bstar (781) · R_X* 0.392 [0.353, 0.432]; sentence 충족
+
+## 4. doc §6.1 24-condition table vs recomputation
+  24-condition table: 24/24 rows match; integrity OK 24/24; b* drift 0/24
+
+## 5. aggregates
+  (ii) total over 24 x 12 = 0; k𝔅 = 12 in 21/24 (D2 C2 4, other 20: 17); k𝔅 < 12: {'DOPbNR16': (11, ['V1-pilot (iii)']), 'ROTaNR16': (11, ['V1-pilot (iii)']), 'ROTaSV': (8, ['M-ours-bstar-scalar (iv)', 'M-ours-gmm32 (iv)', 'V1-pilot (iv)', 'ALDv-pilot (iv)'])}
+  '전부' sentence met 18/24: ['DOPaB16e4k', 'ROTaB16e4k', 'ROTbB16e4k', 'DOPaNR16', 'ROTbNR16', 'DOPaD3', 'DOPbD3', 'ROTaD3', 'ROTbD3', 'DOPbSV', 'ROTbSV', 'DOPaU28', 'ROTaU28', 'ROTbU28', 'DOPaMX', 'DOPbMX', 'ROTaMX', 'ROTbMX']; possible (orig b* (i)) 19: not met among possible ['ROTaNR16']; impossible ['DOPbB16e4k', 'DOPbNR16', 'DOPaSV', 'ROTaSV', 'DOPbU28']
+  per-arm labels over 24:
+    M-ours-bstar         (i) 19; (iii) 3 ['DOPbB16e4k', 'DOPbNR16', 'DOPbU28']; (iv) 2 ['DOPaSV', 'ROTaSV']
+    M-ours-bstar-scalar  (i) 23; (iv) 1 ['ROTaSV']
+    M-ours-gmm32         (i) 23; (iv) 1 ['ROTaSV']
+    R0-pilot@1           (i) 24
+    R1-turbo             (i) 24
+    R2-ours-G            (i) 24
+    R3-bigamp            (i) 24
+    R4-llr               (i) 24
+    R4-scvamp            (i) 24
+    bstar-pilot          (i) 24
+    V1-pilot             (i) 21; (iii) 2 ['DOPbNR16', 'ROTaNR16']; (iv) 1 ['ROTaSV']
+    ALD-pilot            (i) 24
+    ALDv-pilot           (i) 23; (iv) 1 ['ROTaSV']
+  X* sets: M-ours-bstar 21 ; V1-pilot 3 ['DOPaNR16', 'ROTaNR16', 'ROTbNR16']
+  genie >= V1 guard fired: [('DOPbB16e4k', 846, 756), ('DOPbNR16', 415, 179)]
+  DOPbD3: V1 1418 genie 1406 (gap 12); R_X* 0.955 [0.826, 1.107]; X* abs gap 253; CI upper > 1: True
+  R_X defined (primary) count over 24 x 13: 270 (undefined: guard 2 x 13 = 26 expected + others: [('DOPaD3', 'R4-llr'), ('DOPbD3', 'R0-pilot@1'), ('DOPbD3', 'R4-llr'), ('ROTaD3', 'R4-llr'), ('ROTbD3', 'R4-llr'), ('DOPaU28', 'R4-llr'), ('DOPbU28', 'R0-pilot@1'), ('DOPbU28', 'R4-llr'), ('ROTaU28', 'R4-llr'), ('ROTbU28', 'R4-llr'), ('DOPaMX', 'R0-pilot@1'), ('DOPaMX', 'R4-llr'), ('DOPbMX', 'R0-pilot@1'), ('DOPbMX', 'R4-llr'), ('ROTaMX', 'R4-llr'), ('ROTbMX', 'R4-llr')])
+
+## 6. §3 predictions
+  1a DOPa (A): ✓; 1b ROTa (A): ✓; 1c ROTb (A): ✓; 1d DOPb (B): ✗ (A)
+  2  other 20 with k𝔅 = 12 >= 12: 17 -> ✓
+  3a V1-pilot (ii) in >= 1 of DOP nu=0.01: {'DOPbB16e4k': '(i)', 'DOPbNR16': '(iii)', 'DOPbD3': '(i)', 'DOPbSV': '(i)', 'DOPbU28': '(i)', 'DOPbMX': '(i)'} -> ✗
+  3b V1-pilot not (i) >= 4 over 24: 3 ['DOPbNR16', 'ROTaNR16', 'ROTaSV'] -> ✗
+  4  ALD/ALDv all (i): non-(i) [('ROTaSV', 'ALDv-pilot', '(iv)')] -> ✗
+  5  DOPbB16e4k gmm32/scalar >= 1 not (i): {'M-ours-gmm32': '(i)', 'M-ours-bstar-scalar': '(i)'} -> ✗
+  6  X* in {V1-pilot, b*, b*-scalar} all 24: ✓
+  7  invalid / drift: 0 / 0
+
+# done
