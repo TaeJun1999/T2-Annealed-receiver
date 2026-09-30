@@ -14,7 +14,8 @@
 Structure (chunked tasks, resume by skipping finished chunks, one rng stream per point, mp.Pool, flushed
 progress) follows Demo/exp_0925_run.py, which is the proven runner of this project; only the naming, the
 arm sets and the testbed switch differ.  There is deliberately NO --jobs flag (01_RULES §4: the default is
-all cores).  --tag X routes EVERY output -- raw/, the D2 fits, ckpt/, LADDER.md, the sigma grid, the gate
+all cores; --worker-gb G only CAPS the workers by memory -- the SCALE16e4 exception, DECISIONS).
+--tag X routes EVERY output -- raw/, the D2 fits, ckpt/, LADDER.md, the sigma grid, the gate
 files, tests.txt and the lemma artefacts -- into suffixed paths, so a smoke run can never overwrite the real
 one (01_RULES §7).  On top of that the FROZEN A4 grid conf/results/sigma_grid_<testbed>.npz, which every
 GA-GD gate and every score arm reads, is refused outright unless --force-regrid is passed.  ANY departure
@@ -54,6 +55,7 @@ import arms as A
 import bigamp                               # (F3) reuses its pre-registered DIVERGE_NMSE, not a new constant
 
 TAG = ""                                   # set by _init in the parent AND in every worker
+RUN_META = {}                              # --worker-gb: meta|jobs, meta|worker_gb (via _init, so spawn-safe too)
 N_VAL = 5000                               # validation / test set size, exp_0925 convention [exact]
 KAPPAS = (0, 16, 64, 256)                  # MAP shrinkage grid, full covariance only (05_SPEC §4)
 FAM = {"full": 0, "kron": 1}
@@ -102,10 +104,12 @@ def tagged(path):
     return r + (f"_{TAG}" if TAG else "") + e
 
 
-def _init(tag):
+def _init(tag, run_meta=None):
     """Worker initialiser (also called once in the parent).  Robust to fork / spawn / forkserver."""
-    global TAG
+    global TAG, RUN_META
     TAG = tag
+    if run_meta is not None:
+        RUN_META = run_meta
     A.D2_FITS = d_fits_d2()                # arms.fit_path reads this module global at call time
     t = sys.modules.get("torch")           # do NOT import torch here: 192 workers would each pay for it
     if t is not None:
@@ -486,6 +490,7 @@ def run_task(task):
         return f"exists  {os.path.basename(out)}"                      # FINISHED CHUNKS ARE SKIPPED
     t0 = time.time()
     P = build_point(testbed, cell, prior, snr, ntrain, beta, t_in, ckpt, stagec_ckpt, mean_arms, p3_arms, pilot_arms, ald_file)
+    P["meta"].update(RUN_META)                          # empty unless --worker-gb
     if rotation is not None:                            # NEXT_EXPERIMENTS_ROT16e4: receive-array rotation (distribution drift)
         P["gen"].rot = float(np.deg2rad(rotation))
         P["meta"]["rotation"] = (f"deg={rotation!r}: receive (BS) array rotated, every AoA + {rotation} deg (D2/D3/S2v/SV8e: "
@@ -595,6 +600,13 @@ def run_task(task):
             + (f"  [{nf} arm-trial exceptions recorded]" if nf else ""))
 
 
+def mem_jobs(gb):
+    """--worker-gb: floor(0.8 * MemAvailable / gb), MemAvailable from /proc/meminfo, GB = 2**30 bytes (ru_maxrss unit / 2**20)."""
+    with open("/proc/meminfo") as f:
+        kb = next(int(l.split()[1]) for l in f if l.startswith("MemAvailable:"))
+    return int(0.8 * kb / 2 ** 20 // gb)
+
+
 def cmd_run(a):
     testbed = a.testbed
     prior = a.prior or C.PRIOR_OF[testbed]
@@ -603,7 +615,7 @@ def cmd_run(a):
     for cell, p, _ in pts:                              # fail early if a GMM fit is missing
         A.load_fits(testbed, p, C.CELLS[cell]["Nr"], a.ntrain)
     for cell in cells:
-        if C.CELLS[cell]["Nr"] not in (8, 16):          # mirrors build_point's M-ours-dscore guard
+        if C.CELLS[cell]["Nr"] not in (8, 16, 32):      # mirrors build_point's M-ours-dscore guard
             print(f"[run] {cell}: M-ours-dscore -> {NO_SCORE}  (M-ours-score is the closed-form ORACLE and DOES run here)", flush=True)
     _, why = score_prior(testbed, prior, 8, C.NT, a.ckpt, ntrain=a.ntrain)
     print(f"[run] M-ours-dscore: {why}", flush=True)
@@ -634,6 +646,14 @@ def cmd_run(a):
     tasks = [(testbed,) + t for t in tasks]
     tasks.sort(key=lambda t: (t[4], -C.CELLS[t[1]]["Nr"]))   # first chunks of every point early; 8x4 first
     jobs = min(os.cpu_count(), len(tasks))
+    if a.worker_gb is not None:                         # SCALE16e4 memory guard: an exception to 01_RULES §4 (DECISIONS)
+        mj = mem_jobs(a.worker_gb) if a.worker_gb > 0 else 0
+        if mj < 1:
+            sys.exit(f"--worker-gb {a.worker_gb}: 0.8 * MemAvailable fits no worker (or G <= 0) -- refusing")
+        jobs = min(jobs, mj)
+        _init(TAG, {"jobs": jobs, "worker_gb": float(a.worker_gb)})
+        print(f"[run] --worker-gb {a.worker_gb:g}: memory guard allows {mj} workers -> jobs = {jobs} "
+              f"(min of cpu_count {os.cpu_count()}, tasks {len(tasks)}, floor(0.8 MemAvailable / G))", flush=True)
     print(f"[run] {testbed} {len(pts)} points x n={a.n} -> {len(tasks)} tasks on {jobs} workers "
           f"(prior {prior}, cells {cells}, chunk {a.chunk}) -> {d_raw()}", flush=True)
     t0 = time.time()
@@ -641,7 +661,7 @@ def cmd_run(a):
         for i, t in enumerate(tasks):
             print(f"{i + 1}/{len(tasks)} {run_task(t)}", flush=True)
     else:
-        with mp.Pool(jobs, initializer=_init, initargs=(TAG,)) as pool:
+        with mp.Pool(jobs, initializer=_init, initargs=(TAG, RUN_META)) as pool:
             for i, msg in enumerate(pool.imap_unordered(run_task, tasks)):
                 print(f"{i + 1}/{len(tasks)} {msg}", flush=True)
     print(f"[run] finished in {(time.time() - t0) / 60:.1f} min -> "
@@ -760,9 +780,9 @@ def cmd_sigma(a):
                  f"to replace the frozen one deliberately.")
     cells = a.cell or [c for c in C.DEFAULT_CELLS if C.CELLS[c]["Nr"] == 8]     # the array the score net is for
     n = a.n if a.n != 640 else SG.N_MEAS                                # --n's default is the RUN default
-    res, prior = SG.measure(a.testbed, cells, prior=a.prior, n=n)
-    nu, sig, out = SG.write(a.testbed, res, prior, tag=TAG)
-    print(f"[sigma] {a.testbed} prior={prior} cells={cells}: grid of {len(nu)} points, "
+    res, prior = SG.measure(a.testbed, cells, prior=a.prior, n=n, snrs=a.snr)     # --snr: the MEASURED set (default: CELLS grid)
+    nu, sig, out = SG.write(a.testbed, res, prior, tag=TAG, snrs=a.snr)
+    print(f"[sigma] {a.testbed} prior={prior} cells={cells}" + (f" snr={a.snr}" if a.snr else "") + f": grid of {len(nu)} points, "
           f"nu_q in [{nu[0]:.3e}, {nu[-1]:.3e}], sigma_t in [{sig[0]:.3e}, {sig[-1]:.3e}] -> {out}", flush=True)
     return 0
 
@@ -1225,6 +1245,10 @@ def main(argv=None):
                     help="run: also store these per-iteration fields in the raw as '<arm>|<field>'.  r_t = state "
                          "residual |h_post^t - h_post^(t-1)| / |h_post^t| (conf/code/rt_tap.py; score and mixture-EP "
                          "arms only, the rest listed in meta|extra_log|r_t).  OPT-IN; requires --tag.")
+    ap.add_argument("--worker-gb", type=float, default=None,
+                    help="run: peak RSS of one worker in GB (2**30 B); jobs = min(cpu_count, tasks, floor(0.8 MemAvailable / G)), "
+                         "recorded as meta|jobs, meta|worker_gb.  NEXT_EXPERIMENTS_SCALE16e4 memory guard (K=4096 at Nr 32); "
+                         "an exception to 01_RULES §4 'all cores'.  Without it: all cores, unchanged.")
     ap.add_argument("--tag", default="", help="route EVERY output (raw/, ckpt/, LADDER, gates, sigma grid, "
                                               "tests, lemma, D2 fits) to suffixed paths")
     ap.add_argument("--force-regrid", action="store_true",

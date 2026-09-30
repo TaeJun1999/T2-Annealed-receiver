@@ -55,10 +55,11 @@ def measure_point(task):
     return (cell, snr), v
 
 
-def measure(testbed, cells, prior=None, n=N_MEAS, jobs=None):
+def measure(testbed, cells, prior=None, n=N_MEAS, jobs=None, snrs=None):
+    """snrs (runner.py sigma --snr): the MEASURED SNR set for every cell; None = each cell's CELLS grid (unchanged)."""
     import multiprocessing as mp
     prior = prior or C.PRIOR_OF[testbed]
-    tasks = [(testbed, prior, cell, float(s), n) for cell in cells for s in C.CELLS[cell]["snrs"]]
+    tasks = [(testbed, prior, cell, float(s), n) for cell in cells for s in (snrs or C.CELLS[cell]["snrs"])]
     with mp.Pool(min(jobs or os.cpu_count(), len(tasks))) as pool:
         res = dict(pool.map(measure_point, tasks))
     return res, prior
@@ -72,7 +73,7 @@ def build_grid(res, n_grid=N_GRID, pct=PCT):
     return nu, fin, lo, hi
 
 
-def write(testbed, res, prior, out=None, tag=""):
+def write(testbed, res, prior, out=None, tag="", snrs=None):
     """tag != "" routes BOTH the .txt and the .npz to tagged paths, so a smoke run can never overwrite the
     FROZEN A4 grid that every GA-GD gate and every score arm reads (04_SPEC §3)."""
     sfx = f"_{tag}" if tag else ""
@@ -90,7 +91,8 @@ def write(testbed, res, prior, out=None, tag=""):
             f"{C.N_ITER} iterations  x  {len(res)} points  =  {fin.size} samples",
             "convention  : nu_q = per-complex-entry cavity variance (q = h + CN(0, nu_q I));  "
             "sigma_t = sqrt(nu_q/2) = per-real-dimension std",
-        ]) + "\n\n")
+        ] + ([f"SNR set     : {' '.join(f'{s:g}' for s in sorted({float(s) for s in snrs}))} dB  (--snr: the MEASURED set, "
+              f"not the cells' CELLS grid)"] if snrs else [])) + "\n\n")
         f.write("empirical distribution of nu_q (pooled over iterations, SNRs, cells)\n")
         qs = [0.1, 1, 5, 10, 25, 50, 75, 90, 95, 99, 99.9]
         f.write("  percentile " + " ".join(f"{q:>9}" for q in qs) + "\n")
