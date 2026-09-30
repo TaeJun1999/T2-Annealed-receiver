@@ -117,7 +117,8 @@ def main():
         cells={c: dict(C.CELLS[c]) for c in cells}, points={k: v for k, v in sorted(points.items())},
         trial_stream=dict(rule=f"default_rng([{C.SEED}, TBID[testbed], PID[prior], Nr, T, Tp, int(snr)+100])",
                           skip_min=min(skips), skip_max_end=max(skips_end),
-                          split=("A1C5 judging set (trials >= %d)" % C.A1C5_SKIP0 if min(skips) >= C.A1C5_SKIP0
+                          split=("HISNR16e4 high-SNR supplement set (trials >= %d)" % C.HISNR_SKIP0 if min(skips) >= C.HISNR_SKIP0
+                                 else "A1C5 judging set (trials >= %d)" % C.A1C5_SKIP0 if min(skips) >= C.A1C5_SKIP0
                                  else "P3 judging set (trials >= %d)" % C.P3_SKIP0 if min(skips) >= C.P3_SKIP0
                                  else "DEVELOPMENT set (review_next, trials >= %d)" % C.DEV_SKIP0 if min(skips) >= C.DEV_SKIP0
                                  else "TEST set (trials from 0; paired across arms)")),

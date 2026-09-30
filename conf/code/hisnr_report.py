@@ -25,7 +25,10 @@ def main():
     a = ap.parse_args()
     d, _, warns = load_raw("D2", root=os.path.join(C.CONF, a.raw))
     keys = sorted((k for k in d if k[:2] == (a.cell, a.prior)), key=lambda k: k[2])
-    arms = [x for x in ("M-ours-dscore-C-V1", "M-ours-bstar", "R2-ours-G", "R1-turbo", "R3-bigamp", "R5-genie") if x in d[keys[0]]]
+    want = ("M-ours-dscore-C-V1", "M-ours-bstar", "R2-ours-G", "R1-turbo", "R3-bigamp", "R5-genie")
+    arms = [x for x in want if x in d[keys[0]]]
+    if warns or len(arms) != len(want) or not keys:
+        print(f"# hisnr_report {a.raw}: load_raw warnings {warns} / missing arms {set(want) - set(arms)} -> no report"); sys.exit(1)
     print(f"# hisnr_report {a.raw} {a.cell} {a.prior}; load_raw warnings: {len(warns)}; REPORT-ONLY (HISNR16e4 §1)")
     for k in keys:
         n = len(np.asarray(d[k][arms[0]]["blk_err"]))

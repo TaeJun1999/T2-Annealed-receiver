@@ -9,7 +9,7 @@ REG=results/review_next/NEXT_EXPERIMENTS_HISNR16e4.md
 for f in $REG DECISIONS.md; do
   [ -n "$(git ls-files $f)" ] && [ -z "$(git status --porcelain $f)" ] || { log "ABORT: $f not tracked+clean (freeze first)"; exit 1; }
 done
-ls -d raw_HS* >/dev/null 2>&1 && { log "ABORT: raw_HS* exists (re-run needs user approval)"; exit 1; }
+ls -d raw_HS* >/dev/null 2>&1 && [ "$1" != "--resume" ] && { log "ABORT: raw_HS* exists (resume after an interruption: bash code/run_hisnr16e4.sh --resume -- the runner skips finished chunks; re-running a finished tag needs user approval)"; exit 1; }
 H=$(git rev-parse --short HEAD); log "start (git $H)"; OK=0; FAIL=0
 # TAG CELL PR BF CKPT(rel. to conf) SHA ROLE BS KK LL
 while read TAG CELL PR BF CK SHA ROLE BS KK LL; do
@@ -18,14 +18,17 @@ while read TAG CELL PR BF CK SHA ROLE BS KK LL; do
     --stagec-ckpt /home/HTJ/t2/conf/$CK --arm M-ours-dscore-C-V1 M-ours-bstar R2-ours-G R1-turbo R3-bigamp R5-genie --tag $TAG \
     > logs/run_D2_$TAG.log 2>&1 < /dev/null || { log "$TAG ABORT: run failed"; FAIL=$((FAIL+1)); continue; }
   $P code/run_manifest.py --tag $TAG >> $L 2>&1
-  $P code/eval_accept.py --prior $PR --ntrain 160000 --bstar $BS --kron-K $KK --ll-val $LL --n 20480 --skip0 10000 \
+  $P code/eval_accept.py --prior $PR --ntrain 160000 --bstar $BS --kron-K $KK --ll-val $LL --n 20480 --skip0 10000 --points $CELL:6,9,12,15 \
     --tag $TAG:$ROLE:$SHA:$CELL > results/review_next/${TAG}_accept.txt 2>&1; RC=$?
   log "$TAG acceptance rc=$RC ($(head -1 results/review_next/${TAG}_accept.txt | cut -c1-80))"
   [ $RC -ne 0 ] && { log "$TAG INVALID: acceptance failed"; FAIL=$((FAIL+1)); continue; }
-  $P code/hisnr_report.py --raw raw_$TAG --cell $CELL --prior $PR > results/review_next/hisnr_$TAG.txt 2>&1
-  log "$TAG report rc=$?"; OK=$((OK+1))
+  O=results/review_next/hisnr_$TAG.txt; echo "# run_hisnr16e4 git $H $(TZ=America/Chicago date '+%Y-%m-%d %H:%M %Z')" > $O
+  $P code/hisnr_report.py --raw raw_$TAG --cell $CELL --prior $PR >> $O 2>&1; RR=$?
+  $P code/genie_floor.py --raw raw_$TAG --prior $PR --cell $CELL --snrs 6 9 12 15 --skip0 10000 > results/review_next/genie_floor/genie_floor_raw_$TAG.txt 2>&1; RG=$?
+  log "$TAG report rc=$RR genie_floor rc=$RG"; [ $RR -eq 0 ] && [ $RG -eq 0 ] && OK=$((OK+1)) || FAIL=$((FAIL+1))
 done <<'T'
 HSB16e4k C2 S2 B16e4k ckpt/d2sx_N160000_a1.pt 4443921ce8d5c4a1 legacy-last kron 1024 -11.459169831224418
 HSNR16 C6 S2 NR16B16e4 ckpt/d2sx_NR16_N160000_a1_fb2_best.pt c050d611b2c714a6 best kron 4096 63.1751571838059
 T
 log "HISNR_DONE ok=$OK fail=$FAIL"
+exit $FAIL
