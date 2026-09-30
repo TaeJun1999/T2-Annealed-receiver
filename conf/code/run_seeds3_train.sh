@@ -1,7 +1,7 @@
 #!/bin/bash
 # Seed repeats a2 / a3 for D3 (S2c), SV8e, MIX3 (user decision 2026-09-29 CDT: "추천 순서로"; the SEEDS16e4 pattern, frozen recipe).
 # Training only (no BLER): run_d2_sx.py --attempt 2|3 --fallback 1 --no-gbprime, one GPU each.  D3 a2 was started by hand on GPU 1
-# at 16:4x CDT (same command); this script starts the other five.  The BLER evaluation follows its own registration.
+# at 16:36:16 CDT (same command; see NEXT_EXPERIMENTS_SEEDS3_16e4 §4 for every start/stop/resume); this script starts the other five.  The BLER evaluation follows its own registration.
 cd /home/HTJ/t2/conf; P=~/miniforge3/envs/torch/bin/python
 tr () { CUDA_VISIBLE_DEVICES=$1 $P code/run_d2_sx.py --prior $2 --ntrain 160000 --tag $3 --attempt $4 --fallback 1 --no-gbprime \
           > logs/seeds3_$2_a$4.log 2>&1; echo "rc=$?" >> logs/seeds3_$2_a$4.log; }
