@@ -1,0 +1,51 @@
+# captured 2026-10-01 07:39:14 KST (= 09-30 17:39 CDT) by the HISNR16e4 record audit: processes alive NOW whose start precedes HISNR end (10-01 07:09 KST); read from ps / /proc / tmux only (t2_wtS, t2_wtSBL not opened). Processes that ended inside the HISNR window are not visible here.
+# HISNR window: 09-30 22:03 - 10-01 07:09 KST (= 09-30 08:03 - 17:09 CDT); C2 runner 22:03-22:47 KST, C6 runner 22:48 - 07:08 KST
+
+ 276835 수  9월 30 10:49:14 2026  20:50:00  0.0  0.0 bash code/run_sparse_tune.sh
+ 276838 수  9월 30 10:49:14 2026  20:50:00  178  0.2 /home/HTJ/miniforge3/envs/torch/bin/python code/sparse_tune.py --prior S2 --cell C6 --n 256
+ 449328 목 10월  1 00:43:20 2026  06:55:54  0.0  0.0 bash code/gpu_sched.sh
+ 449331 목 10월  1 00:43:20 2026  06:55:54  0.0  0.0 bash code/edge_rule.sh
+ 468488 목 10월  1 01:13:52 2026  06:25:22  0.0  0.0 bash -c cd /home/HTJ/t2_wtS/conf; CUDA_VISIBLE_DEVICES=0 /home/HTJ/miniforge3/envs/torch/bin/python code/fit_gpu.py 32 kron 2048 160000 NR32B16e4 --restart 0 >> logs/fit_edge_NR32B16e4.log 2>&1; rc=$?; echo "[sched $(TZ=America/Chicago date '+%m-%d %H:%M %Z')] done rc=$rc job_g0: /home/HTJ/miniforge3/envs/torch/bin/python code/fit_gpu.py 32 kron 2048 160000 NR32B16e4 --restart 0 >> logs/fit_edge_NR32B16e4.log 2>&1" >> logs/gpu_sched.log
+ 468491 목 10월  1 01:13:52 2026  06:25:22 98.9  0.2 /home/HTJ/miniforge3/envs/torch/bin/python code/fit_gpu.py 32 kron 2048 160000 NR32B16e4 --restart 0
+ 470445 목 10월  1 01:22:00 2026  06:17:13  0.0  0.0 bash -c cd /home/HTJ/t2_wtS/conf; CUDA_VISIBLE_DEVICES=4 /home/HTJ/miniforge3/envs/torch/bin/python code/fit_gpu.py 32 kron 2048 160000 NR32B16e4 --restart 1 >> logs/fit_edge_NR32B16e4.log 2>&1; rc=$?; echo "[sched $(TZ=America/Chicago date '+%m-%d %H:%M %Z')] done rc=$rc job_g4: /home/HTJ/miniforge3/envs/torch/bin/python code/fit_gpu.py 32 kron 2048 160000 NR32B16e4 --restart 1 >> logs/fit_edge_NR32B16e4.log 2>&1" >> logs/gpu_sched.log
+ 470448 목 10월  1 01:22:00 2026  06:17:13 98.5  0.2 /home/HTJ/miniforge3/envs/torch/bin/python code/fit_gpu.py 32 kron 2048 160000 NR32B16e4 --restart 1
+ 472025 목 10월  1 01:33:13 2026  06:06:01  0.0  0.0 bash -c cd /home/HTJ/t2_wtS/conf; CUDA_VISIBLE_DEVICES=1 /home/HTJ/miniforge3/envs/torch/bin/python code/fit_gpu.py 32 kron 2048 160000 NR32B16e4 --restart 2 >> logs/fit_edge_NR32B16e4.log 2>&1; rc=$?; echo "[sched $(TZ=America/Chicago date '+%m-%d %H:%M %Z')] done rc=$rc job_g1: /home/HTJ/miniforge3/envs/torch/bin/python code/fit_gpu.py 32 kron 2048 160000 NR32B16e4 --restart 2 >> logs/fit_edge_NR32B16e4.log 2>&1" >> logs/gpu_sched.log
+ 472028 목 10월  1 01:33:13 2026  06:06:01 98.8  0.2 /home/HTJ/miniforge3/envs/torch/bin/python code/fit_gpu.py 32 kron 2048 160000 NR32B16e4 --restart 2
+ 530477 목 10월  1 05:19:59 2026  02:19:15  0.3  0.0 bash logs/batched_prefix.sh
+ 548042 목 10월  1 06:03:20 2026  01:35:53  0.0  0.0 bash -c cd /home/HTJ/t2_wtS/conf; CUDA_VISIBLE_DEVICES=3 /home/HTJ/miniforge3/envs/torch/bin/python code/fit_gpu.py 32 kron 2048 160000 U28NR32B16e4 --restart 0 --prior UMi28 >> logs/fit_edge_U28NR32B16e4.log 2>&1; rc=$?; echo "[sched $(TZ=America/Chicago date '+%m-%d %H:%M %Z')] done rc=$rc job_g3: /home/HTJ/miniforge3/envs/torch/bin/python code/fit_gpu.py 32 kron 2048 160000 U28NR32B16e4 --restart 0 --prior UMi28 >> logs/fit_edge_U28NR32B16e4.log 2>&1" >> logs/gpu_sched.log
+ 548045 목 10월  1 06:03:20 2026  01:35:53 98.5  0.2 /home/HTJ/miniforge3/envs/torch/bin/python code/fit_gpu.py 32 kron 2048 160000 U28NR32B16e4 --restart 0 --prior UMi28
+ 564556 목 10월  1 06:41:02 2026     58:11  0.0  0.0 bash -c cd /home/HTJ/t2_wtS/conf; CUDA_VISIBLE_DEVICES=2 /home/HTJ/miniforge3/envs/torch/bin/python code/fit_gpu.py 32 kron 2048 160000 U28NR32B16e4 --restart 1 --prior UMi28 >> logs/fit_edge_U28NR32B16e4.log 2>&1; rc=$?; echo "[sched $(TZ=America/Chicago date '+%m-%d %H:%M %Z')] done rc=$rc job_g2: /home/HTJ/miniforge3/envs/torch/bin/python code/fit_gpu.py 32 kron 2048 160000 U28NR32B16e4 --restart 1 --prior UMi28 >> logs/fit_edge_U28NR32B16e4.log 2>&1" >> logs/gpu_sched.log
+ 564559 목 10월  1 06:41:02 2026     58:11  100  0.2 /home/HTJ/miniforge3/envs/torch/bin/python code/fit_gpu.py 32 kron 2048 160000 U28NR32B16e4 --restart 1 --prior UMi28
+ 570309 목 10월  1 06:51:09 2026     48:05  0.0  0.0 bash -c cd /home/HTJ/t2_wtS/conf; CUDA_VISIBLE_DEVICES=5 /home/HTJ/miniforge3/envs/torch/bin/python code/fit_gpu.py 32 kron 2048 160000 U28NR32B16e4 --restart 2 --prior UMi28 >> logs/fit_edge_U28NR32B16e4.log 2>&1; rc=$?; echo "[sched $(TZ=America/Chicago date '+%m-%d %H:%M %Z')] done rc=$rc job_g5: /home/HTJ/miniforge3/envs/torch/bin/python code/fit_gpu.py 32 kron 2048 160000 U28NR32B16e4 --restart 2 --prior UMi28 >> logs/fit_edge_U28NR32B16e4.log 2>&1" >> logs/gpu_sched.log
+ 570311 목 10월  1 06:51:09 2026     48:05  100  0.2 /home/HTJ/miniforge3/envs/torch/bin/python code/fit_gpu.py 32 kron 2048 160000 U28NR32B16e4 --restart 2 --prior UMi28
+
+pid 276835 cwd=/home/HTJ/t2_wtSBL/conf
+pid 276838 cwd=/home/HTJ/t2_wtSBL/conf
+pid 449328 cwd=/home/HTJ/t2_wtS/conf
+pid 449331 cwd=/home/HTJ/t2_wtS/conf
+pid 468488 cwd=/home/HTJ/t2_wtS/conf
+pid 468491 cwd=/home/HTJ/t2_wtS/conf
+pid 470445 cwd=/home/HTJ/t2_wtS/conf
+pid 470448 cwd=/home/HTJ/t2_wtS/conf
+pid 472025 cwd=/home/HTJ/t2_wtS/conf
+pid 472028 cwd=/home/HTJ/t2_wtS/conf
+pid 530477 cwd=/home/HTJ/t2_wtS/conf
+pid 548042 cwd=/home/HTJ/t2_wtS/conf
+pid 548045 cwd=/home/HTJ/t2_wtS/conf
+pid 564556 cwd=/home/HTJ/t2_wtS/conf
+pid 564559 cwd=/home/HTJ/t2_wtS/conf
+pid 570309 cwd=/home/HTJ/t2_wtS/conf
+pid 570311 cwd=/home/HTJ/t2_wtS/conf
+
+# tmux sessions -> pane cwd / start command
+bprefix: /home/HTJ/t2_wtS/conf | "bash logs/batched_prefix.sh"
+dev: /home/HTJ/t2 | 
+edgerule: /home/HTJ/t2_wtS/conf | "bash code/edge_rule.sh"
+gpusched: /home/HTJ/t2_wtS/conf | "bash code/gpu_sched.sh"
+job_g0: /home/HTJ/t2_wtS/conf | "cd /home/HTJ/t2_wtS/conf; CUDA_VISIBLE_DEVICES=0 /home/HTJ/miniforge3/envs/torch/bin/python code/fit_gpu.py 32 kron 2048 160000 NR32B16e4 --restart 0 >> logs/fit_edge_NR32B16e4.log 2>&1; rc=$?; echo \"[sched $(TZ=America/Chicago date '+%m-%d %H:%M %Z')] done rc=\$rc job_g0: /home/HTJ/miniforge3/envs/torch/bin/python code/fit_gpu.py 32 kron 2048 160000 NR32B16e4 --restart 0 >> logs/fit_edge_NR32B16e4.log 2>&1\" >> logs/gpu_sched.log"
+job_g1: /home/HTJ/t2_wtS/conf | "cd /home/HTJ/t2_wtS/conf; CUDA_VISIBLE_DEVICES=1 /home/HTJ/miniforge3/envs/torch/bin/python code/fit_gpu.py 32 kron 2048 160000 NR32B16e4 --restart 2 >> logs/fit_edge_NR32B16e4.log 2>&1; rc=$?; echo \"[sched $(TZ=America/Chicago date '+%m-%d %H:%M %Z')] done rc=\$rc job_g1: /home/HTJ/miniforge3/envs/torch/bin/python code/fit_gpu.py 32 kron 2048 160000 NR32B16e4 --restart 2 >> logs/fit_edge_NR32B16e4.log 2>&1\" >> logs/gpu_sched.log"
+job_g2: /home/HTJ/t2_wtS/conf | "cd /home/HTJ/t2_wtS/conf; CUDA_VISIBLE_DEVICES=2 /home/HTJ/miniforge3/envs/torch/bin/python code/fit_gpu.py 32 kron 2048 160000 U28NR32B16e4 --restart 1 --prior UMi28 >> logs/fit_edge_U28NR32B16e4.log 2>&1; rc=$?; echo \"[sched $(TZ=America/Chicago date '+%m-%d %H:%M %Z')] done rc=\$rc job_g2: /home/HTJ/miniforge3/envs/torch/bin/python code/fit_gpu.py 32 kron 2048 160000 U28NR32B16e4 --restart 1 --prior UMi28 >> logs/fit_edge_U28NR32B16e4.log 2>&1\" >> logs/gpu_sched.log"
+job_g3: /home/HTJ/t2_wtS/conf | "cd /home/HTJ/t2_wtS/conf; CUDA_VISIBLE_DEVICES=3 /home/HTJ/miniforge3/envs/torch/bin/python code/fit_gpu.py 32 kron 2048 160000 U28NR32B16e4 --restart 0 --prior UMi28 >> logs/fit_edge_U28NR32B16e4.log 2>&1; rc=$?; echo \"[sched $(TZ=America/Chicago date '+%m-%d %H:%M %Z')] done rc=\$rc job_g3: /home/HTJ/miniforge3/envs/torch/bin/python code/fit_gpu.py 32 kron 2048 160000 U28NR32B16e4 --restart 0 --prior UMi28 >> logs/fit_edge_U28NR32B16e4.log 2>&1\" >> logs/gpu_sched.log"
+job_g4: /home/HTJ/t2_wtS/conf | "cd /home/HTJ/t2_wtS/conf; CUDA_VISIBLE_DEVICES=4 /home/HTJ/miniforge3/envs/torch/bin/python code/fit_gpu.py 32 kron 2048 160000 NR32B16e4 --restart 1 >> logs/fit_edge_NR32B16e4.log 2>&1; rc=$?; echo \"[sched $(TZ=America/Chicago date '+%m-%d %H:%M %Z')] done rc=\$rc job_g4: /home/HTJ/miniforge3/envs/torch/bin/python code/fit_gpu.py 32 kron 2048 160000 NR32B16e4 --restart 1 >> logs/fit_edge_NR32B16e4.log 2>&1\" >> logs/gpu_sched.log"
+job_g5: /home/HTJ/t2_wtS/conf | "cd /home/HTJ/t2_wtS/conf; CUDA_VISIBLE_DEVICES=5 /home/HTJ/miniforge3/envs/torch/bin/python code/fit_gpu.py 32 kron 2048 160000 U28NR32B16e4 --restart 2 --prior UMi28 >> logs/fit_edge_U28NR32B16e4.log 2>&1; rc=$?; echo \"[sched $(TZ=America/Chicago date '+%m-%d %H:%M %Z')] done rc=\$rc job_g5: /home/HTJ/miniforge3/envs/torch/bin/python code/fit_gpu.py 32 kron 2048 160000 U28NR32B16e4 --restart 2 --prior UMi28 >> logs/fit_edge_U28NR32B16e4.log 2>&1\" >> logs/gpu_sched.log"
+sparsetune: /home/HTJ/t2_wtSBL/conf | "bash code/run_sparse_tune.sh"
