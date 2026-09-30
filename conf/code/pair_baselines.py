@@ -108,6 +108,7 @@ def main():
     ap.add_argument("--r0", choices=("at16", "at1"), default="at16", help="R0-pilot reading: at16 = the 16-iteration trajectory "
                     "(S2V16e4 / ROTMIX16e4 records); at1 = the 1-pass reading 08_SPEC §1 calls R0-pilot (SUPP16e4, load_raw alias "
                     "'R0-pilot@1')")
+    ap.add_argument("--add-baselines", nargs="*", default=[], help="SPARSE16e4: extra baseline arms (from --extra raws) appended to the baseline set; default none = the 12 of SUPP16e4 §1, unchanged")
     ap.add_argument("--expect", action="append", default=[], help="STATIC16e4: ARM=LABEL recorded before this run, e.g. "
                     "'V1-pilot=(i)'; a different recomputed label is code drift -> exit 1 (repeatable)")
     ap.add_argument("--expect-bstar", default=None, help="SUPP16e4: the b* -> V1 label the original registration recorded "
@@ -205,11 +206,11 @@ def main():
             print(f"# extra raw {n} repeats arms {dup} -- refusing"); sys.exit(1)
         for k in keys:
             b[k] = {**b[k], **{x: v for x, v in raws[n][0][k].items() if x not in (GENIE, "run", "meta")}}
-    miss = [x for x in (BSTAR, V1) + BASELINES if x not in b[keys[0]] and x not in PIL + ALD]
+    miss = [x for x in (BSTAR, V1) + BASELINES + tuple(a.add_baselines) if x not in b[keys[0]] and x not in PIL + ALD]
     if miss:
         print(f"# arms missing after the merge: {miss} -- refusing"); sys.exit(1)
     data = {k: {**b[k], **{x: p[k][x] for x in PIL}, **{x: m[k][x] for x in ALD}} for k in keys}
-    BL = tuple("R0-pilot@1" if (x == "R0-pilot" and a.r0 == "at1") else x for x in BASELINES)
+    BL = tuple("R0-pilot@1" if (x == "R0-pilot" and a.r0 == "at1") else x for x in BASELINES) + tuple(a.add_baselines)
     if a.r0 == "at1":
         print("# R0-pilot read at @1 (1-pass, 08_SPEC §1; load_raw alias 'R0-pilot@1'), SUPP16e4 §1")
     snrs = [k[2] for k in keys]
@@ -263,7 +264,7 @@ def main():
     fx, fv, fg = (fails(data[k3], arm) for arm in (xs[0], V1, GENIE))
     ok_range = 0.005 <= fx.mean() <= 0.9 and fx.sum() > fg.sum() and not vg
     R, lo, hi, nn = recovery([(fx, fv, fg)]) if ok_range else (np.nan, np.nan, np.nan, 0)
-    print(f"\nSUMMARY registered baselines {len(labs)} (b* + 𝔅 {len(BASELINES)}): (i) {k}, (ii) {mm}, "
+    print(f"\nSUMMARY registered baselines {len(labs)} (b* + 𝔅 {len(BL)}): (i) {k}, (ii) {mm}, "
           f"not decided {len(labs) - k - mm}")
     print("    " + "  ".join(f"{x}={labs[x]}" for x in labs))
     print(f"X* (fewest -3 dB failures, ties by name) = {xs[0]} (F={xs[1]}); R_X* -3 dB = "
