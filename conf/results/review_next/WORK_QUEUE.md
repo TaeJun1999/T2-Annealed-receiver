@@ -1,6 +1,6 @@
 # 작업 큐 (review_next 이후; 갱신할 때마다 맨 위 시각을 바꾼다)
 
-갱신 2026-09-29 17:40 CDT (Opus 5.5). 사용자 지시 2026-09-29 CDT: "추천 순서로 계속, 남는 자원에는 계속 작업 할당, 빈 곳도 계획에 올려 적절한 순서로". 모든 판정 실험은 사전 등록 → Fable 적대적 검토(서브에이전트) → 동결 → 실행 → §6 전사 → Fable 기록 감사 순서를 지킨다.
+갱신 2026-09-29 22:53 CDT (Opus 5.5). 사용자 지시 2026-09-29 CDT: "추천 순서로 계속, 남는 자원에는 계속 작업 할당, 빈 곳도 계획에 올려 적절한 순서로". 모든 판정 실험은 사전 등록 → Fable 적대적 검토(서브에이전트) → 동결 → 실행 → §6 전사 → Fable 기록 감사 순서를 지킨다.
 
 ## 자원 배치 원칙
 - CPU (192 워커, 수신기 BLER): 한 번에 한 실행. 순서 = 아래 표의 "CPU" 열.
@@ -27,8 +27,8 @@
 | 5 | 2단계 GPU 준비 계속: UMi28 C6·C9 N=1.6e5 적합, V1 1.6e5 학습 (D2 C9, UMi28 C6·C9) | GPU (빈 것) | 시드 학습 종료 뒤 | K 상한 결정 전에는 kron ≤1024 까지만 |
 | 6 | 2단계 등록 → 검토 → 동결 → BLER | CPU (큼) | #3 사용자 결정, #5 | |
 | 7 | 기록 감사 (Fable): STATIC-ALL, SEEDS3, SBL | 서브에이전트 | 각 §6 | |
-| 8 | RESULTS.md (ALD·DOP·ROT·ROTMIX·S2V·SUPP·SEEDS3·STATIC-ALL·SBL), CONTRIBUTIONS.md, conference/ + 그림 갱신, push | — | 각 감사 | |
-| 9 | genie 고SNR 바닥 원인 확인 (실패 시행 채널 재생성, 조건수) | CPU 수 분 | CPU 틈 | 캡션용 |
+| 8 | RESULTS.md: ALD·DOP·ROT·ROTMIX·S2V·SUPP·STATIC **반영 완료 cf289ebe** (§12–§17); 남은 것 SEEDS3·HISNR·SPARSE 반영, CONTRIBUTIONS.md, 그림 | — | 각 감사 | |
+| 9 | ~~genie 고SNR 바닥~~ → **완료** d6f322fb (L=3 랭크 부족 블록) | | | |
 
 ## 사용자 결정 대기
 1. (사용자가 직접 처리: 저장소 공개 여부 — 목록에서 제외)
