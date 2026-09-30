@@ -376,10 +376,10 @@ def build_our_arms(testbed, prior, Nr, Nt, T, Tp, sigma2, code, Xp, ntrain=N_TRA
                                  mode="pilot_only", exact_prior=True)
             assert arms[name].exact_prior and arms[name].mode == "pilot_only"
     if sparse is not None:          # NEXT_EXPERIMENTS_SPARSE16e4: model-based sparse baselines, same EP receiver as b* ('gmm_site')
-        rho, n_em, L = sparse["rho"], sparse["n_em"], sparse["L"]
-        arms["SBL-loop"] = route_a(*a, SparsePrior(Cs, Nr, Nt, rho, n_em), code, Xp, "gmm_site")
-        arms["SBL-pilot"] = route_a(*a, SparsePrior(Cs, Nr, Nt, rho, n_em), code, Xp, "gmm_site", mode="pilot_only")
-        arms["OMP-pilot"] = route_a(*a, OMPSitePrior(Cs, Nr, Nt, rho, L), code, Xp, "gmm_site", mode="pilot_only")
+        rs, n_em, ro, L = sparse["rho_sbl"], sparse["n_em"], sparse["rho_omp"], sparse["L"]
+        arms["SBL-loop"] = route_a(*a, SparsePrior(Cs, Nr, Nt, rs, n_em), code, Xp, "gmm_site")
+        arms["SBL-pilot"] = route_a(*a, SparsePrior(Cs, Nr, Nt, rs, n_em), code, Xp, "gmm_site", mode="pilot_only")
+        arms["OMP-pilot"] = route_a(*a, OMPSitePrior(Cs, Nr, Nt, ro, L), code, Xp, "gmm_site", mode="pilot_only")
         for k in ("SBL-loop", "SBL-pilot", "OMP-pilot"):
             assert arms[k].exact_prior
     if with_G:

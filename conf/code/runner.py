@@ -312,7 +312,7 @@ def _ald_table(path, snr, ckpt):
     return {"hhat": z["hhat"], "b": z["b"], "v": z["v"], "skip": int(z["skip"])}, k
 
 
-SPARSE = None     # NEXT_EXPERIMENTS_SPARSE16e4: dict(rho, n_em, L) from --sparse-arms (set in main before the pool forks)
+SPARSE = None     # NEXT_EXPERIMENTS_SPARSE16e4: dict(rho_sbl, n_em, rho_omp, L) from --sparse-arms (set in main before the pool forks)
 
 
 def build_point(testbed, cell, prior, snr, ntrain=C.N_TRAIN, beta=C.BETA, t_in=C.T_IN, ckpt=None,
@@ -1219,8 +1219,8 @@ def main(argv=None):
                     help="NEXT_EXPERIMENTS_DOP16e4, run: normalised Doppler nu = f_D T_s per symbol; the channel varies within "
                          "the block (per-path Clarke phases, separate stream).  0 = the path code with a static channel "
                          "(control: must reproduce the static raw bit for bit).  OPT-IN; requires --tag.")
-    ap.add_argument("--sparse-arms", default=None, metavar="RHO,N_EM,L",
-                    help="NEXT_EXPERIMENTS_SPARSE16e4, run/smoke: ADD SBL-loop / SBL-pilot / OMP-pilot (model-based sparse baselines, same EP receiver as b*) with dictionary oversampling RHO, SBL EM steps N_EM, OMP atoms L.  OPT-IN; requires --tag.")
+    ap.add_argument("--sparse-arms", default=None, metavar="RHO_SBL,N_EM,RHO_OMP,L",
+                    help="NEXT_EXPERIMENTS_SPARSE16e4, run/smoke: ADD SBL-loop / SBL-pilot / OMP-pilot (model-based sparse baselines, same EP receiver as b*) with dictionary oversampling RHO_SBL (SBL arms) / RHO_OMP (OMP), SBL EM steps N_EM, OMP atoms L.  OPT-IN; requires --tag.")
     ap.add_argument("--ald-file", default=None,
                     help="NEXT_EXPERIMENTS_ALD16e4, run/smoke: ADD ALD-pilot / ALDv-pilot from this code/ald.py estimate file "
                          "(Arvinte-Tamir annealed Langevin, V1 network, precomputed).  OPT-IN; requires --stagec-ckpt, --tag.")
@@ -1281,8 +1281,8 @@ def main(argv=None):
                  "the diffusion arm gets no more data or budget than the GMM arm)")
     if a.sparse_arms:
         global SPARSE
-        r, ne, L = (int(x) for x in a.sparse_arms.split(","))
-        SPARSE = dict(rho=r, n_em=ne, L=L)
+        rs, ne, ro, L = (int(x) for x in a.sparse_arms.split(","))
+        SPARSE = dict(rho_sbl=rs, n_em=ne, rho_omp=ro, L=L)
     if a.ald_file and not a.stagec_ckpt:
         sys.exit("--ald-file needs --stagec-ckpt: ALD-pilot wraps the V1 score prior (cbar, eh2) built from it.")
     if a.train_prior and not a.stagec_ckpt:
