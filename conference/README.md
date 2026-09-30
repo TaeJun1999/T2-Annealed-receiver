@@ -10,7 +10,7 @@
 | 파일 | 내용 |
 |---|---|
 | [`conf/conference_plot/`](../conf/conference_plot/) | 학회용 그림 F16~F29 (pdf·png·txt). F24~F29 는 비정상 실험. `.txt` 에 수치 전부와 캡션용 캐비엇이 있다 |
-| `RESULTS_snapshot.md` | `docs/RESULTS.md` 사본. §1~§10.7과 그림 목록 §11이 들어 있다. 09-27까지의 결과만 담는다 |
+| `RESULTS_snapshot.md` | `docs/RESULTS.md` 사본. §1~§10.7 (정적), §11 그림 목록 F16~F29, §12 ALD, §13–§15 비정상 (DOP·ROT·B′·C·SUPP), §16 STATIC16e4 (정적 × 등록 baseline 13 개, 규칙 고정 사후 계산), §17 genie 바닥 진단 |
 
 공통 조건 (따로 적은 곳 외):
 - testbed D2 계열, 셀 C2 (8×4, T=16, Tp=4)
@@ -35,7 +35,7 @@
 | 파일럿 전용 prior (Arvinte–Tamir형 설정) | [PILOT16e4](../conf/results/review_next/NEXT_EXPERIMENTS_PILOT16e4.md) | P1 4/6 (i), P2 6/6 (i); D2 C2 P2 +1.07 | F22 | §10.6 |
 | 학습/평가 채널 모델 불일치 | [MISMATCH16e4](../conf/results/review_next/NEXT_EXPERIMENTS_MISMATCH16e4.md) | MM 8 쌍 중 7 (i), D2→SV8e (iv) | F23 | §10.7 |
 
-## 2. 09-27 이후 결과 (RESULTS.md 미반영, 등록 문서 §6.1과 DECISIONS가 원본)
+## 2. 09-27 이후 결과 (RESULTS.md §12~§17 에 반영; 원본은 등록 문서 §6.1 과 DECISIONS)
 
 | 실험 | 등록 문서 | 기록된 결과 (DECISIONS 결과 줄 그대로 요약) | 그림 |
 |---|---|---|---|
@@ -45,6 +45,7 @@
 | 표류 학습 prior (B′) | [ROTMIX16e4](../conf/results/review_next/NEXT_EXPERIMENTS_ROTMIX16e4.md) | RB 15° (i) 406:81, 30° (i) 450:122. DD-15·DD-30 판정하지 못함. 판정 3: 세 각도 모두 13/13 (i) | F26 (a)(b) |
 | 공간 비정상 S2v (C) | [S2V16e4](../conf/results/review_next/NEXT_EXPERIMENTS_S2V16e4.md) | 판정 1 (i) 202:32, R_b\* 0.603, ΔR −0.205 (S2 C6보다 낮음). 판정 2: 13/13 (i) | F26 (c) |
 | DOP·ROT 보충 (등록 baseline 전부) | [SUPP16e4](../conf/results/review_next/NEXT_EXPERIMENTS_SUPP16e4.md) | 24/24 수용·무결성 OK. D2 C2 네 조건 모두 (A) "V1 이 𝔅 12 개 전부보다 적게 실패" (DOP ν=0.01 은 원 b\* (iii)). (ii) 0/288, k𝔅 = 12 21/24, "등록된 baseline 전부와 멀어진다" 18/24 | F24, F25, F27, F28, F29 |
+| 정적 × 등록 baseline 13 개 (규칙 고정 사후 계산) | [STATIC16e4](../conf/results/review_next/NEXT_EXPERIMENTS_STATIC16e4.md) | D2 C2 (A) + "등록 baseline 전부(13 개)와 멀어진다"; k𝔅 = 12: D2 C2·D3·UMi28·MIX3; 새 48 라벨 (ii) 0; 감사 정정 없음 | RESULTS §16 |
 
 2절의 기록 감사(Fable)는 모두 완료됐다: ALD·DOP·ROT·ROTMIX·S2V (`5b5c8f4a`, 전부 재현), SUPP16e4 (§6.2, 정정 없음).
 
