@@ -49,6 +49,7 @@ def main():
     ap.add_argument("--iters", type=int, default=16)
     ap.add_argument("--chunk", type=int, default=40)
     ap.add_argument("--n", type=int, default=2560)
+    ap.add_argument("--skip0", type=int, default=0, help="first trial of the plan (HISNR16e4: common.HISNR_SKIP0); default 0 = the test set, unchanged")
     ap.add_argument("--ref-raw", default=None)
     ap.add_argument("--fits-dir", default=None)
     ap.add_argument("--grid", default=None)
@@ -63,7 +64,7 @@ def main():
     if a.bstar == "kron" and a.kron_K is None:
         ap.error("--kron-K is required when --bstar kron")
     points = {p.split(":")[0]: tuple(int(s) for s in p.split(":")[1].split(",")) for p in a.points}
-    plan = [(a.chunk * k, a.chunk) for k in range(a.n // a.chunk)]
+    plan = [(a.skip0 + a.chunk * k, a.chunk) for k in range(a.n // a.chunk)]
     bad, common_meta = [], {}
     ref = load_points(os.path.join(C.CONF, a.ref_raw)) if a.ref_raw else None
     for spec in a.tag:
