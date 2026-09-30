@@ -1,4 +1,6 @@
 #!/bin/bash
+# OBSOLETE (2026-09-29 CDT): written for the ROT16e4 / S2v / S2d runs, all finished and recorded. It does NOT handle SUPP16e4 or
+# later runs -- after a reboot, resume each job with its own script (e.g. run_supp16e4.sh eval <remaining conds>). Kept as a record.
 # review_next: resume every interrupted job after a server reboot (written 2026-09-27 CDT).  Idempotent: a job whose tmux
 # session is alive or whose end marker is logged is left alone, so running it twice (or with nothing to do) is harmless.
 # Lives OUTSIDE conf/code on purpose: runner.py writes `git status --porcelain code ../Demo` (+dirty) into every raw chunk and
