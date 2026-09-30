@@ -219,16 +219,37 @@ class SparsePrior:
     Needs no training data (a model-based baseline, NEXT_EXPERIMENTS_SPARSE16e4).  Every other attribute (C, Cinv, cbar,
     eh2_prior, ...) is the wrapped sample-covariance GaussianPrior's, so the receiver's initial state equals R2's / b*'s."""
 
-    def __init__(self, base, Nr, Nt, rho, n_em, eps=1e-6):
-        self.base, self.A, self.n_em, self.eps = base, dft_dict(Nr, Nt, rho), int(n_em), float(eps)
+    def __init__(self, base, Nr, Nt, rho, n_em, eps=1e-6, update="mackay"):
+        assert update in ("mackay", "em")
+        self.base, self.A, self.n_em, self.eps, self.update = base, dft_dict(Nr, Nt, rho), int(n_em), float(eps), update
         self.clip = "n/a"
 
     def __getattr__(self, k):
         return getattr(self.base, k)
 
+    def gamma_path(self, G, b, stops):
+        """gamma after each step count in `stops` along ONE run (same start, same updates as gamma(); tuning only)."""
+        A = self.A; M = A.shape[1]; N = G.shape[0]; I = np.eye(N); out = {}
+        g = np.full(M, self.base.cbar * self.base.N / M)
+        for it in range(1, max(stops) + 1):
+            K = np.linalg.inv(I + G @ ((A * g) @ A.conj().T))
+            mx = g * (A.conj().T @ (K @ b)); d = np.real(np.einsum("ij,ij->j", A.conj(), K @ (G @ A)))
+            g = (np.maximum(np.abs(mx) ** 2 + g - g ** 2 * d, 1e-12) if self.update == "em"
+                 else np.maximum(np.abs(mx) ** 2 / np.maximum(g * d, 1e-12), 1e-12))
+            if it in stops:
+                out[it] = g.copy()
+        return out
+
+    def site_from_gamma(self, g, N):
+        Cx = (self.A * g) @ self.A.conj().T + self.eps * np.eye(N)
+        Ci = np.linalg.inv(0.5 * (Cx + Cx.conj().T))
+        return 0.5 * (Ci + Ci.conj().T), np.zeros(N, complex)
+
     def gamma(self, G, b):
-        """EM on gamma in the N x N (Woodbury) form: with B = A Gamma, K = (I + G A Gamma A^H)^-1,
-        mu_x = Gamma A^H K b,  diag Sigma_x = gamma - gamma^2 * diag(A^H K G A)  (= (Gamma^-1 + A^H G A)^-1, never forming M x M)."""
+        """gamma updates in the N x N (Woodbury) form: with K = (I + G A Gamma A^H)^-1, d_i = a_i^H K G a_i,
+        mu_x = Gamma A^H K b,  Sigma_x,ii = gamma_i - gamma_i^2 d_i  (= (Gamma^-1 + A^H G A)^-1, never forming M x M).
+        update 'em' (Wipf & Rao 2004): gamma_i <- |mu_i|^2 + Sigma_ii.  update 'mackay' (MacKay 1992; Tipping 2001 fixed point,
+        default -- converges in far fewer steps, SPARSE16e4 review): gamma_i <- |mu_i|^2 / (1 - Sigma_ii / gamma_i) = |mu_i|^2 / (gamma_i d_i)."""
         A = self.A; M = A.shape[1]; N = G.shape[0]; I = np.eye(N)
         g = np.full(M, self.base.cbar * self.base.N / M)
         for _ in range(self.n_em):
@@ -236,7 +257,10 @@ class SparsePrior:
             K = np.linalg.inv(I + G @ (B @ A.conj().T))
             mx = g * (A.conj().T @ (K @ b))
             d = np.real(np.einsum("ij,ij->j", A.conj(), K @ (G @ A)))
-            g = np.maximum(np.abs(mx) ** 2 + g - g ** 2 * d, 1e-12)
+            if self.update == "em":
+                g = np.maximum(np.abs(mx) ** 2 + g - g ** 2 * d, 1e-12)
+            else:
+                g = np.maximum(np.abs(mx) ** 2 / np.maximum(g * d, 1e-12), 1e-12)
         return g
 
     def ep_site(self, G, b, lam_min):
@@ -376,7 +400,7 @@ def build_our_arms(testbed, prior, Nr, Nt, T, Tp, sigma2, code, Xp, ntrain=N_TRA
                                  mode="pilot_only", exact_prior=True)
             assert arms[name].exact_prior and arms[name].mode == "pilot_only"
     if sparse is not None:          # NEXT_EXPERIMENTS_SPARSE16e4: model-based sparse baselines, same EP receiver as b* ('gmm_site')
-        rs, n_em, ro, L = sparse["rho_sbl"], sparse["n_em"], sparse["rho_omp"], sparse["L"]
+        rs, n_em, ro, L = sparse["rho_sbl"], sparse["n_em"], sparse["rho_omp"], sparse["L"]   # resolved for THIS SNR by runner
         arms["SBL-loop"] = route_a(*a, SparsePrior(Cs, Nr, Nt, rs, n_em), code, Xp, "gmm_site")
         arms["SBL-pilot"] = route_a(*a, SparsePrior(Cs, Nr, Nt, rs, n_em), code, Xp, "gmm_site", mode="pilot_only")
         arms["OMP-pilot"] = route_a(*a, OMPSitePrior(Cs, Nr, Nt, ro, L), code, Xp, "gmm_site", mode="pilot_only")

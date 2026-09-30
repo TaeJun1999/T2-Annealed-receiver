@@ -18,7 +18,7 @@ import numpy as np
 import common as C
 import arms as A
 
-RHOS, NEMS, LS = (1, 2, 4, 8), (10, 25, 50, 100, 200), (1, 2, 3, 4, 6, 8, 12, 16, 24)   # extended once after the stage smoke hit rho 4 / n_em 100
+RHOS, NEMS, LS = (1, 2, 4, 8), (5, 10, 25, 50, 100, 200), (1, 2, 3, 4, 6, 8, 12, 16, 24, 32, 48)   # v2 (SPARSE16e4 review): MacKay SBL, per-SNR n_em / L
 
 
 def sites(H, Xp, sigma2, rng):
@@ -33,6 +33,21 @@ def sites(H, Xp, sigma2, rng):
 def post(prior, G, b):
     Lam, eta = prior.ep_site(G, b, 0.0)
     return np.linalg.solve(Lam + G, eta + b)
+
+
+def per_snr_pick(res, cell, N):
+    """SPARSE16e4 §1 rule (v2): per family choose rho minimising the SNR-mean (dB) of the per-SNR best NMSE over the second
+    parameter (n_em for SBL, L for OMP; L > N is not allowed); ties -> smaller rho.  Then at that rho, per SNR, the second
+    parameter with the lowest NMSE (ties -> smaller).  A per-SNR choice at the largest grid value is flagged (edge)."""
+    snrs = [str(x) for x in cell["snrs"]]; out = {}
+    for fam, grid, key in (("sbl", NEMS, "n_em"), ("omp", [L for L in LS if L <= N], "L")):
+        best = lambda r, s: min(grid, key=lambda g: (res[fam][f"{r},{g}"][s], g))
+        score = {r: np.mean([res[fam][f"{r},{best(r, s)}"][s] for s in snrs]) for r in RHOS}
+        r = min(RHOS, key=lambda r: (score[r], r)); out[f"rho_{fam}"] = r; out[f"score_{fam}_db"] = float(score[r])
+        for s in snrs:
+            g = best(r, s); e = out.setdefault("per_snr", {}).setdefault(s, {})
+            e[key] = g; e[f"nmse_{fam}_db"] = float(res[fam][f"{r},{g}"][s]); e[f"edge_{fam}"] = g == max(grid)
+    return out
 
 
 def main():
@@ -51,18 +66,25 @@ def main():
         e = lambda pr: 10 * np.log10(np.mean([np.sum(np.abs(post(pr, G, b) - h) ** 2) for (G, b), h in zip(S, Hs)])
                                      / np.mean(np.sum(np.abs(Hs) ** 2, 1)))
         for rho in RHOS:
+            sp = A.SparsePrior(base, Nr, Nt, rho, max(NEMS)); err = {ne: [] for ne in NEMS}
+            for (G, bb), h in zip(S, Hs):                    # one MacKay run per sample, read at every n_em in NEMS
+                for ne, g in sp.gamma_path(G, bb, set(NEMS)).items():
+                    Lam, eta = sp.site_from_gamma(g, G.shape[0])
+                    err[ne].append(np.sum(np.abs(np.linalg.solve(Lam + G, eta + bb) - h) ** 2))
             for ne in NEMS:
-                res["sbl"].setdefault(f"{rho},{ne}", {})[str(snr)] = e(A.SparsePrior(base, Nr, Nt, rho, ne))
-            for L in LS:
+                res["sbl"].setdefault(f"{rho},{ne}", {})[str(snr)] = float(10 * np.log10(np.mean(err[ne]) / np.mean(np.sum(np.abs(Hs) ** 2, 1))))
+            for L in [L for L in LS if L <= Nr * Nt]:
                 res["omp"].setdefault(f"{rho},{L}", {})[str(snr)] = e(A.OMPSitePrior(base, Nr, Nt, rho, L))
         print(f"[sparse_tune] {a.prior} {a.cell} {snr:+d} dB done ({time.time() - t0:.0f} s)", flush=True)
-    pick = {}
-    for fam in ("sbl", "omp"):
+    pick = per_snr_pick(res, cell, Nr * Nt)
+    for fam in ():
         key = lambda k: (np.mean(list(res[fam][k].values())), *map(int, k.split(",")))
         best = min(res[fam], key=key); vals = list(map(int, best.split(",")))
         grid2 = NEMS if fam == "sbl" else LS
         pick[fam] = dict(zip(("rho", "n_em" if fam == "sbl" else "L"), vals), nmse_db_mean=float(key(best)[0]),
                          grid_edge=[n for n, v, g in (("rho", vals[0], RHOS), ("n_em" if fam == "sbl" else "L", vals[1], grid2)) if v == max(g)])
+    pfile = os.path.join(C.CONF, "results", "sparse", f"pick_{a.prior}_{a.cell}.json")
+    os.makedirs(os.path.dirname(pfile), exist_ok=True); json.dump(pick, open(pfile, "w"), indent=1)
     out = dict(prior=a.prior, cell=a.cell, n=a.n, seed="default_rng([20260930, TBID, PID, Nr, snr+100])", grid=dict(rho=RHOS,
                n_em=NEMS, L=LS), nmse_db=res, pick=pick, wall_sec=time.time() - t0)
     path = a.out or os.path.join(C.CONF, "results", "sparse", f"tune_{a.prior}_{a.cell}.json")
