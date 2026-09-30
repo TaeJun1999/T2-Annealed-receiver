@@ -25,4 +25,5 @@
 - D2 C2 헤드라인 외의 체크포인트(C6, D3, SV8e, 38.901, S2v, S2d)는 UNGATED 측정이다.
 - genie 는 알려진 채널 기준선이며 하한이 아니다. F24 (b) 와 F25 의 도플러 ν = 0.01 에서는 genie 가 블록의 H_0 만 알기 때문에 V1 보다 많이 실패하는 조건이 있다 (SUPP16e4 §0).
 - SNR 점마다 채널과 잡음을 독립으로 뽑는다(`common.trial_rng`). 실패 수가 10 건 안팎인 고SNR 점에서 곡선이 한 점 올라가는 것은 표본 잡음이다.
+- genie 의 고SNR 바닥은 경로 수 L = 3 < Nt = 4 인 **랭크 부족 블록**에서 온다: D2 C2 +9..+15 dB 의 genie 실패 6 건 전부 L = 3 (cond(H) ≈ 1e16), D3 27 건 중 L = 3 이 21 건·L = 4 가 5 건 (`conf/code/genie_floor.py`, `conf/results/review_next/genie_floor/`; 보고 전용 진단).
 - 등록 문서 경로: `conf/results/review_next/NEXT_EXPERIMENTS_<이름>.md`. 결과 색인: 저장소 최상위 `conference/README.md`.

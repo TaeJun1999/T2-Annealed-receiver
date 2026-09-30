@@ -297,3 +297,5 @@
 `[2026-09-30 07:39 KST] STATIC16e4 결과 기록 (Opus 5.5; 텍사스 09-29 17:39 CDT) | run_static16e4.sh 17:31~17:33 CDT, git 2139f082, STATIC_DONE ok=6 fail=0, 무결성 6/6·--expect 6/6. 주 D2 C2 (A) "V1 이 𝔅 12 개 전부보다 적게 실패" + "등록된 baseline 전부(13 개)와 멀어진다" 충족 (규칙 고정 사후 계산 캐비엇). k𝔅=12: D2 C2·D3·UMi28·MIX3; C6 11 (V1-pilot (iv)); SV8e 9 (b*-scalar·gmm32·V1-pilot (iv)). 새 48 라벨 (ii) 0. §3 예측 8/8 적중. 전사만 (§6.1). 다음: Fable 기록 감사.`
 
 `[2026-09-30 07:48 KST] 사용자 결정 — STATIC16e4 의 원고 명칭 = "규칙 고정 사후 계산" (Opus 5.5 전사; 텍사스 09-29 17:48 CDT) | 사용자: "그렇게 부르자" (권고안 수락; 버린 안: "사전 등록"). 이미 본 곡선 위의 계산이므로 원고·RESULTS·conference 색인에서 STATIC16e4 를 사전 등록이라 부르지 않는다.`
+
+`[2026-09-30 12:47 KST] 진단 (보고 전용) — genie 고SNR 바닥의 원인 (Opus 5.5; 텍사스 09-29 22:47 CDT) | 사용자 질문 09-29 ("genie 곡선이 SNR 이 커지는데 나빠지는 부분"). code/genie_floor.py 가 테스트 시행의 채널을 runner 와 같은 난수 소비로 재생성해 기존 raw 의 R5-genie 실패와 대조 (수신기 실행 없음). D2 C2 +9..+15 dB genie 실패 6/6 이 L = 3 (< Nt = 4, cond ≈ 1e16, 랭크 3); D3 27 건 중 L = 3 21·L = 4 5 (CN 경로 이득의 깊은 페이딩, cond ≈ 1e4). 실패 수는 raw 와 일치. 곡선의 한 점 상승은 SNR 점별 독립 표본의 잡음 (같은 날 확인). 결과 results/review_next/genie_floor/, 그림 README 에 한 줄.`
