@@ -203,10 +203,105 @@ class ALDSitePrior:
         return np.eye(N) / self.v - G, self.hhat[tr] / self.v - b
 
 
+def dft_dict(Nr, Nt, rho):
+    """Oversampled 2-D DFT (virtual-channel) dictionary for h = vec(H), column-major: H = F_r X F_t^T <=> h = (F_t kron F_r) vec(X);
+    F_n[k, g] = exp(2 pi j k g / (rho n)) / sqrt(n), g = 0..rho n - 1 (half-wavelength ULA spatial frequencies on a rho-times grid)."""
+    F = lambda n: np.exp(2j * np.pi * np.arange(n)[:, None] * np.arange(int(rho * n))[None, :] / (rho * n)) / np.sqrt(n)
+    return np.kron(F(Nt), F(Nr))
+
+
+class SparsePrior:
+    """Sparse Bayesian learning (SBL; Tipping 2001, Wipf & Rao 2004) as the channel prior of the SAME EP receiver as b* (MODULE_H
+    'gmm_site', exact_prior): h = A x, x_i ~ CN(0, gamma_i), A = dft_dict(Nr, Nt, rho).  At every call the hyper-parameters gamma
+    are re-learned by n_em EM steps on the CURRENT Gaussian likelihood exp(-h^H G h + 2 Re b^H h) (pilots only in the pilot-only
+    mode; pilots + data-aided columns in the loop), started from the flat level cbar N / M, then the prior site of the Gaussian
+    prior CN(0, A diag(gamma) A^H + eps I) is returned: Lam = C^-1, eta = 0 (exact for a Gaussian prior; PSD, no clipping).
+    Needs no training data (a model-based baseline, NEXT_EXPERIMENTS_SPARSE16e4).  Every other attribute (C, Cinv, cbar,
+    eh2_prior, ...) is the wrapped sample-covariance GaussianPrior's, so the receiver's initial state equals R2's / b*'s."""
+
+    def __init__(self, base, Nr, Nt, rho, n_em, eps=1e-6, update="mackay"):
+        assert update in ("mackay", "em")
+        self.base, self.A, self.n_em, self.eps, self.update = base, dft_dict(Nr, Nt, rho), int(n_em), float(eps), update
+        self.clip = "n/a"
+
+    def __getattr__(self, k):
+        return getattr(self.base, k)
+
+    def gamma_path(self, G, b, stops):
+        """gamma after each step count in `stops` along ONE run (same start, same updates as gamma(); tuning only)."""
+        A = self.A; M = A.shape[1]; N = G.shape[0]; I = np.eye(N); out = {}
+        g = np.full(M, self.base.cbar * self.base.N / M)
+        for it in range(1, max(stops) + 1):
+            K = np.linalg.inv(I + G @ ((A * g) @ A.conj().T))
+            mx = g * (A.conj().T @ (K @ b)); d = np.real(np.einsum("ij,ij->j", A.conj(), K @ (G @ A)))
+            g = (np.maximum(np.abs(mx) ** 2 + g - g ** 2 * d, 1e-12) if self.update == "em"
+                 else np.maximum(np.abs(mx) ** 2 / np.maximum(g * d, 1e-12), 1e-12))
+            if it in stops:
+                out[it] = g.copy()
+        return out
+
+    def site_from_gamma(self, g, N):
+        Cx = (self.A * g) @ self.A.conj().T + self.eps * np.eye(N)
+        Ci = np.linalg.inv(0.5 * (Cx + Cx.conj().T))
+        return 0.5 * (Ci + Ci.conj().T), np.zeros(N, complex)
+
+    def gamma(self, G, b):
+        """gamma updates in the N x N (Woodbury) form: with K = (I + G A Gamma A^H)^-1, d_i = a_i^H K G a_i,
+        mu_x = Gamma A^H K b,  Sigma_x,ii = gamma_i - gamma_i^2 d_i  (= (Gamma^-1 + A^H G A)^-1, never forming M x M).
+        update 'em' (Wipf & Rao 2004): gamma_i <- |mu_i|^2 + Sigma_ii.  update 'mackay' (MacKay 1992; Tipping 2001 fixed point,
+        default -- converges in far fewer steps, SPARSE16e4 review): gamma_i <- |mu_i|^2 / (1 - Sigma_ii / gamma_i) = |mu_i|^2 / (gamma_i d_i)."""
+        A = self.A; M = A.shape[1]; N = G.shape[0]; I = np.eye(N)
+        g = np.full(M, self.base.cbar * self.base.N / M)
+        for _ in range(self.n_em):
+            B = A * g
+            K = np.linalg.inv(I + G @ (B @ A.conj().T))
+            mx = g * (A.conj().T @ (K @ b))
+            d = np.real(np.einsum("ij,ij->j", A.conj(), K @ (G @ A)))
+            if self.update == "em":
+                g = np.maximum(np.abs(mx) ** 2 + g - g ** 2 * d, 1e-12)
+            else:
+                g = np.maximum(np.abs(mx) ** 2 / np.maximum(g * d, 1e-12), 1e-12)
+        return g
+
+    def ep_site(self, G, b, lam_min):
+        N = G.shape[0]; g = self.gamma(G, b)
+        Cx = (self.A * g) @ self.A.conj().T + self.eps * np.eye(N)
+        Ci = np.linalg.inv(0.5 * (Cx + Cx.conj().T))
+        return 0.5 * (Ci + Ci.conj().T), np.zeros(N, complex)
+
+
+class OMPSitePrior:
+    """Orthogonal matching pursuit (Pati et al. 1993; Tropp & Gilbert 2007) channel estimate from the pilots on dft_dict(Nr, Nt, rho),
+    handed to RouteA's mode='pilot_only' (exact_prior) as a frozen belief N(hhat, v I) exactly like ALDSitePrior (plug-in v).
+    Greedy on the Gaussian likelihood (G, b): pick the atom maximising |a_i^H (b - G h)|^2 / (a_i^H G a_i), re-solve the
+    least-squares coefficients on the support (A_S^H G A_S) x_S = A_S^H b, stop after L atoms."""
+    V_PLUGIN = 1e-8
+
+    def __init__(self, base, Nr, Nt, rho, L):
+        self.base, self.A, self.L = base, dft_dict(Nr, Nt, rho), int(L)
+        self.clip = "n/a"
+
+    def __getattr__(self, k):
+        return getattr(self.base, k)
+
+    def hhat(self, G, b):
+        A = self.A; AGA = A.conj().T @ G @ A; Ab = A.conj().T @ b
+        dg = np.maximum(np.real(np.diag(AGA)), 1e-30); S = []; h = np.zeros(G.shape[0], complex)
+        for _ in range(self.L):
+            c = np.abs(A.conj().T @ (b - G @ h)) ** 2 / dg
+            c[S] = -1.0; S.append(int(np.argmax(c)))
+            xs = np.linalg.solve(AGA[np.ix_(S, S)], Ab[S]); h = A[:, S] @ xs
+        return h
+
+    def ep_site(self, G, b, lam_min):
+        N = G.shape[0]; h = self.hhat(G, b)
+        return np.eye(N) / self.V_PLUGIN - G, h / self.V_PLUGIN - b
+
+
 def build_our_arms(testbed, prior, Nr, Nt, T, Tp, sigma2, code, Xp, ntrain=N_TRAIN,
                    true_prior=None, score_prior=None, with_G=False, score_prior_v1=None,
                    score_prior_c=None, bstar_scalar=False, mean_arms=False,
-                   score_prior_v1_floor=None, p3_arms=False, pilot_arms=False, ald=None):
+                   score_prior_v1_floor=None, p3_arms=False, pilot_arms=False, ald=None, sparse=None):
     """M-ours-gmm32 / M-ours-bstar / M-ours-score (D1 only) / M-ours-dscore / M-ours-G (test M2 only).
 
     score_prior_v1: a SECOND score.ScorePrior built with psd_project=True (Stage C V1, spec 10 §3b / (F1)).
@@ -304,6 +399,13 @@ def build_our_arms(testbed, prior, Nr, Nt, T, Tp, sigma2, code, Xp, ntrain=N_TRA
             arms[name] = route_a(*a, ALDSitePrior(score_prior_v1, tab, k, v), code, Xp, "score", clip="eta",
                                  mode="pilot_only", exact_prior=True)
             assert arms[name].exact_prior and arms[name].mode == "pilot_only"
+    if sparse is not None:          # NEXT_EXPERIMENTS_SPARSE16e4: model-based sparse baselines, same EP receiver as b* ('gmm_site')
+        rs, n_em, ro, L = sparse["rho_sbl"], sparse["n_em"], sparse["rho_omp"], sparse["L"]   # resolved for THIS SNR by runner
+        arms["SBL-loop"] = route_a(*a, SparsePrior(Cs, Nr, Nt, rs, n_em), code, Xp, "gmm_site")
+        arms["SBL-pilot"] = route_a(*a, SparsePrior(Cs, Nr, Nt, rs, n_em), code, Xp, "gmm_site", mode="pilot_only")
+        arms["OMP-pilot"] = route_a(*a, OMPSitePrior(Cs, Nr, Nt, ro, L), code, Xp, "gmm_site", mode="pilot_only")
+        for k in ("SBL-loop", "SBL-pilot", "OMP-pilot"):
+            assert arms[k].exact_prior
     if with_G:
         arms["M-ours-G"] = route_a(*a, Cs, code, Xp, "gaussian")
 
