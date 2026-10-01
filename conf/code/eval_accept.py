@@ -2,6 +2,7 @@
 of evaluation tags against the values frozen in the pre-registration's §5.  Read-only; prints OK or the failures (exit 1).
 
   --tag TAG:ROLE:SHA:CELLS   (repeatable)  e.g. --tag NR16B16e4:best:0123456789abcdef:C6 --tag NR16B16e4last:last:...:C6
+                             ROLE = SHA = '-' (SPARSE16e4): the tag runs no Stage C arm, meta|stagec_ckpt_id must be ABSENT
   --ntrain N  --kron-K K  --ll-val LL     the frozen b* (kron) and its validation log-likelihood (|diff| <= 1e-9)
   --iters 16  --chunk 40  --n 2560         the registered chunk plan {(chunk*k, chunk)}
   --ref-raw raw_NR16run2                    R5-genie replay check: blk_err / ber / tauL_gmean / alphaD @1..iters must be
@@ -86,7 +87,10 @@ def main():
                     if abs(float(g(f"meta|ll_val|{a.bstar}")) - a.ll_val) > 1e-9:
                         bad.append(f"{os.path.basename(f)}: ll_val|{a.bstar} {g(f'meta|ll_val|{a.bstar}')} != {a.ll_val}")
                     ids = g("meta|stagec_ckpt_id") if "meta|stagec_ckpt_id" in z.files else "(key absent: pre-P0-1 raw)"
-                    if f"sha256[:16]={sha}" not in ids or f"role={role}" not in ids:
+                    if role == sha == "-":      # SPARSE16e4: a tag that builds NO Stage C arm -> the key must be absent
+                        if "meta|stagec_ckpt_id" in z.files:
+                            bad.append(f"{os.path.basename(f)}: ckpt id {ids[:80]} present, tag spec '-:-' expects none")
+                    elif f"sha256[:16]={sha}" not in ids or f"role={role}" not in ids:
                         bad.append(f"{os.path.basename(f)}: ckpt id {ids[:80]} != sha {sha} role {role}")
                     if int(z["run|iters"]) != a.iters:
                         bad.append(f"{os.path.basename(f)}: run|iters {int(z['run|iters'])}")

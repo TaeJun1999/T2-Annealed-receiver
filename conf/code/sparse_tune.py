@@ -3,8 +3,8 @@ estimate NMSE of SBL (arms.SparsePrior, rho x n_em) and OMP (arms.OMPSitePrior, 
 stream (default_rng([20260930, TBID, PID, Nr, SNR]) -- never the test trials 0..2559 nor the development trials of any registered
 tag), with the receiver's own pilot site (G, b) = sum over pilot columns of (x x^H)^* kron I / sigma2, x^* kron y / sigma2
 (RouteA._sites with Tau = 0 on pilots).  The estimate is the pilot-only posterior mean hpost = (Lam + G)^-1 (eta + b), i.e. what
-RouteA mode='pilot_only' freezes.  BLER is NOT computed here.  Rule (fixed before running, §1): per dataset pick the (rho, n_em)
-and (rho, L) with the lowest NMSE averaged in dB over the cell's SNR grid; ties -> smaller rho, then smaller n_em / L.
+RouteA mode='pilot_only' freezes.  BLER is NOT computed here.  Rule (v2, SPARSE16e4 §1 / §5): per_snr_pick below -- per family rho
+minimising the SNR-mean (dB) of the per-SNR best NMSE, then at that rho the per-SNR n_em (SBL) / L (OMP, L <= N); ties -> smaller.
     python code/sparse_tune.py --prior S2 --cell C2 [--n 256] [--out results/sparse/tune_<prior>_<cell>.json]
 """
 import argparse
@@ -93,12 +93,6 @@ def main():
                 res[fam].setdefault(k, v)
         allr |= set(old["grid"]["rho"])
     pick = per_snr_pick(res, cell, Nr * Nt, rhos=allr)
-    for fam in ():
-        key = lambda k: (np.mean(list(res[fam][k].values())), *map(int, k.split(",")))
-        best = min(res[fam], key=key); vals = list(map(int, best.split(",")))
-        grid2 = NEMS if fam == "sbl" else LS
-        pick[fam] = dict(zip(("rho", "n_em" if fam == "sbl" else "L"), vals), nmse_db_mean=float(key(best)[0]),
-                         grid_edge=[n for n, v, g in (("rho", vals[0], RHOS), ("n_em" if fam == "sbl" else "L", vals[1], grid2)) if v == max(g)])
     pfile = os.path.join(C.CONF, "results", "sparse", f"pick_{a.prior}_{a.cell}.json")
     os.makedirs(os.path.dirname(pfile), exist_ok=True); json.dump(pick, open(pfile, "w"), indent=1)
     out = dict(prior=a.prior, cell=a.cell, n=a.n, seed="default_rng([20260930, TBID, PID, Nr, snr+100])", grid=dict(rho=sorted(allr),
