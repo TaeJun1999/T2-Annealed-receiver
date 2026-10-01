@@ -1,0 +1,16 @@
+# SCALE16e4 §5 values read by code/run_scale2.sh (format = its header lines 20-27); committed WITH §5 (= the run commit, DECISIONS 7).
+# Written 2026-10-01 13:04 CDT. Comments ONLY on their own lines: s5() (run_scale2.sh:56) keeps every token after the tag,
+#  so a trailing '# ...' on a CELL line would become extra fields and fail the 11-field check (run_scale2.sh:75).
+# FREEZE = git rev-parse 16a9dff6 (freeze commit). WGB = §1 메모리 가드 행 G = 8.0 (RSS smoke max 7.367 GB + 5 %, rounded up to 0.5 GB).
+# ckpt stem = attempt 1 (_a1); the _a2/_a3 ckpts of the same cells are outside this registration and are not used.
+#  best/last sha16 = sha256sum ckpt/<stem>_best.pt / ckpt/<stem>.pt (first 16 hex).
+# bstar / kron_K / ll_val = arms.gmm_selection on results/gmm_fits_D2_<tag> (merged files' ll_val, Python repr); Ks = the merged grid fitted.
+# K2_K / K2_ll / c_K only when K_max (kron 4096) is the grid edge (b* = kron 4096): K2_ll = merged kron 2048 ll_val,
+#  c_K = max(1, r/(1-r)), r = dll(4096-2048)/dll(2048-1024) of the merged kron ll_val, 'inf' when r >= 1; interior b* -> '-' '-' '-'.
+#  U28NR16B16e4: r 0.5652375151090457 -> c_K 1.3001064598543197 (report-only dF_K).  U28NR32B16e4: r 1.2799495603934918 >= 1 -> inf.
+#  NR32B16e4: merged kron 4096 237.47394470961802 < kron 2048 242.7371088214899 -> b* = kron 2048, interior of the fitted grid -> no K2.
+FREEZE 16a9dff651c8406927400da6353eb5b17022c73f
+WGB 8.0
+CELL U28NR16B16e4 d2sx_UMi28NR16_N160000_a1 34136808b1e367ac ee3818febe902e99 kron 4096 56.5879534445348 16,32,64,128,256,512 16,32,64,128,256,512,1024,2048,4096 2048 55.61013440427408 1.3001064598543197
+CELL U28NR32B16e4 d2sx_UMi28NR32_N160000_a1 463da87aa8dbfb61 347a1e5b6c270222 kron 4096 152.23176788511105 16,32,64,128,256,512 16,32,64,128,256,512,1024,2048,4096 2048 150.38770163027337 inf
+CELL NR32B16e4 d2sx_NR32_N160000_a1 3cf5d3eff96f0341 1f782042a5ad06b8 kron 2048 242.7371088214899 16,32,64,128,256,512 16,32,64,128,256,512,1024,2048,4096 - - -
