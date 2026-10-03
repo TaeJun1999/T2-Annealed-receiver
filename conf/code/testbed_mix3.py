@@ -1,6 +1,12 @@
-"""conf/code/testbed_mix3.py [MIX3|UMi28] -- verification of a 38.901 prior (code/mix3.py) -> results/testbed_<prior>.txt.
+"""conf/code/testbed_mix3.py [MIX3|UMi28] [--nr {8,16,32}] -- verification of a 38.901 prior (code/mix3.py) -> results/testbed_<prior>.txt
+(Nr 8, default, unchanged) or results/testbed_<prior>_Nr<nr>.txt (Nr 16 / 32).
 UMi28 (added 2026-09-26, the main 38.901 experiment): same checks and tolerances against its own phase-0 probe UMi28_mix_8_seed1.json
 (same law: UMi 28 GHz, LoS by the model); its scenario share is 1 by construction.
+--nr 16 / 32 (added 2026-09-30 10:50 CDT for NEXT_EXPERIMENTS_SCALE16e4 ④, before the first Nr 16/32 run; only (UMi28, 16|32, 4) is
+calibrated in mix3.py): the SAME checks with the SAME tolerances as NEXT_EXPERIMENTS_38901 §0 -- TMXa |mean - 1| <= 4 MC s.e. (val
+stream 8 of that Nr, n = N_VAL = 20000), TMXc LoS within 4 binomial s.e. / shares within 4 s.e. of 1/NS, TMXd |NMSE - probe| <= 0.02
+-- against the phase-0 probe of the same Nr (UMi28_mix_16_seed1.json: LoS 0.400, K1 NMSE @ -3 dB 0.3246; UMi28_mix_32_seed1.json:
+LoS 0.400, K1 0.3222; ntr 40000 / nte 1000 like the Nr 8 probe).  TMXa PASS at Nr 16 and 32 is the freeze precondition of stage 2.
 
 Checks (tolerances fixed here before the first run; no receiver / BLER anywhere):
   TMXa normalisation: mean ||H||_F^2 / (Nr Nt) on the VALIDATION stream (8), n = N_VAL, within 4 MC s.e. of 1 (the constant
@@ -13,19 +19,22 @@ Checks (tolerances fixed here before the first run; no receiver / BLER anywhere)
   TMXe T2b pilot decision (erank Rt vs 0.9 Nt) and ensemble effective rank; beamspace top-4 energy (report);
   TMXf generation cost: sample() per call, sample_vecs per 4096.
 """
-import hashlib, json, os, subprocess, sys, time
+import argparse, hashlib, json, os, subprocess, sys, time
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import numpy as np
 import common as C
 import d2
 import mix3
 
-NR, NT, N_VAL = 8, 4, 20000
-PRIOR = sys.argv[1] if len(sys.argv) > 1 else "MIX3"
-assert PRIOR in mix3.PRIORS, PRIOR
-OUT = os.path.join(C.CONF, "results", f"testbed_{PRIOR}.txt")
+_ap = argparse.ArgumentParser()
+_ap.add_argument("prior", nargs="?", default="MIX3", choices=mix3.PRIORS)
+_ap.add_argument("--nr", type=int, choices=(8, 16, 32), default=8)
+_a = _ap.parse_args()
+NR, NT, N_VAL = _a.nr, 4, 20000
+PRIOR = _a.prior
+OUT = os.path.join(C.CONF, "results", f"testbed_{PRIOR}{'' if NR == 8 else f'_Nr{NR}'}.txt")
 PROBE = os.path.join(C.CONF, "results", "review_next", "testbed2_phase0", "phy_results",
-                     {"MIX3": "MIX3_8_seed1.json", "UMi28": "UMi28_mix_8_seed1.json"}[PRIOR])
+                     {"MIX3": f"MIX3_{NR}_seed1.json", "UMi28": f"UMi28_mix_{NR}_seed1.json"}[PRIOR])
 NS = mix3.NSCEN[PRIOR]
 
 

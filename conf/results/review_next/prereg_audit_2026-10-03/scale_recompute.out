@@ -1,0 +1,300 @@
+# scale_recompute.py -- SCALE16e4 §6.1 record audit, own recomputation (no project analysis code called)
+# python 3.12.14 numpy 2.5.2 | CUDA_VISIBLE_DEVICES = ''
+
+## G. git / documents / logs / manifests / acceptance files
+    [ok] HEAD: 'b4433d3c'
+    [ok] branch: 'scale'
+    [ok] commits after b4433d3c on scale: ''
+    [ok] conf/code Demo clean: ''
+    [ok] b4433d3c commit time (KST): '2026-10-02 03:52:11 +0900'
+    [ok] 16a9dff6 commit time (KST): '2026-10-01 04:06:44 +0900'
+    [ok] diff 16a9dff6..b4433d3c -- conf/code Demo: ''
+    [ok] files changed 16a9dff6..b4433d3c: ['conf/results/review_next/NEXT_EXPERIMENTS_SCALE16e4.md', 'conf/results/scale/scale2_s5.txt']
+    [ok] numstat (working tree): ['2\t0\tconf/DECISIONS.md', '324\t0\tconf/results/review_next/NEXT_EXPERIMENTS_SCALE16e4.md', '1\t0\tdocs/EXPERIMENTS.md']
+    [ok] REG hunks: ['@@ -415,3 +415,327 @@ CELL NR32B16e4 d2sx_NR32_N160000_a1 3cf5d3eff96f0341 1f782042a5ad06b8 kron 2048']
+    [ok] REG removed lines: 0
+    [ok] REG lines 1-417 == HEAD (append-only): True
+    [ok] REG line 417 is '## 6.': True
+    [ok] REG line 419 is '### 6.1': True
+    [ok] REG total lines: 741
+    [ok] §6.1 bytes (lines 418-741): 47183
+    [ok] scale2_s5.txt sha256 (HEAD == working): True
+    [ok] placeholder 'x CDT' in §6.1 / EXPERIMENTS row / DECISIONS line: False
+    [ok] placeholder 'x KST' in §6.1 / EXPERIMENTS row / DECISIONS line: False
+    [ok] placeholder 'xx:xx' in §6.1 / EXPERIMENTS row / DECISIONS line: False
+    [ok] placeholder 'TODO' in §6.1 / EXPERIMENTS row / DECISIONS line: False
+    [ok] 'TBD' in §6.1 only as the §5 reference '(§5 의 TBD)': (1, 1, False)
+    [ok] §6.1.5 sums UMi28 C9 / D2 C9 / UMi28 C6 / reuse: (1394.4, 1063.5, 207.2, 57.9)
+    [ok] interpretive word '유의하게' absent: False
+    [ok] interpretive word '우수' absent: False
+    [ok] interpretive word '개선' absent: False
+    [ok] interpretive word '여지' absent: False
+    [ok] interpretive word 'headroom' absent: False
+    [ok] interpretive word '최적의' absent: False
+    [ok] interpretive word '비긴다' absent: False
+    [ok] interpretive word '동등' absent: False
+    [ok] interpretive word 'significant' absent: False
+    [ok] interpretive word '입증' absent: False
+    [ok] interpretive word '확인됐다' absent: False
+    [ok] run_scale2.log lines: 180
+    [ok] L:1 start tune: True
+    [ok] L:11 TUNE_DONE: '[scale2 10-01 12:57 CDT] SCALE2_TUNE_DONE ok=6 fail=0'
+    [ok] L:12 start estimate: "[scale2 10-01 14:03 CDT] start estimate (git b4433d3c, freeze 16a9dff651c8406927400da6353eb5b17022c73f, resume 0, WGB 8.0 (run 8.0), GPU '0')"
+    [ok] L:25 ESTIMATE_DONE: '[scale2 10-01 14:16 CDT] SCALE2_ESTIMATE_DONE ok=6 fail=0'
+    [ok] L:26 start eval: "[scale2 10-01 14:16 CDT] start eval (git b4433d3c, freeze 16a9dff651c8406927400da6353eb5b17022c73f, resume 0, WGB 8.0 (run 8.0), GPU '')"
+    [ok] L:179 DONE: '[scale2 10-03 11:49 CDT] SCALE2_DONE ok=101 fail=0'
+    [ok] L:180 EXIT: 'SCALE2_EXIT=0'
+    [ok] eval rc=0 lines: 101
+    [ok] eval rc!=0 lines: 0
+    [ok] ABORT/SKIPPED/skip:/resume lines: 0
+    [ok] start lines: [1, 12, 26]
+    [ok] frontier lines L:160-175: [160, 161, 162, 163, 164, 165, 166, 167, 168, 169, 170, 171, 172, 173, 174, 175]
+    [ok] pair_baselines lines L:176-178: [176, 177, 178]
+    [ok] L:57: '[scale2 10-01 17:17 CDT] U28NR16B16e4 decision SNRs (anchor b*, never by hand): 0 3 6'
+    [ok] L:94: '[scale2 10-02 08:25 CDT] U28NR32B16e4 decision SNRs (anchor b*, never by hand): -3 0 3'
+    [ok] L:131: '[scale2 10-03 05:03 CDT] NR32B16e4 decision SNRs (anchor b*, never by hand): -9 -6 -3'
+    [ok] L:52: 'raw_B16e4 (D2 C2 K/2 = kron 512 -14.636106156749378): 0 bad of 448 C2 files'
+    [ok] L:53: '[scale2 10-01 15:15 CDT] check raw_B16e4 (D2 C2 K/2) rc=0'
+    [ok] accept line numbers: [35, 42, 43, 50, 51, 86, 87, 88, 89, 90, 123, 124, 125, 126, 127, 156, 157, 158, 159]
+    [ok] all accept lines say ACCEPT: OK and rc=0: True
+    [ok] (k) OK on C9 accept lines: [123, 124, 125, 126, 127, 156, 157, 158, 159]
+    [ok] manifest JSON lines: 22
+    [ok] b* last == A lines rc=0: [85, 122, 155]
+    [ok] guard_report lines rc=0: [81, 118, 151]
+    [ok] eval elapsed minutes: 2733
+    [ok] 45 h 33 min: (45, 33)
+    [ok] KST 2026-10-04 02:06 -> CDT: '10-03 12:06'
+    [ok] KST 2026-10-02 04:16 -> CDT: '10-01 14:16'
+    [ok] KST 2026-10-04 01:49 -> CDT: '10-03 11:49'
+    [ok] KST 2026-10-02 03:52:11 -> CDT: '10-01 13:52'
+    [ok] mtime conf/results/review_next/NEXT_EXPERIMENTS_SCALE16e4.md (KST): '2026-10-04 02:06'
+    [ok] mtime conf/DECISIONS.md (KST): '2026-10-04 02:06'
+    [ok] mtime docs/EXPERIMENTS.md (KST): '2026-10-04 02:06'
+    [ok] rss mentions in run_scale2.sh (lines): [22, 35]
+    [ok] RSS / ps lines in run_scale2.log: 0
+    [ok] 2nd-stage frontier lines carry no --level: True
+    [ok] forced Q-K header absent in primary U28 files: True
+  runner logs (tag: header lines/resume, workers, first done s, finished min, warn/err lines, '/N done' count):
+    [ok] §6.1 runner table rows parsed: 22
+    [ok] runner K2NR16B16e4: hdr 1 resume=0 True ndone 192 werr 0 | workers/first/finished/time/L: ('192', '628', '10.9', '14:27', '27')
+    [ok] runner K2U28B16e4: hdr 1 resume=0 True ndone 192 werr 0 | workers/first/finished/time/L: ('192', '148', '3.7', '14:31', '28')
+    [ok] runner BRB16e4k: hdr 1 resume=0 True ndone 1 werr 0 | workers/first/finished/time/L: ('1', '201', '3.4', '14:34', '29')
+    [ok] runner BRNR16: hdr 1 resume=0 True ndone 1 werr 0 | workers/first/finished/time/L: ('1', '2103', '35.0', '15:09', '30')
+    [ok] runner BRU28: hdr 1 resume=0 True ndone 1 werr 0 | workers/first/finished/time/L: ('1', '296', '4.9', '15:14', '31')
+    [ok] runner U28NR16B16e4: hdr 1 resume=0 True ndone 448 werr 0 | workers/first/finished/time/L: ('192', '2740', '120.8', '17:16', '55')
+    [ok] runner PILU28NR16: hdr 1 resume=0 True ndone 448 werr 0 | workers/first/finished/time/L: ('192', '183', '8.8', '17:25', '58')
+    [ok] runner ALDU28NR16: hdr 1 resume=0 True ndone 448 werr 0 | workers/first/finished/time/L: ('192', '40', '2.5', '17:28', '59')
+    [ok] runner K2U28NR16B16e4: hdr 1 resume=0 True ndone 192 werr 0 | workers/first/finished/time/L: ('192', '640', '12.1', '17:40', '60')
+    [ok] runner U28NR16B16e4chk: hdr 1 resume=0 True ndone 1 werr 0 | workers/first/finished/time/L: ('1', '1130', '18.8', '17:59', '61')
+    [ok] runner U28NR16B16e4last: hdr 1 resume=0 True ndone 192 werr 0 | workers/first/finished/time/L: ('192', '2390', '44.2', '18:43', '62')
+    [ok] runner U28NR32B16e4: hdr 1 resume=0 True ndone 448 werr 0 | workers/first/finished/time/L: ('99', '10100', '820.0', '08:24', '92')
+    [ok] runner PILU28NR32: hdr 1 resume=0 True ndone 448 werr 0 | workers/first/finished/time/L: ('99', '602', '50.6', '09:15', '95')
+    [ok] runner ALDU28NR32: hdr 1 resume=0 True ndone 448 werr 0 | workers/first/finished/time/L: ('99', '50', '4.6', '09:20', '96')
+    [ok] runner K2U28NR32B16e4: hdr 1 resume=0 True ndone 192 werr 0 | workers/first/finished/time/L: ('99', '2011', '73.6', '10:34', '97')
+    [ok] runner U28NR32B16e4chk: hdr 1 resume=0 True ndone 1 werr 0 | workers/first/finished/time/L: ('1', '7230', '120.5', '12:34', '98')
+    [ok] runner U28NR32B16e4last: hdr 1 resume=0 True ndone 192 werr 0 | workers/first/finished/time/L: ('99', '9487', '325.1', '17:59', '99')
+    [ok] runner NR32B16e4: hdr 1 resume=0 True ndone 448 werr 0 | workers/first/finished/time/L: ('99', '8049', '661.9', '05:02', '129')
+    [ok] runner PILNR32: hdr 1 resume=0 True ndone 448 werr 0 | workers/first/finished/time/L: ('99', '499', '40.8', '05:44', '132')
+    [ok] runner ALDNR32: hdr 1 resume=0 True ndone 448 werr 0 | workers/first/finished/time/L: ('99', '22', '1.9', '05:45', '133')
+    [ok] runner NR32B16e4chk: hdr 1 resume=0 True ndone 1 werr 0 | workers/first/finished/time/L: ('1', '5530', '92.2', '07:18', '134')
+    [ok] runner NR32B16e4last: hdr 1 resume=0 True ndone 192 werr 0 | workers/first/finished/time/L: ('99', '7724', '266.7', '11:44', '135')
+  run_manifest JSON (git, n_raw_files, config_hash, arms, written KST -> CDT == log time):
+    [ok] manifest K2NR16B16e4: ('b4433d3c', 192, '5f18c69f99ce4d34', 2, True)
+    [ok] manifest K2U28B16e4: ('b4433d3c', 192, 'af426876fd7d9a24', 2, True)
+    [ok] manifest BRB16e4k: ('b4433d3c', 1, '116f9f39fdff840f', 14, True)
+    [ok] manifest BRNR16: ('b4433d3c', 1, 'df23c83552a360b4', 14, True)
+    [ok] manifest BRU28: ('b4433d3c', 1, '5f69f58ab3f09779', 14, True)
+    [ok] manifest U28NR16B16e4: ('b4433d3c', 448, 'a6690fc805e18f7e', 11, True)
+    [ok] manifest PILU28NR16: ('b4433d3c', 448, 'a6690fc805e18f7e', 3, True)
+    [ok] manifest ALDU28NR16: ('b4433d3c', 448, 'a6690fc805e18f7e', 3, True)
+    [ok] manifest K2U28NR16B16e4: ('b4433d3c', 192, '7742fd0201dd4a3f', 2, True)
+    [ok] manifest U28NR16B16e4chk: ('b4433d3c', 1, 'df23c83552a360b4', 11, True)
+    [ok] manifest U28NR16B16e4last: ('b4433d3c', 192, '7742fd0201dd4a3f', 3, True)
+    [ok] manifest U28NR32B16e4: ('b4433d3c', 448, '8058a740f0282d38', 11, True)
+    [ok] manifest PILU28NR32: ('b4433d3c', 448, '8058a740f0282d38', 3, True)
+    [ok] manifest ALDU28NR32: ('b4433d3c', 448, '8058a740f0282d38', 3, True)
+    [ok] manifest K2U28NR32B16e4: ('b4433d3c', 192, '00d5c3a2d97766a3', 2, True)
+    [ok] manifest U28NR32B16e4chk: ('b4433d3c', 1, 'e153aa498f11669e', 11, True)
+    [ok] manifest U28NR32B16e4last: ('b4433d3c', 192, '00d5c3a2d97766a3', 3, True)
+    [ok] manifest NR32B16e4: ('b4433d3c', 448, '8058a740f0282d38', 11, True)
+    [ok] manifest PILNR32: ('b4433d3c', 448, '8058a740f0282d38', 3, True)
+    [ok] manifest ALDNR32: ('b4433d3c', 448, '8058a740f0282d38', 3, True)
+    [ok] manifest NR32B16e4chk: ('b4433d3c', 1, 'e153aa498f11669e', 11, True)
+    [ok] manifest NR32B16e4last: ('b4433d3c', 192, '96c82d63940fa78e', 3, True)
+  acceptance files: 19 compared
+
+## 1. raw integrity (22 tags): files, chunk plan, run|git, meta, ckpt id, jobs/worker_gb, em_sec, genie (d), chk/bridge replay (e), K/2, last == A
+  K2NR16B16e4: files 192 git b4433d3c ntrain 160000.0 bstar kron kron_K 2048 ll 61.982398757574266 jobs (none) worker_gb (none) n [2560] plan True holes0 True nanfill0 True arms 2 raised 0 points ['-3', '+0', '+3']
+      ckpt id 'sha256[:16]=c050d611b2c714a6 epoch=1684 best_epoch=1684 role=best 16x4'  em_sec 33201.76065135002  fit_sec|V1 36743.34509015083
+  K2U28B16e4: files 192 git b4433d3c ntrain 160000.0 bstar kron kron_K 2048 ll 5.539276756851168 jobs (none) worker_gb (none) n [2560] plan True holes0 True nanfill0 True arms 2 raised 0 points ['+3', '+6', '+9']
+      ckpt id 'sha256[:16]=6f3a1b9490864af1 epoch=379 best_epoch=379 role=best 8x4'  em_sec 7482.270877122879  fit_sec|V1 7828.305099487305
+  BRB16e4k: files 1 git b4433d3c ntrain 160000.0 bstar kron kron_K 1024 ll -11.459169831224418 jobs (none) worker_gb (none) n [40] plan True holes0 True nanfill0 True arms 14 raised 0 points ['-3']
+      ckpt id 'sha256[:16]=4443921ce8d5c4a1 epoch=1784 best_epoch=1764 role=legacy-last 8x4 | BEST_WEIGHTS_UNAVAILABLE: evaluated = last-epoch EMA, reported best_val belongs to best_epoch'  em_sec 107957.18832826614  fit_sec|V1 35774.54626870155
+  BRNR16: files 1 git b4433d3c ntrain 160000.0 bstar kron kron_K 4096 ll 63.1751571838059 jobs (none) worker_gb (none) n [40] plan True holes0 True nanfill0 True arms 14 raised 0 points ['-3']
+      ckpt id 'sha256[:16]=c050d611b2c714a6 epoch=1684 best_epoch=1684 role=best 16x4'  em_sec 46649.95333504677  fit_sec|V1 36743.34509015083
+  BRU28: files 1 git b4433d3c ntrain 160000.0 bstar kron kron_K 4096 ll 5.797910431000217 jobs (none) worker_gb (none) n [40] plan True holes0 True nanfill0 True arms 14 raised 0 points ['+3']
+      ckpt id 'sha256[:16]=6f3a1b9490864af1 epoch=379 best_epoch=379 role=best 8x4'  em_sec 9133.61854147911  fit_sec|V1 7828.305099487305
+  U28NR16B16e4: files 448 git b4433d3c ntrain 160000.0 bstar kron kron_K 4096 ll 56.5879534445348 jobs (none) worker_gb (none) n [2560] plan True holes0 True nanfill0 True arms 11 raised 0 points ['-3', '+0', '+3', '+6', '+9', '+12', '+15']
+      ckpt id 'sha256[:16]=34136808b1e367ac epoch=642 best_epoch=642 role=best 16x4'  em_sec 75912.80111646652  fit_sec|V1 9013.529504776001
+  PILU28NR16: files 448 git b4433d3c ntrain 160000.0 bstar kron kron_K 4096 ll 56.5879534445348 jobs (none) worker_gb (none) n [2560] plan True holes0 True nanfill0 True arms 3 raised 0 points ['-3', '+0', '+3', '+6', '+9', '+12', '+15']
+      ckpt id 'sha256[:16]=34136808b1e367ac epoch=642 best_epoch=642 role=best 16x4'  em_sec 75912.80111646652  fit_sec|V1 9013.529504776001
+  ALDU28NR16: files 448 git b4433d3c ntrain 160000.0 bstar kron kron_K 4096 ll 56.5879534445348 jobs (none) worker_gb (none) n [2560] plan True holes0 True nanfill0 True arms 3 raised 0 points ['-3', '+0', '+3', '+6', '+9', '+12', '+15']
+      ckpt id 'sha256[:16]=34136808b1e367ac epoch=642 best_epoch=642 role=best 16x4'  em_sec 75912.80111646652  fit_sec|V1 9013.529504776001
+  K2U28NR16B16e4: files 192 git b4433d3c ntrain 160000.0 bstar kron kron_K 2048 ll 55.61013440427408 jobs (none) worker_gb (none) n [2560] plan True holes0 True nanfill0 True arms 2 raised 0 points ['+0', '+3', '+6']
+      ckpt id 'sha256[:16]=34136808b1e367ac epoch=642 best_epoch=642 role=best 16x4'  em_sec 72578.62030720711  fit_sec|V1 9013.529504776001
+  U28NR16B16e4chk: files 1 git b4433d3c ntrain 160000.0 bstar kron kron_K 4096 ll 56.5879534445348 jobs (none) worker_gb (none) n [40] plan True holes0 True nanfill0 True arms 11 raised 0 points ['-3']
+      ckpt id 'sha256[:16]=34136808b1e367ac epoch=642 best_epoch=642 role=best 16x4'  em_sec 75912.80111646652  fit_sec|V1 9013.529504776001
+  U28NR16B16e4last: files 192 git b4433d3c ntrain 160000.0 bstar kron kron_K 4096 ll 56.5879534445348 jobs (none) worker_gb (none) n [2560] plan True holes0 True nanfill0 True arms 3 raised 0 points ['+0', '+3', '+6']
+      ckpt id 'sha256[:16]=ee3818febe902e99 epoch=662 best_epoch=642 role=last 16x4 | evaluated = LAST epoch; the best-epoch weights are in the _best.pt sibling'  em_sec 75912.80111646652  fit_sec|V1 9013.529504776001
+  U28NR32B16e4: files 448 git b4433d3c ntrain 160000.0 bstar kron kron_K 4096 ll 152.23176788511105 jobs 99 worker_gb 8.0 n [2560] plan True holes0 True nanfill0 True arms 11 raised 0 points ['-12', '-9', '-6', '-3', '+0', '+3', '+6']
+      ckpt id 'sha256[:16]=463da87aa8dbfb61 epoch=232 best_epoch=232 role=best 32x4'  em_sec 128781.03982377052  fit_sec|V1 4895.238476037979
+  PILU28NR32: files 448 git b4433d3c ntrain 160000.0 bstar kron kron_K 4096 ll 152.23176788511105 jobs 99 worker_gb 8.0 n [2560] plan True holes0 True nanfill0 True arms 3 raised 0 points ['-12', '-9', '-6', '-3', '+0', '+3', '+6']
+      ckpt id 'sha256[:16]=463da87aa8dbfb61 epoch=232 best_epoch=232 role=best 32x4'  em_sec 128781.03982377052  fit_sec|V1 4895.238476037979
+  ALDU28NR32: files 448 git b4433d3c ntrain 160000.0 bstar kron kron_K 4096 ll 152.23176788511105 jobs 99 worker_gb 8.0 n [2560] plan True holes0 True nanfill0 True arms 3 raised 0 points ['-12', '-9', '-6', '-3', '+0', '+3', '+6']
+      ckpt id 'sha256[:16]=463da87aa8dbfb61 epoch=232 best_epoch=232 role=best 32x4'  em_sec 128781.03982377052  fit_sec|V1 4895.238476037979
+  K2U28NR32B16e4: files 192 git b4433d3c ntrain 160000.0 bstar kron kron_K 2048 ll 150.38770163027337 jobs 99 worker_gb 8.0 n [2560] plan True holes0 True nanfill0 True arms 2 raised 0 points ['-3', '+0', '+3']
+      ckpt id 'sha256[:16]=463da87aa8dbfb61 epoch=232 best_epoch=232 role=best 32x4'  em_sec 118360.95772218704  fit_sec|V1 4895.238476037979
+  U28NR32B16e4chk: files 1 git b4433d3c ntrain 160000.0 bstar kron kron_K 4096 ll 152.23176788511105 jobs 1 worker_gb 8.0 n [40] plan True holes0 True nanfill0 True arms 11 raised 0 points ['-12']
+      ckpt id 'sha256[:16]=463da87aa8dbfb61 epoch=232 best_epoch=232 role=best 32x4'  em_sec 128781.03982377052  fit_sec|V1 4895.238476037979
+  U28NR32B16e4last: files 192 git b4433d3c ntrain 160000.0 bstar kron kron_K 4096 ll 152.23176788511105 jobs 99 worker_gb 8.0 n [2560] plan True holes0 True nanfill0 True arms 3 raised 0 points ['-3', '+0', '+3']
+      ckpt id 'sha256[:16]=347a1e5b6c270222 epoch=252 best_epoch=232 role=last 32x4 | evaluated = LAST epoch; the best-epoch weights are in the _best.pt sibling'  em_sec 128781.03982377052  fit_sec|V1 4895.238476037979
+  NR32B16e4: files 448 git b4433d3c ntrain 160000.0 bstar kron kron_K 2048 ll 242.7371088214899 jobs 99 worker_gb 8.0 n [2560] plan True holes0 True nanfill0 True arms 11 raised 0 points ['-12', '-9', '-6', '-3', '+0', '+3', '+6']
+      ckpt id 'sha256[:16]=3cf5d3eff96f0341 epoch=230 best_epoch=230 role=best 32x4'  em_sec 421169.2490725517  fit_sec|V1 2904.2433154582977
+  PILNR32: files 448 git b4433d3c ntrain 160000.0 bstar kron kron_K 2048 ll 242.7371088214899 jobs 99 worker_gb 8.0 n [2560] plan True holes0 True nanfill0 True arms 3 raised 0 points ['-12', '-9', '-6', '-3', '+0', '+3', '+6']
+      ckpt id 'sha256[:16]=3cf5d3eff96f0341 epoch=230 best_epoch=230 role=best 32x4'  em_sec 421169.2490725517  fit_sec|V1 2904.2433154582977
+  ALDNR32: files 448 git b4433d3c ntrain 160000.0 bstar kron kron_K 2048 ll 242.7371088214899 jobs 99 worker_gb 8.0 n [2560] plan True holes0 True nanfill0 True arms 3 raised 0 points ['-12', '-9', '-6', '-3', '+0', '+3', '+6']
+      ckpt id 'sha256[:16]=3cf5d3eff96f0341 epoch=230 best_epoch=230 role=best 32x4'  em_sec 421169.2490725517  fit_sec|V1 2904.2433154582977
+  NR32B16e4chk: files 1 git b4433d3c ntrain 160000.0 bstar kron kron_K 2048 ll 242.7371088214899 jobs 1 worker_gb 8.0 n [40] plan True holes0 True nanfill0 True arms 11 raised 0 points ['-12']
+      ckpt id 'sha256[:16]=3cf5d3eff96f0341 epoch=230 best_epoch=230 role=best 32x4'  em_sec 421169.2490725517  fit_sec|V1 2904.2433154582977
+  NR32B16e4last: files 192 git b4433d3c ntrain 160000.0 bstar kron kron_K 2048 ll 242.7371088214899 jobs 99 worker_gb 8.0 n [2560] plan True holes0 True nanfill0 True arms 3 raised 0 points ['-9', '-6', '-3']
+      ckpt id 'sha256[:16]=1f782042a5ad06b8 epoch=250 best_epoch=230 role=last 32x4 | evaluated = LAST epoch; the best-epoch weights are in the _best.pt sibling'  em_sec 421169.2490725517  fit_sec|V1 2904.2433154582977
+    [ok] npz total over 22 tags: 5382
+  [U28NR16B16e4] family ['ALDU28NR16', 'K2U28NR16B16e4', 'PILU28NR16', 'U28NR16B16e4', 'U28NR16B16e4chk', 'U28NR16B16e4last']
+    [ok] U28NR16B16e4: (c) A epoch == last best_epoch: ('642', '642')
+    [ok] U28NR16B16e4chk: (e) 11 arms x KEYS_RAW == A chunk 0 at -3 dB: []
+    [ok] U28NR16B16e4last: b* last == A (chunk, key) pairs differing / total: (0, 1344)
+    [ok] K2U28NR16B16e4: kron_K / points: ('2048', (0, 3, 6))
+    [ok] U28NR16B16e4: ckpt sha best/last: ('34136808b1e367ac', 'ee3818febe902e99')
+    [ok] U28NR16B16e4: (a) fits grid 15 merged + 3 candidates x 3: ([], [])
+    [ok] U28NR16B16e4: fits kron4096 ll_val == raw meta: '56.5879534445348'
+    [ok] U28NR16B16e4: fits kron2048 ll_val == K2 raw meta: '55.61013440427408'
+  [U28NR32B16e4] family ['ALDU28NR32', 'K2U28NR32B16e4', 'PILU28NR32', 'U28NR32B16e4', 'U28NR32B16e4chk', 'U28NR32B16e4last']
+    [ok] U28NR32B16e4: (c) A epoch == last best_epoch: ('232', '232')
+    [ok] U28NR32B16e4chk: (e) 11 arms x KEYS_RAW == A chunk 0 at -12 dB: []
+    [ok] U28NR32B16e4last: b* last == A (chunk, key) pairs differing / total: (0, 1344)
+    [ok] K2U28NR32B16e4: kron_K / points: ('2048', (-3, 0, 3))
+    [ok] U28NR32B16e4: ckpt sha best/last: ('463da87aa8dbfb61', '347a1e5b6c270222')
+    [ok] U28NR32B16e4: (a) fits grid 15 merged + 3 candidates x 3: ([], [])
+    [ok] U28NR32B16e4: fits kron4096 ll_val == raw meta: '152.23176788511105'
+    [ok] U28NR32B16e4: fits kron2048 ll_val == K2 raw meta: '150.38770163027337'
+  [NR32B16e4] family ['ALDNR32', 'NR32B16e4', 'NR32B16e4chk', 'NR32B16e4last', 'PILNR32']
+    [ok] NR32B16e4: (c) A epoch == last best_epoch: ('230', '230')
+    [ok] NR32B16e4chk: (e) 11 arms x KEYS_RAW == A chunk 0 at -12 dB: []
+    [ok] NR32B16e4last: b* last == A (chunk, key) pairs differing / total: (0, 1344)
+    [ok] NR32B16e4: ckpt sha best/last: ('3cf5d3eff96f0341', '1f782042a5ad06b8')
+    [ok] NR32B16e4: (a) fits grid 15 merged + 3 candidates x 3: ([], [])
+    [ok] NR32B16e4: fits kron2048 ll_val == raw meta: '242.7371088214899'
+    [ok] raw_B16e4k: files, kron_K, ll_val, run|git key: (448, '1024', '-11.459169831224418', '(none)')
+    [ok] raw_B16e4k: chunks-sha: ('78cbb59fc01ce520', 448)
+    [ok] d2sx_N160000_a1.pt sha256[:16]: '4443921ce8d5c4a1'
+    [ok] BRB16e4k: bridge replay 14 arms x KEYS_RAW vs raw_B16e4k chunk 0 at -3 dB: []
+    [ok] BRB16e4k: ckpt id role/sha: (True, True)
+    [ok] raw_NR16B16e4: files, kron_K, ll_val, run|git key: (448, '4096', '63.1751571838059', '(none)')
+    [ok] raw_NR16B16e4: chunks-sha: ('279cdea5c7a4f054', 448)
+    [ok] d2sx_NR16_N160000_a1_fb2_best.pt sha256[:16]: 'c050d611b2c714a6'
+    [ok] BRNR16: bridge replay 14 arms x KEYS_RAW vs raw_NR16B16e4 chunk 0 at -3 dB: []
+    [ok] BRNR16: ckpt id role/sha: (True, True)
+    [ok] K2NR16B16e4: kron_K 2048, ll, genie == raw_NR16B16e4 at (-3, 0, 3): ('2048', '61.982398757574266', 0)
+    [ok] raw_U28B16e4: files, kron_K, ll_val, run|git key: (448, '4096', '5.797910431000217', '(none)')
+    [ok] raw_U28B16e4: chunks-sha: ('213dd3a3a3226fa6', 448)
+    [ok] d2sx_UMi28_N160000_a1_best.pt sha256[:16]: '6f3a1b9490864af1'
+    [ok] BRU28: bridge replay 14 arms x KEYS_RAW vs raw_U28B16e4 chunk 0 at +3 dB: []
+    [ok] BRU28: ckpt id role/sha: (True, True)
+    [ok] K2U28B16e4: kron_K 2048, ll, genie == raw_U28B16e4 at (3, 6, 9): ('2048', '5.539276756851168', 0)
+    [ok] raw_B16e4 (D2 C2 K/2): C2 files, bad: (448, 0)
+    [ok] raw_B16e4k / raw_B16e4 git-tracked and clean: (1792, '')
+
+## 2. decision points, table B (13 X -> V1), 𝔅, X*, sentence condition, failures / NMSE tables -- vs pairB_<T>.txt and §6.1.3
+    [ok] pairB_U28NR16B16e4.txt lines 3-132 == own recompute (130 lines): True
+    [ok] U28NR16B16e4: decision points (anchor b*): (0, 3, 6)
+    [ok] §6.1.3 U28NR16B16e4: 13 rows parsed: 13
+    [ok] pairB_U28NR32B16e4.txt lines 3-132 == own recompute (130 lines): True
+    [ok] U28NR32B16e4: decision points (anchor b*): (-3, 0, 3)
+    [ok] §6.1.3 U28NR32B16e4: 13 rows parsed: 13
+    [ok] pairB_NR32B16e4.txt lines 3-132 == own recompute (130 lines): True
+    [ok] NR32B16e4: decision points (anchor b*): (-9, -6, -3)
+    [ok] §6.1.3 NR32B16e4: 13 rows parsed: 13
+    [ok] NR32B16e4: X*, R_X*, condition: ('V1-pilot (F = 12)', 'undefined (out of range)', 'NOT met')
+    [ok] NR32B16e4: labels (i) 13, (ii) 0: (13, 0, 13)
+    [ok] U28NR16B16e4: X*, R_X*, condition: ('M-ours-bstar (F = 752)', '0.228 [0.190, 0.266]', 'MET')
+    [ok] U28NR16B16e4: labels (i) 13, (ii) 0: (13, 0, 13)
+    [ok] U28NR32B16e4: X*, R_X*, condition: ('V1-pilot (F = 440)', '0.259 [0.216, 0.301]', 'MET')
+    [ok] U28NR32B16e4: labels (i) 13, (ii) 0: (13, 0, 13)
+    [ok] §6.1.3 count sentence: True
+    [ok] §6.1.4 (b) row NR32B16e4: True
+    [ok] §6.1.4 (b) row U28NR16B16e4: True
+    [ok] §6.1.4 (b) row U28NR32B16e4: True
+
+## 3. recovery_ci files (per-SNR + pooled paired bootstrap) and R_dp(last) -- own recompute vs recovery_<T>{,last}.txt
+    [ok] recovery_U28NR16B16e4.txt == own (8 lines): True
+    [ok] recovery_U28NR16B16e4last.txt == own (5 lines): True
+    [ok] recovery_U28NR16B16e4last.txt integrity line: 'b* last == A (report-only integrity, not a gate; raw_U28NR16B16e4last vs raw_U28NR16B16e4): 0 of 1344 (chunk, key) pairs differ -> OK'
+    [ok] recovery_U28NR32B16e4.txt == own (8 lines): True
+    [ok] recovery_U28NR32B16e4last.txt == own (5 lines): True
+    [ok] recovery_U28NR32B16e4last.txt integrity line: 'b* last == A (report-only integrity, not a gate; raw_U28NR32B16e4last vs raw_U28NR32B16e4): 0 of 1344 (chunk, key) pairs differ -> OK'
+    [ok] recovery_NR32B16e4.txt == own (8 lines): True
+    [ok] recovery_NR32B16e4last.txt == own (5 lines): True
+    [ok] recovery_NR32B16e4last.txt integrity line: 'b* last == A (report-only integrity, not a gate; raw_NR32B16e4last vs raw_NR32B16e4): 0 of 1344 (chunk, key) pairs differ -> OK'
+
+## 4. frontier_ci: 12 primary (+Q-K runs b/c) + 3 step + C6 report files -- own recompute (frontier draw order) vs files
+    [ok] scale2_primary_D2_L95.txt body == own recompute (14 lines): True
+    [ok] scale2_primary_D2_L90.txt body == own recompute (14 lines): True
+    [ok] scale2_primary_D2_L95_qkC9.txt body == own recompute (7 lines): True
+    [ok] scale2_primary_D2_L95_qkC2.txt body == own recompute (10 lines): True
+    [ok] scale2_primary_D2_L90_qkC9.txt body == own recompute (7 lines): True
+    [ok] scale2_primary_D2_L90_qkC2.txt body == own recompute (10 lines): True
+    [ok] scale2_primary_U28_L95.txt body == own recompute (15 lines): True
+    [ok] scale2_primary_U28_L90.txt body == own recompute (15 lines): True
+    [ok] scale2_primary_U28_L95_qkC9.txt body == own recompute (10 lines): True
+    [ok] scale2_primary_U28_L95_qkC2.txt body == own recompute (10 lines): True
+    [ok] scale2_primary_U28_L90_qkC9.txt body == own recompute (10 lines): True
+    [ok] scale2_primary_U28_L90_qkC2.txt body == own recompute (10 lines): True
+    [ok] scale2_step_D2_S2.txt body == own recompute (11 lines): True
+    [ok] scale2_step_U28_S1.txt body == own recompute (11 lines): True
+    [ok] scale2_step_U28_S2.txt body == own recompute (11 lines): True
+    [ok] scale2_report_C6_dFK.txt body == own recompute (11 lines): True
+
+## 5. report-only arithmetic, SNR@0.1, ALD NMSE, Δll, predictions -- vs §6.1.4 / §6.1.6 / §6.1.1
+    [ok] decision-point failure sums (b*, V1, genie) x 6 cells: {'D2C9': (1161, 276, 70), 'D2C6': (277, 82, 40), 'D2C2': (864, 488, 125), 'U28C9': (958, 599, 127), 'U28C6': (824, 636, 170), 'U28C2': (800, 712, 215)}
+    [ok] R point values: {'D2C9': '0.8111824014665444', 'D2C6': '0.8227848101265823', 'D2C2': '0.5087956698240866', 'U28C9': '0.43200962695547535', 'U28C6': '0.2874617737003058', 'U28C2': '0.15042735042735042'}
+    [ok] Q_D2: '-0.3255915489625336'
+    [ok] Q_UMi28: '0.007513429982214187'
+    [ok] λ D2 (C9,C2), (C6,C2): ('-0.9560787303601385', '-1.019495436168412')
+    [ok] λ UMi28 (C9,C2), (C6,C2): ('-0.4026289881346652', '-0.17589989619632507')
+    [ok] F_b*/F_V1: ('4.2065', '3.3780', '1.7705', '1.5993', '1.2956', '1.1236')
+    [ok] Δll D2 C6 / D2 C2 / UMi28 C2: ('1.1927584262316344', '3.1769363255249594', '0.25863367414904914')
+    [ok] Δll UMi28 C6 / C9 (§5 ll_val): ('0.9778190402607194', '1.844066254837685', '-5.263164111871873')
+    [ok] r UMi28 C6 -> c_K, r UMi28 C9 >= 1: ('0.5652375151090457', '1.3001064598543197', '1.2799495603934918', True)
+    [ok] r D2 C2 -> c_K: ('0.8403499716975932', '5.2637007373767215')
+    [ok] ΣF+ D2 C2 = 864 - c_K*35 (§1 '= 679.7704741918', file 'SigmaF+ = 679.77'): ('679.7704741918', '679.77')
+    [ok] pred 12 thresholds D2C6/U28C2/U28C6/U28C9: ('29.25', '13.2', '28.2', '53.85')
+    [ok] pred 12 ΔF_K values within (−5, +9, +27, +2): True
+    [ok] NR32B16e4: SNR@0.1 b*/V1/genie: ('-6.24', '-9.22', '-11.54')
+    [ok] U28NR16B16e4: SNR@0.1 b*/V1/genie: ('3.01', '1.60', '-2.82')
+    [ok] U28NR32B16e4: SNR@0.1 b*/V1/genie: ('0.70', '-1.60', '-6.58')
+    [ok] ald_PILNR32: nmse field dB: '-1.66 / -4.16 / -6.63 / -9.46 / -13.13 / -16.87 / -20.48'
+    [ok] ald_PILNR32: recomputed from hhat/H (2560 trials) dB: '-1.66 / -4.16 / -6.63 / -9.46 / -13.13 / -16.87 / -20.48'
+    [ok] ald_PILNR32: ckpt_sha, prov git, ald_py_sha, n trials: ('3cf5d3eff96f0341', 'b4433d3c', 'f1da04d1e91e0baf', 2560)
+    [ok] ald_PILU28NR16: nmse field dB: '-6.60 / -8.81 / -11.43 / -14.22 / -17.05 / -19.82 / -22.61'
+    [ok] ald_PILU28NR16: recomputed from hhat/H (2560 trials) dB: '-6.60 / -8.81 / -11.43 / -14.22 / -17.05 / -19.82 / -22.61'
+    [ok] ald_PILU28NR16: ckpt_sha, prov git, ald_py_sha, n trials: ('34136808b1e367ac', 'b4433d3c', 'f1da04d1e91e0baf', 2560)
+    [ok] ald_PILU28NR32: nmse field dB: '-2.26 / -3.84 / -5.52 / -7.37 / -9.58 / -12.23 / -14.83'
+    [ok] ald_PILU28NR32: recomputed from hhat/H (2560 trials) dB: '-2.26 / -3.84 / -5.52 / -7.37 / -9.58 / -12.23 / -14.83'
+    [ok] ald_PILU28NR32: ckpt_sha, prov git, ald_py_sha, n trials: ('463da87aa8dbfb61', 'b4433d3c', 'f1da04d1e91e0baf', 2560)
+  em_sec / fit_sec: 10 tags compared
+    [ok] §6.1 key value strings present (85): []
+    [ok] EXPERIMENTS row strings (12): []
+    [ok] EXPERIMENTS row has 8 cells: 8
+    [ok] DECISIONS line strings (10): []
+
+## SUMMARY: checks 474, mismatches 0

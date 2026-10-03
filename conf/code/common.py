@@ -81,10 +81,14 @@ CELLS = {                                     # 06_SPEC_runner.md §3, priority 
     # point is run with --snr -6 under the Pareto tag.
     "C7": dict(Nr=8, Nt=4, T=16, Tp=6, snrs=(-9, -6, -3, 0, 3, 6, 9, 12, 15)),
     "C8": dict(Nr=8, Nt=4, T=16, Tp=8, snrs=(-9, -6, -3, 0, 3, 6, 9, 12, 15)),
+    # (user decision 2026-09-29 CDT, array-scaling axis, stage 0) C9 = C2 / C6 with Nr = 32 ALONE: same Nt, T, Tp and code, so
+    # Nr is again the only axis that moves (co-dimension up from C6).  The SNR grid is a STAGE-0 PROBE grid (wide, -15..15) to
+    # place the registered grid; it is narrowed before any registration and before any learned-arm BLER is looked at.
+    "C9": dict(Nr=32, Nt=4, T=16, Tp=4, snrs=(-12, -9, -6, -3, 0, 3, 6)),
 }
 # Every DEFAULT that enumerates CELLS (runner run / sigma) keeps the pre-C7 set, so a command without --cell does
 # exactly what it did before the Tp > Nt cells existed.  C7/C8 are run only when named.
-DEFAULT_CELLS = tuple(c for c in CELLS if CELLS[c]["Tp"] <= CELLS[c]["Nt"])
+DEFAULT_CELLS = tuple(c for c in CELLS if CELLS[c]["Tp"] <= CELLS[c]["Nt"] and c != "C9")   # C9 (array scaling) only when named
 # SNR grids are exp_0925_run.CELLS verbatim: H/H4 (8x4, T=16) -> -3..15 dB, R (4x4, T=28, Tp=2) -> 9/12/15.
 # C4 (4x4, Tp=4) has no exp_0925 counterpart -> 01_RULES §4 fallback "Tp=4 -> 0,3,6,9 dB" shifted onto the
 # 4x4 grid actually used by exp_0921 A (Tp=4: 0,3,6,9) intersected with exp_0925 R -> 3/6/9 (see DECISIONS).

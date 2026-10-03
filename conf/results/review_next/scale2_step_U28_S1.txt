@@ -1,0 +1,12 @@
+# run_scale2 git b4433d3c 2026-10-03 11:48 CDT: frontier_ci.py --recovery raw_U28NR16B16e4:C6:0,3,6 raw_U28B16e4:C2:3,6,9 --rstar 0.05
+# recovery R = (b* - V1)/(b* - genie) @16; paired bootstrap per raw set (three arms together), the two raw sets resampled independently (UNPAIRED difference); B=2000, seed=20260926, 90% CI
+  R1: raw_U28NR16B16e4 C6 SNR ['+0', '+3', '+6']  b* 824 V1 636 genie 170  R = 0.287  [90% 0.252, 0.322]
+  R2: raw_U28B16e4 C2 SNR ['+3', '+6', '+9']  b* 800 V1 712 genie 215  R = 0.150  [90% 0.108, 0.190]
+  R1 - R2 = +0.137  [90% unpaired +0.085, +0.193]  undefined replicates 0
+  R1 - R2 = +0.137  [90% unpaired +0.085, +0.193]  bootstrap two-sided p = 0.0000  (--level 0.9)
+  gaps R1: SigmaF_V1 - SigmaF_g = 466  [90% 432, 501]   SigmaF_b* - SigmaF_g = 654  [90% 616, 696]   (blocks, summed over SNR ['+0', '+3', '+6'])
+  gaps R2: SigmaF_V1 - SigmaF_g = 497  [90% 461, 532]   SigmaF_b* - SigmaF_g = 585  [90% 547, 623]   (blocks, summed over SNR ['+3', '+6', '+9'])
+# Q-OP R*@0.05 = (0.05 - B_V1(s*))/(0.05 - B_g(s*)); s* = first downward crossing of 0.05 by b* (log10 max(BLER, 0.5/n) linear interpolation, snr_at); all grid points of the cell resampled (three arms together), s* recomputed per replicate; B=2000, seed=20260926 (own draw), 90% CI; undefined = lo / hi / B_g(s*) >= 0.05
+  R*1: raw_U28NR16B16e4 C6 grid ['-3', '+0', '+3', '+6', '+9', '+12', '+15'] n=2560  s* = +5.52 dB  B_V1(s*) = 0.0366  B_g(s*) = 0.0060  R* = 0.305  [90% 0.226, 0.386]  undefined replicates 0.0% (lo 0, hi 0, B_g>=t 0)
+  R*2: raw_U28B16e4 C2 grid ['-3', '+0', '+3', '+6', '+9', '+12', '+15'] n=2560  s* = +8.93 dB  B_V1(s*) = 0.0413  B_g(s*) = 0.0104  R* = 0.218  [90% 0.120, 0.322]  undefined replicates 0.0% (lo 0, hi 0, B_g>=t 0)
+  R*1 - R*2 = +0.087  [90% unpaired -0.042, +0.216]  bootstrap two-sided p = 0.2910  undefined replicates 0
