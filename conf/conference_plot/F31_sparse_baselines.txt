@@ -1,0 +1,40 @@
+F31 -- V1 against the model-based sparse baselines (SPARSE16e4): per dataset R_X over the decision points (90% paired bootstrap) for X = SBL-loop, SBL-pilot, OMP-pilot (+ b* cited), and the D2 C2 BLER curves.  Equal budget N_train = 1.6e5, test trials 0..2559 (n = 2560 per SNR), BLER@16.  Recomputed from raw by code/figure_f31.py (pair_baselines.table_b / recovery) and asserted against NEXT_EXPERIMENTS_SPARSE16e4 §6.1 (b* against the record file pairB_SP<suf>.txt).
+
+raw paths (read-only): D2 C2 = /home/HTJ/t2/conf/raw_B16e4k + /home/HTJ/t2/conf/raw_SPB16e4k; D3 = /home/HTJ/t2/conf/raw_D3B16e4 + /home/HTJ/t2/conf/raw_SPD3; SV8e = /home/HTJ/t2/conf/raw_SVB16e4 + /home/HTJ/t2/conf/raw_SPSV; UMi28 = /home/HTJ/t2/conf/raw_U28B16e4 + /home/HTJ/t2/conf/raw_SPU28; MIX3 = /home/HTJ/t2/conf/raw_MXB16e4 + /home/HTJ/t2/conf/raw_SPMX; D2 C6 = /home/HTJ/t2/conf/raw_NR16B16e4 + /home/HTJ/t2/conf/raw_SPNR16
+
+  dataset  X           decision SNRs   pooled a:b  label  R_X -3 dB [90%]        R_X decision points [90%]
+  D2 C2    M-ours-bstar [-3, 0, 3]        454:78    (i)    0.470 [0.427, 0.512]   0.509 [0.470, 0.545]  (cited, STATIC16e4)
+  D2 C2    SBL-loop     [-3, 0, 3]        588:72    (i)    0.540 [0.503, 0.579]   0.587 [0.554, 0.618]
+  D2 C2    SBL-pilot    [-3, 0, 3]        811:52    (i)    0.665 [0.635, 0.694]   0.676 [0.651, 0.702]
+  D2 C2    OMP-pilot    [0, 3, 6]         451:20    (i)    0.697 [0.669, 0.723]   0.834 [0.802, 0.863]
+  D3       M-ours-bstar [0, 3, 6]         393:67    (i)    0.367 [0.335, 0.399]   0.471 [0.433, 0.508]  (cited, STATIC16e4)
+  D3       SBL-loop     [0, 3, 6]         474:69    (i)    0.406 [0.375, 0.438]   0.525 [0.491, 0.560]
+  D3       SBL-pilot    [0, 3, 6]         634:55    (i)    0.506 [0.479, 0.534]   0.613 [0.583, 0.641]
+  D3       OMP-pilot    [3, 6, 9]         506:19    (i)    0.528 [0.500, 0.555]   0.792 [0.760, 0.823]
+  SV8e     M-ours-bstar [-3, 0]           148:72    (iv)   0.143 [0.095, 0.188]   0.155 [0.109, 0.199]  (cited, STATIC16e4)
+  SV8e     SBL-loop     [-3, 0]           256:42    (iv)   0.317 [0.276, 0.355]   0.341 [0.303, 0.377]
+  SV8e     SBL-pilot    [-3, 0, 3]        663:23    (i)    0.585 [0.557, 0.614]   0.604 [0.579, 0.630]
+  SV8e     OMP-pilot    [-3, 0, 3]       1498:15    (i)    0.746 [0.727, 0.765]   0.780 [0.764, 0.795]
+  UMi28    M-ours-bstar [3, 6, 9]         161:73    (i)    0.062 [0.033, 0.089]   0.150 [0.110, 0.189]  (cited, STATIC16e4)
+  UMi28    SBL-loop     [3, 6, 9]         307:56    (i)    0.262 [0.230, 0.292]   0.336 [0.299, 0.370]
+  UMi28    SBL-pilot    [3, 6, 9]         388:49    (i)    0.447 [0.421, 0.471]   0.406 [0.373, 0.437]
+  UMi28    OMP-pilot    [6, 9, 12]        569:10    (i)    0.629 [0.609, 0.648]   0.673 [0.645, 0.700]
+  MIX3     M-ours-bstar [3, 6, 9]         198:71    (i)    0.090 [0.062, 0.117]   0.228 [0.183, 0.271]  (cited, STATIC16e4)
+  MIX3     SBL-loop     [3, 6, 9]         416:56    (i)    0.245 [0.216, 0.273]   0.456 [0.421, 0.490]
+  MIX3     SBL-pilot    [3, 6, 9]         523:49    (i)    0.404 [0.378, 0.428]   0.524 [0.493, 0.555]
+  MIX3     OMP-pilot    [6, 9, 12]        836:8     (i)    0.561 [0.539, 0.582]   0.789 [0.766, 0.812]
+  D2 C6    M-ours-bstar [-3, 0, 3]        213:18    (i)    0.809 [0.747, 0.870]   0.823 [0.771, 0.871]  (cited, STATIC16e4)
+  D2 C6    SBL-loop     [-3, 0, 3]        330:11    (i)    0.865 [0.820, 0.906]   0.884 [0.847, 0.916]
+  D2 C6    SBL-pilot    [-3, 0, 3]        383:14    (i)    0.885 [0.847, 0.920]   0.898 [0.867, 0.926]
+  D2 C6    OMP-pilot    [-3, 0, 3]        322:12    (i)    0.832 [0.777, 0.884]   0.881 [0.845, 0.914]
+
+(b) D2 C2 (raw_B16e4k + raw_SPB16e4k), failures / 2560 per SNR -3 +0 +3 +6 +9 +12 +15 dB:
+    OMP-pilot           @16   1023   342   145    77    62    60    34
+    SBL-pilot           @16    934   244    69    51    27    28    10
+    SBL-loop            @16    705   222    77    48    25    27    10
+    M-ours-bstar        @16    623   184    57    28    17    16     8
+    M-ours-dscore-C-V1  @16    371    88    29    16     7     5     3
+    R5-genie            @16     87    26    12     9     2     2     2
+
+Registered labels and sentences (SPARSE16e4 §6.1, verbatim): 새 18 라벨 중 (i) 17, (iv) 1 (SV8e SBL-loop), (ii) 0.  주 라벨 (D2 C2): (A) "V1 이 희소 baseline 3 개(SBL-loop, SBL-pilot, OMP-pilot) 전부보다 적게 실패" (A1 = `SBL-loop → V1` (i) 588:72).  "전부" 문장 (16 개): D2 C2·D3·UMi28·MIX3 충족 -> "데이터셋 d 에서 등록된 baseline 전부(16 개, 희소 baseline 포함)와 멀어진다"; C6·SV8e 불충족 (STATIC16e4 의 (iv) 로 결과와 무관하게 불가능).  X* (16 개 중 -3 dB 실패 최소) = b* in D2 C2 / D3 / SV8e / UMi28 / MIX3, V1-pilot in D2 C6 (R_X* 0.492 [0.355, 0.630]).  보정 없음, 개수 문장만; 개별 (i) 을 독립 주장으로 쓰지 않는다.
+Caveats (SPARSE16e4 §2 / §5.3 / §6.1, as recorded): rho is the grid edge 16 (the 2nd extension step was stopped for cost; SBL rho 16 edge in D2 C2 / D3 / SV8e / MIX3 / C6, UMi28 rho_SBL 8 interior; OMP rho 16 edge in all 6).  On-grid oversampled 2-D DFT dictionary; off-grid methods (NOMP etc.) out of scope.  SBL = MacKay fixed point, n_em per SNR tuned on pilot-only development NMSE and used unchanged inside the loop (no loop tuning; possible loss up to D3 0.85 dB, direction against SBL-loop = toward V1).  OMP = fixed L per SNR, no noise-based stop, plug-in belief (v = 1e-8).  Where L = N (D2 C2 +15 dB; SV8e, UMi28 +3..+15 dB; MIX3 +6..+15 dB) OMP-pilot equals the pilot LS estimate and is not called 'sparse recovery'; among OMP-pilot decision points this is SV8e +3 dB, UMi28 all three, MIX3 all three.  Raised trials of the new arms: 0 (all 6 rows).  D2 C6 and the non-D2 channel models are UNGATED measurements; D2 C2 is the headline (gate PASS recipe).
