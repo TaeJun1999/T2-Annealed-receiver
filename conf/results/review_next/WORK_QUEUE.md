@@ -1,18 +1,18 @@
 # 작업 큐 (review_next 이후; 갱신할 때마다 맨 위 시각을 바꾼다)
 
-갱신 2026-10-04 11:57 CDT (Opus 5.5). 사용자 지시 2026-09-29 CDT: "추천 순서로 계속, 남는 자원에는 계속 작업 할당, 빈 곳도 계획에 올려 적절한 순서로"; 09-30 CDT: 규모 확장 2단계는 "차례가 오면 승인 없이" (DECISIONS 6b1de688). 모든 판정 실험은 사전 등록 → Fable 적대적 검토(서브에이전트) → 동결 → 실행 → §6 전사 → Fable 기록 감사.
+갱신 2026-10-04 14:55 CDT (Opus 5.5). 사용자 지시 2026-09-29 CDT: "추천 순서로 계속, 남는 자원에는 계속 작업 할당, 빈 곳도 계획에 올려 적절한 순서로"; 09-30 CDT: 규모 확장 2단계는 "차례가 오면 승인 없이" (DECISIONS 6b1de688). 모든 판정 실험은 사전 등록 → Fable 적대적 검토(서브에이전트) → 동결 → 실행 → §6 전사 → Fable 기록 감사.
 
 ## 자원 배치 원칙
 - CPU (192 워커, 수신기 BLER): 한 번에 한 등록 실행. 순서 = 아래 대기열. 지금 비어 있음.
 - GPU (6 장, Exclusive_Process): `~/t2_wtS/conf/code/gpu_sched.sh` (tmux gpusched) 한 곳에서 배정 — 큐 `~/t2_wtS/conf/logs/gpuq.txt` (`<prio> <kind> <label> <cmd>`; 학습 90 > 검사 60 > GMM 재시작 50; 병합은 후보 3 개 뒤 CPU), 로그 `logs/gpu_sched.log`. 격자 끝 규칙 `edge_rule.sh` (tmux edgerule) 가 이 큐에 넣는다. 일괄 EM 검사 PASS 셀의 4096 재시작에는 `logs/batched_prefix.sh` (tmux bprefix) 가 `FIT_KRON_BATCHED=1` 을 붙인다.
-- **main 커밋 금지 구간**: main 에서 등록 BLER 이 도는 동안 (raw 의 run|git 이 한 커밋이어야 함). **scale 커밋 금지 구간**: SCALE16e4 §5 커밋부터 마지막 2단계 raw 까지.
+- **main 커밋 금지 구간**: main 에서 등록 BLER 이 도는 동안 (raw 의 run|git 이 한 커밋이어야 함). **main conf/code·Demo 변경 금지**: NSCALE 동결 2d50dab5 부터 NSCALE §5 까지 (eval 전제 `git diff <동결> <§5> -- conf/code Demo` 비어 있음) — 문서·기록 커밋은 됨. **scale 커밋 금지 구간**: SCALE16e4 §5 커밋부터 마지막 2단계 raw 까지.
 
 ## 진행 중
 | 작업 | 자원 | 상태 |
 |---|---|---|
 | SEEDSNR16e4 배치 1 (scale cd85bef1 동결, 실행 커밋 1 d59b4c6c) | CPU (~/t2_wtS, tmux seedsnr) | 끝나면 실행 커밋 2 (NR32B16e4s3 = fb2 SEED 줄 + §5 부록 + fb3 로그 열람 공개) → `--resume` 배치 2. 배치 중 scale 커밋 금지 |
 | NSCALE GPU (main 5571b5d4, `code/run_nscale_gpu.sh` → gpuq 84 작업) | GPU 6 | 일괄 검사 3 → V1 D2 6.4e5·1.28e6·C6 6.4e5, D1 형제 2, 격자 B64e4·B128e4·NR16B64e4, 보고 전용 K8B64e4. 로그 `logs/nscale/` |
-| NSCALE 등록 초안 (`NEXT_EXPERIMENTS_NSCALE.md` + `code/run_nscale.sh`) | — | Fable 검토 → main 동결 → §5 → BLER (SEEDSNR CPU 뒤) |
+| NSCALE 동결 **2d50dab5** (v7; Fable 7 회 + 동결 전 확인) | — | GB′ 감시 tmux `nsgbp` (`code/nscale_gbp_watch.sh`). GPU 산출물 최종 → `run_nscale.sh prep` → §5 + `nscale_s5.txt` → `links` → §5 커밋 (= 실행) → CPU BLER (SEEDSNR 뒤). **main conf/code 변경 금지 (동결 ~ §5 diff 검사)** → SEEDSNR 의 scale→main 병합은 NSCALE_DONE 뒤 |
 
 ## 대기열 (순서대로)
 | # | 작업 | 자원 | 선행 조건 | 비고 |
