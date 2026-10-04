@@ -1,4 +1,4 @@
-"""conf/code/em_batched_check_nr.py [--nr {16,32}] [--prior {S2,UMi28}] -- Nr-general version of em_batched_check.py /
+"""conf/code/em_batched_check_nr.py [--nr {8,16,32}] [--prior {S2,UMi28}] [--ntrain N] -- Nr-general version of em_batched_check.py /
 em_batched_check2.py for the equal-budget points at N' = 1.6e5: first C6 (Nr=16, S2; user decision 2026-09-24 17:45 CDT
 무렵: "C6(Nr=16) 1.6e5 동일예산"), then the array-scaling stage 2 cells (NEXT_EXPERIMENTS_SCALE16e4: --nr 32 = C9, --prior
 UMi28; PASS -> batched path only for that cell's kron 4096 candidates, otherwise exact).  Defaults 16 / S2 = the original run.
@@ -16,6 +16,8 @@ ll_t(exact)| <= 1e-6 nat/sample, max relative Frobenius difference of the final 
 <= 1e-9, the same number of reseeds; and case (b) has >= 1 reseed.  Then times the batched path at N'=160000, kron
 K=1024 and 2048 (3 iterations each).  Output: results/nr{nr}b_batched_check_{prior}.txt (the original 16/S2 run wrote
 results/nr16b_batched_check.txt).  GPU (one), no BLER.
+--ntrain N (N-scaling, 2026-10-04 CDT; default 160000 = unchanged): case (a) and the timings use the N-sample training set
+instead; output gets the suffix _n<N> (also for --nr 8, whose 3.2e5 checks are em_batched_check{,2}.py).
 """
 import argparse
 import os
@@ -58,22 +60,24 @@ def compare(label, X, K, n_iter, need_reseed):
 def main():
     global NR, PRIOR
     ap = argparse.ArgumentParser(description="batched vs exact kron M-step at Nr 16/32 (GPU, no BLER)")
-    ap.add_argument("--nr", type=int, choices=(16, 32), default=16)
+    ap.add_argument("--nr", type=int, choices=(8, 16, 32), default=16)
+    ap.add_argument("--ntrain", type=int, default=160000)
     ap.add_argument("--prior", choices=("S2", "UMi28"), default="S2")
     a = ap.parse_args()
     NR, PRIOR = a.nr, a.prior
-    out = os.path.join(C.CONF, "results", f"nr{NR}b_batched_check_{PRIOR}.txt")
-    L = [C.header("D2", extra=[f"content     : {PRIOR} Nr={NR} equal-budget N'=1.6e5 -- batched vs exact kron M-step, final iterate, "
-                               "real data; (a) N'=160000 K=512 6 it, (b) reseed-active N=10000 K=512 15 it"])]
-    X16, _, _ = _sets(PRIOR, NR, NT, 160000)[1]
+    n = a.ntrain; sfx = "" if (n == 160000 and NR != 8) else f"_n{n}"
+    out = os.path.join(C.CONF, "results", f"nr{NR}b_batched_check_{PRIOR}{sfx}.txt")
+    L = [C.header("D2", extra=[f"content     : {PRIOR} Nr={NR} equal-budget N'={n:.1e} -- batched vs exact kron M-step, final iterate, "
+                               f"real data; (a) N'={n} K=512 6 it, (b) reseed-active N=10000 K=512 15 it"])]
+    X16, _, _ = _sets(PRIOR, NR, NT, n)[1]
     X1, _, _ = _sets(PRIOR, NR, NT, 10000)[1]
     ok = True
-    for lab, X, n_it, need in (("(a) N'=160000 K=512", X16, 6, False), ("(b) N=10000 K=512 reseed-active", X1, 15, True)):
+    for lab, X, n_it, need in ((f"(a) N'={n} K=512", X16, 6, False), ("(b) N=10000 K=512 reseed-active", X1, 15, True)):
         g, line = compare(lab, X, 512, n_it, need)
         ok &= g; L.append(line); print(line, flush=True)
     for K in (1024, 2048):
         t = run(X16, K, True, 3)
-        L.append(f"timing N'=160000 kron K={K} batched: {t['sec']:.0f} s for {t['n_iter']} iterations "
+        L.append(f"timing N'={n} kron K={K} batched: {t['sec']:.0f} s for {t['n_iter']} iterations "
                  f"({t['sec'] / t['n_iter']:.1f} s/iter), reseeds {t['n_reseed']}")
         print(L[-1], flush=True)
     L.append(f"VERDICT: {'PASS' if ok else 'FAIL'} (criterion in the module docstring)")
