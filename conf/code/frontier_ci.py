@@ -26,6 +26,10 @@ of exp_0925_analysis.snr_at) is censored and counted, never clamped.
         B_V1 / B_g = 10^ of the linear interpolation of log10 max(BLER, 0.5/n) between the grid points bracketing s*;
         every grid point of the cell is resampled (its OWN Resampler: the R lines keep their draws), s* recomputed per
         replicate; undefined = 'lo' / 'hi' / B_g(s*) >= t.  R*1 - R*2 at --level with p.
+    --paired "raw_<N2>:C2:-3,0,3" "raw_<N1>:C2:-3,0,3"   (N-axis trend, 2026-10-04; the options above are untouched)
+        the SAME cell and SAME test trials at two budgets (asserted: same keys, same n, genie columns bit-identical).  ONE index
+        draw per (cell, SNR) per replicate applied to BOTH raws (paired bootstrap), Delta R = R1 - R2 with 90% and 95% CIs and
+        the bootstrap two-sided p (ci_p).  The same raw given twice gives Delta R = 0 in every replicate (degenerate CI, p = 1).
     --goodput raw_B16e4k+raw_PARB16e4:C2 raw_PARB16e4:C7 raw_PARB16e4:C8 --arms M-ours-bstar M-ours-dscore-C-V1 R5-genie
         per SNR and arm: K (1 - BLER@16) / T per cell and the envelope max over cells (08_SPEC §3 table C definition,
         K = Nt (T - Tp) - 6).  No CI, report only.
@@ -299,6 +303,35 @@ def cmd_rstar(sets, nb, seed, level, t):
     return est
 
 
+def cmd_paired(s1, s2, nb, seed):
+    """--paired: Delta R = R1 - R2 of the SAME cell / trials at two budgets, one index draw per (cell, SNR) shared by both raws."""
+    sets = [_rec_cols(s1), _rec_cols(s2)]
+    (raw1, cell, keys, cols1), (raw2, _, keys2, cols2) = sets
+    assert keys == keys2, f"--paired needs the same cell and SNRs: {s1} vs {s2}"
+    for k, a, b in zip(keys, cols1, cols2):
+        assert len(a[0]) == len(b[0]) and np.array_equal(a[2], b[2]), f"--paired {k}: genie differs ({raw1} vs {raw2}) -- not the same trials"
+    print(f"# PAIRED recovery R = (b* - V1)/(b* - genie) @16: same cell / trials at two budgets, ONE index draw per (cell, SNR) "
+          f"applied to both raws (three arms together); B={nb}, seed={seed}")
+    rs = Resampler(seed)
+    bo = np.full((nb, 2), np.nan)
+    for i in range(nb):
+        rs.new_replicate()
+        for j, (_, _, _, cols) in enumerate(sets):
+            bo[i, j] = _R([tuple(rs.take(raw1, k, x) for x in c) for k, c in zip(keys, cols)])[0]   # raw1's draw for both
+    r = []
+    for j, (raw, _, _, cols) in enumerate(sets):
+        rj, (b, v, g) = _R(cols)
+        r.append(rj)
+        lo, hi = pct(bo[:, j], [5, 95])
+        print(f"  R{j + 1}: {raw} {cell} SNR {[f'{k[2]:+.0f}' for k in keys]}  n={len(cols[0][0])}  b* {b} V1 {v} genie {g}  "
+              f"R = {rj:.3f}  [90% {lo:.3f}, {hi:.3f}]")
+    d = bo[:, 0] - bo[:, 1]
+    (l90, h90, p), (l95, h95, _) = ci_p(d, 0.90), ci_p(d, 0.95)
+    print(f"  dR = R1 - R2 = {r[0] - r[1]:+.3f}  [90% paired {l90:+.3f}, {h90:+.3f}]  [95% paired {l95:+.3f}, {h95:+.3f}]  "
+          f"bootstrap two-sided p = {p:.4f}  undefined replicates {int((~np.isfinite(d)).sum())}")
+    return dict(bo=bo, r=r)
+
+
 def cmd_goodput(specs, arms):
     print("# goodput K (1 - BLER@16) / T per cell and the envelope (max over cells) per SNR and arm; K = Nt (T - Tp) - 6; report only")
     cells = []
@@ -325,6 +358,8 @@ def main():
     ap.add_argument("--pair", nargs=2, action="append", metavar=("A=RAWS:CELL:ARM", "B=RAWS:CELL:ARM"))
     ap.add_argument("--recovery", nargs=2, metavar=("RAW:CELL:SNRS", "RAW:CELL:SNRS"))
     ap.add_argument("--goodput", nargs="+", metavar="RAWS:CELL")
+    ap.add_argument("--paired", nargs=2, metavar=("RAW:CELL:SNRS", "RAW:CELL:SNRS"),
+                    help="N-axis trend: paired Delta R of the same cell / trials at two budgets (90%% and 95%% CI, p)")
     ap.add_argument("--level", type=float, default=0.90, help="CI level of the --recovery difference lines (0.95 = Holm first test)")
     ap.add_argument("--extrap", nargs=2, metavar=("K2_OF_1", "K2_OF_2"), help="Q-K: K/2 raw of each --recovery spec, '-' = interior")
     ap.add_argument("--ck", nargs=2, metavar=("C1", "C2"), help="Q-K c_K = max(1, r/(1-r)) per spec ('inf' = r >= 1, '-' = interior)")
@@ -345,6 +380,8 @@ def main():
         cmd_recovery(*a.recovery, a.B, a.seed, a.level, a.extrap, a.ck, a.rstar)
     if a.goodput:
         cmd_goodput(a.goodput, a.arms)
+    if a.paired:
+        cmd_paired(*a.paired, a.B, a.seed)
 
 
 if __name__ == "__main__":

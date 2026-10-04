@@ -42,7 +42,9 @@ def _loglik_t(X, logpi, covs, N, budget=1.5e9):
         b = min(a + chunk, K)
         Z = torch.matmul(X, Linv[a:b].mT)                      # rows L_k^-1 x_i, batched over k
         lw[:, a:b] = -(Z.real ** 2 + Z.imag ** 2).sum(-1).mT
-    return lw + logpi - logdet - N * np.log(np.pi)
+    # c1 (N-scaling, 2026-10-04): in place, same operation order as the original  lw + logpi - logdet - N log pi
+    # (bit-identical), without its two extra (n,K) temporaries
+    return lw.add_(logpi).sub_(logdet).sub_(N * np.log(np.pi))
 
 
 def _kron_mstep_batched(Xt, gam, nk, covs, Tk, Nr, Nt, floor, cbar, eyeNr, eyeNt, chunk=16384):
@@ -122,6 +124,9 @@ def fit_gmm_em_gpu(X, K, rng, n_iter=500, tol=1e-6, floor=1e-4, kappa=0.0, struc
     Xv = torch.as_tensor(np.asarray(Xval, np.complex128), device=dev) if Xval is not None else None
 
     for it in range(n_iter):
+        # c1: drop the previous iteration's (n,K) storage before the E-step (g / gk are views of gam), so the peak is
+        # lw + logsumexp's one (n,K) temporary instead of 5 (n,K) arrays
+        lw = gam = g = gk = None
         lw = _loglik_t(Xt, logpi, covs, N)
         lse = torch.logsumexp(lw, 1)
         ll.append(float(lse.mean()))
@@ -136,7 +141,7 @@ def fit_gmm_em_gpu(X, K, rng, n_iter=500, tol=1e-6, floor=1e-4, kappa=0.0, struc
             log(f"    it {it:>3} ll/sample = {ll[-1]:.4f}" + (f"  val {llv[-1][1]:.4f}" if llv else ""))
         if it >= 20 and ll[-1] - ll[-2] < tol * abs(ll[-1]):
             break
-        gam = torch.exp(lw - lse[:, None])
+        gam = lw.sub_(lse[:, None]).exp_()                       # c1: = torch.exp(lw - lse[:, None]) in place; lw is dead after this
         nk_t = gam.sum(0)
         nk = _host(nk_t)                                         # host copy: same float64 scalars as numpy uses
         if batched and struct == "kron":
