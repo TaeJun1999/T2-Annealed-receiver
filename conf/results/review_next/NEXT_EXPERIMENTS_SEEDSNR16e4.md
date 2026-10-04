@@ -1,0 +1,154 @@
+# NEXT_EXPERIMENTS_SEEDSNR16e4 — 안테나 규모 확장 새 3 셀의 시드 강건성: UMi28 C6 (Nr 16) · UMi28 C9 (Nr 32) · D2 C9 (Nr 32), 시드 a2·a3, 동일예산 N′ = 1.6e5, 판정점 3 점 (사전 등록 초안 v1)
+
+- 작성: 2026-10-03 22:59 CDT (= 10-04 12:59 KST) 초안 v1 (Opus 5.5 서브에이전트, 브랜치 `scale`, worktree `~/t2_wtS`). 앞선 초안 작성자(중단)가 남긴 미추적 `code/run_seedsnr16e4.sh` 를 읽고 고쳐 썼다(바뀐 곳은 §1 실행 스크립트 행 끝). 다음 단계: 적대적 검토(Fable 서브에이전트; 원문 `results/review_next/prereg_reviews_seedsnr16e4/`) → v2 → **동결 커밋**(scale; `conf/DECISIONS.md` 같은 줄) → §5 + `results/scale/seedsnr_s5.txt` 커밋(= **실행 커밋 1**) → CPU BLER 1 묶음 → (D2 C9 a3 의 §3d 사다리가 닫히면) §5 추가 커밋(= **실행 커밋 2**) → 2 묶음. 동결 커밋 뒤 §1~§3 을 바꾸지 않는다; 바꿔야 하면 사용자 승인 + `DECISIONS.md`.
+- **적대적 검토 반영 (워크플로 ROUND 2)** (v1 대상 반드시 3 건 — 통계·공정성 렌즈 M1·M2, 무결성 렌즈 integ-1; 검토 문안 그대로 적용, 그 밖은 바꾸지 않음; 2026-10-03 22:59 CDT (= 10-04 12:59 KST)): **M1** → §1 시드 강건성 라벨 행 끝(사다리 한정어 `; a<s> = §3d fb<k>` 는 라벨 문자열의 일부 — 한정어 없는 "시드 강건 (3/3 (i))" 은 세 시드가 모두 시행 1 일 때만; §6·EXPERIMENTS·RESULTS 는 이 문자열 그대로; §6 에서 D2 C9 는 등록 라벨·선례 규칙 라벨을 두 열로), (S1) "붙일 수 있다" → "**붙인다**" + 한정어 판 `"(확산 시드 3/3; a<s> = §3d fb<k> 클리핑)"`, (S2) 문자열 `(2/2[; a3 = §3d fb<k>])`, §2 표에 "§3d 시행 2·3 체크포인트" 행 추가. **M2** → §3 머리말 끝에 채점 규칙(미리 고정: 예측 4–8 은 라벨 대상 태그만 채점하고 "(n/6 태그 채점)", 라벨 대상 태그가 없는 셀은 "채점 불가 (사유)" 로 합계 밖; 1–3·10–12 는 이분), 예측 7 "라벨 대상 시드 태그 모두", 예측 8 "라벨 대상 시드(a1 포함)". **integ-1** → `code/run_seedsnr16e4.sh`: 회귀 검사를 실행 커밋(묶음)마다 한 번 — `raw_U28NR16B16e4chkS` 가 완성돼 있고 `run|git` 이 HEAD 가 아니면(= 2 묶음) 태그 `U28NR16B16e4chkS2` 로 다시 돈다(앞의 chkS 링크 검사 줄을 지우고 그 판정 뒤에서 `gmm_fits_D2_$CHK` 링크를 검사), start 로그에 `chk $CHK`, 머리말 (0) 에 batch 2 문구; 문서 §1 회귀 검사 행·묶음 행 "(chkS2 포함)"·수용 (e)·비용 행(chkS 묶음마다 ≈ 0.3 h, 2 묶음 ≈ 4.7 → 5.0 h)·§4.3 링크 7 → 8 개. 작성자 검사: `bash -n` 통과; 스크립트에서 그대로 잘라 낸 `nraw`·`gitok`·새 3 줄을 scratch git 저장소·가짜 raw(`run|git` 만 든 npz)로 시험(`…/scratchpad/seedsnr/chk2test/`) — chkS raw 없음 → chkS, chkS raw 의 `run|git` = HEAD → chkS(1 묶음 재개), 다른 커밋 → chkS2 이고 chkS2 링크가 없으면 ABORT(precondition) · 있으면 통과. 스크립트는 실행하지 않았다.
+- 틀: `NEXT_EXPERIMENTS_SEEDS16e4.md` §1–§3 (라벨·수용·태그 관례 — **그대로** 쓴다; `--ref-arms all` 규칙), `_SEEDS3_16e4.md` (라벨의 절대 범주 표현, 재개 보장 범위 공개, §4 시작·중단·재개 표, §5 epoch 검사, `run_seeds3_eval.sh`·`run_seeds16e4.sh`), `_SCALE16e4.md` (셀·fits·b\*·판정점·σ 격자, §1 학습 실패 행(§3d), 메모리 가드 G·수용 (k), 실행 위치·실행 커밋 규칙(결정 6·7), chk 회귀 검사, `run_scale2.sh` 의 `acc`·`kchk`·`dp`), `_C6B16e4.md` §1 학습 실패 처리·§5 (D2 C6 a1 = §3d fb2 선례), `10_SPEC_stageC.md` §3d·§6g, `01_RULES.md` §4·§5, `08_SPEC_analysis.md` §2, DECISIONS 6953d595 (§3d 시행 선택 규칙).
+- **작성 시점 공개**:
+  - 사용자 지시: 2026-10-03 CDT 사용자 원문 "실험을 짧게 걸리는거 먼저 하고, 그 다음에 길게 걸리는거 하자" (주 세션이 비용을 비교해 ① 이 실험(Nr 16/32 시드 강건성)을 먼저, ② N 확대를 뒤로 배정). 설계 선택은 작성자가 했고 주 세션이 검토한다(사용자 항목별 승인 아님); 사용자 확인을 권하는 항목은 §4.2.
+  - 이 등록은 SCALE16e4 의 BLER 결과 전부(§6.1, 감사 §6.2), SEEDS16e4·SEEDS3_16e4 결과를 **본 뒤** 쓴다. 이 초안 작성 중 본 것: a2·a3 학습 로그의 요약 줄(epoch·val loss; 판정량 아님), D2 C9 a3 fb2 학습 로그의 마지막 줄(epoch 643; 판정량 아님). **fb3 의 로그·체크포인트는 열지 않았다**(파일 존재만 `ls` 로 봤다).
+  - **a2·a3 학습은 이 등록보다 먼저, 등록 없이 끝났다**: 주 세션이 SCALE16e4 동결(09-30 14:06 CDT) 뒤·§5 커밋(10-01 13:52 CDT) 전에 빈 GPU 에 넣었다(`logs/gpu_sched.log:53–56,58,60`, 10-01 00:52–03:34 CDT 투입; DECISIONS 줄 없음; SCALE16e4 §5 기록 노트 9·11·12 가 "등록 밖" 으로 기록). 학습만이고 BLER 은 없다 — 이 셀들의 테스트 BLER(SCALE16e4 A 태그)은 학습이 끝난 뒤(10-01 14:16 CDT~) 나왔다. 시드별 시각은 **§4.1 표**.
+  - **이 등록이 평가하는 체크포인트는 어느 수신기로도 평가된 적 없다**: `raw_*{NR32,NR16}*s{2,3}` 없음, `logs/run_D2_*.log`·`logs/ald_*.log` 에 `_a2`/`_a3` stem 없음(작성자 grep, `~/t2_wtS`·`~/t2`).
+  - **U28NR16 a3 의 SIGINT·재개**: 주 세션이 GPU 를 비우려고 epoch 491 진행 중에 SIGINT (`gpu_sched.log:68` "aborted=True = not an attempt") → 같은 명령으로 재개(`:71`, 로그 `>>` 이어 쓰기) → 635 epoch patience 정지(`:72`). 01_RULES §5 의 재개 규칙 그대로다. **재개의 보장 범위** (SEEDS3_16e4 공개 그대로; 현재 줄 번호): `score.train` 은 model·optimizer·EMA·CPU 생성기 `g` 상태·best/best_epoch·hist 를 복원하고(`score.py` 872, 908–916) 진행 중이던 epoch 491 을 저장된 RNG 로 처음부터 다시 돈다(`:1010–1027`, 로그 506 행에 epoch 491 이 재개 구간에 한 번만 있다) → 표본 스트림은 중단 없는 실행과 같다; GPU 부동소수 비트 동일은 보장되지 않는다(결정론 설정 없음 — 중단 없는 실행의 재현에도 같은 제약).
+  - **D2 C9 a3 는 발산했다**(1240 epoch, best @1235, `stopped_by=diverged`; `gpu_sched.log:74` 10-01 08:33 CDT). 주 세션이 10_SPEC §3d 로 fb2·fb3 를 GPU 0·1 에서 병렬 시작했다(`gpu_sched.log:90–91`, 10-03 18:12 CDT; 이 초안보다 먼저). 이것은 **선례(SEEDS16e4·SEEDS3 §1: 발산 시드는 사다리 없이 "학습 실패")와 다른 규칙**이고, 근거와 선례 규칙 병기는 §1 학습 실패 행에 적는다.
+  - 작성자가 이미 관측된 a1 데이터에서 한 확인(새 시행 없음, scratch 출력, 단일 프로세스·GPU 숨김): (1) `raw_<T>` 의 판정점 3 점 청크만 심볼릭 링크한 디렉터리에 `analysis.main("D2", "", root=…, out_dir=…)` → 세 셀 모두 판정점과 표 B `b* → V1` 계수가 7 점 표와 같다(UMi28 C6 0/+3/+6 232:44, UMi28 C9 −3/0/+3 391:32, D2 C9 −9/−6/−3 914:29); (2) 같은 부분집합으로 `frontier_ci.py --recovery … --level 0.95` → SCALE16e4 의 R1·R1 − R2 줄(90 %·95 %)이 숫자 그대로 재현(D2 `scale2_primary_D2_L95.txt:3–6`, UMi28 S1 `scale2_step_U28_S1.txt:3–5`); (3) {V1, b\*, genie} 3 arm raw(`raw_U28NR16B16e4last`)에는 `analysis.main` 이 table A 의 기준 arm `R2-ours-G` 가 없어 `KeyError` 로 멈춘다.
+- 목적: SEEDS16e4 와 같다 — "검증손실로 고른 시드 a1 이 운이 좋았던 것 아닌가" 를 SCALE16e4 의 새 3 셀(Nr 16·32)에서 묻는다. 같은 레시피·예산·GMM b\*·테스트 시행·판정점에서 확산 체크포인트만 바꾼다. SCALE16e4 의 판정(1차 (T+) 둘, 표 B (i) 셋, 𝔅 36, 2차 단계)은 어느 결과에서도 바뀌지 않는다; 산출은 **셀별 시드 강건성 라벨 3 개 + §1 문장 조건**이다.
+
+---
+
+## 0. 출발점 (판정에 쓰지 않는다; SCALE16e4 §6.1 전사)
+
+| | UMi28 C6 a1 (`raw_U28NR16B16e4`, `_best` @642) | UMi28 C9 a1 (`raw_U28NR32B16e4`, `_best` @232) | D2 C9 a1 (`raw_NR32B16e4`, `_best` @230) |
+|---|---|---|---|
+| 판정점 (앵커 b\*, 자동) | +0/+3/+6 | −3/+0/+3 | −9/−6/−3 |
+| 표 B `b* → V1` | 114:26 · 81:11 · 37:7, pooled 232:44, POWERED 3/3 → (i) | 173:13 · 136:12 · 82:7, 391:32, 3/3 → (i) | 641:16 · 198:9 · 75:4, 914:29, 3/3 → (i) |
+| 판정점 실패 수 /2560: b\* · V1 · genie | 455·257·112 · 367·187·82 · 119·38·13 | 509·304·145 · 349·180·70 · 88·30·9 | 849·231·81 · 224·42·10 · 48·18·4 |
+| 첫 판정점 V1 BLER@16 (95% Wilson) | +0 dB 0.143 (0.130, 0.157), 367 | −3 dB 0.136 (0.124, 0.150), 349 | −9 dB 0.087 (0.077, 0.099), 224 |
+| 첫 판정점 b\* / genie | 0.178 / 0.046 | 0.199 / 0.034 | 0.332 / 0.019 |
+| **R_dp** [90% paired] (`recovery_<T>.txt:8`) | **0.287** [0.253, 0.322] | **0.432** [0.402, 0.462] | **0.811** [0.790, 0.832] |
+| SNR@0.1 격차 b\*−V1 [90%]: 7 점 표 / 3 점 부분집합 (작성자 확인) | +1.41 [+1.08, +1.67] / +1.41 [+1.09, +1.65] | +2.29 [+1.98, +2.61] / +2.29 [+1.99, +2.60] | +2.99 [+2.72, +3.25] / "≥ +2.76" (V1 이 −9 dB 에서 이미 0.1 아래 — censored) |
+| 이 셀을 쓰는 SCALE16e4 문장 | UMi28 S1 증가 +0.137 [90% +0.085, +0.193], S2 증가 (단조 증가), "등록된 baseline 전부(13 개)와 멀어진다" | UMi28 1차 (T+) ΔR +0.282 [90% +0.232, +0.335], S2, "전부(13 개)" | D2 1차 (T+) ΔR +0.302 [95% +0.254, +0.355], D2 S2 판정하지 못함 |
+| 세 시드 best val (판정량 아님) | a1 0.5224766 @642 · a2 0.5221701 @847 · a3 0.5224268 @615 | a1 0.3923236 @232 · a2 0.3914202 @446 · a3 0.3913749 @917 | a1 0.0988171 @230 · a2 0.1022046 @318 · a3 원 시행 발산(@1235 0.0959989, 평가 안 함) · a3 fb2 [학습 중] |
+
+- **이미 정해진 사실**: 판정점은 앵커 b\* 의 BLER 로만 정해지고 §1 수용 (b) 가 b\* 출력의 a1 비트 동일을 요구하므로, 수용된 시드 태그의 판정점은 a1 과 같다(세 셀 모두 세 점의 b\* BLER 이 [0.005, 0.9] 안 — SV8e 같은 미리 정해진 (iv) 는 없다). 작성자 확인 (1)(2) 로, 판정점 3 점만 돌려도 a1 의 판정점·표 B 계수·R_dp·ΔR/S1 줄이 7 점 결과와 같게 계산된다.
+- 선례: SEEDS16e4 §6 — D2 C2 "시드 강건 (3/3 (i))", UMi28 C2 "시드 강건 (3/3 (i))" (R(3 점 합) D2 0.509/0.513/0.520, UMi28 0.150/0.162/0.178). SEEDS3_16e4 §6 — D3 3/3 (i), MIX3 3/3 (i) (보고 전용), SV8e "판정하지 못함 (0/3 (i), 3 판정 못함)" (§0 의 사실).
+
+## 1. 고정되는 것
+
+| 항목 | 값 |
+|---|---|
+| **체크포인트** | UMi28 C6: `ckpt/d2sx_UMi28NR16_N160000_a{2,3}_best.pt` — `train_nr16.py --nr 16 --prior UMi28 --ntrain 160000 --sigma-tag U28NR16g --fits-tag U28NR16B16e4 --attempt 2\|3 --fallback 1 --no-gbprime` (rung D2SXUMi28NR16160000). UMi28 C9: `ckpt/d2sx_UMi28NR32_N160000_a{2,3}_best.pt` — `--nr 32 --prior UMi28 --ntrain 160000 --sigma-tag U28NR32 --fits-tag U28NR32B16e4 --attempt 2\|3 --fallback 1 --no-gbprime` (D2SXUMi28NR32160000). D2 C9 a2: `ckpt/d2sx_NR32_N160000_a2_best.pt` — `--nr 32 --ntrain 160000 --sigma-tag NR32 --fits-tag NR32B16e4 --attempt 2 --fallback 1 --no-gbprime` (D2SXNR32160000); **D2 C9 a3 는 다음 행**. 레시피·σ 격자·분할(split_hash)은 a1 과 같다(SCALE16e4 §1 V1 학습 행; §5 에서 대조). 시드 = SEED_TRAIN + rung·17 + attempt (초기화·배치 순서만 다름). **평가 가중치 = `_best.pt`** (a1 판정 태그와 같음); last 는 평가하지 않는다. sha·epoch·best_epoch·stopped_by 는 §5 에 적고 커밋한 뒤에만 BLER |
+| **학습 실패 · D2 C9 a3 (§3d)** | 발산 판정은 `score.py` 규칙(val > 3·best 또는 NaN 이 5 epoch 연속). `aborted = True` (SIGINT, 또는 min_epochs 전 max_epochs)는 01_RULES §5 에 따라 시도가 아니며 같은 체크포인트에서 재개한다; max_epochs 3000 정지는 유효(C6B16e4 §1). **`stopped_by = diverged` 이면 10_SPEC §3d**: fb2 = `train_nr16.py --nr 32 --ntrain 160000 --sigma-tag NR32 --fits-tag NR32B16e4 --attempt 3 --fallback 2 --no-gbprime` (전역 기울기 노름 클리핑 1.0), fb3 = `… --fallback 3 …` (+ lr/3); 같은 rung·attempt = **같은 시드**(초기화·데이터 스트림) — 시드 축은 a3 그대로다(`train_nr16.py` docstring·`:54–65`). 체크포인트 `ckpt/d2sx_NR32_N160000_a3_fb{2,3}{,_best}.pt`. **쓰는 시행 = 번호가 가장 낮은 성공 시행**(DECISIONS 6953d595; 성공 = aborted False 이고 stopped_by ≠ diverged): fb2 가 성공하면 fb2 를 쓰고 fb3 은 그 시점에 SIGINT 로 멈추며 **열지 않는다**(sha·val·BLER 모두 읽지 않음). fb2 가 diverged 이면 fb3 (성공일 때). 둘 다 실패 → **"학습 실패 (시드 a3)"**, BLER 없음, §5 `SEED NR32B16e4s3 -`, 집계에서 "판정 못함". 쓴 시행을 §5·§6 에 적는다. 원 시행 a3 의 `_best.pt` (@1235)는 보존하되 평가하지 않는다(C6B16e4 §5 선례). UMi28 C6·C9 와 D2 C9 a2 는 모두 patience 정지라 이 행이 걸리지 않는다(§5). **선례와 다른 규칙 (공개)**: SEEDS16e4 §1·SEEDS3 §1 은 발산 시드를 사다리 없이 "학습 실패" 로 센다("시드 분포 자체를 보므로 수리하지 않는다"). 이 등록은 §3d 를 쓴다. 근거: (1) 이 셀들의 a1 을 낸 등록(SCALE16e4 §1 학습 실패 행)의 절차가 "동결 레시피 + §3d" 이고, 같은 추세의 D2 C6 a1 (`raw_NR16B16e4`) 자체가 같은 양상(시행 1 이 epoch 1064 에서 best 직후 발산)으로 만든 fb2 체크포인트다(C6B16e4 §5) — Nr ≥ 16 에서 a1 값을 낸 절차의 시드 분포를 재려면 사다리까지 포함해야 한다; (2) fb2 는 a3 의 시드에 클리핑만 더하므로 시드 축이 바뀌지 않는다; (3) 시행 선택은 미리 정한 번호 규칙이고 val loss·BLER 을 보지 않는다. 주 세션 결정(WORK_QUEUE "NR32 a3 diverged → 시드 등록 시 §3d fb2"; 사다리 학습은 이 초안 전에 시작). **선례 규칙 병기 (보고 전용)**: 선례 규칙이면 D2 C9 a3 = 학습 실패이고 D2 C9 집계는 a1·a2 의 라벨로만 정해진다 — §6 에 등록 라벨과 나란히 적되 라벨로 쓰지 않는다(이미 정해지는 값이라 선택의 여지가 없다) |
+| **바뀌지 않는 것** | GMM b\*·적합(값은 `results/scale/scale2_s5.txt` CELL 줄 = SCALE16e4 §5; 스크립트가 읽는다): UMi28 C6 = `gmm_fits_D2_U28NR16B16e4` (kron 4096, ll_val 56.5879534445348), UMi28 C9 = `gmm_fits_D2_U28NR32B16e4` (kron 4096, 152.23176788511105), D2 C9 = `gmm_fits_D2_NR32B16e4` (kron 2048 — 적합 격자 내부, 242.7371088214899); 세 셀 모두 격자 full 16..512 · kron 16..4096. 링크 `results/gmm_fits_D2_<T>s{2,3}` → `gmm_fits_D2_<T>` (상대 링크, git 미추적 — 선례; 스크립트가 대상 일치를 검사). 부호 (133,171)_8, QPSK, 16 반복, n = 2560, 테스트 시행 0..2559, chunk 40 → {(40k, 40): k = 0..63} × 3 점 = 192 파일, 수신기 CPU complex128, GPU 숨김(`CUDA_VISIBLE_DEVICES=`). 시행 스트림은 (셀, prior, SNR) 로 정해지므로(`trial_rng([20260926, 2, PID, Nr, T, Tp, snr+100])`) **b\*·genie·모든 비-V1 arm 의 출력은 a1 A 태그와 비트 동일**해야 하고 판정점(앵커 b\*)도 a1 과 같다 |
+| **SNR 점 = 판정점 3 점만** | UMi28 C6 0/+3/+6, UMi28 C9 −3/0/+3, D2 C9 −9/−6/−3 (SCALE16e4 §6.1 의 자동 판정점; 스크립트 상수, 손으로 고르지 않음). 근거: (1) 라벨(표 B)·R_dp·§1 문장 조건은 판정점 3 점만 쓰고, 판정점은 앵커 b\* 로 정해지며 b\* 는 수용 (b) 로 a1 과 비트 동일 → 나머지 4 점은 어떤 라벨·문장에도 들어가지 않는다; (2) 작성자 확인 (1)(2): 3 점 부분집합에서 a1 의 판정점·표 B 계수·R_dp·ΔR/S1 줄이 7 점 결과와 같다; (3) 비용 ≈ 53.4 h → ≈ 22.9 h (비용 행). 선례(SEEDS16e4·SEEDS3)는 셀 격자 7 점 전부를 돌렸다 — C2 태그당 30–90 분이라 비용 문제가 없었다. **잃는 것 (보고 전용만)**: V1 의 SNR@0.1 (D2 C9 은 V1 이 −9 dB 에서 이미 0.1 아래라 격차가 "≥" 로 censored), UMi28 C6 의 R(−3 dB), R\*@0.05·Q-OP, 판정점 밖 V1 곡선 — §6 에 n/a 로 적는다 |
+| **arm = A 태그의 11 arm** | `M-ours-dscore-C-V1 M-ours-bstar M-ours-bstar-scalar M-ours-gmm32 R0-pilot R1-turbo R2-ours-G R3-bigamp R4-llr R4-scvamp R5-genie` (V0·V4·V4b 없음 = SCALE16e4 원칙 (2)). 근거: (1) 표 B·R_dp 는 b\*·V1·genie 가 한 raw 에 있어야 한다(V1 만 돌리고 a1 raw 의 b\* 열을 빌리는 도구는 없고, 새 코드는 쓰지 않는다); (2) {V1, b\*, genie} 3 arm raw 에는 analysis 가 돌지 않는다(작성자 확인 (3)); (3) 나머지 8 arm 의 추가 비용은 SCALE16e4 실측으로 6–17 % (last 태그 {V1, b\*, genie} 3 점 44.2 / 325.1 / 266.7 분 vs A 태그 × 3/7 = 51.8 / 351.4 / 283.7 분)이고, 그 대가로 비-V1 10 arm 전부의 a1 재생이 수신기 코드·환경 회귀 검사가 된다(선례 `--ref-arms all`). 𝔅(`pair_baselines`)·PIL·ALD·last·K2 태그와 GB′ 는 돌리지 않는다(시드는 V1 만 바꾼다; 선례도 GB′·pair 없음) |
+| **회귀 검사 (실행 0 단계, 게이트)** | `U28NR16B16e4chkS` = SCALE16e4 chk 명령 그대로(a1 `_best` 34136808b1e367ac, UMi28 C6 −3 dB, 청크 0 = 이미 관측된 시행 0..39, 11 arm, 워커 1)를 실행 커밋에서 다시 돌려 `eval_accept --ref-arms all` 로 `raw_U28NR16B16e4` 와 11 arm × KEYS_RAW 비트 동일을 확인한다(fits 링크 `gmm_fits_D2_U28NR16B16e4chkS` → `gmm_fits_D2_U28NR16B16e4`). **실패하면 실행 전체 ABORT → 사용자**(코드·환경 drift). 근거: 시드 태그의 `--ref-arms all` 은 V1 이 설계상 달라 V1 경로(score 네트워크·torch)의 drift 를 잡지 못한다; chk 는 a1 V1 까지 재현한다(RGB16e4chk·SCALE16e4 chk 선례). 비용 ≈ 19 분(SCALE16e4 18.8 분). **실행 커밋(묶음)마다 1 회**: 2 묶음에서는 `raw_U28NR16B16e4chkS` 의 `run\|git` 이 HEAD 가 아니므로 스크립트가 태그 `U28NR16B16e4chkS2` 로 같은 명령을 다시 돌린다(링크 `gmm_fits_D2_U28NR16B16e4chkS2` → `gmm_fits_D2_U28NR16B16e4`; 비용 ≈ 19 분 추가). 사다리가 실행 커밋 1 전에 닫혀 한 묶음이면 chkS2 는 없다 |
+| **태그·실행 (명령 원문)** | 태그 `<T>s<s>` (s = 2, 3): `U28NR16B16e4s{2,3}`, `U28NR32B16e4s{2,3}`, `NR32B16e4s{2,3}`. 실행: tmux 안에서 `bash code/run_seedsnr16e4.sh [--resume]` (스크립트가 `~/t2_wtS/conf` 로 이동하고 `CUDA_VISIBLE_DEVICES=` 를 export). 태그마다 runner 호출 = `runner.py run --testbed D2 --ntrain 160000 --prior <UMi28\|S2> --cell <C6\|C9> [--worker-gb <G>] --stagec-ckpt /home/HTJ/t2/conf/ckpt/<stem>_best.pt --n 2560 --chunk 40 --snr <판정점 3> --arm <11 arm> --tag <T>s<s>`. 순서: chkS → U28NR16 s2, s3 → U28NR32 s2, s3 → NR32 s2, s3 (사다리가 열려 있는 D2 C9 a3 가 마지막). 한 번에 하나(CPU 등록 실행은 한 번에 하나 — WORK_QUEUE 원칙); 다른 `runner.py run` 이 있으면 시작하지 않는다. raw 는 `~/t2_wtS/conf/raw_<T>s<s>/` (git 미추적, SCALE16e4 선례) |
+| **묶음** | **1 묶음** = 실행 커밋 1: `seedsnr_s5.txt` 에 준비된 5 시드의 `SEED` 줄; `NR32B16e4s3` 는 줄이 없어 PENDING(실행하지 않고 끝 줄에 표시). **2 묶음**: 1 묶음 `SEEDSNR_DONE` 뒤, 사다리가 닫히면 `seedsnr_s5.txt` 에 그 줄(`SEED NR32B16e4s3 d2sx_NR32_N160000_a3_fb<k> <sha16>` 또는 `SEED NR32B16e4s3 -`)과 §5 의 그 칸만 더한 커밋(= 실행 커밋 2) → `bash code/run_seedsnr16e4.sh --resume` (chkS2 포함; 끝난 raw 는 건너뛰고 뒤 단계만 결정적으로 다시 돈다). 실행 커밋 1 전에 사다리가 닫히면 한 묶음으로 끝낸다. raw 마다 `run\|git` 은 하나(1 또는 2)이고 두 커밋의 `conf/code`·`Demo` 는 같다(스크립트 전제; SEEDS16e4 선례: 태그마다 다른 실행 커밋, 코드 동일) |
+| **메모리 가드 (C9)** | SCALE16e4 결정 5 그대로: C9 의 모든 runner 호출에 `--worker-gb G`, **G = `scale2_s5.txt` 의 `WGB` = 8.0** (jobs = min(cpu, 태스크, floor(0.8·MemAvailable/G)); SCALE16e4 는 같은 셀·fits·arm 으로 45 h 동안 G 인상·OOM 없이 jobs 99). UMi28 C6·chkS 는 가드 없음(전체 코어). RSS > 1.25·G 또는 OOM 이면 멈추고 사용자에게 알린 뒤 `SEEDSNR_WGB=<G′> bash code/run_seedsnr16e4.sh --resume` (G′ ≥ G, G 와 같은 규칙; `seedsnr_s5.txt`·HEAD 불변; 자원 문제라 재개에 승인은 필요 없다). 01_RULES §4 의 예외는 SCALE16e4 동결 줄에 이미 있고 그대로 쓴다. RSS 는 기록하지 않는다(위 실측이 근거; SCALE16e4 §6.1.5 와 같음) |
+| **수용 검사** (하나라도 어긋나면 그 태그 무효 → 원인 기록 → 재실행은 사용자 승인; 재실행하면 새 태그가 그 시드의 유일한 값) | (a) **단독 호출** `eval_accept.py --ntrain 160000 --prior <p> --nr <Nr> --bstar kron --kron-K <K> --ll-val <ll> --points <C>:<판정점> --ref-raw raw_<T> --fits-dir results/gmm_fits_D2_<T>s<s> --grid "full:<FK> kron:<KR>" --tag <T>s<s>:best:<sha>:<C>` → `results/review_next/<T>s<s>_accept.txt`: 청크 {(40k, 40)} × 3 점, meta ntrain·bstar·kron_K·ll_val (\|Δ\| ≤ 1e-9), ckpt sha·role best, iters 16, **R5-genie 4 키가 a1 raw 와 비트 동일**, 격자 완전성(병합 파일 + K ≥ 1024 후보 3 개). (b) **`--ref-arms all` 게이트** → `<T>s<s>_refarms.txt`: 점마다 "arms differing" 이 정확히 `['M-ours-dscore-C-V1']`, shared 2560/2560, 빠진 키 없음(선례의 ⊆ {V0, V1, V4, V4b} 에서 돌리지 않는 V0·V4·V4b 를 뺀 것). (c) 시드 태그 표 B 의 판정점(앵커 b\*, 스크립트 정규식 — 블록이 정확히 하나일 때만) = a1 의 판정점. (d) C9: 청크 전부의 `meta\|jobs`·`meta\|worker_gb` 존재, worker_gb ≥ `WGB` (값 집합은 `ACCEPT (k)` 줄; SCALE16e4 (k)). (e) 회귀 검사 chkS(2 묶음은 chkS2) 비트 동일(실패 = 전체 ABORT). (f) raw 마다 깨끗한 커밋 하나 = 그 실행 커밋, `conf/code`·`Demo` 가 동결 커밋과 같고 SCALE16e4 실행 커밋 b4433d3c 대비 `code/run_seedsnr16e4.sh` 추가뿐(스크립트 전제), load_raw 경고 0 (analysis 로그). (g) ckpt: 시드 `_best.pt` sha = §5 (스크립트 전제), `_best.pt` epoch == last `.pt` best_epoch·sigma_tag·split_hash = a1 (§5, 수동), raw `meta\|stagec_ckpt_id` 의 `epoch=`·`best_epoch=` 가 §5 와 같음(§6, 수동), a1 `_best.pt` sha 불변(스크립트 전제). (h) 표 머리말 N_train 160000, UMi28 태그는 UMi28 배너(§6, 수동). 무효 태그는 집계에서 "판정 못함 (수용 실패)" 로 센다 |
+| **시드 강건성 라벨** (SEEDS16e4 §1 의 규칙 그대로, SEEDS3 의 절대 범주 표현; 분모 3 = a1·a2·a3) | 셀마다 시드별 표 B `b* → V1` (§2): **(i) = V1 이 적게 실패 (POWERED, ≥ 2/3)**; **(ii)/(iii) = "다름"**; **(iv)/학습 실패/수용 실패 = "판정 못함"**. 집계: 셋 다 (i) → **"시드 강건 (3/3 (i))"**; (ii)/(iii) 가 하나라도 → **"시드 의존 (k/3 (i), m 다름)"**; 그 밖 → **"판정하지 못함 (k/3 (i), j 판정 못함)"**. k·m·j 는 a1 을 포함한 세 시드에서 센다; a1 은 SCALE16e4 §6.1.3 의 라벨((i)) 그대로. 셀·예산·prior 한정 문장이며 arm 주장이 아니다. a1 을 다른 시드로 바꾸지 않고 세 시드를 한 표에 싣는다; BLER 을 본 뒤 시드를 고르지 않는다; 동등성은 주장하지 않는다. **사다리 한정어 (라벨 문자열의 일부; 보고 전용 아님)**: 어느 셀의 시드가 §3d 시행 2·3 의 체크포인트이면 그 시드의 §2 라벨과 그 셀의 집계 라벨에 `; a<s> = §3d fb<k>` 를 붙인다 — 예: D2 C9 "시드 강건 (3/3 (i); a3 = §3d fb2)". 한정어 없는 "시드 강건 (3/3 (i))" 은 세 시드가 모두 시행 1 일 때만 쓴다(SEEDS16e4·SEEDS3 문자열과 같은 뜻을 유지). §6 표·EXPERIMENTS 행·RESULTS 인용은 모두 이 문자열을 그대로 쓴다. §6 에서 D2 C9 는 등록 라벨(사다리)과 선례 규칙 라벨을 같은 표의 두 열로 나란히 적는다 |
+| **문장 조건** (여기서 고정; 라벨이 아니다) | **(S1) 셀 문장**: 셀 라벨이 "시드 강건 (3/3 (i))" 이면 SCALE16e4 §6.1.3 의 그 셀 표 B 문장에 "(확산 시드 3/3)" 을 **붙인다**; 라벨에 사다리 한정어가 있으면 `"(확산 시드 3/3; a<s> = §3d fb<k> 클리핑)"` 으로 붙인다. 아니면 그 문장과 그 셀을 쓰는 SCALE16e4 문장(UMi28 C6: S1·S2·"전부(13 개)"; UMi28 C9: UMi28 1차·S2·"전부(13 개)"; D2 C9: D2 1차·D2 S2)에 **"단일 시드 한정 (SEEDSNR16e4: <집계 라벨>)"** 캐비엇을 붙인다(선례 "3/3 이 아니면 단일 시드 한정"). **(S2) 1차 (T+) 의 C9 시드 교체 유지**, 데이터셋 d ∈ {D2, UMi28} 마다: C9 셀의 시드 s 가 라벨 대상(학습 성공·수용 통과)이면 dR_d(s) = R_C9(시드 s) − R_C2(a1 등록 raw) 를 SCALE16e4 1차와 같은 명령형 `frontier_ci.py --recovery "raw_<T>s<s>:C9:<판정점>" "<C2 raw>:C2:<판정점>" --level 0.95` (C2 raw: D2 `raw_B16e4k` −3/0/+3, UMi28 `raw_U28B16e4` +3/+6/+9; 비짝 부트스트랩 B 2000, seed 20260926, C9 가 spec 1; 출력에 90 %·95 % 줄이 함께 있다)으로 구해, **SCALE16e4 §6.1.1 에서 그 데이터셋이 판정된 수준(D2 95 %, UMi28 90 %)의 CI 하한 > 0 이면 "유지"**. 두 시드 모두 유지일 때만 `"SCALE16e4 1차 (T+) 는 C9 확산 시드 a2·a3 에서도 유지된다 (2/2[; a3 = §3d fb<k>])"` 를 쓰고 SCALE16e4 의 G_d·Q-K·Q-OP 한정어를 그대로 붙인다(이 등록은 그것들을 다시 계산하지 않는다). 아니면 "유지 k/2 (시드 s: 하한 ≤ 0 \| 판정 못함 (사유))" 로만 쓴다. **(S3) UMi28 S1 "증가" 의 C6 시드 교체 유지**: S1(s) = R_C6(시드 s) − R_C2(a1) (같은 명령형, C6 가 spec 1), 90 % 하한 > 0 → 유지; 2/2 일 때만 "UMi28 S1 증가는 C6 확산 시드 a2·a3 에서도 유지된다 (2/2)". 공통: C2 끝은 등록 a1 raw 로 고정한다(C2 의 시드 산포는 SEEDS16e4 의 몫 — 이 문장의 범위 밖). (S2)(S3) 은 "모두 성립" 형이라 보정 없이 쓴다(교집합 규칙); 등록 사이 보정 없음. 2차 S2 단계(C9 − C6)·D2 S2 는 셀 사이 시드 짝이 임의라 다루지 않는다. 같은 명령을 a1 의 3 점 부분집합에 돌리면 SCALE16e4 값이 그대로 나온다(작성자 확인 (2)) |
+| 보고 전용 | 시드별 판정점 점별 실패 수(b\*·V1·genie; b\*·genie 는 a1 과 같은 값임을 확인), pooled a:b 와 부호검정 p, 점별 R 과 R_dp [90% paired] (`recovery_ci`), 첫 판정점 V1 BLER (95% Wilson), SNR@0.1 격차(3 점 표; D2 C9 은 censored), `frontier_ci` 의 gaps 줄(ΣF_V1 − ΣF_g, ΣF_b\* − ΣF_g)과 dR·S1 의 다른 수준 줄, 가드 발동률, 세 시드의 val loss·epoch, 시드 간 산포(max − min)의 R_dp·ΣF_V1, `meta\|jobs`, D2 C9 의 선례 규칙 병기. 계산하지 않음: GB′, 𝔅, last, PIL·ALD, R\*@0.05·Q-OP, Q-K, 판정점 밖 점 |
+| 다중성 | 시드 태그 6 개의 표 B 는 각각 보고하고, 새로 만드는 라벨은 셀별 집계 3 개뿐이다. 문장 (S2)(S3) 은 교집합형. 등록 사이 보정 없음. p ≥ 0.05 는 판정하지 못함이지 차이 없음이 아니다 |
+| **실행 위치·커밋** | scale worktree `~/t2_wtS/conf` (SCALE16e4 의 raw·fits·σ·code 가 여기 있다; main 에는 병합된 코드만), GPU 숨김. **동결 커밋 (scale)** = 이 문서 v2 + `code/run_seedsnr16e4.sh` + `conf/DECISIONS.md` 동결 줄 + 검토 원문. **동결 전 main → scale 병합 금지**: 스크립트가 `git diff --name-status b4433d3c HEAD -- code ../Demo` = `A conf/code/run_seedsnr16e4.sh` 한 줄을 요구한다(main 의 그림 스크립트 등이 들어오면 ABORT; 그때는 새 동결). **실행 커밋 1** = §5 + `results/scale/seedsnr_s5.txt` 만(`git diff <동결> <실행 1> -- code ../Demo` 빈 것; SCALE16e4 결정 7 선례). **실행 중 scale 커밋 금지**(`run()` 이 HEAD 를 검사해 ABORT); 이 문서·`DECISIONS.md` 는 실행 중 편집하지 않는다(청결 전제, `--resume` 도 같다). main 커밋은 이 실행과 무관하다(`runner._git_head` 는 worktree 의 `code`·`../Demo` 만 본다). 실행 커밋 2 는 1 묶음 `SEEDSNR_DONE` 뒤에만. 결과 파일(tables·accept·refarms·recovery·manifest·guard·seedsnr_dR)·§6·감사는 scale 에 커밋한 뒤 main 으로 병합(양쪽 DECISIONS·EXPERIMENTS 줄 시간순 보존 — SCALE16e4 선례) |
+| **실행 스크립트** | `code/run_seedsnr16e4.sh` (`run_seeds3_eval.sh`·`run_seeds16e4.sh` 의 태그별 흐름 + `run_scale2.sh` 의 `run`·`acc`·`kchk`·`dp`). §5 값은 `results/scale/seedsnr_s5.txt` 에서 읽는다: `FREEZE <동결 커밋>`, `SEED <tag> <ckpt_stem> <best_sha16>` 또는 `SEED <tag> -` (주석은 자기 줄에만); a1 셀 값(b\*·kron_K·ll_val·격자·a1 `_best` sha)과 `WGB` 는 `results/scale/scale2_s5.txt`. **전제**(실패 = 순서·자원 문제로 ABORT, 고친 뒤 승인 없이 재개): flock 단일 실행, `git status --porcelain code ../Demo` 빈 것, 이 문서·`DECISIONS.md`·두 s5 파일 추적·청결, HEAD = `seedsnr_s5.txt` 의 마지막 커밋, FREEZE 가 HEAD 의 조상이고 `code`·`Demo` 가 같음, b4433d3c 대비 이 스크립트 추가뿐, `common.CELLS["C9"]` = (−12..+6), `WGB` > 0 이고 `SEEDSNR_WGB` ≥ WGB, 다른 `runner.py run` 없음, SEED 줄 중복·미지 태그 없음, a1 raw 448 파일·a1 `_best.pt` sha = `scale2_s5.txt`, 시드 `_best.pt` sha = `SEED` 줄, fits 링크(시드 태그·chkS) 대상 일치, 이 등록의 기존 raw 는 `--resume` 일 때만(부분 raw 는 청크 전부의 `run\|git` 이 HEAD 일 때만 이어 감). **흐름**: (0) chkS run → 수용(`--ref-arms all`) → 실패 시 ABORT. (1) 시드 태그마다: run → `runner.py analysis` → 판정점 대조(수용 (c)) → `run_manifest` → `guard_report` → `recovery_ci --snrs <판정점>` → 수용 (a)(+C9 (d)) → `--ref-arms all` 게이트 (b) → (a)(b)(c) 통과 시 `frontier_ci` dR/S1 (`results/review_next/seedsnr_dR_<T>s<s>.txt`, 머리말 줄에 git·시각). `SEED … -` 는 실행 없이 "학습 실패" 로, 줄 없음은 PENDING 으로 로그. 로그 `logs/run_seedsnr16e4.log` (CDT), runner 로그 `logs/run_D2_<tag>.log` 는 호출마다 머리말 줄을 붙여 이어 쓴다. 끝 줄 **`SEEDSNR_DONE ok=<n> fail=<n> pending=<tags> trainfail=<tags>`**. **앞 초안 대비 바꾼 곳**: UMi28 C6 에도 S1(s) 계산 추가(앞 초안은 C9 만), `frontier_ci --level 0.90` → `0.95` (90 %·95 % 줄을 함께 출력 — (S2) 가 D2 95 %를 읽는다), 머리말의 "REPORT-ONLY" 를 §1 문장 조건으로, 본 루프의 입력을 fd 3 으로(루프 안 명령이 stdin 을 먹지 못하게). **작성자 검사**: `bash -n` 통과; 플래그를 argparse 와 grep 대조(`runner.py` `--testbed --ntrain --prior --cell --worker-gb --stagec-ckpt --n --chunk --snr --arm --tag`, `analysis`; `eval_accept.py` `--ntrain --prior --nr --bstar --kron-K --ll-val --n --points --ref-raw --ref-arms --fits-dir --grid --tag`; `recovery_ci.py` `--raw --cell --snrs`; `frontier_ci.py` `--recovery --level`; `guard_report.py` `--raw --testbed`; `run_manifest.py` `--tag`) — 전부 있음; 보조 함수 단위 시험(scratch): `s2c`·`sd` 파싱, `dp` 가 3 점 부분집합 표에서 '0 3 6' / '-3 0 3' / '-9 -6 -3', `refok` 이 V1 만 다른 출력은 통과·b\* 포함/shared 2559/빠진 키는 실패, `kchk` 이 C9 last raw 는 OK·C6 chk raw 는 FAILED. 스크립트는 실행하지 않았다 |
+| **비용 (추정, 작성자 산술)** | 출처: SCALE16e4 §6.1 runner 표(A 태그 7 점·11 arm: UMi28 C6 120.8 분 @192 워커, UMi28 C9 820.0 분 @99, D2 C9 661.9 분 @99). 3 점이면 × 3/7: **51.8 / 351.4 / 283.7 분** (last 태그 3 점 실측 44.2 / 325.1 / 266.7 분과 정합). 시드 두 개: **≈ 22.9 h** + chkS 묶음마다 ≈ 0.3 h + 뒤 단계 수 분 → **1 묶음 ≈ 18.5 h, 2 묶음 ≈ 5.0 h**. 비교: 7 점 전부 ≈ 53.4 h; {V1, b\*, genie} 3 점 ≈ 21.2 h (−7 %, 그러나 analysis 불가). C9 의 jobs 가 99 가 아니면 시간은 99/jobs 배. GPU: 없음(fb2·fb3 학습은 이미 GPU 0·1 에서 진행 중, 등록 밖 비용). RAM: C9 워커 ≤ G = 8.0 GB × jobs |
+| 무결성 | 이번 BLER 로 점·arm·가중치·시행·문장 수준을 고르지 않는다. 판정점은 a1 의 앵커 b\*, 가중치는 `_best.pt` (val loss), 사다리 시행은 번호 규칙. a1 은 보고용 arm 그대로 |
+
+## 2. 라벨 (시드마다; SEEDS16e4 §2 표 그대로, UNDECIDED / 비유의는 "판정하지 못함" 이며 어느 쪽의 증거도 아니다)
+
+| 표 B `b* → V1` (시드 s, 셀 c) | 기록 |
+|---|---|
+| (i) POWERED 이고 second arm fewer ≥ 2/3 | "c 의 시드 s 에서 V1 이 b\* 보다 적게 실패" |
+| (ii) POWERED 이고 first arm fewer ≥ 2/3 | "c 의 시드 s 에서 b\* 가 V1 보다 적게 실패" |
+| (iii) POWERED, 어느 쪽도 ≥ 2/3 아님 | "판정하지 못함 (유의 방향 없음)" |
+| (iv) UNDECIDED (판정점 < 3 이거나 불일치 쌍 ≥ 6 인 판정점이 2 개 미만) | "판정하지 못함 (검정력 미달)" — 격자 확장 없음 |
+| (i)–(iv) 가 §3d 시행 2·3 의 체크포인트에서 나온 경우 | 같은 문자열 + `"; a<s> = §3d fb<k>"` |
+| 학습 실패 (D2 C9 a3 가 fb3 까지 실패) / 수용 실패 | BLER 없음 / 무효; "학습 실패 (시드 s)" / "수용 실패 (시드 s)"; 집계에서 "판정 못함", 분모 3 그대로 |
+
+- 시드 강건성 라벨(§1)은 이 표의 셀별 집계다. 어느 결과도 SCALE16e4 의 판정·§6 을 바꾸지 않는다; 바뀌는 것은 §1 (S1) 의 캐비엇 유무와 (S2)(S3) 문장의 성립 여부뿐이다.
+
+## 3. 미리 적는 예측 (SCALE16e4 a1 결과·SEEDS16e4/SEEDS3 결과·a2·a3 val loss·fb2 학습 곡선 epoch 643 까지를 본 뒤의 약한 예측; 각 항목 적중/빗나감 이분, 범위는 닫힌 구간·3 자리 값)
+
+**채점 규칙(미리 고정)**: 예측 4–8 은 라벨 대상 태그(학습 성공·수용 통과)에 대해서만 채점한다. 학습 실패·수용 실패 태그가 있으면 그 태그를 뺀 나머지로 적중/빗나감을 정하고 "(n/6 태그 채점)" 을 옆에 적는다; 어느 셀의 라벨 대상 태그가 하나도 없으면 그 셀의 항목은 "채점 불가 (사유)" 로 적고 적중·빗나감 합계에 넣지 않는다. 예측 1–3·10–12 는 그대로 이분 채점한다(학습 실패는 1–3·10·11 의 빗나감).
+
+1. **UMi28 C6 a2·a3 표 B 모두 (i)** → "시드 강건 (3/3 (i))".
+2. **UMi28 C9 a2·a3 표 B 모두 (i)** → "시드 강건 (3/3 (i))".
+3. **D2 C9 a2·a3 표 B 모두 (i)** → "시드 강건 (3/3 (i))".
+4. 첫 판정점 V1 BLER: 두 시드 모두 a1 의 95% Wilson CI 안 — UMi28 C6 +0 dB [0.130, 0.157].
+5. 같은 예측, UMi28 C9 −3 dB [0.124, 0.150].
+6. 같은 예측, D2 C9 −9 dB [0.077, 0.099].
+7. R_dp: 라벨 대상 시드 태그 모두 90% CI 가 a1 의 CI 와 겹친다(교집합 비어 있지 않음, 경계 포함) — UMi28 C6 [0.253, 0.322], UMi28 C9 [0.402, 0.462], D2 C9 [0.790, 0.832].
+8. 셀마다 라벨 대상 시드(a1 포함)의 R_dp 의 산포(max − min) ≤ 0.05.
+9. (낮은 확신) D2 C9 a2 (best val 0.1022046, 세 시드 중 최대) 의 R_dp < a1 의 0.811.
+10. (S2) D2 "유지 2/2", UMi28 "유지 2/2"; (S3) UMi28 S1 "유지 2/2".
+11. 학습: D2 C9 a3 fb2 가 발산하지 않고 끝나 a3 = fb2 (fb3 미사용).
+12. 수용: chkS 비트 동일; 여섯 태그 모두 비-V1 10 arm 이 a1 과 비트 동일, 판정점 a1 과 같음, ACCEPT OK.
+13. 빗나갈 경로 (예측 아님, 기록): (a) 어느 시드가 (ii)/(iii) → "시드 의존", §1 (S1) 캐비엇, 재선택 없음; (b) 수용 실패 → 무효·원인 기록, 재실행은 사용자; (c) fb2·fb3 모두 실패 → "학습 실패 (시드 a3)", D2 C9 집계 "판정하지 못함 (k/3 (i), 1 판정 못함)" 이상 불가; (d) chkS 실패 → 전체 ABORT, 사용자; (e) OOM → G′ 재개.
+
+## 4. 선행 작업과 실행 현황 (갱신한다)
+
+### 4.1 학습 (CDT; `logs/gpu_sched.log` 줄 번호와 학습 로그 `logs/train_d2sx_<stem>.log` 의 `# done` 줄; 학습 로그 머리말의 KST 는 `date` 로 환산)
+
+| 시드 | 투입 → 종료 (`gpu_sched.log`) | 결과 (`# done`) | 중단·재개 |
+|---|---|---|---|
+| UMi28 C6 a2 | GPU 2, 10-01 02:58 → 07:54 CDT (:58, :73) | 867 epoch, best @847 val 5.221701e-01, patience, aborted False | 없음 |
+| UMi28 C6 a3 | GPU 0, 10-01 03:34 CDT (:60) → SIGINT (:67 06:24 done 줄, :68 06:25 "SIGINT … epoch 491, aborted=True = not an attempt") → 재개 GPU 5 06:34 → 07:37 CDT (:71, :72) | 첫 구간 "491 epochs, stopped_by=interrupted, aborted=True" (best @486); 재개 머리말 `# =====` 10-01 06:41:30 CDT; **635 epoch, best @615 val 5.224268e-01, patience** | 1 회 (epoch 1–490 완료 뒤, epoch 491 을 저장 RNG 로 다시 학습) |
+| UMi28 C9 a2 | GPU 4, 10-01 00:52 → 03:43 CDT (:55, :61) | 466 epoch, best @446 val 3.914202e-01, patience | 없음 |
+| UMi28 C9 a3 | GPU 5, 10-01 00:52 → 06:33 CDT (:56, :70) | 937 epoch, best @917 val 3.913749e-01, patience | 없음 |
+| D2 C9 a2 | GPU 2, 10-01 00:52 → 02:57 CDT (:53, :57) | 338 epoch, best @318 val 1.022046e-01, patience | 없음 |
+| D2 C9 a3 (원 시행) | GPU 3, 10-01 00:52 → 08:33 CDT (:54, :74) | **1240 epoch, stopped_by=diverged**, best @1235 val 9.599885e-02 (epoch 1239–1240 val 7.4e+01 / 3.1e+01) → §3d | — |
+| D2 C9 a3 fb2 | GPU 0, 10-03 18:12 CDT (:90) | 진행 중 (초안 작성 시 epoch 643, val 9.413645e-02 — 판정량 아님) | |
+| D2 C9 a3 fb3 | GPU 1, 10-03 18:12 CDT (:91) | 진행 중 — **열지 않음**; fb2 가 성공하면 그 시점에 SIGINT | |
+
+- **규칙**: 이후의 중단·재개는 이 표에 **추가만** 한다; 체크포인트를 지우고 처음부터 다시 학습하지 않는다(같은 시드의 재추첨 금지; 하면 그 시드는 "학습 실패" 로 세고 분모 3 유지 — SEEDS3 §4 규칙).
+
+### 4.2 열린 항목 (주 세션·사용자)
+
+1. **§3d 적용이 선례(SEEDS16e4·SEEDS3 의 "사다리 없음")와 다르다** — 연구 판단에 해당하므로 주 세션이 사용자 확인을 받거나 DECISIONS 에 근거를 남길 것(§1 학습 실패 행; 선례 규칙 병기는 이미 등록됨). → **주 세션 결정 (동결 시)**: §3d 적용 유지 — 근거는 같은 추세의 D2 C6 a1 이 같은 늦은 발산 뒤 fb2 체크포인트라는 점과 번호 규칙(검증 손실·BLER 무관); 라벨 문자열의 사다리 한정어(M1)와 선례 규칙 라벨 병기로 공개; 근거는 DECISIONS 동결 줄.
+2. 사용자 지시 원문·시각(머리 목록 첫 줄)과 DECISIONS 동결 줄. → **완료** (동결 커밋).
+3. 사다리가 실행 커밋 1 전에 닫히면 한 묶음, 아니면 두 묶음(§1 묶음 행).
+4. 적대적 검토 → v2. → **완료** (ROUND 2 반드시 0; 원문 `prereg_reviews_seedsnr/`).
+
+### 4.3 현황
+
+| 항목 | 상태 |
+|---|---|
+| `code/run_seedsnr16e4.sh` | 작성·`bash -n` 통과·보조 함수 시험(§1 실행 스크립트 행); 미추적 → 동결 커밋에 넣는다 |
+| fits 링크 8 개 (`gmm_fits_D2_<T>s{2,3}` 6 + `gmm_fits_D2_U28NR16B16e4chkS` + `gmm_fits_D2_U28NR16B16e4chkS2`) | [실행 커밋 1 전] 생성 — 상대 링크, git 미추적(선례), 스크립트가 대상 일치 검사 |
+| `results/scale/seedsnr_s5.txt` | [실행 커밋 1] §5 와 함께 커밋 (초안 §5 끝) |
+| 적대적 검토 → v2 → 동결 → §5·실행 커밋 1 → 1 묶음 → (사다리) 실행 커밋 2 → 2 묶음 → §6 전사 → Fable 기록 감사 → `docs/EXPERIMENTS.md` 행 | 대기 |
+
+## 5. 평가 전 고정 기록 (실행 커밋 전에 채우고 커밋한다; 표기: 값은 초안 작성 시 관측(2026-10-03 22:59 CDT (= 10-04 12:59 KST)) — §5 커밋 때 파일로 재확인, **TBD(규칙)** = 아직 없는 값과 그것을 정하는 규칙)
+
+| 항목 | UMi28 C6 a2 | UMi28 C6 a3 | UMi28 C9 a2 | UMi28 C9 a3 | D2 C9 a2 | D2 C9 a3 |
+|---|---|---|---|---|---|---|
+| `_best.pt` sha256[:16] · epoch · best_epoch · role | **f956a85c82ed4fb3** · 847 · 847 · best | **9c38545ab009f307** · 615 · 615 · best | **c11bb951ff7be4d4** · 446 · 446 · best | **7f72480c42fcd6c9** · 917 · 917 · best | **0c887ee786ff9dfa** · 318 · 318 · best | TBD (§1 §3d 규칙: fb2 성공 → `d2sx_NR32_N160000_a3_fb2_best.pt`; fb2 발산 → fb3; 둘 다 실패 → `-`) |
+| last `.pt` sha256[:16] · epoch · best_epoch · stopped_by (평가 안 함) | e26ed7c35c52b876 · 867 · 847 · patience | 0a4592e302a23c65 · 635 · 615 · patience | a63316777178b994 · 466 · 446 · patience | ac384d5f5d1f7ac7 · 937 · 917 · patience | 8d9c5f0c6643a609 · 338 · 318 · patience | TBD |
+| 검사: `_best.pt` epoch == last `best_epoch` | 847 = 847 ✓ | 615 = 615 ✓ | 446 = 446 ✓ | 917 = 917 ✓ | 318 = 318 ✓ | TBD |
+| best val | 0.5221701264381409 | 0.5224268436431885 | 0.3914201557636261 | 0.3913748860359192 | 0.10220460593700409 | TBD |
+| sigma_tag · split_hash · grad_clip · lr (= a1? ) | U28NR16g · 83e08c3911e52fc3 · 0.0 · 0.002238046051591068 (a1 같음 ✓) | 같음 ✓ | U28NR32 · 01735b4ef4b87ff8 · 0.0 · 같음 (✓) | 같음 ✓ | NR32 · 3669354ecf3a9f00 · 0.0 · 같음 (✓) | fb2: 클리핑 1.0·같은 lr / fb3: 1.0·lr/3 (σ·분할은 a1 과 같아야 함) |
+| 참조 raw · a1 `_best` sha (`scale2_s5.txt`) | raw_U28NR16B16e4 · 34136808b1e367ac | 〃 | raw_U28NR32B16e4 · 463da87aa8dbfb61 | 〃 | raw_NR32B16e4 · 3cf5d3eff96f0341 | 〃 |
+| 판정점 (스크립트 상수) | 0,3,6 | 〃 | −3,0,3 | 〃 | −9,−6,−3 | 〃 |
+| 쓴 사다리 시행 | — | — | — | — | — | TBD (fb2 / fb3 / 학습 실패; fb3 를 열지 않았음을 함께 적는다) |
+
+- 읽은 것: ckpt 메타 키(`torch.load`, CPU, 가중치 미사용)와 파일 sha256, 학습 로그 `# done` 줄, a1 학습 로그의 σ·split 줄. a1 의 σ 격자·split_hash: UMi28 C6 [3.2943e-02, 5.4696e-01] · 83e08c3911e52fc3, UMi28 C9 [3.2958e-02, 1.7232e+00] · 01735b4ef4b87ff8, D2 C9 [3.2813e-02, 1.7404e+00] · 3669354ecf3a9f00 (각 a1 학습 로그) — 시드 로그와 같다.
+- 동결 커밋 해시: TBD. 실행 커밋 1·2 해시: TBD (raw `run|git` 으로 §6 에서 확인).
+
+**`results/scale/seedsnr_s5.txt` 초안** (실행 커밋 1 에 넣는다; FREEZE 는 동결 커밋의 `git rev-parse` 전체 해시):
+
+```
+# SEEDSNR16e4 §5 values read by code/run_seedsnr16e4.sh; committed WITH §5 (= the run commit). Comments ONLY on their own lines.
+# Written 2026-10-03 22:59 CDT (= 10-04 12:59 KST). sha16 = sha256sum ckpt/<stem>_best.pt (first 16 hex). a1 values / WGB: results/scale/scale2_s5.txt.
+# NR32B16e4s3: §3d ladder (fb2 / fb3) open at run commit 1 -> no SEED line (PENDING); its line comes in run commit 2.
+FREEZE <full hash of the freeze commit>
+SEED U28NR16B16e4s2 d2sx_UMi28NR16_N160000_a2 f956a85c82ed4fb3
+SEED U28NR16B16e4s3 d2sx_UMi28NR16_N160000_a3 9c38545ab009f307
+SEED U28NR32B16e4s2 d2sx_UMi28NR32_N160000_a2 c11bb951ff7be4d4
+SEED U28NR32B16e4s3 d2sx_UMi28NR32_N160000_a3 7f72480c42fcd6c9
+SEED NR32B16e4s2 d2sx_NR32_N160000_a2 0c887ee786ff9dfa
+```
+
+**DECISIONS 동결 줄에 적을 것**: 이 문서 v2 동결(해시), 사용자 지시 원문, 설계 선택(판정점 3 점·11 arm·chkS·(S1)–(S3))이 작성자·주 세션 선택임, §3d 를 선례와 다르게 적용한 근거와 선례 규칙 병기, a2·a3 가 등록 전 학습됐고 BLER 이 없었음, U28NR16 a3 SIGINT·재개, 동결 전 main → scale 병합 금지.
+
+## 6. 결과 (이 절은 추가만 한다)
