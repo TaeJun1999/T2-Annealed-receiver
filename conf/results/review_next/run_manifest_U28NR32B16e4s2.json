@@ -1,0 +1,171 @@
+{
+ "manifest_version": 1,
+ "written": "2026-10-05 08:00:40 KST",
+ "git_commit": "b53a8529",
+ "result_tag": "U28NR32B16e4s2",
+ "testbed": "D2",
+ "raw_dir": "/home/HTJ/t2_wtS/conf/raw_U28NR32B16e4s2",
+ "n_raw_files": 192,
+ "config_hash": "be3c3e0d438468f4",
+ "code_hashes": {
+  "Demo": {
+   "t2_route_a.py": "95a5408901ec125c",
+   "t2_trellis.py": "31cd0ee9c68e972b",
+   "t2_gmm.py": "d064e58c7510c769"
+  },
+  "conf_code": {
+   "runner.py": "e5ca4104bc13fbb8",
+   "arms.py": "4d85793abfc69248",
+   "score.py": "f5379bdf8a085fc9",
+   "common.py": "08bef83ab1dc92e5",
+   "d2.py": "93e475c4118366bc",
+   "analysis.py": "dbfd316e34ccdb7f",
+   "rt_tap.py": "5d97dc7124150423",
+   "p3_rules.py": "a06e952b1eddf3ad",
+   "mix3.py": "04a9b9d24aa3e24e"
+  }
+ },
+ "channel_model": {
+  "testbed": "D2",
+  "prior": "UMi28",
+  "description": "UMi28 = D2-pipeline prior UMi28, 3GPP TR 38.901 via Sionna 2.1 (code/mix3.py): UMi 28 GHz only, BS ULA Nr, UE ULA 4, half-wavelength, single V pol, omni, uplink, LoS/NLoS by the model, UE yaw ~ U[-pi,pi), pathloss/shadowing off, narrowband snapshot (CIR summed at the first time sample), ensemble-normalised E||H||^2 = Nr Nt"
+ },
+ "cells": {
+  "C9": {
+   "Nr": 32,
+   "Nt": 4,
+   "T": 16,
+   "Tp": 4,
+   "snrs": [
+    -12,
+    -9,
+    -6,
+    -3,
+    0,
+    3,
+    6
+   ]
+  }
+ },
+ "points": {
+  "D2_C9_UMi28_Nr32_T16_Tp4_eig_snr-3": 2560,
+  "D2_C9_UMi28_Nr32_T16_Tp4_eig_snr0": 2560,
+  "D2_C9_UMi28_Nr32_T16_Tp4_eig_snr3": 2560
+ },
+ "trial_stream": {
+  "rule": "default_rng([20260926, TBID[testbed], PID[prior], Nr, T, Tp, int(snr)+100])",
+  "skip_min": 0,
+  "skip_max_end": 2560,
+  "split": "TEST set (trials from 0; paired across arms)"
+ },
+ "run_params": {
+  "beta": "0.7",
+  "dtype": "complex128/float64",
+  "git": "d59b4c6c",
+  "iters": "16",
+  "n": "40",
+  "seed": "20260926",
+  "snr": [
+   "-3.0",
+   "0.0",
+   "3.0"
+  ],
+  "t_in": "5",
+  "n_chunks": 192
+ },
+ "receiver": {
+  "outer_iterations": 16,
+  "beta": 0.7,
+  "arm_overrides": "(none)",
+  "t_in_bigamp": 5,
+  "n_inner_routeA": 1,
+  "dtype": "complex128/float64",
+  "device": "CPU, one thread per worker",
+  "code": "conv (133,171)_8 nu=6 terminated, QPSK"
+ },
+ "gmm": {
+  "bstar": "kron",
+  "kron_K": "4096",
+  "ntrain": 160000.0,
+  "selection": "validation log-likelihood over the pre-registered K grid (BLER never consulted)",
+  "fits_dir": "/home/HTJ/t2_wtS/conf/results/gmm_fits_D2_U28NR32B16e4s2",
+  "em_sec": "128781.03982377052"
+ },
+ "sample_counts": {
+  "train_channels": 160000,
+  "score_train": 144000,
+  "score_val": 16000,
+  "test_trials_per_point": [
+   2560
+  ]
+ },
+ "stagec_checkpoint": {
+  "path": "/home/HTJ/t2/conf/ckpt/d2sx_UMi28NR32_N160000_a2_best.pt",
+  "sha256_16": "c11bb951ff7be4d4",
+  "stored_epoch": 446,
+  "best_epoch": 446,
+  "best_val": 0.3914201557636261,
+  "role": "best",
+  "evaluated_weights": "best EMA @446",
+  "best_pt": null,
+  "hp": {
+   "arch": "dit",
+   "param": "vp",
+   "domain": "angle",
+   "lr": 0.002238046051591068,
+   "ema": 0.999,
+   "batch": 256,
+   "emb": 256,
+   "width": 64,
+   "depth": 6,
+   "heads": 8,
+   "patch": 1
+  },
+  "params": 485570,
+  "rung": "D2SXUMi28NR32160000",
+  "attempt": 2,
+  "Nr": 32,
+  "Nt": 4,
+  "split_hash": "01735b4ef4b87ff8",
+  "sigma_tag": "U28NR32",
+  "train_epochs": 446,
+  "stopped_by": null,
+  "train_wall_sec": 9773.28881406784,
+  "train_device": "cuda:0 NVIDIA RTX PRO 6000 Blackwell Server Edition",
+  "val_frac": 0.1,
+  "seeds": {
+   "split": 20260926,
+   "val": 20260927,
+   "train": 20260928,
+   "gate": 20260929
+  }
+ },
+ "stagec_status": "built from explicit ckpt /home/HTJ/t2/conf/ckpt/d2sx_UMi28NR32_N160000_a2_best.pt -- caller override, NOT verified against the gate record here (recorded PASS rows: none) | V1 (psd_project=True): built from explicit ckpt /home/HTJ/t2/conf/ckpt/d2sx_UMi28NR32_N160000_a2_best.pt -- caller override, NOT verified against the gate record here (recorded PASS rows: none)",
+ "stagec_gate": "NO GATE RECORD mentions d2sx_UMi28NR32_N160000_a2_best.pt -- UNVERIFIED here.  (GA-GD are measurable on D1 only, 10_SPEC §5: a D2 re-train is qualified by its D1 sibling's gate row, which this string cannot prove.)",
+ "stagec_ckpt_id": "sha256[:16]=c11bb951ff7be4d4 epoch=446 best_epoch=446 role=best 32x4",
+ "arms": [
+  "M-ours-bstar",
+  "M-ours-bstar-scalar",
+  "M-ours-dscore-C-V1",
+  "M-ours-gmm32",
+  "R0-pilot",
+  "R1-turbo",
+  "R2-ours-G",
+  "R3-bigamp",
+  "R4-llr",
+  "R4-scvamp",
+  "R5-genie"
+ ],
+ "versions": {
+  "python": "3.12.14",
+  "numpy": "2.5.2",
+  "torch": "2.14.0+cu130",
+  "host": "0695aede856d",
+  "cpu_count": 192
+ },
+ "output_paths": {
+  "tables": "/home/HTJ/t2_wtS/conf/results/tables_D2_U28NR32B16e4s2.txt",
+  "guard": "/home/HTJ/t2_wtS/conf/results/guard_D2_U28NR32B16e4s2.txt",
+  "log": "/home/HTJ/t2_wtS/conf/logs/run_D2_U28NR32B16e4s2.log"
+ }
+}
