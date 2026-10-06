@@ -8,6 +8,9 @@ Same data, computation, asserts, error bars, colours and markers as the original
     (a) Sparse specular   (b) 3GPP UMi 28 GHz   (c) Sparse specular, 32x4   (d) 3GPP UMi 28 GHz, 32x4;
   - the registered-label annotations of (a)/(b) (primary Delta R / Holm / (T+) / robustness tags, the S1/S2 step labels,
     "monotone increase") are not drawn; the per-point values above the markers stay;
+  - zero-failure points: the curve breaks there instead of joining its neighbours, and Perfect CSI's zero points
+    are drawn as a short downward arrow from the 95% Wilson upper bound (the F17 convention; 0/2560 -> 1.5e-3);
+    the record text keeps listing them as 'not drawn' (no plotted estimate);
   - reads conf/ and ~/t2_wtS/conf raws (read-only) as the original does and writes only F30_scale_trend.{pdf,png} next to
     this script (no .txt; the record text is printed to stdout unchanged, so it can be diffed against
     conf/figs/F30_scale_trend.txt).
@@ -55,6 +58,16 @@ FIG = os.path.dirname(os.path.abspath(__file__))              # paper version: f
 RV = os.path.join(C.CONF, "results", "review_next")
 WTS = os.path.join(os.path.expanduser("~"), "t2_wtS", "conf")
 BS, V1A, GE, R2 = "M-ours-bstar", "M-ours-dscore-C-V1", "R5-genie", "R2-ours-G"
+
+
+def zero_arrows(ax, xs, n, color):
+    """Zero-failure points (0/n blocks) cannot sit on a log axis: draw a short cap at the 95% Wilson upper bound
+    z^2/(n+z^2) and a downward arrow (the F17 convention), never a made-up value; the curve itself breaks there."""
+    hi = 1.96 ** 2 / (n + 1.96 ** 2)
+    for s in xs:
+        ax.plot([s - 0.3, s + 0.3], [hi, hi], color=color, lw=1.0, zorder=6)
+        ax.annotate("", xy=(s, hi / 1.7), xytext=(s, hi), zorder=6,
+                    arrowprops=dict(arrowstyle="-|>", color=color, lw=0.9, mutation_scale=6.5, shrinkA=0, shrinkB=0))
 
 
 def raw(tag):
@@ -210,9 +223,10 @@ def main():
             assert all(len(F.fails(d, key, arm)) == n for key in keys)
             assert k.tolist() == rec[arm], (tag, arm, k.tolist(), rec[arm])
             ci = np.array([wilson(int(a), n) for a in k]); p = k / n; ok = k > 0
-            ax.errorbar(snrs[ok], p[ok], yerr=[p[ok] - ci[ok, 0], ci[ok, 1] - p[ok]], color=sty["color"], marker=sty["marker"],
+            ax.errorbar(snrs, np.where(ok, p, np.nan), yerr=[np.where(ok, p - ci[:, 0], np.nan), np.where(ok, ci[:, 1] - p, np.nan)], color=sty["color"], marker=sty["marker"],
                         ls=sty["ls"], lw=1.1, ms=(4 if sty["marker"] != "*" else 6.5), capsize=1.5, elinewidth=0.8, label=lab,
                         zorder=4 if arm == V1A else 3)
+            if arm == GE: zero_arrows(ax, snrs[~ok], n, sty["color"])
             txt.append(f"  {arm:<20} " + " ".join(f"{int(a):5d}" for a in k)
                        + ("" if ok.all() else "   (zero-failure points not drawn: " + ", ".join(f"{s:+.0f}" for s in snrs[~ok]) + " dB)"))
         ax.set_yscale("log"); ax.set_ylim(2e-4, 1.05); ax.set_xticks(range(-12, 7, 3)); ax.set_xlabel("SNR [dB]")

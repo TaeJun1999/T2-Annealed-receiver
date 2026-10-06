@@ -7,6 +7,9 @@ Same data, computation, asserts, colours, markers and line styles as the origina
   - panel titles removed (dataset names go to the caption), only the bold panel labels (a)-(f) remain:
     (a) Sparse specular, 8x4   (b) Sparse specular, 16x4   (c) Sparse specular, CN gains (8x4)
     (d) Clustered SV (Saleh-Valenzuela, 8x4)   (e) 3GPP UMi 28 GHz (8x4)   (f) 3GPP mixed (8x4);
+  - zero-failure points: the curve breaks there instead of joining its neighbours, and Perfect CSI's zero points
+    are drawn as a short downward arrow from the 95% Wilson upper bound (the F17 convention; 0/2560 -> 1.5e-3);
+    the record text keeps listing them as 'not drawn' (no plotted estimate);
   - reads the raw files from conf/ (read-only) and writes only F22_pilot_only.{pdf,png} next to this script
     (no .txt; the record text is printed to stdout and keeps the internal names).
 The original docstring follows.
@@ -58,6 +61,16 @@ SETS = [("(a) D2 sparse specular, 8×4 (headline)", "B16e4k", "PILB16e4k", "C2",
         ("(f) 3GPP 38.901 MIX3 (side point)", "MXB16e4", "PILMX", "C2", "MIX3", (0.670, 0.648))]
 
 
+def zero_arrows(ax, xs, n, color):
+    """Zero-failure points (0/n blocks) cannot sit on a log axis: draw a short cap at the 95% Wilson upper bound
+    z^2/(n+z^2) and a downward arrow (the F17 convention), never a made-up value; the curve itself breaks there."""
+    hi = 1.96 ** 2 / (n + 1.96 ** 2)
+    for s in xs:
+        ax.plot([s - 0.3, s + 0.3], [hi, hi], color=color, lw=1.0, zorder=6)
+        ax.annotate("", xy=(s, hi / 1.7), xytext=(s, hi), zorder=6,
+                    arrowprops=dict(arrowstyle="-|>", color=color, lw=0.9, mutation_scale=6.5, shrinkA=0, shrinkB=0))
+
+
 def fails(d, key, arm):
     return np.nan_to_num(np.asarray(d[key][arm]["blk_err"])[:, -1], nan=1.0)   # a raised block is a failure
 
@@ -81,10 +94,11 @@ def main():
         zeros = []
         for arm, s, lab, sty, pil in ARMS:
             k = np.array([fails(src[s], key, arm).sum() for key in keys]); p = k / 2560.0; ok = k > 0
-            h, = ax.plot(snrs[ok], p[ok], color=sty["color"], marker=sty["marker"], ls="--" if pil else sty["ls"],
+            h, = ax.plot(snrs, np.where(ok, p, np.nan), color=sty["color"], marker=sty["marker"], ls="--" if pil else sty["ls"],
                          lw=1.0 if pil else 1.5, ms=5.5 if sty["marker"] == "*" else 3.4,
                          mfc="white" if pil else sty["color"], mew=0.9, zorder=4 if "V1" in arm else 3)
             handles.setdefault(lab, h)
+            if arm == "R5-genie": zero_arrows(ax, snrs[~ok], 2560, sty["color"])
             zeros += [f"{arm} {x:+.0f}" for x, z in zip(snrs, ok) if not z]
             txt.append(f"    {arm:<20}" + " ".join(f"{int(x):5d}" for x in k))
         txt.append("    zero-failure points (not drawn on the log axis): " + ("; ".join(zeros) if zeros else "none"))
