@@ -1,6 +1,6 @@
 # 학회 원고용 결과 모음
 
-색인 기준: SEEDSNR16e4 결과·감사까지 (scale c689a935 의 결과·문서 파일을 main 에 사본; 갱신 2026-10-05 18:39 CDT). NSCALE (N-스케일링) 은 실행 중 — 결과는 10-06 CDT 예정. **원고 목표와 배치 계획은 [`PAPER_PLAN.md`](PAPER_PLAN.md)** (IEEE ICC 2027, 투고 마감 2026-10-16, 6 쪽; 저널판 없음). 이 폴더는 **색인과 사본**만 담는다. 원본은 다음과 같다.
+색인 기준: NSCALE 결과·감사까지 (main 에서 기록; 갱신 2026-10-06 15:44 CDT). **원고 목표와 배치 계획은 [`PAPER_PLAN.md`](PAPER_PLAN.md)** (IEEE ICC 2027, 투고 마감 2026-10-16, 6 쪽; 저널판 없음). 이 폴더는 **색인과 사본**만 담는다. 원본은 다음과 같다.
 - 수치: `conf/results/`
 - 실행 기록: `docs/EXPERIMENTS.md`
 - 결정: `conf/DECISIONS.md`
@@ -52,7 +52,7 @@
 
 2절의 기록 감사(Fable)는 모두 완료됐다: ALD·DOP·ROT·ROTMIX·S2V (`5b5c8f4a`, 전부 재현), SUPP16e4 (§6.2, 정정 없음), STATIC16e4 (§6.2, 정정 없음).
 
-## 3. 09-30 이후 결과 (RESULTS.md §18~§21 에 반영; 원본은 등록 문서 §6.1 과 DECISIONS)
+## 3. 09-30 이후 결과 (RESULTS.md §18~§23 에 반영; 원본은 등록 문서 §6.1 과 DECISIONS)
 
 | 실험 | 등록 문서 | 기록된 결과 (등록 §6.1 라벨 그대로 요약) | 그림 | RESULTS 절 |
 |---|---|---|---|---|
@@ -61,6 +61,7 @@
 | 정적 6 데이터셋 × 희소 baseline 3 개 (SBL-loop, SBL-pilot, OMP-pilot) | [SPARSE16e4](../conf/results/review_next/NEXT_EXPERIMENTS_SPARSE16e4.md) | D2 C2 (A) "V1 이 희소 baseline 3 개(SBL-loop, SBL-pilot, OMP-pilot) 전부보다 적게 실패" (SBL-loop 588:72). 새 18 라벨 (i) 17·(iv) 1 (SV8e SBL-loop)·(ii) 0. "등록된 baseline 전부(16 개, 희소 baseline 포함)와 멀어진다": D2 C2·D3·UMi28·MIX3. 예측 6/6 (1 채점 안 함) | F31 | §20 |
 | 배열 규모 축 Nr 8 → 16 → 32 (D2·UMi28; UNGATED 배열 규모 축 측정) | [SCALE16e4](../conf/results/review_next/NEXT_EXPERIMENTS_SCALE16e4.md) | 1차 (Holm m = 2): D2 (T+) ΔR +0.302 [95% +0.254, +0.355] + G_D2 + "[운영점 정합 강건]" "[K 상한 강건]"; UMi28 (T+) ΔR +0.282 [90% +0.232, +0.335] + G_UMi28 + "[운영점 정합 강건]" "[K 상한 민감: 외삽 불가]". 2차: "D2 16→32 판정하지 못함", "UMi28 단조 증가". 새 3 셀 표 B (i) 3/3, 𝔅 36 (i); "전부(13 개)" UMi28 C6·C9 (D2 C9 불충족). 예측 적중 13·빗나감 5 | F30 | §21 |
 | 시드 강건성 3 (Nr 16/32: UMi28 C6·C9, D2 C9; a2·a3) | [SEEDSNR16e4](../conf/results/review_next/NEXT_EXPERIMENTS_SEEDSNR16e4.md) | 6 시드 태그 표 B 6/6 (i); UMi28 C6 "시드 강건 (3/3 (i))", UMi28 C9 "시드 강건 (3/3 (i))", D2 C9 "시드 강건 (3/3 (i); a3 = §3d fb2)" (선례 규칙 병기 "판정하지 못함 (2/3 (i), 1 판정 못함)", 보고 전용); (S2) SCALE16e4 1차 (T+) 가 C9 시드 교체에서 유지 2/2 (D2·UMi28), (S3) UMi28 S1 유지 2/2; R_dp 산포 0.023 / 0.014 / 0.017 | — (F30 에 시드 미표시) | §22 |
+| 동일예산 N 확장 (C2 6.4e5·1.28e6, C6 6.4e5; 보고 전용 kron 8192) | [NSCALE](../conf/results/review_next/NEXT_EXPERIMENTS_NSCALE.md) | P1: C2 6.4e5 통과 (394:70, +1.24 dB [90% +1.06, +1.44]), 1.28e6 통과 (391:90, +1.10 dB [+0.92, +1.30]), C6 6.4e5 (i) (R(−3 dB) 0.779, "기하 효과 대부분 유지"); S_N C2 (1e4…1.28e6) · C6 (1e4…6.4e5) 성립; 1차 짝 추세 (Holm m = 2): C2 ΔR −0.042 [95% −0.082, −0.001] (T−) + Q-OP·Q-K '[한정어 판정 불가: 비짝 CI 폭 (L⁰ = (T0))]', C6 −0.043 [90% −0.098, +0.010] (T0); (E) +1.11 dB [90% +0.86, +1.36]; 보고 전용 kron 8192 ΔR +0.009 [90% −0.010, +0.028]; 세 새 점 모두 b\* = kron 4096 격자 끝 (G_N) | F16 (b) | §23 |
 
 3절의 기록 감사(Fable)도 모두 완료됐다. 수치·라벨·예측 채점 오류는 모두 0 이다: SEEDS3 (§6.2, 위생 정정 6), HISNR (§6.2, 327 검사, 위생 정정 3), SPARSE (§6.2, 2153 검사, 위생 정정 3), SEEDSNR (§6.2, 540 + 99 검사, 위생 정정 3 + 주 세션 결정 1; 폴더 `prereg_audit_2026-10-04/`), SCALE (§6.2, 474 검사, 위생 정정 3 + 주 세션 결정 1). 감사 폴더는 `conf/results/review_next/prereg_audit_2026-09-30/`, `_2026-10-01/`, `_2026-10-03/` 이다.
 

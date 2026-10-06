@@ -12,6 +12,9 @@ rendered text differs, plus two internal-process artefacts removed from panel (b
     four lines and raised so it sits inside the axes clear of the OMP curve; x ticks pinned to the original's 0/5/10/15;
   - (b) "kron <n>" labels -> "K = <n>"; the "gate-FAIL recipe" shading + text and the best-val-weights marker (and its legend
     entry) are not drawn -- the best-val count is still computed and printed with the record text;
+  - (b) adds the two NSCALE budget points (pre-registered, run commit 68d4d353, results 2026-10-06): 6.4e5 (raw_B64e4last)
+    and 1.28e6 (raw_B128e4last), last-EMA like the others, b* = kron 4096 (grid edge), D1-sibling gate PASS; their _best.pt
+    judging-run counts are printed with the record text (not drawn, as for 3.2e5);
   - reads the raw files from conf/ (read-only) and writes only F16_headline_budget.{pdf,png} next to this script
     (no .txt; the record text is printed to stdout unchanged, so it can be diffed against conf/figs/F16_headline_budget.txt).
 The original docstring follows.
@@ -105,7 +108,8 @@ def main():
                 bbox=dict(boxstyle="round,pad=0.3", fc="white", ec="0.7"))
 
     budgets = [(1e4, "B1e4", "kron 512", False), (4e4, "B4e4k", "kron 2048", False),
-               (1.6e5, "B16e4k", "kron 1024", True), (3.2e5, "B32e4last", "kron 4096", True)]
+               (1.6e5, "B16e4k", "kron 1024", True), (3.2e5, "B32e4last", "kron 4096", True),
+               (6.4e5, "B64e4last", "kron 4096", True), (1.28e6, "B128e4last", "kron 4096", True)]   # NSCALE points
     txt += ["", "(b) C2 -3 dB, BLER@16 vs equal budget (last-EMA weights; GMM fit and score net on the same N_train channels):"]
     rows = {}
     for N, tag, bk, gate in budgets:
@@ -121,11 +125,15 @@ def main():
                     capsize=2, label=lab)
     b = raw("B32e4"); v = fails(b, "C2", -3.0, "M-ours-dscore-C-V1")   # best-val weights: record text only, not drawn
     txt.append(f"  N=3.2e5 B32e4 (_best.pt, judging run): M-ours-dscore-C-V1 {int(v.sum())}/{len(v)}")
-    for N, tag, bk, gate in budgets:
+    for N, tag in ((6.4e5, "B64e4"), (1.28e6, "B128e4")):                # NSCALE judging runs: record text only, not drawn
+        v = fails(raw(tag), "C2", -3.0, "M-ours-dscore-C-V1")
+        txt.append(f"  N={N:.2e} {tag} (_best.pt, judging run): M-ours-dscore-C-V1 {int(v.sum())}/{len(v)}")
+    for N, tag, bk, gate in budgets[:3]:                              # GMM K labels above the points, centred
         a2.annotate(bk.replace("kron", "K ="), (N, rows[N]["M-ours-bstar"].mean()), textcoords="offset points",
-                    xytext={1.6e5: (4, 13), 3.2e5: (6, -22)}.get(N, (0, 13)), ha="right" if N >= 1.6e5 else "center",
-                    fontsize=7, color=S.INK)
-    a2.set_xscale("log"); a2.set_ylim(0, 0.3); a2.set_xlim(6e3, 5e5)
+                    xytext=(0, 16), ha="center", fontsize=7, color=S.INK)
+    a2.annotate("K = 4096", (6.4e5, rows[6.4e5]["M-ours-bstar"].mean()), textcoords="offset points",   # one label for
+                xytext=(0, -20), ha="center", fontsize=7, color=S.INK)                                    # 3.2e5-1.28e6
+    a2.set_xscale("log"); a2.set_ylim(0, 0.3); a2.set_xlim(6e3, 2.2e6)
     a2.set_xlabel(r"Training set size $N_{\rm train}$ (channels)"); a2.set_ylabel("BLER at −3 dB")
     a2.set_title("(b)", loc="left", fontweight="bold", fontsize=8.8)
     fig.tight_layout()
