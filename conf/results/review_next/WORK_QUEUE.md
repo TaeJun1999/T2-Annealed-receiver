@@ -1,6 +1,6 @@
 # 작업 큐 (review_next 이후; 갱신할 때마다 맨 위 시각을 바꾼다)
 
-갱신 2026-10-05 18:26 CDT (Opus 5.5). 사용자 지시 2026-09-29 CDT: "추천 순서로 계속, 남는 자원에는 계속 작업 할당, 빈 곳도 계획에 올려 적절한 순서로"; 09-30 CDT: 규모 확장 2단계는 "차례가 오면 승인 없이" (DECISIONS 6b1de688). 모든 판정 실험은 사전 등록 → Fable 적대적 검토(서브에이전트) → 동결 → 실행 → §6 전사 → Fable 기록 감사.
+갱신 2026-10-06 15:46 CDT (Opus 5.5). **실험 단계 끝 — NSCALE 결과·감사·RESULTS §23 까지 main 에 기록 (7adcee92), scale → main 병합 (36cd150e); 이제 원고 (웹 채팅, paper 브랜치).** 사용자 지시 2026-09-29 CDT: "추천 순서로 계속, 남는 자원에는 계속 작업 할당, 빈 곳도 계획에 올려 적절한 순서로"; 09-30 CDT: 규모 확장 2단계는 "차례가 오면 승인 없이" (DECISIONS 6b1de688). 모든 판정 실험은 사전 등록 → Fable 적대적 검토(서브에이전트) → 동결 → 실행 → §6 전사 → Fable 기록 감사.
 
 ## 원고 목표 (사용자 10-05 CDT)
 - **IEEE ICC 2027** (Washington DC). 공식 call 페이지 기준 투고 마감 **2026-10-16**, 통지 2027-01-15, 최종본 2027-02-19. 투고본 **6 쪽 (10 pt) 상한** — 넘으면 심사 없이 거절. 저널판 없음 (DECISIONS 3a64d0ae) → 6 쪽에 못 넣는 것은 arXiv 확장판.
@@ -13,8 +13,7 @@
 ## 진행 중
 | 작업 | 자원 | 상태 |
 |---|---|---|
-| NSCALE GPU (main 5571b5d4, `code/run_nscale_gpu.sh` → gpuq 84 작업; kron 4096 세 점 병합 완료) | GPU 6 | 일괄 검사 3 → V1 D2 6.4e5·1.28e6·C6 6.4e5, D1 형제 2, 격자 B64e4·B128e4·NR16B64e4, 보고 전용 K8B64e4. 로그 `logs/nscale/` |
-| NSCALE 동결 **2d50dab5** (v7; Fable 7 회 + 동결 전 확인) | — | GB′ 감시 tmux `nsgbp` (`code/nscale_gbp_watch.sh`). GPU 산출물 최종 → `run_nscale.sh prep` → §5 + `nscale_s5.txt` → `links` → §5 커밋 (= 실행) → CPU BLER (SEEDSNR 뒤). **main conf/code 변경 금지 (동결 ~ §5 diff 검사)** → SEEDSNR 의 scale→main 병합은 NSCALE_DONE 뒤 |
+| 원고 (IEEE ICC 2027, 마감 2026-10-16) — 웹 채팅에서 사용자가 작성, 자료는 paper 브랜치 (`conference/tools/sync_paper_branch.sh`) | — | 진행 중. 실험 큐·GPU 큐 비어 있음 |
 
 ## 대기열 (순서대로)
 | # | 작업 | 자원 | 선행 조건 | 비고 |
@@ -22,6 +21,7 @@
 | 4 | RESULTS.md: SEEDS3·HISNR·SPARSE·SCALE 반영, CONTRIBUTIONS.md (09-27 이전에 머묾), 결과 요약 artifact 페이지, 그림 | — | 사용자 요청 시 (규칙: 요청 때 갱신) | |
 
 ## 완료 (최근)
+- NSCALE (2026-10-06 15:46 CDT 기록): §5 = 실행 커밋 68d4d353 → eval 10-06 08:11–15:06 CDT `NSCALE_DONE ok=89 fail=0` → §6.1 (생성기 s6_gen.py) + §6.2 Fable 감사 MUST 0 (c69222a5) → RESULTS §23 (7adcee92); 논문 F16 (b) 에 6.4e5·1.28e6 점 (35e9b293), 표 I 초안·F30top (46a7477d).
 - SEEDSNR16e4 실행 (1 묶음 ok=47 → 실행 커밋 2 b53a8529 → 2 묶음 ok=51) → 결과·감사 scale c689a935 (6/6 표 B (i), 세 셀 '시드 강건 (3/3 (i))'; fb3 로그 열람 공개). **scale→main 병합 대기: NSCALE_DONE 뒤** (main conf/code 동결)
 - STATIC16e4 (faebac20, 감사 34dbf03b) · genie 고SNR 바닥 진단 (d6f322fb) · 1단계 파일럿 (scale a798d878)
 - SEEDS3_16e4 결과·감사 (15d4e1dc) · HISNR16e4 결과·감사 (이 커밋)
@@ -34,3 +34,9 @@
 1. (사용자가 직접 처리: 저장소 공개 여부 — 목록에서 제외)
 2. (해결 10-05 CDT, 사용자: "저널까지 확장하는 건 무리 — paper 에 쓸 좋은 source·결과는 모두 conference 에") → 저널판 없음, 비정상 묶음 포함 학회 원고. DECISIONS 같은 날 줄
 3. (선택) 불일치 20 조합 전부, A′ 시공간 prior, C9 N-스케일링 (SEEDSNR 끝남) — 저널판이 없으므로 하려면 학회 원고 일정 안에서
+
+## 사용자 결정 대기 (원고)
+- GitHub 기본 브랜치를 `paper` 로 (사용자가 GitHub Settings 에서; 웹 채팅이 paper 만 보게).
+- 원격 옛 `conference` 브랜치 (마지막 커밋 cf289ebe, 09-29 CDT) 삭제 여부.
+- F17 캡션: (b) 곡선 = best-validation, (c) 16×4·1.6e5 점 = 마지막 EMA (0.815) — 밝히거나 하나로.
+- 표 I: 한 단 판이 단 높이의 약 0.89 — (D) 시드를 본문 한 문장으로 옮길지 등 (`conference/tables/README.md`).
