@@ -32,3 +32,10 @@
 - F30 의 SCALE16e4 raw (C9 셀·UMi28 C6) 는 scale 워크트리 `~/t2_wtS/conf/raw_*` 에 있다 (미추적). 재사용 셀 raw 는 `conf/raw_*`. 경로는 F30 `.txt` 머리말에 있다.
 - F32 는 보고 전용이다 (HISNR16e4 §1): 새 시행은 원 태그와 합치지 않고, 등록된 판정점·라벨·"전부" 문장은 원 태그의 것이다.
 - 등록 문서 경로: `conf/results/review_next/NEXT_EXPERIMENTS_<이름>.md`. 결과 색인: 저장소 최상위 `conference/README.md`.
+
+## 제목 제거 재생성 (2026-10-05 21:16 CDT)
+
+LaTeX 캡션을 따로 달기 위해 F16–F32 를 **그림 제목 없이** 다시 만들었다. 스크립트 (`conf/code/figure_f*.py`, NSCALE 실행 때문에 동결) 는 고치지 않고 `conference/tools/regen_notitle.py` 로 실행만 했다: 축 제목은 앞의 패널 표시 "(a)" 만 남기고 (굵게, 왼쪽 위) 나머지 문구를 지운다; 전체 제목 (suptitle) 은 없다. 데이터·축·범례·그림 안 주석·파일 이름은 그대로이고, `.txt` (수치·캡션 메모) 는 바이트 동일하다.
+- 지운 패널 제목의 내용은 각 그림 `.txt` 의 캡션 메모에 있다.
+- F25 는 원 제목에 패널 표시가 없어 위치 순서로 붙였다: (a) Doppler ν = 0.005, (b) Doppler ν = 0.01, (c) rotation 15°, (d) rotation 30°.
+- F29 (단일 패널) 는 원 제목이 색 범례였다 — 캡션에: 파랑 = (i) V1 이 적게 실패, 회색 = (iii) 유의 방향 없음, 흰색 = (iv) 검정력 미달.
