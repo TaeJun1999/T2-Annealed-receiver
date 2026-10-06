@@ -11,6 +11,8 @@
 | 파일 | 내용 |
 |---|---|
 | [`conf/conference_plot/`](../conf/conference_plot/) | 학회용 그림 F16~F32 (pdf·png·txt)와 그림 색인 README. F24~F29 는 비정상 실험, F30~F32 는 10-03 추가분이다. `.txt` 에 수치 전부와 캡션용 캐비엇이 있다 |
+| [`tables/`](tables/) | **표 I 초안** (본문용 한 단 `table1_compact.tex`, 전체판 `table1.tex`, 출처 `table1_sources.md`) — 상태는 `tables/README.md` |
+| [`figures/`](figures/) | **논문 그림** (내부 용어 없음, 제목 없음, TrueType): F16–F32 와 F30top (F30 위 두 칸의 IEEE 크기판 — 두 단 7.16 in, 한 단 3.5 in); 용어집 `TERMS.md`, 캡션 메모 `README.md` |
 | `RESULTS_snapshot.md` | `docs/RESULTS.md` 사본 (2026-10-05 18:39 CDT 판: §1~§22 전부 — §22 SEEDSNR16e4 포함). 사본은 RESULTS 갱신을 커밋할 때 다시 만든다 |
 
 공통 조건 (따로 적은 곳 외):

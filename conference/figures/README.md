@@ -28,6 +28,7 @@
 | F28 | Sparse specular 16×4: (a) Doppler 0.005, (b) 0.01, (c) 회전 15°, (d) 30° | |
 | F29 | 24 조건 × 기준선 13 개 라벨 격자 | 범례 4 칸 (Proposed fails more 는 0/288) |
 | F30 | (a) Sparse specular, (b) 3GPP UMi 28 GHz: 격차 비율 vs N_r (8·16·32); (c) Sparse specular 32×4, (d) 3GPP UMi 28 GHz 32×4 BLER | (a)(b) 90% paired CI, 판정점 3 개의 합 |
+| F30top | F30 의 윗줄 (a)(b) 만, 같은 데이터·CI·그리기 (`paper_f30top.py`; 기록 텍스트 = F30 의 것에서 (c)(d) BLER 블록만 뺀 것, 같은 실행의 `paper_f30.main()` 출력과 assert): (a) Sparse specular, (b) 3GPP UMi 28 GHz — 격차 비율 vs N_r (8·16·32). `F30top_wide` = `figure*` 용 7.16×2.5 in, (a)·(b) 나란히; `F30top_col` = 한 단 3.5×4.3 in, (a) 위·(b) 아래 | F30 (a)(b) 와 같음: 90% paired CI, 판정점 3 개의 합; 데이터셋 이름은 그림에 없으니 캡션에. 32×4 BLER 곡선 (F30 (c)(d)) 은 없음. Sparse specular N_r = 32 의 CI [0.790, 0.832] 는 마커 지름 정도라 막대가 마커에 가려 끝 막대만 보임 (한 단 판에서 더 심함) — 필요하면 구간을 캡션·본문에 수치로 |
 | F31 | (a) 데이터셋별 기준선→Perfect CSI 격차 비율 (GMM prior + 희소 3 개), (b) Sparse specular 8×4 BLER (Proposed, GMM prior, 희소 3 개, Perfect CSI) | 행 중 16×4 표시가 없는 것은 8×4 |
 | F32 | +6..+15 dB: (a) Sparse specular 8×4, (b) 16×4 — 속 빈 왼쪽 = 원 시험 시행 (n = 2560), 채움 오른쪽 = 새 시행 (n = 20480) | 보고 전용 보강 |
 

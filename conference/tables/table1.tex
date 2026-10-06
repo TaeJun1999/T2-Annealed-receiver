@@ -1,0 +1,98 @@
+% =====================================================================
+% Table I -- FULL version, double column (table*), IEEE ICC 2027
+% Built 2026-10-06 from the project records; every number in this file
+% is listed with its source in conference/tables/table1_sources.md.
+% Numbers are copied as recorded (no recomputation, no interpretation).
+% Plain LaTeX only: no package beyond IEEEtran (tabular* and \surd are
+% standard LaTeX; no array/booktabs/threeparttable needed).
+% The full table does not fit one column at \footnotesize.  Measured
+% (IEEEtran 10pt, Times, tectonic): 516 pt wide (tabular*), table + notes
+% about 621 pt tall, i.e. about 0.92 of the 672 pt page height -- meant
+% for the arXiv companion; the single-column version for the 6-page
+% paper is table1_compact.tex.
+% Caption wording is a placeholder for the author.
+% =====================================================================
+\begin{table*}[!t]
+\centering
+\caption{Proposed (diffusion prior) versus the registered baselines}
+\label{tab:summary_full}
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}lccccc@{}}
+\hline
+\multicolumn{6}{@{}l@{}}{\textbf{(A)} All 16 registered baselines$^{\rm d}$, sparse specular, $8\times4$ (label $\surd$ for 16 of 16)}\\
+\hline
+Baseline & Gain [dB] (90\% CI)$^{\rm b}$ & Label$^{\rm a}$ & $a{:}b^{\rm c}$ & $R_X$ vs.\ this baseline (90\% CI)$^{\rm e}$ & Non-stationary$^{\rm f}$ $\surd$\,/\,n.s.\,/\,insuff.\\
+\hline
+GMM prior                          & +1.41 (+1.22, +1.64) & $\surd$ & 454:78  & 0.470 (0.427, 0.512) & 19\,/\,3\,/\,2\\
+GMM prior, scalar site             & +1.58 (+1.37, +1.82) & $\surd$ & 498:73  & 0.502 (0.460, 0.542) & 23\,/\,0\,/\,1\\
+GMM prior ($K=32$)                 & +1.76 (+1.53, +2.02) & $\surd$ & 565:78  & 0.517 (0.477, 0.557) & 23\,/\,0\,/\,1\\
+GMM prior, pilot-only              & +1.99 (+1.78, +2.21) & $\surd$ & 814:41  & 0.681 (0.654, 0.709) & 24\,/\,0\,/\,0\\
+Gaussian prior                     & +2.29 (+2.03, +2.54) & $\surd$ & 778:69  & 0.622 (0.590, 0.656) & 24\,/\,0\,/\,0\\
+Pilot-only LMMSE$^{\rm o}$         & +8.25 (+7.78, +8.82) & $\surd$ & 832:0   & 0.845 (0.830, 0.860) & 24\,/\,0\,/\,0\\
+Turbo LMMSE receiver               & +4.53 (+4.24, +4.85) & $\surd$ & 724:12  & 0.782 (0.762, 0.802) & 24\,/\,0\,/\,0\\
+BiG-AMP                            & +4.54 (+4.25, +4.86) & $\surd$ & 461:4   & 0.782 (0.762, 0.802) & 24\,/\,0\,/\,0\\
+SC-VAMP                            & +8.06 (+7.46, +8.77) & $\surd$ & 759:2   & 0.807 (0.790, 0.825) & 24\,/\,0\,/\,0\\
+SC-VAMP (LLR)                      & $\geq$+17.23         & $\surd$ & 1623:2  & 0.867 (0.854, 0.879) & 24\,/\,0\,/\,0\\
+Proposed prior, pilot-only         & +0.92 (+0.77, +1.07) & $\surd$ & 347:51  & 0.473 (0.432, 0.513) & 21\,/\,2\,/\,1\\
+Annealed Langevin (plug-in)$^{\rm n}$ & +1.82 (+1.62, +2.05) & $\surd$ & 678:54  & 0.619 (0.585, 0.651) & 24\,/\,0\,/\,0\\
+Annealed Langevin (error-aware)$^{\rm n}$ & +1.54 (+1.37, +1.74) & $\surd$ & 644:50  & 0.629 (0.597, 0.659) & 23\,/\,0\,/\,1\\
+SBL (in loop)                      & +1.86 (+1.64, +2.10) & $\surd$ & 588:72  & 0.540 (0.503, 0.579) & not run\\
+SBL (pilot-only)                   & +2.12 (+1.90, +2.35) & $\surd$ & 811:52  & 0.665 (0.635, 0.694) & not run\\
+OMP (pilot-only)                   & +3.24 (+2.99, +3.51) & $\surd$ & 451:20  & 0.697 (0.669, 0.723) & not run\\
+\hline
+\multicolumn{6}{@{}l@{}}{\textbf{(B)} Channel models, $8\times4$: proposed vs.\ GMM prior$^{\rm i}$}\\
+\hline
+Channel model & Gain [dB] (90\% CI)$^{\rm b}$ & Label$^{\rm a}$ & $a{:}b^{\rm c}$ & $R$ (90\% CI)$^{\rm e}$ & $\surd$ vs.\ the 16 baselines$^{\rm d}$\\
+\hline
+Sparse specular                            & +1.41 (+1.22, +1.64) & $\surd$ & 454:78 & 0.470 (0.427, 0.512) & 16/16\\
+Sparse specular, CN gains$^{\rm g}$        & +1.41 (+1.19, +1.67) & $\surd$ & 393:67 & 0.367 (0.335, 0.399) & 16/16\\
+3GPP UMi 28\,GHz$^{\rm g}$                 & +0.60 (+0.33, +0.87) & $\surd$ & 161:73 & 0.062 (0.033, 0.089) & 16/16\\
+3GPP mixed$^{\rm g,h}$                     & +0.98 (+0.68, +1.31) & $\surd$ & 198:71 & 0.090 (0.062, 0.117) & 16/16\\
+Clustered SV (Saleh--Valenzuela)$^{\rm g}$ & +0.25 (+0.16, +0.33) & insuff. & 148:72 & 0.143 (0.095, 0.188) & 11/16 (5 insuff.)\\
+\hline
+\multicolumn{6}{@{}l@{}}{\textbf{(C)} Non-stationary conditions$^{\rm f,g}$: 24 conditions $\times$ (GMM prior + 12 non-sparse baselines)}\\
+\hline
+\multicolumn{5}{@{}l}{Proposed vs.\ GMM prior, $\surd$\,/\,n.s.\,/\,insuff.\,/\,proposed fails more}                                   & 19\,/\,3\,/\,2\,/\,0\\
+\multicolumn{5}{@{}l}{\quad $\surd$ vs.\ GMM prior per condition type, of 6 settings: Doppler $\nu=0.005$ / $\nu=0.01$ / rotation $15^\circ$ / $30^\circ$} & 5\,/\,3\,/\,5\,/\,6\\
+\multicolumn{5}{@{}l}{Conditions with $\surd$ vs.\ each of the other 12 baselines}                                                         & 21/24\\
+\multicolumn{5}{@{}l}{Labels with the proposed failing more, over 24 conditions $\times$ 12 baselines}                                     & 0/288\\
+\multicolumn{5}{@{}l}{Conditions with $\surd$ vs.\ all 13 and $R$ vs.\ the best baseline above 0$^{\rm m}$}                                & 18/24\\
+\multicolumn{5}{@{}l}{Sparse specular $8\times4$: conditions with $\surd$ vs.\ each of the 12 other baselines}                              & 4/4\\
+\hline
+\multicolumn{6}{@{}l@{}}{\textbf{(D)} Diffusion training seeds$^{\rm j}$: proposed vs.\ GMM prior}\\
+\hline
+Cell & Gain [dB], seeds 1\,/\,2\,/\,3$^{\rm b}$ & \multicolumn{2}{c}{Seeds with $\surd$} & $R$, seeds 1\,/\,2\,/\,3$^{\rm e}$ & \\
+\hline
+Sparse specular, $8\times4$                   & +1.41\,/\,+1.44\,/\,+1.48 & \multicolumn{2}{c}{3/3}                       & 0.470\,/\,0.478\,/\,0.463 & \\
+Sparse specular, CN gains, $8\times4^{\rm g}$ & +1.41\,/\,+1.42\,/\,+1.46 & \multicolumn{2}{c}{3/3}                       & 0.367\,/\,0.337\,/\,0.343 & \\
+3GPP UMi 28\,GHz, $8\times4^{\rm g}$          & +0.60\,/\,+0.74\,/\,+0.74 & \multicolumn{2}{c}{3/3}                       & 0.062\,/\,0.059\,/\,0.036 & \\
+3GPP mixed, $8\times4^{\rm g,h}$              & +0.98\,/\,+0.72\,/\,+0.83 & \multicolumn{2}{c}{3/3}                       & 0.090\,/\,0.078\,/\,0.085 & \\
+Clustered SV, $8\times4^{\rm g}$              & +0.25\,/\,+0.24\,/\,+0.30 & \multicolumn{2}{c}{0/3 (3 insuff.)$^{\rm l}$} & 0.143\,/\,0.127\,/\,0.148 & \\
+3GPP UMi 28\,GHz, $16\times4^{\rm g}$         & +1.41\,/\,--\,/\,--       & \multicolumn{2}{c}{3/3}                       & 0.287\,/\,0.269\,/\,0.292 & \\
+3GPP UMi 28\,GHz, $32\times4^{\rm g}$         & +2.29\,/\,--\,/\,--       & \multicolumn{2}{c}{3/3}                       & 0.432\,/\,0.443\,/\,0.446 & \\
+Sparse specular, $32\times4^{\rm g}$          & +2.99\,/\,--\,/\,--       & \multicolumn{2}{c}{3/3$^{\rm k}$}             & 0.811\,/\,0.813\,/\,0.796 & \\
+\hline
+\end{tabular*}
+
+\vspace{3pt}
+\begin{minipage}{\textwidth}
+\footnotesize
+All trained priors (GMM and diffusion): $N_{\rm train}=1.6\times10^5$ channels; BLER after 16 receiver iterations; 2560 blocks per SNR; SNR grid $-3{:}3{:}15$\,dB ($32\times4$: $-12{:}3{:}6$\,dB).
+$^{\rm a}$Paired two-sided sign test on block failures at the three registered decision SNRs (grid points with the baseline's BLER in $[0.005,0.9]$, nearest 0.1). $\surd$: proposed fails less, $p<0.05$ at $\geq2$ of the 3 points; n.s.: neither side at $\geq2$ points; insuff.: fewer than 3 decision SNRs, or fewer than 2 of them with $\geq6$ discordant blocks. n.s.\ and insuff.\ mean ``not decided'', not ``no difference''.
+$^{\rm b}$SNR at BLER 0.1 of the baseline (GMM prior in (B), (D)) minus that of the proposed method ($>0$: proposed better), 90\% paired-bootstrap CI; a report field, not the registered test. $\geq$: the baseline never reaches 0.1 on the grid. --: not measured (decision SNRs only).
+$^{\rm c}$Discordant blocks summed over the decision SNRs: only the baseline failed\,:\,only the proposed method failed.
+$^{\rm d}$Static labels vs.\ the 13 non-sparse baselines: post-hoc computation with a fixed rule on existing runs, after the curves had been seen (not pre-registered); the comparisons with the GMM prior, both annealed-Langevin estimators and the pilot-only proposed prior were also pre-registered individually. Labels vs.\ the 3 sparse baselines: pre-registered; they use an on-grid oversampled 2-D DFT dictionary with oversampling factor 16 at the edge of the tuning grid, SBL (in loop) reuses the per-SNR iteration count tuned on pilot-only development NMSE, and OMP equals pilot LS at the decision SNRs of UMi and mixed (and at one of clustered SV).
+$^{\rm e}$Fraction of the baseline-to-perfect-CSI gap closed, $(F_X-F_{\rm prop})/(F_X-F_{\rm PCSI})$, $F$ = block failures (of 2560) at $-3$\,dB; $X$ = the baseline in (A) (report-only), the GMM prior in (B) and (D); $16\times4$ and $32\times4$ rows: failures summed over the three decision SNRs. $R$ is relative to $X$ (it also rises when $X$ worsens). Perfect CSI: the same EP detector and BCJR loop given the true channel; a reference, not a bound.
+$^{\rm f}$Priors trained on static (0$^\circ$) channels, applied without retraining to 6 settings (sparse specular $8\times4$ and $16\times4$; CN gains, clustered SV, UMi, mixed at $8\times4$) $\times$ \{in-block Doppler $\nu=0.005$, $0.01$; receive-array rotation $15^\circ$, $30^\circ$\}; counts of the 24 conditions; none with ``proposed fails more''. Sparse baselines were not run in these conditions.
+$^{\rm g}$Diffusion checkpoint(s) not covered by the sample-quality gate (the sparse-specular $8\times4$ recipe passed it on a sibling testbed): measurement labels, not method verdicts.
+$^{\rm h}$Report-only adjunct point.
+$^{\rm i}$GMM prior: $K$ chosen by validation likelihood; at the grid edge for sparse specular $8\times4$ ($K=1024$) and CN gains, UMi, mixed ($K=4096$); clustered SV $K=256$, inside the grid; (D) UMi $16\times4$, $32\times4$: $K=4096$ (grid edge), sparse specular $32\times4$: $K=2048$ (inside). The registered protocol, not an optimal GMM.
+$^{\rm j}$Seed 1 is the reported model; seeds were not chosen after BLER. Label: seeds (of 3) with $\surd$ vs.\ the GMM prior.
+$^{\rm k}$Seed 3 diverged in training and used the registered fallback (gradient clipping 1.0); under the earlier rule without this fallback: 2/3 and 1 insuff.\ (report-only).
+$^{\rm l}$Fixed before the seed runs (only two decision SNRs on the grid); report-only.
+$^{\rm m}$I.e., the GMM label is $\surd$ (19 of 24 conditions eligible), each of the other 12 labels is $\surd$, and the lower 90\% CI bound of $R$ vs.\ the best baseline (fewest failures at $-3$\,dB) is above 0.
+$^{\rm n}$Pilot-only estimator using the proposed method's diffusion weights; not a reproduction of the original estimator.
+$^{\rm o}$Read after the first receiver pass (registered rule for this baseline).
+\end{minipage}
+\end{table*}
