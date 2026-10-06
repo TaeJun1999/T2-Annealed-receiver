@@ -1,0 +1,94 @@
+% =====================================================================
+% Table I -- COMPACT single-column version (IEEE ICC 2027 manuscript)
+% Built 2026-10-06 from the project records; every number in this file
+% is listed with its source in conference/tables/table1_sources.md.
+% Numbers are copied as recorded (three counts derived by enumeration,
+% listed in table1_sources.md; no interpretation).
+% Plain LaTeX only: no package beyond IEEEtran (\surd is a standard
+% math symbol; no array/booktabs/threeparttable needed).
+% Relative to the full version (table1.tex, table*): moved into notes =
+% common conditions, GMM K; left out (full version only) = Label column
+% of (A) (all 16 are "proposed fails less", stated in the (A) title),
+% R vs. each baseline in (A), n.s./insuff. split of the per-baseline
+% non-stationary counts, a:b and the 90% CIs of R in (B), per-condition-
+% type GMM counts in (C), per-seed gains and R in (D).
+% Caption wording is a placeholder for the author.
+% Measured (IEEEtran 10pt, Times, tectonic; T1 and OT1 alike): tabular
+% 249.8 pt wide (column 252 pt); table + notes about 595 pt tall, i.e.
+% about 0.89 of the 672 pt column.  To shrink: drop (D) to a sentence
+% (saves about 75 pt with its note) or drop the a:b column and note c.
+% =====================================================================
+\begin{table}[!t]
+\centering
+\caption{Proposed (diffusion prior) versus the registered baselines}
+\label{tab:summary}
+\footnotesize
+\setlength{\tabcolsep}{2.5pt}
+\begin{tabular}{@{}lccc@{}}
+\hline
+\multicolumn{4}{@{}l@{}}{\textbf{(A)} 16 registered baselines$^{\rm d}$, sparse specular $8\times4$; label $\surd$ for all 16$^{\rm a}$}\\
+\hline
+Baseline & Gain [dB] (90\% CI)$^{\rm b}$ & $a{:}b^{\rm c}$ & Non-st.$^{\rm e}$\\
+\hline
+GMM prior                       & +1.41 (+1.22, +1.64) & 454:78  & 19/24\\
+GMM prior, scalar site          & +1.58 (+1.37, +1.82) & 498:73  & 23/24\\
+GMM prior ($K=32$)              & +1.76 (+1.53, +2.02) & 565:78  & 23/24\\
+GMM prior, pilot-only           & +1.99 (+1.78, +2.21) & 814:41  & 24/24\\
+Gaussian prior                  & +2.29 (+2.03, +2.54) & 778:69  & 24/24\\
+Pilot-only LMMSE$^{\rm l}$      & +8.25 (+7.78, +8.82) & 832:0   & 24/24\\
+Turbo LMMSE receiver            & +4.53 (+4.24, +4.85) & 724:12  & 24/24\\
+BiG-AMP                         & +4.54 (+4.25, +4.86) & 461:4   & 24/24\\
+SC-VAMP                         & +8.06 (+7.46, +8.77) & 759:2   & 24/24\\
+SC-VAMP (LLR)                   & $\geq$+17.23         & 1623:2  & 24/24\\
+Proposed prior, pilot-only      & +0.92 (+0.77, +1.07) & 347:51  & 21/24\\
+Annealed Langevin (plug-in)$^{\rm k}$ & +1.82 (+1.62, +2.05) & 678:54  & 24/24\\
+Annealed Langevin (error-aware)$^{\rm k}$ & +1.54 (+1.37, +1.74) & 644:50  & 23/24\\
+SBL (in loop)                   & +1.86 (+1.64, +2.10) & 588:72  & --\\
+SBL (pilot-only)                & +2.12 (+1.90, +2.35) & 811:52  & --\\
+OMP (pilot-only)                & +3.24 (+2.99, +3.51) & 451:20  & --\\
+\hline
+\multicolumn{4}{@{}l@{}}{\textbf{(B)} Channel models, $8\times4$: proposed vs.\ GMM prior$^{\rm j}$}\\
+\hline
+Channel model & Gain [dB] (90\% CI)$^{\rm b}$ & $R^{\rm f}$ & Label$^{\rm a}$\\
+\hline
+Sparse specular                 & +1.41 (+1.22, +1.64) & 0.470 & $\surd$\\
+Sparse specular, CN gains$^{\rm g}$ & +1.41 (+1.19, +1.67) & 0.367 & $\surd$\\
+3GPP UMi 28\,GHz$^{\rm g}$      & +0.60 (+0.33, +0.87) & 0.062 & $\surd$\\
+3GPP mixed$^{\rm g,h}$          & +0.98 (+0.68, +1.31) & 0.090 & $\surd$\\
+Clustered SV$^{\rm g}$          & +0.25 (+0.16, +0.33) & 0.143 & insuff.\\
+\multicolumn{4}{@{}l@{}}{Vs.\ the 16 baselines$^{\rm d}$: $\surd$ 16/16 in rows 1--4; 11/16 (5 insuff.) in row 5}\\
+\hline
+\multicolumn{4}{@{}l@{}}{\textbf{(C)} Non-stationary$^{\rm e,g}$: 24 conditions $\times$ (GMM prior + 12 baselines)}\\
+\hline
+\multicolumn{3}{@{}l}{Proposed vs.\ GMM prior: $\surd$\,/\,n.s.\,/\,insuff.}      & 19\,/\,3\,/\,2\\
+\multicolumn{3}{@{}l}{Conditions with $\surd$ vs.\ each of the other 12}          & 21/24\\
+\multicolumn{3}{@{}l}{Labels with the proposed failing more (24 $\times$ 12)}     & 0/288\\
+\multicolumn{3}{@{}l}{$\surd$ vs.\ all 13 and $R$ vs.\ best baseline $>0$$^{\rm e}$} & 18/24\\
+\multicolumn{3}{@{}l}{Sparse specular $8\times4$: $\surd$ vs.\ each of the 12}    & 4/4\\
+\hline
+\textbf{(D)} Seeds $\surd$ vs.\ GMM$^{\rm i}$ & $8\times4$ & $16\times4$ & $32\times4$\\
+\hline
+Sparse specular                 & 3/3                 & --                 & 3/3$^{\rm g,i}$\\
+Sparse specular, CN gains       & 3/3$^{\rm g}$       & --                 & --\\
+3GPP UMi 28\,GHz                & 3/3$^{\rm g}$       & 3/3$^{\rm g}$      & 3/3$^{\rm g}$\\
+3GPP mixed                      & 3/3$^{\rm g,h}$     & --                 & --\\
+Clustered SV                    & 0/3$^{\rm g,i}$     & --                 & --\\
+\hline
+\end{tabular}
+
+\vspace{2pt}
+\begin{minipage}{\columnwidth}
+\scriptsize
+All trained priors: $N_{\rm train}=1.6\times10^5$ channels; BLER after 16 iterations; 2560 blocks per SNR. Sparse specular $8\times4$ (all seeds): last-epoch EMA diffusion weights (best-validation weights not saved); other diffusion checkpoints: best-validation weights.
+$^{\rm a}$Paired sign test on block failures at the 3 registered decision SNRs (baseline BLER in $[0.005,0.9]$ nearest 0.1 on a log scale; grid $-3{:}3{:}15$\,dB, $32\times4$: $-12{:}3{:}6$\,dB). $\surd$: proposed fails less ($p<0.05$ at $\geq2$ points); n.s.: neither side; insuff.: too few decision SNRs or discordant blocks. n.s./insuff.: not decided (not ``no difference''). No multiplicity correction; labels are counted, not claimed individually.
+$^{\rm b}$SNR at BLER 0.1, baseline minus proposed ($>0$: proposed better); report field, not the test; $\geq$: baseline never reaches 0.1.
+$^{\rm c}$Blocks with only the baseline\,:\,only the proposed failing, over the decision SNRs.
+$^{\rm d}$Static labels vs.\ the 13 non-sparse baselines: post-hoc computation with a fixed rule on existing runs (those vs.\ GMM, Gaussian prior, annealed Langevin and the pilot-only proposed prior also pre-registered); vs.\ the 3 sparse ones: pre-registered. Sparse: on-grid 2-D DFT dictionary, oversampling 16 at the tuning-grid edge (SBL at UMi: 8, inside); SBL in loop keeps pilot-tuned iteration counts; OMP = pilot LS at the decision SNRs of UMi, mixed (one of clustered SV).
+$^{\rm e}$Static/0$^\circ$-trained priors, no retraining; \{sparse specular $8\times4$, $16\times4$; CN gains; clustered SV; UMi; mixed\} $\times$ \{Doppler $\nu=0.005$, $0.01$; rotation $15^\circ$, $30^\circ$\}. Non-st.: conditions with $\surd$, the rest n.s./insuff.\ (gate: note g); --: not run (in (D): no seed study). (C) row 4: lower 90\% CI bound of $R$ vs.\ the best baseline (fewest failures at $-3$\,dB) above 0; 19 conditions eligible (GMM label $\surd$).
+$^{\rm f}$Fraction of the GMM-to-perfect-CSI gap closed, block failures at $-3$\,dB; relative to GMM. Perfect CSI: same EP detector and BCJR loop given the true channel; a reference, not a bound.
+$^{\rm g}$Not covered by the sample-quality gate (unlike the sparse-specular $8\times4$ recipe; in Non-st.\ and (C): all conditions except sparse specular $8\times4$): measurement labels, not method verdicts. $^{\rm h}$Report-only adjunct point.
+$^{\rm i}$Of 3 diffusion seeds (seed 1 = reported; seeds not chosen after BLER). Sparse specular $32\times4$: seed 3 from the registered divergence fallback (gradient clipping); without it 2/3, 1 not decided (seed 3 counted as a training failure; report-only). Clustered SV: insuff.\ at all 3, fixed before the runs (two decision SNRs).
+$^{\rm j}$GMM prior: $K$ by validation likelihood, at the grid edge ($K=1024$ sparse specular; 4096 CN gains, UMi incl.\ $16\times4$, $32\times4$, mixed); inside: clustered SV 256, sparse specular $32\times4$ 2048. EM stopped by the tolerance rule for the $K=4096$ fits and for sparse specular $32\times4$. The registered protocol, not an optimal GMM.
+$^{\rm k}$Uses the proposed method's diffusion weights; not the original estimator. $^{\rm l}$Read after the first receiver pass (registered rule).
+\end{minipage}
+\end{table}
