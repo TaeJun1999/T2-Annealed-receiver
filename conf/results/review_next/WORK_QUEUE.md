@@ -35,8 +35,8 @@
 2. (해결 10-05 CDT, 사용자: "저널까지 확장하는 건 무리 — paper 에 쓸 좋은 source·결과는 모두 conference 에") → 저널판 없음, 비정상 묶음 포함 학회 원고. DECISIONS 같은 날 줄
 3. (선택) 불일치 20 조합 전부, A′ 시공간 prior, C9 N-스케일링 (SEEDSNR 끝남) — 저널판이 없으므로 하려면 학회 원고 일정 안에서
 
-## 사용자 결정 대기 (원고)
-- GitHub 기본 브랜치를 `paper` 로 (사용자가 GitHub Settings 에서; 웹 채팅이 paper 만 보게).
-- 원격 옛 `conference` 브랜치 (마지막 커밋 cf289ebe, 09-29 CDT) 삭제 여부.
-- F17 캡션: (b) 곡선 = best-validation, (c) 16×4·1.6e5 점 = 마지막 EMA (0.815) — 밝히거나 하나로.
-- 표 I: 한 단 판이 단 높이의 약 0.89 — (D) 시드를 본문 한 문장으로 옮길지 등 (`conference/tables/README.md`).
+## 원고 결정 기록 (2026-10-06 15:50 CDT)
+- GitHub 기본 브랜치 = `paper` (사용자가 바꿈).
+- 원격 옛 `conference` 브랜치는 지우지 않는다 (사용자 "일단 지우지 마").
+- F17: 그림은 그대로, 캡션에 가중치 종류를 밝힌다 (사용자 "캡션에 밝히는게 좋겠다").
+- 표 I: "너무 큰 table은 안돼" → 본문용 `conference/tables/table1_small.tex` (단 높이 0.41); 큰 판 둘은 arXiv 확장판용.

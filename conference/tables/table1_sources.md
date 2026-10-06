@@ -174,3 +174,14 @@
 | 다중성 보정 없음, 개수 문장 | SUPP16e4 :40; `docs/RESULTS.md` :1348; `docs/paper/CONTRIBUTIONS.md` :112 |
 | 시드 3 폴백 없는 선례 규칙: 2/3, 1 판정 못함 (학습 실패) | `NEXT_EXPERIMENTS_SEEDSNR16e4.md` :243; `NEXT_EXPERIMENTS_SEEDS16e4.md` :33 |
 | 32×4 SNR 격자 −12:3:6 dB | `docs/RESULTS.md` :1495, :1497, :1388 |
+
+## table1_small.tex (2026-10-06 15:50 CDT; 본문용 작은 표)
+
+모든 수치는 `table1.tex` (감사판) 의 같은 칸에서 옮겼다 (기계 대조: 숫자 37 개 중 35 개가 `table1.tex` 에 그대로 있음). 나머지 둘은 작성자 산술:
+
+| 값 | 뜻 | 계산 |
+|---|---|---|
+| 12/12 | (A) 에서 따로 적은 4 개 (GMM prior, Proposed prior pilot-only, Annealed Langevin (error-aware), SBL (in loop)) 를 뺀 나머지 baseline 12 개가 모두 √ | `table1.tex` (A) 16 행 모두 √ (`pairB_SPB16e4k.txt` :119 `(i) 16`) − 4 |
+| +1.58 to ≥+17.23 | 그 12 개의 이득 범위 | `table1.tex` (A) 의 해당 12 행: 최소 GMM prior, scalar site +1.58, 최대 SC-VAMP (LLR) ≥ +17.23 |
+| 7/8 | 시드 연구가 있는 셀 8 개 중 3/3 √ 인 셀 7 개 | `table1.tex` (D) 8 행: 3/3 이 7 행, Clustered SV 0/3 (3 insuff.) 1 행 |
+

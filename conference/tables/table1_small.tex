@@ -1,0 +1,50 @@
+% =====================================================================
+% Table I -- SMALL single-column version for the 6-page manuscript
+% (user 2026-10-06 CDT: "너무 큰 table은 안돼").  A subset of the audited
+% full table (table1.tex): every number here appears there, with its source
+% in table1_sources.md.  Per-baseline rows beyond the four closest, the a:b
+% counts, per-condition non-stationary counts and per-seed values stay in
+% table1.tex / table1_compact.tex (arXiv companion).
+% Plain LaTeX only (\surd is a standard math symbol).  Caption wording is a
+% placeholder for the author.
+% =====================================================================
+\begin{table}[!t]
+\centering
+\caption{Proposed (diffusion prior) versus the registered baselines}
+\label{tab:summary}
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}lccc@{}}
+\hline
+Comparison$^{\rm a}$ & Gain [dB] (90\% CI) & $R$ & Label\\
+\hline
+\multicolumn{4}{@{}l}{\emph{Sparse specular $8\times4$: all 16 registered baselines$^{\rm b}$}}\\
+GMM prior                          & +1.41 (+1.22, +1.64) & 0.470 & $\surd$\\
+Proposed prior, pilot-only         & +0.92 (+0.77, +1.07) & --    & $\surd$\\
+Annealed Langevin (error-aware)    & +1.54 (+1.37, +1.74) & --    & $\surd$\\
+SBL (in loop)                      & +1.86 (+1.64, +2.10) & --    & $\surd$\\
+Other 12 baselines                 & +1.58 to $\geq$+17.23 & --   & 12/12 $\surd$\\
+\hline
+\multicolumn{4}{@{}l}{\emph{Other channel models, $8\times4$, vs.\ GMM prior$^{\rm c}$}}\\
+Sparse specular, CN gains          & +1.41 (+1.19, +1.67) & 0.367 & $\surd$\\
+3GPP UMi 28\,GHz                   & +0.60 (+0.33, +0.87) & 0.062 & $\surd$\\
+3GPP mixed$^{\rm d}$               & +0.98 (+0.68, +1.31) & 0.090 & $\surd$\\
+Clustered SV                       & +0.25 (+0.16, +0.33) & 0.143 & insuff.\\
+\hline
+\multicolumn{4}{@{}l}{\emph{Robustness, vs.\ GMM prior}}\\
+\multicolumn{3}{@{}l}{Non-stationary, 24 conditions$^{\rm c,e}$: $\surd$\,/\,n.s.\,/\,insuff.} & 19\,/\,3\,/\,2\\
+\multicolumn{3}{@{}l}{\quad proposed fails more, vs.\ 12 baselines (24 $\times$ 12)}            & 0/288\\
+\multicolumn{3}{@{}l}{Diffusion seeds: cells with 3/3 seeds $\surd$$^{\rm c,f}$}               & 7/8\\
+\hline
+\end{tabular}
+
+\vspace{2pt}
+\begin{minipage}{\columnwidth}
+\scriptsize
+$^{\rm a}$Equal training budget $N_{\rm train}=1.6\times10^5$; BLER after 16 iterations, 2560 blocks per SNR. Gain: SNR at BLER 0.1, baseline minus proposed, paired bootstrap; $\geq$: baseline never reaches 0.1. $R$: fraction of the GMM-to-perfect-CSI gap closed at $-3$\,dB (perfect CSI: same receiver given the true channel; a reference, not a bound). Label: paired sign test at 3 decision SNRs; $\surd$: proposed fails less ($p<0.05$ at $\geq2$); n.s./insuff.: not decided. No multiplicity correction. GMM $K$ by validation likelihood, mostly at the grid edge (registered protocol, not an optimal GMM).
+$^{\rm b}$Labels vs.\ the 13 non-sparse baselines: post-hoc with a fixed rule (GMM, Gaussian, annealed Langevin and pilot-only proposed prior also pre-registered); vs.\ the 3 sparse: pre-registered.
+$^{\rm c}$Except sparse specular $8\times4$, not covered by the sample-quality gate (measurement labels). $^{\rm d}$Report-only adjunct.
+$^{\rm e}$Static-trained priors without retraining; Doppler $\nu\in\{0.005,0.01\}$, rotation $15^\circ$/$30^\circ$, 6 settings.
+$^{\rm f}$3 seeds per cell; clustered SV insuff.\ at all 3; sparse specular $32\times4$ seed 3 from the registered divergence fallback.
+\end{minipage}
+\end{table}
