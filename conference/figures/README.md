@@ -40,3 +40,10 @@
 - 고침 (논문판 `paper_f21/f22/f30/f32.py`): 실패 0 점에서 곡선을 끊고 (이웃 점을 잇지 않음), Perfect CSI 의 실패 0 점은 95% Wilson 상한 (0/2560 → 1.5×10⁻³) 에서 아래로 향하는 짧은 화살표로 그린다 (F17 과 같은 표기; 추정값을 만들지 않음). 다른 방법의 실패 0 점은 곡선이 거기서 끝나거나 끊긴다.
 - 캡션 문구 예: "Downward arrows: no block failure observed for perfect CSI (0/2560); the arrow starts at the 95% upper confidence bound (1.5×10⁻³). Other curves end or break at SNRs with no failed block."
 - 기록판 그림 (`conf/conference_plot/`, `conf/figs/`) 은 아직 옛 표기 (점 생략) 다.
+
+## Perfect CSI 곡선의 비단조 (재점검, 2026-10-06 16:59 CDT)
+
+- 논문 그림 10 개의 Perfect CSI 곡선 32 개에서 BLER 이 SNR 과 함께 올라가는 칸을 모두 단측 Fisher 검정 (SNR 점마다 독립 시행 — `common.trial_rng` 의 시드에 SNR 이 들어간다).
+- **정적 조건**: 올라가는 칸은 실패 수 1→2, 0→1, 2→3, 3→4, 2→4, 10→14 뿐이고 모두 p ≥ 0.27 — 이항 잡음 (2026-09-25 점검 "버그 없음" 과 같은 결론: 참 H·참 σ², 재생 비트 동일, rank-3 블록의 천천히 줄어드는 꼬리). 시행 8 배 (n = 20480) 인 F32 의 채운 점은 단조 (C2 66/36/16/13, C6 17/16/7/7) 다.
+- **도플러 조건 (F24 (a) ν = 0.005, (b) ν = 0.01)**: 고SNR 에서 실제로 올라간다 (9 → 15 dB 실패 22 → 41, p = 0.011; 356 → 413, p = 0.014). 원인: 이 실험의 genie 는 블록 첫 심볼의 채널 H_0 만 안다 (runner meta "genie knows H_0 only") — 심볼마다 변하는 채널과의 차이가 잡음보다 커지는 고SNR 에서 오차가 바닥을 치고 늘어난다. 버그가 아니라 기준의 정의이며 등록 캐비엇 (ν = 0.01 의 genie ≥ V1 가드) 과 같은 사정.
+- 캡션 문구 예 (F24): "Under Doppler, the perfect-CSI reference knows only the channel at the start of each block, so its BLER floors and rises at high SNR." (정적 그림, 필요하면): "High-SNR perfect-CSI points rest on a few failures out of 2560 (independent trials per SNR); small non-monotone steps are within binomial noise."
