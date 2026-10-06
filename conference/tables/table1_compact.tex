@@ -2,7 +2,8 @@
 % Table I -- COMPACT single-column version (IEEE ICC 2027 manuscript)
 % Built 2026-10-06 from the project records; every number in this file
 % is listed with its source in conference/tables/table1_sources.md.
-% Numbers are copied as recorded (no recomputation, no interpretation).
+% Numbers are copied as recorded (three counts derived by enumeration,
+% listed in table1_sources.md; no interpretation).
 % Plain LaTeX only: no package beyond IEEEtran (\surd is a standard
 % math symbol; no array/booktabs/threeparttable needed).
 % Relative to the full version (table1.tex, table*): moved into notes =
@@ -78,16 +79,16 @@ Clustered SV                    & 0/3$^{\rm g,i}$     & --                 & --\
 \vspace{2pt}
 \begin{minipage}{\columnwidth}
 \scriptsize
-All trained priors: $N_{\rm train}=1.6\times10^5$ channels; BLER after 16 iterations; 2560 blocks per SNR.
-$^{\rm a}$Paired sign test on block failures at the 3 registered decision SNRs (baseline BLER in $[0.005,0.9]$ nearest 0.1; grid $-3{:}3{:}15$\,dB). $\surd$: proposed fails less ($p<0.05$ at $\geq2$ points); n.s.: neither side; insuff.: too few decision SNRs or discordant blocks. n.s./insuff.: not decided (not ``no difference'').
+All trained priors: $N_{\rm train}=1.6\times10^5$ channels; BLER after 16 iterations; 2560 blocks per SNR. Sparse specular $8\times4$ (all seeds): last-epoch EMA diffusion weights (best-validation weights not saved); other diffusion checkpoints: best-validation weights.
+$^{\rm a}$Paired sign test on block failures at the 3 registered decision SNRs (baseline BLER in $[0.005,0.9]$ nearest 0.1 on a log scale; grid $-3{:}3{:}15$\,dB, $32\times4$: $-12{:}3{:}6$\,dB). $\surd$: proposed fails less ($p<0.05$ at $\geq2$ points); n.s.: neither side; insuff.: too few decision SNRs or discordant blocks. n.s./insuff.: not decided (not ``no difference''). No multiplicity correction; labels are counted, not claimed individually.
 $^{\rm b}$SNR at BLER 0.1, baseline minus proposed ($>0$: proposed better); report field, not the test; $\geq$: baseline never reaches 0.1.
 $^{\rm c}$Blocks with only the baseline\,:\,only the proposed failing, over the decision SNRs.
-$^{\rm d}$Static labels vs.\ the 13 non-sparse baselines: post-hoc computation with a fixed rule on existing runs (those vs.\ GMM, annealed Langevin and the pilot-only proposed prior also pre-registered); vs.\ the 3 sparse ones: pre-registered. Sparse: on-grid 2-D DFT dictionary, oversampling 16 at the tuning-grid edge; SBL in loop keeps pilot-tuned iteration counts; OMP = pilot LS at the decision SNRs of UMi, mixed (one of clustered SV).
-$^{\rm e}$Static/0$^\circ$-trained priors, no retraining; \{sparse specular $8\times4$, $16\times4$; CN gains; clustered SV; UMi; mixed\} $\times$ \{Doppler $\nu=0.005$, $0.01$; rotation $15^\circ$, $30^\circ$\}. Non-st.: conditions with $\surd$, the rest n.s./insuff.; --: not run. (C) row 4: lower 90\% CI bound of $R$ vs.\ the best baseline (fewest failures at $-3$\,dB) above 0; 19 conditions eligible (GMM label $\surd$).
+$^{\rm d}$Static labels vs.\ the 13 non-sparse baselines: post-hoc computation with a fixed rule on existing runs (those vs.\ GMM, Gaussian prior, annealed Langevin and the pilot-only proposed prior also pre-registered); vs.\ the 3 sparse ones: pre-registered. Sparse: on-grid 2-D DFT dictionary, oversampling 16 at the tuning-grid edge (SBL at UMi: 8, inside); SBL in loop keeps pilot-tuned iteration counts; OMP = pilot LS at the decision SNRs of UMi, mixed (one of clustered SV).
+$^{\rm e}$Static/0$^\circ$-trained priors, no retraining; \{sparse specular $8\times4$, $16\times4$; CN gains; clustered SV; UMi; mixed\} $\times$ \{Doppler $\nu=0.005$, $0.01$; rotation $15^\circ$, $30^\circ$\}. Non-st.: conditions with $\surd$, the rest n.s./insuff.\ (gate: note g); --: not run (in (D): no seed study). (C) row 4: lower 90\% CI bound of $R$ vs.\ the best baseline (fewest failures at $-3$\,dB) above 0; 19 conditions eligible (GMM label $\surd$).
 $^{\rm f}$Fraction of the GMM-to-perfect-CSI gap closed, block failures at $-3$\,dB; relative to GMM. Perfect CSI: same EP detector and BCJR loop given the true channel; a reference, not a bound.
-$^{\rm g}$Not covered by the sample-quality gate (unlike the sparse-specular $8\times4$ recipe): measurement labels, not method verdicts. $^{\rm h}$Report-only adjunct point.
-$^{\rm i}$Of 3 diffusion seeds (seed 1 = reported). Sparse specular $32\times4$: seed 3 from the registered divergence fallback (gradient clipping); without it 2/3, 1 insuff.\ (report-only). Clustered SV: insuff.\ at all 3, fixed before the runs (two decision SNRs).
-$^{\rm j}$GMM prior: $K$ by validation likelihood, at the grid edge ($K=1024$ sparse specular; 4096 CN gains, UMi incl.\ $16\times4$, $32\times4$, mixed); inside: clustered SV 256, sparse specular $32\times4$ 2048.
+$^{\rm g}$Not covered by the sample-quality gate (unlike the sparse-specular $8\times4$ recipe; in Non-st.\ and (C): all conditions except sparse specular $8\times4$): measurement labels, not method verdicts. $^{\rm h}$Report-only adjunct point.
+$^{\rm i}$Of 3 diffusion seeds (seed 1 = reported; seeds not chosen after BLER). Sparse specular $32\times4$: seed 3 from the registered divergence fallback (gradient clipping); without it 2/3, 1 not decided (seed 3 counted as a training failure; report-only). Clustered SV: insuff.\ at all 3, fixed before the runs (two decision SNRs).
+$^{\rm j}$GMM prior: $K$ by validation likelihood, at the grid edge ($K=1024$ sparse specular; 4096 CN gains, UMi incl.\ $16\times4$, $32\times4$, mixed); inside: clustered SV 256, sparse specular $32\times4$ 2048. EM stopped by the tolerance rule for the $K=4096$ fits and for sparse specular $32\times4$. The registered protocol, not an optimal GMM.
 $^{\rm k}$Uses the proposed method's diffusion weights; not the original estimator. $^{\rm l}$Read after the first receiver pass (registered rule).
 \end{minipage}
 \end{table}

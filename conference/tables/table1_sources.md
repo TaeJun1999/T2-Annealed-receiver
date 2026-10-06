@@ -161,3 +161,16 @@
 - R_dp 의 90% CI 셋째 자리: 같은 셀의 `recovery_<T>.txt` 와 frontier (`scale2_step_*`/`primary_*`) 가 난수 흐름이 달라 다르다 — UMi28 C6 [0.253, 0.322] (SN:225) 대 [0.252, 0.322] (R §21.2 :1441), UMi28 C9 [0.402, 0.462] (SN:228) 대 [0.401, 0.463] (R §21.1 :1395). 기록 자신이 이유를 적어 두었다 (R §21.4 :1499). 표는 R_dp 점추정만 쓴다 (0.287, 0.432 은 양쪽 동일).
 - 같은 $8\times4$ sparse specular 셀의 R 이 두 정의로 기록돼 있다: −3 dB 한 점 0.470 (표 (A)(B)(D) 가 쓰는 값) 대 판정점 합 R_dp 0.509 (R §21.1 :1394, PAPER_PLAN 2순위 행, 그림 F30). 정의 차이이지 모순은 아니지만, 표 I 와 그림 3 을 함께 쓰면 두 값이 나란히 보이므로 본문·캡션에서 정의를 밝혀야 한다 (CONTRIBUTIONS:113 끝 문장도 같은 주의).
 - 그 밖에 표에 쓴 값에서 RESULTS·등록 문서·pairB·그림 .txt 사이 불일치는 찾지 못했다 (교차 확인: SP ↔ ST 13 블록 바이트 동일, SP ↔ R §20, R §10.1–10.2 ↔ F20, R §10.5 ↔ S1, R §18 ↔ S3, R §22 ↔ SN, SU 집계 ↔ R §15).
+
+
+## Fable 감사 반영 출처 (2026-10-06 01:41 CDT)
+
+| 추가한 주석 | 출처 (감사 보고 인용) |
+|---|---|
+| Gaussian prior 비교도 개별 사전 등록 | `conf/10_SPEC_stageC.md` :145–146; `conf/code/analysis.py` :396–399 (REF = `R2-ours-G`, :100); STATIC16e4 :5, :69 |
+| SBL at UMi: oversampling 8 (격자 내부) | `docs/RESULTS.md` :1378 |
+| EM tol 정지 (K=4096 적합, sparse specular 32×4) | `docs/RESULTS.md` :1038, :1402, :1486 |
+| 평가 가중치: sparse specular 8×4 = last-epoch EMA (best 미저장), 그 밖 = best-validation | `docs/RESULTS.md` :25–26, :1003, :1206, :1388; 라벨 불변 :1013, R_dp best/last 차 ≤ 0.009 :1520–1522 |
+| 다중성 보정 없음, 개수 문장 | SUPP16e4 :40; `docs/RESULTS.md` :1348; `docs/paper/CONTRIBUTIONS.md` :112 |
+| 시드 3 폴백 없는 선례 규칙: 2/3, 1 판정 못함 (학습 실패) | `NEXT_EXPERIMENTS_SEEDSNR16e4.md` :243; `NEXT_EXPERIMENTS_SEEDS16e4.md` :33 |
+| 32×4 SNR 격자 −12:3:6 dB | `docs/RESULTS.md` :1495, :1497, :1388 |
