@@ -6,6 +6,9 @@ Same data, computation, asserts, colours, markers and line styles as the origina
   - panel titles removed (dataset names go to the caption), only the bold panel labels (a)-(f) remain:
     (a) Sparse specular, 8x4   (b) Sparse specular, 16x4   (c) Sparse specular, CN gains (8x4)
     (d) Clustered SV (Saleh-Valenzuela, 8x4)   (e) 3GPP UMi 28 GHz (8x4)   (f) 3GPP mixed (8x4);
+  - zero-failure points: the curve breaks there instead of joining its neighbours, and Perfect CSI's zero points
+    are drawn as a short downward arrow from the 95% Wilson upper bound (the F17 convention; 0/2560 -> 1.5e-3);
+    the record text keeps listing them as 'not drawn' (no plotted estimate);
   - reads the raw files from conf/ (read-only) and writes only F21_all_baselines.{pdf,png} next to this script
     (no .txt; the record text is printed to stdout and keeps the internal names).
 The original docstring follows.
@@ -74,6 +77,16 @@ SETS = [("(a) D2 sparse specular, 8×4 (headline)", "B16e4k", "C2", "S2", "D1-si
         ("(f) 3GPP 38.901 MIX3 (side point)", "MXB16e4", "C2", "MIX3", "UNGATED, report-only", (1421, 1354, 679))]
 
 
+def zero_arrows(ax, xs, n, color):
+    """Zero-failure points (0/n blocks) cannot sit on a log axis: draw a short cap at the 95% Wilson upper bound
+    z^2/(n+z^2) and a downward arrow (the F17 convention), never a made-up value; the curve itself breaks there."""
+    hi = 1.96 ** 2 / (n + 1.96 ** 2)
+    for s in xs:
+        ax.plot([s - 0.3, s + 0.3], [hi, hi], color=color, lw=1.0, zorder=6)
+        ax.annotate("", xy=(s, hi / 1.7), xytext=(s, hi), zorder=6,
+                    arrowprops=dict(arrowstyle="-|>", color=color, lw=0.9, mutation_scale=6.5, shrinkA=0, shrinkB=0))
+
+
 def fails(d, key, arm, it):
     v = np.asarray(d[key][arm]["blk_err"])[:, it]
     return np.where(np.isfinite(v), v, 1.0)          # a raised block is a failure (01_RULES §4)
@@ -108,7 +121,7 @@ def main():
         for arm, it, lab, col, mk, ls, lw, filled in SP_ARMS:   # drawn first: the original curves stay on top, unchanged
             k = np.array([fails(d, key, arm, it).sum() for key in keys]); assert all(len(d[key][arm]["blk_err"]) == 2560 for key in keys)
             p = k / 2560.0; ok = k > 0
-            h, = ax.plot(snrs[ok], p[ok], color=col, marker=mk, ls=ls, lw=lw, ms=3.2, mfc=col if filled else "white", mew=0.9,
+            h, = ax.plot(snrs, np.where(ok, p, np.nan), color=col, marker=mk, ls=ls, lw=lw, ms=3.2, mfc=col if filled else "white", mew=0.9,
                          zorder=1)
             handles.setdefault(lab, h)
             zeros += [f"{lab} {s:+.0f}" for s, z in zip(snrs, ok) if not z]
@@ -116,9 +129,10 @@ def main():
         for arm, it, lab, col, mk, ls, lw, filled in ARMS:
             k = np.array([fails(d, key, arm, it).sum() for key in keys]); assert all(len(d[key][arm]["blk_err"]) == 2560 for key in keys)
             p = k / 2560.0; ok = k > 0
-            h, = ax.plot(snrs[ok], p[ok], color=col, marker=mk, ls=ls, lw=lw, ms=(3.2 if mk not in "*" else 5.5),
+            h, = ax.plot(snrs, np.where(ok, p, np.nan), color=col, marker=mk, ls=ls, lw=lw, ms=(3.2 if mk not in "*" else 5.5),
                          mfc=col if filled else "white", mew=0.9, zorder=5 if "V1" in arm else 3 if arm == "M-ours-bstar" else 2)
             handles.setdefault(lab, h)
+            if arm == "R5-genie": zero_arrows(ax, snrs[~ok], 2560, col)
             zeros += [f"{lab.split(' (')[0]} {s:+.0f}" for s, z in zip(snrs, ok) if not z]
             txt.append(f"    {arm:<20}{'@1 ' if it == 0 else '@16'}  " + " ".join(f"{int(x):5d}" for x in k))
         for arm in ABLATIONS:

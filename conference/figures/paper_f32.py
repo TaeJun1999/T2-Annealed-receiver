@@ -6,6 +6,9 @@ Same data, computation, asserts, colours, markers and error bars as the original
   - y label "BLER (16 outer iterations)" -> "BLER" (iterations go to the caption);
   - titles removed, only the bold panel labels remain.  Panel mapping, for the caption:
       (a) Sparse specular, 8x4   (b) Sparse specular, 16x4;
+  - zero-failure points: the curve breaks there instead of joining its neighbours, and Perfect CSI's zero points
+    are drawn as a short downward arrow from the 95% Wilson upper bound (the F17 convention; 0/2560 -> 1.5e-3);
+    the record text keeps listing them as 'not drawn' (no plotted estimate);
   - reads conf/ (read-only) and writes only F32_hisnr_highsnr.{pdf,png} next to this script (no .txt; the record text is
     printed to stdout with the internal names).
 The original docstring follows.
@@ -60,6 +63,16 @@ CELLS = [("C2", "(a) D2 C2 (8×4, headline)", "HSB16e4k", "B16e4k", "SPB16e4k"),
          ("C6", "(b) D2 C6 (16×4, UNGATED)", "HSNR16", "NR16B16e4", "SPNR16")]
 
 
+def zero_arrows(ax, xs, n, color, w=0.3):
+    """Zero-failure points (0/n blocks) cannot sit on a log axis: draw a short cap at the 95% Wilson upper bound
+    z^2/(n+z^2) and a downward arrow (the F17 convention), never a made-up value; the curve itself breaks there."""
+    hi = 1.96 ** 2 / (n + 1.96 ** 2)
+    for s in xs:
+        ax.plot([s - w, s + w], [hi, hi], color=color, lw=1.0, zorder=6)
+        ax.annotate("", xy=(s, hi / 1.7), xytext=(s, hi), zorder=6,
+                    arrowprops=dict(arrowstyle="-|>", color=color, lw=0.9, mutation_scale=6.5, shrinkA=0, shrinkB=0))
+
+
 def counts(d, cell, arm):
     """failures @16 per SNR of SNRS (a raised block = failure) and n."""
     out, ns = [], set()
@@ -102,10 +115,11 @@ def main():
                 k, n = counts(dd, cell, arm)
                 k = np.array(k); p = k / n; ci = np.array([wilson(int(a), n) for a in k]); ok = k > 0
                 x = np.array(SNRS) + dx + jit
-                ax.errorbar(x[ok], p[ok], yerr=[p[ok] - ci[ok, 0], ci[ok, 1] - p[ok]], color=sty["color"], marker=sty["marker"],
+                ax.errorbar(x, np.where(ok, p, np.nan), yerr=[np.where(ok, p - ci[:, 0], np.nan), np.where(ok, ci[:, 1] - p, np.nan)], color=sty["color"], marker=sty["marker"],
                             ls=sty["ls"] if filled else "none", lw=1.1, ms=(3.8 if sty["marker"] != "*" else 6),
                             mfc=sty["color"] if filled else "white", mew=0.9, capsize=1.5, elinewidth=0.8,
                             zorder=4 if arm == V1A else 3)
+                if arm == GE: zero_arrows(ax, x[~ok], n, sty["color"], w=0.1)   # narrow: markers sit 0.06 dB apart here
                 zeros += [f"{arm} n={n} {s:+.0f} dB" for s, z in zip(SNRS, ok) if not z]
         txt.append("    zero-failure points (not drawn on the log axis): " + ("; ".join(zeros) if zeros else "none"))
         txt.append("")

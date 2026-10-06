@@ -33,3 +33,10 @@
 | F32 | +6..+15 dB: (a) Sparse specular 8×4, (b) 16×4 — 속 빈 왼쪽 = 원 시험 시행 (n = 2560), 채움 오른쪽 = 새 시행 (n = 20480) | 보고 전용 보강 |
 
 본문 6 쪽 후보는 `../PAPER_PLAN.md` §2 (F16, F30, 표 I, 필요시 F31/F20/F27).
+
+## 실패 0 점 표기 (Perfect CSI 곡선이 끊겨 보이던 문제, 2026-10-06 16:44 CDT)
+
+- 원인: 어떤 SNR 에서 한 블록도 실패하지 않으면 (0/2560) BLER 0 은 로그 축에 그릴 수 없어, 스크립트가 그 점을 빼고 이웃 점을 이었다 → F21 (b)(d), F22 (b)(d), F30 (c), F32 (b) 에서 Perfect CSI 곡선이 일찍 끝나거나 점을 건너뛰었다 (F17 은 이미 화살표 표기). 수치·기록 (.txt 의 'not drawn' 목록) 은 그대로다.
+- 고침 (논문판 `paper_f21/f22/f30/f32.py`): 실패 0 점에서 곡선을 끊고 (이웃 점을 잇지 않음), Perfect CSI 의 실패 0 점은 95% Wilson 상한 (0/2560 → 1.5×10⁻³) 에서 아래로 향하는 짧은 화살표로 그린다 (F17 과 같은 표기; 추정값을 만들지 않음). 다른 방법의 실패 0 점은 곡선이 거기서 끝나거나 끊긴다.
+- 캡션 문구 예: "Downward arrows: no block failure observed for perfect CSI (0/2560); the arrow starts at the 95% upper confidence bound (1.5×10⁻³). Other curves end or break at SNRs with no failed block."
+- 기록판 그림 (`conf/conference_plot/`, `conf/figs/`) 은 아직 옛 표기 (점 생략) 다.
