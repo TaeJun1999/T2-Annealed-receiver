@@ -13,7 +13,7 @@ mapfile -t REGS < <(ls conf/results/review_next/NEXT_EXPERIMENTS_*.md)
 export GIT_INDEX_FILE="$SP/paper_branch.index"
 git read-tree --empty
 git add -f -- "${PATHS[@]}" "${REGS[@]}"
-git ls-files --cached | grep -E '\.(npz|pt|ckpt)$|__pycache__' | xargs -r git rm -q --cached --        # never ship data
+{ git ls-files --cached | grep -E '\.(npz|pt|ckpt)$|__pycache__' || true; } | xargs -r git rm -q --cached --   # never ship data
 cat > "$SP/paper_branch_README.md" <<EOF
 # paper — IEEE ICC 2027 원고 자료 (웹 작성용)
 
