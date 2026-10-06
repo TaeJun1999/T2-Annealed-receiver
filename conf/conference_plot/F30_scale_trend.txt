@@ -1,0 +1,88 @@
+F30 -- the antenna-array scaling axis (SCALE16e4): recovery over the decision points R_dp vs Nr = 8 / 16 / 32 (C2 / C6 / C9, Nt 4, T 16, Tp 4, equal budget N' = 1.6e5, test trials 0..2559, n = 2560 per SNR, BLER@16) for D2 and UMi28, and the BLER curves of the two C9 cells.  Recomputed from raw by code/figure_f30.py (frontier_ci.cmd_recovery, B 2000, seed 20260926) and asserted against NEXT_EXPERIMENTS_SCALE16e4 §6.1.
+
+raw paths (read-only): D2 Nr 8 C2 = /home/HTJ/t2/conf/raw_B16e4k; D2 Nr 16 C6 = /home/HTJ/t2/conf/raw_NR16B16e4; D2 Nr 32 C9 = /home/HTJ/t2_wtS/conf/raw_NR32B16e4; UMi28 Nr 8 C2 = /home/HTJ/t2/conf/raw_U28B16e4; UMi28 Nr 16 C6 = /home/HTJ/t2_wtS/conf/raw_U28NR16B16e4; UMi28 Nr 32 C9 = /home/HTJ/t2_wtS/conf/raw_U28NR32B16e4
+
+  D2     Nr  8 C2  raw_B16e4k        decision SNRs [-3, 0, 3] (recomputed, anchor b*)  SigmaF b* 864 V1 488 genie 125  R_dp = 0.509 [90% 0.470, 0.544]  (registered CI: primary_D2_L90:4)
+  D2     Nr 16 C6  raw_NR16B16e4     decision SNRs [-3, 0, 3] (recomputed, anchor b*)  SigmaF b* 277 V1 82 genie 40  R_dp = 0.823 [90% 0.774, 0.874]  (registered CI: step_D2_S2:4)
+  D2     Nr 32 C9  raw_NR32B16e4     decision SNRs [-9, -6, -3] (recomputed, anchor b*)  SigmaF b* 1161 V1 276 genie 70  R_dp = 0.811 [90% 0.790, 0.832]  (registered CI: primary_D2_L90:3)
+  UMi28  Nr  8 C2  raw_U28B16e4      decision SNRs [3, 6, 9] (recomputed, anchor b*)  SigmaF b* 800 V1 712 genie 215  R_dp = 0.150 [90% 0.108, 0.190]  (registered CI: primary_U28_L90:4)
+  UMi28  Nr 16 C6  raw_U28NR16B16e4  decision SNRs [0, 3, 6] (recomputed, anchor b*)  SigmaF b* 824 V1 636 genie 170  R_dp = 0.287 [90% 0.252, 0.322]  (registered CI: step_U28_S1:3)
+  UMi28  Nr 32 C9  raw_U28NR32B16e4  decision SNRs [-3, 0, 3] (recomputed, anchor b*)  SigmaF b* 958 V1 599 genie 127  R_dp = 0.432 [90% 0.401, 0.463]  (registered CI: primary_U28_L90:3)
+
+(c) D2 C9 (32×4) BLER@16 (raw_NR32B16e4), failures / 2560 per SNR -12 -9 -6 -3 +0 +3 +6 dB:
+  R2-ours-G             2452  1297   359   151    87    35    23
+  M-ours-bstar          2243   849   231    81    47    23    20
+  M-ours-dscore-C-V1    1347   224    42    10     7     4     2
+  R5-genie               347    48    18     4     3     2     0   (zero-failure points not drawn: +6 dB)
+
+(d) UMi28 C9 (32×4) BLER@16 (raw_U28NR32B16e4), failures / 2560 per SNR -12 -9 -6 -3 +0 +3 +6 dB:
+  R2-ours-G             2460  1468   919   676   436   238   102
+  M-ours-bstar          2280  1207   761   509   304   145    62
+  M-ours-dscore-C-V1    2219  1068   595   349   180    70    27
+  R5-genie               846   423   227    88    30     9     3
+
+Annotations in (a)/(b) are English glosses of the registered labels below (verbatim).
+1차 라벨 (§6.1.1, §2.1 문구 그대로):
+  D2 — (T+): "Nr 8→32 에서 V1 의 genie 격차 회수율(b* 대비 상대 격차)이 커진다 (D2, 동일예산 1.6e5, b* 판정점 운영점, UNGATED 배열 규모 축 측정)" + G_D2 + "[운영점 정합 강건]" "[K 상한 강건]".
+  UMi28 — (T+): "Nr 8→32 에서 V1 의 genie 격차 회수율(b* 대비 상대 격차)이 커진다 (UMi28, 동일예산 1.6e5, b* 판정점 운영점, UNGATED 배열 규모 축 측정)" + G_UMi28 + "[운영점 정합 강건]" "[K 상한 민감: 외삽 불가]" (UMi28 C9 r = 1.2799 >= 1 -> c_K = inf, §2.1 Q-K (1) 로 강제; BLER 전에 정해짐).
+  G_D2 = "(b* = 등록 프로토콜의 GMM — kron K ≤ 4096, 재시작 3, EM 상한 500 반복·tol/patience 정지 — 이며 최적 GMM 이 아니다; 격자 끝·tol 정지 셀: D2 C9 `NR32B16e4` tol 정지 24/24 (b* kron 2048 은 적합 격자 내부, 격자 끝 아님), D2 C2 `B16e4k` 격자 끝 kron 1024 (2048 미적합))"
+  G_UMi28 = "(b* = 등록 프로토콜의 GMM — kron K ≤ 4096, 재시작 3, EM 상한 500 반복·tol/patience 정지 — 이며 최적 GMM 이 아니다; 격자 끝·tol 정지 셀: UMi28 C9 `U28NR32B16e4` 격자 끝 kron 4096 (4096 멈춤)·tol 정지 24/24, UMi28 C2 `U28B16e4` 격자 끝 kron 4096 (4096 멈춤))"
+  Holm 순서: p_D2 = p_UMi28 = 0.0000 (B = 2000 이라 p < 0.001 로 읽음) -> 동률 -> D2 첫째 (95 % CI), UMi28 둘째 (90 % CI).
+  Q-OP L* = R*_C9 - R*_C2 (R*@0.05): D2 +0.299 [95% +0.190, +0.413], UMi28 +0.339 [90% +0.210, +0.460] -> 둘 다 "[운영점 정합 강건]".
+  Q-K D2 세 실행 (a) +0.466 [95% +0.294, +0.770] (b) +0.302 [95% +0.254, +0.355] (c) +0.466 [95% +0.294, +0.770] -> 모두 (T+) -> "[K 상한 강건]"; 등록 공개의 재게시: C2 끝의 c_K = 5.264 로 R+_C2 가 0.509 -> 0.346 [90% 0.106, 0.492] 로 내려가 (a)·(c) 가 '강건' 쪽으로 기울고, 그래서 실행 (b) 가 (T+) 의 실제 검사다; 미확장 D2 C2 b* 자체는 반대로 ΔR_D2 에 보수적이다.
+  데이터셋 문장 S_D2·S_UMi28 성립, 공동 문장 성립 (§6.1.1 문구; "적어도 하나" 문장은 쓰지 않는다; 데이터셋을 합치지 않는다).
+2차 단계 라벨 (§6.1.2, 90 %, 보정 없음, 단계마다 독립): "D2 8→16 (기록값, 채점 없음)" (+0.314 [90% +0.251, +0.381], §0.1); "D2 16→32 판정하지 못함"; "UMi28 8→16 증가"; "UMi28 16→32 증가" -> "UMi28 단조 증가"; D2 는 "D2 단조 증가" 를 붙이지 않는다.
+  ("판정하지 못함" 은 어느 쪽의 증거도 아니다 — 등록 §2 머리말.)  R* 단계 (보고, 라벨 없음): D2 S2 +0.102 [90% +0.030, +0.175]; UMi28 S1 +0.087 [90% -0.042, +0.216]; UMi28 S2 +0.252 [90% +0.140, +0.352].
+
+Caveats copied from SCALE16e4 §6.1.7 / §6.1.4 (facts only):
+  - grid edge: UMi28 C6 / C9 b* = kron 4096 (stopped at 4096); reuse UMi28 C2 and D2 C6 kron 4096, D2 C2 kron 1024 (2048 not fitted). D2 C9 is INTERIOR (merged kron 4096 ll_val 237.474 < kron 2048 242.737) -> no K2 tag, Q-K C9 slot '-'.  Convergence: the new 3 cells stopped by tol 24/24 / 22/24 (patience 2) / 24/24.
+  - UMi28 C6 decision points 0/+3/+6 leave one grid point (-3 dB) below; -9/-6 dB are off the grid and were not measured.
+  - reuse cells' registered CIs are THIS run's file values and differ from the §0.1 table in the third digit (D2 C2 [0.470, 0.544] vs [0.470, 0.545]; D2 C6 [0.774, 0.874] vs [0.771, 0.871]; UMi28 C2 [0.108, 0.190] vs [0.110, 0.189]).  UMi28 C6 appears in two runs: step S1 [0.252, 0.322] (drawn) and step S2 [0.252, 0.323] (same point estimate).
+  - every cell is an UNGATED array-scaling measurement, cell / budget / prior limited; seed-spread caveat (SEEDS16e4): D2 0.011, UMi28 0.028.
+  - last-EMA tags (report-only, §6.1.4 (f)): R_dp(last) D2 C9 0.808 [0.786, 0.829], UMi28 C6 0.278 [0.243, 0.313], UMi28 C9 0.439 [0.409, 0.469]; role sensitivity of the reuse cells: D2 C6 0.823/0.806, UMi28 C2 0.150/0.152; D2 C2 has legacy-last weights only.
+  - first K = 4096 chunk worker RSS was not recorded (deviation, §6.1.5); no memory-guard raise, no OOM.
+  - D2 C9 table-B 'all 13 baselines' sentence NOT met (X* = V1-pilot, R_X* undefined: -3 dB BLER 0.0047 < 0.005); UMi28 C6 / C9 MET.
+
+Asserted: lines 2-8 of each scale2_<run>.txt reproduced byte-identically (raw path -> raw_<tag>); decision points of the 6 cells (anchor b*), SigmaF (b*, V1, genie) and R_dp [90%] of every cell in every run, Delta R [level] + p of the 5 runs (§6.1.1 / §6.1.2 / the scale2_* record files), C9 failures per SNR of genie / V1 / b* (§6.1.4 (b)) and R2 (pairB_<T>.txt).
+
+recomputed frontier_ci.cmd_recovery output (raw names = the paths above):
+  [primary D2; record primary_D2_L95:3-6]
+  # recovery R = (b* - V1)/(b* - genie) @16; paired bootstrap per raw set (three arms together), the two raw sets resampled independently (UNPAIRED difference); B=2000, seed=20260926, 90% CI
+    R1: /home/HTJ/t2_wtS/conf/raw_NR32B16e4 C9 SNR ['-9', '-6', '-3']  b* 1161 V1 276 genie 70  R = 0.811  [90% 0.790, 0.832]
+    R2: /home/HTJ/t2/conf/raw_B16e4k C2 SNR ['-3', '+0', '+3']  b* 864 V1 488 genie 125  R = 0.509  [90% 0.470, 0.544]
+    R1 - R2 = +0.302  [90% unpaired +0.262, +0.345]  undefined replicates 0
+    R1 - R2 = +0.302  [95% unpaired +0.254, +0.355]  bootstrap two-sided p = 0.0000  (--level 0.95)
+    gaps R1: SigmaF_V1 - SigmaF_g = 206  [90% 182, 231]   SigmaF_b* - SigmaF_g = 1091  [90% 1045, 1135]   (blocks, summed over SNR ['-9', '-6', '-3'])
+    gaps R2: SigmaF_V1 - SigmaF_g = 363  [90% 332, 396]   SigmaF_b* - SigmaF_g = 739  [90% 697, 781]   (blocks, summed over SNR ['-3', '+0', '+3'])
+  [primary UMi28; record primary_U28_L90:3-6]
+  # recovery R = (b* - V1)/(b* - genie) @16; paired bootstrap per raw set (three arms together), the two raw sets resampled independently (UNPAIRED difference); B=2000, seed=20260926, 90% CI
+    R1: /home/HTJ/t2_wtS/conf/raw_U28NR32B16e4 C9 SNR ['-3', '+0', '+3']  b* 958 V1 599 genie 127  R = 0.432  [90% 0.401, 0.463]
+    R2: /home/HTJ/t2/conf/raw_U28B16e4 C2 SNR ['+3', '+6', '+9']  b* 800 V1 712 genie 215  R = 0.150  [90% 0.108, 0.190]
+    R1 - R2 = +0.282  [90% unpaired +0.232, +0.335]  undefined replicates 0
+    R1 - R2 = +0.282  [90% unpaired +0.232, +0.335]  bootstrap two-sided p = 0.0000  (--level 0.9)
+    gaps R1: SigmaF_V1 - SigmaF_g = 472  [90% 437, 505]   SigmaF_b* - SigmaF_g = 831  [90% 786, 871]   (blocks, summed over SNR ['-3', '+0', '+3'])
+    gaps R2: SigmaF_V1 - SigmaF_g = 497  [90% 461, 532]   SigmaF_b* - SigmaF_g = 585  [90% 547, 623]   (blocks, summed over SNR ['+3', '+6', '+9'])
+  [step D2 S2; record step_D2_S2:3-6]
+  # recovery R = (b* - V1)/(b* - genie) @16; paired bootstrap per raw set (three arms together), the two raw sets resampled independently (UNPAIRED difference); B=2000, seed=20260926, 90% CI
+    R1: /home/HTJ/t2_wtS/conf/raw_NR32B16e4 C9 SNR ['-9', '-6', '-3']  b* 1161 V1 276 genie 70  R = 0.811  [90% 0.790, 0.832]
+    R2: /home/HTJ/t2/conf/raw_NR16B16e4 C6 SNR ['-3', '+0', '+3']  b* 277 V1 82 genie 40  R = 0.823  [90% 0.774, 0.874]
+    R1 - R2 = -0.012  [90% unpaired -0.067, +0.041]  undefined replicates 0
+    R1 - R2 = -0.012  [90% unpaired -0.067, +0.041]  bootstrap two-sided p = 0.7200  (--level 0.9)
+    gaps R1: SigmaF_V1 - SigmaF_g = 206  [90% 182, 231]   SigmaF_b* - SigmaF_g = 1091  [90% 1045, 1135]   (blocks, summed over SNR ['-9', '-6', '-3'])
+    gaps R2: SigmaF_V1 - SigmaF_g = 42  [90% 29, 54]   SigmaF_b* - SigmaF_g = 237  [90% 213, 263]   (blocks, summed over SNR ['-3', '+0', '+3'])
+  [step UMi28 S1; record step_U28_S1:3-6]
+  # recovery R = (b* - V1)/(b* - genie) @16; paired bootstrap per raw set (three arms together), the two raw sets resampled independently (UNPAIRED difference); B=2000, seed=20260926, 90% CI
+    R1: /home/HTJ/t2_wtS/conf/raw_U28NR16B16e4 C6 SNR ['+0', '+3', '+6']  b* 824 V1 636 genie 170  R = 0.287  [90% 0.252, 0.322]
+    R2: /home/HTJ/t2/conf/raw_U28B16e4 C2 SNR ['+3', '+6', '+9']  b* 800 V1 712 genie 215  R = 0.150  [90% 0.108, 0.190]
+    R1 - R2 = +0.137  [90% unpaired +0.085, +0.193]  undefined replicates 0
+    R1 - R2 = +0.137  [90% unpaired +0.085, +0.193]  bootstrap two-sided p = 0.0000  (--level 0.9)
+    gaps R1: SigmaF_V1 - SigmaF_g = 466  [90% 432, 501]   SigmaF_b* - SigmaF_g = 654  [90% 616, 696]   (blocks, summed over SNR ['+0', '+3', '+6'])
+    gaps R2: SigmaF_V1 - SigmaF_g = 497  [90% 461, 532]   SigmaF_b* - SigmaF_g = 585  [90% 547, 623]   (blocks, summed over SNR ['+3', '+6', '+9'])
+  [step UMi28 S2; record step_U28_S2:3-6]
+  # recovery R = (b* - V1)/(b* - genie) @16; paired bootstrap per raw set (three arms together), the two raw sets resampled independently (UNPAIRED difference); B=2000, seed=20260926, 90% CI
+    R1: /home/HTJ/t2_wtS/conf/raw_U28NR32B16e4 C9 SNR ['-3', '+0', '+3']  b* 958 V1 599 genie 127  R = 0.432  [90% 0.401, 0.463]
+    R2: /home/HTJ/t2_wtS/conf/raw_U28NR16B16e4 C6 SNR ['+0', '+3', '+6']  b* 824 V1 636 genie 170  R = 0.287  [90% 0.252, 0.323]
+    R1 - R2 = +0.145  [90% unpaired +0.099, +0.193]  undefined replicates 0
+    R1 - R2 = +0.145  [90% unpaired +0.099, +0.193]  bootstrap two-sided p = 0.0000  (--level 0.9)
+    gaps R1: SigmaF_V1 - SigmaF_g = 472  [90% 437, 505]   SigmaF_b* - SigmaF_g = 831  [90% 786, 871]   (blocks, summed over SNR ['-3', '+0', '+3'])
+    gaps R2: SigmaF_V1 - SigmaF_g = 466  [90% 433, 502]   SigmaF_b* - SigmaF_g = 654  [90% 614, 696]   (blocks, summed over SNR ['+0', '+3', '+6'])

@@ -1,0 +1,12 @@
+F23 -- train/test channel-model mismatch (NEXT_EXPERIMENTS_MISMATCH16e4 §6.1), cell C2, n = 2560 per SNR, BLER@16; SNR@0.1 gaps in dB with 90% paired bootstrap.  Recomputed from raw by code/figure_f23.py (read-only).
+
+  D2 → D3        raw_MMs2s2c x raw_D3B16e4 (S2c): MM (i); gap b*-V1 mismatched +1.33 [+1.11, +1.61], matched +1.41 [+1.19, +1.67]; cost V1 +0.25 [+0.13, +0.38], cost b* +0.17 [-0.04, +0.40]
+  D3 → D2        raw_MMs2cs2 x raw_B16e4k (S2): MM (i); gap b*-V1 mismatched +1.18 [+1.00, +1.39], matched +1.41 [+1.22, +1.64]; cost V1 +0.06 [-0.04, +0.16], cost b* -0.17 [-0.32, -0.02]
+  UMi28 → MIX3   raw_MMu28mx x raw_MXB16e4 (MIX3): MM (i); gap b*-V1 mismatched +0.61 [+0.33, +0.92], matched +0.98 [+0.68, +1.31]; cost V1 +0.28 [+0.12, +0.46], cost b* -0.09 [-0.35, +0.19]
+  MIX3 → UMi28   raw_MMmxu28 x raw_U28B16e4 (UMi28): MM (i); gap b*-V1 mismatched +1.04 [+0.73, +1.30], matched +0.60 [+0.33, +0.87]; cost V1 -0.05 [-0.22, +0.10], cost b* +0.40 [+0.12, +0.63]
+  D2 → UMi28     raw_MMs2u28 x raw_U28B16e4 (UMi28): MM (i); gap b*-V1 mismatched +0.35 [+0.12, +0.61], matched +0.60 [+0.33, +0.87]; cost V1 +1.51 [+1.19, +1.81], cost b* +1.26 [+0.90, +1.61]
+  UMi28 → D2     raw_MMu28s2 x raw_B16e4k (S2): MM (i); gap b*-V1 mismatched +0.82 [+0.66, +0.99], matched +1.41 [+1.22, +1.64]; cost V1 +0.93 [+0.76, +1.12], cost b* +0.33 [+0.16, +0.50]
+  D2 → SV8e      raw_MMs2sv x raw_SVB16e4 (SV8e): MM (iv); gap b*-V1 mismatched -0.11 [-0.23, +0.01], matched +0.25 [+0.16, +0.33]; cost V1 +0.64 [+0.53, +0.77], cost b* +0.28 [+0.19, +0.39]
+  SV8e → D2      raw_MMsvs2 x raw_B16e4k (S2): MM (i); gap b*-V1 mismatched +1.00 [+0.82, +1.19], matched +1.41 [+1.22, +1.64]; cost V1 +0.85 [+0.68, +1.04], cost b* +0.43 [+0.25, +0.61]
+
+Registered measurement labels (MM bstar-mis -> V1-mis): (i) at 7 of 8 train/test pairs, (iv) at D2 -> SV8e (two decision points).  Report-only elsewhere; no first-order test.  Only the prior side is mismatched (pilots, sigma^2 and the receiver are the test model's).

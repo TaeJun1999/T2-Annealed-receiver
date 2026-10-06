@@ -1,0 +1,44 @@
+F28 -- D2 C6 (16x4) under within-block Doppler and Rx-array rotation, static / 0-deg trained prior; every registered baseline on the same trials (raw_<T> + raw_X{L,P,A}<T>).  Recomputed from raw.
+
+(a) Doppler ν = 0.005, 16×4 -- failures / 2560 at SNR -3 +0 +3 +6 +9 +12 +15 dB:
+    R3-bigamp           @16   1151   554   261   172   147   186   157
+    R1-turbo            @16    800   326   174   101    71    70    70
+    R2-ours-G           @16    349   140    80    53    26    39    42
+    ALD-pilot           @16    340   113    83    42    31    28    40
+    V1-pilot            @16    129    36    23    21    17    29    21
+    M-ours-bstar        @16    224    82    53    44    28    37    34
+    M-ours-dscore-C-V1  @16     80    26    20    14    17    24    32
+    R5-genie            @16     42    28    21    23    26    35    51
+    zero-failure points (not drawn on the log axis): none
+(b) Doppler ν = 0.01, 16×4 -- failures / 2560 at SNR -3 +0 +3 +6 +9 +12 +15 dB:
+    R3-bigamp           @16   1489   796   432   306   275   311   267
+    R1-turbo            @16   1193   603   432   315   301   313   365
+    R2-ours-G           @16    572   294   210   171   171   170   206
+    ALD-pilot           @16    869   415   298   209   187   218   213
+    V1-pilot            @16    491   208   169   135   125   176   177
+    M-ours-bstar        @16    422   210   162   147   157   192   223
+    M-ours-dscore-C-V1  @16    179   110    91   110   135   179   206
+    R5-genie            @16    415   280   281   273   264   322   311
+    zero-failure points (not drawn on the log axis): none
+(c) Rx rotation 15°, 16×4 -- failures / 2560 at SNR -3 +0 +3 +6 +9 +12 +15 dB:
+    R3-bigamp           @16   1083   468   238   144   140   177   140
+    R1-turbo            @16    747   322   161    85    57    43    22
+    R2-ours-G           @16    315   140    79    48    25    22    14
+    ALD-pilot           @16    270    91    64    20    10     5     3
+    V1-pilot            @16    108    31    13     5     4     1     2
+    M-ours-bstar        @16    213    95    46    26    18    13     8
+    M-ours-dscore-C-V1  @16     60    22    10     6     2     2     1
+    R5-genie            @16     24    11     2     6     3     2     1
+    zero-failure points (not drawn on the log axis): none
+(d) Rx rotation 30°, 16×4 -- failures / 2560 at SNR -3 +0 +3 +6 +9 +12 +15 dB:
+    R3-bigamp           @16   1137   534   259   160   166   202   171
+    R1-turbo            @16   1032   411   243   138   109    74    41
+    R2-ours-G           @16    487   185   127    79    55    35    24
+    ALD-pilot           @16    315    93    56    27    12     7     8
+    V1-pilot            @16    159    26    19    10     6     7     2
+    M-ours-bstar        @16    375   147   101    56    40    24    20
+    M-ours-dscore-C-V1  @16     86    16    21    10     6     3     1
+    R5-genie            @16     21    11     6     3     4     1     2
+    zero-failure points (not drawn on the log axis): none
+
+Registered labels: DOP16e4 / ROT16e4 §6.1 and SUPP16e4 §6.1.  C6 is UNGATED (no D1 sibling).  In (b) genie holds only H_0 of the block and fails about as often as b* at -3 dB (SUPP16e4 §0).

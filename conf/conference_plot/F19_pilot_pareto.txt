@@ -1,0 +1,28 @@
+F19 -- pilot overhead: Tp >= Nt Pareto cells (NEXT_EXPERIMENTS_PARETO v2, frozen eee1d669; results §6).  Numbers recomputed from raw by code/figure_f19.py (read-only); headline checkpoint d2sx_N160000_a1.pt (legacy last-EMA, sha 4443921ce8d5c4a1), headline fits (b* = kron K=1024, grid-edge caveat).
+
+(a) BLER@16 (failures / 2560) vs SNR:
+  C2 (Tp=4) M-ours-dscore-C-V1   -6:1534 -3:371 +0:88 +3:29 +6:16 +9:7 +12:5 +15:3
+  C2 (Tp=4) M-ours-bstar         -6:1979 -3:623 +0:184 +3:57 +6:28 +9:17 +12:16 +15:8
+  C7 (Tp=6) M-ours-bstar         -9:2505 -6:1619 -3:420 +0:118 +3:48 +6:23 +9:12 +12:13 +15:9
+  C8 (Tp=8) M-ours-bstar         -9:2399 -6:1243 -3:302 +0:87 +3:40 +6:22 +9:8 +12:5 +15:5
+  C2 (Tp=4) R5-genie             -6:520 -3:87 +0:26 +3:12 +6:9 +9:2 +12:2 +15:2
+  zero-failure points (not drawn on the log axis): none
+
+(b) SNR@0.1 [dB] per (cell, arm) with its own unpaired bootstrap 90% interval (single-spec frontier_ci bootstrap, B=2000, seed 20260926):
+  C2 Tp/T=0.250 M-ours-bstar         -0.81 [90% -1.02, -0.60] censored 0.0%
+  C7 Tp/T=0.375 M-ours-bstar         -1.83 [90% -2.00, -1.66] censored 0.0%
+  C8 Tp/T=0.500 M-ours-bstar         -2.60 [90% -2.81, -2.42] censored 0.0%
+  C2 Tp/T=0.250 M-ours-dscore-C-V1   -2.23 [90% -2.38, -2.07] censored 0.0%
+  C7 Tp/T=0.375 M-ours-dscore-C-V1   -2.92 [90% -3.11, -2.74] censored 0.0%
+  C8 Tp/T=0.500 M-ours-dscore-C-V1   -3.57 [90% -3.75, -3.39] censored 0.0%
+  C2 Tp/T=0.250 R2-ours-G            +0.06 [90% -0.20, +0.31] censored 0.0%
+  C7 Tp/T=0.375 R2-ours-G            -0.89 [90% -1.11, -0.66] censored 0.0%
+  C8 Tp/T=0.500 R2-ours-G            -1.59 [90% -1.79, -1.37] censored 0.0%
+  C2 Tp/T=0.250 R5-genie             -4.81 [90% -4.94, -4.68] censored 0.0%
+  C7 Tp/T=0.375 R5-genie             -4.84 [90% -4.98, -4.69] censored 0.0%
+  C8 Tp/T=0.500 R5-genie             -5.26 [90% -5.41, -5.10] censored 0.0%
+  P-a: SNR@0.1(V1, C2) - SNR@0.1(b*, C7) = -0.40 dB [95% -0.67, -0.13] bootstrap p 0.0040 (= record §6.2)
+  P-b: SNR@0.1(V1, C2) - SNR@0.1(b*, C8) = +0.38 dB [90% +0.14, +0.63] bootstrap p 0.0070 (= record §6.2)
+
+Registered labels (NEXT_EXPERIMENTS_PARETO.md §6): (A) table B b*->V1 in C7 and C8: (i) V1 fewer failures, POWERED 3/3 (pooled 287:60, 607:113).  (B) P-a "V1(Tp=4) has a lower SNR@0.1 than b*(Tp=6)" (Holm first); P-b "b*(Tp=8) has a lower SNR@0.1 than V1(Tp=4)" (reverse, significant).  Headline (C2 B16e4k) unchanged.
+Caveats: headline weights are legacy last-EMA (best weights not saved); b* kron K=1024 is at the fitted grid edge; C2 -6 dB trials were previously observed with 1e4 arms (genie bit-identical to raw_B1e4lo); cross-cell comparisons are unpaired.
