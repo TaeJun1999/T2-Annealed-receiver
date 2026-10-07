@@ -10,8 +10,12 @@ Same data, computation, asserts, colours, markers and line styles as the origina
   - zero-failure points: the curve breaks there instead of joining its neighbours, and Perfect CSI's zero points
     are drawn as a short downward arrow from the 95% Wilson upper bound (the F17 convention; 0/2560 -> 1.5e-3);
     the record text keeps listing them as 'not drawn' (no plotted estimate);
-  - reads the raw files from conf/ (read-only) and writes only F22_pilot_only.{pdf,png} next to this script
-    (no .txt; the record text is printed to stdout and keeps the internal names).
+  - FIGHS16e4 merge (NEXT_EXPERIMENTS_FIGHS16e4 §1, report-only; fighs_merge.py): every curve keeps its original raw (n = 2560)
+    at -3..+3 dB and takes +6..+15 dB from n = 20480 new trials (raw_FH<tag>; (a)(b) loop arms + genie: HISNR raw_HSB16e4k /
+    raw_HSNR16, R0-pilot raw_FHB16e4k / raw_FHNR16B16e4); BLER = k/n and the zero-failure arrow with each point's own n
+    (0/20480 -> 1.87e-4); y from 3e-5; merged k/n printed after the unchanged record;
+  - reads the raw files from conf/ (read-only) and writes only F22_pilot_only.{pdf,png} next to this script (or to
+    $FIG_OUTDIR) (no .txt; the record text is printed to stdout and keeps the internal names).
 The original docstring follows.
 
 conf/code/figure_f22.py -- F22: the learned prior used once on the pilots vs inside the turbo loop (report figure, read-only).
@@ -38,13 +42,14 @@ import matplotlib.pyplot as plt
 plt.rcParams.update({"pdf.fonttype": 42, "ps.fonttype": 42})   # TrueType fonts in PDF (IEEE PDF eXpress rejects Type 3)
 from analysis import load_raw
 from figstyle import INK, V1, GMM, GENIE, GAUSS
+import fighs_merge as M                              # conference/figures/fighs_merge.py (FIGHS16e4 merge, zero_arrows)
 
 plt.rcParams.update({"font.size": 8, "axes.labelsize": 8.5, "axes.titlesize": 8.5, "legend.fontsize": 7.5,
                      "xtick.labelsize": 7.5, "ytick.labelsize": 7.5, "axes.grid": True, "grid.alpha": 0.25,
                      "figure.dpi": 200, "savefig.bbox": "tight", "savefig.pad_inches": 0.02,
                      "text.color": INK, "axes.labelcolor": INK, "axes.titlecolor": INK,
                      "xtick.labelcolor": INK, "ytick.labelcolor": INK})
-FIG = os.path.dirname(os.path.abspath(__file__))     # paper version: figures only, next to this script
+FIG = M.FIG                                          # paper version: figures only, next to this script ($FIG_OUTDIR)
 # (arm, source 'base'|'pil', legend label, style, dashed pilot-only?)
 ARMS = [("R0-pilot", "base", "Pilot-only LMMSE", GAUSS, True),
         ("bstar-pilot", "pil", "GMM prior, pilot-only", GMM, True),
@@ -61,16 +66,6 @@ SETS = [("(a) D2 sparse specular, 8×4 (headline)", "B16e4k", "PILB16e4k", "C2",
         ("(f) 3GPP 38.901 MIX3 (side point)", "MXB16e4", "PILMX", "C2", "MIX3", (0.670, 0.648))]
 
 
-def zero_arrows(ax, xs, n, color):
-    """Zero-failure points (0/n blocks) cannot sit on a log axis: draw a short cap at the 95% Wilson upper bound
-    z^2/(n+z^2) and a downward arrow (the F17 convention), never a made-up value; the curve itself breaks there."""
-    hi = 1.96 ** 2 / (n + 1.96 ** 2)
-    for s in xs:
-        ax.plot([s - 0.3, s + 0.3], [hi, hi], color=color, lw=1.0, zorder=6)
-        ax.annotate("", xy=(s, hi / 1.7), xytext=(s, hi), zorder=6,
-                    arrowprops=dict(arrowstyle="-|>", color=color, lw=0.9, mutation_scale=6.5, shrinkA=0, shrinkB=0))
-
-
 def fails(d, key, arm):
     return np.nan_to_num(np.asarray(d[key][arm]["blk_err"])[:, -1], nan=1.0)   # a raised block is a failure
 
@@ -80,7 +75,7 @@ def main():
     txt = ["F22 -- learned prior used once on the pilots (Arvinte–Tamir-type setting, same V1 weights / GMM fits / trials) vs "
            "inside the turbo loop; NEXT_EXPERIMENTS_PILOT16e4 §6.1; BLER@16, n = 2560 per SNR.  Recomputed from raw by "
            "code/figure_f22.py (read-only).", ""]
-    handles = {}
+    handles, fh = {}, []                                  # fh: FIGHS16e4 merge record (printed after the record)
     for ax, (title, tb, tp, cell, prior, rec3) in zip(axs.flat, SETS):
         src = {"base": load_raw("D2", root=os.path.join(CONF, f"raw_{tb}"))[0],
                "pil": load_raw("D2", root=os.path.join(CONF, f"raw_{tp}"))[0]}
@@ -91,19 +86,23 @@ def main():
         assert got == rec3, (tp, got, rec3)
         txt.append(f"{title} -- raw_{tb} + raw_{tp}, cell {cell}, prior {prior}.  Failures / 2560 at SNR "
                    + " ".join(f"{s:+.0f}" for s in snrs) + " dB:")
-        zeros = []
+        zeros = []                                        # record: the original raws' zero-failure points
+        fh.append(f"  {title[:3]} raw_{tb} + raw_{tp}, cell {cell}:")
         for arm, s, lab, sty, pil in ARMS:
-            k = np.array([fails(src[s], key, arm).sum() for key in keys]); p = k / 2560.0; ok = k > 0
-            h, = ax.plot(snrs, np.where(ok, p, np.nan), color=sty["color"], marker=sty["marker"], ls="--" if pil else sty["ls"],
+            f = [fails(src[s], key, arm) for key in keys]
+            k = np.array([x.sum() for x in f]); n = np.array([len(x) for x in f])
+            km, nm, line = M.merge(snrs, k, n, tb if s == "base" else tp, cell, prior, arm); fh.append(line)   # +6..+15 dB: n = 20480
+            ok = km > 0
+            h, = ax.plot(snrs, np.where(ok, km / nm, np.nan), color=sty["color"], marker=sty["marker"], ls="--" if pil else sty["ls"],
                          lw=1.0 if pil else 1.5, ms=5.5 if sty["marker"] == "*" else 3.4,
                          mfc="white" if pil else sty["color"], mew=0.9, zorder=4 if "V1" in arm else 3)
             handles.setdefault(lab, h)
-            if arm == "R5-genie": zero_arrows(ax, snrs[~ok], 2560, sty["color"])
-            zeros += [f"{arm} {x:+.0f}" for x, z in zip(snrs, ok) if not z]
+            if arm == "R5-genie": M.zero_arrows(ax, snrs[~ok], nm[~ok], sty["color"])
+            zeros += [f"{arm} {x:+.0f}" for x, z in zip(snrs, k > 0) if not z]
             txt.append(f"    {arm:<20}" + " ".join(f"{int(x):5d}" for x in k))
         txt.append("    zero-failure points (not drawn on the log axis): " + ("; ".join(zeros) if zeros else "none"))
         ax.set_title(title[:3], loc="left", fontweight="bold", fontsize=8)   # paper: panel label only
-        ax.set_yscale("log"); ax.set_ylim(2e-4, 1.05); ax.set_xticks(range(-3, 16, 3))
+        ax.set_yscale("log"); ax.set_ylim(3e-5, 1.05); ax.set_xticks(range(-3, 16, 3))   # §1: 3e-5 (1/20480 = 4.9e-5 visible)
     for ax in axs[1]:
         ax.set_xlabel("SNR [dB]")
     for ax in axs[:, 0]:
@@ -117,7 +116,7 @@ def main():
             "measurement: P1 (i) at D3, UMi28, MIX3, (iv) at C6, SV8e (two decision points); P2 (i) at all six.  "
             "P1 cannot separate data-aided re-estimation from repeated prior application (16 vs 1 Module H passes).  "
             "Not a reproduction of the Langevin estimator of Arvinte & Tamir."]
-    print("\n".join(txt))
+    print("\n".join(txt + M.block(fh)))
 
 
 if __name__ == "__main__":

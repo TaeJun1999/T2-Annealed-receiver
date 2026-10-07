@@ -10,8 +10,12 @@ Same data, computation, bootstrap, asserts, colours, markers and shading as the 
     drawn (markers and data unchanged);
   - panel titles removed (setup, CI levels and "UMi 28 GHz" of (b) go to the caption), only the bold panel labels
     (a), (b), (c) remain;
-  - reads the raw files from conf/ (read-only) and writes only F20_channel_models.{pdf,png} next to this script
-    (no .txt; the record text is printed to stdout and keeps the internal names).
+  - FIGHS16e4 merge (NEXT_EXPERIMENTS_FIGHS16e4 §1, report-only; fighs_merge.py): the (b) curves keep raw_U28B16e4 (n = 2560)
+    at -3..+3 dB and take +6..+15 dB from n = 20480 new trials (raw_FHU28B16e4); BLER and Wilson bars with each point's own n
+    (was a fixed n = 2560); zero-failure points break the curve (Perfect CSI: arrow from its own-n Wilson bound); y from 3e-5;
+    merged k/n printed after the unchanged record ((a), (c) unchanged);
+  - reads the raw files from conf/ (read-only) and writes only F20_channel_models.{pdf,png} next to this script (or to
+    $FIG_OUTDIR) (no .txt; the record text is printed to stdout and keeps the internal names).
 The original docstring follows.
 
 conf/code/figure_f20.py -- F20: the learned prior across channel models (cell C2, 8x4, T=16, Tp=4, equal budget 1.6e5).
@@ -41,13 +45,14 @@ plt.rcParams.update({"pdf.fonttype": 42, "ps.fonttype": 42})   # TrueType fonts 
 from analysis import load_raw, gain, wilson
 from recovery_ci import fails, boot, rec
 from figstyle import INK, INK2, SHADE, V1, GMM, GENIE, GAUSS
+import fighs_merge as M                              # conference/figures/fighs_merge.py (FIGHS16e4 merge)
 
 plt.rcParams.update({"font.size": 8, "axes.labelsize": 8.5, "axes.titlesize": 8.5, "legend.fontsize": 8,
                      "xtick.labelsize": 8, "ytick.labelsize": 8, "axes.grid": True, "grid.alpha": 0.25,
                      "figure.dpi": 200, "savefig.bbox": "tight", "savefig.pad_inches": 0.02,
                      "text.color": INK, "axes.labelcolor": INK, "axes.titlecolor": INK,
                      "xtick.labelcolor": INK, "ytick.labelcolor": INK})
-FIG = os.path.dirname(os.path.abspath(__file__))     # paper version: figures only, next to this script
+FIG = M.FIG                                          # paper version: figures only, next to this script ($FIG_OUTDIR)
 BS, V1A, GE, R2 = "M-ours-bstar", "M-ours-dscore-C-V1", "R5-genie", "R2-ours-G"
 # (label, raw tag, prior, table-B label as registered, record gap (est, lo, hi), record R(-3 dB) (R, lo, hi), note)
 TB = [("D2 sparse specular\n(headline)", "B16e4k", "S2", "(i) 3/3", (1.41, 1.22, 1.64), (0.470, 0.427, 0.512), "gate PASS"),
@@ -102,15 +107,19 @@ def main():
     snrs = sorted(k[2] for k in d if k[0] == "C2")
     txt += ["", "(b) 3GPP 38.901 UMi 28 GHz (raw_U28B16e4, V1 = _best weights), failures / 2560 per SNR "
             + " ".join(f"{s:+.0f}" for s in snrs) + " dB:"]
+    fh = ["  (b) UMi28 C2:"]                                   # FIGHS16e4 merge record (printed after the record)
     for arm, sty, lab in ((R2, GAUSS, "Gaussian prior"), (BS, GMM, "GMM prior"), (V1A, V1, "Proposed"),
                           (GE, GENIE, "Perfect CSI")):
-        k = np.array([fails(d, "C2", s, arm).sum() for s in snrs]); n = 2560
-        ci = np.array([wilson(int(a), n) for a in k]); p = k / n; ok = k > 0
-        a2.errorbar(np.array(snrs)[ok], p[ok], yerr=[p[ok] - ci[ok, 0], ci[ok, 1] - p[ok]], color=sty["color"],
-                    marker=sty["marker"], ls=sty["ls"], lw=1.1, ms=(4 if sty["marker"] != "*" else 6.5), capsize=1.5,
-                    elinewidth=0.8, label=lab, zorder=4 if arm == V1A else 3)
+        f = [fails(d, "C2", s, arm) for s in snrs]
+        k = np.array([x.sum() for x in f]); n = np.array([len(x) for x in f]); assert (n == 2560).all(), (arm, n)
         txt.append(f"  {arm:<20} " + " ".join(str(int(a)) for a in k))
-    a2.set_yscale("log"); a2.set_ylim(2e-4, 1.0); a2.set_xticks(range(-3, 16, 3)); a2.set_xlabel("SNR [dB]")
+        k, n, line = M.merge(snrs, k, n, "U28B16e4", "C2", "UMi28", arm); fh.append(line)   # +6..+15 dB: n = 20480 raw
+        ci = np.array([wilson(int(a), int(m)) for a, m in zip(k, n)]); p = k / n; ok = k > 0
+        a2.errorbar(snrs, np.where(ok, p, np.nan), yerr=[np.where(ok, p - ci[:, 0], np.nan), np.where(ok, ci[:, 1] - p, np.nan)],
+                    color=sty["color"], marker=sty["marker"], ls=sty["ls"], lw=1.1, ms=(4 if sty["marker"] != "*" else 6.5),
+                    capsize=1.5, elinewidth=0.8, label=lab, zorder=4 if arm == V1A else 3)
+        if arm == GE: M.zero_arrows(a2, np.array(snrs)[~ok], n[~ok], sty["color"])
+    a2.set_yscale("log"); a2.set_ylim(3e-5, 1.0); a2.set_xticks(range(-3, 16, 3)); a2.set_xlabel("SNR [dB]")   # §1: 3e-5 (1/20480 visible)
     a2.set_ylabel("BLER")
     a2.set_title("(b)", loc="left", fontweight="bold", fontsize=8.5)   # paper: panel label only
     a2.legend(loc="lower left", frameon=False, fontsize=6.8, handlelength=2.0)
@@ -136,7 +145,7 @@ def main():
             "Caveats: D3/SV8e/38.901 checkpoints are UNGATED (measurement, not an arm verdict); one diffusion seed per testbed "
             "(seed repeats registered in NEXT_EXPERIMENTS_SEEDS16e4); b* of D3/UMi28/MIX3 is kron K=4096 at the grid edge with "
             "a tol-rule convergence caveat; testbeds are not paired with D2 (different streams)."]
-    print("\n".join(txt))                                # paper version: no .txt (the record is conf/figs/F20_channel_models.txt)
+    print("\n".join(txt + M.block(fh)))                              # paper version: no .txt (the record is conf/figs/F20_channel_models.txt)
 
 
 if __name__ == "__main__":

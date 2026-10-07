@@ -15,8 +15,13 @@ rendered text differs, plus two internal-process artefacts removed from panel (b
   - (b) adds the two NSCALE budget points (pre-registered, run commit 68d4d353, results 2026-10-06): 6.4e5 (raw_B64e4last)
     and 1.28e6 (raw_B128e4last), last-EMA like the others, b* = kron 4096 (grid edge), D1-sibling gate PASS; their _best.pt
     judging-run counts are printed with the record text (not drawn, as for 3.2e5);
-  - reads the raw files from conf/ (read-only) and writes only F16_headline_budget.{pdf,png} next to this script
-    (no .txt; the record text is printed to stdout unchanged, so it can be diffed against conf/figs/F16_headline_budget.txt).
+  - FIGHS16e4 merge (NEXT_EXPERIMENTS_FIGHS16e4 §1, report-only; fighs_merge.py): every (a) curve keeps raw_B16e4k /
+    raw_SPB16e4k (n = 2560) at -3..+3 dB and takes +6..+15 dB from n = 20480 new trials (raw_HSB16e4k; sparse three
+    raw_FHSPB16e4k); BLER and Wilson bars with each point's own n; zero-failure points break the curve (Perfect CSI: arrow
+    from its own-n Wilson bound; was a 3e-4 floor, never hit); y from 3e-5 (box moved right, clear of the OMP curve); merged
+    k/n printed after the unchanged record;
+  - reads the raw files from conf/ (read-only) and writes only F16_headline_budget.{pdf,png} next to this script (or to
+    $FIG_OUTDIR) (no .txt; the record text is printed to stdout unchanged, so it can be diffed against conf/figs/F16_headline_budget.txt).
 The original docstring follows.
 
 conf/code/figure_f16.py -- F16: representative result figure (report figure; numbers straight from the raw files).
@@ -43,11 +48,12 @@ import matplotlib.pyplot as plt
 plt.rcParams.update({"pdf.fonttype": 42, "ps.fonttype": 42})   # TrueType fonts in PDF (IEEE PDF eXpress rejects Type 3)
 from analysis import load_raw
 import figstyle as S
+import fighs_merge as M                                       # conference/figures/fighs_merge.py (FIGHS16e4 merge)
 
 plt.rcParams.update({"font.size": 9, "axes.labelsize": 9, "legend.fontsize": 8, "xtick.labelsize": 8.5,
                      "ytick.labelsize": 8.5, "axes.grid": True, "grid.alpha": 0.25, "figure.dpi": 160,
                      "savefig.bbox": "tight"})
-FIG = os.path.dirname(os.path.abspath(__file__))              # paper version: figures only, next to this script
+FIG = M.FIG                                                   # paper version: figures only, next to this script ($FIG_OUTDIR)
 _st = lambda d: (d["color"], d["marker"], d["ls"])            # colour/marker/linestyle roles from figstyle
 ARMS = [("R2-ours-G", "Gaussian prior", *_st(S.GAUSS)),
         ("M-ours-bstar", "GMM prior", *_st(S.GMM)),
@@ -82,13 +88,16 @@ def main():
     fig, (a1, a2) = plt.subplots(1, 2, figsize=(7.0, 3.25), gridspec_kw={"width_ratios": [1.15, 1]})
     txt = ["F16 -- representative result.  Numbers recomputed from the raw files by code/figure_f16.py.", ""]
     txt.append("(a) D2 C2 (8x4, T=16, Tp=4), N_train=1.6e5 equal budget (raw_B16e4k), n=2560 per SNR, BLER@16:")
+    fh = ["  (a) D2 C2:"]                                             # FIGHS16e4 merge record (printed after the record)
     for arm, lab, col, mk, ls in ARMS:
         f = [fails(H, "C2", s, arm) for s in snrs]
         k = np.array([x.sum() for x in f]); n = np.array([len(x) for x in f])
-        p = k / n; lo, hi = wilson(k, n)
-        a1.errorbar(snrs, np.maximum(p, 3e-4), yerr=[np.maximum(p - lo, 0), hi - p], color=col, marker=mk, ls=ls,
-                    ms=5 if mk != "*" else 8, lw=1.4, capsize=2, label=lab)
         txt.append(f"  {arm:<20} " + " ".join(f"{int(x)}/{int(m)}" for x, m in zip(k, n)))
+        k, n, line = M.merge(snrs, k, n, "B16e4k", "C2", "S2", arm); fh.append(line)   # +6..+15 dB: n = 20480 raw
+        p = k / n; lo, hi = wilson(k, n); ok = k > 0
+        a1.errorbar(snrs, np.where(ok, p, np.nan), yerr=[np.where(ok, np.maximum(p - lo, 0), np.nan), np.where(ok, hi - p, np.nan)],
+                    color=col, marker=mk, ls=ls, ms=5 if mk != "*" else 8, lw=1.4, capsize=2, label=lab)
+        if arm == "R5-genie": M.zero_arrows(a1, np.array(snrs)[~ok], n[~ok], col)
     SP, _, w = load_raw("D2", root=os.path.join(C.CONF, "raw_SPB16e4k")); assert not w, w
     assert sorted(SP) == sorted(H), (sorted(SP), sorted(H))
     for key in H:                                                 # same trials (figure_f31.load): genie bit-identical
@@ -97,14 +106,16 @@ def main():
         f = [fails(SP, "C2", s, arm) for s in snrs]
         k = np.array([int(x.sum()) for x in f]); n = np.array([len(x) for x in f])
         assert k.tolist() == REC_SP[arm] and set(n.tolist()) == {2560}, (arm, k, n)
+        k, n, line = M.merge(snrs, k, n, "SPB16e4k", "C2", "S2", arm); fh.append(line)
         ok = k > 0
-        a1.plot(np.array(snrs)[ok], (k / n)[ok], color=SPARSE, marker=mk, ls=ls, lw=1.1, ms=3.4,
+        a1.plot(snrs, np.where(ok, k / n, np.nan), color=SPARSE, marker=mk, ls=ls, lw=1.1, ms=3.4,
                 mfc=SPARSE if filled else "white", mew=0.9, zorder=1.9 - 0.1 * i, label=lab)
-    a1.set_yscale("log"); a1.set_ylim(1.5e-4, 0.6); a1.set_xlabel("SNR [dB]"); a1.set_ylabel("BLER")
+    a1.set_yscale("log"); a1.set_ylim(3e-5, 0.6); a1.set_xlabel("SNR [dB]"); a1.set_ylabel("BLER")   # §1: 3e-5 (1/20480 = 4.9e-5 visible)
     a1.set_xticks([0, 5, 10, 15])          # the original's auto ticks (its box overflowed the axes, which made them narrower)
     a1.set_title("(a)", loc="left", fontweight="bold", fontsize=8.8)
     a1.annotate("GMM prior → Proposed:\n−3 dB: BLER 0.243 → 0.145\n+1.41 dB at BLER 0.1\n[90% CI 1.22, 1.64]",
-                xy=(0.38, 0.76), xycoords="axes fraction", fontsize=7.0, color=S.INK,   # clear of the OMP curve, inside the axes
+                xy=(0.44, 0.76), xycoords="axes fraction", fontsize=7.0, color=S.INK,   # clear of the OMP curve, inside the axes
+                                                                                         # (x 0.38 -> 0.44 with the y limit 3e-5)
                 bbox=dict(boxstyle="round,pad=0.3", fc="white", ec="0.7"))
 
     budgets = [(1e4, "B1e4", "kron 512", False), (4e4, "B4e4k", "kron 2048", False),
@@ -156,7 +167,7 @@ def main():
             "near rank 2), a slowly decaying tail, not a flat floor; 9-15 dB points are 2/2560 each (Wilson 95% [2.1e-4, "
             "2.8e-3]) and every SNR point uses independent channel draws, so 12 vs 9 (3 vs 6 dB) and 2/2/2 are within "
             "binomial noise (log-linear binomial fit p = 0.18). The same tail appears in C1/C5/C6, not on full-rank D1."]
-    print("\n".join(txt))                                          # record text (internal names), not written to a file
+    print("\n".join(txt + M.block(fh)))                            # record text (internal names), not written to a file
 
 
 if __name__ == "__main__":
