@@ -17,7 +17,7 @@ precision; this GPU's FP64 rate is ~1/64), deterministic algorithms ON, TF32 OFF
 exception covers this precompute only).
 
     regen    : (CPU, GPUs hidden) regenerate trials with the runner's stream -> results/ald/pilots_<TAG>_<set>.npz
-               (b, H per trial, G, sigma2 per SNR; set = dev (trials DEV_SKIP0..+n) or test (0..2559))
+               (b, H per trial, G, sigma2 per SNR; set = dev (trials DEV_SKIP0..+n), test (0..2559) or hisnr (HISNR_SKIP0.., n 20480, +6..+15 dB; FIGHS16e4))
     tune     : (GPU) grid alpha_step = c * smin^2 (c in C_GRID) x beta in BETA_GRID on dev NMSE; stop step per SNR
     estimate : (GPU) frozen hyper-parameters on the test pilots -> results/ald/ald_<TAG>.npz (hhat, b, v per SNR)
 """
@@ -82,14 +82,14 @@ def _regen_one(args):
 
 def cmd_regen(a):
     import multiprocessing as mp
-    snrs = [float(s) for s in C.CELLS[a.cell]["snrs"]]
+    snrs = [6.0, 9.0, 12.0, 15.0] if a.set == "hisnr" else [float(s) for s in C.CELLS[a.cell]["snrs"]]   # hisnr: FIGHS16e4
     if a.fits_tag:                                  # ROTMIX16e4 §1: the fits must BE the train prior's (runner's guard)
         fp = os.path.realpath(os.path.join(C.CONF, "results", f"gmm_fits_D2_{a.fits_tag}",
                                            f"fit_{a.prior}_Nr{C.CELLS[a.cell]['Nr']}_fullK32_n160000.npz"))
         want = a.train_prior or a.prior
         if not os.path.basename(fp).startswith(f"fit_{want}_"):
             raise SystemExit(f"--fits-tag {a.fits_tag}: full K=32 resolves to {fp}, not a {want} fit (--train-prior {a.train_prior})")
-    skip, n = (C.DEV_SKIP0, a.n_dev) if a.set == "dev" else (0, 2560)
+    skip, n = {"dev": (C.DEV_SKIP0, a.n_dev), "test": (0, 2560), "hisnr": (C.HISNR_SKIP0, 20480)}[a.set]
     jobs = [(a.testbed, a.prior, a.cell, s, skip, n, a.fits_tag, a.rotation, a.train_prior, a.doppler) for s in snrs]
     t0 = time.time()
     with mp.Pool(len(jobs)) as pool:
@@ -284,7 +284,7 @@ def main():
     ap.add_argument("cmd", choices=("regen", "tune", "estimate"))
     ap.add_argument("--tag", required=True); ap.add_argument("--testbed", default="D2")
     ap.add_argument("--prior", default="S2"); ap.add_argument("--cell", default="C2")
-    ap.add_argument("--fits-tag"); ap.add_argument("--set", choices=("dev", "test"), default="dev")
+    ap.add_argument("--fits-tag"); ap.add_argument("--set", choices=("dev", "test", "hisnr"), default="dev")
     ap.add_argument("--n-dev", type=int, default=512); ap.add_argument("--ckpt")
     ap.add_argument("--doppler", type=float, default=None,
                     help="regen: normalised Doppler nu per symbol of the TEST channels (NEXT_EXPERIMENTS_SUPP16e4; runner.py "
