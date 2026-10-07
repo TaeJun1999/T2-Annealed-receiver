@@ -2,7 +2,7 @@
 
 ## 환경
 
-- **실행 위치**: Docker 컨테이너 (`9000babdde68`), 계정 `HTJ`, 사용자별 분리 컨테이너
+- **실행 위치**: Docker 컨테이너 (ID 는 재생성 때마다 바뀐다 — 2026-10-07 CDT 확인 `262d04c812cc`; 재생성되면 tmux·`/tmp` 가 사라지고 홈은 남는다), 계정 `HTJ`, 사용자별 분리 컨테이너
 - **시각**: `TZ=Asia/Seoul`. `date`와 로그 타임스탬프는 KST (UTC 아님)
 - **conda**: Miniforge (`~/miniforge3`), 채널은 conda-forge만. `defaults` 채널 사용 금지
   - `base` (Python 3.14): 도구 전용(tmux, node, uv). **실험 패키지 설치 금지**
@@ -26,7 +26,7 @@
 ## GPU
 
 - **하드웨어**: NVIDIA RTX PRO 6000 Blackwell Server Edition × 6, 각 96GB
-- **CUDA 13.0 / 드라이버 580.173.02 / sm_120 (capability 12.0)**
+- **CUDA 13.0 / 드라이버 580.178.04 / sm_120 (capability 12.0)** (드라이버는 호스트 것 — 2026-10-07 CDT 에 읽은 값; 2026-09-16 기록은 580.173.02 였고 언제 바뀌었는지는 기록이 없다; 2026-10-07 CDT 에 torch 2.14.0+cu130 동작·`sm_120` 확인)
 - **Compute Mode: Exclusive_Process** — GPU당 프로세스 1개만 가능
 
 규칙:

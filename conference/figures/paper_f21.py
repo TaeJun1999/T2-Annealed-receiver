@@ -9,8 +9,12 @@ Same data, computation, asserts, colours, markers and line styles as the origina
   - zero-failure points: the curve breaks there instead of joining its neighbours, and Perfect CSI's zero points
     are drawn as a short downward arrow from the 95% Wilson upper bound (the F17 convention; 0/2560 -> 1.5e-3);
     the record text keeps listing them as 'not drawn' (no plotted estimate);
-  - reads the raw files from conf/ (read-only) and writes only F21_all_baselines.{pdf,png} next to this script
-    (no .txt; the record text is printed to stdout and keeps the internal names).
+  - FIGHS16e4 merge (NEXT_EXPERIMENTS_FIGHS16e4 §1, report-only; fighs_merge.py): every curve keeps its original raw (n = 2560)
+    at -3..+3 dB and takes +6..+15 dB from n = 20480 new trials (raw_FH<tag>; (a)(b) core arms: HISNR raw_HSB16e4k /
+    raw_HSNR16); BLER = k/n and the zero-failure arrow with each point's own n (0/20480 -> 1.87e-4); y from 3e-5; merged k/n
+    printed after the unchanged record;
+  - reads the raw files from conf/ (read-only) and writes only F21_all_baselines.{pdf,png} next to this script (or to
+    $FIG_OUTDIR) (no .txt; the record text is printed to stdout and keeps the internal names).
 The original docstring follows.
 
 conf/code/figure_f21.py -- F21: every baseline and the proposed V1 on every channel model (report figure, read-only).
@@ -40,13 +44,14 @@ import matplotlib.pyplot as plt
 plt.rcParams.update({"pdf.fonttype": 42, "ps.fonttype": 42})   # TrueType fonts in PDF (IEEE PDF eXpress rejects Type 3)
 from analysis import load_raw
 from figstyle import INK, INK2, V1, GMM, GENIE, GAUSS
+import fighs_merge as M                              # conference/figures/fighs_merge.py (FIGHS16e4 merge, zero_arrows)
 
 plt.rcParams.update({"font.size": 8, "axes.labelsize": 8.5, "axes.titlesize": 8.5, "legend.fontsize": 7.5,
                      "xtick.labelsize": 7.5, "ytick.labelsize": 7.5, "axes.grid": True, "grid.alpha": 0.25,
                      "figure.dpi": 200, "savefig.bbox": "tight", "savefig.pad_inches": 0.02,
                      "text.color": INK, "axes.labelcolor": INK, "axes.titlecolor": INK,
                      "xtick.labelcolor": INK, "ytick.labelcolor": INK})
-FIG = os.path.dirname(os.path.abspath(__file__))     # paper version: figures only, next to this script
+FIG = M.FIG                                          # paper version: figures only, next to this script ($FIG_OUTDIR)
 GREY, LIGHT = "#52514e", "#a3a29d"
 # (raw arm key, iteration index, legend label, colour, marker, line style, line width, filled?)
 ARMS = [("R3-bigamp", -1, "BiG-AMP", GREY, "v", "--", 1.0, False),
@@ -77,16 +82,6 @@ SETS = [("(a) D2 sparse specular, 8×4 (headline)", "B16e4k", "C2", "S2", "D1-si
         ("(f) 3GPP 38.901 MIX3 (side point)", "MXB16e4", "C2", "MIX3", "UNGATED, report-only", (1421, 1354, 679))]
 
 
-def zero_arrows(ax, xs, n, color):
-    """Zero-failure points (0/n blocks) cannot sit on a log axis: draw a short cap at the 95% Wilson upper bound
-    z^2/(n+z^2) and a downward arrow (the F17 convention), never a made-up value; the curve itself breaks there."""
-    hi = 1.96 ** 2 / (n + 1.96 ** 2)
-    for s in xs:
-        ax.plot([s - 0.3, s + 0.3], [hi, hi], color=color, lw=1.0, zorder=6)
-        ax.annotate("", xy=(s, hi / 1.7), xytext=(s, hi), zorder=6,
-                    arrowprops=dict(arrowstyle="-|>", color=color, lw=0.9, mutation_scale=6.5, shrinkA=0, shrinkB=0))
-
-
 def fails(d, key, arm, it):
     v = np.asarray(d[key][arm]["blk_err"])[:, it]
     return np.where(np.isfinite(v), v, 1.0)          # a raised block is a failure (01_RULES §4)
@@ -96,7 +91,7 @@ def main():
     fig, axs = plt.subplots(2, 3, figsize=(7.16, 5.0), sharex=True, sharey=True, layout="constrained")
     txt = ["F21 -- every baseline and the proposed V1 on every channel model; equal budget N_train = 1.6e5, n = 2560 per SNR, "
            "BLER@16 unless stated.  Recomputed from raw by code/figure_f21.py (read-only).", ""]
-    handles = {}
+    handles, fh = {}, []                                  # fh: FIGHS16e4 merge record (printed after the record)
     for ax, (title, tag, cell, prior, status, rec3) in zip(axs.flat, SETS):
         d, meta, w1 = load_raw("D2", root=os.path.join(CONF, f"raw_{tag}"))
         sp_tag, sp_rec = SPS[tag]
@@ -117,30 +112,33 @@ def main():
         bs = f"kron K={m['kron_K']}" if m["bstar"] == "kron" else f"full K={m['bstar'][3:]}"
         txt.append(f"{title} -- raw_{tag}, cell {cell}, prior {prior}, {status}; b* = {bs}.  Failures / 2560 at SNR "
                    + " ".join(f"{s:+.0f}" for s in snrs) + " dB:")
-        zeros = []
+        zeros = []                                        # record: the original raws' zero-failure points
+        fh.append(f"  {title[:3]} raw_{tag} + raw_{sp_tag}, cell {cell}:")
         for arm, it, lab, col, mk, ls, lw, filled in SP_ARMS:   # drawn first: the original curves stay on top, unchanged
             k = np.array([fails(d, key, arm, it).sum() for key in keys]); assert all(len(d[key][arm]["blk_err"]) == 2560 for key in keys)
-            p = k / 2560.0; ok = k > 0
-            h, = ax.plot(snrs, np.where(ok, p, np.nan), color=col, marker=mk, ls=ls, lw=lw, ms=3.2, mfc=col if filled else "white", mew=0.9,
-                         zorder=1)
+            km, nm, line = M.merge(snrs, k, 2560, sp_tag, cell, prior, arm); fh.append(line)   # +6..+15 dB: n = 20480 raw
+            ok = km > 0
+            h, = ax.plot(snrs, np.where(ok, km / nm, np.nan), color=col, marker=mk, ls=ls, lw=lw, ms=3.2, mfc=col if filled else "white",
+                         mew=0.9, zorder=1)
             handles.setdefault(lab, h)
-            zeros += [f"{lab} {s:+.0f}" for s, z in zip(snrs, ok) if not z]
+            zeros += [f"{lab} {s:+.0f}" for s, z in zip(snrs, k > 0) if not z]
             txt.append(f"    {arm:<20}@16  " + " ".join(f"{int(x):5d}" for x in k) + f"   (raw_{sp_tag})")
         for arm, it, lab, col, mk, ls, lw, filled in ARMS:
             k = np.array([fails(d, key, arm, it).sum() for key in keys]); assert all(len(d[key][arm]["blk_err"]) == 2560 for key in keys)
-            p = k / 2560.0; ok = k > 0
-            h, = ax.plot(snrs, np.where(ok, p, np.nan), color=col, marker=mk, ls=ls, lw=lw, ms=(3.2 if mk not in "*" else 5.5),
+            km, nm, line = M.merge(snrs, k, 2560, tag, cell, prior, arm); fh.append(line)
+            ok = km > 0
+            h, = ax.plot(snrs, np.where(ok, km / nm, np.nan), color=col, marker=mk, ls=ls, lw=lw, ms=(3.2 if mk not in "*" else 5.5),
                          mfc=col if filled else "white", mew=0.9, zorder=5 if "V1" in arm else 3 if arm == "M-ours-bstar" else 2)
             handles.setdefault(lab, h)
-            if arm == "R5-genie": zero_arrows(ax, snrs[~ok], 2560, col)
-            zeros += [f"{lab.split(' (')[0]} {s:+.0f}" for s, z in zip(snrs, ok) if not z]
+            if arm == "R5-genie": M.zero_arrows(ax, snrs[~ok], nm[~ok], col)
+            zeros += [f"{lab.split(' (')[0]} {s:+.0f}" for s, z in zip(snrs, k > 0) if not z]
             txt.append(f"    {arm:<20}{'@1 ' if it == 0 else '@16'}  " + " ".join(f"{int(x):5d}" for x in k))
         for arm in ABLATIONS:
             if arm in d[keys[0]]:
                 txt.append(f"    (not drawn) {arm:<20}  " + " ".join(f"{int(fails(d, key, arm, -1).sum()):5d}" for key in keys))
         txt.append("    zero-failure points (not drawn on the log axis): " + ("; ".join(zeros) if zeros else "none"))
         ax.set_title(title[:3], loc="left", fontweight="bold", fontsize=8)   # paper: panel label only
-        ax.set_yscale("log"); ax.set_ylim(2e-4, 1.05); ax.set_xticks(range(-3, 16, 3))
+        ax.set_yscale("log"); ax.set_ylim(3e-5, 1.05); ax.set_xticks(range(-3, 16, 3))   # §1: 3e-5 (1/20480 = 4.9e-5 visible)
     for ax in axs[1]:
         ax.set_xlabel("SNR [dB]")
     for ax in axs[:, 0]:
@@ -154,7 +152,7 @@ def main():
             "not tested.  D2 C6 and every non-D2 channel model are UNGATED measurements; MIX3 is a registered report-only side "
             "point.  R3-bigamp cannot take a correlated prior (structural); R4 arms are interface adaptations of the cited "
             "method.  genie is a known-channel reference, not a bound."]
-    print("\n".join(txt))
+    print("\n".join(txt + M.block(fh)))
 
 
 if __name__ == "__main__":

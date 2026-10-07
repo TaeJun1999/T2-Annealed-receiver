@@ -1,12 +1,12 @@
 # 작업 큐 (review_next 이후; 갱신할 때마다 맨 위 시각을 바꾼다)
 
-갱신 2026-10-06 15:46 CDT (Opus 5.5). **실험 단계 끝 — NSCALE 결과·감사·RESULTS §23 까지 main 에 기록 (7adcee92), scale → main 병합 (36cd150e); 이제 원고 (웹 채팅, paper 브랜치).** 사용자 지시 2026-09-29 CDT: "추천 순서로 계속, 남는 자원에는 계속 작업 할당, 빈 곳도 계획에 올려 적절한 순서로"; 09-30 CDT: 규모 확장 2단계는 "차례가 오면 승인 없이" (DECISIONS 6b1de688). 모든 판정 실험은 사전 등록 → Fable 적대적 검토(서브에이전트) → 동결 → 실행 → §6 전사 → Fable 기록 감사.
+갱신 2026-10-07 17:09 CDT (Opus 5.5). **실험 단계 끝 — 원고 (웹 채팅, paper 브랜치). 마지막 실행 = FIGHS16e4 (보고 전용 그림 보강; 10-06 19:30 ~ 10-07 16:12 CDT, 24/24 수용, 기록·감사 끝 — 이 커밋).** 사용자 지시 2026-09-29 CDT: "추천 순서로 계속, 남는 자원에는 계속 작업 할당, 빈 곳도 계획에 올려 적절한 순서로"; 09-30 CDT: 규모 확장 2단계는 "차례가 오면 승인 없이" (DECISIONS 6b1de688). 모든 판정 실험은 사전 등록 → Fable 적대적 검토(서브에이전트) → 동결 → 실행 → §6 전사 → Fable 기록 감사.
 
 ## 원고 목표 (사용자 10-05 CDT)
 - **IEEE ICC 2027** (Washington DC). 공식 call 페이지 기준 투고 마감 **2026-10-16**, 통지 2027-01-15, 최종본 2027-02-19. 투고본 **6 쪽 (10 pt) 상한** — 넘으면 심사 없이 거절. 저널판 없음 (DECISIONS 3a64d0ae) → 6 쪽에 못 넣는 것은 arXiv 확장판.
 
 ## 자원 배치 원칙
-- CPU (192 워커, 수신기 BLER): 한 번에 한 등록 실행. 순서 = 아래 대기열. 지금 비어 있음.
+- CPU (192 워커, 수신기 BLER): 한 번에 한 등록 실행. 순서 = 아래 대기열. 지금 비어 있음. 컨테이너가 다시 만들어지면 (2026-10-06 20:38 CDT 에 한 번 — tmux·`/tmp`·세션 감시가 사라지고 홈은 남는다) 등록의 재개 절차로 잇는다 (예: `conf/logs/fighs_interrupt_20261006CDT/`).
 - GPU (6 장, Exclusive_Process): `~/t2_wtS/conf/code/gpu_sched.sh` (tmux gpusched) 한 곳에서 배정 — 큐 `~/t2_wtS/conf/logs/gpuq.txt` (`<prio> <kind> <label> <cmd>`; 학습 90 > 검사 60 > GMM 재시작 50; 병합은 후보 3 개 뒤 CPU), 로그 `logs/gpu_sched.log`. 격자 끝 규칙 `edge_rule.sh` (tmux edgerule) 가 이 큐에 넣는다. 일괄 EM 검사 PASS 셀의 4096 재시작에는 `logs/batched_prefix.sh` (tmux bprefix) 가 `FIT_KRON_BATCHED=1` 을 붙인다.
 - **main 커밋 금지 구간**: main 에서 등록 BLER 이 도는 동안 (raw 의 run|git 이 한 커밋이어야 함). **main conf/code·Demo 변경 금지**: NSCALE 동결 2d50dab5 부터 NSCALE §5 까지 (eval 전제 `git diff <동결> <§5> -- conf/code Demo` 비어 있음) — 문서·기록 커밋은 됨. **scale 커밋 금지 구간**: SCALE16e4 §5 커밋부터 마지막 2단계 raw 까지.
 
@@ -21,6 +21,7 @@
 | 4 | RESULTS.md: SEEDS3·HISNR·SPARSE·SCALE 반영, CONTRIBUTIONS.md (09-27 이전에 머묾), 결과 요약 artifact 페이지, 그림 | — | 사용자 요청 시 (규칙: 요청 때 갱신) | |
 
 ## 완료 (최근)
+- FIGHS16e4 (2026-10-07 17:09 CDT 기록): 실행 커밋 331f6e57 → 10-06 19:30 CDT 시작, 20:38 CDT 컨테이너 재생성으로 중단, 21:15 CDT `--resume` → 10-07 16:12 CDT `FIGHS_DONE ok=24 fail=0` → §6.1 (생성기 `prereg_audit_2026-10-07/s6_gen.py`) + §6.2 Fable 감사 MUST 0 → 논문 그림 7 개 (F16 (a)·F17·F20 (b)·F21·F22·F24 (c)(d)·F31 (b)) 의 +6..+15 dB 점 = n 20480, 기록 `conference/figures/records/`, 캡션 메모 `conference/figures/README.md` 'FIGHS16e4 merge'.
 - NSCALE (2026-10-06 15:46 CDT 기록): §5 = 실행 커밋 68d4d353 → eval 10-06 08:11–15:06 CDT `NSCALE_DONE ok=89 fail=0` → §6.1 (생성기 s6_gen.py) + §6.2 Fable 감사 MUST 0 (c69222a5) → RESULTS §23 (7adcee92); 논문 F16 (b) 에 6.4e5·1.28e6 점 (35e9b293), 표 I 초안·F30top (46a7477d).
 - SEEDSNR16e4 실행 (1 묶음 ok=47 → 실행 커밋 2 b53a8529 → 2 묶음 ok=51) → 결과·감사 scale c689a935 (6/6 표 B (i), 세 셀 '시드 강건 (3/3 (i))'; fb3 로그 열람 공개). **scale→main 병합 대기: NSCALE_DONE 뒤** (main conf/code 동결)
 - STATIC16e4 (faebac20, 감사 34dbf03b) · genie 고SNR 바닥 진단 (d6f322fb) · 1단계 파일럿 (scale a798d878)

@@ -1,0 +1,126 @@
+F24 -- D2 C2 (8x4) under within-block Doppler and Rx-array rotation, static / 0-deg trained prior; every registered baseline on the same trials (raw_<T> + raw_X{L,P,A}<T>).  Recomputed from raw.
+
+(a) Doppler ν = 0.005 -- failures / 2560 at SNR -3 +0 +3 +6 +9 +12 +15 dB:
+    R3-bigamp           @16   1517   613   251   173   157   154   170
+    R1-turbo            @16   1497   678   284   159    90    74    75
+    R2-ours-G           @16    950   333   119    79    52    43    38
+    ALD-pilot           @16   1030   307   109    67    33    42    32
+    V1-pilot            @16    789   217    61    37    18    26    16
+    M-ours-bstar        @16    740   231    71    50    28    43    28
+    M-ours-dscore-C-V1  @16    442   119    44    23    11    21    26
+    R5-genie            @16    183    61    27    28    22    31    41
+    zero-failure points (not drawn on the log axis): none
+(b) Doppler ν = 0.01 -- failures / 2560 at SNR -3 +0 +3 +6 +9 +12 +15 dB:
+    R3-bigamp           @16   1827   948   444   319   318   344   316
+    R1-turbo            @16   1840  1035   566   397   352   340   392
+    R2-ours-G           @16   1316   573   271   225   180   189   205
+    ALD-pilot           @16   1630   819   462   307   241   271   268
+    V1-pilot            @16   1380   600   307   204   189   200   200
+    M-ours-bstar        @16   1133   447   225   179   152   185   194
+    M-ours-dscore-C-V1  @16    756   320   142   119   118   177   185
+    R5-genie            @16    846   527   394   382   356   398   413
+    zero-failure points (not drawn on the log axis): none
+(c) Rx rotation 15° -- failures / 2560 at SNR -3 +0 +3 +6 +9 +12 +15 dB:
+    R3-bigamp           @16   1414   542   215   141   132   142   145
+    R1-turbo            @16   1390   591   221   121    67    31    22
+    R2-ours-G           @16    854   277   103    76    34    19    15
+    ALD-pilot           @16    888   243    73    41    20     7     4
+    V1-pilot            @16    669   146    40    23    10     6     3
+    M-ours-bstar        @16    656   184    52    43    17    11     8
+    M-ours-dscore-C-V1  @16    404    93    27    20    10     6     3
+    R5-genie            @16    111    35    10     9     4     3     4
+    zero-failure points (not drawn on the log axis): none
+(d) Rx rotation 30° -- failures / 2560 at SNR -3 +0 +3 +6 +9 +12 +15 dB:
+    R3-bigamp           @16   1497   616   254   173   164   172   171
+    R1-turbo            @16   1507   683   273   128    72    45    31
+    R2-ours-G           @16    996   344   132    78    35    27    22
+    ALD-pilot           @16    977   286    97    58    19    13    11
+    V1-pilot            @16    837   176    48    31    12     6     6
+    M-ours-bstar        @16    781   228    81    51    29    19    12
+    M-ours-dscore-C-V1  @16    519   123    43    29    11     7     6
+    R5-genie            @16    113    38    19    13     5     2     3
+    zero-failure points (not drawn on the log axis): none
+
+Registered labels: DOP16e4 / ROT16e4 §6.1 (b* -> V1) and SUPP16e4 §6.1 (all 12 baselines).  In (b) genie holds only H_0 of the block and fails more often than V1 at -3 dB (SUPP16e4 §0).
+
+FIGHS16e4 merge (REPORT-ONLY, NEXT_EXPERIMENTS_FIGHS16e4 §1): the record above is the original raws' (n = 2560, unchanged; its zero-failure / 'not drawn' notes refer to those points).  Drawn: -3/0/+3 dB = those counts, +6/+9/+12/+15 dB = the counts below (new trials 10000..30479, n = 20480 per SNR; one point = one raw, never pooled).  'rising' = a cell of the drawn curve where BLER rises with SNR, with its one-sided Fisher p (independent trials per SNR; the +3 -> +6 dB cell compares the two trial sets; §1: reported, no smoothing / re-run / dropped point):
+  (c) raw_ROTaB16e4k + raw_XLROTaB16e4k + raw_XPROTaB16e4k + raw_XAROTaB16e4k, cell C2:
+    R3-bigamp           @16  1159/20480 1047/20480 1205/20480 1146/20480   (raw_FHROTaB16e4k)   rising: +9->+12 dB p=0.00033
+    R1-turbo            @16  948/20480 539/20480 295/20480 198/20480   (raw_FHROTaB16e4k)
+    R2-ours-G           @16  520/20480 306/20480 178/20480 136/20480   (raw_FHROTaB16e4k)
+    ALD-pilot           @16  330/20480 135/20480 78/20480 71/20480   (raw_FHXAROTaB16e4k)
+    V1-pilot            @16  148/20480 70/20480 43/20480 20/20480   (raw_FHXPROTaB16e4k)
+    M-ours-bstar        @16  293/20480 147/20480 107/20480 78/20480   (raw_FHROTaB16e4k)
+    M-ours-dscore-C-V1  @16  141/20480 66/20480 42/20480 24/20480   (raw_FHROTaB16e4k)
+    R5-genie            @16  71/20480 36/20480 19/20480 18/20480   (raw_FHROTaB16e4k)
+  (d) raw_ROTbB16e4k + raw_XLROTbB16e4k + raw_XPROTbB16e4k + raw_XAROTbB16e4k, cell C2:
+    R3-bigamp           @16  1362/20480 1299/20480 1418/20480 1397/20480   (raw_FHROTbB16e4k)   rising: +9->+12 dB p=0.0096
+    R1-turbo            @16  1143/20480 654/20480 383/20480 227/20480   (raw_FHROTbB16e4k)
+    R2-ours-G           @16  612/20480 378/20480 222/20480 153/20480   (raw_FHROTbB16e4k)
+    ALD-pilot           @16  385/20480 208/20480 112/20480 106/20480   (raw_FHXAROTbB16e4k)
+    V1-pilot            @16  197/20480 110/20480 63/20480 42/20480   (raw_FHXPROTbB16e4k)
+    M-ours-bstar        @16  385/20480 246/20480 159/20480 104/20480   (raw_FHROTbB16e4k)
+    M-ours-dscore-C-V1  @16  175/20480 107/20480 62/20480 39/20480   (raw_FHROTbB16e4k)
+    R5-genie            @16  79/20480 43/20480 31/20480 14/20480   (raw_FHROTbB16e4k)
+F26 -- drift-trained priors (ROTMIX16e4 B', S2d prior, D2 C2) and the visibility-window prior (S2V16e4 C, D2 C6).  Recomputed from raw.
+
+(a) drift-trained prior, rotation 15° (B′) -- failures / 2560 at SNR -3 +0 +3 +6 +9 +12 +15 dB:
+    R3-bigamp           @16   1414   542   215   141   132   142   145
+    R1-turbo            @16   1386   576   219   117    67    27    27
+    R2-ours-G           @16    831   281   102    68    40    17    13
+    ALD-pilot           @16    845   228    70    36    12     9    10
+    V1-pilot            @16    624   123    37    20     8     4     2
+    M-ours-bstar        @16    625   159    53    36    24    11     7
+    M-ours-dscore-C-V1  @16    390    92    30    19     6     4     2
+    R5-genie            @16    111    35    10     9     4     3     4
+    zero-failure points (not drawn on the log axis): none
+(b) drift-trained prior, rotation 30° (B′) -- failures / 2560 at SNR -3 +0 +3 +6 +9 +12 +15 dB:
+    R3-bigamp           @16   1497   616   254   173   164   172   171
+    R1-turbo            @16   1441   632   268   127    73    48    28
+    R2-ours-G           @16    909   304   123    74    41    32    20
+    ALD-pilot           @16    906   255    79    52    15    12    13
+    V1-pilot            @16    720   156    41    21     8     7     3
+    M-ours-bstar        @16    645   186    62    44    19    16    13
+    M-ours-dscore-C-V1  @16    424   102    39    27     7     6     4
+    R5-genie            @16    113    38    19    13     5     2     3
+    zero-failure points (not drawn on the log axis): none
+(c) spatial non-stationarity S2v, 16×4 (C) -- failures / 2560 at SNR -3 +0 +3 +6 +9 +12 +15 dB:
+    R3-bigamp           @16   1228   552   240   139   153   195   138
+    R1-turbo            @16    776   312   137    62    33    30    17
+    R2-ours-G           @16    333   130    61    31    17    19     8
+    ALD-pilot           @16    359   141    67    24    15    13     5
+    V1-pilot            @16    152    37    19     8     3     6     1
+    M-ours-bstar        @16    202    69    29    13     7    16     8
+    M-ours-dscore-C-V1  @16     94    23    13     5     2     5     1
+    R5-genie            @16     23     9     5     2     0     4     1
+    zero-failure points (not drawn on the log axis): Perfect CSI +9
+
+Registered labels: ROTMIX16e4 §6.1 (RB 15°/30° (i)), S2V16e4 §6.1 (judgement 1 (i), 13/13).  UNGATED.
+F25 -- all 24 SUPP16e4 conditions: -3 dB BLER@16 (failures / 2560) of V1, of the closest registered baseline X* (fewest -3 dB failures among b* + 𝔅 12, R0-pilot @1; ties by name) and of genie.  Recomputed from raw.
+
+    DOPaB16e4k  D2 C2  Doppler ν = 0.005  V1   442  X* M-ours-bstar    740  genie   183
+    DOPaNR16    D2 C6  Doppler ν = 0.005  V1    80  X* V1-pilot        129  genie    42
+    DOPaD3      D3     Doppler ν = 0.005  V1  1102  X* M-ours-bstar   1392  genie   644
+    DOPaSV      SV8e   Doppler ν = 0.005  V1   472  X* M-ours-bstar    541  genie    65
+    DOPaU28     UMi28  Doppler ν = 0.005  V1  1324  X* M-ours-bstar   1371  genie   755
+    DOPaMX      MIX3   Doppler ν = 0.005  V1  1431  X* M-ours-bstar   1501  genie   891
+    DOPbB16e4k  D2 C2  Doppler ν = 0.01   V1   756  X* M-ours-bstar   1133  genie   846
+    DOPbNR16    D2 C6  Doppler ν = 0.01   V1   179  X* M-ours-bstar    422  genie   415
+    DOPbD3      D3     Doppler ν = 0.01   V1  1418  X* M-ours-bstar   1671  genie  1406
+    DOPbSV      SV8e   Doppler ν = 0.01   V1   711  X* M-ours-bstar    803  genie   451
+    DOPbU28     UMi28  Doppler ν = 0.01   V1  1614  X* M-ours-bstar   1638  genie  1342
+    DOPbMX      MIX3   Doppler ν = 0.01   V1  1697  X* M-ours-bstar   1749  genie  1483
+    ROTaB16e4k  D2 C2  rotation 15°       V1   404  X* M-ours-bstar    656  genie   111
+    ROTaNR16    D2 C6  rotation 15°       V1    60  X* V1-pilot        108  genie    24
+    ROTaD3      D3     rotation 15°       V1  1056  X* M-ours-bstar   1303  genie   460
+    ROTaSV      SV8e   rotation 15°       V1   438  X* M-ours-bstar    511  genie    38
+    ROTaU28     UMi28  rotation 15°       V1  1261  X* M-ours-bstar   1317  genie   630
+    ROTaMX      MIX3   rotation 15°       V1  1400  X* M-ours-bstar   1460  genie   671
+    ROTbB16e4k  D2 C2  rotation 30°       V1   519  X* M-ours-bstar    781  genie   113
+    ROTbNR16    D2 C6  rotation 30°       V1    86  X* V1-pilot        159  genie    21
+    ROTbD3      D3     rotation 30°       V1  1142  X* M-ours-bstar   1430  genie   520
+    ROTbSV      SV8e   rotation 30°       V1   506  X* M-ours-bstar    570  genie    59
+    ROTbU28     UMi28  rotation 30°       V1  1364  X* M-ours-bstar   1389  genie   721
+    ROTbMX      MIX3   rotation 30°       V1  1495  X* M-ours-bstar   1540  genie   802
+
+Registered labels and sentences: NEXT_EXPERIMENTS_SUPP16e4.md §6.1 (k𝔅 = 12 in 21/24, (ii) 0/288).  Where genie fails at least as often as V1 (DOPb D2 C2, DOPb D2 C6) genie holds only H_0 of the Doppler block (registration §0).  D2 C6 and non-D2 channel models are UNGATED measurements.

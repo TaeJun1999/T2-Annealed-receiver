@@ -11,8 +11,12 @@ two internal-process artefacts are no longer drawn:
     the gate shading and its PASS/FAIL labels and the "registered band value" note are not drawn (their values are
     still computed and asserted; the last-EMA lines are unchanged);
   - one-row legend (was two columns) so the taller (c) axis takes the two-line y label;
+  - FIGHS16e4 merge (NEXT_EXPERIMENTS_FIGHS16e4 §1, report-only; fighs_merge.py): the (a)(b) curves keep raw_B16e4k /
+    raw_NR16B16e4 (n = 2560) at -3..+3 dB and take +6..+15 dB from n = 20480 new trials (HISNR raw_HSB16e4k / raw_HSNR16);
+    Wilson bars and zero-failure labels with each point's own n; zero points break the curve; merged k/n printed after the
+    unchanged record ((c) unchanged);
   - reads the raw files and checkpoints from conf/ (read-only) and writes only F17_codim_C6.{pdf,png} next to this
-    script (no .txt; the record text is printed to stdout and keeps the internal names).
+    script (or to $FIG_OUTDIR) (no .txt; the record text is printed to stdout and keeps the internal names).
 The original docstring follows.
 
 conf/code/figure_f17.py -- F17: the co-dimension (여차원) figure, cell C6 (Nr=16) next to the headline cell C2 (Nr=8).
@@ -49,13 +53,14 @@ from matplotlib.lines import Line2D
 from analysis import load_raw, sign_p, wilson
 from recovery_ci import fails, boot, rec
 from figstyle import INK, V1, GMM, GENIE, CELL_C2, CELL_C6
+import fighs_merge as M                              # conference/figures/fighs_merge.py (FIGHS16e4 merge)
 
 plt.rcParams.update({"font.size": 8, "axes.labelsize": 8.5, "axes.titlesize": 8.5, "legend.fontsize": 8,
                      "xtick.labelsize": 8, "ytick.labelsize": 8, "axes.grid": True, "grid.alpha": 0.25,
                      "figure.dpi": 200, "savefig.bbox": "tight", "savefig.pad_inches": 0.02,
                      "text.color": INK, "axes.labelcolor": INK, "axes.titlecolor": INK,   # text is always ink (figstyle)
                      "xtick.labelcolor": INK, "ytick.labelcolor": INK})
-FIG = os.path.dirname(os.path.abspath(__file__))     # paper version: figures only, next to this script
+FIG = M.FIG                                          # paper version: figures only, next to this script ($FIG_OUTDIR)
 B, SEED, DEC = 2000, 20260926, (-3.0, 0.0, 3.0)
 # (arm, legend label, colour, marker, line style [figstyle roles], SNR dodge [dB], zorder: genie drawn above V1 so its star stays visible)
 ARMS = [("M-ours-bstar", "GMM prior", GMM["color"], GMM["marker"], GMM["ls"], -0.45, 3),
@@ -122,7 +127,7 @@ def main():
               "(a) C2 ($N_r$=8): headline cell,\nD1-sibling gate PASS"),
              (a2, "C6", "NR16B16e4", "C6 (16x4, T=16, Tp=4), raw_NR16B16e4 (_best, registered measurement tag; UNGATED, "
               "geometry-axis measurement, not an arm verdict)", "(b) C6 ($N_r$=16): UNGATED,\nmeasurement, not an arm verdict")]
-    zeros = []
+    zeros, fh = [], []                                         # fh: FIGHS16e4 merge record (printed after the record)
     for ax, cell, tag, desc, title in cells:
         d, meta = raw(tag)
         m = meta[(cell, "S2")]
@@ -130,27 +135,30 @@ def main():
         txt.append(f"  {desc}; b* = {m['bstar']} K={m['kron_K']} ll_val {m['ll_val|kron']!r}"
                    + (f"; V1 ckpt {m['stagec_ckpt_id']}" if "stagec_ckpt_id" in m else "; V1 ckpt legacy last-EMA "
                       "d2sx_N160000_a1.pt (results/review_next/NEXT_EXPERIMENTS.md:13)"))
-        cnt = {}
+        cnt, cm = {}, {}
+        fh.append(f"  {title[:3]} {cell}:")
         for arm, lab, col, mk, ls, dx, z in ARMS:
             f = [fails(d, cell, s, arm) for s in snrs]
             k = np.array([x.sum() for x in f]); n = np.array([len(x) for x in f])
             assert (n == 2560).all()
+            zeros += [f"{cell} {arm} {s:+.0f} dB 0/2560 (95% Wilson [0, {wilson(0, 2560)[1]:.2e}])" for s, a in zip(snrs, k) if a == 0]
+            txt.append(f"    {arm:<20} " + " ".join(f"{int(a)}/{int(b)}" for a, b in zip(k, n)) + "   (SNR " +
+                       " ".join(f"{s:+.0f}" for s in snrs) + " dB)")
+            cnt[arm] = k
+            k, n, line = M.merge(snrs, k, n, tag, cell, "S2", arm); fh.append(line); cm[arm] = k   # +6..+15 dB: n = 20480 raw
             ok = k > 0
             ci = np.array([wilson(int(a), int(b)) for a, b in zip(k, n)])
             p = k / n
             x = np.array(snrs) + dx                            # per-arm dodge (ARMS): b* -0.45, V1 0, genie +0.45 dB
-            ax.errorbar(x[ok], p[ok], yerr=[p[ok] - ci[ok, 0], ci[ok, 1] - p[ok]], color=col, marker=mk, ls=ls, lw=1.1,
-                        ms=(4 if mk != "*" else 6.5), capsize=1.5, elinewidth=0.9, zorder=z)
-            for s, hi in zip(x[~ok], ci[~ok, 1]):              # zero failures: arrow down from the Wilson upper end
+            ax.errorbar(x, np.where(ok, p, np.nan), yerr=[np.where(ok, p - ci[:, 0], np.nan), np.where(ok, ci[:, 1] - p, np.nan)],
+                        color=col, marker=mk, ls=ls, lw=1.1, ms=(4 if mk != "*" else 6.5), capsize=1.5, elinewidth=0.9, zorder=z)
+            for s, hi, nz in zip(x[~ok], ci[~ok, 1], n[~ok]):  # zero failures: arrow down from the Wilson upper end (own n)
                 ax.plot([s - 0.1, s + 0.1], [hi, hi], color=col, lw=1.0, zorder=6)
                 ax.annotate("", xy=(s, hi / 1.45), xytext=(s, hi), zorder=6,   # ends above the V1 marker next to it
                             arrowprops=dict(arrowstyle="-|>", color=col, lw=0.9, mutation_scale=6.5, shrinkA=0, shrinkB=0))
-                ax.text(s + 0.3, hi * 1.08, "0/2560", rotation=90, ha="left", va="top", fontsize=8, color=INK)
-                zeros.append(f"{cell} {arm} {s - dx:+.0f} dB 0/2560 (95% Wilson [0, {hi:.2e}])")
-            txt.append(f"    {arm:<20} " + " ".join(f"{int(a)}/{int(b)}" for a, b in zip(k, n)) + "   (SNR " +
-                       " ".join(f"{s:+.0f}" for s in snrs) + " dB)")
-            cnt[arm] = k
+                ax.text(s + 0.3, hi * 1.08, f"0/{nz}", rotation=90, ha="left", va="top", fontsize=8, color=INK)
         assert (cnt["M-ours-dscore-C-V1"] < cnt["M-ours-bstar"]).all(), cell    # caption: V1 fewer at all 7 SNRs
+        assert (cm["M-ours-dscore-C-V1"] < cm["M-ours-bstar"]).all(), cell      # ... also at the drawn (merged) points
         b3, v3, g3 = (int(cnt[a][snrs.index(-3.0)]) for a in ("M-ours-bstar", "M-ours-dscore-C-V1", "R5-genie"))
         ax.text(0.97, 0.965, f"Block errors at −3 dB:\nGMM prior {b3}/2560\nProposed {v3}/2560\nPerfect CSI {g3}/2560", transform=ax.transAxes,
                 ha="right", va="top", fontsize=8, bbox=dict(boxstyle="round,pad=0.25", fc="white", ec="0.75", lw=0.6))
@@ -343,7 +351,7 @@ def main():
             f"sits at its exact budget, and each hollow best-validation point is drawn at {HOLLOW_X} x its budget "
             f"(C6 1.6e5 at {1.6e5 * HOLLOW_X:.3g}, C2 3.2e5 at {3.2e5 * HOLLOW_X:.3g}); the x tick labels 1, 4, 16, 32 "
             "(x 1e4) are the exact budgets."]
-    print("\n".join(txt))
+    print("\n".join(txt + M.block(fh)))
 
 
 if __name__ == "__main__":

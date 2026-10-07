@@ -12,8 +12,13 @@ Same data, computation, asserts, colours, markers and line styles as the origina
       F25  (a) Doppler nu = 0.005  (b) Doppler nu = 0.01  (c) array rotation 15 deg  (d) array rotation 30 deg
       F26  (a) drift-trained prior, array rotation 15 deg (8x4)  (b) drift-trained prior, array rotation 30 deg (8x4)
            (c) spatially non-stationary, Sparse specular 16x4;
-  - reads conf/ (read-only) and writes only the {pdf,png} figures next to this script (no .txt; the record text is printed
-    to stdout with the internal names).
+  - FIGHS16e4 merge (NEXT_EXPERIMENTS_FIGHS16e4 §1, report-only; fighs_merge.py), F24 (c)(d) only: every curve keeps its
+    original raw (raw_ROT{a,b}B16e4k + XL/XP/XA, n = 2560) at -3..+3 dB and takes +6..+15 dB from n = 20480 new trials
+    (raw_FHROT{a,b}B16e4k: V1 b* R2 R1 R3 genie; raw_FHXPROT{a,b}B16e4k: pilot-only V1; raw_FHXAROT{a,b}B16e4k: ALD); BLER with
+    each point's own n; zero-failure points break the curve (Perfect CSI: arrow from its own-n Wilson bound); the shared F24
+    y axis starts at 3e-5 (so also in (a)(b), data unchanged); merged k/n printed after the unchanged F24 record (F25, F26 unchanged);
+  - reads conf/ (read-only) and writes only the {pdf,png} figures next to this script (or to $FIG_OUTDIR) (no .txt; the record
+    text is printed to stdout with the internal names).
 The original docstring follows.
 
 conf/code/figure_f24.py -- F24-F26: the non-stationary experiments (report figures, read-only).
@@ -44,6 +49,7 @@ plt.rcParams.update({"pdf.fonttype": 42, "ps.fonttype": 42})   # TrueType fonts 
 from analysis import load_raw
 from figstyle import INK, V1, GMM, GENIE, GAUSS
 from figure_f21 import fails
+import fighs_merge as M                              # conference/figures/fighs_merge.py (FIGHS16e4 merge)
 
 plt.rcParams.update({"font.size": 8, "axes.labelsize": 8.5, "axes.titlesize": 8.5, "legend.fontsize": 7.5,
                      "xtick.labelsize": 7.5, "ytick.labelsize": 7.5, "axes.grid": True, "grid.alpha": 0.25,
@@ -51,8 +57,11 @@ plt.rcParams.update({"font.size": 8, "axes.labelsize": 8.5, "axes.titlesize": 8.
                      "text.color": INK, "axes.labelcolor": INK, "axes.titlecolor": INK,
                      "xtick.labelcolor": INK, "ytick.labelcolor": INK})
 assert os.path.samefile(C.CONF, CONF)
-FIG = os.path.dirname(os.path.abspath(__file__))     # paper version: figures only, next to this script
+FIG = M.FIG                                          # paper version: figures only, next to this script ($FIG_OUTDIR)
 GREY, ALD = "#52514e", "#4a3aa7"
+# F24 (c)(d) merge: each curve's original raw = prefix + the panel's base tag (§0.1: V1 b* R2 genie <T>, R1 R3 XL<T>, pilot-only V1
+# XP<T>, ALD XA<T>); fighs_merge.hs_tag maps it to its +6..+15 dB raw (FHROT<x>, FHXPROT<x>, FHXAROT<x>)
+ORIG_PFX = {"R1-turbo": "XL", "R3-bigamp": "XL", "V1-pilot": "XP", "ALD-pilot": "XA"}
 # (raw arm key, iteration index, legend label, colour, marker, line style, line width, filled?)
 ARMS = [("R3-bigamp", -1, "BiG-AMP", GREY, "v", "--", 1.0, False),
         ("R1-turbo", -1, "Turbo LMMSE receiver", GREY, "^", "-", 1.0, False),
@@ -84,16 +93,25 @@ def load(tags, cell):
     return out
 
 
-def curves(ax, d, title, rec3, txt):
+def curves(ax, d, title, rec3, txt, base=None, fh=None):
+    """base: the panel's base raw tag when its +6..+15 dB points come from the FIGHS16e4 raws (F24 (c)(d), D2 C2 prior S2;
+    merged k/n lines go to fh); None = drawn as before (F24 (a)(b), F26)."""
     snrs = np.array(sorted(d))
     got = tuple(int(fails(d, -3.0, a, -1).sum()) for a in ("M-ours-bstar", "M-ours-dscore-C-V1", "R5-genie"))
     assert got == rec3, (title, got, rec3)
     txt.append(f"{title} -- failures / 2560 at SNR " + " ".join(f"{s:+.0f}" for s in snrs) + " dB:")
     zeros, hs = [], {}
+    if base:
+        fh.append(f"  {title[:3]} raw_{base} + raw_XL{base} + raw_XP{base} + raw_XA{base}, cell C2:")
     for arm, it, lab, col, mk, ls, lw, filled in ARMS:
         k = np.array([fails(d, s, arm, it).sum() for s in snrs]); assert all(len(d[s][arm]["blk_err"]) == 2560 for s in snrs)
         ok = k > 0
-        hs[lab], = ax.plot(snrs[ok], k[ok] / 2560.0, color=col, marker=mk, ls=ls, lw=lw, ms=(3.2 if mk != "*" else 5.5),
+        x, y = snrs[ok], k[ok] / 2560.0                    # zero points dropped (as before; F24 (a)(b), F26)
+        if base:                                           # FIGHS16e4 merge: +6..+15 dB from n = 20480; the curve breaks at 0
+            km, nm, line = M.merge(snrs, k, 2560, ORIG_PFX.get(arm, "") + base, "C2", "S2", arm); fh.append(line)
+            x, y = snrs, np.where(km > 0, km / nm, np.nan)
+            if arm == "R5-genie": M.zero_arrows(ax, snrs[km == 0], nm[km == 0], col)
+        hs[lab], = ax.plot(x, y, color=col, marker=mk, ls=ls, lw=lw, ms=(3.2 if mk != "*" else 5.5),
                            mfc=col if filled else "white", mew=0.9, zorder=5 if arm == "M-ours-dscore-C-V1" else 3)
         zeros += [f"{lab.split(' (')[0]} {s:+.0f}" for s, z in zip(snrs, ok) if not z]
         txt.append(f"    {arm:<20}@16  " + " ".join(f"{int(x):5d}" for x in k))
@@ -105,9 +123,11 @@ def curves(ax, d, title, rec3, txt):
 
 def grid_figure(name, panels, shape, size, head, foot):
     fig, axs = plt.subplots(*shape, figsize=size, sharex=True, sharey=True, layout="constrained", squeeze=False)
-    txt, hs = [head, ""], {}
-    for ax, (title, tags, cell, rec3) in zip(axs.flat, panels):
-        hs.update(curves(ax, load(tags, cell), title, rec3, txt))
+    txt, hs, fh = [head, ""], {}, []
+    for ax, (title, tags, cell, rec3, *base) in zip(axs.flat, panels):     # base: F24 (c)(d) only (FIGHS16e4 merge)
+        hs.update(curves(ax, load(tags, cell), title, rec3, txt, *base, fh=fh))
+    if fh:
+        axs.flat[0].set_ylim(3e-5, 1.05)                   # shared y, §1: 3e-5 (1/20480 = 4.9e-5 visible)
     for ax in axs[-1]:
         ax.set_xlabel("SNR [dB]")
     for ax in axs[:, 0]:
@@ -117,7 +137,7 @@ def grid_figure(name, panels, shape, size, head, foot):
                handlelength=2.6)
     for ext in ("pdf", "png"):
         fig.savefig(os.path.join(FIG, f"{name}.{ext}"))
-    print("\n".join(txt + ["", foot]))                 # paper version: printed only, no .txt file
+    print("\n".join(txt + ["", foot] + M.block(fh)))   # paper version: printed only, no .txt file
 
 
 def f25():
@@ -174,8 +194,8 @@ def main():
     grid_figure("F24_nonstationary_D2C2",
                 [("(a) Doppler ν = 0.005", t("DOPaB16e4k"), "C2", (740, 442, 183)),
                  ("(b) Doppler ν = 0.01", t("DOPbB16e4k"), "C2", (1133, 756, 846)),
-                 ("(c) Rx rotation 15°", t("ROTaB16e4k"), "C2", (656, 404, 111)),
-                 ("(d) Rx rotation 30°", t("ROTbB16e4k"), "C2", (781, 519, 113))],
+                 ("(c) Rx rotation 15°", t("ROTaB16e4k"), "C2", (656, 404, 111), "ROTaB16e4k"),   # FIGHS16e4 merge
+                 ("(d) Rx rotation 30°", t("ROTbB16e4k"), "C2", (781, 519, 113), "ROTbB16e4k")],
                 (2, 2), (7.16, 5.2),
                 "F24 -- D2 C2 (8x4) under within-block Doppler and Rx-array rotation, static / 0-deg trained prior; every "
                 "registered baseline on the same trials (raw_<T> + raw_X{L,P,A}<T>).  Recomputed from raw.",

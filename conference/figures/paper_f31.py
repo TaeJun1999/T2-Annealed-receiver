@@ -6,9 +6,13 @@ Same data, computation, asserts, error bars, colours and markers as the original
     (dataset codes -> dataset names in the (a) tick labels; x label of (a) = fraction of the baseline-to-perfect-CSI gap closed);
   - plot titles removed, only the bold panel labels (a), (b) remain ((b) = Sparse specular, 8x4 -> caption);
   - the registered-label marks "(iv)" in (a) are not drawn (TERMS.md allows "insuff." if a mark is wanted back);
+  - FIGHS16e4 merge (NEXT_EXPERIMENTS_FIGHS16e4 §1, report-only; fighs_merge.py): the (b) curves keep raw_B16e4k /
+    raw_SPB16e4k (n = 2560) at -3..+3 dB and take +6..+15 dB from n = 20480 new trials (raw_HSB16e4k; sparse three
+    raw_FHSPB16e4k); BLER with each point's own n; zero-failure points break the curve (Perfect CSI: arrow from its own-n
+    Wilson bound; were dropped and joined, never hit); y from 3e-5; merged k/n printed after the unchanged record ((a) unchanged);
   - reads the raw files and record files from conf/ (read-only; helpers incl. conf/code/figure_f30.py) and writes only
-    F31_sparse_baselines.{pdf,png} next to this script (no .txt; the record text is printed to stdout unchanged, so it can be
-    diffed against conf/figs/F31_sparse_baselines.txt).
+    F31_sparse_baselines.{pdf,png} next to this script (or to $FIG_OUTDIR) (no .txt; the record text is printed to stdout
+    unchanged, so it can be diffed against conf/figs/F31_sparse_baselines.txt).
 The original docstring follows.
 
 conf/code/figure_f31.py -- F31: V1 against the model-based sparse baselines (SPARSE16e4; report figure, read-only).
@@ -44,8 +48,9 @@ from analysis import load_raw
 from pair_baselines import table_b, recovery, fails
 from figstyle import INK, INK2, V1, GMM, GENIE
 from figure_f30 import rec_fails, RV, raw                     # conf/code/figure_f30.py (read paths only; its rcParams too)
+import fighs_merge as M                                       # conference/figures/fighs_merge.py (FIGHS16e4 merge)
 
-FIG = os.path.dirname(os.path.abspath(__file__))              # paper version: figures only, next to this script
+FIG = M.FIG                                                   # paper version: figures only, next to this script ($FIG_OUTDIR)
 V1A, BS, GE = "M-ours-dscore-C-V1", "M-ours-bstar", "R5-genie"
 SPARSE = "#1baf7a"
 NEW = ("SBL-loop", "SBL-pilot", "OMP-pilot")
@@ -160,16 +165,19 @@ def main():
     d, keys, rec = D2C2
     snrs = np.array([k[2] for k in keys])
     txt += ["", "(b) D2 C2 (raw_B16e4k + raw_SPB16e4k), failures / 2560 per SNR " + " ".join(f"{s:+.0f}" for s in snrs) + " dB:"]
+    fh = ["  (b) D2 C2:"]                                         # FIGHS16e4 merge record (printed after the record)
     for x in ("OMP-pilot", "SBL-pilot", "SBL-loop", BS, V1A, GE):
         lab, col, mk, ls, filled = STY[x]
         k = np.array([int(fails(d[key], x).sum()) for key in keys])
         assert k.tolist() == rec[x], (x, k.tolist(), rec[x]); assert all(len(d[key][x]["blk_err"]) == 2560 for key in keys)
-        ok = k > 0
-        a2.plot(snrs[ok], k[ok] / 2560, color=col, marker=mk, ls=ls, lw=1.8 if x == V1A else 1.1,
+        km, nm, line = M.merge(snrs, k, 2560, "SPB16e4k" if x in NEW else "B16e4k", "C2", "S2", x); fh.append(line)   # +6..+15 dB
+        ok = km > 0
+        a2.plot(snrs, np.where(ok, km / nm, np.nan), color=col, marker=mk, ls=ls, lw=1.8 if x == V1A else 1.1,
                 ms=3.4 if mk != "*" else 5.5, mfc=col if filled else "white", mew=0.9, zorder=5 if x == V1A else 3)
+        if x == GE: M.zero_arrows(a2, snrs[~ok], nm[~ok], col)
         txt.append(f"    {x:<20}@16  " + " ".join(f"{int(v):5d}" for v in k)
-                   + ("" if ok.all() else "   (zero-failure points not drawn)"))
-    a2.set_yscale("log"); a2.set_ylim(5e-4, 1.0); a2.set_xticks(range(-3, 16, 3)); a2.set_xlabel("SNR [dB]"); a2.set_ylabel("BLER")
+                   + ("" if (k > 0).all() else "   (zero-failure points not drawn)"))
+    a2.set_yscale("log"); a2.set_ylim(3e-5, 1.0); a2.set_xticks(range(-3, 16, 3)); a2.set_xlabel("SNR [dB]"); a2.set_ylabel("BLER")
     a2.set_title("(b)", loc="left", fontweight="bold", fontsize=8.2)
     L = [Line2D([], [], color=STY[x][1], marker=STY[x][2], ls=STY[x][3], mfc=STY[x][1] if STY[x][4] else "white",
                 ms=4 if STY[x][2] != "*" else 6, label=STY[x][0]) for x in (V1A, BS, "SBL-loop", "SBL-pilot", "OMP-pilot", GE)]
@@ -189,7 +197,7 @@ def main():
             "SV8e, UMi28 +3..+15 dB; MIX3 +6..+15 dB) OMP-pilot equals the pilot LS estimate and is not called 'sparse recovery'; among "
             "OMP-pilot decision points this is SV8e +3 dB, UMi28 all three, MIX3 all three.  Raised trials of the new arms: 0 (all 6 rows).  "
             "D2 C6 and the non-D2 channel models are UNGATED measurements; D2 C2 is the headline (gate PASS recipe)."]
-    print("\n".join(txt))                                          # record text (internal names), not written to a file
+    print("\n".join(txt + M.block(fh)))                                        # record text (internal names), not written to a file
 
 
 if __name__ == "__main__":
