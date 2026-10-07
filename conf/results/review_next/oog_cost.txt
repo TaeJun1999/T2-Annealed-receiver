@@ -1,0 +1,34 @@
+oog_cost -- single-thread cost of one ABOVE-grid prior query, K2 arms (code/bench_oog.py)
+
+date      : 2026. 09. 26. (토) 10:46:35 KST
+git       : HEAD 9fbbcd6b (bench_oog.py itself is a new, uncommitted file; prior_variants.py / diag_prior_swap.py / score.py unchanged vs HEAD)
+host      : 9000babdde68  CPU Intel(R) Xeon(R) 6740P  load average at end 1.96 / 192 cores
+threads   : torch.get_num_threads() = 1, OMP/MKL/OPENBLAS_NUM_THREADS = 1/1/1
+torch     : 2.14.0+cu130  numpy 2.5.2  dtype float64  device cpu
+checkpoint: ckpt/d2sx_N160000_a1.pt (DiT, vp)  fits B16e4k  ntrain 160000  edge_kw {'M': 16, 'burn': 100, 'keep': 100, 'n_jac': 16} + eps_frac 0.05
+
+Method: priors built by diag_prior_swap.build('C1', -3, ...) exactly as the K2 runs; prior._eval(q, nu) timed with time.perf_counter.  nu_above = median iteration-1 nu_q of V1-edge in raw_review_next_K2test (C1 -3 dB, n=2560; the value is the same in every block), nu_in = median iteration-2..16 nu_q of V1-edge (in-grid).  Each repetition uses a new synthetic q = h + CN(0, nu I), h ~ D2 S2 generator (the prior caches an identical (q, nu)); one untimed warm-up call per arm.  Network work counted by instrumenting model.raw and torch.func.jacrev on one query.
+nu_above = 1.997993 (> nu_hi 1.4285757)   nu_in = 0.255623
+
+Network work per ABOVE-grid query (counted; matches the code: ScorePrior._eval = jacrev(tweedie) + tweedie forward; clamp = _net(q, s_hi) + _jac(q, s_hi); edge = (burn+keep)=200 Langevin score calls on M=16 chains + keep=100 denoiser calls on the same batch + n_jac=16 jacrev):
+  M-ours-dscore-C-V1   2 network forwards (2 x batch 1; 2 sample-forwards), 1 jacrev (each = 1 of those forwards + 64 VJPs, vmapped)
+  V1-clamp             2 network forwards (2 x batch 1; 2 sample-forwards), 1 jacrev (each = 1 of those forwards + 64 VJPs, vmapped)
+  V1-edge              316 network forwards (16 x batch 1 + 300 x batch 16; 4816 sample-forwards), 16 jacrev (each = 1 of those forwards + 64 VJPs, vmapped)
+  V1 in-grid (ref.)    2 network forwards (2 x batch 1; 2 sample-forwards), 1 jacrev (each = 1 of those forwards + 64 VJPs, vmapped)
+
+Seconds per query (single thread):
+  M-ours-dscore-C-V1   median 0.0664 s  min 0.0648  max 0.1080  reps 40  non-finite outputs 0
+  V1-clamp             median 0.0600 s  min 0.0590  max 0.0613  reps 40  non-finite outputs 0  above-grid path taken 41/41
+  V1-edge              median 6.2571 s  min 5.9659  max 6.5110  reps 10  non-finite outputs 0  above-grid path taken 11/11
+  V1 in-grid           median 0.0601 s  min 0.0590  max 0.1055  reps 40  non-finite outputs 0
+
+Per-block prior-network time at C1 -3 dB TEST (16 outer iterations = 16 queries per block; raw_review_next_K2test, n=2560):
+  M-ours-dscore-C-V1   above-grid queries/block 14.5521  -> 1.054 s/block = 1.10 x (16 in-grid V1 queries = 0.962 s);  if all 16 were above-grid: 1.06 s/block
+  V1-clamp             above-grid queries/block 1.0000  -> 0.962 s/block = 1.00 x (16 in-grid V1 queries = 0.962 s);  if all 16 were above-grid: 0.96 s/block
+  V1-edge              above-grid queries/block 1.0004  -> 7.161 s/block = 7.45 x (16 in-grid V1 queries = 0.962 s);  if all 16 were above-grid: 100.11 s/block
+  (V1-edge: 2561 above-grid queries in 2560 blocks = every block at iteration 1 + 1 block at iteration 2; V1-clamp 2560, all at iteration 1.  The frozen V1's count is over its 2246 recorded blocks; its 314 raised blocks carry no nu_q record.  The frozen V1's network work per query is the same above and in the grid (2 forwards + 1 jacrev); its per-block line uses its own measured above-grid time.)
+  Receiver work outside the prior (LMMSE-PIC, BCJR) is not included; timings are on this host at the load above, not under the 128-worker contention of the K2 runs.
+
+wall time of this benchmark: 86 s
+
+Note added 2026-09-25 21:53 CDT (= 09-26 11:53 KST, from date), benchmark NOT rerun, every number above unchanged: the line above saying "the 128-worker contention of the K2 runs" is imprecise.  The K2 runs used 128 workers (dev 3200..4479), 192 (test 0..2559) and 64 per report point (C1 0 dB, C5 -6 dB): first line of logs/review_next/k2_C1_m3.log, k2test_C1_m3.log, k2_C1_p0.log, k2_C5_m6.log.  code/bench_oog.py now prints this wording on a rerun.

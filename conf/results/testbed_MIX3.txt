@@ -1,0 +1,13 @@
+# date        : 2026-09-26 23:35:46 KST
+# git commit  : 598b6de6
+# content     : testbed_mix3.py -- 3GPP TR 38.901 MIX3 (code/mix3.py), Nr=8 x Nt=4; streams from common.train_rng('D2','MIX3',...)
+# calibration : P_RAW=0.9953569092328413  TRAIN_SHA=9f595676e0d1a032  (n=160000, train stream 7)
+
+TMXa normalisation (val stream 8, n=20000): mean ||H||^2/(Nr Nt) = 0.99880 (s.e. 0.00288; 4 s.e. band) -> PASS;  per-block power CV 0.407
+TMXb per-entry E|H_ab|^2: min 0.9877 max 1.0101 (report only)
+TMXc LoS fraction 0.2712 vs probe 0.273 (4 s.e. = 0.058); umi@28GHz share 0.333 LoS 0.407, uma@28GHz share 0.334 LoS 0.196, rma@3.5GHz share 0.333 LoS 0.211 -> PASS
+TMXd pilot-stage K=1 Gaussian NMSE @ -3 dB (nu = sigma^2/Nt): 0.3229 vs probe 0.3150 (|diff| <= 0.02) -> PASS
+TMXe erank(Rt) = 3.483 / 4 (T2b threshold 3.6) -> pilots 'eig' for Tp<=Nt;  erank(C_ens) = 27.54 / 32;  beamspace top-4 energy median 0.744
+TMXf cost: sample() 10.4 ms/call (after warm-up), sample_vecs 4096 in 4.2 s, val draw 20000 in 24.0 s
+
+ALL PASS (70 s CPU)

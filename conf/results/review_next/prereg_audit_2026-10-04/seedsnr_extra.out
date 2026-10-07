@@ -1,0 +1,112 @@
+== fb3 disclosure: §5 addendum (:138) vs §6.1.7 (:330)
+  OK   §6.1.7 text = §5 text with only the closing sentence replaced -- 860 vs 873 chars
+  OK   same 18 CDT times in both
+  OK   10 before-freeze times all < 22:59:56 (freeze) -- ['10-03 18:23 CDT', '10-03 18:54 CDT', '10-03 19:24 CDT', '10-03 19:54 CDT', '10-03 20:24 CDT', '10-03 20:54 CDT', '10-03 21:24 CDT', '10-03 21:54 CDT', '10-03 22:24 CDT', '10-03 22:54 CDT']
+  OK   4 after-freeze times all > freeze and < fb2 decision 01:56 -- ['10-03 23:23 CDT', '10-03 23:54 CDT', '10-04 00:24 CDT', '10-04 00:54 CDT']
+  OK   design-subagent read 03:27 after SIGINT 02:24
+  OK   count 10 + 4 = 14 as stated
+  OK   commit b53a8529 message carries the same count (14: 10·4, design 1)
+  OK   gpu_sched.log:92 fb2 done rc=0 10-04 01:56
+  OK   gpu_sched.log:93-94 fb3 end 10-04 02:24 (SIGINT, main-session line)
+  NOTE gpu_sched.log:94 (02:24 CDT) says fb3 'NOT opened (log/ckpt not read)'; the §5 addendum (17:36 CDT) later disclosed 14 briefing tail reads, all before 02:24.
+== batch 1 vs batch 2 post-run log strings (timestamps stripped, manifest git_commit masked)
+  OK   50 line pairs identical -- diffs 0
+== interpretive vocabulary / placeholders in the appended text (§6.1 :158-339, EXPERIMENTS:59, DECISIONS:315)
+  OK   interpretive vocabulary absent -- {}
+   context '최적': [' 반복·tol/patience 정지 — 이며 최적 GMM 이 아니다; 격자 끝·tol 정지 셀', ' 반복·tol/patience 정지 — 이며 최적 GMM 이 아니다; 격자 끝·tol 정지 셀']
+   context '동등': ['시드를 한 표에 싣는다 (위 §6.1.2); 동등성은 주장하지 않는다 — §1 라벨 행.)']
+   context '해석': [', Opus 5.5 서브에이전트 — 전사만, 해석 없음; 원본 `logs/run_seedsnr']
+   context '강건성': ['#### 6.1.3 시드 강건성 라벨 (§1; 분모 3 = a1·a2·a3,']
+  OK   '최적' only inside the quoted G_d strings
+  OK   '동등' only as '동등성은 주장하지 않는다' (§1 wording)
+  OK   no placeholders (x CDT / __NOW / TODO)
+  OK   'TBD' only when quoting §5's own TBD cell
+== §0-§5 stale cells named in §6.1.7 exist as quoted
+  OK   §0 :30 'a3 fb2 [학습 중]'
+  OK   §4.1 :101-102 '진행 중'
+  OK   §4.3 :120 '대기'
+  OK   §5 :139 'TBD'
+== cited table lines
+  OK   U28NR16B16e4s2 :32 = R3-bigamp N_train=0 (record cites :29-36 as N_train=160000 lines)
+  OK   U28NR16B16e4s2 :29-31,33-36,41 N_train=160000
+  OK   U28NR16B16e4s2 :38 V1 budget
+  OK   U28NR16B16e4s2 :47 stagec_ckpt_id
+  OK   U28NR16B16e4s2 :49 raw run params git
+  OK   U28NR16B16e4s2 :260-265 b*->V1 block
+  OK   U28NR16B16e4s2 :74 table A V1 row, :73 b*, :76 genie
+  OK   U28NR16B16e4s3 :32 = R3-bigamp N_train=0 (record cites :29-36 as N_train=160000 lines)
+  OK   U28NR16B16e4s3 :29-31,33-36,41 N_train=160000
+  OK   U28NR16B16e4s3 :38 V1 budget
+  OK   U28NR16B16e4s3 :47 stagec_ckpt_id
+  OK   U28NR16B16e4s3 :49 raw run params git
+  OK   U28NR16B16e4s3 :260-265 b*->V1 block
+  OK   U28NR16B16e4s3 :74 table A V1 row, :73 b*, :76 genie
+  OK   U28NR32B16e4s2 :32 = R3-bigamp N_train=0 (record cites :29-36 as N_train=160000 lines)
+  OK   U28NR32B16e4s2 :29-31,33-36,41 N_train=160000
+  OK   U28NR32B16e4s2 :38 V1 budget
+  OK   U28NR32B16e4s2 :47 stagec_ckpt_id
+  OK   U28NR32B16e4s2 :49 raw run params git
+  OK   U28NR32B16e4s2 :260-265 b*->V1 block
+  OK   U28NR32B16e4s2 :74 table A V1 row, :73 b*, :76 genie
+  OK   U28NR32B16e4s3 :32 = R3-bigamp N_train=0 (record cites :29-36 as N_train=160000 lines)
+  OK   U28NR32B16e4s3 :29-31,33-36,41 N_train=160000
+  OK   U28NR32B16e4s3 :38 V1 budget
+  OK   U28NR32B16e4s3 :47 stagec_ckpt_id
+  OK   U28NR32B16e4s3 :49 raw run params git
+  OK   U28NR32B16e4s3 :260-265 b*->V1 block
+  OK   U28NR32B16e4s3 :74 table A V1 row, :73 b*, :76 genie
+  OK   NR32B16e4s2 :32 = R3-bigamp N_train=0 (record cites :29-36 as N_train=160000 lines)
+  OK   NR32B16e4s2 :29-31,33-36,41 N_train=160000
+  OK   NR32B16e4s2 :38 V1 budget
+  OK   NR32B16e4s2 :47 stagec_ckpt_id
+  OK   NR32B16e4s2 :49 raw run params git
+  OK   NR32B16e4s2 :257-262 b*->V1 block
+  OK   NR32B16e4s2 :71 table A V1 row, :70 b*, :73 genie
+  OK   NR32B16e4s3 :32 = R3-bigamp N_train=0 (record cites :29-36 as N_train=160000 lines)
+  OK   NR32B16e4s3 :29-31,33-36,41 N_train=160000
+  OK   NR32B16e4s3 :38 V1 budget
+  OK   NR32B16e4s3 :47 stagec_ckpt_id
+  OK   NR32B16e4s3 :49 raw run params git
+  OK   NR32B16e4s3 :257-262 b*->V1 block
+  OK   NR32B16e4s3 :71 table A V1 row, :70 b*, :73 genie
+  OK   a1 U28NR16B16e4 :38 N_train=28160000 (same display as seed tags)
+  OK   a1 U28NR32B16e4 :38 N_train=28160000 (same display as seed tags)
+  OK   SEEDS16e4 tab_U28B16e4s2:38 N_train=28160000
+== EXPERIMENTS row / DECISIONS line
+  OK   EXPERIMENTS :59 has 8 columns
+  OK   EXPERIMENTS :59 KST range = CDT + 14 h
+  OK   EXPERIMENTS :59 contains 'ok=47 fail=0'
+  OK   EXPERIMENTS :59 contains 'ok=51 fail=0'
+  OK   EXPERIMENTS :59 contains '230:54 · 238:47'
+  OK   EXPERIMENTS :59 contains '403:35 · 398:27'
+  OK   EXPERIMENTS :59 contains '909:22 · 899:31'
+  OK   EXPERIMENTS :59 contains '0.269 / 0.292 (a1 0.287)'
+  OK   EXPERIMENTS :59 contains '0.443 / 0.446 (a1 0.432)'
+  OK   EXPERIMENTS :59 contains '0.813 / 0.796 (a1 0.811)'
+  OK   EXPERIMENTS :59 contains '+0.256·+0.239'
+  OK   EXPERIMENTS :59 contains '+0.243·+0.247'
+  OK   EXPERIMENTS :59 contains '+0.064·+0.085'
+  OK   EXPERIMENTS :59 contains 'd59b4c6c'
+  OK   EXPERIMENTS :59 contains 'b53a8529'
+  OK   EXPERIMENTS :59 contains 'cd85bef1'
+  OK   EXPERIMENTS :59 contains '적중 10·빗나감 2'
+  OK   EXPERIMENTS :59 contains '18 h 31 min'
+  OK   EXPERIMENTS :59 contains '5 h 17 min'
+  OK   EXPERIMENTS :59 contains 'jobs 98'
+  OK   DECISIONS :315 KST/CDT
+  OK   DECISIONS :315 contains '10-03 23:03 ~ 10-04 17:34 CDT'
+  OK   DECISIONS :315 contains '17:36 ~ 22:53 CDT'
+  OK   DECISIONS :315 contains 'ok=47 fail=0'
+  OK   DECISIONS :315 contains 'ok=51 fail=0'
+  OK   DECISIONS :315 contains '1 묶음 6 개 d59b4c6c, 2 묶음 2 개 b53a8529'
+  OK   DECISIONS :315 contains 'jobs 99 (UMi28 C9)·98 (D2 C9)'
+  OK   DECISIONS :315 contains '시드 강건 (3/3 (i); a3 = §3d fb2)'
+  OK   DECISIONS :315 contains '판정하지 못함 (2/3 (i), 1 판정 못함)'
+  OK   DECISIONS :315 contains '적중 10·빗나감 2 (3: 문자열 한정어, 9)'
+  OK   DECISIONS :315 contains '14 회 — 동결 전 10·뒤 4, 설계 서브에이전트 1 회'
+  OK   DECISIONS :314 blank, :313 = freeze line
+== mtimes (KST) of the three edited files vs recorded 13:09 KST
+  OK   mtime NEXT_EXPERIMENTS_SEEDSNR16e4.md = 2026-10-05 13:09 KST -- 2026-10-05 13:09
+  OK   mtime EXPERIMENTS.md = 2026-10-05 13:09 KST -- 2026-10-05 13:09
+  OK   mtime DECISIONS.md = 2026-10-05 13:09 KST -- 2026-10-05 13:09
+TOTAL 99 checks, failures 0

@@ -1,0 +1,97 @@
+# conf/results/diag/jacpsd-counterfactual_SUMMARY.txt
+# DIAGNOSTIC ONLY -- nothing retrained, no hyperparameter of any pre-registered arm touched, no gate
+# threshold changed, no pre-registered file written.  Checkpoint fixed: ckpt/d2sx_N10000_a1.pt.
+# date 2026-09-21 KST | D2 cell C2 (8x4, T=16, Tp=4), prior S2, 16 outer iterations, beta=0.7, b*=kron.
+# ADVERSARIAL REVIEW of the claim "the learned denoiser's Jacobian is not a valid covariance, so the
+# D-14 site is a mismatched (precision, mean) pair and the loop diverges".  Verdict: CONFIRMED (CAUSAL),
+# with two corrections to the claimant's supporting argument (marked [C1], [C2] below).
+#
+# code: conf/code/diag_psd_cf.py (receiver-level do()-interventions), conf/code/diag_psd_align.py
+#       (independent site-level re-derivation).  log: conf/logs/jacpsd_counterfactual_D2.log
+
+================================================================================================
+1. INDEPENDENT RE-DERIVATION (diag_psd_align.py, grid k=6 nu=1.6932e-2, n=128, seed 987654321 --
+   an INDEPENDENT sample stream, not the claimant's score.SEED_GATE)
+================================================================================================
+model                  frac lmin(Herm J)<0   med lmin   med |lmin|   med cond   as-is site shift (med)
+diffusion                            1.000  -6.558e-02    2.882e-03   3.909e+02              1.857e+00
+GMM-exact(kron,K=512)                0.000  +9.941e-02    9.941e-02   1.659e+01              8.969e-10
+  -> reproduces the claimant's k=6 numbers (they reported shift median 1.87 at n=256).  The Jacobian
+     defect is real and is not an artifact of their sample stream.
+
+================================================================================================
+2. RECEIVER-LEVEL do()-INTERVENTIONS  (diag_psd_cf.py, n=64 paired trials/point, 16 iterations)
+   Only the Wirtinger Jacobian handed to _matrix_site (D-14) is altered.  prior.denoise -- the D-13
+   belief scalarisation alphaH = tr(J)/N -- is delegated UNTOUCHED, so D-13 is held fixed throughout.
+================================================================================================
+                                                       BLER@16 (+-95%)         NMSE_H med@16    frac NMSE>1
+arm                intervention on Herm(J)              0 dB        6 dB       0 dB    6 dB     0 dB   6 dB
+dscore|eta         none (== pre-registered M-ours-dscore) 0.922(.066) 0.719(.110) 1.3284 1.1825  0.531 0.547
+dscore|psd1e-2     eig clipped into [1e-2, 1]            0.031(.043) 0.000(.000) 0.0241 0.0080  0.000 0.000
+dscore|mean        none; clip='mean' instead of 'eta'    0.047(.052) 0.000(.000) 0.0241 0.0080  0.000 0.000
+dscore|abs1e-2     |eig| floored at 1e-2, SIGN KEPT      0.922(.066) 0.578(.121) 0.5596 0.5397  0.375 0.281
+dscore|belsc       D-14 site removed entirely            0.047(.052) 0.016(.030) 0.0241 0.0083  0.000 0.000
+gmmB|eta           none (exact GMM through score wiring) 0.109(.076) 0.031(.043) 0.0519 0.0160  0.000 0.000
+gmmB|flip4         sign of 4 smallest |eig| flipped      0.141(.085) 0.016(.030) 0.0680 0.0230  0.000 0.000
+gmmB|tiny4         4 smallest |eig| set to +1e-4 (PD)    0.109(.076) 0.031(.043) 0.0526 0.0160  0.000 0.000
+gmmB|epsite        none (== pre-registered M-ours-bstar) 0.125(.081) 0.016(.030) 0.0533 0.0159  0.000 0.000
+gauss|sitesc       none (== pre-registered R2-ours-G)    0.078(.066) 0.016(.030) 0.0668 0.0182  0.000 0.000
+  fraction of J's that were indefinite BEFORE the intervention (JFix counter):
+    dscore|psd1e-2  94.8% (0 dB) / 98.6% (6 dB)      dscore|abs1e-2  69.2% / 97.0%
+
+READING:
+ (a) REMOVE the negative eigenvalues -> the collapse disappears.  0.922 -> 0.031 at 0 dB and
+     0.719 -> 0.000 at 6 dB, NMSE 1.33 -> 0.024 and 1.18 -> 0.008.  The repaired arm is then the BEST
+     arm in the table, beating M-ours-bstar (0.125/0.016) and R2-ours-G (0.078/0.016).  The learned
+     denoiser's MEAN was never the problem.
+ (b) KEEP the negative eigenvalues but remove the near-singularity (abs1e-2) -> NO recovery at all
+     (0.922 at 0 dB, identical to the untouched arm).  So ill-conditioning of SigH is NOT the cause.
+ (c) INJECT near-singularity into the working GMM arm while keeping it PD (tiny4, eig -> +1e-4) ->
+     NO damage whatever (0.109 -> 0.109 / 0.031 -> 0.031).  Confirms (b) from the other side.
+ (d) Repairing ONLY the (precision, mean) mismatch the claim names -- clip='mean', which recomputes
+     eta from the floored Lam so the site's belief mean is hH again -- also fully recovers
+     (0.047 / 0.000).  This is the claimed mechanism isolated on its own.
+ (e) The mechanism is SPECIFIC to the learned prior: the exact GMM denoiser pushed through the SAME
+     score wiring (gmmB|eta) is healthy, because its Jacobian is PSD to machine precision.
+
+================================================================================================
+3. TWO CORRECTIONS TO THE CLAIMANT'S SUPPORTING ARGUMENT (the verdict survives both)
+================================================================================================
+[C1] "non-symmetric, indefinite" -- only INDEFINITENESS is causal.  ScorePrior._eval Hermitian-
+     symmetrises J before the receiver sees it, and every intervention above operates on the already-
+     symmetrised Herm(J); asymmetry (herm_res 0.195) is a symptom of the same non-conservative score
+     field, not a link in the causal chain.  Likewise the claimant's split table attributes the blow-up
+     to "the NEGATIVE eigenvalue" while their two groups differ in BOTH sign and conditioning
+     (|lmin| 2.9e-3 for the diffusion vs 9.9e-2 for the GMM).  abs1e-2 / tiny4 separate the two and
+     show the sign is the whole story; the magnitude only sets the GAIN (damage ~ 1/|eig|), which is
+     why injecting the sign at the GMM's own eigenvalue magnitude (flip4, |eig| 33x larger) produces
+     only a mild 0.109 -> 0.141 and does not reproduce the collapse.
+[C2] the receiver-side "mean relative belief-mean shift" (their 4.3e3 - 1.1e5 table) is a MARKER of
+     the defect, not a dose.  RouteAClip records shift from the PRE-recompute eta regardless of clip
+     mode (Demo/t2_gmm.py:120 precedes line 121), so dscore|mean records shift 1.146e+03 at 0 dB --
+     the same order as the pre-registered arm -- while achieving BLER 0.047.  Their "shift peaks at
+     6 dB, NMSE peaks at 6 dB" correspondence is therefore weaker evidence than they presented, and
+     their own table already breaks it (shift is MINIMUM at 12 dB, 1.61e3, where BLER is still 0.523).
+
+================================================================================================
+4. THE SNR SHAPE IS PRODUCED BY THE MECHANISM (the task's "non-monotonic" objection dissolves)
+================================================================================================
+Damage measured like-for-like against the same receiver's own pilot trajectory (pre-registered raw,
+640 trials/SNR) is MONOTONE in SNR; the non-monotonic ABSOLUTE BLER is saturation near 0.9, not a
+second phenomenon:
+   SNR      -3      0      3      6      9     12     15
+   BLER dscore@16   0.805  0.898  0.883  0.795  0.686  0.523  0.312
+   / pilot_C@16       1.7    6.1   17.7   26.8   54.9   47.9   66.7
+   / M-ours-bstar     3.1    9.7   33.2   63.6  109.7   55.8  100.0
+This tracks the nu-dependence of the defect on the frozen grid (results/diag/jacobian-psd_D2.npz):
+frac lmin(Herm J)<0 is 0.17-0.44 for nu >= 3.6e-1 (the large-nu regime the receiver sits in at -3 dB,
+where BLER@1 0.725 is indistinguishable from pilot 0.747) and 0.86-1.00 for nu in [2.2e-3, 9.3e-2],
+the band the receiver falls into as SNR rises, where site shift_med is 1.8-4.1.
+
+================================================================================================
+5. PRE-REGISTERED CORROBORATION (no new measurement)
+================================================================================================
+Gate GD -- the relative Frobenius error of the FULL Wirtinger matrix J, frozen before any BLER was
+seen -- is the gate this checkpoint family FAILED on D1 (0.27-0.32 vs tol 0.20) where the true score
+is known.  The pre-registered gate that failed is exactly the Jacobian gate.  GB'/Hyvarinen measure the
+score VALUE (first order) and pass handsomely; they say nothing about its derivative.  Consistent.

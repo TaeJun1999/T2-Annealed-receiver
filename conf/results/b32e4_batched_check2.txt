@@ -1,0 +1,10 @@
+# date        : 2026-09-25 04:40:54 KST
+# git commit  : c470e6d4
+# versions    : python 3.12.14  numpy 2.5.2  scipy 1.18.1  torch 2.14.0+cu130 (cuda_available=True)
+# device      : CPU (192 cores) | dtype: complex128 / float64 | deterministic: yes (fixed seeds, no GPU in the receiver)
+# testbed     : D2
+# seed rule   : default_rng([20260926, TBID[testbed], PID[prior], Nr, T, Tp, int(snr)+100])  (trials of a point = ONE stream)
+# code        : rate-1/2 conv (133,171)_8 nu=6 terminated, QPSK, outer iterations = 16 for EVERY arm
+# Demo/ hashes: t2_route_a.py=95a5408901ec125c  t2_trellis.py=31cd0ee9c68e972b  t2_gmm.py=d064e58c7510c769
+# content     : em_batched_check2 -- FINAL-iterate exact vs batched kron M-step, N'=3.2e5, K=1024, 4 iterations
+exact 481 s, batched 14 s; max|dll_t| 5.68e-14, max rel dcov 1.10e-12, max|dpi| 8.72e-16, reseeds 0/0 -> PASS

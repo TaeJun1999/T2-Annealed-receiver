@@ -1,0 +1,68 @@
+# date        : 2026-09-23 07:57:18 KST
+# git commit  : 274cb6fe
+# versions    : python 3.12.14  numpy 2.5.2  scipy 1.18.1  torch 2.14.0+cu130 (cuda_available=True)
+# device      : CPU (192 cores) | dtype: complex128 / float64 | deterministic: yes (fixed seeds, no GPU in the receiver)
+# testbed     : D2
+# seed rule   : default_rng([20260926, TBID[testbed], PID[prior], Nr, T, Tp, int(snr)+100])  (trials of a point = ONE stream)
+# code        : rate-1/2 conv (133,171)_8 nu=6 terminated, QPSK, outer iterations = 16 for EVERY arm
+# Demo/ hashes: t2_route_a.py=95a5408901ec125c  t2_trellis.py=31cd0ee9c68e972b  t2_gmm.py=d064e58c7510c769
+# content     : NEXT_EXPERIMENTS v3 §2.2 / §2.3 / §2.4, HELD-OUT AWGN halves (P1-2, P1-3, P1-4). P1-x diagnostic, NOT a gate
+# script      : conf/code/diag_p1_heldout.py sha256[:16]=f15895c52d552ff2
+# this script : network Jacobians + GMM control on cuda (NVIDIA RTX PRO 6000 Blackwell Server Edition), CUDA_VISIBLE_DEVICES=3, float64/complex128; the receiver is NOT run
+# ckpt        : /home/HTJ/t2/conf/ckpt/d2sx_N160000_a1.pt
+# ckpt id     : sha256[:16]=4443921ce8d5c4a1 epoch=1784 best_epoch=1764 role=legacy-last 8x4 | BEST_WEIGHTS_UNAVAILABLE: evaluated = last-epoch EMA, reported best_val belongs to best_epoch
+# GMM b*      : tag B16e4k, fits /home/HTJ/t2/conf/results/gmm_fits_D2_B16e4k, N_train 160000, bstar=kron -> kron K=1024
+# queries     : h = gen.sample_vecs(C.train_rng('D2','S2',8,10), n)  noise E ~ default_rng(score.SEED_GATE=20260929) (shared over k)
+# n           : n_calib = 32 (§2.2, §2.4)   n_phase = 32 (§2.3, first n_phase of the same queries)   ** SMOKE **   ** NOT the registered n/grid/ckpt: no verdict **
+# grid        : frozen D2 (sigma_grid_D2.npz), ks = [0, 10, 19]; tiers low k0-6 / mid k7-14 / high k15-19
+# registered  : floor = C.LAM_MIN = 1e-06, unfloored subspace = eig > 10*floor; phi = 2 pi k'/8; bands rho (0.8, 1.25) cov90 (0.85, 0.95); H2 >= 14/20 satisfying; C-calib >= 7/20 violating; C-phase >= 0.1
+# seeds       : h = C.train_rng stream 10 (above); noise E and the toy S each from a fresh default_rng(SEED_GATE); no other randomness
+# toy check: nu*J vs Cov 4.83e-16, nu*K vs P 4.15e-14, r_P 2.76e-15 (tol 1e-12) PASS
+# checks  : GMM GPU vs CPU denoise_full 1.73e-12; GMM closed-form vs ExactGMMTorch autodiff J 9.11e-13 K(pseudo, /||Cov||) 9.16e-13 (tol 1e-10); V1 eigen-floor vs score.project_psd 2.56e-15 (tol 1e-12); first 4 samples per point
+
+## §2.2 calibration (held-out).  V1 = nu*project_psd(J); rho_sub/d2/cov on the unfloored subspace (identical for V0 and V1); cov50/90 = nominal coverage, proper-CN reference
+ k   sigma |   rhoV1   rhoV0 rho_sub  d2/dim  cov50  cov90  slope  fhit  n<fl nexcl  flErr  flEig | V0psd c90psd | H2 | GMM    rho rho_sub d2/dim  cov50  cov90  slope |   nmseN   nmseG
+ 0  0.0331 |   0.859   0.861   0.856   0.797  0.719  0.938  1.127  0.81   1.8   1.8  0.004  0.002 |  0.19  0.833 |  Y |      0.993   0.993  0.938  0.531  0.812  0.769 |  0.0008  0.0018
+10  0.1820 |   0.891   0.898   0.885   0.688  0.781  0.938  1.050  0.94   4.7   4.7  0.007  0.008 |  0.06  1.000 |  Y |      1.058   1.058  1.013  0.438  0.562  0.552 |  0.0212  0.0453
+19  0.8452 |   0.926   0.926   0.926   0.826  0.719  0.844  1.015  0.03   0.1   0.1  0.000  0.000 |  0.97  0.839 |  n |      0.920   0.920  0.830  0.750  0.844  1.060 |  0.3635  0.4481
+
+## §2.3 global-phase equivariance (held-out).  eps/epsJ pooled over k'=1..7; ratio = eps_phi/delta, delta = ||D(q)-h||/||h||; eps0 = k'=0 re-evaluation (numerical floor)
+ k   sigma |   eps_med   eps_max  epsJ_med  epsJ_max delta_med RATIO_med r(k0incl) r_of_meds  eps0_max | GMM   eps_med   eps_max  epsJ_max ratio_med
+ 0  0.0331 | 8.186e-03 1.299e-02 1.133e-01 1.555e-01 2.746e-02    0.2978    0.2854    0.2982  0.00e+00 |      4.07e-16  7.72e-16  2.87e-12  9.24e-15
+10  0.1820 | 2.325e-02 3.658e-02 1.691e-01 3.118e-01 1.386e-01    0.1628    0.1573    0.1677  0.00e+00 |      3.91e-16  7.41e-16  2.16e-13  1.89e-15
+19  0.8452 | 4.523e-02 8.723e-02 1.038e-01 1.768e-01 5.850e-01    0.0783    0.0734    0.0773  0.00e+00 |      4.31e-16  1.31e-15  1.31e-14  6.46e-16
+
+## §2.4 pseudo-covariance (held-out, REPORT-ONLY; H4 is judged at receiver iteration 4 on real queries)
+ k   sigma | rP_V1_med rP_V1_max rP_V0_med rP_V0_max rP_raw_med | GMM    rP_med    rP_max
+ 0  0.0331 |    0.3361    0.6473    0.3361    0.6473     0.3351 |        0.0193    0.1684
+10  0.1820 |    0.5187    0.9142    0.5187    0.9123     0.5158 |        0.1700    0.5260
+19  0.8452 |    0.4921    0.5703    0.4921    0.5703     0.4914 |        0.3103    0.4532
+
+## tiers (median over the tier's evaluated grid points of the per-point value; §2.3 rule applied to every row)
+quantity                             low k0-6  mid k7-14  high k15-19
+phase ratio (PRIMARY, k'=1..7)         0.2978     0.1628       0.0783
+phase ratio (k'=0..7 literal)          0.2854     0.1573       0.0734
+phase ratio-of-medians                 0.2982     0.1677       0.0773
+eps_phi median                         0.0082     0.0232       0.0452
+eps_J median                           0.1133     0.1691       0.1038
+GMM phase ratio                        0.0000     0.0000       0.0000
+V1 rho_sub                             0.8563     0.8848       0.9260
+V1 rho_full                            0.8593     0.8908       0.9260
+V0 rho_full                            0.8611     0.8981       0.9261
+V1 cov90                               0.9375     0.9375       0.8438
+V1 d2/dim median                       0.7969     0.6880       0.8257
+V1 floored error mass                  0.0036     0.0067       0.0000
+GMM rho_full                           0.9933     1.0581       0.9199
+GMM cov90                              0.8125     0.5625       0.8438
+r_P V1 median                          0.3361     0.5187       0.4921
+r_P V0 median                          0.3361     0.5187       0.4921
+GMM r_P median                         0.0193     0.1700       0.3103
+
+## rules
+C-phase (§2.6) / H3(a) (§1): tier ratios low 0.2978 mid 0.1628 high 0.0783; tiers >= 0.1: ['low', 'mid'] -> C-phase SATISFIED (A1)  [NOT A VERDICT: n/grid/ckpt differ from the registered run]
+   (alternative readings: k'=0..7 literal -> SATISFIED, ratio-of-medians -> SATISFIED; reading-robust)
+H2 (§1) / C-calib (§2.6): V1 grid points with rho_sub in [0.8, 1.25] AND cov90 in [0.85, 0.95]: 2/3 (low 1, mid 1, high 0); violating 1. H2 rejected iff >= 14/20 satisfy; C-calib satisfied iff >= 7/20 violate -> undetermined  [NOT A VERDICT: n/grid/ckpt differ from the registered run]
+   (alternative reading, full-space rho_tr instead of rho_sub: 2/3 satisfy -> undetermined; reading-robust)
+H4 / C-pseudo: NOT decided here (registered on r_P at receiver iteration 4, real queries). Held-out r_P above is report-only.
+
+# wall 5 s

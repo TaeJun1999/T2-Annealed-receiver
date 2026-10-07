@@ -1,0 +1,46 @@
+# audit ps snapshot 2026-09-30 20:41:45 CDT (= 10:41:45 KST); ps -eo pid,lstart,etime,time,pcpu,args --sort=lstart | grep -vE 'ps -eo|grep|awk|sort' | grep -E 'fit_gpu|sparse_tune|gpu_sched|edge_rule|batched_prefix|runner.py|pair_baselines|claude$|bun |chroma-mcp|node ' 
+   1668 화  9월 29 12:42:57 2026 1-21:58:47 00:04:41 0.1 /home/HTJ/.bun/bin/bun /home/HTJ/.claude/plugins/cache/thedotmack/claude-mem/13.25.1/scripts/worker-service.cjs --daemon
+   2020 화  9월 29 12:43:01 2026 1-21:58:43 00:00:00 0.0 /home/HTJ/miniforge3/bin/uv tool uvx --python 3.13 --with onnxruntime>=1.20 --with protobuf<7 --from chroma-mcp==0.2.6 chroma-mcp --client-ty
+   2032 화  9월 29 12:43:01 2026 1-21:58:43 06:19:25 13.7 /home/HTJ/.cache/uv/archive-v0/GLlMhE22IBGyh5wa/bin/python /home/HTJ/.cache/uv/archive-v0/GLlMhE22IBGyh5wa/bin/chroma-mcp --client-type pers
+   3414 화  9월 29 12:43:15 2026 1-21:58:29 01:50:51 4.0 claude
+   3581 화  9월 29 12:43:17 2026 1-21:58:27 00:00:02 0.0 /home/HTJ/miniforge3/bin/node /home/HTJ/.claude/plugins/cache/thedotmack/claude-mem/13.25.1/scripts/mcp-server.cjs
+ 449328 목 10월  1 00:43:20 2026  09:58:24 00:00:01  0.0 bash code/gpu_sched.sh
+ 449331 목 10월  1 00:43:20 2026  09:58:24 00:00:00  0.0 bash code/edge_rule.sh
+ 468488 목 10월  1 01:13:52 2026  09:27:52 00:00:00  0.0 bash -c cd /home/HTJ/t2_wtS/conf; CUDA_VISIBLE_DEVICES=0 /home/HTJ/miniforge3/envs/torch/bin/python code/fit_gpu.py 32 kron 2048 160000 NR32B
+ 468491 목 10월  1 01:13:52 2026  09:27:52 09:16:06 97.9 /home/HTJ/miniforge3/envs/torch/bin/python code/fit_gpu.py 32 kron 2048 160000 NR32B16e4 --restart 0
+ 470445 목 10월  1 01:22:00 2026  09:19:44 00:00:00  0.0 bash -c cd /home/HTJ/t2_wtS/conf; CUDA_VISIBLE_DEVICES=4 /home/HTJ/miniforge3/envs/torch/bin/python code/fit_gpu.py 32 kron 2048 160000 NR32B
+ 470448 목 10월  1 01:22:00 2026  09:19:44 09:12:37 98.7 /home/HTJ/miniforge3/envs/torch/bin/python code/fit_gpu.py 32 kron 2048 160000 NR32B16e4 --restart 1
+ 472025 목 10월  1 01:33:13 2026  09:08:31 00:00:00  0.0 bash -c cd /home/HTJ/t2_wtS/conf; CUDA_VISIBLE_DEVICES=1 /home/HTJ/miniforge3/envs/torch/bin/python code/fit_gpu.py 32 kron 2048 160000 NR32B
+ 472028 목 10월  1 01:33:13 2026  09:08:31 09:03:55 99.1 /home/HTJ/miniforge3/envs/torch/bin/python code/fit_gpu.py 32 kron 2048 160000 NR32B16e4 --restart 2
+ 530477 목 10월  1 05:19:59 2026  05:21:45 00:01:19  0.4 bash logs/batched_prefix.sh
+ 548042 목 10월  1 06:03:20 2026  04:38:24 00:00:00  0.0 bash -c cd /home/HTJ/t2_wtS/conf; CUDA_VISIBLE_DEVICES=3 /home/HTJ/miniforge3/envs/torch/bin/python code/fit_gpu.py 32 kron 2048 160000 U28NR
+ 548045 목 10월  1 06:03:20 2026  04:38:24 04:30:15 97.0 /home/HTJ/miniforge3/envs/torch/bin/python code/fit_gpu.py 32 kron 2048 160000 U28NR32B16e4 --restart 0 --prior UMi28
+ 564556 목 10월  1 06:41:02 2026  04:00:41 00:00:00  0.0 bash -c cd /home/HTJ/t2_wtS/conf; CUDA_VISIBLE_DEVICES=2 /home/HTJ/miniforge3/envs/torch/bin/python code/fit_gpu.py 32 kron 2048 160000 U28NR
+ 564559 목 10월  1 06:41:02 2026  04:00:41 03:59:48 99.6 /home/HTJ/miniforge3/envs/torch/bin/python code/fit_gpu.py 32 kron 2048 160000 U28NR32B16e4 --restart 1 --prior UMi28
+ 570309 목 10월  1 06:51:09 2026  03:50:35 00:00:00  0.0 bash -c cd /home/HTJ/t2_wtS/conf; CUDA_VISIBLE_DEVICES=5 /home/HTJ/miniforge3/envs/torch/bin/python code/fit_gpu.py 32 kron 2048 160000 U28NR
+ 570311 목 10월  1 06:51:09 2026  03:50:35 03:49:32 99.5 /home/HTJ/miniforge3/envs/torch/bin/python code/fit_gpu.py 32 kron 2048 160000 U28NR32B16e4 --restart 2 --prior UMi28
+# tmux:
+bprefix: 1 windows (created Thu Oct  1 05:19:59 2026)
+dev: 5 windows (created Tue Sep 29 12:43:02 2026)
+edgerule: 1 windows (created Thu Oct  1 00:43:20 2026)
+gpusched: 1 windows (created Thu Oct  1 00:43:20 2026)
+job_g0: 1 windows (created Thu Oct  1 01:13:52 2026)
+job_g1: 1 windows (created Thu Oct  1 01:33:13 2026)
+job_g2: 1 windows (created Thu Oct  1 06:41:03 2026)
+job_g3: 1 windows (created Thu Oct  1 06:03:20 2026)
+job_g4: 1 windows (created Thu Oct  1 01:22:01 2026)
+job_g5: 1 windows (created Thu Oct  1 06:51:09 2026)
+# cwd of fit_gpu pids:
+468488 /home/HTJ/t2_wtS/conf
+468491 /home/HTJ/t2_wtS/conf
+470445 /home/HTJ/t2_wtS/conf
+470448 /home/HTJ/t2_wtS/conf
+472025 /home/HTJ/t2_wtS/conf
+472028 /home/HTJ/t2_wtS/conf
+548042 /home/HTJ/t2_wtS/conf
+548045 /home/HTJ/t2_wtS/conf
+564556 /home/HTJ/t2_wtS/conf
+564559 /home/HTJ/t2_wtS/conf
+570309 /home/HTJ/t2_wtS/conf
+570311 /home/HTJ/t2_wtS/conf
+762961 /home/HTJ/t2

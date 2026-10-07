@@ -1,0 +1,323 @@
+# recompute.py -- record audit 2026-09-26 (Fable 5.1); raw/ckpt/fits/csv/git only
+# git HEAD bb8ca540
+
+## 0. code identity: conf/code diff vs the freeze eee1d669 (empty = identical)
+  2b03df55: ''
+  07a8935a: ''
+  80bae849: ''
+  344d084c: ''
+  baa3c370: ''
+  4219fdfc: ''
+
+## 1. checkpoints sha256[:16]
+  d2sx_N160000_a1.pt: 4443921ce8d5c4a1
+  d2sx_S2c_N160000_a1_best.pt: 7ebf4e6647d4413f
+  d2sx_S2c_N160000_a1.pt: 9fc82e075a5eaf8f
+  d2sx_SV8e_N160000_a1_best.pt: d2d78962c2846364
+  d2sx_SV8e_N160000_a1.pt: c20ec3d6126b70b6
+  d2sx_UMi28_N160000_a1_best.pt: 6f3a1b9490864af1
+  d2sx_UMi28_N160000_a1.pt: 1fc8c7766507b823
+  d2sx_MIX3_N160000_a1_best.pt: b591ae24ae3c5f31
+  d2sx_MIX3_N160000_a1.pt: 10c3fb112c685d1b
+
+## 2. b* fit files (ll_val repr, n_iter, it_best, n_reseed, restart)
+  B16e4k kron K=1024: ('-11.459169831224418', 331, 290, 0, 1)
+  D3B16e4 kron K=4096: ('0.08879931165293979', 200, 190, 37827, 2)
+  SVB16e4 full K=256: ('-47.80545576704972', 301, 260, 0, 2)
+  U28B16e4 kron K=4096: ('5.797910431000217', 88, 80, 71589, 0)
+  MXB16e4 kron K=4096: ('33.7604873920761', 67, 60, 86904, 2)
+  B16e4k Nr8 em_sec sum over 13 files: 107957.18832826614
+
+## 3. GB' csv rows
+  S2c: 160000,1,160000,True,514,3.534156e-01,kron,4096,4096,0.486646,0.880254,0.558939,-0.119746
+  SV8e: 160000,1,160000,True,260,7.134662e-01,gmm256,256,4096,0.891997,0.968563,0.917691,-0.031437
+  UMi28: 160000,1,160000,True,399,5.533451e-01,kron,4096,4096,0.911994,2.370150,0.919938,1.370150
+  MIX3: 160000,1,160000,True,484,4.814744e-01,kron,4096,4096,0.879470,0.941047,0.894132,-0.058953
+  UMi28 per-sigma ratio max at sigma=0.5951: 2.3701; n>1 = 1; neighbours 0.9257 / 0.9409
+
+## 4. PARETO (PARB16e4 + B16e4k)
+  [PARB16e4] meta per point (n, bstar, kron_K, ll_val|bstar, ntrain, ckpt id, iters, em_sec):
+    576 files: ntrain=160000.0 bstar=kron kron_K=1024 ll_val=-11.459169831224418 ckpt='sha256[:16]=4443921ce8d5c4a1 epoch=1784 best_epoch=1764 role=legacy-la' iters=16 em_sec=107957.18832826614
+  [PARB16e4chk] meta per point (n, bstar, kron_K, ll_val|bstar, ntrain, ckpt id, iters, em_sec):
+    1 files: ntrain=160000.0 bstar=kron kron_K=1024 ll_val=-11.459169831224418 ckpt='sha256[:16]=4443921ce8d5c4a1 epoch=1784 best_epoch=1764 role=legacy-la' iters=16 em_sec=107957.18832826614
+  points in PARB16e4: [('C2', -6.0), ('C7', -9.0), ('C7', -6.0), ('C7', -3.0), ('C7', 0.0), ('C7', 3.0), ('C7', 6.0), ('C7', 9.0), ('C7', 12.0), ('C7', 15.0), ('C8', -9.0), ('C8', -6.0), ('C8', -3.0), ('C8', 0.0), ('C8', 3.0), ('C8', 6.0), ('C8', 9.0), ('C8', 12.0), ('C8', 15.0)]
+  C7 b*->V1: decision [-3.0, 0.0, 3.0] a:b [(195, 41, '3.3e-25'), (61, 10, '4.6e-10'), (31, 9, '0.00068')] pooled 287:60 p=1.2e-36 POWERED=True wx=0 wy=3 -> (i) second fewer
+  C7 b*->scalar: decision [-3.0, 0.0, 3.0] a:b [(57, 59, '0.93'), (17, 28, '0.14'), (13, 14, '1')] pooled 87:101 p=0.34 POWERED=True wx=0 wy=0 -> (iii) no direction
+  C7 paired gap b*-V1: +1.09 dB [90% +0.90, +1.28] censored 0%;  b*-scalar: -0.10 dB [90% -0.20, +0.02] censored 0%
+  C7 recovery (-3.0,): b*/V1/genie (420, 266, 97) R=0.477 [90% 0.417, 0.531] undefined 0
+  C7 recovery (-3.0, 0.0, 3.0): b*/V1/genie (586, 359, 144) R=0.514 [90% 0.461, 0.563] undefined 0
+  C7 SNR@0.1:
+    R2-ours-G            SNR@0.1  -0.89 (ok)
+    M-ours-gmm32         SNR@0.1  -1.37 (ok)
+    M-ours-bstar         SNR@0.1  -1.83 (ok)
+    M-ours-dscore-C-V0   SNR@0.1  15.00 (hi)
+    M-ours-dscore-C-V1   SNR@0.1  -2.92 (ok)
+    M-ours-dscore-C-V4   SNR@0.1  -2.92 (ok)
+    M-ours-dscore-C-V4b  SNR@0.1  -2.86 (ok)
+    M-ours-bstar-scalar  SNR@0.1  -1.73 (ok)
+    R5-genie             SNR@0.1  -4.84 (ok)
+  C7 BLER@16 (-9/-6/-3/0/+15):
+    R2-ours-G            0.987 / 0.700 / 0.231 / 0.070 / 0.006
+    M-ours-gmm32         0.976 / 0.638 / 0.192 / 0.058 / 0.004
+    M-ours-bstar         0.979 / 0.632 / 0.164 / 0.046 / 0.004
+    M-ours-dscore-C-V0   0.976 / 0.648 / 0.543 / 0.825 / 0.255
+    M-ours-dscore-C-V1   0.944 / 0.459 / 0.104 / 0.026 / 0.002
+    M-ours-dscore-C-V4   0.943 / 0.466 / 0.104 / 0.029 / 0.002
+    M-ours-dscore-C-V4b  0.943 / 0.475 / 0.106 / 0.029 / 0.002
+    M-ours-bstar-scalar  0.977 / 0.632 / 0.165 / 0.050 / 0.004
+    R5-genie             0.711 / 0.185 / 0.038 / 0.014 / 0.000
+  C7 V0 guard fire rate: -9:0.423 -6:0.394 -3:0.537 +0:0.839 +3:0.950 +6:0.949 +9:0.918 +12:0.839 +15:0.579
+  C8 b*->V1: decision [-6.0, -3.0, 0.0] a:b [(422, 68, '2e-63'), (142, 31, '3.5e-18'), (43, 14, '0.00015')] pooled 607:113 p=1.4e-82 POWERED=True wx=0 wy=3 -> (i) second fewer
+  C8 b*->scalar: decision [-6.0, -3.0, 0.0] a:b [(66, 65, '1'), (24, 52, '0.0018'), (12, 29, '0.012')] pooled 102:146 p=0.0062 POWERED=True wx=2 wy=0 -> (ii) first fewer
+  C8 paired gap b*-V1: +0.97 dB [90% +0.79, +1.14] censored 0%;  b*-scalar: -0.26 dB [90% -0.38, -0.15] censored 0%
+  C8 recovery (-3.0,): b*/V1/genie (302, 191, 88) R=0.519 [90% 0.445, 0.587] undefined 0
+  C8 recovery (-6.0, -3.0, 0.0): b*/V1/genie (1632, 1138, 485) R=0.431 [90% 0.402, 0.460] undefined 0
+  C8 SNR@0.1:
+    R2-ours-G            SNR@0.1  -1.59 (ok)
+    M-ours-gmm32         SNR@0.1  -2.14 (ok)
+    M-ours-bstar         SNR@0.1  -2.60 (ok)
+    M-ours-dscore-C-V0   SNR@0.1  15.00 (hi)
+    M-ours-dscore-C-V1   SNR@0.1  -3.57 (ok)
+    M-ours-dscore-C-V4   SNR@0.1  -3.55 (ok)
+    M-ours-dscore-C-V4b  SNR@0.1  -3.51 (ok)
+    M-ours-bstar-scalar  SNR@0.1  -2.34 (ok)
+    R5-genie             SNR@0.1  -5.26 (ok)
+  C8 BLER@16 (-9/-6/-3/0/+15):
+    R2-ours-G            0.952 / 0.558 / 0.162 / 0.058 / 0.004
+    M-ours-gmm32         0.935 / 0.505 / 0.140 / 0.043 / 0.002
+    M-ours-bstar         0.937 / 0.486 / 0.118 / 0.034 / 0.002
+    M-ours-dscore-C-V0   0.930 / 0.569 / 0.499 / 0.816 / 0.159
+    M-ours-dscore-C-V1   0.875 / 0.347 / 0.075 / 0.023 / 0.000
+    M-ours-dscore-C-V4   0.874 / 0.352 / 0.075 / 0.022 / 0.000
+    M-ours-dscore-C-V4b  0.878 / 0.354 / 0.077 / 0.020 / 0.000
+    M-ours-bstar-scalar  0.937 / 0.485 / 0.129 / 0.041 / 0.002
+    R5-genie             0.602 / 0.142 / 0.034 / 0.013 / 0.000
+  C8 V0 guard fire rate: -9:0.405 -6:0.353 -3:0.500 +0:0.841 +3:0.947 +6:0.952 +9:0.905 +12:0.810 +15:0.505
+  C2 merged points: [-6.0, -3.0, 0.0, 3.0, 6.0, 9.0, 12.0, 15.0]
+  C2 -6 dB BLER@16:
+    R2-ours-G            0.840
+    M-ours-gmm32         0.795
+    M-ours-bstar         0.773
+    M-ours-dscore-C-V0   0.782
+    M-ours-dscore-C-V1   0.599
+    M-ours-dscore-C-V4   0.607
+    M-ours-dscore-C-V4b  0.611
+    M-ours-bstar-scalar  0.782
+    R5-genie             0.203
+  C2 (8 pts) SNR@0.1:
+    R2-ours-G            SNR@0.1   0.06 (ok)
+    M-ours-gmm32         SNR@0.1  -0.47 (ok)
+    M-ours-bstar         SNR@0.1  -0.81 (ok)
+    M-ours-dscore-C-V0   SNR@0.1  15.00 (hi)
+    M-ours-dscore-C-V1   SNR@0.1  -2.23 (ok)
+    M-ours-dscore-C-V4   SNR@0.1  -2.08 (ok)
+    M-ours-dscore-C-V4b  SNR@0.1  -1.98 (ok)
+    M-ours-bstar-scalar  SNR@0.1  -0.64 (ok)
+    R5-genie             SNR@0.1  -4.81 (ok)
+  pair V1_C2 vs bstar_C7: V1_C2 SNR@0.1 -2.23 (ok) [90% -2.38, -2.07] | bstar_C7 SNR@0.1 -1.83 (ok) [90% -2.00, -1.65] | Delta -0.40 dB [90% -0.64, -0.17] [95% -0.67, -0.13] p=0.0040 censored 0.0%
+  pair bstar_C2 vs bstar_C7: bstar_C2 SNR@0.1 -0.81 (ok) [90% -1.02, -0.58] | bstar_C7 SNR@0.1 -1.83 (ok) [90% -2.00, -1.65] | Delta +1.02 dB [90% +0.74, +1.31] [95% +0.69, +1.36] p=0.0000 censored 0.0%
+  pair V1_C2 vs bstar_C8: V1_C2 SNR@0.1 -2.23 (ok) [90% -2.38, -2.07] | bstar_C8 SNR@0.1 -2.60 (ok) [90% -2.81, -2.42] | Delta +0.38 dB [90% +0.14, +0.63] [95% +0.09, +0.69] p=0.0070 censored 0.0%
+  pair bstar_C2 vs bstar_C8: bstar_C2 SNR@0.1 -0.81 (ok) [90% -1.02, -0.58] | bstar_C8 SNR@0.1 -2.60 (ok) [90% -2.81, -2.42] | Delta +1.79 dB [90% +1.51, +2.10] [95% +1.46, +2.17] p=0.0000 censored 0.0%
+  pair V1_C2 vs V1_C7: V1_C2 SNR@0.1 -2.23 (ok) [90% -2.38, -2.07] | V1_C7 SNR@0.1 -2.92 (ok) [90% -3.11, -2.74] | Delta +0.69 dB [90% +0.44, +0.94] [95% +0.41, +0.99] p=0.0000 censored 0.0%
+  pair V1_C2 vs V1_C8: V1_C2 SNR@0.1 -2.23 (ok) [90% -2.38, -2.07] | V1_C8 SNR@0.1 -3.57 (ok) [90% -3.75, -3.39] | Delta +1.34 dB [90% +1.11, +1.57] [95% +1.06, +1.62] p=0.0000 censored 0.0%
+  pair genie_C2 vs genie_C7: genie_C2 SNR@0.1 -4.81 (ok) [90% -4.95, -4.68] | genie_C7 SNR@0.1 -4.84 (ok) [90% -4.97, -4.69] | Delta +0.02 dB [90% -0.17, +0.22] [95% -0.21, +0.25] p=0.8660 censored 0.0%
+  pair genie_C2 vs genie_C8: genie_C2 SNR@0.1 -4.81 (ok) [90% -4.95, -4.68] | genie_C8 SNR@0.1 -5.26 (ok) [90% -5.42, -5.10] | Delta +0.45 dB [90% +0.24, +0.66] [95% +0.20, +0.69] p=0.0000 censored 0.0%
+  regression check PARB16e4chk vs raw_B16e4k C2 -3 trials 0..39: arms in chk 16, differing []
+  !! load_raw warning B1e4lo:   NOTE ('C5', 'S2', -9.0) M-ours-dscore-C-V0: 12/2560 blocks carry a non-finite blk_err@16 (the arm raised) -> KEPT and counted as block errors, never dropped
+  !! load_raw warning B1e4lo:   NOTE ('C5', 'S2', -9.0) M-ours-dscore-C-V1: 13/2560 blocks carry a non-finite blk_err@16 (the arm raised) -> KEPT and counted as block errors, never dropped
+  !! load_raw warning B1e4lo:   NOTE ('C5', 'S2', -9.0) M-ours-dscore-C-V4: 38/2560 blocks carry a non-finite blk_err@16 (the arm raised) -> KEPT and counted as block errors, never dropped
+  !! load_raw warning B1e4lo:   NOTE ('C5', 'S2', -7.0) M-ours-dscore-C-V0: 32/2560 blocks carry a non-finite blk_err@16 (the arm raised) -> KEPT and counted as block errors, never dropped
+  !! load_raw warning B1e4lo:   NOTE ('C5', 'S2', -7.0) M-ours-dscore-C-V1: 11/2560 blocks carry a non-finite blk_err@16 (the arm raised) -> KEPT and counted as block errors, never dropped
+  !! load_raw warning B1e4lo:   NOTE ('C5', 'S2', -7.0) M-ours-dscore-C-V4: 14/2560 blocks carry a non-finite blk_err@16 (the arm raised) -> KEPT and counted as block errors, never dropped
+  !! load_raw warning B1e4lo:   NOTE ('C5', 'S2', -6.0) M-ours-dscore-C-V0: 30/2560 blocks carry a non-finite blk_err@16 (the arm raised) -> KEPT and counted as block errors, never dropped
+  !! load_raw warning B1e4lo:   NOTE ('C5', 'S2', -6.0) M-ours-dscore-C-V1: 5/2560 blocks carry a non-finite blk_err@16 (the arm raised) -> KEPT and counted as block errors, never dropped
+  !! load_raw warning B1e4lo:   NOTE ('C5', 'S2', -6.0) M-ours-dscore-C-V4: 6/2560 blocks carry a non-finite blk_err@16 (the arm raised) -> KEPT and counted as block errors, never dropped
+  C2 -6 genie blk_err/ber/tauL_gmean/alphaD identical to B1e4lo: True
+
+## 5. D3B16e4 (S2c)
+  [D3B16e4] meta per point (n, bstar, kron_K, ll_val|bstar, ntrain, ckpt id, iters, em_sec):
+    448 files: ntrain=160000.0 bstar=kron kron_K=4096 ll_val=0.08879931165293979 ckpt='sha256[:16]=7ebf4e6647d4413f epoch=494 best_epoch=494 role=best 8x4' iters=16 em_sec=15862.749816656113
+  [D3B16e4last] meta per point (n, bstar, kron_K, ll_val|bstar, ntrain, ckpt id, iters, em_sec):
+    448 files: ntrain=160000.0 bstar=kron kron_K=4096 ll_val=0.08879931165293979 ckpt='sha256[:16]=9fc82e075a5eaf8f epoch=514 best_epoch=494 role=last 8x4 | ' iters=16 em_sec=15862.749816656113
+  best b*->V1: decision [0.0, 3.0, 6.0] a:b [(221, 39, '4.9e-32'), (116, 19, '3.6e-18'), (56, 9, '2e-09')] pooled 393:67 p=3.6e-57 POWERED=True wx=0 wy=3 -> (i) second fewer
+  best b*->scalar: decision [0.0, 3.0, 6.0] a:b [(50, 67, '0.14'), (43, 46, '0.83'), (20, 32, '0.13')] pooled 113:145 p=0.053 POWERED=True wx=0 wy=0 -> (iii) no direction
+  best R2->b*: decision [0.0, 3.0, 6.0] a:b [(229, 66, '3.1e-22'), (126, 48, '2.9e-09'), (100, 12, '1.9e-18')] pooled 455:126 p=1.2e-44 POWERED=True wx=0 wy=3 -> (i) second fewer
+  best paired gap b*-V1: +1.41 dB [90% +1.19, +1.67] censored 0%;  b*-scalar: -0.05 dB [90% -0.24, +0.15] censored 0%;  R2-b*: +1.61 dB [90% +1.16, +2.06] censored 0%
+  best recovery (-3.0,): b*/V1/genie (1298, 1000, 485) R=0.367 [90% 0.335, 0.399] undefined 0
+  best recovery (0.0, 3.0, 6.0): b*/V1/genie (923, 597, 231) R=0.471 [90% 0.433, 0.508] undefined 0
+  best dR(-3 dB) vs D2: -0.104 [90% -0.156, -0.049] undefined 0
+  best dR(decision (0.0, 3.0, 6.0)) vs D2(-3,0,3): -0.038 [90% -0.089, +0.016] undefined 0
+  best anchor b* BLER@16 -3 dB = 0.507 (saturation guard band [0.005, 0.9])
+  last b*->V1: decision [0.0, 3.0, 6.0] a:b [(226, 36, '7.9e-35'), (119, 21, '8.2e-18'), (55, 13, '2.7e-07')] pooled 400:70 p=3.3e-57 POWERED=True wx=0 wy=3 -> (i) second fewer
+  last b*->scalar: decision [0.0, 3.0, 6.0] a:b [(50, 67, '0.14'), (43, 46, '0.83'), (20, 32, '0.13')] pooled 113:145 p=0.053 POWERED=True wx=0 wy=0 -> (iii) no direction
+  last R2->b*: decision [0.0, 3.0, 6.0] a:b [(229, 66, '3.1e-22'), (126, 48, '2.9e-09'), (100, 12, '1.9e-18')] pooled 455:126 p=1.2e-44 POWERED=True wx=0 wy=3 -> (i) second fewer
+  last paired gap b*-V1: +1.45 dB [90% +1.22, +1.72] censored 0%;  b*-scalar: -0.05 dB [90% -0.24, +0.15] censored 0%;  R2-b*: +1.61 dB [90% +1.16, +2.06] censored 0%
+  last recovery (-3.0,): b*/V1/genie (1298, 1000, 485) R=0.367 [90% 0.335, 0.398] undefined 0
+  last recovery (0.0, 3.0, 6.0): b*/V1/genie (923, 593, 231) R=0.477 [90% 0.439, 0.515] undefined 0
+  last dR(-3 dB) vs D2: -0.104 [90% -0.157, -0.050] undefined 0
+  best SNR@0.1:
+    R2-ours-G            SNR@0.1   4.22 (ok)
+    M-ours-gmm32         SNR@0.1   3.46 (ok)
+    M-ours-bstar         SNR@0.1   2.61 (ok)
+    M-ours-dscore-C-V0   SNR@0.1  15.00 (hi)
+    M-ours-dscore-C-V1   SNR@0.1   1.20 (ok)
+    M-ours-dscore-C-V4   SNR@0.1   1.26 (ok)
+    M-ours-dscore-C-V4b  SNR@0.1   1.29 (ok)
+    M-ours-bstar-scalar  SNR@0.1   2.65 (ok)
+    R5-genie             SNR@0.1  -1.38 (ok)
+  last V1 SNR@0.1:
+    last V1 SNR@0.1 1.16 (ok)
+  best BLER@16 (-3/0/+3/+6):
+    R2-ours-G            0.568 / 0.293 / 0.119 / 0.078
+    M-ours-gmm32         0.537 / 0.249 / 0.111 / 0.057
+    M-ours-bstar         0.507 / 0.229 / 0.088 / 0.043
+    M-ours-dscore-C-V0   0.584 / 0.496 / 0.641 / 0.747
+    M-ours-dscore-C-V1   0.391 / 0.158 / 0.050 / 0.025
+    M-ours-dscore-C-V4   0.393 / 0.158 / 0.053 / 0.030
+    M-ours-dscore-C-V4b  0.408 / 0.161 / 0.054 / 0.029
+    M-ours-bstar-scalar  0.509 / 0.236 / 0.089 / 0.048
+    R5-genie             0.189 / 0.058 / 0.018 / 0.014
+  best V0 guard fire rate: -3:0.233 +0:0.312 +3:0.473 +6:0.587 +9:0.635 +12:0.627 +15:0.494
+  best-vs-last V1 at decision [0.0, 3.0, 6.0]: +0 16:8 · +3 12:11 · +6 2:7 pooled 30:26 p=0.689;  at -3: -3 21:21 pooled 21:21 p=1
+  arms differing between D3B16e4 and D3B16e4last: ['M-ours-dscore-C-V0', 'M-ours-dscore-C-V1', 'M-ours-dscore-C-V4', 'M-ours-dscore-C-V4b']
+
+## 5. SVB16e4 (SV8e)
+  [SVB16e4] meta per point (n, bstar, kron_K, ll_val|bstar, ntrain, ckpt id, iters, em_sec):
+    448 files: ntrain=160000.0 bstar=gmm256 kron_K=2048 ll_val=-47.80545576704972 ckpt='sha256[:16]=d2d78962c2846364 epoch=240 best_epoch=240 role=best 8x4' iters=16 em_sec=10589.87728881836
+  [SVB16e4last] meta per point (n, bstar, kron_K, ll_val|bstar, ntrain, ckpt id, iters, em_sec):
+    448 files: ntrain=160000.0 bstar=gmm256 kron_K=2048 ll_val=-47.80545576704972 ckpt='sha256[:16]=c20ec3d6126b70b6 epoch=260 best_epoch=240 role=last 8x4 | ' iters=16 em_sec=10589.87728881836
+  best b*->V1: decision [-3.0, 0.0] a:b [(124, 62, '6.4e-06'), (24, 10, '0.024')] pooled 148:72 p=3.3e-07 POWERED=False wx=0 wy=2 -> (iv) UNDECIDED
+  best b*->scalar: decision [-3.0, 0.0] a:b [(45, 59, '0.2'), (15, 12, '0.7')] pooled 60:71 p=0.38 POWERED=False wx=0 wy=0 -> (iv) UNDECIDED
+  best R2->b*: decision [-3.0, 0.0, 3.0] a:b [(186, 51, '3.1e-19'), (35, 13, '0.0021'), (10, 2, '0.039')] pooled 231:66 p=1.3e-22 POWERED=True wx=0 wy=3 -> (i) second fewer
+  best paired gap b*-V1: +0.25 dB [90% +0.16, +0.33] censored 0%;  b*-scalar: -0.01 dB [90% -0.08, +0.06] censored 0%;  R2-b*: +0.41 dB [90% +0.31, +0.51] censored 0%
+  best recovery (-3.0,): b*/V1/genie (464, 402, 31) R=0.143 [90% 0.095, 0.188] undefined 0
+  best recovery (-3.0, 0.0): b*/V1/genie (524, 448, 34) R=0.155 [90% 0.109, 0.199] undefined 0
+  best dR(-3 dB) vs D2: -0.327 [90% -0.392, -0.262] undefined 0
+  best dR(decision (-3.0, 0.0)) vs D2(-3,0,3): -0.354 [90% -0.413, -0.295] undefined 0
+  best anchor b* BLER@16 -3 dB = 0.181 (saturation guard band [0.005, 0.9])
+  last b*->V1: decision [-3.0, 0.0] a:b [(125, 61, '3.1e-06'), (26, 7, '0.0013')] pooled 151:68 p=2.1e-08 POWERED=False wx=0 wy=2 -> (iv) UNDECIDED
+  last b*->scalar: decision [-3.0, 0.0] a:b [(45, 59, '0.2'), (15, 12, '0.7')] pooled 60:71 p=0.38 POWERED=False wx=0 wy=0 -> (iv) UNDECIDED
+  last R2->b*: decision [-3.0, 0.0, 3.0] a:b [(186, 51, '3.1e-19'), (35, 13, '0.0021'), (10, 2, '0.039')] pooled 231:66 p=1.3e-22 POWERED=True wx=0 wy=3 -> (i) second fewer
+  last paired gap b*-V1: +0.28 dB [90% +0.20, +0.37] censored 0%;  b*-scalar: -0.01 dB [90% -0.08, +0.06] censored 0%;  R2-b*: +0.41 dB [90% +0.31, +0.51] censored 0%
+  last recovery (-3.0,): b*/V1/genie (464, 400, 31) R=0.148 [90% 0.100, 0.193] undefined 0
+  last recovery (-3.0, 0.0): b*/V1/genie (524, 441, 34) R=0.169 [90% 0.124, 0.211] undefined 0
+  last dR(-3 dB) vs D2: -0.322 [90% -0.388, -0.260] undefined 0
+  best SNR@0.1:
+    R2-ours-G            SNR@0.1  -1.72 (ok)
+    M-ours-gmm32         SNR@0.1  -2.04 (ok)
+    M-ours-bstar         SNR@0.1  -2.13 (ok)
+    M-ours-dscore-C-V0   SNR@0.1  -1.93 (ok)
+    M-ours-dscore-C-V1   SNR@0.1  -2.38 (ok)
+    M-ours-dscore-C-V4   SNR@0.1  -2.37 (ok)
+    M-ours-dscore-C-V4b  SNR@0.1  -2.36 (ok)
+    M-ours-bstar-scalar  SNR@0.1  -2.12 (ok)
+    R5-genie             SNR@0.1  -3.00 (lo)
+  last V1 SNR@0.1:
+    last V1 SNR@0.1 -2.41 (ok)
+  best BLER@16 (-3/0/+3/+6):
+    R2-ours-G            0.234 / 0.032 / 0.006 / 0.001
+    M-ours-gmm32         0.195 / 0.024 / 0.003 / 0.000
+    M-ours-bstar         0.181 / 0.023 / 0.003 / 0.000
+    M-ours-dscore-C-V0   0.165 / 0.040 / 0.032 / 0.037
+    M-ours-dscore-C-V1   0.157 / 0.018 / 0.002 / 0.000
+    M-ours-dscore-C-V4   0.163 / 0.016 / 0.002 / 0.000
+    M-ours-dscore-C-V4b  0.168 / 0.015 / 0.002 / 0.000
+    M-ours-bstar-scalar  0.187 / 0.022 / 0.002 / 0.000
+    R5-genie             0.012 / 0.001 / 0.000 / 0.000
+  best V0 guard fire rate: -3:0.009 +0:0.014 +3:0.027 +6:0.035 +9:0.031 +12:0.017 +15:0.015
+  best-vs-last V1 at decision [-3.0, 0.0]: -3 16:14 · +0 6:1 pooled 22:15 p=0.324;  at -3: -3 16:14 pooled 16:14 p=0.856
+  arms differing between SVB16e4 and SVB16e4last: ['M-ours-dscore-C-V0', 'M-ours-dscore-C-V1', 'M-ours-dscore-C-V4', 'M-ours-dscore-C-V4b']
+
+## 5. U28B16e4 (UMi28)
+  [U28B16e4] meta per point (n, bstar, kron_K, ll_val|bstar, ntrain, ckpt id, iters, em_sec):
+    448 files: ntrain=160000.0 bstar=kron kron_K=4096 ll_val=5.797910431000217 ckpt='sha256[:16]=6f3a1b9490864af1 epoch=379 best_epoch=379 role=best 8x4' iters=16 em_sec=9133.61854147911
+  [U28B16e4last] meta per point (n, bstar, kron_K, ll_val|bstar, ntrain, ckpt id, iters, em_sec):
+    448 files: ntrain=160000.0 bstar=kron kron_K=4096 ll_val=5.797910431000217 ckpt='sha256[:16]=1fc8c7766507b823 epoch=399 best_epoch=379 role=last 8x4 | ' iters=16 em_sec=9133.61854147911
+  best b*->V1: decision [3.0, 6.0, 9.0] a:b [(76, 38, '0.00048'), (50, 22, '0.0013'), (35, 13, '0.0021')] pooled 161:73 p=8.7e-09 POWERED=True wx=0 wy=3 -> (i) second fewer
+  best b*->scalar: decision [3.0, 6.0, 9.0] a:b [(29, 38, '0.33'), (18, 30, '0.11'), (15, 18, '0.73')] pooled 62:86 p=0.058 POWERED=True wx=0 wy=0 -> (iii) no direction
+  best R2->b*: decision [3.0, 6.0, 9.0] a:b [(175, 32, '4.6e-25'), (119, 28, '1.5e-14'), (62, 16, '1.5e-07')] pooled 356:76 p=2.2e-44 POWERED=True wx=0 wy=3 -> (i) second fewer
+  best paired gap b*-V1: +0.60 dB [90% +0.33, +0.87] censored 0%;  b*-scalar: -0.25 dB [90% -0.44, -0.02] censored 0%;  R2-b*: +1.48 dB [90% +1.09, +1.87] censored 0%
+  best recovery (-3.0,): b*/V1/genie (1270, 1228, 594) R=0.062 [90% 0.033, 0.089] undefined 0
+  best recovery (3.0, 6.0, 9.0): b*/V1/genie (800, 712, 215) R=0.150 [90% 0.110, 0.189] undefined 0
+  best dR(-3 dB) vs D2: -0.408 [90% -0.458, -0.358] undefined 0
+  best dR(decision (3.0, 6.0, 9.0)) vs D2(-3,0,3): -0.358 [90% -0.411, -0.305] undefined 0
+  best anchor b* BLER@16 -3 dB = 0.496 (saturation guard band [0.005, 0.9])
+  last b*->V1: decision [3.0, 6.0, 9.0] a:b [(74, 39, '0.0013'), (53, 21, '0.00026'), (33, 11, '0.0013')] pooled 160:71 p=4.6e-09 POWERED=True wx=0 wy=3 -> (i) second fewer
+  last b*->scalar: decision [3.0, 6.0, 9.0] a:b [(29, 38, '0.33'), (18, 30, '0.11'), (15, 18, '0.73')] pooled 62:86 p=0.058 POWERED=True wx=0 wy=0 -> (iii) no direction
+  last R2->b*: decision [3.0, 6.0, 9.0] a:b [(175, 32, '4.6e-25'), (119, 28, '1.5e-14'), (62, 16, '1.5e-07')] pooled 356:76 p=2.2e-44 POWERED=True wx=0 wy=3 -> (i) second fewer
+  last paired gap b*-V1: +0.65 dB [90% +0.39, +0.94] censored 0%;  b*-scalar: -0.25 dB [90% -0.44, -0.02] censored 0%;  R2-b*: +1.48 dB [90% +1.09, +1.87] censored 0%
+  last recovery (-3.0,): b*/V1/genie (1270, 1233, 594) R=0.055 [90% 0.026, 0.081] undefined 0
+  last recovery (3.0, 6.0, 9.0): b*/V1/genie (800, 711, 215) R=0.152 [90% 0.111, 0.191] undefined 0
+  last dR(-3 dB) vs D2: -0.415 [90% -0.466, -0.366] undefined 0
+  best SNR@0.1:
+    R2-ours-G            SNR@0.1   7.20 (ok)
+    M-ours-gmm32         SNR@0.1   6.54 (ok)
+    M-ours-bstar         SNR@0.1   5.73 (ok)
+    M-ours-dscore-C-V0   SNR@0.1  15.00 (hi)
+    M-ours-dscore-C-V1   SNR@0.1   5.13 (ok)
+    M-ours-dscore-C-V4   SNR@0.1   5.26 (ok)
+    M-ours-dscore-C-V4b  SNR@0.1   5.22 (ok)
+    M-ours-bstar-scalar  SNR@0.1   5.98 (ok)
+    R5-genie             SNR@0.1   0.59 (ok)
+  last V1 SNR@0.1:
+    last V1 SNR@0.1 5.08 (ok)
+  best BLER@16 (-3/0/+3/+6):
+    R2-ours-G            0.570 / 0.336 / 0.224 / 0.130
+    M-ours-gmm32         0.521 / 0.296 / 0.196 / 0.113
+    M-ours-bstar         0.496 / 0.279 / 0.168 / 0.095
+    M-ours-dscore-C-V0   0.666 / 0.527 / 0.467 / 0.408
+    M-ours-dscore-C-V1   0.480 / 0.256 / 0.154 / 0.084
+    M-ours-dscore-C-V4   0.486 / 0.264 / 0.152 / 0.087
+    M-ours-dscore-C-V4b  0.484 / 0.270 / 0.156 / 0.086
+    M-ours-bstar-scalar  0.504 / 0.278 / 0.172 / 0.100
+    R5-genie             0.232 / 0.118 / 0.051 / 0.023
+  best V0 guard fire rate: -3:0.391 +0:0.355 +3:0.300 +6:0.231 +9:0.228 +12:0.162 +15:0.123
+  best-vs-last V1 at decision [3.0, 6.0, 9.0]: +3 19:22 · +6 10:6 · +9 7:7 pooled 36:35 p=1;  at -3: -3 18:23 pooled 18:23 p=0.533
+  arms differing between U28B16e4 and U28B16e4last: ['M-ours-dscore-C-V0', 'M-ours-dscore-C-V1', 'M-ours-dscore-C-V4', 'M-ours-dscore-C-V4b']
+
+## 5. MXB16e4 (MIX3)
+  [MXB16e4] meta per point (n, bstar, kron_K, ll_val|bstar, ntrain, ckpt id, iters, em_sec):
+    448 files: ntrain=160000.0 bstar=kron kron_K=4096 ll_val=33.7604873920761 ckpt='sha256[:16]=b591ae24ae3c5f31 epoch=464 best_epoch=464 role=best 8x4' iters=16 em_sec=6242.08159995079
+  [MXB16e4last] meta per point (n, bstar, kron_K, ll_val|bstar, ntrain, ckpt id, iters, em_sec):
+    448 files: ntrain=160000.0 bstar=kron kron_K=4096 ll_val=33.7604873920761 ckpt='sha256[:16]=10c3fb112c685d1b epoch=484 best_epoch=464 role=last 8x4 | ' iters=16 em_sec=6242.08159995079
+  best b*->V1: decision [3.0, 6.0, 9.0] a:b [(85, 39, '4.4e-05'), (71, 21, '1.6e-07'), (42, 11, '2.2e-05')] pooled 198:71 p=4.8e-15 POWERED=True wx=0 wy=3 -> (i) second fewer
+  best b*->scalar: decision [3.0, 6.0, 9.0] a:b [(35, 45, '0.31'), (19, 34, '0.053'), (16, 22, '0.42')] pooled 70:101 p=0.022 POWERED=True wx=0 wy=0 -> (iii) no direction
+  best R2->b*: decision [6.0, 9.0, 12.0] a:b [(166, 31, '1.6e-23'), (97, 18, '2.8e-14'), (57, 12, '3.7e-08')] pooled 320:61 p=1.7e-43 POWERED=True wx=0 wy=3 -> (i) second fewer
+  best paired gap b*-V1: +0.98 dB [90% +0.68, +1.31] censored 0%;  b*-scalar: -0.32 dB [90% -0.53, -0.07] censored 0%;  R2-b*: +2.33 dB [90% +1.80, +2.94] censored 0%
+  best recovery (-3.0,): b*/V1/genie (1421, 1354, 679) R=0.090 [90% 0.062, 0.117] undefined 0
+  best recovery (3.0, 6.0, 9.0): b*/V1/genie (803, 676, 246) R=0.228 [90% 0.183, 0.271] undefined 0
+  best dR(-3 dB) vs D2: -0.380 [90% -0.430, -0.328] undefined 0
+  best dR(decision (3.0, 6.0, 9.0)) vs D2(-3,0,3): -0.281 [90% -0.335, -0.224] undefined 0
+  best anchor b* BLER@16 -3 dB = 0.555 (saturation guard band [0.005, 0.9])
+  last b*->V1: decision [3.0, 6.0, 9.0] a:b [(84, 49, '0.003'), (71, 20, '7.2e-08'), (43, 11, '1.4e-05')] pooled 198:80 p=1e-12 POWERED=True wx=0 wy=3 -> (i) second fewer
+  last b*->scalar: decision [3.0, 6.0, 9.0] a:b [(35, 45, '0.31'), (19, 34, '0.053'), (16, 22, '0.42')] pooled 70:101 p=0.022 POWERED=True wx=0 wy=0 -> (iii) no direction
+  last R2->b*: decision [6.0, 9.0, 12.0] a:b [(166, 31, '1.6e-23'), (97, 18, '2.8e-14'), (57, 12, '3.7e-08')] pooled 320:61 p=1.7e-43 POWERED=True wx=0 wy=3 -> (i) second fewer
+  last paired gap b*-V1: +0.94 dB [90% +0.65, +1.26] censored 0%;  b*-scalar: -0.32 dB [90% -0.53, -0.07] censored 0%;  R2-b*: +2.33 dB [90% +1.80, +2.94] censored 0%
+  last recovery (-3.0,): b*/V1/genie (1421, 1345, 679) R=0.102 [90% 0.075, 0.130] undefined 0
+  last recovery (3.0, 6.0, 9.0): b*/V1/genie (803, 685, 246) R=0.212 [90% 0.168, 0.255] undefined 0
+  last dR(-3 dB) vs D2: -0.368 [90% -0.417, -0.316] undefined 0
+  best SNR@0.1:
+    R2-ours-G            SNR@0.1   8.06 (ok)
+    M-ours-gmm32         SNR@0.1   6.48 (ok)
+    M-ours-bstar         SNR@0.1   5.72 (ok)
+    M-ours-dscore-C-V0   SNR@0.1  15.00 (hi)
+    M-ours-dscore-C-V1   SNR@0.1   4.74 (ok)
+    M-ours-dscore-C-V4   SNR@0.1   5.12 (ok)
+    M-ours-dscore-C-V4b  SNR@0.1   5.16 (ok)
+    M-ours-bstar-scalar  SNR@0.1   6.04 (ok)
+    R5-genie             SNR@0.1   1.10 (ok)
+  last V1 SNR@0.1:
+    last V1 SNR@0.1 4.78 (ok)
+  best BLER@16 (-3/0/+3/+6):
+    R2-ours-G            0.630 / 0.416 / 0.250 / 0.148
+    M-ours-gmm32         0.570 / 0.349 / 0.194 / 0.109
+    M-ours-bstar         0.555 / 0.330 / 0.166 / 0.095
+    M-ours-dscore-C-V0   0.791 / 0.706 / 0.654 / 0.582
+    M-ours-dscore-C-V1   0.529 / 0.308 / 0.148 / 0.075
+    M-ours-dscore-C-V4   0.529 / 0.312 / 0.153 / 0.084
+    M-ours-dscore-C-V4b  0.530 / 0.318 / 0.155 / 0.084
+    M-ours-bstar-scalar  0.556 / 0.339 / 0.170 / 0.101
+    R5-genie             0.265 / 0.140 / 0.056 / 0.027
+  best V0 guard fire rate: -3:0.536 +0:0.527 +3:0.491 +6:0.420 +9:0.375 +12:0.296 +15:0.223
+  best-vs-last V1 at decision [3.0, 6.0, 9.0]: +3 8:19 · +6 7:6 · +9 7:6 pooled 22:31 p=0.272;  at -3: -3 15:6 pooled 15:6 p=0.0784
+  arms differing between MXB16e4 and MXB16e4last: ['M-ours-dscore-C-V0', 'M-ours-dscore-C-V1', 'M-ours-dscore-C-V4', 'M-ours-dscore-C-V4b']

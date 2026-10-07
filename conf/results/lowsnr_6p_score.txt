@@ -1,0 +1,41 @@
+# (10_SPEC_stageC §6p) low-SNR extension, equal budget N=1e4, scored against the pre-registration
+# raw: raw_B1e4lo (-9/-7/-6/-5 dB) + raw_B1e4 (C2) / raw_B1e4x (C5) for -3..+15 dB.  n per point printed;
+# a point with n < 2560 is INCOMPLETE and is marked.  Raised blocks count as block errors.
+
+===== C2 (Tp=4) =====
+  SNR     n    nu_q  grid |     R1-turbo M-ours-bstar M-ours-dscor M-ours-dscor M-ours-dscor     R5-genie | GMM/V1  V1 guard
+   -9  2560   1.986   OUT |       0.9957       0.9961       0.9812       0.9809       0.9969       0.7848 |   1.02    0.000
+   -7  2560   1.253    in |       0.9590       0.9059       0.7957       0.8016       0.9578       0.3520 |   1.14    0.000
+   -6  2560   0.995    in |       0.9125       0.7914       0.6008       0.6074       0.9246       0.2031 |   1.32    0.000
+   -5  2560   0.791    in |       0.7984       0.5797       0.3949       0.3992       0.8379       0.1090 |   1.47    0.000
+   -3  2560   0.499    in |       0.5367       0.2523       0.1453       0.1523       0.7887       0.0340 |   1.74    0.000
+   +0  2560   0.250    in |       0.2129       0.0832       0.0371       0.0398       0.8871       0.0102 |   2.24    0.000
+   +3  2560   0.125    in |       0.0789       0.0242       0.0094       0.0117       0.8871       0.0047 |   2.58    0.000
+   +6  2560   0.063    in |       0.0414       0.0125       0.0039       0.0051       0.8152       0.0035 |   3.20    0.000
+   +9  2560   0.031    in |       0.0254       0.0082       0.0035       0.0031       0.6902       0.0008 |   2.33    0.000
+  +12  2560   0.016    in |       0.0187       0.0082       0.0027       0.0035       0.5062       0.0008 |   3.00    0.000
+  +15  2560   0.008    in |       0.0086       0.0031       0.0016       0.0012       0.3109       0.0008 |   2.00    0.000
+
+===== C5 (Tp=3) =====
+  SNR     n    nu_q  grid |     R1-turbo M-ours-bstar M-ours-dscor M-ours-dscor M-ours-dscor     R5-genie | GMM/V1  V1 guard
+   -9  2560   2.981   OUT |       0.9992       0.9980       1.0000       1.0000       1.0000       0.8078 |   1.00    0.865
+   -7  2560   2.004   OUT |       0.9895       0.9637       0.9980       0.9949       1.0000       0.3652 |   0.97    0.836
+   -6  2560   1.660   OUT |       0.9656       0.9035       0.9930       0.9934       0.9988       0.2238 |   0.91    0.779
+   -5  2560   1.387    in |       0.9352       0.7934       0.6547       0.6641       0.9488       0.1207 |   1.21    0.000
+   -3  2560   0.998    in |       0.7953       0.5437       0.3941       0.4191       0.9035       0.0355 |   1.38    0.000
+   +0  2560   0.667    in |       0.5508       0.2762       0.1762       0.2117       0.9348       0.0137 |   1.57    0.000
+   +3  2560   0.500    in |       0.3633       0.1871       0.1258       0.1520       0.9340       0.0074 |   1.49    0.000
+   +6  2560   0.417    in |       0.2879       0.1723       0.1203       0.1449       0.8902       0.0043 |   1.43    0.001
+   +9  2560   0.375    in |       0.2219       0.1617       0.1180       0.1625       0.8340       0.0012 |   1.37    0.003
+  +12  2560   0.354    in |       0.1777       0.1547       0.1363       0.1621       0.6863       0.0008 |   1.13    0.003
+  +15  2560   0.344    in |       0.1578       0.1457       0.1586       0.1691       0.5281       0.0000 |   0.92    0.002
+
+===== predictions (§6p, committed 279512b before the run) =====
+1. C2 GMM/V1 ratio at -6 / -7 dB EXCEEDS the -3 dB ratio (1.74): -6 dB 1.32, -7 dB 1.14 -> FALSE
+2. C2 -9 dB: V1 collapses (guard > 0.5 and V1 worse than GMM): guard 0.00, ratio 1.02 -> FALSE
+3. C5 alive at -5 dB, degrades from -6 dB: ratio -5 1.21, -6 0.91, -7 0.97, -9 1.00; V1 guard -5 0.00, -6 0.78, -7 0.84
+4. collapse SNRs differ between cells and follow the closed form (C2 -7.57 / C5 -5.17 dB, +-1 dB):
+   C2: lowest SNR with V1 guard <= 0.5 = -9; first collapse (guard > 0.5) at None
+   C5: lowest SNR with V1 guard <= 0.5 = -5; first collapse (guard > 0.5) at -9
+
+Score against the wording in 10_SPEC_stageC.md §6p; where a point is INCOMPLETE the score is provisional.

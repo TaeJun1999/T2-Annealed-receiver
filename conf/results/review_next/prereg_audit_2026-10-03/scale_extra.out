@@ -1,0 +1,7 @@
+NR32B16e4: files 24 merged 15 candidates 9 -> {'tol': 24, 'patience': 0, 'cap': 0} non-tol []
+U28NR16B16e4: files 24 merged 15 candidates 9 -> {'tol': 22, 'patience': 2, 'cap': 0} non-tol [('fullK128_n160000.npz', 251, 210), ('fullK32_n160000.npz', 211, 170)]
+U28NR32B16e4: files 24 merged 15 candidates 9 -> {'tol': 24, 'patience': 0, 'cap': 0} non-tol []
+
+run_manifest.py config_hash context:
+    config_hash=hashlib.sha256(json.dumps(dict(sorted((k, sorted(v)) for k, v in run.items())) | dict(
+    print(json.dumps({k: man[k] for k in ("git_commit", "result_tag", "config_hash", "n_raw_files", "arms")}, ensure_ascii=False))

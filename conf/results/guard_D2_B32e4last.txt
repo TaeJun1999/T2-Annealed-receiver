@@ -1,0 +1,27 @@
+# date        : 2026-09-25 08:28:12 KST
+# git commit  : 36b12bf6
+# versions    : python 3.12.14  numpy 2.5.2  scipy 1.18.1  torch 2.14.0+cu130 (cuda_available=True)
+# device      : CPU (192 cores) | dtype: complex128 / float64 | deterministic: yes (fixed seeds, no GPU in the receiver)
+# testbed     : D2
+# seed rule   : default_rng([20260926, TBID[testbed], PID[prior], Nr, T, Tp, int(snr)+100])  (trials of a point = ONE stream)
+# code        : rate-1/2 conv (133,171)_8 nu=6 terminated, QPSK, outer iterations = 16 for EVERY arm
+# Demo/ hashes: t2_route_a.py=95a5408901ec125c  t2_trellis.py=31cd0ee9c68e972b  t2_gmm.py=d064e58c7510c769
+# content     : (F3) Module H divergence guard firings, DIVERGE_NMSE = 10.0 (reused from code/bigamp.py, NOT re-chosen)
+# raw         : raw_B32e4last
+# rule        : a trial fires the guard if NMSE > 10.0 or non-finite at ANY of the 16 iterations.
+# status      : DETECTION AND CLASSIFICATION ONLY -- no arm's trajectory is altered, so every
+#               number recorded before this guard existed remains valid.
+# read-only   : the raw files are not rewritten.
+
+cell    SNR arm                        fired     of    rate  worst NMSE seen
+------------------------------------------------------------------------------
+C2       -3 M-ours-dscore-C-V0          1831   2560   0.715  3.972e+07
+C2       +0 M-ours-dscore-C-V0          2163   2560   0.845  4.711e+09
+C2       +3 M-ours-dscore-C-V0          2359   2560   0.921  1.756e+09
+C2       +6 M-ours-dscore-C-V0          2399   2560   0.937  1.191e+09
+C2       +9 M-ours-dscore-C-V0          2390   2560   0.934  1.218e+09
+C2      +12 M-ours-dscore-C-V0          2242   2560   0.876  1.453e+10
+C2      +15 M-ours-dscore-C-V0          1989   2560   0.777  8.097e+08
+
+arms that NEVER fired the guard anywhere in this raw set (12): M-ours-bstar, M-ours-bstar-scalar, M-ours-dscore-C-V1, M-ours-dscore-C-V4, M-ours-dscore-C-V4b, M-ours-gmm32, R0-pilot, R1-turbo, R2-ours-G, R3-bigamp, R4-llr, R4-scvamp
+not applicable -- no channel estimate, so no Module H path (1): R5-genie

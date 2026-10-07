@@ -1,0 +1,8 @@
+# run_scale2 git b4433d3c 2026-10-03 11:47 CDT: frontier_ci.py --recovery raw_NR32B16e4:C9:-9,-6,-3 raw_B16e4k:C2:-3,0,3 --extrap - - --ck - - --level 0.90
+# recovery R = (b* - V1)/(b* - genie) @16; paired bootstrap per raw set (three arms together), the two raw sets resampled independently (UNPAIRED difference); B=2000, seed=20260926, 90% CI
+  R1: raw_NR32B16e4 C9 SNR ['-9', '-6', '-3']  b* 1161 V1 276 genie 70  R = 0.811  [90% 0.790, 0.832]
+  R2: raw_B16e4k C2 SNR ['-3', '+0', '+3']  b* 864 V1 488 genie 125  R = 0.509  [90% 0.470, 0.544]
+  R1 - R2 = +0.302  [90% unpaired +0.262, +0.345]  undefined replicates 0
+  R1 - R2 = +0.302  [90% unpaired +0.262, +0.345]  bootstrap two-sided p = 0.0000  (--level 0.9)
+  gaps R1: SigmaF_V1 - SigmaF_g = 206  [90% 182, 231]   SigmaF_b* - SigmaF_g = 1091  [90% 1045, 1135]   (blocks, summed over SNR ['-9', '-6', '-3'])
+  gaps R2: SigmaF_V1 - SigmaF_g = 363  [90% 332, 396]   SigmaF_b* - SigmaF_g = 739  [90% 697, 781]   (blocks, summed over SNR ['-3', '+0', '+3'])

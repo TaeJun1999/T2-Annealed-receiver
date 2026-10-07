@@ -1,0 +1,48 @@
+# date        : 2026-09-21 10:02:41 KST
+# git commit  : 5e2e77a
+# versions    : python 3.12.14  numpy 2.5.2  scipy 1.18.1  torch 2.14.0+cu130 (cuda_available=True)
+# device      : CPU (192 cores) | dtype: complex128 / float64 | deterministic: yes (fixed seeds, no GPU in the receiver)
+# testbed     : D1
+# seed rule   : default_rng([20260926, TBID[testbed], PID[prior], Nr, T, Tp, int(snr)+100])  (trials of a point = ONE stream)
+# code        : rate-1/2 conv (133,171)_8 nu=6 terminated, QPSK, outer iterations = 16 for EVERY arm
+# Demo/ hashes: t2_route_a.py=95a5408901ec125c  t2_trellis.py=31cd0ee9c68e972b  t2_gmm.py=d064e58c7510c769
+# content     : SAMPLE-COMPLEXITY of the learned score against the pre-registered gates (REPORT ONLY).
+# 
+# WHY THIS EXISTS.  The arm comparison is fixed at the equal N_train = 1e4 budget the GMM fit received
+# (01_RULES §5) and nothing here changes that: no arm is built at any other budget.  What this measures
+# is a DIFFERENT quantity -- how much data the pre-registered bar GC <= 0.15 actually needs.  Without it
+# the negative result reads 'we tried 959 configurations and none passed'; with it, it reads 'GB and GD
+# are met at 1e4 and GC needs ~1e5', which is a number a follow-up can act on.
+# 
+# The architecture is the best-D1-gate-score configuration from the HPO study, copied verbatim and NOT
+# re-searched per budget: dit / vp / angle, w64 d6 heads8 patch1, lr 2.238e-3, emb 256.
+# Gates are evaluated on the REPORTED held-out stream 10, identical to every other gate number here.
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+# CIRCULAR TESTBED -- true prior is defined as a grid GMM; the GMM arm is correctly specified.
+# No claim about learned priors can be made from this table.
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+   N_train  epochs    val_loss         GB         GC         GD  gate_score  verdict
+  ----------------------------------------------------------------------------------
+     2,500     357  7.4618e-01    0.05523    0.78537    0.32425      5.2358  FAIL
+    10,000     200  7.2817e-01    0.01174    0.24333    0.16081      1.6222  FAIL   <- the arm budget (01_RULES §5)
+    40,000     200  7.3615e-01    0.00453    0.16651    0.10099      1.1101  FAIL
+   160,000     200  7.3984e-01    0.00266    0.09986    0.07183      0.6657  PASS   <- clears all four gates
+
+  GC scaling: a log-log fit over these four budgets gives GC ~ N^(-0.474) (R^2 = 0.9342).
+  Extrapolating that fit, GC crosses the pre-registered 0.15 at N ~ 52,731; it is bracketed by
+  the measured points N = 40,000 (GC 0.1665, fail) and N = 160,000 (GC 0.0999, pass), so the
+  crossing is MEASURED, not only extrapolated.
+
+  READING.  At the equal 1e4 budget the learned score already meets GB (denoising NMSE excess, 0.0117
+  against 0.05) and GD (the full Wirtinger Jacobian D-14 inverts, 0.161 against 0.20).  The single
+  quantity it misses is GC, the relative error of the score itself, by a factor of 1.62.  The deficit
+  is therefore one of SAMPLE SIZE, not of architecture or of the receiver interface:
+    - architecture was searched over 959 configurations (hpo_D1.txt) and, at equal trials per
+      architecture (hpo_strat_D1.txt), five of the six families are statistically indistinguishable;
+    - the interface is not the bottleneck: M-ours-score (the EXACT score through one-shot D-13+D-14)
+      is not measurably different from R6-exactEP (the exact prior through the exact mixture-EP site),
+      p = 0.14, SNR@0.1 gap -0.07 dB [90% CI -0.55, +0.39] on D1 C1.
+
+  This does NOT license a learned-prior arm at any budget: M-ours-dscore stays BLOCKED on both
+  testbeds because the pre-registered comparison is at 1e4 and it fails there.

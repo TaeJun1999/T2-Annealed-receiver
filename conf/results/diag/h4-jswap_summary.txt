@@ -1,0 +1,96 @@
+# conf/results/diag/h4-jswap_summary.txt
+# ADVERSARIAL re-test of H4 (M-ours-dscore BLER collapse on D2/C2) -- 2026-09-21 KST
+# DIAGNOSTIC ONLY: frozen checkpoint ckpt/d2sx_N10000_a1.pt, nothing retrained, no hyperparameter
+# tuned, no gate threshold changed, no pre-registered file written.  D2 cell C2 (8x4, T=16, Tp=4),
+# prior S2, 16 outer iterations, beta=0.7, same trial stream as the published diagnostic.
+# code: conf/code/diag_h4_jswap.py, conf/code/diag_h4_psd_indep.py
+#
+# WHY: the published H4 factorial swapped the WHOLE Module-H denoiser (mean AND Jacobian) between the
+# GMM and the checkpoint.  That cannot separate "the learned MEAN is bad" from "the learned JACOBIAN is
+# bad", and it never showed the learned Jacobian to be SUFFICIENT.  Here exactly ONE factor moves at a
+# time inside the frozen score wiring (mode='scalar', scal='belief', hsite='matrix', clip='eta').
+#
+# HARNESS VALIDATION (my code vs the published npz, first 64 of the same paired trials):
+#   d|scorew == dscore|scorew : blk_err bit-exact, max|dNMSE| = 0.000e+00   (both SNRs)
+#   g|scorew == gmmB|scorew   : blk_err bit-exact, max|dNMSE| = 1.1e-11 / 5.0e-12  (BLAS reassociation)
+#
+# ---------------------------------------------------------------- BLER@16, n=64 paired trials
+#   arm                 mean source   J in _matrix_site   clip      0 dB            +6 dB
+#   d|scorew            learned       learned            eta    0.922 +- 0.034   0.719 +- 0.056
+#   d|scorew+gmmJ       learned       EXACT GMM          eta    0.062 +- 0.030   0.000 +- 0.000
+#   d|scorew+psd        learned       learned, eig in (0,1]  eta 0.031 +- 0.022   0.000 +- 0.000
+#   d|scorew+clipmean   learned       learned            mean   0.047 +- 0.026   0.000 +- 0.000
+#   g|scorew            EXACT GMM     EXACT GMM          eta    0.109 +- 0.039   0.031 +- 0.022
+#   g|scorew+dJ         EXACT GMM     learned            eta    0.953 +- 0.026   0.922 +- 0.034
+#   gauss|sitesc (= R2-ours-G anchor)                           0.078 +- 0.034   0.016 +- 0.016
+#
+# Paired McNemar (discordant pairs, 0 dB / +6 dB), all one-sided, p < 1e-13 each:
+#   g|scorew -> g|scorew+dJ        54:0  / 57:0     (swapping ONLY J INTO an exact arm breaks it)
+#   d|scorew -> d|scorew+gmmJ       0:55 /  0:46    (swapping ONLY J OUT of the arm repairs it)
+#   d|scorew -> d|scorew+psd        0:57 /  0:46    (PSD-clamping the learned J repairs it)
+#   d|scorew -> d|scorew+clipmean   0:56 /  0:46    (changing ONLY the clip rule repairs it)
+#
+# => The learned Jacobian is NECESSARY and SUFFICIENT for the collapse GIVEN the D-14 matrix site.
+#    The learned Tweedie MEAN is exonerated: with an exact J it beats the GMM arm (0.062 vs 0.109 at
+#    0 dB, 0.000 vs 0.031 at +6), consistent with GB' and the Hyvarinen diagnostic.
+#    But clip='mean' (a pre-existing RouteAClip option, same checkpoint, same indefinite J) repairs it
+#    just as completely.  So it is an INTERACTION with TWO independently sufficient repairs -- the
+#    published claim that "the single causal component is the D-14 matrix site fed by the learned
+#    Jacobian" is one factor short.
+#
+# ---------------------------------------------------------------- CAUSE, NOT SYMPTOM
+# At iteration 1 the cavity is arm-independent: nu_q@1 and alphaH@1 are BIT-IDENTICAL between each
+# swapped pair (checked on h4-jswap_D2_C2_snr+0_n4.npz), so the query point q handed to _matrix_site is
+# the same healthy point.  NMSE of the FIRST channel estimate, median:
+#   0 dB : g|scorew 0.152 -> g|scorew+dJ 5.004      d|scorew 1.568 -> d|scorew+gmmJ 0.093
+#   +6 dB: g|scorew 0.049 -> g|scorew+dJ 26.25      d|scorew 4.774 -> d|scorew+gmmJ 0.026
+# The damage is injected at the FIRST site formation, before any decoder feedback.  It is upstream of
+# the loop, not a downstream artefact of a diverged trajectory.
+# Not sigma-grid extrapolation either: frac(nu_q outside the frozen measured D2 grid) = 0.000 at every
+# iteration at -3 / 0 / +6 dB (grid sigma in [3.306e-02, 8.452e-01]).
+#
+# ---------------------------------------------------------------- INDEPENDENT PSD RE-CHECK
+# (h4-jswap_psd_independent.npz; held-out channel stream 11 -- NOT the published stream 10 -- noise seed
+#  20260921, and score.ExactGMMTorch as the GMM reference rather than t2_gmm.GMMPriorB, which closes the
+#  published run's own caveat (3).  n=96 q per nu, all nu in-grid.)
+#   nu        model        frac lmin(J)<0   frac lmax(J)>1   med #eig<0   med clip shift   med |J-J^H|/|J|
+#   2.60e-01  diffusion        0.698            0.948           1.0          1.995e+00        1.063e-01
+#             ExactGMM         0.000            0.792           0.0          2.692e-03        7.63e-16
+#   9.32e-02  diffusion        0.958            0.927           3.0          4.420e+00        1.119e-01
+#             ExactGMM         0.000            0.667           0.0          3.979e-04        4.51e-16
+#   3.35e-02  diffusion        1.000            0.979           7.0          2.349e+00        1.071e-01
+#             ExactGMM         0.000            0.562           0.0          2.444e-06        3.16e-16
+#   1.69e-02  diffusion        0.990            0.938           6.0          3.039e+00        1.724e-01*
+#             ExactGMM         0.000            0.510           0.0          2.091e-08        2.31e-16
+#   (*worst lmin at this nu; med |J-J^H|/|J| = 9.79e-02)
+# CORRECTION to the published claim (b): the clip FIRES at a comparable rate for both denoisers -- the
+# GMM's J has lmax>1 on 51-79% of held-out q, which also drives Lambda negative and trips the floor.
+# "Clip firing rate" is therefore NOT the discriminator.  The discriminator is that only the learned J is
+# INDEFINITE (frac lmin<0 = 0.70-1.00 vs 0.000), which makes (nu J)^-1 a large-magnitude NEGATIVE
+# operator, so eta = (nu J)^-1 hH - q/nu explodes while Lambda is floored to +1e-6 and clip='eta' keeps
+# the exploded eta.  That inconsistency, not the floor itself, moves the belief mean.
+# CORRECTION to its magnitude: the published shift of 6.96e+03 / 2.88e+03 / 8.70e+02 is measured ALONG
+# THE ALREADY-DIVERGED trajectory and is therefore partly a symptom.  Measured on held-out q, the clean
+# figure is 2.0-4.4 (still 3-6 orders above the GMM's 2.7e-03 - 2.1e-08).  Direction survives; magnitude
+# does not.
+#
+# ---------------------------------------------------------------- DOES IT PRODUCE THE FULL BLER SHAPE?
+# Yes.  Partition the published n=128 trials by whether NMSE ever exceeds 1 during the 16 iterations
+# (dscore|scorew):
+#   SNR   blowup rate   BLER | blew up   BLER | clean   product   observed BLER@16
+#   -3       0.836          0.953           0.333        0.852        0.852
+#    0       0.984          0.929           0.000        0.914        0.914
+#   +6       0.969          0.798           0.000        0.773        0.773
+# The blow-up rate RISES with SNR (the Jacobian gets more indefinite as nu shrinks: frac lmin<0
+# 0.70 -> 1.00 above), while the conditional BLER given a blow-up FALLS with SNR (the likelihood
+# recovers more of the block).  The product is non-monotone and peaks at 0 dB -- exactly the observed
+# shape, including NMSE > 1.  The mechanism accounts for the full pattern.
+#
+# ---------------------------------------------------------------- WOULD IT HAVE BROKEN THE GMM ARM?
+# No, and that is the point: the GMM's J is Cov[h|q]/nu computed in closed form, PSD by construction
+# (frac lmin<0 = 0.000 at every nu, worst lmin strictly positive, |J-J^H|/|J| ~ 1e-16).  The defect is
+# specific to the learned prior and is exactly what gate GD (full-Wirtinger-matrix relative Frobenius
+# error, 0.27-0.32 vs tol 0.20 on D1) already measured and failed.
+#
+# NOT A RESULT: d|scorew+psd / +clipmean / +gmmJ are diagnostic probes.  Their BLER was seen before any
+# pre-registration and none of them may enter a table on the strength of these numbers.

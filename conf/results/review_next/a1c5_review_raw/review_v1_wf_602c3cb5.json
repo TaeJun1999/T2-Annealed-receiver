@@ -1,0 +1,310 @@
+[
+ {
+  "lens": "stats-leakage",
+  "findings": [
+   {
+    "title": "1차 검정 H9 는 a1 쌍 하나만으로 '지지' 가 나올 수 있어, 문서가 분리하겠다는 '학습 난수' 를 분리하지 못한다",
+    "section": "§1 1차 검정 H9 / 머리말 목적 (ii) / §0 둘째 불릿",
+    "severity": "critical",
+    "evidence": "문장: \"(ii) 학습 난수(초기값·attempt 스트림)와 분리해서 다시 묻는다\", \"한 쌍의 차이는 augmentation 과 학습 난수를 가르지 못한다 → attempt 2·3 을 더해 3쌍으로 묻는다\", \"시행 i 마다 d_i = mean_{k} fail_aug,k − mean_{k} fail_ctrl,k … exact 양측 부호검정\". 시행 누출은 없다(4480 이후 미사용, P3 의 3200..3839 는 레거시 ckpt 만). 문제는 체크포인트 수준이다: 3단계 신호(16:38, p=0.0038)는 이미 시행 표본 잡음으로는 설명이 어렵고, 남는 대안 설명은 \"a1 aug ckpt 가 초기값 운으로 C5 에서 우연히 좋다\" 인데, 같은 6 체크포인트를 새 시행에 돌리면 a1 쌍의 차이는 그대로 재현된다(체크포인트 성질이지 시행 성질이 아니다). 3쌍 평균 부호검정에서 a2·a3 쌍이 동률인 시행은 sign(d) 가 a1 의 부호로 결정되므로 a1 이 단독으로 검정을 끌고 간다. 계산(analysis.sign_p, 쌍 간 불일치 독립 근사, n=1280): a1 쌍만 3단계 비율(16:38/640)이고 a2·a3 는 완전 귀무(대칭 불일치)여도 기대 a:b ≈ 122:163, n_d ≈ 285, p ≈ 0.018 → '지지'. 즉 a2·a3 가 아무 효과도 안 보여도 H9 는 지지가 되며, 이는 문서가 배제하려는 바로 그 대안가설과 구별되지 않는다. 부차 항목(쌍별 3개, '3 중 aug 가 적은 쌍 수')이 이를 잡을 수 있지만 \"판정 아님\" 으로 묶여 있다.",
+    "fix": "1차 검정을 새 체크포인트 쌍만으로 정의한다: d_i = mean_{k=2,3} fail_aug,k − mean_{k=2,3} fail_ctrl,k (또는 a2·a3 쌍 두 paired 검정 모두 aug 가 적고 p<0.05). a1 쌍의 새 시행 결과는 '개발 신호의 재현(체크포인트 성질)' 으로 보고 전용으로 내린다. 3쌍 평균을 유지하려면 판정 조건에 '3쌍 중 ≥2쌍에서 aug 가 적음' 과 'a1 을 뺀 2쌍 group 검정 p<0.05' 를 공동 조건으로 명시하고, 그렇지 않으면 머리말 (ii) 와 §0 둘째 불릿의 '학습 난수와 분리' 문구를 삭제하고 '6 체크포인트 조건부, 시행에 대한 추론' 으로 고쳐 쓴다."
+   },
+   {
+    "title": "예측 범위와 MDD 추정치가 서로·그리고 자료와 맞지 않는다 (n_d 40~120, 순 +15~+40)",
+    "section": "§3 예측 첫 불릿 / §1 1차 검정 H9 'MDD 는 보고(n_d 40~120 이면 순 14~24)'",
+    "severity": "major",
+    "evidence": "문장: \"H9: 지지 (aug 가 적음), 순 #d<0 − #d>0 = +15 ~ +40 (a1 쌍의 개발 신호 −22/640 을 1280 으로 늘리면 ≈ −44, 세 쌍 평균으로 줄어듦)\" 과 \"MDD 는 보고(n_d 40~120 이면 순 14~24)\". (a) n_d: 3단계 a1 쌍 하나가 n=640 에서 n_d=54 → n=1280 이면 그 쌍만으로 ≈108 이고, 2단계 C2 에서 group n_d(34)는 개별 쌍(16·17·21)의 약 1.9배였다. C5 에서 group n_d 는 ≈200~290 이 예상되므로 '40~120' 은 자료와 어긋난다. pair_tags.mdd: mdd(200)=30, mdd(250)=32, mdd(300)=36. (b) 따라서 예측 순 +15~+40 의 대부분이 MDD(30~36) 아래라 '지지' 예측과 양립하지 않는다(+15 면 판정 불가). (c) '세 쌍 평균으로 줄어듦' 은 방향이 반대다: 세 쌍이 모두 a1 과 같은 효과면 group 순은 커진다(계산: 기대 net ≈ +121, p≈6e-13); 순이 +41 근처로 '줄어드는' 것은 a2·a3 가 귀무일 때다(계산: +41). 즉 예측 범위는 위 critical 항목의 'a1 단독' 시나리오를 내장하고 있다.",
+    "fix": "n_d 예상을 자료에서 다시 유도해 적는다(a1 단독 ≈108, group ≈200~290, MDD 30~36). 예측을 두 갈래로 분리해 적는다: 'a2·a3 도 효과 있음 → group 순 ≥ +80', 'a1 만 효과 → group 순 ≈ +40, a2·a3 group 판정 불가'. 지지 예측을 유지하려면 순 범위 하한을 MDD 위로 올리거나, 하한이 MDD 아래일 수 있음을 명시한다."
+   },
+   {
+    "title": "테스트 집합 확증 규칙(3쌍 평균 × 3점 규칙 × power guard)을 실행할 코드가 없고 §5 선행 목록에도 빠져 있다",
+    "section": "§2 테스트 집합 확증 / §5 선행 작업",
+    "severity": "major",
+    "evidence": "문장: \"점마다 H9 와 같은 3쌍 평균 부호검정. 통과 = 3점 중 2점 이상에서 aug 가 적고 p < 0.05, 그리고 08_SPEC §2 power guard\". conf/code/pair_tags.py: rule3 는 `--aug member --ctrl member` 단일 쌍만 받고(run_rule3 는 disc(F[x],F[y])), group 모드에는 3점 규칙·power guard 출력이 없으며, `DECISION = (\"C2\", [-3, 0, 3])` 이라 C5 에서는 \"rule outcome (NOT the §3.1 step 4 verdict …)\" 만 찍힌다. §5 표의 pair_tags 확장 항목은 수용 검사·비트 동일 검사만 적고 group+rule3 결합·C5 판정점은 없다. 구현 없이 확증을 돌리면 판정을 손으로 조합하게 되어 재현·감사가 안 된다. 참고로 power guard 자체는 C5 에서 구속력이 없다: 테스트 집합 V1 실패율 −3/0/+3 dB = 0.400/0.186/0.121 (tables_D2_C.txt, n=2560 → 1024/476/310 블록) 이라 세 점 모두 n_d ≥ 6 은 자명하다 — 구멍은 아니지만 guard 가 이 문서에서 하는 일이 없음을 적어 두는 편이 맞다.",
+    "fix": "§5 에 'pair_tags.py group 모드에 --rule3 (판정점 셀·SNR 3점을 인자로, ≥2점 승·guard) 추가, 셀 C5 등록' 을 선행 작업으로 넣고, 확증 실행 명령과 함께 판정 명령을 §2 에 고정한다. guard 가 C5 에서 비구속임을 한 줄로 적는다."
+   },
+   {
+    "title": "발산·중간 `_best.pt`·'학습 종료 감지' 의 처리가 비어 있어 발산한 attempt 의 체크포인트가 유효 쌍으로 들어갈 수 있다",
+    "section": "§1 결측·발산 처리 / §1 학습 (a2·a3) / §5 run_a1c5.sh",
+    "severity": "major",
+    "evidence": "문장: \"attempt 가 §3d 로 발산하거나 `_best.pt` 를 남기지 못하면 그대로 기록한다. H9 는 3쌍이 모두 있을 때만 판정한다\", \"학습 종료 감지 후 자동 실행\". score.py 1020~1030: `_best.pt` 는 val 개선 epoch 마다 저장되고 발산(stop='diverged')으로 끝나도 삭제되지 않는다(발산은 min_epochs 를 무시하므로 best epoch 이 200 미만일 수 있다). 지금도 ckpt_review_next/ 에 aug/ctrl_N160000_a{2,3}_best.pt 가 이미 존재한다(학습 중, epoch ≈ 310~330). CHANGELOG §5: \"train이 diverged로 끝나도 exit 0\" → run_a1c5_train.sh 는 발산도 \"done\" 으로 기록한다. 따라서 '발산 or _best 없음' 이라는 이분법에 '발산했지만 _best.pt 는 있음' 이 빠져 있고, 종료 감지를 A1C5_TRAIN_DONE 만으로 하면 발산 ckpt 나(더 이르게 트리거되면) 학습 중 ckpt 가 평가된다. `ckpt_identity(best)['epoch'] == ckpt_identity(last)['best_epoch']` 검사도 이 경우를 걸러 주지 못한다.",
+    "fix": "§1 에 명시: 쌍 자격 = last 파일 stopped_by ∈ {patience, max_epochs}, aborted=False, 발산 아님, `_best.pt` 존재, best.epoch == last.best_epoch — 하나라도 어긋나면 그 attempt 는 '자격 없음' 으로 기록하고 H9 는 판정 불가(쌍 부족). run_a1c5.sh 의 트리거를 'A1C5_TRAIN_DONE 뒤 각 last 파일의 stopped_by 확인' 으로 고정한다."
+   },
+   {
+    "title": "통과 시 문장 범위가 3쌍·비고정 초기값 설계가 뒷받침하는 것보다 넓다",
+    "section": "§2 '통과했을 때의 문장 범위'",
+    "severity": "major",
+    "evidence": "문장: \"위상 augmentation 은 Tp=3 (< Nt) 셀에서, 3 attempt 평균으로, V1 의 실패를 줄인다\". 부호검정의 n 은 시행이고 체크포인트 6개는 고정 조건이다(문서 스스로 '비교는 3단계와 같이 초기값 차이 포함'). 3 attempt 는 attempt 수준 표본 3 이며 p 값은 attempt 간 분산을 반영하지 않는다. 위 critical 항목대로 a1 단독으로도 통과가 가능하므로, '위상 augmentation 은 … 줄인다' 는 일반 명제는 이 설계로 얻을 수 없다.",
+    "fix": "문장을 '이 3 aug/ctrl 체크포인트 쌍(초기값 비고정)에서, 시행에 대한 부호검정으로, C5 의 통과한 SNR 에 한해 aug 평균 실패가 적었다' 로 제한하고, 일반화(augmentation 자체의 효과)는 attempt 수준 표본이 필요함을 §2 에 적는다."
+   },
+   {
+    "title": "수용 검사의 n 이 점에 묶여 있지 않아 판정점의 부분 실행(16 청크)이 유효로 통과한다",
+    "section": "§5 pair_tags 수용 검사 확장 / §1 판정 집합",
+    "severity": "minor",
+    "evidence": "문장: \"skip ≥ 4480 인 점은 청크 집합이 정확히 [(4480+40k, 40)] (n = 1280 또는 640, 등록값) 일 때만 유효\". '1280 또는 640' 을 점과 무관하게 받으면 C5 −3 dB 가 16 청크만 끝난 상태(예: 실행 중단·일부 태그 미완)도 n=640 으로 수용되어 절반 표본으로 판정이 나올 수 있다. §1 표의 검사 문장은 판정점 k=0..31 만 적고 보고 전용 2점의 규칙은 §5 에만 있다.",
+    "fix": "수용 검사를 점별로 고정: (C5, −3) = 정확히 32 청크, (C5, 0)·(C2, −3) = 정확히 16 청크; 다른 조합은 무효. §1 표에 같이 적는다."
+   },
+   {
+    "title": "'role=best 검사는 기존 그대로' 는 사실이 아니다 — pair_tags 는 역할을 검사하지 않는다",
+    "section": "§5 pair_tags 수용 검사 확장",
+    "severity": "minor",
+    "evidence": "문장: \"6 태그 동일 청크 목록·run 파라미터·체크포인트 1개(`role=best`) 검사는 기존 그대로\". pair_tags.py 에 'role' 문자열은 없다(chunk_ids 는 ckpt id 문자열 하나만 모으고, 태그당 id 가 2개 이상이면 거부할 뿐). v3 §0 의 best==last.best_epoch 검사는 run_manifest.py 가 기록만 한다. 어떤 태그가 실수로 `aug_N160000_a2.pt`(last) 로 돌면 pair_tags 는 통과시킨다.",
+    "fix": "pair_tags 확장 항목에 'ckpt id 에 role=best 가 없거나 epoch != best_epoch 이면 거부' 를 추가하거나, 그 검사가 run_a1c5.sh/DECISIONS 기록 단계에서 이뤄짐을 명시한다."
+   },
+   {
+    "title": "수용 검사 실패(b*·genie 불일치, 청크 결손, 예외)의 후속 절차가 없다",
+    "section": "§1 실행 행 '수용 검사' / §1 결측·발산 처리",
+    "severity": "minor",
+    "evidence": "문장: \"b*·genie 는 … 6 태그에서 비트 동일해야 한다(수용 검사)\", \"아니면 무효\". '무효' 다음에 무엇을 하는지(같은 태그로 결손 청크만 재실행? 새 태그로 전부 재실행? 판정 포기?)가 없다. runner 는 완료 청크를 건너뛰고 수신기는 결정적이므로 '같은 태그로 결손 청크만 재실행 → 재검사' 가 자연스럽지만, 미리 적지 않으면 결과를 본 뒤 고르게 된다. 예외(raised)는 arm 별로 NaN 처리되므로 genie 불일치의 원인이 될 수 없고, 불일치는 코드·fit 심볼릭 링크 오류를 뜻한다 — 그 경우의 처리(6 태그 전부 새 태그 재실행)도 없다.",
+    "fix": "§1 에 추가: 청크 결손·불일치 → 해당 청크를 같은 태그로 재실행 후 재검사(최대 1회); b*·genie 가 태그 간 다르면 원인을 DECISIONS 에 적고 6 태그 전부를 새 태그로 재실행, 이전 태그는 보존·미사용."
+   }
+  ],
+  "verdicts": [
+   {
+    "title": "1차 검정 H9 는 a1 쌍 하나만으로 '지지' 가 나올 수 있어, 문서가 분리하겠다는 '학습 난수' 를 분리하지 못한다",
+    "real": true,
+    "severity": "critical",
+    "reason": "확인됨. 문제 문장: 머리말 \"(ii) 학습 난수(초기값·attempt 스트림)와 분리해서 다시 묻는다\", §0 \"한 쌍의 차이는 augmentation 과 학습 난수를 가르지 못한다 → attempt 2·3 을 더해 3쌍으로 묻는다\", §1 \"d_i = mean_{k=1..3} fail_aug,k − mean_{k=1..3} fail_ctrl,k … exact 양측 부호검정\". 시행 누출은 없다(파일명 확인: C5 −3 은 2560..3199 개발, 3200..3839 P3 레거시 V1·b* 만; 4480 이후 미사용). 그러나 검정의 n 은 시행이고 6 체크포인트는 고정 조건이므로, a1 aug 체크포인트가 초기값 운으로 C5 에 유리하다는 대안가설은 새 시행에서도 그대로 재현된다. group_counts 는 a2·a3 가 동률인 시행의 부호를 a1 이 결정하게 한다. 몬테카를로(pair_tags.group_counts + analysis.sign_p, n=1280, 쌍 간 독립): a1 쌍만 16:38/640 비율이고 a2·a3 는 27:27 대칭 귀무일 때 기대 net ≈ +41, n_d ≈ 285, p 중앙값 0.019, 반복의 65% 에서 p<0.05 → '지지'. 즉 a2·a3 가 아무 효과도 없어도 H9 는 지지될 수 있고, 이는 문서가 배제하려는 대안가설과 구별되지 않는다. 검정 정의 자체는 v3 §3.1 2단계와 동일해 동결 규칙과 충돌은 없으나, 이 문서가 새로 붙인 목적 (ii) 와 §2 문장 범위는 이 검정으로 얻을 수 없다. 부차 항목(쌍별 3개)이 이를 잡을 수 있으나 '판정 아님' 이다.",
+    "fix": "1차 검정을 새 체크포인트 쌍만으로 정의한다(d_i = mean_{k=2,3} fail_aug,k − mean_{k=2,3} fail_ctrl,k, 또는 'a1 을 뺀 2쌍 group p<0.05 이고 aug 가 적음' 을 3쌍 group 과 공동 조건으로). a1 쌍의 새 시행 결과는 '개발 신호의 재현(체크포인트 성질)' 보고 전용으로 내린다. 3쌍 평균 단독 판정을 유지하려면 머리말 (ii) 와 §0 둘째 불릿의 '학습 난수와 분리' 문구를 삭제하고 '이 6 체크포인트 조건부, 시행에 대한 추론' 으로 고쳐 쓴다. 어느 쪽이든 커밋 전에 §1 에 고정한다."
+   },
+   {
+    "title": "예측 범위와 MDD 추정치가 서로·그리고 자료와 맞지 않는다 (n_d 40~120, 순 +15~+40)",
+    "real": true,
+    "severity": "major",
+    "reason": "확인됨. 문제 문장: §1 \"MDD 는 보고(n_d 40~120 이면 순 14~24)\", §3 \"순 #d<0 − #d>0 = +15 ~ +40 (a1 쌍의 개발 신호 −22/640 을 1280 으로 늘리면 ≈ −44, 세 쌍 평균으로 줄어듦)\". (a) n_d: a1 쌍 하나가 n=640 에서 n_d=54 → n=1280 이면 ≈108(시뮬 108±16); 2단계 group n_d(34)는 개별 쌍(16·17·21) 평균의 1.9배였다. C5 에서 group n_d 는 시뮬 ≈ 285(5~95% 261~309) 로 '40~120' 과 어긋나며 mdd(200)=30, mdd(250)=32, mdd(300)=36 이다. (b) 따라서 예측 순 +15~+40 의 대부분이 MDD 아래여서 '지지' 예측과 양립하지 않는다(+15 면 판정 불가). (c) '세 쌍 평균으로 줄어듦' 은 방향이 반대다: 세 쌍이 모두 a1 과 같은 효과면 group net ≈ +121(p≈6e-13)로 커지고, +41 로 '줄어드는' 것은 a2·a3 가 귀무일 때다 — 예측이 1번 항목의 'a1 단독' 시나리오를 내장하고 있다. 예측은 '빗나가면 그대로 쓴다' 조항이라 판정을 바꾸지는 않지만, §1 의 MDD 수치는 틀리고 예측은 자체 판정 규칙과 모순된다.",
+    "fix": "n_d 예상을 자료에서 다시 유도해 적는다(a1 단독 ≈108, group ≈260~310, MDD 30~36). 예측을 두 갈래로 분리한다: 'a2·a3 도 효과 있음 → group 순 ≥ +80', 'a1 만 효과 → group 순 ≈ +40, a1 제외 2쌍은 판정 불가'. 지지 예측을 유지하려면 순 범위 하한을 MDD 위로 올리거나 하한이 MDD 아래일 수 있음을 명시한다."
+   },
+   {
+    "title": "테스트 집합 확증 규칙(3쌍 평균 × 3점 규칙 × power guard)을 실행할 코드가 없고 §5 선행 목록에도 빠져 있다",
+    "real": true,
+    "severity": "minor",
+    "reason": "사실은 맞다: pair_tags.py rule3 는 `--aug member --ctrl member` 단일 쌍만 받고, group 모드에는 3점 규칙·guard 출력이 없으며, DECISION=(\"C2\",[-3,0,3]) 이라 C5 에서는 \"rule outcome (NOT the §3.1 step 4 verdict …)\" 만 찍힌다. §5 표에도 이 확장이 없다. 다만 '실행 불가' 는 과장이다: `group --cell C5 --snr -3 0 3` 을 테스트 집합 태그로 돌리면 split_of 가 [0,2560) 을 TEST OK 로 수용하고 점마다 PRIMARY 줄(p, a:b, n_d)이 나오므로, '3점 중 2점 aug 가 적고 p<0.05' 와 guard 는 그 출력에서 결정적으로 조합된다. power guard 는 C5 에서 비구속(테스트 V1 실패율 0.400/0.186/0.121, n=2560 → 불일치 수백). 따라서 판정이 틀리거나 조작될 여지는 없고, P3 선례(p3_rules --confirm 을 테스트 결과 전 커밋)에 비해 감사 가능성이 떨어지는 문제다.",
+    "fix": "§5 에 'pair_tags.py group 모드에 --rule3(판정 셀·SNR 3점 인자, ≥2점 승, guard) 추가 및 C5 판정점 등록' 을 선행 작업으로 넣고 §2 에 판정 명령을 고정한다. 최소한 §2 에 'group 출력의 PRIMARY 줄 3개를 3점 규칙으로 조합한다' 와 'guard 는 C5 에서 비구속' 을 한 줄로 적는다."
+   },
+   {
+    "title": "발산·중간 `_best.pt`·'학습 종료 감지' 의 처리가 비어 있어 발산한 attempt 의 체크포인트가 유효 쌍으로 들어갈 수 있다",
+    "real": true,
+    "severity": "major",
+    "reason": "확인됨. 문제 문장: §1 \"attempt 가 §3d 로 발산하거나 `_best.pt` 를 남기지 못하면 그대로 기록한다. H9 는 3쌍이 모두 있을 때만 판정한다\", §5 \"학습 종료 감지 후 자동 실행\". score.py 1020~1030: `_best.pt` 는 val 개선 epoch 마다 저장되고 stop='diverged' 로 끝나도 삭제되지 않으며 발산은 min_epochs 를 무시한다(주석 'A DIVERGED run is a COMPLETED attempt'). train_ctrl.py 135~138: best 가 있으면 발산해도 exit 0 → run_a1c5_train.sh 는 'done' 을 찍는다(CHANGELOG §5 'train이 diverged로 끝나도 exit 0'). 지금 ckpt_review_next/ 에 aug/ctrl_N160000_a{2,3}_best.pt 가 이미 있다(학습 중, epoch 323~346). 실패 시나리오: aug_a3 가 epoch 400 에서 발산해 epoch 330 의 `_best.pt` 를 남기면, '발산 → 그대로 기록' 과 '3쌍이 모두 있음(파일 존재)' 두 읽기가 각각 판정 불가 / 판정 진행으로 갈린다. 또 '학습 종료 감지' 가 정의되지 않아(A1C5_TRAIN_DONE 로그 줄뿐) 조기 트리거 시 학습 중 ckpt 가 평가될 수 있고, best.epoch == last.best_epoch 검사는 발산 케이스를 거르지 못한다.",
+    "fix": "§1 에 쌍 자격을 명시: last 파일 stopped_by ∈ {patience, max_epochs}, aborted=False, `_best.pt` 존재, ckpt_identity(best).epoch == last.best_epoch — 하나라도 어긋나면 해당 attempt 는 자격 없음, H9 는 판정 불가(쌍 부족). run_a1c5.sh 트리거를 'A1C5_TRAIN_DONE 확인 후 4개 last 파일의 stopped_by·aborted 를 읽어 DECISIONS 에 기록한 뒤 실행' 으로 고정한다."
+   },
+   {
+    "title": "통과 시 문장 범위가 3쌍·비고정 초기값 설계가 뒷받침하는 것보다 넓다",
+    "real": true,
+    "severity": "minor",
+    "reason": "확인되나 1번 항목의 파생이다. 문제 문장: §2 \"위상 augmentation 은 Tp=3 (< Nt) 셀에서, 3 attempt 평균으로, V1 의 실패를 줄인다\". 부호검정의 n 은 시행이고 p 는 attempt 간 분산을 반영하지 않으며(문서 스스로 '초기값 차이 포함'), 1번 시뮬대로 a1 단독으로도 통과가 가능하므로 주어가 '위상 augmentation' 인 일반 명제는 얻을 수 없다. 다만 문장에 '3 attempt 평균으로'·'통과한 SNR 에 한정' 이 이미 있어 과장의 폭은 좁고, 1번의 수정(a2·a3 공동 조건)이 들어가면 대부분 해소된다.",
+    "fix": "문장을 '이 3 aug/ctrl 체크포인트 쌍(초기값 비고정)에서, 시행에 대한 부호검정으로, C5 의 통과한 SNR 에 한해 aug 의 평균 실패가 적었다' 로 제한하고, augmentation 자체의 효과(일반화)는 attempt 수준 표본이 필요함을 §2 에 한 줄 적는다. 1번을 'a1 제외 2쌍 공동 조건' 으로 고치면 현 문장을 유지해도 된다."
+   },
+   {
+    "title": "수용 검사의 n 이 점에 묶여 있지 않아 판정점의 부분 실행(16 청크)이 유효로 통과한다",
+    "real": true,
+    "severity": "minor",
+    "reason": "부분적으로 확인. §1 표는 판정 집합에 '정확히 {(4480+40k,40): k=0..31}', 보고 전용 2점에 'skip 4480..5119 (n=640, 청크 16×40)' 로 점별 n 을 이미 고정하고 있어 문서 수준의 애매함은 없다. 그러나 §5 의 코드 명세 \"청크 집합이 정확히 [(4480+40k, 40)] (n = 1280 또는 640, 등록값)\" 대로 구현하면, C5 −3 dB 가 16 청크만 끝난 상태(중단·일부 태그 미완)에서도 pair_tags 가 'acceptance OK' 를 찍는다 — §1 규칙 위반을 코드가 잡지 못하는 구멍이며 사람이 §1 과 대조해야 한다. 판정 조작 가능성은 낮지만(runner 명령이 --n 1280 으로 고정) 자동 검사의 목적에 어긋난다.",
+    "fix": "§5 코드 명세를 점별로 고정: (C5, −3) = 정확히 32 청크, (C5, 0)·(C2, −3) = 정확히 16 청크, 그 외 조합은 INVALID. §1 표의 검사 문장에도 보고 전용 2점의 16 청크 규칙을 같이 적는다."
+   },
+   {
+    "title": "'role=best 검사는 기존 그대로' 는 사실이 아니다 — pair_tags 는 역할을 검사하지 않는다",
+    "real": true,
+    "severity": "minor",
+    "reason": "확인됨. 문제 문장: §5 \"6 태그 동일 청크 목록·run 파라미터·체크포인트 1개(`role=best`) 검사는 기존 그대로\". pair_tags.py 에 'role' 문자열은 없다: chunk_ids 는 meta|stagec_ckpt_id 문자열을 모아 한 태그 안에서 2개 이상이면 거부할 뿐이고, role=best 는 runner.stagec_id_str 이 만든 문자열의 일부로 출력만 된다. run_manifest.py 의 검사도 legacy-last 의 epoch≠best_epoch 표기뿐이다. 실패 시나리오: 어떤 태그가 실수로 `aug_N160000_a2.pt`(last) 로 돌면 pair_tags 는 그대로 통과시키고 헤더에 role=last 가 찍힐 뿐이며, 사람이 읽지 않으면 last 와 best 가 섞인 3쌍 평균이 판정된다.",
+    "fix": "pair_tags 확장 항목에 'ckpt id 문자열에 role=best 가 없거나 epoch != best_epoch 이면 거부' 를 추가하거나, 그 검사가 run_a1c5.sh 의 identity 기록 단계에서 이뤄짐을 §5 에 명시하고 '기존 그대로' 문구를 지운다."
+   },
+   {
+    "title": "수용 검사 실패(b*·genie 불일치, 청크 결손, 예외)의 후속 절차가 없다",
+    "real": true,
+    "severity": "minor",
+    "reason": "확인되나 위험은 작다. 문제 문장: §1 \"b*·genie 는 … 6 태그에서 비트 동일해야 한다(수용 검사)\", \"아니면 무효\". '무효' 뒤의 절차(같은 태그로 결손 청크 재실행 / 새 태그 전부 재실행 / 판정 포기)가 없다. 수신기는 결정적(CPU complex128, 고정 seed)이므로 결손 청크를 어느 방식으로 다시 돌려도 V1 수치는 같아 결과를 본 뒤 고르는 조작은 성립하지 않는다 — 원 지적의 '미리 적지 않으면 결과를 본 뒤 고르게 된다' 는 이 점에서 약하다. 남는 실제 문제는 b*·genie 의 태그 간 불일치가 코드·fit 심볼릭 링크 오류(DECISIONS 2026-09-22 05:55 의 부분집합 b* 선례)를 뜻하는데 그 경우의 처리(원인 기록, 6 태그 새 태그 재실행, 이전 태그 보존)가 없다는 점이다.",
+    "fix": "§1 에 추가: 청크 결손 → 같은 태그로 결손 청크만 재실행 후 재검사(최대 1회, runner 가 완료 청크를 건너뜀); b*·genie 가 태그 간 다르면 원인을 DECISIONS 에 적고 6 태그 전부를 새 태그로 재실행, 이전 태그는 보존·미사용; 재검사도 실패하면 판정 불가(수용 실패)."
+   }
+  ]
+ },
+ {
+  "lens": "rules-executability",
+  "findings": [
+   {
+    "title": "GB′ command cannot compare against kron K=1024@1.6e5: `runner.py gate` ignores --ntrain, and without --tag it overwrites the pre-registered gate_D2.txt",
+    "section": "§1 보고 전용 지표 (GB′) / §5",
+    "severity": "major",
+    "evidence": "Draft: \"GB′ (`runner.py gate --testbed D2 --ckpt <ckpt> --ntrain 160000 --tag …`; 참조 b* = kron K=1024@1.6e5)\". In conf/code/runner.py `_block_D2` builds the reference with `A.module_h_priors(a.testbed, prior, Nr, Nt)` — no ntrain argument, so `arms.gmm_selection` uses N_TRAIN=10000 regardless of --ntrain. With `--tag X` and `gmm_fits_D2_X -> gmm_fits_D2_B16e4k`, `load_fits` looks for `*_n10000.npz`, which do not exist in gmm_fits_D2_B16e4k (only `_n160000.npz`) -> FileNotFoundError, no GB′. If someone drops --tag to make it run, D2_FITS = gmm_fits_D2 (kron K=512 @1e4, the wrong reference) AND `cmd_gate` writes `tagged(results/gate_D2.txt)` = conf/results/gate_D2.txt, overwriting the frozen 2026-09-21 gate record (§0 결과 보존 violation). No GB′ for aug_/ctrl_N160000_a1 exists under results/review_next either, so the command has never been exercised.",
+    "fix": "Replace the command with a small script (or a `--gmm-ntrain` plumb in cmd_gate) that does what diag_p1_heldout.py does: `R._init('B16e4k'); hp,_,llv,bstar,_ = A.module_h_priors('D2','S2',8,4, ntrain=160000); assert bstar=='kron' and kron_K==1024; score.gb_prime(ckpt, hp['kron'], 'D2', 8, 4, prior='S2', device='cuda')` and write to results/review_next/gbprime_<tag>.txt. State in §1 that runner.py gate must not be used without --tag."
+   },
+   {
+    "title": "Test-set confirmation is not executable: no pair_tags mode implements group (3-pair mean) + 3-point rule + power guard, and rule3 hardcodes C2; runner command for the test set is not given",
+    "section": "§2 테스트 집합 확증 / §5",
+    "severity": "major",
+    "evidence": "Draft: \"점마다 H9 와 같은 3쌍 평균 부호검정. 통과 = 3점 중 2점 이상에서 aug 가 적고 p < 0.05, 그리고 08_SPEC §2 power guard\". pair_tags.py `rule3` takes `--aug`/`--ctrl` as SINGLE members (`type=member`, not nargs='+'), computes pairwise `disc()` not `group_counts()`, and prints \"NOT the §3.1 step 4 verdict: its decision points are C2 [-3,0,3]\" for any other cell (`DECISION = (\"C2\", [-3.0, 0.0, 3.0])`). `group` mode has no 2-of-3 / power-guard logic. §5 lists pair_tags extensions only for the skip-4480 acceptance and bit-identity, not for this. The confirmation runner invocation (`--skip0 0 --n 2560 --chunk 40`, tags) is not written, although `split_of` accepts a test point only as the full contiguous [0, 2560).",
+    "fix": "Add to §5 a prerequisite 'pair_tags.py group3 (or rule3 --aug/--ctrl nargs=+)': per point d_i = mean_aug − mean_ctrl, n_d = #{d≠0}, PASS iff ≥2 of the 3 points have #d<0 > #d>0 with p<0.05 and all 3 points present with n_d ≥ 6 at ≥2 points; decision cell/SNRs C5 −3/0/+3 passed explicitly. Write the runner command (`runner.py run --testbed D2 --cell C5 --snr -3 0 3 --prior S2 --skip0 0 --n 2560 --chunk 40 --ntrain 160000 --stagec-ckpt … --arm M-ours-dscore-C-V1 R5-genie --tag review_next_A1C5test_<aug|ctrl>_a<k>`) and the genie bit-identity check across the 6 tags."
+   },
+   {
+    "title": "Acceptance-check spec in §5 (\"n = 1280 또는 640\") lets a truncated judging run (16 chunks, n=640) pass as valid",
+    "section": "§5 pair_tags.py 수용 검사 확장 (vs §1 판정 집합)",
+    "severity": "major",
+    "evidence": "§1: \"6개 태그 모두 raw 청크 집합이 정확히 {(4480+40k, 40) : k=0..31}, 아니면 무효\" (judging point). §5: \"skip ≥ 4480 인 점은 청크 집합이 정확히 [(4480+40k, 40)] (n = 1280 또는 640, 등록값) 일 때만 유효\". If the extension accepts either 16 or 32 chunks at any point (the literal reading), a C5 −3 dB run interrupted after the first 16 chunks in all 6 tags (or launched with --n 640 by mistake) passes acceptance and H9 is judged on n=640 instead of the registered 1280 — a different n and p, and a stopping point that can be chosen. Current code would at least print INVALID (`split_of`: `ch == DEV_CHUNKS` fails), so the extension must not loosen this.",
+    "fix": "Key the required chunk list on the point: C5 −3 dB -> exactly 32 chunks from 4480 (n=1280); C5 0 dB and C2 −3 dB -> exactly 16 chunks from 4480 (n=640); anything else INVALID (refuse, not just label). Print the split as 'A1C5 judging set' / 'A1C5 report-only', not DEVELOPMENT."
+   },
+   {
+    "title": "Draft claims an existing `role=best` check in pair_tags.py; only 'one checkpoint id per tag' is checked",
+    "section": "§5 pair_tags.py 수용 검사 확장; §1 비교 대상",
+    "severity": "major",
+    "evidence": "Draft: \"6 태그 동일 청크 목록·run 파라미터·체크포인트 1개(`role=best`) 검사는 기존 그대로\". pair_tags.py `load()` only refuses `if len(i) > 1` (mixed checkpoints within a tag); `chunk_ids` never inspects `role=`. A tag evaluated with `aug_N160000_a2.pt` (last) instead of `_best.pt` passes every automated check and enters the H9 mean; the only trace is the `stage C ckpt:` header line a human must read. §1 fixes \"역할은 모두 `_best.pt`\" and §0 of v3 requires best weights, so the acceptance must enforce it.",
+    "fix": "In the extension, parse `role=` from `meta|stagec_ckpt_id` and refuse unless every tag's id has `role=best`; also assert the six sha256[:16] equal the values recorded in DECISIONS.md before evaluation (pass them via a `--expect-ckpt TAG=sha` option or a small JSON)."
+   },
+   {
+    "title": "Divergence clause is ambiguous: a §3d-diverged attempt still leaves a `_best.pt`, so \"3쌍이 모두 있다\" has two readings; best/last identity check not required",
+    "section": "§1 결측·발산 처리",
+    "severity": "major",
+    "evidence": "Draft: \"attempt 가 §3d 로 발산하거나 `_best.pt` 를 남기지 못하면 그대로 기록한다. **H9 는 3쌍이 모두 있을 때만 판정**한다\". score.train saves `_best.pt` at every improvement before a later divergence (a DIVERGED run is 'a COMPLETED attempt', score.py ~L1001), and train_ctrl.py exits 0 either way. If e.g. aug_a3 diverges at epoch 700 with a `_best.pt`@640, reading A ('pair exists, use _best.pt') and reading B ('diverged -> pair missing -> 판정 불가(쌍 부족)') give different verdicts, and the choice can be made after seeing the other pairs. Likewise §0 (v3) requires `ckpt_identity(best)['epoch'] == ckpt_identity(last)['best_epoch']` before use; the draft does not say what happens if this fails (a run killed between the two saves).",
+    "fix": "Fix one reading before commit: 'an attempt with stopped_by=diverged (or aborted) counts as missing even if a _best.pt exists; a _best.pt whose epoch != last.best_epoch also counts as missing'. State the consequence explicitly: any missing pair -> H9 = 판정 불가(쌍 부족) unless the user approves attempt 4 before any evaluation; the secondary pairwise tests are still reported for the pairs that exist."
+   },
+   {
+    "title": "b*/genie bit-identity 'acceptance' does not say which fields or what happens on failure",
+    "section": "§1 실행 / §5",
+    "severity": "minor",
+    "evidence": "Draft: \"b*·genie 는 체크포인트와 무관하므로 6 태그에서 **비트 동일**해야 한다(수용 검사: 같은 시행을 봤다는 증거)\". Not stated: which arrays (blk_err only, or all KEYS_RAW as P3 §7.4 did), which tag is the reference, and whether a mismatch invalidates the run or is only reported. runner.py gives no reason to expect a mismatch (arms take no rng; OMP=1; P3 confirmed V1 bit-identity across runs), but if one occurs the draft has no rule.",
+    "fix": "Specify: all KEYS_RAW arrays of M-ours-bstar and R5-genie at every point must be bit-identical across the 6 tags (reference = aug_a1 tag); a mismatch -> the run is INVALID and is re-run after the cause is recorded, never judged."
+   },
+   {
+    "title": "Prediction/MDD ranges assume n_d 40–120, but the group test at C5 −3 dB n=1280 will likely have n_d ≈ 200, i.e. MDD ≈ 30, above the low end of the predicted effect",
+    "section": "§1 1차 검정 H9 (MDD 보고), §3 예측",
+    "severity": "minor",
+    "evidence": "Draft: \"MDD 는 보고(n_d 40~120 이면 순 14~24)\" and \"순 #d<0 − #d>0 = +15 ~ +40\". Step 2 showed the group test's n_d ≈ 2× a single pair's (34 vs 16–21). Step 3 gave n_d=54 for one pair on 640 trials at C5 −3 dB, so the group n_d on 1280 trials is ≈ 200–220; `pair_tags.mdd(200)=30, mdd(220)=32` (computed). The predicted +15..+29 half of the range would be 판정 불가, contradicting the headline prediction 'H9: 지지'. Report-only, no rule error.",
+    "fix": "Quote MDD for n_d 150–250 (26–32) and either narrow the prediction to net ≥ +30 or say explicitly that the lower half of the range is expected to be 판정 불가."
+   },
+   {
+    "title": "H9 outcome set omits the reverse-direction significant case",
+    "section": "§1 1차 검정 H9 / §2",
+    "severity": "minor",
+    "evidence": "Draft: \"결과는 셋 중 하나: 지지(p < 0.05 이고 #d<0 > #d>0) / 판정 불가(p ≥ 0.05, n_d ≥ 6) / UNDECIDED(n_d < 6)\". p < 0.05 with #d>0 > #d<0 (aug worse) matches none of the three; §2's table maps only 지지 / 판정 불가 / UNDECIDED. P3 §7 had to invent '반대 방향 → 지지 아님' after the fact.",
+    "fix": "Add a fourth outcome '반대 방향 유의(p < 0.05, #d>0 > #d<0) → 지지 아님, A1 닫음' to §1 and §2."
+   },
+   {
+    "title": "Sign convention of 'net' in §3 is the opposite of pair_tags output and is mixed within one bullet",
+    "section": "§3 예측",
+    "severity": "minor",
+    "evidence": "\"순 #d<0 − #d>0 = +15 ~ +40 (a1 쌍의 개발 신호 −22/640 을 1280 으로 늘리면 ≈ −44 …)\". pair_tags prints net(a−b) with a=#d>0, so aug-better is NEGATIVE (−22 in A1s3); the draft's +15~+40 uses the reversed sign in the same sentence as −22/−44.",
+    "fix": "Use pair_tags' convention throughout: 'net(a−b) = −15 ~ −40 (aug 가 적음)', and quote the a1 signal as −22 → ≈ −44."
+   },
+   {
+    "title": "ε_φ command is incomplete: diag_p1_heldout.py refuses without a distinct --out, and its verdict lines are labelled NOT A VERDICT",
+    "section": "§1 보고 전용 지표 (ε_φ)",
+    "severity": "minor",
+    "evidence": "Draft: \"ε_φ (`diag_p1_heldout.py --ckpt <ckpt> …` 의 §2.3 위상 비, held-out)\". diag_p1_heldout.py defaults `--out` to results/review_next/p1_heldout, which exists -> SystemExit('exists -- pass --overwrite'); `--overwrite` would destroy the P1 record. Defaults for the GMM reference are right (B16e4k, 160000, asserts kron K=1024). A non-registered ckpt sets `registered=False` and prints '[NOT A VERDICT …]' — fine for report-only but should be said.",
+    "fix": "Write the full command: `diag_p1_heldout.py --ckpt conf/ckpt_review_next/<ckpt> --out results/review_next/p1_heldout_<tag> --device cuda` (no --overwrite), and note that the phase ratio is read from the `phase|` block and is report-only."
+   },
+   {
+    "title": "Cost formula double-counts the 16 iterations",
+    "section": "§4 비용",
+    "severity": "minor",
+    "evidence": "\"6 태그 × (1280 + 640 + 640) 시행 × 16 반복 × (V1 ≈ 1.0 s + b* ≈ 0.75 s + genie) ≈ 8 CPU-h\". The 1.0 s / 0.75 s figures are per 16-iteration block (complexity_moduleH_ep.txt, P3 §1). 6×2560×1.75 s ≈ 7.5 CPU-h matches '≈ 8' only without the ×16; with it the formula gives ≈ 120 CPU-h.",
+    "fix": "Delete '× 16 반복' (or write 'per 16-iteration block')."
+   },
+   {
+    "title": "Relative --stagec-ckpt path and training-start time are cwd/log dependent",
+    "section": "§1 실행; §1 학습",
+    "severity": "minor",
+    "evidence": "\"--stagec-ckpt conf/ckpt_review_next/<ckpt>\": runner.py resolves the path as given or under conf/, so from cwd conf/ (where run_h0_a1s3.sh and run_a1s2.sh run) it becomes conf/conf/ckpt_review_next/… and the run is refused; earlier scripts used absolute paths. Also \"2026-09-23 09:42 CDT 시작\": run_a1c5_train.log says 'start (git f5856204)' at 09:38 CDT and the four train logs open 23:39 KST (= 09:39 CDT).",
+    "fix": "Use the absolute path /home/HTJ/t2/conf/ckpt_review_next/<ckpt> in §1 and run_a1c5.sh; correct the start time to 09:38 CDT."
+   },
+   {
+    "title": "Relation to the frozen v3 §3.1 steps 4–5 should be stated as an addition, not left implicit",
+    "section": "§2 / header",
+    "severity": "minor",
+    "evidence": "v3 §3.1 step 4 fixes the confirmation as 'C2 −3/0/+3 dB, only if step 3 C2 −3 dB p<0.05' and step 5 as headline replacement; the draft registers a confirmation on C5 −3/0/+3 with no headline change. It says \"이 문서는 2단계·3단계의 결과를 바꾸지 않는다\" but never says that v3 steps 4–5 were not triggered (C2 −3 dB 판정 불가) and remain closed, and that this document is a new, separate registration rather than a re-reading of step 4.",
+    "fix": "Add one sentence to §2: 'v3 §3.1 4·5단계는 3단계 C2 −3 dB 판정 불가로 발동하지 않았고 그대로 닫혀 있다. 이 문서의 확증은 그 규칙의 변경이 아니라 별도 등록(추가)이며, 통과해도 v3 5단계(헤드라인 교체)를 되살리지 않는다.'"
+   }
+  ],
+  "verdicts": [
+   {
+    "title": "GB′ command cannot compare against kron K=1024@1.6e5: `runner.py gate` ignores --ntrain, and without --tag it overwrites the pre-registered gate_D2.txt",
+    "real": true,
+    "severity": "major",
+    "reason": "확인됨. conf/code/runner.py:812-813 `_block_D2` 는 `A.module_h_priors(a.testbed, prior, Nr, Nt)` 로 호출해 `a.ntrain` 을 넘기지 않으므로 arms.gmm_selection 은 항상 N_TRAIN=10000 fits 를 찾는다. 초안 §1 의 `ln -sfn gmm_fits_D2_B16e4k results/gmm_fits_D2_<tag>` 뒤 `--tag` 로 gate 를 돌리면 gmm_fits_D2_B16e4k 에는 `_n10000.npz` 가 0개(확인: `ls | grep -c n10000` = 0)라 `load_fits` 가 FileNotFoundError → GB′ 없음. `--tag` 를 빼면 D2_FITS = gmm_fits_D2(1e4 fits, 잘못된 참조)이고 `cmd_gate` 의 `changed`/`--tag` 강제는 run/fit 에만 있어(runner.py:1157) `results/gate_D2.txt`(2026-09-21 07:49, §0 결과 보존 대상)를 덮어쓴다. results/review_next 에 aug/ctrl 의 GB′ 산출물이 없어 이 명령은 한 번도 실행된 적이 없다. 보고 전용 지표라 판정은 안 바뀌므로 critical 은 아님.",
+    "fix": "§1 의 GB′ 명령을 `diag_p1_heldout.py` 와 같은 경로로 바꾼다: `R._init('B16e4k')` 또는 `A.D2_FITS` 를 B16e4k 로 잡고 `A.module_h_priors('D2','S2',8,4, ntrain=160000)` 로 kron K=1024 를 assert 한 뒤 `score.gb_prime(ckpt, hp['kron'], 'D2', 8, 4, prior='S2', device='cuda')` 를 `results/review_next/gbprime_<tag>.txt` 에 쓰는 작은 스크립트(또는 cmd_gate 에 `--gmm-ntrain` 배관 + 결과 경로 review_next 강제). §1·§5 에 `runner.py gate` 를 --tag 없이 쓰지 말 것을 명시."
+   },
+   {
+    "title": "Test-set confirmation is not executable: no pair_tags mode implements group (3-pair mean) + 3-point rule + power guard, and rule3 hardcodes C2; runner command for the test set is not given",
+    "real": true,
+    "severity": "major",
+    "reason": "대체로 확인됨. pair_tags.py `rule3` 는 `--aug/--ctrl` 가 단일 member(`type=member`, nargs 없음)이고 `disc()` 쌍 비교만 하며, `DECISION=(\"C2\",[-3,0,3])` 이라 C5 에서는 'NOT the §3.1 step 4 verdict' 로 찍는다. `group` 모드는 점별 PRIMARY 만 내고 2-of-3·power guard 논리가 없다. §5 의 선행 목록에는 이 확장이 없고, 테스트 확증용 runner 호출(`--skip0 0 --n 2560`, 태그 이름)도 §2 에 없다. 다만 '실행 불가' 는 과함: `group --cell C5 --snr -3 0 3` 로 세 점의 카운트·p 는 나오고(split_of 는 [0,2560) 전체를 test 로 수용), 2-of-3 + guard 는 손으로 셀 수 있다. 문제는 P3 선례(p3_rules --confirm 을 데이터 관측 전에 커밋)와 달리 판정 논리가 코드로 고정되지 않아 사후 적용 여지가 남는 것.",
+    "fix": "§5 에 선행 항목 추가: `pair_tags.py rule3` 를 `--aug/--ctrl nargs='+'`(3쌍 평균 group_counts) 로 확장하고 `--decision C5 -3 0 3` 을 인자로 받아 PASS/NOT PASSED/guard 를 출력(테스트 집합 [0,2560) 전체만 수용). §2 에 확증 runner 명령을 명시: `runner.py run --testbed D2 --cell C5 --snr -3 0 3 --prior S2 --skip0 0 --n 2560 --chunk 40 --ntrain 160000 --stagec-ckpt /home/HTJ/t2/conf/ckpt_review_next/<ckpt> --arm M-ours-dscore-C-V1 R5-genie --tag review_next_A1C5test_<aug|ctrl>_a<k>` + 6 태그 genie 비트 동일 검사. 판정 코드는 테스트 결과 관측 전에 커밋."
+   },
+   {
+    "title": "Acceptance-check spec in §5 (\"n = 1280 또는 640\") lets a truncated judging run (16 chunks, n=640) pass as valid",
+    "real": true,
+    "severity": "minor",
+    "reason": "부분 확인. §1 은 판정점의 수용 조건을 명확히 고정한다(\"6개 태그 모두 raw 청크 집합이 정확히 {(4480+40k,40): k=0..31}, 아니면 무효\"). 따라서 규칙 자체는 두 읽기를 허용하지 않고, 문제는 §5 의 구현 메모 \"(n = 1280 또는 640, 등록값)\" 이 점별로 매이지 않아 코드가 그대로 구현되면 C5 −3 dB 의 16청크 실행을 '유효' 로 찍을 수 있다는 것뿐. 현재 코드(`split_of`)는 skip≥4480 을 DEV_CHUNKS 와 비교해 INVALID 라벨만 붙이고 sys.exit 하지 않으므로(footer 경고) 확장은 필요하다. 판정을 뒤집을 수 있는 규칙 결함이 아니라 구현 명세의 느슨함 → minor.",
+    "fix": "§5 문구를 점별로 묶는다: C5 −3 dB → 정확히 32청크(n=1280), C5 0 dB·C2 −3 dB → 정확히 16청크(n=640); 그 외는 REFUSED(라벨이 아니라 거부). 분할 표기는 'A1C5 judging set' / 'A1C5 report-only'."
+   },
+   {
+    "title": "Draft claims an existing `role=best` check in pair_tags.py; only 'one checkpoint id per tag' is checked",
+    "real": true,
+    "severity": "major",
+    "reason": "확인됨. pair_tags.py `chunk_ids` 는 `meta|stagec_ckpt_id` 문자열을 집합에 모으기만 하고, `load()` 는 `len(i) > 1` 일 때만 거부한다. `role=` 값을 검사하는 코드는 없다. 초안 §5 \"체크포인트 1개(`role=best`) 검사는 기존 그대로\" 는 존재하지 않는 검사를 있다고 적은 것. `aug_N160000_a2.pt`(role=last) 로 평가된 태그는 모든 자동 검사를 통과해 H9 평균에 들어가며, 흔적은 헤더의 'stage C ckpt:' 줄뿐이다. §1(역할 전부 `_best.pt`)·v3 §0(평가 가중치 = `_best.pt`) 의 필수 요소를 자동 수용 검사가 강제하지 못한다.",
+    "fix": "확장에서 `meta|stagec_ckpt_id` 의 `role=` 을 파싱해 6 태그 모두 `role=best` 가 아니면 REFUSED; 아울러 DECISIONS.md 에 미리 적은 6개 sha256[:16] 을 `--expect-ckpt TAG=sha`(또는 JSON) 로 받아 일치하지 않으면 REFUSED."
+   },
+   {
+    "title": "Divergence clause is ambiguous: a §3d-diverged attempt still leaves a `_best.pt`, so \"3쌍이 모두 있다\" has two readings; best/last identity check not required",
+    "real": true,
+    "severity": "major",
+    "reason": "확인됨. score.py:1026-1028 은 개선 epoch 마다 `_best.pt` 를 먼저 저장하고, §3d 발산은 그 뒤 'diverged' 로 break 하며 COMPLETED attempt 로 취급(주석 L1001); train_ctrl.py 는 발산해도 exit 0(CHANGELOG §5 마지막 항목도 명시). 따라서 발산한 attempt 에도 `_best.pt` 가 남아 초안 \"발산하거나 `_best.pt` 를 남기지 못하면 그대로 기록… 3쌍이 모두 있을 때만 판정\" 은 (A) `_best.pt` 가 있으면 쌍 존재 / (B) 발산 = 쌍 결측 의 두 읽기를 허용하고, 다른 쌍의 결과를 본 뒤 고를 수 있다. 또 v3 §0 평가 가중치 행은 `ckpt_identity(best)['epoch'] == ckpt_identity(last)['best_epoch']` 확인을 요구하는데 초안은 실패 시 처리를 적지 않았다(CHANGELOG §5 의 저장 사이 크래시 사례).",
+    "fix": "커밋 전 한 읽기로 고정: 'stopped_by=diverged 또는 aborted 인 attempt 는 `_best.pt` 가 있어도 결측으로 본다; best.epoch != last.best_epoch 인 `_best.pt` 도 결측'. 결과를 명시: 결측 쌍이 하나라도 있으면 H9 = 판정 불가(쌍 부족), 평가 전 사용자 승인으로 attempt 4 를 학습할 때만 예외; 존재하는 쌍의 부차 paired 검정은 보고."
+   },
+   {
+    "title": "b*/genie bit-identity 'acceptance' does not say which fields or what happens on failure",
+    "real": true,
+    "severity": "minor",
+    "reason": "확인됨. 초안 §1 \"b*·genie 는 … 6 태그에서 비트 동일해야 한다(수용 검사)\" 와 §5 \"태그 간 비트 동일 검사 추가\" 는 비교 필드(blk_err 만인지 KEYS_RAW 전부인지), 기준 태그, 불일치 시 결과(무효 vs 보고)를 적지 않았다. P3 §7.4 는 'V1·b* 의 모든 KEYS_RAW 필드 비트 동일' 로 실행했고 §2.1 은 '어긋나면 실행 무효' 를 명시했다. 불일치가 날 이유는 없으나(arm 은 rng 미사용, P3 에서 확인) 규칙 공백은 맞다.",
+    "fix": "명시: M-ours-bstar·R5-genie 의 모든 KEYS_RAW 배열이 세 점 모두에서 6 태그 간 비트 동일(기준 = aug_a1 태그); 불일치 → 그 실행 무효, 원인 기록 후 재실행, 판정하지 않음."
+   },
+   {
+    "title": "Prediction/MDD ranges assume n_d 40–120, but the group test at C5 −3 dB n=1280 will likely have n_d ≈ 200, i.e. MDD ≈ 30, above the low end of the predicted effect",
+    "real": true,
+    "severity": "minor",
+    "reason": "확인됨. A1s3 C5 −3 dB 한 쌍 n_d=54 (640 시행), A1s2 는 group n_d(34)가 단일 쌍(16~21)의 약 2배 → 1280 시행 3쌍 group 의 n_d 는 ≈ 200 안팎. 계산: pair_tags.mdd = {150: 26, 200: 30, 220: 32, 250: 32}. 초안의 \"n_d 40~120 이면 순 14~24\" 는 판정점 규모에 맞지 않고, 예측 \"+15 ~ +40\" 의 하반부(< 30)는 판정 불가가 되어 헤드라인 예측 'H9: 지지' 와 충돌한다. 보고용 수치라 규칙 오류는 아님.",
+    "fix": "MDD 를 n_d 150~250 (26~32) 로 적고, 예측을 '순 ≥ +30' 으로 좁히거나 '범위 하반부는 판정 불가로 예상' 을 명시."
+   },
+   {
+    "title": "H9 outcome set omits the reverse-direction significant case",
+    "real": true,
+    "severity": "minor",
+    "reason": "확인됨. 초안 §1 H9 결과 집합은 지지 / 판정 불가(p ≥ 0.05, n_d ≥ 6) / UNDECIDED 뿐이라 p < 0.05 이고 #d>0 > #d<0 인 경우가 어디에도 속하지 않고, §2 표도 세 결과만 매핑한다. P3 §5.1 항목 5 가 같은 공백을 사후에 '반대 방향 → 지지 아님' 으로 메운 선례가 있다. 실질적 다음 단계는 어느 쪽이든 'A1 닫음' 이라 판정이 뒤집히진 않음.",
+    "fix": "§1·§2 에 네 번째 결과 추가: '반대 방향 유의(p < 0.05, #d>0 > #d<0) → 지지 아님, A1 닫음(반대 방향의 유의성은 보고)'."
+   },
+   {
+    "title": "Sign convention of 'net' in §3 is the opposite of pair_tags output and is mixed within one bullet",
+    "real": true,
+    "severity": "minor",
+    "reason": "확인됨. pair_tags 는 `net(a-b)` (a = #d>0 = aug 나쁨) 로 찍어 A1s3 C5 −3 dB 가 `net(a-b)=-22`. 초안 §3 은 자체 정의 \"순 #d<0 − #d>0 = +15 ~ +40\" 로 부호를 뒤집고, 같은 괄호 안에서 \"−22/640 … ≈ −44\" 는 pair_tags 부호로 인용한다. 정의가 명시돼 예측 자체는 모호하지 않지만 한 문장 안에 두 부호가 섞여 예측 대조 시 오독 여지가 있다.",
+    "fix": "pair_tags 관행으로 통일: 'net(a−b) = −15 ~ −40 (aug 가 적음); a1 쌍 개발 신호 −22 → ≈ −44'."
+   },
+   {
+    "title": "ε_φ command is incomplete: diag_p1_heldout.py refuses without a distinct --out, and its verdict lines are labelled NOT A VERDICT",
+    "real": true,
+    "severity": "minor",
+    "reason": "확인됨. diag_p1_heldout.py:218-222: `--out` 기본은 results/review_next/p1_heldout 이고 이미 `p1_heldout.{npz,txt}` 가 있어 `--overwrite` 없이는 SystemExit; `--overwrite` 는 P1 기록을 파괴한다(§0 결과 보존 위반). `--out` 은 review_next 아래여야 한다(L219-220). GMM 기본값(B16e4k, 160000, kron K=1024 assert)은 맞다. 비등록 ckpt 는 `registered=False` 로 '[NOT A VERDICT …]' 가 찍히며 보고 전용이라 무해하나 초안이 명시하지 않았다.",
+    "fix": "§1 에 전체 명령 명시: `diag_p1_heldout.py --ckpt /home/HTJ/t2/conf/ckpt_review_next/<ckpt> --out results/review_next/p1_heldout_<tag> --device cuda`(--overwrite 금지), 위상 비는 `phase|` 블록에서 읽고 보고 전용임을 적는다."
+   },
+   {
+    "title": "Cost formula double-counts the 16 iterations",
+    "real": true,
+    "severity": "minor",
+    "reason": "확인됨. complexity_moduleH_ep.txt: 블록 중앙값 V1 1006 ms, b* 754 ms 는 16 반복 전체 블록 기준(MH/call 60 ms × 16 calls/blk). 6 × 2560 × ≈1.9 s ≈ 8 CPU-h 는 '× 16 반복' 없이 맞고, 곱하면 ≈ 130 CPU-h 가 되어 '≈ 8 CPU-h' 와 모순.",
+    "fix": "'× 16 반복' 삭제(또는 '16 반복 블록당' 으로 표기)."
+   },
+   {
+    "title": "Relative --stagec-ckpt path and training-start time are cwd/log dependent",
+    "real": true,
+    "severity": "minor",
+    "reason": "확인됨. runner.py:1168 은 `--stagec-ckpt` 를 주어진 대로 또는 `C.CONF` 아래에서만 찾는다. 선행 스크립트(run_h0_a1s3.sh L9, run_a1s2.sh L7)는 `cd /home/HTJ/t2/conf` 하고 절대경로(`/home/HTJ/t2/conf/ckpt_review_next/...`)를 쓴다; 초안의 `conf/ckpt_review_next/<ckpt>` 는 conf/ 에서 실행하면 conf/conf/... 로 풀려 거부된다(t2 루트에서만 동작). 시작 시각: run_a1c5_train.log '[a1c5 09:38 CDT] start (git f5856204)', 네 학습 로그 헤더 2026-09-23 23:39 KST(= 09:39 CDT); 초안 §1·§5 의 09:42 CDT 는 틀림.",
+    "fix": "§1·run_a1c5.sh 에 절대경로 `/home/HTJ/t2/conf/ckpt_review_next/<ckpt>` 사용; 시작 시각을 09:38 CDT(로그 기준, 학습 프로세스 09:39 CDT)로 정정."
+   },
+   {
+    "title": "Relation to the frozen v3 §3.1 steps 4–5 should be stated as an addition, not left implicit",
+    "real": true,
+    "severity": "minor",
+    "reason": "약하게 확인됨. 초안 §0 표(\"판정 불가 → 테스트 확증 없음\")와 §2(\"C2 헤드라인 교체 없음\")·§1 헤드라인 행은 4단계 미발동·헤드라인 불변을 이미 담고 있다. 빠진 것은 v3 §0 '확증 실행(테스트 집합): §3.1 통과 시 한 번' 이라는 동결 규칙과의 관계다 — 3단계가 판정점에서 실패했는데 A1 아래에 테스트 확증을 새로 등록하므로, 이것이 v3 규칙의 재해석이 아니라 사용자 승인에 따른 별도 추가 등록이고 통과해도 v3 5단계를 되살리지 않음을 한 문장으로 못 박지 않으면 v3 §0 '한 번' 과 겉으로 충돌한다. 판정에는 영향 없음.",
+    "fix": "§2 에 추가: 'v3 §3.1 4·5단계는 3단계 C2 −3 dB 판정 불가로 발동하지 않았고 그대로 닫혀 있다. 이 문서의 확증은 그 규칙의 변경이 아니라 사용자 결정(2026-09-23 09:40 CDT)에 따른 별도 등록(추가)이며, 통과해도 v3 5단계(헤드라인 교체)를 되살리지 않는다.' + DECISIONS.md 한 줄."
+   }
+  ]
+ }
+]

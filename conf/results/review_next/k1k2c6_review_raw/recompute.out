@@ -1,0 +1,218 @@
+====================================================================================================
+K2 (raw_review_next_K2) + K2test
+
+== raw_review_next_K2 C1 -3 dB: trials 3200..4479 n=1280 chunks OK=True (128)
+   meta uniform: {'meta|arms': ['M-ours-dscore-C-V1 V1-edge V1-clamp M-ours-bstar M-ours-bstar-scalar gmmB-scorew-eta R5-genie'], 'meta|ckpt_sha': ['4443921ce8d5c4a1'], 'meta|edge_kw': ["[('M', 16), ('burn', 100), ('eps_frac', 0.05), ('keep', 100), ('n_jac', 16)]"], 'meta|bstar': ['kron'], 'meta|kron_K': ['1024.0'], 'meta|ntrain': ['160000.0'], 'meta|fits_tag': ['B16e4k'], 'run|iters': ['16']}
+   M-ours-dscore-C-V1     fails  1259 (0.9836)  guard 1280  exceptions 144  above-grid it1 0.89 it2-16 0.791
+   V1-edge                fails   895 (0.6992)  guard 0  exceptions 0  above-grid it1 1.00 it2-16 0.000  n_oog/block 1.00
+   V1-clamp               fails   885 (0.6914)  guard 0  exceptions 0  above-grid it1 1.00 it2-16 0.000  n_oog/block 1.00
+   M-ours-bstar           fails   959 (0.7492)  guard 0  exceptions 0  above-grid it1 0.00 it2-16 0.000
+   M-ours-bstar-scalar    fails  1024 (0.8000)  guard 0  exceptions 0  above-grid it1 1.00 it2-16 0.000
+   gmmB-scorew-eta        fails  1004 (0.7844)  guard 0  exceptions 0  above-grid it1 1.00 it2-16 0.000
+   R5-genie               fails    42 (0.0328)  guard 0  exceptions 0  above-grid it1 0.00 it2-16 0.000
+   gap position M-ours-dscore-C-V1     -0.327
+   gap position V1-edge                +0.070
+   gap position V1-clamp               +0.081
+   gap position M-ours-bstar           +0.000
+   gap position M-ours-bstar-scalar    -0.071
+   gap position gmmB-scorew-eta        -0.049
+   gap position R5-genie               +1.000
+           M-ours-bstar -> V1-edge              198:134  p_scipy=0.000526 p_house=0.000526  n_d=332 MDD=38
+     M-ours-dscore-C-V1 -> V1-edge              372:8  p_scipy=8.31e-99 p_house=8.31e-99  n_d=380 MDD=40
+        gmmB-scorew-eta -> V1-edge              183:74  p_scipy=7.89e-12 p_house=7.89e-12  n_d=257 MDD=33
+    M-ours-bstar-scalar -> V1-edge              199:70  p_scipy=1.69e-15 p_house=1.69e-15  n_d=269 MDD=35
+           M-ours-bstar -> V1-clamp             199:125  p_scipy=4.66e-05 p_house=4.66e-05  n_d=324 MDD=38
+     M-ours-dscore-C-V1 -> V1-clamp             382:8  p_scipy=1e-101 p_house=1e-101  n_d=390 MDD=40
+               V1-clamp -> V1-edge              32:42  p_scipy=0.295 p_house=0.295  n_d=74 MDD=18
+           M-ours-bstar -> M-ours-dscore-C-V1   13:313  p_scipy=9.03e-76 p_house=9.03e-76  n_d=326 MDD=38
+
+== raw_review_next_K2 C1 0 dB: trials 2560..3199 n=640 chunks OK=True (64)
+   meta uniform: {'meta|arms': ['M-ours-dscore-C-V1 V1-edge V1-clamp M-ours-bstar M-ours-bstar-scalar gmmB-scorew-eta R5-genie'], 'meta|ckpt_sha': ['4443921ce8d5c4a1'], 'meta|edge_kw': ["[('M', 16), ('burn', 100), ('eps_frac', 0.05), ('keep', 100), ('n_jac', 16)]"], 'meta|bstar': ['kron'], 'meta|kron_K': ['1024.0'], 'meta|ntrain': ['160000.0'], 'meta|fits_tag': ['B16e4k'], 'run|iters': ['16']}
+   M-ours-dscore-C-V1     fails   306 (0.4781)  guard 0  exceptions 0  above-grid it1 1.00 it2-16 0.000
+   V1-edge                fails   305 (0.4766)  guard 0  exceptions 0  above-grid it1 1.00 it2-16 0.000  n_oog/block 1.00
+   V1-clamp               fails   299 (0.4672)  guard 0  exceptions 0  above-grid it1 1.00 it2-16 0.000  n_oog/block 1.00
+   M-ours-bstar           fails   344 (0.5375)  guard 0  exceptions 0  above-grid it1 0.00 it2-16 0.000
+   M-ours-bstar-scalar    fails   389 (0.6078)  guard 0  exceptions 0  above-grid it1 1.00 it2-16 0.000
+   gmmB-scorew-eta        fails   379 (0.5922)  guard 0  exceptions 0  above-grid it1 1.00 it2-16 0.000
+   R5-genie               fails     9 (0.0141)  guard 0  exceptions 0  above-grid it1 0.00 it2-16 0.000
+   gap position M-ours-dscore-C-V1     +0.113
+   gap position V1-edge                +0.116
+   gap position V1-clamp               +0.134
+   gap position M-ours-bstar           +0.000
+   gap position M-ours-bstar-scalar    -0.134
+   gap position gmmB-scorew-eta        -0.104
+   gap position R5-genie               +1.000
+           M-ours-bstar -> V1-edge              112:73  p_scipy=0.00507 p_house=0.00507  n_d=185 MDD=29
+     M-ours-dscore-C-V1 -> V1-edge              27:26  p_scipy=1 p_house=1  n_d=53 MDD=17
+        gmmB-scorew-eta -> V1-edge              120:46  p_scipy=8.35e-09 p_house=8.35e-09  n_d=166 MDD=28
+    M-ours-bstar-scalar -> V1-edge              122:38  p_scipy=1.8e-11 p_house=1.8e-11  n_d=160 MDD=26
+           M-ours-bstar -> V1-clamp             117:72  p_scipy=0.00131 p_house=0.00131  n_d=189 MDD=29
+     M-ours-dscore-C-V1 -> V1-clamp             28:21  p_scipy=0.392 p_house=0.392  n_d=49 MDD=15
+               V1-clamp -> V1-edge              23:29  p_scipy=0.488 p_house=0.488  n_d=52 MDD=16
+           M-ours-bstar -> M-ours-dscore-C-V1   112:74  p_scipy=0.00651 p_house=0.00651  n_d=186 MDD=28
+
+== raw_review_next_K2 C5 -6 dB: trials 2560..3199 n=640 chunks OK=True (64)
+   meta uniform: {'meta|arms': ['M-ours-dscore-C-V1 V1-edge V1-clamp M-ours-bstar M-ours-bstar-scalar gmmB-scorew-eta R5-genie'], 'meta|ckpt_sha': ['4443921ce8d5c4a1'], 'meta|edge_kw': ["[('M', 16), ('burn', 100), ('eps_frac', 0.05), ('keep', 100), ('n_jac', 16)]"], 'meta|bstar': ['kron'], 'meta|kron_K': ['1024.0'], 'meta|ntrain': ['160000.0'], 'meta|fits_tag': ['B16e4k'], 'run|iters': ['16']}
+   M-ours-dscore-C-V1     fails   639 (0.9984)  guard 640  exceptions 0  above-grid it1 1.00 it2-16 0.986
+   V1-edge                fails   505 (0.7891)  guard 0  exceptions 0  above-grid it1 1.00 it2-16 0.000  n_oog/block 1.00
+   V1-clamp               fails   503 (0.7859)  guard 0  exceptions 0  above-grid it1 1.00 it2-16 0.000  n_oog/block 1.00
+   M-ours-bstar           fails   579 (0.9047)  guard 0  exceptions 0  above-grid it1 0.00 it2-16 0.000
+   M-ours-bstar-scalar    fails   581 (0.9078)  guard 0  exceptions 0  above-grid it1 1.00 it2-16 0.000
+   gmmB-scorew-eta        fails   569 (0.8891)  guard 0  exceptions 0  above-grid it1 1.00 it2-16 0.000
+   R5-genie               fails   131 (0.2047)  guard 0  exceptions 0  above-grid it1 0.00 it2-16 0.000
+   gap position M-ours-dscore-C-V1     -0.134
+   gap position V1-edge                +0.165
+   gap position V1-clamp               +0.170
+   gap position M-ours-bstar           +0.000
+   gap position M-ours-bstar-scalar    -0.004
+   gap position gmmB-scorew-eta        +0.022
+   gap position R5-genie               +1.000
+           M-ours-bstar -> V1-edge              86:12  p_scipy=5.93e-15 p_house=5.93e-15  n_d=98 MDD=22
+     M-ours-dscore-C-V1 -> V1-edge              134:0  p_scipy=9.18e-41 p_house=9.18e-41  n_d=134 MDD=24
+        gmmB-scorew-eta -> V1-edge              84:20  p_scipy=1.64e-10 p_house=1.64e-10  n_d=104 MDD=22
+    M-ours-bstar-scalar -> V1-edge              91:15  p_scipy=1.9e-14 p_house=1.9e-14  n_d=106 MDD=22
+           M-ours-bstar -> V1-clamp             86:10  p_scipy=3.21e-16 p_house=3.21e-16  n_d=96 MDD=22
+     M-ours-dscore-C-V1 -> V1-clamp             136:0  p_scipy=2.3e-41 p_house=2.3e-41  n_d=136 MDD=24
+               V1-clamp -> V1-edge              4:6  p_scipy=0.754 p_house=0.754  n_d=10 MDD=8
+           M-ours-bstar -> M-ours-dscore-C-V1   1:61  p_scipy=2.73e-17 p_house=2.73e-17  n_d=62 MDD=18
+
+== raw_review_next_K2test C1 -3 dB TEST: trials 0..2559 n=2560 chunks OK=True (256)
+   meta uniform: {'meta|arms': ['M-ours-dscore-C-V1 V1-edge V1-clamp M-ours-bstar M-ours-bstar-scalar gmmB-scorew-eta R5-genie'], 'meta|ckpt_sha': ['4443921ce8d5c4a1'], 'meta|edge_kw': ["[('M', 16), ('burn', 100), ('eps_frac', 0.05), ('keep', 100), ('n_jac', 16)]"], 'meta|bstar': ['kron'], 'meta|kron_K': ['1024.0'], 'meta|ntrain': ['160000.0'], 'meta|fits_tag': ['B16e4k'], 'run|iters': ['16']}
+   M-ours-dscore-C-V1     fails  2515 (0.9824)  guard 2560  exceptions 314  above-grid it1 0.88 it2-16 0.793
+   V1-edge                fails  1770 (0.6914)  guard 0  exceptions 0  above-grid it1 1.00 it2-16 0.000  n_oog/block 1.00
+   V1-clamp               fails  1783 (0.6965)  guard 0  exceptions 0  above-grid it1 1.00 it2-16 0.000  n_oog/block 1.00
+   M-ours-bstar           fails  1906 (0.7445)  guard 3  exceptions 0  above-grid it1 0.00 it2-16 0.000
+   M-ours-bstar-scalar    fails  2071 (0.8090)  guard 0  exceptions 0  above-grid it1 1.00 it2-16 0.000
+   gmmB-scorew-eta        fails  2027 (0.7918)  guard 0  exceptions 0  above-grid it1 1.00 it2-16 0.000
+   R5-genie               fails    95 (0.0371)  guard 0  exceptions 0  above-grid it1 0.00 it2-16 0.000
+   gap position M-ours-dscore-C-V1     -0.336
+   gap position V1-edge                +0.075
+   gap position V1-clamp               +0.068
+   gap position M-ours-bstar           +0.000
+   gap position M-ours-bstar-scalar    -0.091
+   gap position gmmB-scorew-eta        -0.067
+   gap position R5-genie               +1.000
+           M-ours-bstar -> V1-edge              400:264  p_scipy=1.47e-07 p_house=1.47e-07  n_d=664 MDD=52
+     M-ours-dscore-C-V1 -> V1-edge              758:13  p_scipy=8.08e-205 p_house=8.08e-205  n_d=771 MDD=57
+        gmmB-scorew-eta -> V1-edge              379:122  p_scipy=1.12e-31 p_house=1.12e-31  n_d=501 MDD=45
+    M-ours-bstar-scalar -> V1-edge              406:105  p_scipy=9.12e-43 p_house=9.12e-43  n_d=511 MDD=47
+           M-ours-bstar -> V1-clamp             402:279  p_scipy=2.77e-06 p_house=2.77e-06  n_d=681 MDD=53
+     M-ours-dscore-C-V1 -> V1-clamp             746:14  p_scipy=7.33e-200 p_house=7.33e-200  n_d=760 MDD=56
+               V1-clamp -> V1-edge              75:62  p_scipy=0.305 p_house=0.305  n_d=137 MDD=25
+           M-ours-bstar -> M-ours-dscore-C-V1   20:629  p_scipy=4.75e-158 p_house=4.75e-158  n_d=649 MDD=51
+   K2test vs raw_B16e4 (C1 -3 dB, trials 0..2559) bit-identity max|diff| over KEYS_RAW: {'M-ours-dscore-C-V1': 0.0, 'R5-genie': 0.0}
+   raw_B16e4 V1 fails 2515 (0.9824); b*(K<=512) 1946; genie 95
+
+====================================================================================================
+K1 (raw_review_next_K1 + LO + P3ref)
+
+== C2 -3 dB: K1 trials 3200..4479 n=1280 chunks OK=True; LO has all=True (LO iters 32); P3ref has all=True
+   meta uniform: {'meta|arms': ['BR-S M-ours-dscore-C-V1 M-ours-bstar R5-genie'], 'meta|bg_kw': ["[('burn', 25), ('chains', 4), ('keep', 75), ('n_ph', 48), ('n_th', 96)]"], 'meta|ckpt_sha': ['4443921ce8d5c4a1'], 'meta|fits_tag': ['B16e4k'], 'meta|ntrain': ['160000.0'], 'run|iters': ['16']}
+   K1 vs P3ref bit-identity (KEYS_RAW @1..16): {'M-ours-dscore-C-V1': 0.0, 'M-ours-bstar': 0.0, 'R5-genie': 0.0}
+   M-ours-bstar         fails  307 (0.2398) gap pos +0.000
+   M-ours-dscore-C-V1   fails  173 (0.1352) gap pos +0.528
+   BR-S                 fails  167 (0.1305) gap pos +0.551
+   R5-genie             fails   53 (0.0414) gap pos +1.000
+   LO-S-d0.001          fails   80 (0.0625) gap pos +0.894
+     M-ours-dscore-C-V1 -> BR-S           26:20 p_scipy=0.461 p_house=0.461 n_d=46 MDD=16
+                   BR-S -> LO-S-d0.001    95:8 p_scipy=5.11e-20 p_house=5.11e-20 n_d=103 MDD=21
+                   BR-S -> R5-genie       126:12 p_scipy=3.86e-25 p_house=3.86e-25 n_d=138 MDD=24
+           M-ours-bstar -> BR-S           156:16 p_scipy=5.08e-30 p_house=5.08e-30 n_d=172 MDD=28
+     M-ours-dscore-C-V1 -> LO-S-d0.001    100:7 p_scipy=3.45e-22 p_house=3.45e-22 n_d=107 MDD=23
+   BR-S exceptions 0 guard 0 chain spread median 0.000495 p90 0.000812
+
+== C5 -3 dB: K1 trials 3200..3839 n=640 chunks OK=True; LO has all=True (LO iters 32); P3ref has all=True
+   meta uniform: {'meta|arms': ['BR-S M-ours-dscore-C-V1 M-ours-bstar R5-genie'], 'meta|bg_kw': ["[('burn', 25), ('chains', 4), ('keep', 75), ('n_ph', 48), ('n_th', 96)]"], 'meta|ckpt_sha': ['4443921ce8d5c4a1'], 'meta|fits_tag': ['B16e4k'], 'meta|ntrain': ['160000.0'], 'run|iters': ['16']}
+   K1 vs P3ref bit-identity (KEYS_RAW @1..16): {'M-ours-dscore-C-V1': 0.0, 'M-ours-bstar': 0.0, 'R5-genie': 0.0}
+   M-ours-bstar         fails  298 (0.4656) gap pos +0.000
+   M-ours-dscore-C-V1   fails  230 (0.3594) gap pos +0.254
+   BR-S                 fails  229 (0.3578) gap pos +0.257
+   R5-genie             fails   30 (0.0469) gap pos +1.000
+   LO-S-d0.001          fails   63 (0.0984) gap pos +0.877
+     M-ours-dscore-C-V1 -> BR-S           26:25 p_scipy=1 p_house=1 n_d=51 MDD=15
+                   BR-S -> LO-S-d0.001    170:4 p_scipy=3.15e-45 p_house=3.15e-45 n_d=174 MDD=28
+                   BR-S -> R5-genie       202:3 p_scipy=5.59e-56 p_house=5.59e-56 n_d=205 MDD=31
+           M-ours-bstar -> BR-S           119:50 p_scipy=1.14e-07 p_house=1.14e-07 n_d=169 MDD=27
+     M-ours-dscore-C-V1 -> LO-S-d0.001    169:2 p_scipy=9.83e-48 p_house=9.83e-48 n_d=171 MDD=27
+   BR-S exceptions 0 guard 0 chain spread median 0.000592 p90 0.00104
+
+====================================================================================================
+C6 NR16B16e4 / NR16B16e4last / NR16run2
+   raw_NR16B16e4 snr -3: chunks OK=True n=2560 meta {'meta|ntrain': ['160000.0'], 'meta|bstar': ['kron'], 'meta|kron_K': ['4096'], 'meta|ll_val|kron': ['63.1751571838059'], 'meta|em_sec': ['46649.95333504677'], 'meta|stagec_ckpt_id': ['sha256[:16]=c050d611b2c714a6 epoch=1684 best_epoch=1684 role=best 16x4'], 'run|iters': ['16']}
+   raw_NR16B16e4 snr +0: chunks OK=True n=2560 meta {'meta|ntrain': ['160000.0'], 'meta|bstar': ['kron'], 'meta|kron_K': ['4096'], 'meta|ll_val|kron': ['63.1751571838059'], 'meta|em_sec': ['46649.95333504677'], 'meta|stagec_ckpt_id': ['sha256[:16]=c050d611b2c714a6 epoch=1684 best_epoch=1684 role=best 16x4'], 'run|iters': ['16']}
+   raw_NR16B16e4 snr +3: chunks OK=True n=2560 meta {'meta|ntrain': ['160000.0'], 'meta|bstar': ['kron'], 'meta|kron_K': ['4096'], 'meta|ll_val|kron': ['63.1751571838059'], 'meta|em_sec': ['46649.95333504677'], 'meta|stagec_ckpt_id': ['sha256[:16]=c050d611b2c714a6 epoch=1684 best_epoch=1684 role=best 16x4'], 'run|iters': ['16']}
+   raw_NR16B16e4 snr +6: chunks OK=True n=2560 meta {'meta|ntrain': ['160000.0'], 'meta|bstar': ['kron'], 'meta|kron_K': ['4096'], 'meta|ll_val|kron': ['63.1751571838059'], 'meta|em_sec': ['46649.95333504677'], 'meta|stagec_ckpt_id': ['sha256[:16]=c050d611b2c714a6 epoch=1684 best_epoch=1684 role=best 16x4'], 'run|iters': ['16']}
+   raw_NR16B16e4 snr +9: chunks OK=True n=2560 meta {'meta|ntrain': ['160000.0'], 'meta|bstar': ['kron'], 'meta|kron_K': ['4096'], 'meta|ll_val|kron': ['63.1751571838059'], 'meta|em_sec': ['46649.95333504677'], 'meta|stagec_ckpt_id': ['sha256[:16]=c050d611b2c714a6 epoch=1684 best_epoch=1684 role=best 16x4'], 'run|iters': ['16']}
+   raw_NR16B16e4 snr +12: chunks OK=True n=2560 meta {'meta|ntrain': ['160000.0'], 'meta|bstar': ['kron'], 'meta|kron_K': ['4096'], 'meta|ll_val|kron': ['63.1751571838059'], 'meta|em_sec': ['46649.95333504677'], 'meta|stagec_ckpt_id': ['sha256[:16]=c050d611b2c714a6 epoch=1684 best_epoch=1684 role=best 16x4'], 'run|iters': ['16']}
+   raw_NR16B16e4 snr +15: chunks OK=True n=2560 meta {'meta|ntrain': ['160000.0'], 'meta|bstar': ['kron'], 'meta|kron_K': ['4096'], 'meta|ll_val|kron': ['63.1751571838059'], 'meta|em_sec': ['46649.95333504677'], 'meta|stagec_ckpt_id': ['sha256[:16]=c050d611b2c714a6 epoch=1684 best_epoch=1684 role=best 16x4'], 'run|iters': ['16']}
+   raw_NR16B16e4last snr -3: chunks OK=True n=2560 meta {'meta|ntrain': ['160000.0'], 'meta|bstar': ['kron'], 'meta|kron_K': ['4096'], 'meta|ll_val|kron': ['63.1751571838059'], 'meta|em_sec': ['46649.95333504677'], 'meta|stagec_ckpt_id': ['sha256[:16]=bf688d605691c7f7 epoch=1704 best_epoch=1684 role=last 16x4 | evaluated = LAST epoch; the best-epoch weights are in the _best.pt sibling'], 'run|iters': ['16']}
+   raw_NR16B16e4last snr +0: chunks OK=True n=2560 meta {'meta|ntrain': ['160000.0'], 'meta|bstar': ['kron'], 'meta|kron_K': ['4096'], 'meta|ll_val|kron': ['63.1751571838059'], 'meta|em_sec': ['46649.95333504677'], 'meta|stagec_ckpt_id': ['sha256[:16]=bf688d605691c7f7 epoch=1704 best_epoch=1684 role=last 16x4 | evaluated = LAST epoch; the best-epoch weights are in the _best.pt sibling'], 'run|iters': ['16']}
+   raw_NR16B16e4last snr +3: chunks OK=True n=2560 meta {'meta|ntrain': ['160000.0'], 'meta|bstar': ['kron'], 'meta|kron_K': ['4096'], 'meta|ll_val|kron': ['63.1751571838059'], 'meta|em_sec': ['46649.95333504677'], 'meta|stagec_ckpt_id': ['sha256[:16]=bf688d605691c7f7 epoch=1704 best_epoch=1684 role=last 16x4 | evaluated = LAST epoch; the best-epoch weights are in the _best.pt sibling'], 'run|iters': ['16']}
+   raw_NR16B16e4last snr +6: chunks OK=True n=2560 meta {'meta|ntrain': ['160000.0'], 'meta|bstar': ['kron'], 'meta|kron_K': ['4096'], 'meta|ll_val|kron': ['63.1751571838059'], 'meta|em_sec': ['46649.95333504677'], 'meta|stagec_ckpt_id': ['sha256[:16]=bf688d605691c7f7 epoch=1704 best_epoch=1684 role=last 16x4 | evaluated = LAST epoch; the best-epoch weights are in the _best.pt sibling'], 'run|iters': ['16']}
+   raw_NR16B16e4last snr +9: chunks OK=True n=2560 meta {'meta|ntrain': ['160000.0'], 'meta|bstar': ['kron'], 'meta|kron_K': ['4096'], 'meta|ll_val|kron': ['63.1751571838059'], 'meta|em_sec': ['46649.95333504677'], 'meta|stagec_ckpt_id': ['sha256[:16]=bf688d605691c7f7 epoch=1704 best_epoch=1684 role=last 16x4 | evaluated = LAST epoch; the best-epoch weights are in the _best.pt sibling'], 'run|iters': ['16']}
+   raw_NR16B16e4last snr +12: chunks OK=True n=2560 meta {'meta|ntrain': ['160000.0'], 'meta|bstar': ['kron'], 'meta|kron_K': ['4096'], 'meta|ll_val|kron': ['63.1751571838059'], 'meta|em_sec': ['46649.95333504677'], 'meta|stagec_ckpt_id': ['sha256[:16]=bf688d605691c7f7 epoch=1704 best_epoch=1684 role=last 16x4 | evaluated = LAST epoch; the best-epoch weights are in the _best.pt sibling'], 'run|iters': ['16']}
+   raw_NR16B16e4last snr +15: chunks OK=True n=2560 meta {'meta|ntrain': ['160000.0'], 'meta|bstar': ['kron'], 'meta|kron_K': ['4096'], 'meta|ll_val|kron': ['63.1751571838059'], 'meta|em_sec': ['46649.95333504677'], 'meta|stagec_ckpt_id': ['sha256[:16]=bf688d605691c7f7 epoch=1704 best_epoch=1684 role=last 16x4 | evaluated = LAST epoch; the best-epoch weights are in the _best.pt sibling'], 'run|iters': ['16']}
+   raw_NR16run2 snr -3: chunks OK=True n=2560
+   raw_NR16run2 snr +0: chunks OK=True n=2560
+   raw_NR16run2 snr +3: chunks OK=True n=2560
+   raw_NR16run2 snr +6: chunks OK=True n=2560
+   raw_NR16run2 snr +9: chunks OK=True n=2560
+   raw_NR16run2 snr +12: chunks OK=True n=2560
+   raw_NR16run2 snr +15: chunks OK=True n=2560
+
+-- genie bit-identity across the three raw sets (KEYS_RAW; nmse NaN-aware):
+   snr -3: best vs run2 {'R5-genie': 0.0}  last vs run2 {'R5-genie': 0.0}
+   snr +0: best vs run2 {'R5-genie': 0.0}  last vs run2 {'R5-genie': 0.0}
+   snr +3: best vs run2 {'R5-genie': 0.0}  last vs run2 {'R5-genie': 0.0}
+   snr +6: best vs run2 {'R5-genie': 0.0}  last vs run2 {'R5-genie': 0.0}
+   snr +9: best vs run2 {'R5-genie': 0.0}  last vs run2 {'R5-genie': 0.0}
+   snr +12: best vs run2 {'R5-genie': 0.0}  last vs run2 {'R5-genie': 0.0}
+   snr +15: best vs run2 {'R5-genie': 0.0}  last vs run2 {'R5-genie': 0.0}
+-- arm-wise identity best vs last (max|diff| over KEYS_RAW), -3 dB:
+   {'M-ours-bstar': 0.0, 'M-ours-bstar-scalar': 0.0, 'M-ours-dscore-C-V0': 115289193612.20201, 'M-ours-dscore-C-V1': 99999999.75176992, 'M-ours-dscore-C-V4': 99999999.51103477, 'M-ours-dscore-C-V4b': 99999999.79443426, 'M-ours-gmm32': 0.0, 'R0-pilot': 0.0, 'R1-turbo': 0.0, 'R2-ours-G': 0.0, 'R3-bigamp': 0.0, 'R4-llr': 0.0, 'R4-scvamp': 0.0, 'R5-genie': 0.0}
+
+-- failures @16 and decision points (anchor b*, BLER in [0.005,0.9], smallest |log10(BLER/0.1)|):
+   b* BLER@16: {-3: np.float64(0.0719), 0: np.float64(0.0238), 3: np.float64(0.0125), 6: np.float64(0.0086), 9: np.float64(0.0055), 12: np.float64(0.0039), 15: np.float64(0.002)} -> decision SNRs [-3, 0, 3]
+   [best] -3 dB fails bstar=184 V1=53 genie=22 scalar=207 V4=65 V4b=76 V0=2560 | b*->V1 142:11 p=3.5e-30 | b*->scalar 42:65 p=0.033 | b*->V4 141:22 p=1.9e-22 | b*->V4b 132:24 p=2.9e-19 | R=0.809
+   [best] +0 dB fails bstar=61 V1=20 genie=10 scalar=95 V4=23 V4b=29 V0=2560 | b*->V1 45:4 p=8.2e-10 | b*->scalar 11:45 p=5.4e-06 | b*->V4 45:7 p=7e-08 | b*->V4b 41:9 p=5.6e-06 | R=0.804
+   [best] +3 dB fails bstar=32 V1=9 genie=8 scalar=38 V4=12 V4b=12 V0=2560 | b*->V1 26:3 p=1.5e-05 | b*->scalar 9:15 p=0.31 | b*->V4 23:3 p=8.8e-05 | b*->V4b 22:2 p=3.6e-05 | R=0.958
+   [best] pooled: V1 213:18 p=1.8e-43, scalar 62:125 p=4.8e-06, V4 209:32 p=4.9e-33, V4b 195:35 p=4.1e-28
+   [last] -3 dB fails bstar=184 V1=52 genie=22 scalar=207 V4=68 V4b=75 V0=2560 | b*->V1 142:10 p=5e-31 | b*->scalar 42:65 p=0.033 | b*->V4 138:22 p=9.8e-22 | b*->V4b 132:23 p=8.8e-20 | R=0.815
+   [last] +0 dB fails bstar=61 V1=24 genie=10 scalar=95 V4=25 V4b=25 V0=2560 | b*->V1 41:4 p=9.3e-09 | b*->scalar 11:45 p=5.4e-06 | b*->V4 42:6 p=1e-07 | b*->V4b 43:7 p=2.1e-07 | R=0.725
+   [last] +3 dB fails bstar=32 V1=10 genie=8 scalar=38 V4=8 V4b=14 V0=2560 | b*->V1 25:3 p=2.7e-05 | b*->scalar 9:15 p=0.31 | b*->V4 25:1 p=8e-07 | b*->V4b 21:3 p=0.00028 | R=0.917
+   [last] pooled: V1 208:17 p=5.9e-43, scalar 62:125 p=4.8e-06, V4 205:29 p=7.9e-34, V4b 196:33 p=2.1e-29
+   [1e4] -3 dB fails bstar=207 V1=52 genie=22 scalar=261 V4=68 V4b=75 V0=2560 | b*->V1 163:8 p=1.1e-38 | b*->scalar 35:89 p=1.3e-06 | b*->V4 156:17 p=2.6e-29 | b*->V4b 157:25 p=1.4e-24 | R=0.838
+   [1e4] +0 dB fails bstar=81 V1=18 genie=10 scalar=109 V4=31 V4b=29 V0=2559 | b*->V1 66:3 p=1.9e-16 | b*->scalar 17:45 p=0.0005 | b*->V4 58:8 p=1.8e-10 | b*->V4b 60:8 p=5.7e-11 | R=0.887
+   [1e4] +3 dB fails bstar=47 V1=12 genie=8 scalar=61 V4=11 V4b=10 V0=2558 | b*->V1 37:2 p=2.8e-09 | b*->scalar 10:24 p=0.024 | b*->V4 37:1 p=2.8e-10 | b*->V4b 38:1 p=1.5e-10 | R=0.897
+   [1e4] pooled: V1 266:13 p=1.6e-62, scalar 62:158 p=7.6e-11, V4 251:26 p=2.2e-47, V4b 255:34 p=4.9e-43
+
+-- best vs last V1 paired sign test (a = best fails & last ok):
+   -3 dB 9:8 p=1
+   +0 dB 2:6 p=0.29
+   +3 dB 1:2 p=1
+   pooled 12:16 p=0.57
+
+-- recovery paired bootstrap reproduction (B=2000, seed 20260926, rng.integers(0,n,n), pct 5/95):
+   [best] -3 dB R=0.809 CI90 [0.747, 0.870] undefined=0
+   [best] +0 dB R=0.804 CI90 [0.694, 0.903] undefined=0
+   [best] +3 dB R=0.958 CI90 [0.750, 1.188] undefined=0
+   [best] pooled R=0.823 CI90 [0.771, 0.871]
+   [last] -3 dB R=0.815 CI90 [0.756, 0.872] undefined=0
+   [last] +0 dB R=0.725 CI90 [0.617, 0.827] undefined=0
+   [last] +3 dB R=0.917 CI90 [0.714, 1.120] undefined=0
+   [last] pooled R=0.806 CI90 [0.757, 0.854]
+   [1e4] -3 dB R=0.838 CI90 [0.781, 0.892] undefined=0
+   [1e4] +0 dB R=0.887 CI90 [0.810, 0.965] undefined=0
+   [1e4] +3 dB R=0.897 CI90 [0.786, 1.000] undefined=0
+   [1e4] pooled R=0.858 CI90 [0.817, 0.899]
+
+-- V0 guard rate per SNR (best tag) and any other arm firing:
+   -3 dB V0 1.000; others firing: ['R5-genie']
+   +0 dB V0 1.000; others firing: ['R5-genie']
+   +3 dB V0 1.000; others firing: ['R5-genie']
+   +6 dB V0 1.000; others firing: ['R5-genie']
+   +9 dB V0 1.000; others firing: ['R5-genie']
+   +12 dB V0 0.998; others firing: ['R5-genie']
+   +15 dB V0 0.993; others firing: ['R5-genie']
+
+-- BLER@16 at -3 dB (best): {'V1': np.float64(0.0207), 'V4': np.float64(0.0254), 'V4b': np.float64(0.0297), 'bstar': np.float64(0.0719), 'scalar': np.float64(0.0809), 'genie': np.float64(0.0086)}

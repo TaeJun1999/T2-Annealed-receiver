@@ -1,0 +1,11 @@
+# SUPP16e4 prerequisite smokes (2026-09-29 KST; raws deleted after each check; new arms' failure counts not inspected)
+1. ald.py regen --doppler 0 vs no --doppler (D2 C2 dev, 16 trials): b, H, G, sigma2 bit-identical -> True
+2. XA-type runner smoke: D2 C2 nu=0.005, -3 dB, trials 0..39, --ald-file (estimate from a copied ALD16e4 tune record), --arm ALD-pilot ALDv-pilot R5-genie
+   R5-genie 4 keys == raw_DOPaB16e4k chunk 0: True; ALD-pilot / ALDv-pilot raised 0; estimate fixed & == precomputed (rtol 1e-9): True; meta|doppler written
+3. XP-type runner smoke: same point, --pilot-arms --arm V1-pilot bstar-pilot R5-genie (HEAD d17f3d65+dirty vs original raw 063f3bcb)
+   R5-genie 4 keys == raw_DOPaB16e4k chunk 0: True; V1-pilot@1 == M-ours-dscore-C-V1@1: True; bstar-pilot@1 == M-ours-bstar@1: True; raised 0
+4. pair_baselines --extra dry run: raw_RMX15 split into A (all arms but the 7 XL arms) + B (7 XL arms + genie + meta/run) ->
+   output == unsplit output (except header); labels/numbers == committed pairB_RMX15.txt (new lines 'absolute gap', 'SUMMARY-B' only)
+   (first attempt flagged the pseudo-arm 'run' as duplicated -> fixed: meta/run excluded from the duplicate check and the merge)
+5. pair_baselines genie>=V1 guard: first version had the inequality inverted (fired on every normal condition) -> fixed to F_genie >= F_V1;
+   RMX15 (F_V1 390 > F_genie 111) prints no guard line after the fix.

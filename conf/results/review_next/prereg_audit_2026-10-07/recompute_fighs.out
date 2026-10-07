@@ -1,0 +1,98 @@
+# recompute_fighs.py  started 2026-10-07 16:59:53 CDT (= 06:59 KST)  HEAD 331f6e57
+[PASS] A1 ROWS: 24 rows, 15 fields each
+[PASS] A2 §1a lists the same 24 tags in the same order
+[PASS] A3 §1a REF / ORIG / pick sha / ckpt sha / flags agree with ROWS -- []
+[PASS] A4 checkpoint / pick sha256[:16] on disk = ROWS (6 ckpt, 6 picks) -- []
+[PASS] A5 original ALD test estimate / test+dev pilots / tune record sha256[:16] = §1/§5 -- []
+
+# B. scanning 49152 new-raw chunks with 32 workers ...
+[PASS] B0 every chunk readable (no exceptions) -- []
+[PASS] B1 trial plan: 24 tags x 2048 chunks = 4 SNR x skip 10000..30440 step 40, n 40; run|snr/skip/n = file name -- []
+[PASS] B2 cell / prior of every chunk name = the row's -- []
+[PASS] B3 run|git = 331f6e57 (no +dirty), run|iters 16, run|seed 20260926 in every chunk of every tag -- []
+[PASS] B4 meta ntrain / bstar / kron_K / ll_val / ckpt sha+role (SP rows: no ckpt id) / sparse = pick / rotation / ald_file+sha -- []
+[PASS] B5 arm set of every chunk = the row's arms; blk_err shape (40, 16) -- []
+[PASS] B6 non-finite blk_err@16 count = 0 and <arm>|failed sums = 0 in all 24 tags (raised trials 0) -- {}
+[PASS] B7 genie replay vs REF (HSB16e4k / HSNR16 / same-dataset first row): blk_err, ber, tauL_gmean, alphaD bit-identical in every chunk of the 18 REF rows -- []
+   replay rows checked: 18 (= 36864 chunks x 4 keys)
+   info: FHROTaB16e4k genie failures per SNR [71, 36, 19, 18] vs HSB16e4k 66/36/16/13 (different channel: expected to differ)
+
+# C. scanning 11648 original-raw chunks (26 raws) ...
+[PASS] C0 original chunks readable
+[PASS] C1 26 original raws: 448 chunks each = 7 SNR x skip 0..2520 step 40 (no hole / overlap), n = 2560 per point -- []
+   original raws' run|git: B16e4k:[None], D3B16e4:[None], MXB16e4:[None], NR16B16e4:[None], PILB16e4k:[None], PILD3:[None], PILMX:[None], PILNR16:[None], PILSV:[None], PILU28:[None], ROTaB16e4k:['a4cbd184'], ROTbB16e4k:['a4cbd184'], SPB16e4k:['02dafa1c'], SPD3:['02dafa1c'], SPMX:['02dafa1c'], SPNR16:['02dafa1c'], SPSV:['02dafa1c'], SPU28:['02dafa1c'], SVB16e4:[None], U28B16e4:[None], XAROTaB16e4k:['e7c9f4a7'], XAROTbB16e4k:['e7c9f4a7'], XLROTaB16e4k:['e7c9f4a7'], XLROTbB16e4k:['e7c9f4a7'], XPROTaB16e4k:['e7c9f4a7'], XPROTbB16e4k:['e7c9f4a7']
+[PASS] C2 redrawn curves = 76 (D2 C2 6, D3/SV8e/UMi28/MIX3 12 each, rotation 8 each, D2 C6 6) -- [6, 12, 12, 12, 12, 8, 8, 6]
+
+# D. controls
+[PASS] D1 24 receiver controls: raw_FHC* vs ORIG, every arm x KEYS_RAW bit-identical (NaN = NaN), 4 chunks each; counts = *_control.txt; verdict OK -- []
+   total (chunk, arm, key) comparisons FHC vs ORIG: 2632, differ 0
+[PASS] D2 environment check: 24 raw_ZZ* vs raw_FHC*, arms x KEYS_RAW identical; cmp_ZZ*.txt counts agree; ENVCHK: OK x 24 -- []
+[PASS] D3 §6.1 '비교 2632, 다름 0; 다른 키 [meta|em_sec_note]' = recomputed -- 2632, other keys ['meta|em_sec_note']
+   ALD control a: hhat (7, 2560, 32) b (7, 2560, 32) v (7,), identical True, max|diff| 0.0; keys ['b', 'ckpt_sha', 'doppler', 'hhat', 'nmse', 'prov', 'rotation', 'skip', 'snrs', 'train_prior', 'tune', 'v']
+   ALD control b: hhat (7, 2560, 32) b (7, 2560, 32) v (7,), identical True, max|diff| 0.0; keys ['b', 'ckpt_sha', 'doppler', 'hhat', 'nmse', 'prov', 'rotation', 'skip', 'snrs', 'train_prior', 'tune', 'v']
+[PASS] D4 2 ALD estimator controls: hhat (7, 2560, 32), b, v bit-identical to the original test estimates; file says CONTROL-ALD: OK -- []
+
+# E. count tables
+[PASS] E1 24 count tables: every (SNR, arm) failures / n = raw recount (400 rows incl. R0-pilot@1 = iteration 1); row count = 4 x (arms + alias) -- []
+[PASS] E2 count tables: BLER and 95% Wilson strings re-formatted from own Wilson (400 cells) -- []
+[PASS] E3 count-table headers: load_raw warnings 0 in all 24 -- {'0'}
+[PASS] E4 §6.1 report tables: every 'failures · BLER' cell = raw recount (336 cells) and the 8 '같은 수' genie lines are truly equal across their tags -- []
+[PASS] E5 §6.1 report tables cover every (arm, SNR) of the 24 count tables (genie merged per group) -- 336 vs 336
+
+# F. predictions
+[PASS] F1 prediction 1: 281/304 cells inside the original 95% Wilson interval (closed), 0.9243 >= 0.90 -- 281/304 = 0.9243
+[PASS] F2 fighs_cells.tsv: 304 rows = (group, tag, arm, orig raw, SNR, orig fail/n, Wilson lo/hi, new fail/n, BLER, inside) recomputed -- []
+[PASS] F3 §6.1 prediction-1 group table (curves, cells, inside) x 8 -- []
+[PASS] F4 §6.1 list of the 23 outside cells = recomputed (order, counts, intervals, BLER) -- 23 listed, 23 recomputed; diff []
+[PASS] F5 §0.4 original failure counts (+6/+9/+12/+15, n = 2560) = raw recount for all 76 curves -- []
+[PASS] F6 §0.4 ↑ marks = curves with a rising cell in the original counts (15/76) -- 15 vs 15; diff []
+[PASS] F7 prediction 2: original 9/70 (the 9 curves listed in §6.1), new 0/70; R3 excluded = 70 curves -- old [('D2 C2 (Sparse specular 8×4)', 'SBL-loop'), ('D2 C2 (Sparse specular 8×4)', 'SBL-pilot'), ('D2 C2 (Sparse specular 8×4)', 'bstar-pilot'), ('D2 C2 회전 15°', 'R5-genie'), ('D2 C2 회전 30°', 'R5-genie'), ('D2 C6 (Sparse specular 16×4)', 'SBL-loop'), ('D2 C6 (Sparse specular 16×4)', 'V1-pilot'), ('D3 (S2c) C2', 'R5-genie'), ('SV8e C2', 'R1-turbo')], new []
+[PASS] F8 §6.1 rising-cell table (8 rows: cells, counts, one-sided Fisher p, label) = recomputed from raw -- 8 rows vs 8; diff [] / []
+[PASS] F9 prediction 3 table (6 datasets x 4 SNR V1 : b*) = raw; total 23/24 (SV8e +12 dB 1 > 0 is the one miss) -- [('D3 (S2c) C2', 'FHD3B16e4', [(399, 788), (182, 429), (101, 225), (55, 142)], 4), ('SV8e C2', 'FHSVB16e4', [(2, 10), (1, 3), (1, 0), (0, 0)], 3), ('UMi28 C2', 'FHU28B16e4', [(1746, 2029), (866, 1079), (386, 546), (145, 223)], 4), ('MIX3 C2', 'FHMXB16e4', [(1499, 1840), (702, 963), (313, 444), (141, 225)], 4), ('D2 C2 회전 15°', 'FHROTaB16e4k', [(141, 293), (66, 147), (42, 107), (24, 78)], 4), ('D2 C2 회전 30°', 'FHROTbB16e4k', [(175, 385), (107, 246), (62, 159), (39, 104)], 4)]
+
+# G. logs / narrative
+[PASS] G1 run log: exactly 2 'start (git 331f6e57)' lines (resume=0 at 10-06 19:30, resume=1 at 10-06 21:15 CDT)
+[PASS] G2 segment 1: phase C done 19:38 '24 receiver control(s) OK, 2 ALD estimator control(s) OK'; last timed line = FHD3B16e4 run 20:37; no FIGHS_DONE; no ABORT/INVALID/SKIP/FAILED/rc!=0
+[PASS] G3 segment 2: phase C done 21:16 (same counts); FIGHS_DONE ok=24 fail=0 at 10-07 16:12; no ABORT/INVALID/SKIP/FAILED/rc!=0; resume scan line '0 unreadable'
+[PASS] G4 segment 1 ran rows 1-3 to acceptance (rc=0) and started row 4; segment 2 ran/accepted all 24 (rc=0) in registered order
+[PASS] G5 §6.1 per-row table (24 rows: runner segments / done / exists / minutes, acceptance time+rc, accept-file verdicts, raised 0, §1b estimate) = logs + files -- []
+[PASS] G6 runner minutes: sum of 'finished in' (segments >= 0.5 min) = 1166.4 -- 1166.4
+[PASS] G7 §6.1 group runner minutes and 'estimate' column = sums of per-row minutes / per-row §1b integers -- {'D2 C2 (Sparse specular 8×4)': (56.1, 57), 'D3 (S2c) C2': (129.2, 146), 'SV8e C2': (69.8, 78), 'UMi28 C2': (297.5, 248), 'MIX3 C2': (302.7, 250), 'D2 C2 회전 15°': (45.8, 51), 'D2 C2 회전 30°': (46.0, 51), 'D2 C6 (Sparse specular 16×4)': (219.3, 255)}
+   note: the registration's own §1b group table reads 58 / 145 / 78 / 247 / 250 / 51 / 51 / 256 (its per-row values were rounded differently); §6.1's column is the per-row sum
+[PASS] G8 durations: resume -> FIGHS_DONE 18.95 h, first start -> FIGHS_DONE 20.70 h -- 18.95 / 20.70
+[PASS] G9 §6.1 control table = first / last line of the 24 control + 2 aldcontrol files (26 rows) -- []
+[PASS] G10 §6.1 manifest table (24 rows) = run_manifest_<TAG>.json + fits links; git 331f6e57, 2048 files, arms, ckpt sha, link -> registered fits; written (KST) <= acceptance (CDT) within 3 min -- []
+[PASS] G11 before/: 39 files (= before.sha256 entries, recover.log 'backup: 39'); excluding the 2 appended logs: 34 identical now, 3 manifests differ -- 39 files, same 34, diff ['run_manifest_FHB16e4k.json', 'run_manifest_FHPILB16e4k.json', 'run_manifest_FHSPB16e4k.json']
+[PASS] G12 the 3 differing manifests differ only in versions.host (0695aede856d -> 262d04c812cc) and written; §6.1 quotes both values -- []
+[PASS] G13 ALD control estimates: sha256[:16] before = now (be03f8de6de67c10 / 6534bb27258fa42b) and mtimes 10-07 11:15:40 / 11:16:15 KST (resume recomputed them)
+[PASS] G14 new-trial ALD estimates: sha d962c0b6cf7e47a6 / bc23a889d2521ec0, mtimes 10-08 01:36:09 / 02:28:07 KST, prov git 331f6e57 (and skip 10000, n 20480) -- {'a': ('d962c0b6cf7e47a6', '10-08 01:36:09', '331f6e57', 10000, 20480, (4, 20480, 32), ['b', 'ckpt_sha', 'doppler', 'hhat', 'nmse', 'prov', 'rotation', 'skip', 'snrs', 'train_prior', 'tune', 'v']), 'b': ('bc23a889d2521ec0', '10-08 02:28:07', '331f6e57', 10000, 20480, (4, 20480, 32), ['b', 'ckpt_sha', 'doppler', 'hhat', 'nmse', 'prov', 'rotation', 'skip', 'snrs', 'train_prior', 'tune', 'v'])}
+[PASS] G15 recover.log: start 21:08:00 (host 262d04c812cc, driver 580.178.04, git 331f6e57), backup 39, envchk done 21:15:03 '24/24', resume call, exit rc=0 16:12:53; §6.1 quotes it verbatim
+[PASS] G16 figs_pushed.txt (7 lines) quoted verbatim in §6.1
+[PASS] G17 the 6 paper-branch commits in figs_pushed.txt exist, their commit times = the listed times, on branch paper and not on main -- []
+[PASS] G18 chunk mtimes: rows 1-3 written 19:38-20:37 CDT (before the container re-creation 20:38:41), rows 4-24 after 21:19 CDT within their own run..acceptance window; nothing written to raw_FH* between the last pre-interruption chunk and the resume -- [] gap []
+   per-tag chunk mtime windows (CDT): FHSPB16e4k 10-06 19:43..20:28; FHPILB16e4k 10-06 20:29..20:33; FHB16e4k 10-06 20:34..20:36; FHD3B16e4 10-06 21:25..22:31; FHSPD3 10-06 22:36..23:21; FHPILD3 10-06 23:23..23:29; FHSVB16e4 10-06 23:32..00:05; FHSPSV 10-07 00:07..00:36; FHPILSV 10-07 00:37..00:41; FHU28B16e4 10-07 00:52..03:01; FHSPU28 10-07 03:06..04:24; FHPILU28 10-07 04:29..05:41; FHMXB16e4 10-07 05:52..07:59; FHSPMX 10-07 08:05..09:33; FHPILMX 10-07 09:38..10:46; FHROTaB16e4k 10-07 10:50..11:27; FHXPROTaB16e4k 10-07 11:27..11:31; FHXAROTaB16e4k 10-07 11:36..11:38; FHROTbB16e4k 10-07 11:41..12:19; FHXPROTbB16e4k 10-07 12:19..12:23; FHXAROTbB16e4k 10-07 12:28..12:30; FHPILNR16 10-07 12:32..13:03; FHNR16B16e4 10-07 13:04..13:08; FHSPNR16 10-07 13:21..16:11
+[PASS] G19 control raws raw_FHC* (96 chunks) written 19:30-19:38 CDT in the old container only (no chunk written at the resume); raw_ZZ* (96) written 21:08-21:15 CDT -- FHC 19:31:48..19:38:26, ZZ 21:08:09..21:14:55
+[PASS] G20 24 control runner logs: 2 headers (control resume=0 at 19:31, resume=1 at 21:16), 4 done + 4 exists (resume skipped the chunks) -- []
+[PASS] G21 FHD3B16e4 first segment: header 20:37 CDT, 0 done, 0 exists, no 'finished in'; second segment 21:19 CDT 2048 done, 72.5 min
+[PASS] G22 registration: lines 1..204 (through '## 6. 결과 (이 절은 추가만 한다)') byte-identical to commit 331f6e57; §6.1 is pure addition -- frozen 204 lines, now 607
+[PASS] G23 HEAD = 331f6e57 (commit 2026-10-06 19:30 CDT), 0 commits after it, conf/code + Demo clean, DECISIONS.md clean -- 2026-10-06 19:30 CDT
+[PASS] G24 the 9 PNGs on the paper branch = the regenerated working-tree PNGs (git diff --quiet paper) -- []
+   tracked files modified vs 331f6e57 (git status ' M', non-log): CLAUDE.md conf/results/review_next/NEXT_EXPERIMENTS_FIGHS16e4.md conference/figures/F16_headline_budget.pdf conference/figures/F16_headline_budget.png conference/figures/F17_codim_C6.pdf conference/figures/F17_codim_C6.png conference/figures/F20_channel_models.pdf conference/figures/F20_channel_models.png conference/figures/F21_all_baselines.pdf conference/figures/F21_all_baselines.png conference/figures/F22_pilot_only.pdf conference/figures/F22_pilot_only.png conference/figures/F24_nonstationary_D2C2.pdf conference/figures/F24_nonstationary_D2C2.png conference/figures/F25_nonstationary_all.pdf conference/figures/F26_drift_spatial.pdf conference/figures/F31_sparse_baselines.pdf conference/figures/F31_sparse_baselines.png conference/figures/README.md conference/figures/paper_f16.py conference/figures/paper_f17.py conference/figures/paper_f20.py conference/figures/paper_f21.py conference/figures/paper_f22.py conference/figures/paper_f24.py conference/figures/paper_f31.py
+   untracked figure code / records: conference/figures/fighs_merge.py conference/figures/records/
+
+# H. figure records
+[PASS] H1 7 figure records: every merged k/n (516) = count table (fighs_/hisnr_) and (FH tags) = raw; rising cells + one-sided Fisher p recomputed over the whole drawn curve; no FALLBACK / WARNING / 'n = 2560 over the whole range' -- []
+[PASS] H2 §6.1 quotes exactly the records' rising lines (10 lines) and the records' line counts / mtimes -- 10 vs 10 (f21 7 + f22 1 + f24 2); headers [True, True, True, True, True, True, True]
+
+# I. environment
+   now: {"host": "262d04c812cc", "pid1": "화 10월  6 20:38:41 2026", "up": "up 1 week, 2 days, 19 hours, 20 minutes", "drv": "580.178.04", "ldd": "ldd (Ubuntu GLIBC 2.39-0ubuntu8.7) 2.39", "apt": "Start-Date: 2026-07-07  13:42:56"}
+[PASS] I1 §6.1 '환경': hostname 262d04c812cc, PID 1 start '화 10월  6 20:38:41 2026' (CDT), driver 580.178.04, glibc 2.39-0ubuntu8.7, apt last Start-Date 2026-07-07 13:42:56 = read now
+[PASS] I2 the container re-creation (PID 1 start 20:38:41 CDT) falls between the last pre-interruption log line (20:37) and recover start (21:08:00)
+[PASS] I3 driver value before the interruption: committed CLAUDE.md (331f6e57) says 580.173.02; working-tree CLAUDE.md now says 580.178.04 (uncommitted edit after the record) -- CLAUDE.md mtime 10-07 16:26 CDT
+   note: recover.sh header says 'old container 9000babdde68' (= the committed CLAUDE.md id); the manifests written before the interruption say host 0695aede856d
+   no log under conf/ records the driver version before 10-06 21:08 CDT: (none)
+[PASS] I4 §6.1 header time 16:23 CDT (= 06:23 KST) is after the s6 generator outputs' mtimes (06:22 KST) and after FIGHS_DONE
+[PASS] I5 §6.1 body (between the header and '편차·주의') = s6_draft_raw.md output (after its HTML comment) line for line -- 336 vs 336 non-empty lines
+
+# SUMMARY: 65 checks, 0 FAIL
+# finished 2026-10-07 17:05:31 CDT

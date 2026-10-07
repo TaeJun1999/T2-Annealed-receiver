@@ -1,0 +1,37 @@
+# date        : 2026-09-24 01:02:57 KST
+# git commit  : 2b599c14
+# versions    : python 3.12.14  numpy 2.5.2  scipy 1.18.1  torch 2.14.0+cu130 (cuda_available=True)
+# device      : CPU (192 cores) | dtype: complex128 / float64 | deterministic: yes (fixed seeds, no GPU in the receiver)
+# testbed     : D2
+# seed rule   : default_rng([20260926, TBID[testbed], PID[prior], Nr, T, Tp, int(snr)+100])  (trials of a point = ONE stream)
+# code        : rate-1/2 conv (133,171)_8 nu=6 terminated, QPSK, outer iterations = 16 for EVERY arm
+# Demo/ hashes: t2_route_a.py=95a5408901ec125c  t2_trellis.py=31cd0ee9c68e972b  t2_gmm.py=d064e58c7510c769
+# content     : review_next P3 §3 ONE-SHOT test-set confirmation of the adopted rule R-adapt (NEXT_EXPERIMENTS_P3 v2)
+# runs        : conf/raw_review_next_P3test (32 iterations + r_t, test trials 0..2559); R16 reference = its iteration 16, verified BIT-IDENTICAL to conf/raw_B16e4k for V1 and b* in every KEYS_RAW field at every SNR; the receiver ran 32 outer iterations (the 'outer iterations = 16' line above is the common header's default)
+# Demo hashes : at run time (run manifests) identical for both tags: t2_gmm.py=d064e58c7510c769  t2_route_a.py=95a5408901ec125c  t2_trellis.py=31cd0ee9c68e972b
+# rule        : pass (per prior) = at >= 2 of C2 -3/+0/+3 dB R-adapt has fewer failures with p < 0.05, AND power guard (all 3 present, n_d >= 6 at >= 2); other SNRs and pooled p report-only; headline unchanged either way
+# checkpoint  : /home/HTJ/t2/conf/ckpt/d2sx_N160000_a1.pt (last-EMA, BEST_WEIGHTS_UNAVAILABLE); GMM b* kron K=1024, N_train 160000
+
+## V1: R-adapt vs R16 (a = only R-adapt fails, b = only R16 fails)
+    SNR   R16   R32  R-adapt  mean t  max t  S-res  oracle raised  div   test
+     -3   371   341      342   17.90     32    303     287      0    0   a:b = 2:31  n_d 33  p = 1.31e-07  -> 지지  [decision]
+     +0    88    79       79   16.55     32     58      55      0    0   a:b = 0:9  n_d 9  p = 0.00391  -> 지지  [decision]
+     +3    29    24       25   16.20     32     19      15      0    0   a:b = 0:4  n_d 4  p = 0.125  -> UNDECIDED  [decision]
+     +6    16    14       15   16.10     32     12      10      0    0   a:b = 0:1  n_d 1  p = 1  -> UNDECIDED  [report-only]
+     +9     7     6        7   16.02     32      3       3      0    0   a:b = 0:0  n_d 0  p = 1  -> UNDECIDED  [report-only]
+    +12     5     4        4   16.01     29      3       2      0    0   a:b = 0:1  n_d 1  p = 1  -> UNDECIDED  [report-only]
+    +15     3     3        3   16.01     32      3       3      0    0   a:b = 0:0  n_d 0  p = 1  -> UNDECIDED  [report-only]
+  3-point rule: wins 2/3 (need >= 2), power guard OK -> V1: PASS   (pooled over the 3 points, report only: a:b = 2:44, p = 3.08e-11)
+
+## bstar: R-adapt vs R16 (a = only R-adapt fails, b = only R16 fails)
+    SNR   R16   R32  R-adapt  mean t  max t  S-res  oracle raised  div   test
+     -3   623   589      589   18.72     32    548     529      0    0   a:b = 1:35  n_d 36  p = 1.08e-09  -> 지지  [decision]
+     +0   184   159      162   16.77     32    131     115      0    0   a:b = 0:22  n_d 22  p = 4.77e-07  -> 지지  [decision]
+     +3    57    49       49   16.18     32     34      30      0    0   a:b = 0:8  n_d 8  p = 0.00781  -> 지지  [decision]
+     +6    28    27       28   16.10     32     22      21      0    0   a:b = 0:0  n_d 0  p = 1  -> UNDECIDED  [report-only]
+     +9    17    13       13   16.06     32      8       8      0    0   a:b = 0:4  n_d 4  p = 0.125  -> UNDECIDED  [report-only]
+    +12    16    15       16   16.04     32     11      10      0    0   a:b = 0:0  n_d 0  p = 1  -> UNDECIDED  [report-only]
+    +15     8     7        7   16.03     32      4       4      0    0   a:b = 0:1  n_d 1  p = 1  -> UNDECIDED  [report-only]
+  3-point rule: wins 3/3 (need >= 2), power guard OK -> bstar: PASS   (pooled over the 3 points, report only: a:b = 1:65, p = 1.82e-18)
+
+(S-res / oracle columns: report only -- S-res is not a confirmation candidate (§3), the oracle uses true bits.  'raised' base trials take their R16 from raw_B16e4k (§1 '비정상 값'); per prior and SNR that count is  (others 0).)

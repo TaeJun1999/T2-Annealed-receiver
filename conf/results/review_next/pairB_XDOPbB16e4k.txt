@@ -1,0 +1,132 @@
+# pair_baselines raw_DOPbB16e4k + raw_XPDOPbB16e4k + raw_XADOPbB16e4k + raw_XLDOPbB16e4k, cell C2, prior S2, rotation (none), doppler nu=0.01 per , git base=063f3bcb extra0=e7c9f4a7 pil=e7c9f4a7 ald=e7c9f4a7; integrity: OK
+# R0-pilot read at @1 (1-pass, 08_SPEC §1; load_raw alias 'R0-pilot@1'), SUPP16e4 §1
+# genie -3 dB failures 846 >= V1 756: R_X undefined for every X at -3 dB (SUPP16e4 §1 guard)
+M-ours-bstar -> M-ours-dscore-C-V1  [anchor M-ours-bstar]  decision SNRs ['+3', '+12', '+15']
+    sign test @16: +3 dB 119:36 p=1.4e-11  +12 dB 68:60 p=0.54  +15 dB 101:92 p=0.56   pooled 288:188 p=5.3e-06
+    POWERED=True  second arm fewer at 1/3, first arm fewer at 0/3  -> (iii)
+    SNR@0.1 gap (M-ours-bstar minus V1): +1.61 dB  [90% paired bootstrap +1.29, +2.04; censored replicates 0%]
+    absolute gap -3 dB: F_X - F_V1 = 377 blocks of 2560
+    R_X -3 dB (primary): undefined (the genie fails at least as often as V1 at -3 dB)
+    R_X decision points (secondary): undefined (the genie fails at least as often as V1 over the decision points)
+M-ours-bstar-scalar -> M-ours-dscore-C-V1  [anchor M-ours-bstar-scalar]  decision SNRs ['+3', '+6', '+15']
+    sign test @16: +3 dB 150:38 p=6.1e-17  +6 dB 107:19 p=4.5e-16  +15 dB 123:73 p=0.00044   pooled 380:130 p=2e-29
+    POWERED=True  second arm fewer at 3/3, first arm fewer at 0/3  -> (i)
+    SNR@0.1 gap (M-ours-bstar-scalar minus V1): +2.14 dB  [90% paired bootstrap +1.76, +3.08; censored replicates 0%]
+    absolute gap -3 dB: F_X - F_V1 = 387 blocks of 2560
+    R_X -3 dB (primary): undefined (the genie fails at least as often as V1 at -3 dB)
+    R_X decision points (secondary): undefined (the genie fails at least as often as V1 over the decision points)
+M-ours-gmm32 -> M-ours-dscore-C-V1  [anchor M-ours-gmm32]  decision SNRs ['+3', '+12', '+15']
+    sign test @16: +3 dB 130:32 p=3.3e-15  +12 dB 88:55 p=0.0072  +15 dB 104:86 p=0.22   pooled 322:173 p=2.1e-11
+    POWERED=True  second arm fewer at 2/3, first arm fewer at 0/3  -> (i)
+    SNR@0.1 gap (M-ours-gmm32 minus V1): +1.90 dB  [90% paired bootstrap +1.56, +2.48; censored replicates 0%]
+    absolute gap -3 dB: F_X - F_V1 = 405 blocks of 2560
+    R_X -3 dB (primary): undefined (the genie fails at least as often as V1 at -3 dB)
+    R_X decision points (secondary): undefined (the genie fails at least as often as V1 over the decision points)
+R0-pilot@1 -> M-ours-dscore-C-V1  [anchor R0-pilot@1]  decision SNRs ['+9', '+12', '+15']
+    sign test @16: +9 dB 536:2 p=3.2e-157  +12 dB 461:6 p=7.4e-128  +15 dB 557:18 p=9.4e-140   pooled 1554:26 p=0
+    POWERED=True  second arm fewer at 3/3, first arm fewer at 0/3  -> (i)
+    SNR@0.1 gap (R0-pilot@1 minus V1): >= +14.18 dB (R0-pilot@1 never reaches 0.1 on the grid)
+    absolute gap -3 dB: F_X - F_V1 = 1504 blocks of 2560
+    R_X -3 dB (primary): undefined (the genie fails at least as often as V1 at -3 dB)
+    R_X decision points (secondary): undefined (the genie fails at least as often as V1 over the decision points)
+R1-turbo -> M-ours-dscore-C-V1  [anchor R1-turbo]  decision SNRs ['+9', '+12', '+15']
+    sign test @16: +9 dB 255:21 p=2.9e-52  +12 dB 195:32 p=1e-29  +15 dB 264:57 p=5.5e-33   pooled 714:110 p=3.7e-109
+    POWERED=True  second arm fewer at 3/3, first arm fewer at 0/3  -> (i)
+    SNR@0.1 gap (R1-turbo minus V1): >= +14.18 dB (R1-turbo never reaches 0.1 on the grid)
+    absolute gap -3 dB: F_X - F_V1 = 1084 blocks of 2560
+    R_X -3 dB (primary): undefined (the genie fails at least as often as V1 at -3 dB)
+    R_X decision points (secondary): undefined (the genie fails at least as often as V1 over the decision points)
+R2-ours-G -> M-ours-dscore-C-V1  [anchor R2-ours-G]  decision SNRs ['+3', '+6', '+15']
+    sign test @16: +3 dB 168:39 p=2.8e-20  +6 dB 133:27 p=5e-18  +15 dB 103:83 p=0.16   pooled 404:149 p=3.6e-28
+    POWERED=True  second arm fewer at 2/3, first arm fewer at 0/3  -> (i)
+    SNR@0.1 gap (R2-ours-G minus V1): +3.09 dB  [90% paired bootstrap +2.04, +4.33; censored replicates 0%]
+    absolute gap -3 dB: F_X - F_V1 = 560 blocks of 2560
+    R_X -3 dB (primary): undefined (the genie fails at least as often as V1 at -3 dB)
+    R_X decision points (secondary): undefined (the genie fails at least as often as V1 over the decision points)
+R3-bigamp -> M-ours-dscore-C-V1  [anchor R3-bigamp]  decision SNRs ['+6', '+9', '+15']
+    sign test @16: +6 dB 229:29 p=9.4e-40  +9 dB 240:40 p=6.2e-36  +15 dB 227:96 p=2.2e-13   pooled 696:165 p=2.9e-78
+    POWERED=True  second arm fewer at 3/3, first arm fewer at 0/3  -> (i)
+    SNR@0.1 gap (R3-bigamp minus V1): >= +14.18 dB (R3-bigamp never reaches 0.1 on the grid)
+    absolute gap -3 dB: F_X - F_V1 = 1071 blocks of 2560
+    R_X -3 dB (primary): undefined (the genie fails at least as often as V1 at -3 dB)
+    R_X decision points (secondary): undefined (the genie fails at least as often as V1 over the decision points)
+R4-llr -> M-ours-dscore-C-V1  [anchor R4-llr]  decision SNRs ['+9', '+12', '+15']
+    sign test @16: +9 dB 1215:9 p=0  +12 dB 980:18 p=9.8e-263  +15 dB 944:11 p=9.5e-263   pooled 3139:38 p=0
+    POWERED=True  second arm fewer at 3/3, first arm fewer at 0/3  -> (i)
+    SNR@0.1 gap (R4-llr minus V1): >= +14.18 dB (R4-llr never reaches 0.1 on the grid)
+    absolute gap -3 dB: F_X - F_V1 = 1579 blocks of 2560
+    R_X -3 dB (primary): undefined (the genie fails at least as often as V1 at -3 dB)
+    R_X decision points (secondary): undefined (the genie fails at least as often as V1 over the decision points)
+R4-scvamp -> M-ours-dscore-C-V1  [anchor R4-scvamp]  decision SNRs ['+6', '+9', '+12']
+    sign test @16: +6 dB 559:2 p=4.2e-164  +9 dB 490:6 p=2e-136  +12 dB 425:13 p=8.5e-108   pooled 1474:21 p=0
+    POWERED=True  second arm fewer at 3/3, first arm fewer at 0/3  -> (i)
+    SNR@0.1 gap (R4-scvamp minus V1): >= +14.18 dB (R4-scvamp never reaches 0.1 on the grid)
+    absolute gap -3 dB: F_X - F_V1 = 1245 blocks of 2560
+    R_X -3 dB (primary): undefined (the genie fails at least as often as V1 at -3 dB)
+    R_X decision points (secondary): undefined (the genie fails at least as often as V1 over the decision points)
+bstar-pilot -> M-ours-dscore-C-V1  [anchor bstar-pilot]  decision SNRs ['+6', '+9', '+12']
+    sign test @16: +6 dB 185:27 p=3.7e-30  +9 dB 157:33 p=1.5e-20  +12 dB 115:52 p=1.2e-06   pooled 457:112 p=2.1e-50
+    POWERED=True  second arm fewer at 3/3, first arm fewer at 0/3  -> (i)
+    SNR@0.1 gap (bstar-pilot minus V1): +6.93 dB  [90% paired bootstrap +5.04, +9.63; censored replicates 0%]
+    absolute gap -3 dB: F_X - F_V1 = 1003 blocks of 2560
+    R_X -3 dB (primary): undefined (the genie fails at least as often as V1 at -3 dB)
+    R_X decision points (secondary): undefined (the genie fails at least as often as V1 over the decision points)
+V1-pilot -> M-ours-dscore-C-V1  [anchor V1-pilot]  decision SNRs ['+3', '+6', '+12']
+    sign test @16: +3 dB 180:15 p=4.3e-37  +6 dB 106:21 p=7.5e-15  +12 dB 79:56 p=0.058   pooled 365:92 p=1.6e-39
+    POWERED=True  second arm fewer at 2/3, first arm fewer at 0/3  -> (i)
+    SNR@0.1 gap (V1-pilot minus V1): +3.51 dB  [90% paired bootstrap +2.98, +4.06; censored replicates 0%]
+    absolute gap -3 dB: F_X - F_V1 = 624 blocks of 2560
+    R_X -3 dB (primary): undefined (the genie fails at least as often as V1 at -3 dB)
+    R_X decision points (secondary): undefined (the genie fails at least as often as V1 over the decision points)
+ALD-pilot -> M-ours-dscore-C-V1  [anchor ALD-pilot]  decision SNRs ['+9', '+12', '+15']
+    sign test @16: +9 dB 151:28 p=1.4e-21  +12 dB 144:50 p=9.5e-12  +15 dB 161:78 p=8.5e-08   pooled 456:156 p=5e-35
+    POWERED=True  second arm fewer at 3/3, first arm fewer at 0/3  -> (i)
+    SNR@0.1 gap (ALD-pilot minus V1): +7.43 dB  [90% paired bootstrap +6.52, +9.51; censored replicates 10%]
+    absolute gap -3 dB: F_X - F_V1 = 874 blocks of 2560
+    R_X -3 dB (primary): undefined (the genie fails at least as often as V1 at -3 dB)
+    R_X decision points (secondary): undefined (the genie fails at least as often as V1 over the decision points)
+ALDv-pilot -> M-ours-dscore-C-V1  [anchor ALDv-pilot]  decision SNRs ['+6', '+12', '+15']
+    sign test @16: +6 dB 159:24 p=1.3e-25  +12 dB 100:57 p=0.00075  +15 dB 113:90 p=0.12   pooled 372:171 p=3.8e-18
+    POWERED=True  second arm fewer at 2/3, first arm fewer at 0/3  -> (i)
+    SNR@0.1 gap (ALDv-pilot minus V1): +5.12 dB  [90% paired bootstrap +4.49, +6.13; censored replicates 0%]
+    absolute gap -3 dB: F_X - F_V1 = 896 blocks of 2560
+    R_X -3 dB (primary): undefined (the genie fails at least as often as V1 at -3 dB)
+    R_X decision points (secondary): undefined (the genie fails at least as often as V1 over the decision points)
+SUMMARY-B (baselines without b*, 12): (i) 12, (ii) 0, not decided 0; b* -> V1 (iii)
+
+SUMMARY registered baselines 13 (b* + 𝔅 12): (i) 12, (ii) 0, not decided 1
+    M-ours-bstar=(iii)  M-ours-bstar-scalar=(i)  M-ours-gmm32=(i)  R0-pilot@1=(i)  R1-turbo=(i)  R2-ours-G=(i)  R3-bigamp=(i)  R4-llr=(i)  R4-scvamp=(i)  bstar-pilot=(i)  V1-pilot=(i)  ALD-pilot=(i)  ALDv-pilot=(i)
+X* (fewest -3 dB failures, ties by name) = M-ours-bstar (F=1133); R_X* -3 dB = undefined (out of range)
+'등록된 baseline 전부와 멀어진다' condition (k = 13, (ii) = 0, R_X* CI lower > 0): NOT met
+BLER@16 failures / n per SNR -3 +0 +3 +6 +9 +12 +15 dB:
+    R5-genie              846   527   394   382   356   398   413
+    M-ours-dscore-C-V1    756   320   142   119   118   177   185
+    M-ours-bstar         1133   447   225   179   152   185   194
+    M-ours-bstar-scalar  1143   512   254   207   188   205   235
+    M-ours-gmm32         1161   488   240   191   158   210   203
+    R0-pilot@1           2260  1578   990   731   652   632   724
+    R1-turbo             1840  1035   566   397   352   340   392
+    R2-ours-G            1316   573   271   225   180   189   205
+    R3-bigamp            1827   948   444   319   318   344   316
+    R4-llr               2335  2208  1897  1554  1324  1139  1118
+    R4-scvamp            2001  1292   819   676   602   589   682
+    bstar-pilot          1759   821   370   277   242   240   224
+    V1-pilot             1380   600   307   204   189   200   200
+    ALD-pilot            1630   819   462   307   241   271   268
+    ALDv-pilot           1652   737   388   254   205   220   208
+    R0-pilot             1890   895   439   328   256   253   236
+report-only, median NMSE@16 of the channel estimate per SNR:
+    M-ours-dscore-C-V1  1.55e-01 1.27e-01 1.17e-01 1.09e-01 1.08e-01 1.04e-01 1.04e-01
+    M-ours-bstar        1.98e-01 1.46e-01 1.24e-01 1.12e-01 1.10e-01 1.03e-01 1.03e-01
+    M-ours-bstar-scalar 2.01e-01 1.49e-01 1.25e-01 1.13e-01 1.11e-01 1.04e-01 1.04e-01
+    M-ours-gmm32        2.17e-01 1.55e-01 1.27e-01 1.14e-01 1.10e-01 1.03e-01 1.03e-01
+    R0-pilot@1          3.23e-01 1.98e-01 1.15e-01 6.47e-02 3.70e-02 2.14e-02 1.40e-02
+    R1-turbo            3.00e-01 1.91e-01 1.42e-01 1.22e-01 1.14e-01 1.08e-01 1.06e-01
+    R2-ours-G           2.54e-01 1.70e-01 1.34e-01 1.16e-01 1.12e-01 1.04e-01 1.03e-01
+    R3-bigamp           4.21e-01 2.56e-01 1.67e-01 1.29e-01 1.18e-01 1.10e-01 1.09e-01
+    R4-llr              3.81e-01 5.05e-01 1.26e+00 3.01e-01 1.95e-01 1.55e-01 1.50e-01
+    R4-scvamp           3.12e-01 2.03e-01 1.52e-01 1.32e-01 1.24e-01 1.16e-01 1.18e-01
+    bstar-pilot         2.38e-01 1.43e-01 8.49e-02 4.98e-02 3.00e-02 1.86e-02 1.27e-02
+    V1-pilot            1.75e-01 9.54e-02 5.34e-02 3.03e-02 1.83e-02 1.21e-02 9.01e-03
+    ALD-pilot           2.33e-01 1.23e-01 7.12e-02 3.65e-02 1.92e-02 1.23e-02 9.09e-03
+    ALDv-pilot          2.33e-01 1.23e-01 7.12e-02 3.65e-02 1.92e-02 1.23e-02 9.09e-03

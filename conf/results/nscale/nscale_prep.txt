@@ -1,0 +1,109 @@
+# NSCALE prep (read-only; §5 helper).  The registered rules are in NEXT_EXPERIMENTS_NSCALE.md §1; these lines only gather the values.
+
+== B64e4 (C2, Nr 8, N' 640000)
+  batched check results/nr8b_batched_check_S2_n640000.txt: VERDICT: PASS (criterion in the module docstring)
+  fit logs with OOM: none
+    full K=16    ll_val -38.337809223956114    r1 kappa 0 n_iter 181 it_best 140 stop patience reseed 0 sec 611  cand 0
+    full K=32    ll_val -31.360194545727325    r1 kappa 0 n_iter 376 it_best 370 stop tol reseed 0 sec 1564  cand 0
+    full K=64    ll_val -24.968339135970076    r0 kappa 0 n_iter 451 it_best 410 stop patience reseed 0 sec 2818  cand 0
+    full K=128   ll_val -19.41851503605083     r2 kappa 0 n_iter 331 it_best 290 stop patience reseed 0 sec 6296  cand 0
+    full K=256   ll_val -14.2999221836327      r1 kappa 0 n_iter 481 it_best 440 stop patience reseed 0 sec 9617  cand 0
+    full K=512   ll_val -9.430325411871934     r1 kappa 0 n_iter 500 it_best 490 stop cap500 reseed 0 sec 17664  cand 0
+    kron K=16    ll_val -38.77681721356206     r0 kappa 0 n_iter 295 it_best 290 stop tol reseed 0 sec 117 batched [1.0, 1.0, 1.0] cand 0
+    kron K=32    ll_val -33.018309250539545    r2 kappa 0 n_iter 238 it_best 230 stop tol reseed 0 sec 163 batched [1.0, 1.0, 1.0] cand 0
+    kron K=64    ll_val -27.50016283258215     r2 kappa 0 n_iter 177 it_best 170 stop tol reseed 0 sec 345 batched [1.0, 1.0, 1.0] cand 0
+    kron K=128   ll_val -22.409260318178628    r1 kappa 0 n_iter 241 it_best 200 stop patience reseed 0 sec 691 batched [1.0, 1.0, 1.0] cand 0
+    kron K=256   ll_val -17.84624845006982     r0 kappa 0 n_iter 281 it_best 250 stop tol reseed 0 sec 1408 batched [1.0, 1.0, 1.0] cand 0
+    kron K=512   ll_val -13.876738342540357    r2 kappa 0 n_iter 191 it_best 150 stop patience reseed 0 sec 2046 batched [1.0, 1.0, 1.0] cand 0
+    kron K=1024  ll_val -10.155676697271073    r2 kappa 0 n_iter 221 it_best 180 stop patience reseed 0 sec 4364 batched [1.0, 1.0, 1.0] cand 3
+    kron K=2048  ll_val -6.855596311929488     r1 kappa 0 n_iter 381 it_best 340 stop patience reseed 0 sec 12341 batched [1.0, 1.0, 1.0] cand 3
+    kron K=4096  ll_val -4.2936152070786635    r1 kappa 0 n_iter 381 it_best 340 stop patience reseed 898 sec 23080 batched [1.0, 1.0, 1.0] cand 3
+    grid missing: none
+  b* = kron kron_K 4096 ll_val -4.2936152070786635  (GRID EDGE = cap 4096)
+  Q-K: r 0.7763389995682298 -> c_K 3.4710521640765846;  K2 set b* = kron 2048 -6.855596311929488 -> kron 2048 OK
+  ckpt d2sx_N640000_a1_best.pt: sha256[:16] f6e4a6b000d35f5a epoch 1217 best_epoch 1217 role best best_val 3.474525e-01
+  ckpt d2sx_N640000_a1.pt: sha256[:16] fa3afcfb84259976 epoch 1237 best_epoch 1217 role last best_val 3.474525e-01
+  best.epoch == last.best_epoch: True; roles best/last
+  other attempts of this stem: none
+  training: # ===== 2026-10-05 00:46:11 KST  D2SX640000 attempt 1  testbed D2 prior S2  Nr=8 Nt=4 || # done        : 1237 epochs, stopped_by=patience, aborted=False, best val 3.474525e-01 @ epoch 1217, wall 58319.3 s, 47.146 s/epoch || # ===== 2026-10-06 10:51:55 KST  D2SX640000 attempt 1  testbed D2 prior S2  Nr=8 Nt=4 || # resume      : checkpoint already meets stopped_by=patience at epoch 1237 -- no epoch trained, /home/HTJ/t2/conf/ckpt/d2sx_N640000_a1.pt left untouched || # done        : 1237 epochs, stopped_by=patience, aborted=False, best val 3.474525e-01 @ epoch 1217, wall 5.6 s, 5.600 s/epoch
+  D1 sibling (samplecx.csv row; last file sx_N640000_D1[_fb<k>].pt): epochs 215 val_loss 7.385598e-01 GA 9.847e-16 GB 0.00140 GC 0.09603 GD 0.06601 csv passed=True -> thresholds PASS
+  D1 ckpt sx_N640000_D1.pt: sha256[:16] dc2665c2cbfcda79; training: # ===== 2026-10-05 11:15:04 KST  SX640000 attempt 1  testbed D1 prior S  Nr=8 Nt=4 || # done        : 215 epochs, stopped_by=patience, aborted=False, best val 7.385598e-01 @ epoch 195, wall 10163.0 s, 47.270 s/epoch
+  GB' csv: gmm_ntrain 640000 equal_budget True kron K 4096 ratio min/max/median 0.451443/0.879592/0.514538 worst_excess -0.120408
+  GB' log lines @N=640000: ['gbp_B64e4.log: [d2sx] GMM b* = kron (kron K=4096) @N=640000 | diff/gmm min 0.4514 max 0.8796 median 0.5145 | equal_budget=True', 'gbp_NR16B64e4.log: [nr16] GMM b* = kron (kron K=4096) @N=640000 | diff/gmm min 0.2728 max 0.5170 median 0.2913 | equal_budget=True']
+  GB' npz results/d2_gbprime_N640000_a1.npz: newer than the kron 4096 merge: True
+  DRAFT  PT B64e4 C2 640000 d2sx_N640000_a1 f6e4a6b000d35f5a fa3afcfb84259976 kron 4096 -4.2936152070786635 16,32,64,128,256,512 16,32,64,128,256,512,1024,2048,4096 2048 -6.855596311929488 3.4710521640765846 PASS
+    kron K=8192  ll_val -2.4856244669792424    r0 kappa 0 n_iter 311 it_best 270 stop patience reseed 24042 sec 51918 batched [1.0, 1.0, 1.0] cand 3
+  K8: B64e4 grid + kron 8192 -> b* kron 8192 -2.4856244669792424; dll(8192-4096) +1.8080
+  DRAFT  K8 8192 -2.4856244669792424 1
+
+== B128e4 (C2, Nr 8, N' 1280000)
+  batched check results/nr8b_batched_check_S2_n1280000.txt: VERDICT: PASS (criterion in the module docstring)
+  fit logs with OOM: none
+    full K=16    ll_val -38.394635940839116    r2 kappa 0 n_iter 141 it_best 100 stop patience reseed 0 sec 1118  cand 0
+    full K=32    ll_val -31.14923147028535     r0 kappa 0 n_iter 359 it_best 350 stop tol reseed 0 sec 2503  cand 0
+    full K=64    ll_val -24.97485412554862     r1 kappa 0 n_iter 500 it_best 490 stop cap500 reseed 0 sec 6715  cand 0
+    full K=128   ll_val -19.259266682926224    r0 kappa 0 n_iter 311 it_best 270 stop patience reseed 0 sec 12711  cand 0
+    full K=256   ll_val -13.999289922047081    r0 kappa 0 n_iter 261 it_best 220 stop patience reseed 0 sec 20588  cand 0
+    full K=512   ll_val -8.81302556797323      r1 kappa 0 n_iter 491 it_best 450 stop patience reseed 0 sec 39467  cand 0
+    kron K=16    ll_val -39.07301514539034     r2 kappa 0 n_iter 431 it_best 390 stop patience reseed 0 sec 300 batched [1.0, 1.0, 1.0] cand 0
+    kron K=32    ll_val -32.818560665752244    r1 kappa 0 n_iter 242 it_best 210 stop tol reseed 0 sec 336 batched [1.0, 1.0, 1.0] cand 0
+    kron K=64    ll_val -27.550026199512192    r0 kappa 0 n_iter 171 it_best 130 stop patience reseed 0 sec 412 batched [1.0, 1.0, 1.0] cand 0
+    kron K=128   ll_val -22.558353349846154    r2 kappa 0 n_iter 231 it_best 190 stop patience reseed 0 sec 1318 batched [1.0, 1.0, 1.0] cand 0
+    kron K=256   ll_val -17.88905884302987     r1 kappa 0 n_iter 231 it_best 190 stop patience reseed 0 sec 2081 batched [1.0, 1.0, 1.0] cand 0
+    kron K=512   ll_val -13.561779664999273    r1 kappa 0 n_iter 231 it_best 190 stop patience reseed 0 sec 5022 batched [1.0, 1.0, 1.0] cand 0
+    kron K=1024  ll_val -9.827712154376806     r1 kappa 0 n_iter 231 it_best 190 stop patience reseed 0 sec 9707 batched [1.0, 1.0, 1.0] cand 3
+    kron K=2048  ll_val -6.175440687470083     r1 kappa 0 n_iter 283 it_best 270 stop tol reseed 0 sec 24929 batched [1.0, 1.0, 1.0] cand 3
+    kron K=4096  ll_val -3.1746045830106424    r1 kappa 0 n_iter 361 it_best 320 stop patience reseed 36 sec 50390 batched [1.0, 1.0, 1.0] cand 3
+    grid missing: none
+  b* = kron kron_K 4096 ll_val -3.1746045830106424  (GRID EDGE = cap 4096)
+  Q-K: r 0.8216355579397788 -> c_K 4.606498629712138;  K2 set b* = kron 2048 -6.175440687470083 -> kron 2048 OK
+  ckpt d2sx_N1280000_a1_best.pt: sha256[:16] ec1c29cdf4eabac7 epoch 866 best_epoch 866 role best best_val 3.444063e-01
+  ckpt d2sx_N1280000_a1.pt: sha256[:16] cd6106d493bcbdae epoch 886 best_epoch 866 role last best_val 3.444063e-01
+  best.epoch == last.best_epoch: True; roles best/last
+  other attempts of this stem: none
+  training: # ===== 2026-10-05 00:46:14 KST  D2SX1280000 attempt 1  testbed D2 prior S2  Nr=8 Nt=4 || # done        : 886 epochs, stopped_by=patience, aborted=False, best val 3.444063e-01 @ epoch 866, wall 85537.8 s, 96.544 s/epoch || # ===== 2026-10-06 03:07:06 KST  D2SX1280000 attempt 1  testbed D2 prior S2  Nr=8 Nt=4 || # resume      : checkpoint already meets stopped_by=patience at epoch 886 -- no epoch trained, /home/HTJ/t2/conf/ckpt/d2sx_N1280000_a1.pt left untouched || # done        : 886 epochs, stopped_by=patience, aborted=False, best val 3.444063e-01 @ epoch 866, wall 11.3 s, 11.293 s/epoch
+  D1 sibling (samplecx.csv row; last file sx_N1280000_D1[_fb<k>].pt): epochs 200 val_loss 7.384518e-01 GA 1.015e-15 GB 0.00130 GC 0.08180 GD 0.06847 csv passed=True -> thresholds PASS
+  D1 ckpt sx_N1280000_D1.pt: sha256[:16] 4aa5f3e0bb9baf90; training: # ===== 2026-10-05 10:39:41 KST  SX1280000 attempt 1  testbed D1 prior S  Nr=8 Nt=4 || # done        : 200 epochs, stopped_by=patience, aborted=False, best val 7.384518e-01 @ epoch 114, wall 24397.0 s, 121.985 s/epoch
+  GB' csv: gmm_ntrain 1280000 equal_budget True kron K 4096 ratio min/max/median 0.447127/0.877990/0.513312 worst_excess -0.122010
+  GB' log lines @N=1280000: ['gbp_B128e4.log: [d2sx] GMM b* = kron (kron K=4096) @N=1280000 | diff/gmm min 0.4471 max 0.8780 median 0.5133 | equal_budget=True']
+  GB' npz results/d2_gbprime_N1280000_a1.npz: newer than the kron 4096 merge: True
+  DRAFT  PT B128e4 C2 1280000 d2sx_N1280000_a1 ec1c29cdf4eabac7 cd6106d493bcbdae kron 4096 -3.1746045830106424 16,32,64,128,256,512 16,32,64,128,256,512,1024,2048,4096 2048 -6.175440687470083 4.606498629712138 PASS
+
+== NR16B64e4 (C6, Nr 16, N' 640000)
+  batched check results/nr16b_batched_check_S2_n640000.txt: VERDICT: PASS (criterion in the module docstring)
+  fit logs with OOM: none
+    full K=16    ll_val -29.321347143757038    r1 kappa 0 n_iter 366 it_best 330 stop tol reseed 0 sec 1796  cand 0
+    full K=32    ll_val -9.806996983806753     r1 kappa 0 n_iter 500 it_best 490 stop cap500 reseed 0 sec 4878  cand 0
+    full K=64    ll_val 6.699283115944112      r2 kappa 0 n_iter 500 it_best 490 stop cap500 reseed 0 sec 11391  cand 0
+    full K=128   ll_val 21.624390562492614     r0 kappa 0 n_iter 500 it_best 490 stop cap500 reseed 0 sec 18001  cand 0
+    full K=256   ll_val 33.878036491600334     r0 kappa 0 n_iter 500 it_best 490 stop cap500 reseed 0 sec 31344  cand 0
+    full K=512   ll_val 40.77121185010288      r2 kappa 0 n_iter 500 it_best 490 stop cap500 reseed 0 sec 54629  cand 3
+    kron K=16    ll_val -29.06045392700477     r1 kappa 0 n_iter 303 it_best 300 stop tol reseed 0 sec 311 batched [1.0, 1.0, 1.0] cand 0
+    kron K=32    ll_val -9.48879710732886      r1 kappa 0 n_iter 141 it_best 100 stop patience reseed 0 sec 411 batched [1.0, 1.0, 1.0] cand 0
+    kron K=64    ll_val 8.487419209725475      r2 kappa 0 n_iter 115 it_best 110 stop tol reseed 0 sec 570 batched [1.0, 1.0, 1.0] cand 0
+    kron K=128   ll_val 24.665073213419703     r2 kappa 0 n_iter 127 it_best 90 stop tol reseed 0 sec 1195 batched [1.0, 1.0, 1.0] cand 0
+    kron K=256   ll_val 39.733133914797065     r2 kappa 0 n_iter 145 it_best 140 stop tol reseed 0 sec 2548 batched [1.0, 1.0, 1.0] cand 0
+    kron K=512   ll_val 52.92209341584101      r2 kappa 0 n_iter 153 it_best 150 stop tol reseed 0 sec 5949 batched [1.0, 1.0, 1.0] cand 0
+    kron K=1024  ll_val 65.39771233397857      r2 kappa 0 n_iter 210 it_best 180 stop tol reseed 0 sec 14832 batched [1.0, 1.0, 1.0] cand 3
+    kron K=2048  ll_val 75.1325369582494       r2 kappa 0 n_iter 211 it_best 170 stop patience reseed 1362 sec 31831 batched [1.0, 1.0, 1.0] cand 3
+    kron K=4096  ll_val 81.9525983268529       r1 kappa 0 n_iter 274 it_best 260 stop tol reseed 30032 sec 61736 batched [1.0, 1.0, 1.0] cand 3
+    grid missing: none
+  b* = kron kron_K 4096 ll_val 81.9525983268529  (GRID EDGE = cap 4096)
+  Q-K: r 0.7005838966630933 -> c_K 2.339833725892784;  K2 set b* = kron 2048 75.1325369582494 -> kron 2048 OK
+  ckpt d2sx_NR16_N640000_a1_best.pt: sha256[:16] 001a9e2e2a0feafd epoch 458 best_epoch 458 role best best_val 1.768667e-01
+  ckpt d2sx_NR16_N640000_a1.pt: sha256[:16] 08feec97841119f7 epoch 478 best_epoch 458 role last best_val 1.768667e-01
+  best.epoch == last.best_epoch: True; roles best/last
+  other attempts of this stem: none
+  training: # ===== 2026-10-05 00:46:17 KST  D2SXNR16640000 attempt 1  testbed D2 prior S2  Nr=16 Nt=4 || # done        : 478 epochs, stopped_by=patience, aborted=False, best val 1.768667e-01 @ epoch 458, wall 18772.8 s, 39.274 s/epoch || # ===== 2026-10-06 11:08:06 KST  D2SXNR16640000 attempt 1  testbed D2 prior S2  Nr=16 Nt=4 || # resume      : checkpoint already meets stopped_by=patience at epoch 478 -- no epoch trained, /home/HTJ/t2/conf/ckpt/d2sx_NR16_N640000_a1.pt left untouched || # done        : 478 epochs, stopped_by=patience, aborted=False, best val 1.768667e-01 @ epoch 458, wall 6.8 s, 6.791 s/epoch
+  GB' log lines @N=640000: ['gbp_B64e4.log: [d2sx] GMM b* = kron (kron K=4096) @N=640000 | diff/gmm min 0.4514 max 0.8796 median 0.5145 | equal_budget=True', 'gbp_NR16B64e4.log: [nr16] GMM b* = kron (kron K=4096) @N=640000 | diff/gmm min 0.2728 max 0.5170 median 0.2913 | equal_budget=True']
+  GB' npz results/d2_gbprime_NR16_N640000_a1.npz: newer than the kron 4096 merge: True
+  DRAFT  PT NR16B64e4 C6 640000 d2sx_NR16_N640000_a1 001a9e2e2a0feafd 08feec97841119f7 kron 4096 81.9525983268529 16,32,64,128,256,512 16,32,64,128,256,512,1024,2048,4096 2048 75.1325369582494 2.339833725892784 UNGATED
+
+== base points (read-only)
+  raw_B32e4: 448 C2 files (448 expected); ckpt d2sx_N320000_a1_best.pt sha 035744cbe955984d (expected 035744cbe955984d)
+  raw_NR16B16e4: 448 C6 files (448 expected); ckpt d2sx_NR16_N160000_a1_fb2_best.pt sha c050d611b2c714a6 (expected c050d611b2c714a6)
+  raw_K2NR16B16e4: 0 C6 files (192 expected)
+  raw_B16e4k: 448 C2 files (448 expected)
+  raw_B1e4: 448 C2 files (448 expected)
+  results/review_next/K2NR16B16e4_accept.txt: ACCEPT: OK -- K2NR16B16e4
+  K2B32e4 set (B32e4 grid without kron 4096): b* = ('kron', 2048, -7.792724507139091)

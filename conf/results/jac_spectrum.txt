@@ -1,0 +1,198 @@
+# date        : 2026-09-21 16:55:12 KST
+# git commit  : 77ac40c
+# versions    : python 3.12.14  numpy 2.5.2  scipy 1.18.1  torch 2.14.0+cu130 (cuda_available=True)
+# device      : CPU (192 cores) | dtype: complex128 / float64 | deterministic: yes (fixed seeds, no GPU in the receiver)
+# testbed     : D2
+# seed rule   : default_rng([20260926, TBID[testbed], PID[prior], Nr, T, Tp, int(snr)+100])  (trials of a point = ONE stream)
+# code        : rate-1/2 conv (133,171)_8 nu=6 terminated, QPSK, outer iterations = 16 for EVERY arm
+# Demo/ hashes: t2_route_a.py=95a5408901ec125c  t2_trellis.py=31cd0ee9c68e972b  t2_gmm.py=d064e58c7510c769
+# content     : eigenvalue SPECTRUM of sym(J) for the learned score vs the exact/fitted GMM, on both
+#               testbeds and two training budgets.  n=48 held-out samples per grid point, 64 eigen-
+#               values each.  Logs: logs/jacspec_{D2_N10000,D2_N160000,D1_N160000}.log
+# why         : lmin alone cannot separate 'the model is wrong' from 'the truth sits on the PSD
+#               boundary'.  The full spectrum can.
+# code        : conf/code/jac_spectrum.py (new).  Nothing retrained, nothing tuned, no threshold moved.
+
+                    |         k=0  sigma .033        |         k=6  sigma .092        |         k=12 sigma .256        |         k=18 sigma .713
+model               |   n_neg  n<0.01   25%tl   lmin |   n_neg  n<0.01   25%tl   lmin |   n_neg  n<0.01   25%tl   lmin |   n_neg  n<0.01   25%tl   lmin
+-------------------------------------------------------------------------------------------------------------------------------------------------------
+D1 N=1.6e5  learned |     0.0     0.0   0.979  +0.94 |     0.0     0.0   0.866  +0.68 |     0.0     0.0   0.470  +0.22 |     0.0     0.0   0.118 +0.031
+D1 N=1.6e5  EXACT   |     0.0     0.0   0.980  +0.92 |     0.0     0.0   0.867  +0.62 |     0.0     0.0   0.471  +0.21 |     0.0     0.0   0.117 +0.039
+D2 N=1e4    learned |     8.0     9.3   0.069  -0.20 |    10.6    12.4   0.028  -0.25 |    11.2    13.7   0.018  -0.27 |     7.8    10.9   0.022  -0.12
+D2 N=1.6e5  learned |    10.3    12.5   0.028  -0.20 |    17.0    19.8  -0.003  -0.28 |    14.1    17.6   0.005  -0.63 |     0.7     1.6   0.051 -0.045
+D2 both     FITTED  |     0.0     0.1   0.948 +4e-03 |     0.0     2.5   0.665 +6e-04 |     0.0     4.5   0.203 +8e-05 |     0.0     0.6   0.092 +5e-03
+
+  n_neg = number of eigenvalues < 0 out of 64;  n<0.01 = number below 0.01;  25%tl = 25th percentile.
+  [CORRECTED 18:40 after audit: this column was labelled n<0.1 but holds the logs' n<0.01
+   column in every row.  The n<0.1 counts are much larger -- e.g. D2 N=1.6e5 k=18 is 38.08
+   of 64, not 1.6.  READING 4 below is corrected accordingly.]
+  D1's reference row is NOT the true prior.  [CORRECTED 18:40 after audit.]  jac_spectrum.py
+  selects it with arms.gmm_selection(), which returns an EM FIT on N_TRAIN=10000 -- the logs
+  label it GMM-exact(b*=kron,K=32), i.e. the exact score OF a fitted K=32 Kronecker mixture.
+  D1's TRUE prior is angle_grid_prior(...), a 32x32 = 1024-component grid mixture, and it was
+  NOT used here.  A re-measurement against the true prior is outstanding.
+  D2's "FITTED" row is NOT ground truth -- it is a 512-component Kronecker GMM fitted to D2, i.e. a
+  smooth mis-specified approximation.  D2 has no closed-form true score (05_SPEC §3).
+
+READING
+
+1.  ON D1 THE LEARNED JACOBIAN IS RIGHT.  Its spectrum matches the exact one to three significant
+    figures at every grid point (0.979/0.980, 0.866/0.867, 0.470/0.471, 0.118/0.117; lmin 0.94/0.92,
+    0.68/0.62, 0.22/0.21, 0.031/0.039).  n_neg = 0 everywhere.  So the estimation procedure -- the
+    architecture, the training objective, the Tweedie/Wirtinger conversion, the autodiff path -- is
+    NOT the problem.  Given a smooth full-support target it recovers the second-order structure.
+    This is the measurement behind the D1 BLER result: V0 == V1 (the PSD projection never fires) and
+    the learned arm ties the exact-score oracle and the exact-EP bound.
+
+2.  ON D2 IT IS NOT, AND MORE DATA MAKES IT WORSE.  n_neg goes 8.0 -> 10.3 (k=0) and 10.6 -> 17.0
+    (k=6) when the budget is raised 16x; the 25th percentile falls to -0.003.  The learned spectrum
+    crowds, and crosses, the PSD boundary.
+
+3.  THE FITTED GMM IS NOT A REFERENCE HERE.  Its 25th percentile is 0.948 at k=0 where the learned
+    model's is 0.028.  A mixture with full-rank component covariances cannot represent a density
+    supported near a low-dimensional set, so its Jacobian stays near the identity and is trivially
+    PSD.  Its PSD-ness is therefore NOT evidence that the learned model is wrong: the two models
+    disagree about the local geometry, and on D2 we have no closed form to adjudicate.
+    What we do have: two ground-truth-free diagnostics (GB' denoising, Hyvarinen score matching)
+    both put the learned model CLOSER to the truth than the fitted GMM on D2.  That makes it
+    plausible -- NOT proven -- that the near-zero spectrum is fidelity rather than noise.
+
+4.  THE sigma DEPENDENCE EXPLAINS THE SNR SHAPE that the divergence diagnosis left open.
+    On D2 the damage peaks at sigma ~ 0.09-0.26 (n_neg 14-17) and essentially VANISHES at
+    sigma = 0.71 (n_neg 0.7, n<0.1 1.6).  The receiver's nu shrinks as SNR rises, so the operating
+    point walks INTO the bad band as SNR increases -- which is the observed BLER shape
+    (worst at 0..+3 dB, better at -3 dB where nu is large).  The settling experiment
+    (code/diag_psd_cf.py, all seven SNRs) tests this prediction directly.
+
+5.  CAVEAT on V1's identity claim.  selftest_M6 asserted the PSD projection is the identity on the
+    exact prior because its lmin sits 780x above LAM_MIN=1e-6.  Measured over the full sigma grid
+    that margin is smaller: the fitted GMM's lmin reaches 7.6e-5 at k=12, i.e. 76x.  The identity
+    still holds, with two orders of margin rather than three.  Recorded so the claim is not quoted
+    at the stronger figure.
+
+WHAT THIS DOES NOT ESTABLISH
+  - It does not prove D2's true Jacobian is near-singular.  The manifold argument (D2's support is a
+    union of 3L-dimensional sets, L~U{3..8}, i.e. 9..24 dimensions in R^64) is a PREDICTION from the
+    generative model, and the measured n_neg of 8-17 is far below the 20-27 that argument suggested.
+    The argument is consistent with the direction of the effect and wrong about its size.
+  - It does not identify which of the 64 directions are tangent and which are normal; that would
+    need the true tangent space, which the D2 generator can supply but this measurement did not use.
+
+====================================================================================================
+ADDENDUM 2026-09-21 21:55 -- D1 MEASURED AGAINST THE **TRUE** PRIOR
+====================================================================================================
+The retracted claim above ("matches the exact one to three significant figures") failed because the
+reference was an EM FIT, not ground truth.  D1's true prior is available in closed form -- it is the
+grid mixture the testbed is DEFINED by, t2_gmm.angle_grid_prior(S, 8, 4, rho_c=0.7, KG=32), 32x32 =
+1024 components.  The measurement was repeated with BOTH references present (logs/jacspec_D1_true.log,
+n=48 held-out samples per grid point, 64 eigenvalues each).
+
+  model                      k=0 s=.0329        k=6 s=.0899        k=12 s=.2452       k=18 s=.6690
+  -------------------------------------------------------------------------------------------------
+  learned  lmin / 25%tl / lmax   .9407/.9789/1.012  .6765/.8664/1.073  .2232/.4702/1.190  .0308/.1184/1.317
+  TRUE     lmin / 25%tl / lmax   .9450/.9798/1.019  .6978/.8670/1.096  .2369/.4699/1.162  .0403/.1163/1.350
+  FITTED   lmin / 25%tl / lmax   .9209/.9797/1.051  .6195/.8666/1.219  .2142/.4714/1.406  .0392/.1172/1.290
+
+  n_neg = 0 for ALL THREE at ALL FOUR grid points.  The learned Jacobian is PSD on D1, as is the truth.
+
+RELATIVE ERROR AGAINST THE TRUE PRIOR (%), learned vs fitted:
+
+  quantity   sigma .0329      .0899       .2452       .6690      learned closer at
+  ----------------------------------------------------------------------------------
+  lmin       0.46 / 2.55   3.05 /11.22   5.78 / 9.58  23.47/ 2.63    3 of 4 (5.6x, 3.7x, 1.7x)
+  25%tile    0.09 / 0.01   0.07 / 0.05   0.06 / 0.32   1.81/ 0.77    1 of 4 (both < 2% throughout)
+  lmax       0.69 / 3.14   2.10 /11.22   2.41 /21.00   2.44/ 4.44    **4 of 4** (1.8x .. 8.7x)
+
+WHAT THIS SUPPORTS, IN PLACE OF THE RETRACTED CLAIM.
+On D1 the learned score's Jacobian is PSD everywhere, and it tracks the TRUE Jacobian about as well as
+the fitted mixture does on the bulk of the spectrum (25th percentile: both inside 2% at every point),
+and BETTER on the extremes -- lmax at all four sigma, lmin at the three smaller sigma.  The fitted
+mixture is closer on lmin only at the largest sigma (0.669), where the learned model is 23% low.
+The extremes are what RouteAClip._matrix_site consumes: it inverts nu*Herm(J), so the smallest and
+largest eigenvalues set the site's conditioning and its sign validity.
+
+WHAT IT DOES NOT SUPPORT.
+  - It is four grid points and n=48.  It is not a claim about the whole grid.
+  - "Better than the fitted GMM on D1" does not transfer to D2, where the same learned model's
+    Jacobian is indefinite at essentially every point and no closed-form truth exists to compare against.
+  - It says nothing about the receiver.  The D1 BLER result (tables_D1_C.txt) is the separate evidence,
+    and it includes a total collapse of every learned arm at C1 Tp=2, -3 dB.
+
+====================================================================================================
+ADDENDUM 2026-09-21 23:50 -- D2 AT THE FINAL, FULLY-TRAINED CHECKPOINT (reproducible)
+====================================================================================================
+The D2 rows in the main table were measured on session-scoped temp-dir snapshots, which the 18:20
+audit flagged as irreproducible.  The N'=1.6e5 D2 training has since finished (stopped_by=patience,
+1784 epochs, best val 3.519379e-01 @1764) and the checkpoint is permanent:
+    conf/ckpt/d2sx_N160000_a1.pt   sha256 4443921ce8d5c4a1...
+Re-measured on it (logs/jacspec_D2_final.log, n=48, 64 eigenvalues per sample):
+
+  model                k=0 s=.0331          k=6 s=.0920          k=12 s=.2561        k=18 s=.7126
+  ---------------------------------------------------------------------------------------------
+  learned  n_neg          6.71                19.79                13.50               0.69
+           n<0.1         26.52                37.58                41.10              35.50
+           25%tile       0.0381              -0.0104               0.0063              0.0565
+           lmin         -0.140               -0.298               -0.451              -0.033
+  FITTED   n_neg          0.00                 0.00                 0.00                0.00
+           n<0.1          3.44                 6.54                11.19               16.94
+           25%tile       0.9476               0.6654               0.2028              0.0916
+
+THREE THINGS THIS CHANGES OR SHARPENS.
+
+1.  MORE DATA MAKES IT WORSE, not merely no-better.  At N=1e4 the negative counts were
+    8.0 / 10.6 / 11.2 / 7.8; at N=1.6e5 fully trained they are 6.71 / 19.79 / 13.50 / 0.69.
+    At sigma = 0.092 the 25th PERCENTILE is negative (-0.0104): more than a quarter of the 64
+    eigenvalues are below zero.  The direction of the effect with budget is not favourable.
+
+2.  THE MANIFOLD PREDICTION WAS HALF RIGHT, and the half that was right is the near-zero count,
+    not the negative count.  D2's support is a union of 3L-dimensional sets (L ~ U{3..8}), i.e.
+    9..24 dimensions in R^64, so the co-dimension is 40..55.  The learned model places
+    26.5 / 37.6 / 41.1 / 35.5 eigenvalues below 0.1 -- and 41.1 at sigma=0.256 sits inside the
+    predicted 40..55 band.  The fitted mixture places only 3.4 / 6.5 / 11.2 / 16.9 there, because
+    full-rank component covariances cannot represent a density concentrated near a low-dimensional
+    set.  What was over-predicted earlier was how many of those near-zero eigenvalues cross zero
+    (predicted ~half the co-dimension, measured 7-20).
+
+3.  REPRODUCIBILITY RESTORED.  These rows can be regenerated from conf/ alone:
+      OMP_NUM_THREADS=2 python code/jac_spectrum.py --testbed D2 --ckpt ckpt/d2sx_N160000_a1.pt --n 48
+    The earlier temp-dir rows are kept above for the epoch-240 vs epoch-880 comparison, and are
+    labelled as snapshots.
+
+STILL NOT ESTABLISHED.  D2 has no closed-form prior, so "the learned near-zero spectrum is closer to
+the truth than the fitted mixture's" remains unproven.  The two ground-truth-free diagnostics (GB',
+Hyvarinen) both favour the learned model on D2, which makes it plausible, not proven.
+
+====================================================================================================
+ADDENDUM 2026-09-22 00:15 -- THE MECHANISM, SHARPENED.  ASYMMETRY IS NOT THE DISCRIMINANT.
+====================================================================================================
+Drawing F8 forced a number into the open that the earlier framing had passed over: **the learned
+field is non-conservative on D1 too.**  logs/jacpsd_D1_N160000.log, same model that passes the gate:
+
+  sigma      0.033      0.090      0.245      0.669
+  D1 asym    1.88e-3    1.08e-2    3.74e-2    8.39e-2     f(lmin<0) = 0.000 at all 20 grid points
+  D2 asym    1.8e-1     2.6e-1     2.6e-1     1.6e-1      f(lmin<0) = 1.000 for sigma <= 0.2
+
+At the top of the grid D1's asymmetry is 0.084 against D2's 0.16-0.28 -- a factor of about 3, the
+SAME ORDER OF MAGNITUDE -- yet D1 never produces a single negative eigenvalue and D2 produces 7-20
+of 64.  So "denoising score matching yields a non-conservative field" is TRUE but is NOT what
+separates the two testbeds.  It is a property of the estimator on both.
+
+WHAT SEPARATES THEM IS MARGIN.  The true Jacobian's spectrum on D1 sits away from zero
+(lmin 0.938 -> 0.025 across the grid; 25th percentile 0.980 -> 0.116), so a perturbation of that size
+cannot change a sign.  On D2 the spectrum crowds zero -- the manifold structure puts 26 to 41 of the
+64 eigenvalues below 0.1 (co-dimension 40..55) -- so the same perturbation flips 7 to 20 of them.
+
+  It is not that the learned score is worse on D2.  It is that D2's geometry leaves no margin, and
+  the estimator error is roughly the same size on both.
+
+This also explains the sigma dependence WITHIN D2 without a second mechanism: f(lmin<0) falls from
+1.000 to 0.36 as sigma goes past 0.2 because smoothing by a larger noise level lifts the true
+spectrum off zero, restoring margin.  It is the same statement read along sigma instead of across
+testbeds.
+
+CONSEQUENCE FOR THE CLAIM.  The usable form is about the PRIOR's geometry, not about the learner:
+a learned score can be plugged into an EP matrix site when the target density's posterior covariance
+is bounded away from singular at the noise levels the receiver visits, and cannot when it is not.
+That is checkable before any training -- from the generative model's intrinsic dimension -- and it is
+checkable after training WITHOUT ground truth, by counting f(lmin(Herm J) < 0) on held-out samples.
+Neither check is in GA-GD.

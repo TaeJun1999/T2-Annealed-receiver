@@ -1,0 +1,27 @@
+# date        : 2026-09-21 07:09:27 KST
+# git commit  : f94def4
+# versions    : python 3.12.14  numpy 2.5.2  scipy 1.18.1  torch 2.14.0+cu130 (cuda_available=True)
+# device      : CPU (192 cores) | dtype: complex128 / float64 | deterministic: yes (fixed seeds, no GPU in the receiver)
+# testbed     : D1
+# seed rule   : default_rng([20260926, TBID[testbed], PID[prior], Nr, T, Tp, int(snr)+100])  (trials of a point = ONE stream)
+# code        : rate-1/2 conv (133,171)_8 nu=6 terminated, QPSK, outer iterations = 16 for EVERY arm
+# Demo/ hashes: t2_route_a.py=95a5408901ec125c  t2_trellis.py=31cd0ee9c68e972b  t2_gmm.py=d064e58c7510c769
+# content     : CONTROLLED architecture comparison -- EQUAL trials per architecture, RANDOM sampling.
+# why         : the TPE study (hpo_D1.txt) allocates its budget adaptively, so its per-architecture
+#               'best' is confounded by trial count.  This table is the comparable one.
+# objective   : the pre-registered gate score, minimised.  Never BLER.  Search stream 11.
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+# CIRCULAR TESTBED -- true prior is defined as a grid GMM; the GMM arm is correctly specified.
+# No claim about learned priors can be made from this table.
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+  equal-n comparison: the first 30 trials of each architecture (collected: {'adm': 30, 'conv': 30, 'dit': 30, 'mlp': 32, 'unet': 30, 'uvit': 44})
+
+  arch      n     best      p25   median    worst
+  --------------------------------------------------
+  unet     30    1.572    2.145    3.356   10.877
+  uvit     30    1.814    2.746    3.889   16.608
+  dit      30    1.865    2.734    3.302   20.483
+  adm      30    1.872    2.958    6.757   48.885
+  conv     30    1.902    2.455    2.654 1770.612
+  mlp      30    4.540    5.202    6.100   19.628

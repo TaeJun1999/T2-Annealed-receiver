@@ -1,0 +1,11 @@
+# run_nscale git 68d4d353 2026-10-06 15:05 CDT: frontier_ci.py --recovery raw_B128e4:C2:-3,0,3 raw_B32e4:C2:-3,0,3 --extrap raw_K2B128e4 - --ck 4.606498629712138 - --level 0.90
+# recovery R = (b* - V1)/(b* - genie) @16; paired bootstrap per raw set (three arms together), the two raw sets resampled independently (UNPAIRED difference); B=2000, seed=20260926, 90% CI
+  R1: raw_B128e4 C2 SNR ['-3', '+0', '+3']  b* 789 V1 488 genie 125  R = 0.453  [90% 0.413, 0.496]
+  R2: raw_B32e4 C2 SNR ['-3', '+0', '+3']  b* 836 V1 484 genie 125  R = 0.495  [90% 0.457, 0.530]
+  R1 - R2 = -0.042  [90% unpaired -0.096, +0.013]  undefined replicates 0
+  R1 - R2 = -0.042  [90% unpaired -0.096, +0.013]  bootstrap two-sided p = 0.2270  (--level 0.9)
+  gaps R1: SigmaF_V1 - SigmaF_g = 363  [90% 330, 395]   SigmaF_b* - SigmaF_g = 664  [90% 624, 704]   (blocks, summed over SNR ['-3', '+0', '+3'])
+  gaps R2: SigmaF_V1 - SigmaF_g = 359  [90% 328, 392]   SigmaF_b* - SigmaF_g = 711  [90% 671, 752]   (blocks, summed over SNR ['-3', '+0', '+3'])
+# Q-K (K upper-limit SENSITIVITY, not a bound): dF = SigmaF_b*(K/2) - SigmaF_b*(K_max), SigmaF+ = SigmaF_b*(K_max) - c_K max(0, dF), R+ = (SigmaF+ - SigmaF_V1)/(SigmaF+ - SigmaF_g); the K/2 b* column resampled with the BASE raw's indices
+  R1+: raw_B128e4 C2 kron_K 4096  K/2 raw raw_K2B128e4 kron_K 2048  b*(K/2) 828  dF = +39  c_K = 4.6065  SigmaF+ = 609.347  R+ = 0.251  [90% -0.027, 0.417]  SigmaF+ <= SigmaF_g in 0.0% of replicates  
+  R1+ - R2+ = -0.245  [90% unpaired -0.526, -0.076]  bootstrap two-sided p = 0.0050  undefined replicates 0

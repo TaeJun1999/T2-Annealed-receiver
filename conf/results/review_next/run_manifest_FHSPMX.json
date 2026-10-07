@@ -1,0 +1,126 @@
+{
+ "manifest_version": 1,
+ "written": "2026-10-07 23:34:02 KST",
+ "git_commit": "331f6e57",
+ "result_tag": "FHSPMX",
+ "testbed": "D2",
+ "raw_dir": "/home/HTJ/t2/conf/raw_FHSPMX",
+ "n_raw_files": 2048,
+ "config_hash": "b9c95a599873d719",
+ "code_hashes": {
+  "Demo": {
+   "t2_route_a.py": "95a5408901ec125c",
+   "t2_trellis.py": "31cd0ee9c68e972b",
+   "t2_gmm.py": "d064e58c7510c769"
+  },
+  "conf_code": {
+   "runner.py": "427b3fead7f1eb48",
+   "arms.py": "7ad16d731778f6b6",
+   "score.py": "f5379bdf8a085fc9",
+   "common.py": "08bef83ab1dc92e5",
+   "d2.py": "93e475c4118366bc",
+   "analysis.py": "dbfd316e34ccdb7f",
+   "rt_tap.py": "5d97dc7124150423",
+   "p3_rules.py": "a06e952b1eddf3ad",
+   "mix3.py": "04a9b9d24aa3e24e"
+  }
+ },
+ "channel_model": {
+  "testbed": "D2",
+  "prior": "MIX3",
+  "description": "MIX3 = D2-pipeline prior MIX3, 3GPP TR 38.901 via Sionna 2.1 (code/mix3.py): per block UMi 28 GHz / UMa 28 GHz / RMa 3.5 GHz (1/3 each), BS ULA Nr, UE ULA 4, half-wavelength, single V pol, omni, uplink, LoS/NLoS by the model, UE yaw ~ U[-pi,pi), pathloss/shadowing off, narrowband snapshot (CIR summed at the first time sample), ensemble-normalised E||H||^2 = Nr Nt"
+ },
+ "cells": {
+  "C2": {
+   "Nr": 8,
+   "Nt": 4,
+   "T": 16,
+   "Tp": 4,
+   "snrs": [
+    -3,
+    0,
+    3,
+    6,
+    9,
+    12,
+    15
+   ]
+  }
+ },
+ "points": {
+  "D2_C2_MIX3_Nr8_T16_Tp4_eig_snr12": 20480,
+  "D2_C2_MIX3_Nr8_T16_Tp4_eig_snr15": 20480,
+  "D2_C2_MIX3_Nr8_T16_Tp4_eig_snr6": 20480,
+  "D2_C2_MIX3_Nr8_T16_Tp4_eig_snr9": 20480
+ },
+ "trial_stream": {
+  "rule": "default_rng([20260926, TBID[testbed], PID[prior], Nr, T, Tp, int(snr)+100])",
+  "skip_min": 10000,
+  "skip_max_end": 30480,
+  "split": "HISNR16e4 high-SNR supplement set (trials >= 10000)"
+ },
+ "run_params": {
+  "beta": "0.7",
+  "dtype": "complex128/float64",
+  "git": "331f6e57",
+  "iters": "16",
+  "n": "40",
+  "seed": "20260926",
+  "snr": [
+   "12.0",
+   "15.0",
+   "6.0",
+   "9.0"
+  ],
+  "t_in": "5",
+  "n_chunks": 2048
+ },
+ "receiver": {
+  "outer_iterations": 16,
+  "beta": 0.7,
+  "arm_overrides": "(none)",
+  "t_in_bigamp": 5,
+  "n_inner_routeA": 1,
+  "dtype": "complex128/float64",
+  "device": "CPU, one thread per worker",
+  "code": "conv (133,171)_8 nu=6 terminated, QPSK"
+ },
+ "gmm": {
+  "bstar": "kron",
+  "kron_K": "4096",
+  "ntrain": 160000.0,
+  "selection": "validation log-likelihood over the pre-registered K grid (BLER never consulted)",
+  "fits_dir": "/home/HTJ/t2/conf/results/gmm_fits_D2_FHSPMX",
+  "em_sec": "6242.08159995079"
+ },
+ "sample_counts": {
+  "train_channels": 160000,
+  "score_train": 144000,
+  "score_val": 16000,
+  "test_trials_per_point": [
+   20480
+  ]
+ },
+ "stagec_checkpoint": null,
+ "stagec_status": "not requested (--stagec-ckpt not given) -- arm set is the pre-registered one",
+ "stagec_gate": "(none)",
+ "stagec_ckpt_id": "(none)",
+ "arms": [
+  "OMP-pilot",
+  "R5-genie",
+  "SBL-loop",
+  "SBL-pilot"
+ ],
+ "versions": {
+  "python": "3.12.14",
+  "numpy": "2.5.2",
+  "torch": "2.14.0+cu130",
+  "host": "262d04c812cc",
+  "cpu_count": 192
+ },
+ "output_paths": {
+  "tables": "/home/HTJ/t2/conf/results/tables_D2_FHSPMX.txt",
+  "guard": "/home/HTJ/t2/conf/results/guard_D2_FHSPMX.txt",
+  "log": "/home/HTJ/t2/conf/logs/run_D2_FHSPMX.log"
+ }
+}

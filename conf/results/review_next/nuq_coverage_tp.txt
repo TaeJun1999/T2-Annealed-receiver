@@ -1,0 +1,49 @@
+# date        : 2026-09-26 13:37:27 KST
+# git commit  : d2e115e4
+# versions    : python 3.12.14  numpy 2.5.2  scipy 1.18.1  torch 2.14.0+cu130 (cuda_available=True)
+# device      : CPU (192 cores) | dtype: complex128 / float64 | deterministic: yes (fixed seeds, no GPU in the receiver)
+# testbed     : D2
+# seed rule   : default_rng([20260926, TBID[testbed], PID[prior], Nr, T, Tp, int(snr)+100])  (trials of a point = ONE stream)
+# code        : rate-1/2 conv (133,171)_8 nu=6 terminated, QPSK, outer iterations = 16 for EVERY arm
+# Demo/ hashes: t2_route_a.py=95a5408901ec125c  t2_trellis.py=31cd0ee9c68e972b  t2_gmm.py=d064e58c7510c769
+# content     : nu_q coverage of the Tp >= Nt cells vs the headline sigma grid (measurement, no BLER)
+# receiver    : Gaussian Chat of results/gmm_fits_D2_B16e4k (full K=32, N=160000) through the score interface (= sigma.py's receiver; R2-ours-G's trajectory, checked per trial below)
+# trials      : 6400..6463 of each point's common.trial_rng stream (D2/S2), 16 outer iterations
+# grid        : ckpt/d2sx_N160000_a1.pt sigma_tag='' -> results/sigma_grid_D2.npz: s_lo = 3.306220e-02, s_hi = 8.451555e-01 (nu = 2 sigma^2: [2.1862e-03, 1.4286e+00])
+# fractions   : below = sigma_t < s_lo, inside = s_lo <= sigma_t <= s_hi, above = sigma_t > s_hi (ScorePrior rule)
+
+=== C2  (8x4, T=16, Tp=4, K=42, pilots dft (4, 4))
+    SNR    n_q   below  inside   above   median sigma_t per iteration 1,2,4,8,16               below% per iteration 1..16
+     -3   1024   0.000   1.000   0.000   4.994e-01 3.474e-01 2.743e-01 2.698e-01 2.683e-01     0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0
+     +0   1024   0.000   1.000   0.000   3.536e-01 2.072e-01 1.910e-01 1.905e-01 1.905e-01     0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0
+     +3   1024   0.000   1.000   0.000   2.503e-01 1.365e-01 1.341e-01 1.341e-01 1.341e-01     0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0
+     +6   1024   0.000   1.000   0.000   1.772e-01 9.524e-02 9.457e-02 9.457e-02 9.457e-02     0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0
+     +9   1024   0.000   1.000   0.000   1.254e-01 6.799e-02 6.750e-02 6.750e-02 6.750e-02     0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0
+    +12   1024   0.000   1.000   0.000   8.881e-02 4.785e-02 4.765e-02 4.765e-02 4.765e-02     0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0
+    +15   1024   0.176   0.824   0.000   6.287e-02 3.370e-02 3.370e-02 3.370e-02 3.370e-02     0  19  19  19  19  19  19  19  19  19  19  19  19  19  19  19
+    all   7168   0.025   0.975   0.000   pooled over the 7 SNRs x 64 trials x 16 iterations; min sigma_t 3.2217e-02 (0.974 x s_lo)
+
+=== C7  (8x4, T=16, Tp=6, K=34, pilots dft (4, 6))
+    SNR    n_q   below  inside   above   median sigma_t per iteration 1,2,4,8,16               below% per iteration 1..16
+     -3   1024   0.000   1.000   0.000   4.078e-01 3.087e-01 2.666e-01 2.641e-01 2.638e-01     0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0
+     +0   1024   0.000   1.000   0.000   2.887e-01 1.923e-01 1.883e-01 1.873e-01 1.873e-01     0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0
+     +3   1024   0.000   1.000   0.000   2.044e-01 1.341e-01 1.335e-01 1.335e-01 1.335e-01     0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0
+     +6   1024   0.000   1.000   0.000   1.447e-01 9.423e-02 9.416e-02 9.416e-02 9.416e-02     0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0
+     +9   1024   0.000   1.000   0.000   1.024e-01 6.620e-02 6.615e-02 6.615e-02 6.615e-02     0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0
+    +12   1024   0.000   1.000   0.000   7.251e-02 4.704e-02 4.690e-02 4.689e-02 4.690e-02     0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0
+    +15   1024   0.257   0.743   0.000   5.133e-02 3.353e-02 3.353e-02 3.353e-02 3.354e-02     0  27  28  28  28  28  28  28  28  28  27  27  27  27  27  27
+    all   7168   0.037   0.963   0.000   pooled over the 7 SNRs x 64 trials x 16 iterations; min sigma_t 3.2132e-02 (0.972 x s_lo)
+
+=== C8  (8x4, T=16, Tp=8, K=26, pilots dft (4, 8))
+    SNR    n_q   below  inside   above   median sigma_t per iteration 1,2,4,8,16               below% per iteration 1..16
+     -3   1024   0.000   1.000   0.000   3.531e-01 2.884e-01 2.621e-01 2.610e-01 2.602e-01     0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0
+     +0   1024   0.000   1.000   0.000   2.500e-01 1.850e-01 1.839e-01 1.838e-01 1.838e-01     0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0
+     +3   1024   0.000   1.000   0.000   1.770e-01 1.316e-01 1.310e-01 1.310e-01 1.310e-01     0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0
+     +6   1024   0.000   1.000   0.000   1.253e-01 9.327e-02 9.271e-02 9.271e-02 9.271e-02     0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0
+     +9   1024   0.000   1.000   0.000   8.870e-02 6.565e-02 6.559e-02 6.559e-02 6.559e-02     0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0
+    +12   1024   0.000   1.000   0.000   6.280e-02 4.658e-02 4.657e-02 4.657e-02 4.657e-02     0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0
+    +15   1024   0.644   0.356   0.000   4.446e-02 3.280e-02 3.280e-02 3.280e-02 3.280e-02     0  67  69  69  69  69  69  69  69  69  69  69  69  69  69  69
+    all   7168   0.092   0.908   0.000   pooled over the 7 SNRs x 64 trials x 16 iterations; min sigma_t 3.2002e-02 (0.968 x s_lo)
+
+identity check: max |NMSE_t(score-interface Gaussian) - NMSE_t(R2-ours-G)| over every trial, iteration, point = 2.786e-08
+wall 8 s on 21 workers

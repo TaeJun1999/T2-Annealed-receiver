@@ -1,0 +1,35 @@
+# pair_dop raw_DOPbD3 x raw_D3B16e4, nu=0.01, cell C2, prior S2c, n=2560 per SNR, git 063f3bcb; raised {'V1-dop': 0, 'bstar-dop': 0, 'R2-dop': 0, 'genie-dop': 0}; integrity (point sets, meta nu, one clean code version, fits/ckpt fingerprint, trial counts, Doppler applied): OK
+DP: b* -> V1, both under the same within-block Doppler: bstar-dop -> V1-dop  [anchor bstar-dop]  decision SNRs ['+9', '+12', '+15']
+    sign test @16: +9 dB 110:46 p=3.2e-07  +12 dB 91:47 p=0.00023  +15 dB 98:58 p=0.0017   pooled 299:151 p=2.7e-12
+    POWERED=True  second arm fewer at 3/3, first arm fewer at 0/3  -> (i) second arm fewer
+    SNR@0.1 gap (bstar-dop minus V1-dop): +2.18 dB  [90% paired bootstrap +1.53, +4.00; censored replicates 0%]
+report: V1 with Doppler -> V1 static: V1-dop -> M-ours-dscore-C-V1  [anchor V1-dop]  decision SNRs ['+6', '+9', '+12']
+    sign test @16: +6 dB 210:1 p=1.3e-61  +9 dB 158:4 p=9.7e-42  +12 dB 171:2 p=2.5e-48   pooled 539:7 p=2.4e-149
+    POWERED=True  second arm fewer at 3/3, first arm fewer at 0/3  -> (i) second arm fewer
+    SNR@0.1 gap (V1-dop minus M-ours-dscore-C-V1): +5.27 dB  [90% paired bootstrap +4.53, +5.83; censored replicates 0%]
+report: b* with Doppler -> b* static: bstar-dop -> M-ours-bstar  [anchor bstar-dop]  decision SNRs ['+9', '+12', '+15']
+    sign test @16: +9 dB 198:6 p=7.5e-51  +12 dB 203:4 p=7.4e-55  +15 dB 204:2 p=4.1e-58   pooled 605:12 p=2.1e-161
+    POWERED=True  second arm fewer at 3/3, first arm fewer at 0/3  -> (i) second arm fewer
+    SNR@0.1 gap (bstar-dop minus M-ours-bstar): +6.04 dB  [90% paired bootstrap +5.33, +7.85; censored replicates 0%]
+report: static b* -> V1 with Doppler: M-ours-bstar -> V1-dop  [anchor M-ours-bstar]  decision SNRs ['+0', '+3', '+6']
+    sign test @16: +0 dB 115:308 p=2e-21  +3 dB 60:215 p=1.2e-21  +6 dB 26:188 p=1.7e-31   pooled 201:711 p=2e-67
+    POWERED=True  second arm fewer at 0/3, first arm fewer at 3/3  -> (ii) first arm fewer
+    SNR@0.1 gap (M-ours-bstar minus V1-dop): -3.86 dB  [90% paired bootstrap -4.44, -3.09; censored replicates 0%]
+report: Gaussian R2 -> V1, both with Doppler: R2-dop -> V1-dop  [anchor R2-dop]  decision SNRs ['+9', '+12', '+15']
+    sign test @16: +9 dB 143:53 p=9.6e-11  +12 dB 128:52 p=1.4e-08  +15 dB 114:48 p=2.3e-07   pooled 385:153 p=4.4e-24
+    POWERED=True  second arm fewer at 3/3, first arm fewer at 0/3  -> (i) second arm fewer
+    SNR@0.1 gap (R2-dop minus V1-dop): +6.71 dB  [90% paired bootstrap +2.29, +8.12; censored replicates 10%]
+report: genie (knows H_0) with Doppler -> static genie: genie-dop -> R5-genie  [anchor genie-dop]  decision SNRs ['+9', '+12', '+15']
+    sign test @16: +9 dB 483:0 p=8e-146  +12 dB 515:0 p=1.9e-155  +15 dB 481:1 p=7.7e-143   pooled 1479:1 p=0
+    POWERED=True  second arm fewer at 3/3, first arm fewer at 0/3  -> (i) second arm fewer
+    SNR@0.1 gap (genie-dop minus R5-genie): >= +16.38 dB (genie-dop never reaches 0.1 on the grid)
+report-only, gap retention = gap(bstar-dop - V1-dop) / gap(b* - V1, static) = +2.18 / +1.41 = 1.55
+BLER@16 failures / n per SNR -3 +0 +3 +6 +9 +12 +15 dB:
+    R2-dop               1789  1141   680   438   271   267   240
+    bstar-dop            1671  1002   554   356   245   235   214
+    V1-dop               1418   779   381   273   181   191   174
+    genie-dop            1406   942   694   573   493   529   483
+    R2-ours-G            1454   749   304   199    75    57    22
+    M-ours-bstar         1298   586   226   111    53    36    12
+    M-ours-dscore-C-V1   1000   404   129    64    27    22     5
+    R5-genie              485   149    47    35    10    14     3

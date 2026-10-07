@@ -1,0 +1,165 @@
+# date        : 2026-09-25 10:25:01 KST
+# git commit  : 8f64c45a
+# versions    : python 3.12.14  numpy 2.5.2  scipy 1.18.1  torch 2.14.0+cu130 (cuda_available=True)
+# device      : CPU (192 cores) | dtype: complex128 / float64 | deterministic: yes (fixed seeds, no GPU in the receiver)
+# testbed     : D2
+# seed rule   : default_rng([20260926, TBID[testbed], PID[prior], Nr, T, Tp, int(snr)+100])  (trials of a point = ONE stream)
+# code        : rate-1/2 conv (133,171)_8 nu=6 terminated, QPSK, outer iterations = 16 for EVERY arm
+# Demo/ hashes: t2_route_a.py=95a5408901ec125c  t2_trellis.py=31cd0ee9c68e972b  t2_gmm.py=d064e58c7510c769
+# content     : review_next P4-LO latent-oracle REFERENCE receiver (report-only; a reference, not a bound) -- diag_latent_oracle.py
+
+== C2 -3 dB (trials 3200..4479) ==
+   acceptance: chunk set / run meta / R5-genie ['blk_err', 'ber', 'nmse', 'tauL_gmean', 'alphaD', 'tauL_clip_frac', 'alphaD_clip'] @1..16 vs raw_review_next_P3ref: shared 1280 of 1280, max |diff| 0, vacuous (all-NaN both sides) ['nmse'] -> PASS (replay bit-identical)
+   exceptions / F3 guard (nmse > 10 or non-finite at any iteration; detection only): LO-G-d0.001 0/0 of 1280, LO-S-d0.001 0/0 of 1280, LO-G-d0.01 0/0 of 1280, LO-S-d0.01 0/0 of 1280, R2-ours-G 0/0 of 1280, R5-genie 0/0 of 1280
+   @16  n=1280 (trials 3200..4479)   failures (BLER)   median NMSE   gap position (b* - X)/(b* - genie)
+     M-ours-bstar             307 (0.2398)   9.8706e-02   +0.000
+     M-ours-dscore-C-V1       173 (0.1352)   5.4529e-02   +0.528
+     R2-ours-G                411 (0.3211)   1.3830e-01   -0.409
+     LO-G-d0.001               80 (0.0625)   2.0720e-02   +0.894
+     LO-S-d0.001               80 (0.0625)   2.0720e-02   +0.894
+     LO-G-d0.01                79 (0.0617)   2.1263e-02   +0.898
+     LO-S-d0.01                79 (0.0617)   2.1263e-02   +0.898
+     R5-genie                  53 (0.0414)   nan   +1.000
+     paired sign tests (a = first fails & second ok, b = reverse), house test p (n_d < 6 -> UNDECIDED):
+       M-ours-dscore-C-V1 -> LO-G-d0.001       100:7    p=3.5e-22
+       M-ours-dscore-C-V1 -> LO-S-d0.001       100:7    p=3.5e-22
+       M-ours-dscore-C-V1 -> LO-G-d0.01        101:7    p=1.8e-22
+       M-ours-dscore-C-V1 -> LO-S-d0.01        101:7    p=1.8e-22
+              LO-G-d0.001 -> R5-genie           38:11   p=0.00014
+              LO-S-d0.001 -> R5-genie           38:11   p=0.00014
+               LO-G-d0.01 -> R5-genie           38:12   p=0.00031
+               LO-S-d0.01 -> R5-genie           38:12   p=0.00031
+             M-ours-bstar -> LO-G-d0.001       232:5    p=5.5e-62
+             M-ours-bstar -> LO-S-d0.001       232:5    p=5.5e-62
+             M-ours-bstar -> LO-G-d0.01        233:5    p=2.8e-62
+             M-ours-bstar -> LO-S-d0.01        233:5    p=2.8e-62
+              LO-G-d0.001 -> LO-S-d0.001         0:0    p=1  UNDECIDED (n_d < 6)
+               LO-G-d0.01 -> LO-S-d0.01          0:0    p=1  UNDECIDED (n_d < 6)
+   @32  n=1280 (trials 3200..4479)   failures (BLER)   median NMSE   gap position (b* - X)/(b* - genie)
+     M-ours-bstar             290 (0.2266)   9.8164e-02   +0.000
+     M-ours-dscore-C-V1       154 (0.1203)   5.3969e-02   +0.557
+     R2-ours-G                395 (0.3086)   1.3642e-01   -0.430
+     LO-G-d0.001               74 (0.0578)   2.0706e-02   +0.885
+     LO-S-d0.001               74 (0.0578)   2.0706e-02   +0.885
+     LO-G-d0.01                76 (0.0594)   2.1248e-02   +0.877
+     LO-S-d0.01                76 (0.0594)   2.1248e-02   +0.877
+     R5-genie                  46 (0.0359)   nan   +1.000
+     paired sign tests (a = first fails & second ok, b = reverse), house test p (n_d < 6 -> UNDECIDED):
+       M-ours-dscore-C-V1 -> LO-G-d0.001        90:10   p=3.1e-17
+       M-ours-dscore-C-V1 -> LO-S-d0.001        90:10   p=3.1e-17
+       M-ours-dscore-C-V1 -> LO-G-d0.01         89:11   p=2.5e-16
+       M-ours-dscore-C-V1 -> LO-S-d0.01         89:11   p=2.5e-16
+              LO-G-d0.001 -> R5-genie           38:10   p=6.2e-05
+              LO-S-d0.001 -> R5-genie           38:10   p=6.2e-05
+               LO-G-d0.01 -> R5-genie           40:10   p=2.4e-05
+               LO-S-d0.01 -> R5-genie           40:10   p=2.4e-05
+             M-ours-bstar -> LO-G-d0.001       220:4    p=7.7e-60
+             M-ours-bstar -> LO-S-d0.001       220:4    p=7.7e-60
+             M-ours-bstar -> LO-G-d0.01        219:5    p=3.4e-58
+             M-ours-bstar -> LO-S-d0.01        219:5    p=3.4e-58
+              LO-G-d0.001 -> LO-S-d0.001         0:0    p=1  UNDECIDED (n_d < 6)
+               LO-G-d0.01 -> LO-S-d0.01          0:0    p=1  UNDECIDED (n_d < 6)
+
+== C2 6 dB (trials 3200..3839) ==
+   acceptance: chunk set / run meta / R5-genie ['blk_err', 'ber', 'nmse', 'tauL_gmean', 'alphaD', 'tauL_clip_frac', 'alphaD_clip'] @1..16 vs raw_review_next_P3ref: shared 640 of 640, max |diff| 0, vacuous (all-NaN both sides) ['nmse'] -> PASS (replay bit-identical)
+   exceptions / F3 guard (nmse > 10 or non-finite at any iteration; detection only): LO-G-d0.001 0/0 of 640, LO-S-d0.001 0/0 of 640, LO-G-d0.01 0/0 of 640, LO-S-d0.01 0/0 of 640, R2-ours-G 0/0 of 640, R5-genie 0/0 of 640
+   @16  n=640 (trials 3200..3839)   failures (BLER)   median NMSE   gap position (b* - X)/(b* - genie)
+     M-ours-bstar               6 (0.0094)   1.4059e-02   +0.000
+     M-ours-dscore-C-V1         1 (0.0016)   6.3146e-03   +1.000
+     R2-ours-G                 13 (0.0203)   1.7581e-02   -1.400
+     LO-G-d0.001                1 (0.0016)   2.7454e-03   +1.000
+     LO-S-d0.001                1 (0.0016)   2.7454e-03   +1.000
+     LO-G-d0.01                 1 (0.0016)   4.6976e-03   +1.000
+     LO-S-d0.01                 1 (0.0016)   4.6976e-03   +1.000
+     R5-genie                   1 (0.0016)   nan   +1.000
+     paired sign tests (a = first fails & second ok, b = reverse), house test p (n_d < 6 -> UNDECIDED):
+       M-ours-dscore-C-V1 -> LO-G-d0.001         0:0    p=1  UNDECIDED (n_d < 6)
+       M-ours-dscore-C-V1 -> LO-S-d0.001         0:0    p=1  UNDECIDED (n_d < 6)
+       M-ours-dscore-C-V1 -> LO-G-d0.01          0:0    p=1  UNDECIDED (n_d < 6)
+       M-ours-dscore-C-V1 -> LO-S-d0.01          0:0    p=1  UNDECIDED (n_d < 6)
+              LO-G-d0.001 -> R5-genie            0:0    p=1  UNDECIDED (n_d < 6)
+              LO-S-d0.001 -> R5-genie            0:0    p=1  UNDECIDED (n_d < 6)
+               LO-G-d0.01 -> R5-genie            0:0    p=1  UNDECIDED (n_d < 6)
+               LO-S-d0.01 -> R5-genie            0:0    p=1  UNDECIDED (n_d < 6)
+             M-ours-bstar -> LO-G-d0.001         5:0    p=0.062  UNDECIDED (n_d < 6)
+             M-ours-bstar -> LO-S-d0.001         5:0    p=0.062  UNDECIDED (n_d < 6)
+             M-ours-bstar -> LO-G-d0.01          5:0    p=0.062  UNDECIDED (n_d < 6)
+             M-ours-bstar -> LO-S-d0.01          5:0    p=0.062  UNDECIDED (n_d < 6)
+              LO-G-d0.001 -> LO-S-d0.001         0:0    p=1  UNDECIDED (n_d < 6)
+               LO-G-d0.01 -> LO-S-d0.01          0:0    p=1  UNDECIDED (n_d < 6)
+   @32  n=640 (trials 3200..3839)   failures (BLER)   median NMSE   gap position (b* - X)/(b* - genie)
+     M-ours-bstar               6 (0.0094)   1.4075e-02   +0.000
+     M-ours-dscore-C-V1         1 (0.0016)   6.3146e-03   +1.000
+     R2-ours-G                  9 (0.0141)   1.7566e-02   -0.600
+     LO-G-d0.001                1 (0.0016)   2.7454e-03   +1.000
+     LO-S-d0.001                1 (0.0016)   2.7454e-03   +1.000
+     LO-G-d0.01                 1 (0.0016)   4.6976e-03   +1.000
+     LO-S-d0.01                 1 (0.0016)   4.6976e-03   +1.000
+     R5-genie                   1 (0.0016)   nan   +1.000
+     paired sign tests (a = first fails & second ok, b = reverse), house test p (n_d < 6 -> UNDECIDED):
+       M-ours-dscore-C-V1 -> LO-G-d0.001         0:0    p=1  UNDECIDED (n_d < 6)
+       M-ours-dscore-C-V1 -> LO-S-d0.001         0:0    p=1  UNDECIDED (n_d < 6)
+       M-ours-dscore-C-V1 -> LO-G-d0.01          0:0    p=1  UNDECIDED (n_d < 6)
+       M-ours-dscore-C-V1 -> LO-S-d0.01          0:0    p=1  UNDECIDED (n_d < 6)
+              LO-G-d0.001 -> R5-genie            0:0    p=1  UNDECIDED (n_d < 6)
+              LO-S-d0.001 -> R5-genie            0:0    p=1  UNDECIDED (n_d < 6)
+               LO-G-d0.01 -> R5-genie            0:0    p=1  UNDECIDED (n_d < 6)
+               LO-S-d0.01 -> R5-genie            0:0    p=1  UNDECIDED (n_d < 6)
+             M-ours-bstar -> LO-G-d0.001         5:0    p=0.062  UNDECIDED (n_d < 6)
+             M-ours-bstar -> LO-S-d0.001         5:0    p=0.062  UNDECIDED (n_d < 6)
+             M-ours-bstar -> LO-G-d0.01          5:0    p=0.062  UNDECIDED (n_d < 6)
+             M-ours-bstar -> LO-S-d0.01          5:0    p=0.062  UNDECIDED (n_d < 6)
+              LO-G-d0.001 -> LO-S-d0.001         0:0    p=1  UNDECIDED (n_d < 6)
+               LO-G-d0.01 -> LO-S-d0.01          0:0    p=1  UNDECIDED (n_d < 6)
+
+== C5 -3 dB (trials 3200..3839) ==
+   acceptance: chunk set / run meta / R5-genie ['blk_err', 'ber', 'nmse', 'tauL_gmean', 'alphaD', 'tauL_clip_frac', 'alphaD_clip'] @1..16 vs raw_review_next_P3ref: shared 640 of 640, max |diff| 0, vacuous (all-NaN both sides) ['nmse'] -> PASS (replay bit-identical)
+   exceptions / F3 guard (nmse > 10 or non-finite at any iteration; detection only): LO-G-d0.001 0/0 of 640, LO-S-d0.001 0/0 of 640, LO-G-d0.01 0/0 of 640, LO-S-d0.01 0/0 of 640, R2-ours-G 0/0 of 640, R5-genie 0/0 of 640
+   @16  n=640 (trials 3200..3839)   failures (BLER)   median NMSE   gap position (b* - X)/(b* - genie)
+     M-ours-bstar             298 (0.4656)   1.2991e-01   +0.000
+     M-ours-dscore-C-V1       230 (0.3594)   7.3044e-02   +0.254
+     R2-ours-G                379 (0.5922)   3.3034e-01   -0.302
+     LO-G-d0.001               63 (0.0984)   2.0215e-02   +0.877
+     LO-S-d0.001               63 (0.0984)   2.0215e-02   +0.877
+     LO-G-d0.01                65 (0.1016)   2.0758e-02   +0.869
+     LO-S-d0.01                65 (0.1016)   2.0758e-02   +0.869
+     R5-genie                  30 (0.0469)   nan   +1.000
+     paired sign tests (a = first fails & second ok, b = reverse), house test p (n_d < 6 -> UNDECIDED):
+       M-ours-dscore-C-V1 -> LO-G-d0.001       169:2    p=9.8e-48
+       M-ours-dscore-C-V1 -> LO-S-d0.001       169:2    p=9.8e-48
+       M-ours-dscore-C-V1 -> LO-G-d0.01        168:3    p=5.6e-46
+       M-ours-dscore-C-V1 -> LO-S-d0.01        168:3    p=5.6e-46
+              LO-G-d0.001 -> R5-genie           38:5    p=2.5e-07
+              LO-S-d0.001 -> R5-genie           38:5    p=2.5e-07
+               LO-G-d0.01 -> R5-genie           41:6    p=1.8e-07
+               LO-S-d0.01 -> R5-genie           41:6    p=1.8e-07
+             M-ours-bstar -> LO-G-d0.001       239:4    p=2e-65
+             M-ours-bstar -> LO-S-d0.001       239:4    p=2e-65
+             M-ours-bstar -> LO-G-d0.01        236:3    p=5.2e-66
+             M-ours-bstar -> LO-S-d0.01        236:3    p=5.2e-66
+              LO-G-d0.001 -> LO-S-d0.001         0:0    p=1  UNDECIDED (n_d < 6)
+               LO-G-d0.01 -> LO-S-d0.01          0:0    p=1  UNDECIDED (n_d < 6)
+   @32  n=640 (trials 3200..3839)   failures (BLER)   median NMSE   gap position (b* - X)/(b* - genie)
+     M-ours-bstar             281 (0.4391)   1.2022e-01   +0.000
+     M-ours-dscore-C-V1       209 (0.3266)   6.8863e-02   +0.283
+     R2-ours-G                366 (0.5719)   3.1982e-01   -0.335
+     LO-G-d0.001               58 (0.0906)   2.0112e-02   +0.878
+     LO-S-d0.001               58 (0.0906)   2.0112e-02   +0.878
+     LO-G-d0.01                57 (0.0891)   2.0627e-02   +0.882
+     LO-S-d0.01                57 (0.0891)   2.0627e-02   +0.882
+     R5-genie                  27 (0.0422)   nan   +1.000
+     paired sign tests (a = first fails & second ok, b = reverse), house test p (n_d < 6 -> UNDECIDED):
+       M-ours-dscore-C-V1 -> LO-G-d0.001       154:3    p=7.1e-42
+       M-ours-dscore-C-V1 -> LO-S-d0.001       154:3    p=7.1e-42
+       M-ours-dscore-C-V1 -> LO-G-d0.01        155:3    p=3.6e-42
+       M-ours-dscore-C-V1 -> LO-S-d0.01        155:3    p=3.6e-42
+              LO-G-d0.001 -> R5-genie           36:5    p=7.8e-07
+              LO-S-d0.001 -> R5-genie           36:5    p=7.8e-07
+               LO-G-d0.01 -> R5-genie           35:5    p=1.4e-06
+               LO-S-d0.01 -> R5-genie           35:5    p=1.4e-06
+             M-ours-bstar -> LO-G-d0.001       228:5    p=8.1e-61
+             M-ours-bstar -> LO-S-d0.001       228:5    p=8.1e-61
+             M-ours-bstar -> LO-G-d0.01        228:4    p=3.5e-62
+             M-ours-bstar -> LO-S-d0.01        228:4    p=3.5e-62
+              LO-G-d0.001 -> LO-S-d0.001         0:0    p=1  UNDECIDED (n_d < 6)
+               LO-G-d0.01 -> LO-S-d0.01          0:0    p=1  UNDECIDED (n_d < 6)

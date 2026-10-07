@@ -1,0 +1,212 @@
+[
+ {
+  "lens": "numbers",
+  "findings": [
+   {
+    "title": "Selection-frequency fail/success split (§2.3 '필수 보고') not reproduced in the record",
+    "location": "conf/results/review_next/NEXT_EXPERIMENTS_P3.md:175 (§7.3 H8 row); §7.1 has no selection table",
+    "severity": "major",
+    "evidence": "Pre-registration §2.3 (line 62): \"선택 빈도표(실행별 선택 수, 실패·성공 블록 나눠서)는 필수 보고\". The record gives only totals: \"선택 분포: V1 기본 579 / b05 562 / fb05 139, b* 1006 / 148 / 126\". The split exists only in the source output p3_rules_C2_m3.txt:88 \"base: 579 (fail 42 / ok 537)  b05: 562 (fail 43 / ok 519)  fb05: 139 (fail 59 / ok 80)\" and :92 \"base: 1006 (fail 98 / ok 908)  b05: 148 (fail 61 / ok 87)  fb05: 126 (fail 114 / ok 12)\" (recount from raw npz agrees). Report-only points likewise only in txt.",
+    "fix": "Add (append-only) the fail/ok split to §7.1 or §7.3: V1 S-res base 579 (42/537), b05 562 (43/519), fb05 139 (59/80); b* base 1006 (98/908), b05 148 (61/87), fb05 126 (114/12); or state explicitly that the split is in p3_rules_<점>.txt §selection frequency."
+   },
+   {
+    "title": "§7.1 claim 'R-adapt == R32 in every block, all three points' is false for the bstar-b05 variant at C2 +6 dB",
+    "location": "conf/results/review_next/NEXT_EXPERIMENTS_P3.md:138",
+    "severity": "minor",
+    "evidence": "Text: \"R-adapt 의 결과는 모든 블록에서 R32 와 같다(블록별 일치; 세 점 모두).\" Base runs: true (blockwise diff 0 at all three points, recounted from raw). But p3_rules_C2_p6.txt:29 \"bstar  b05  7  6  7\" — b05 variant R32 = 6, R-adapt = 7 (1 block differs; raw recount confirms).",
+    "fix": "Qualify to the base runs: \"기본 실행의 R-adapt 는 … R32 와 같다(세 점 모두); 변형은 C2 +6 dB bstar-b05 에서 1블록 다름(R32 6 / R-adapt 7)\"."
+   },
+   {
+    "title": "EXPERIMENTS.md row rounds the R16 gap p downward: 'p ≤ 2e-25' but the value is 2.21e-25",
+    "location": "docs/EXPERIMENTS.md:30",
+    "severity": "minor",
+    "evidence": "Row text: \"V1<b* 격차 전 규칙 유지(p ≤ 2e-25)\". Source p3_rules_C2_m3.txt:78 \"V1 vs b* (R16) … p = 2.21e-25\" (recount 2.21e-25), which is > 2e-25. §7.1:150 and commit d00bb877 correctly say 2.2e-25.",
+    "fix": "Change to \"p ≤ 2.2e-25\" (or \"p ≤ 3e-25\")."
+   },
+   {
+    "title": "Test-set row judgement timestamp '01:05 KST' is later than both the output file and the commit",
+    "location": "docs/EXPERIMENTS.md:31",
+    "severity": "minor",
+    "evidence": "Row: \"… 판정 01:05 KST\". p3_confirm_C2.txt:1 \"# date : 2026-09-24 01:02:57 KST\"; p3_confirm.log mtime 01:02; commit 13d353b5 (which includes the row) at 2026-09-24 01:03:43 +0900.",
+    "fix": "Replace with \"판정 01:03 KST\" (01:02:57)."
+   },
+   {
+    "title": "Commit 2b599c14 message gives the test run start as 10:10 CDT; the log says 10:12 CDT",
+    "location": "git commit 2b599c14 (message line \"- run_p3test.sh (실행 10:10 CDT~)\")",
+    "severity": "minor",
+    "evidence": "conf/logs/review_next/run_p3test.log:1 and conf/logs/queue.log:62 \"[p3test 10:12 CDT] P3 test confirmation start (git d00bb877)\"; NEXT_EXPERIMENTS_P3.md:104/181 and EXPERIMENTS.md:31 say 10:12~11:02 CDT.",
+    "fix": "Commit messages are immutable; note in DECISIONS/record that the run start is 10:12 CDT per log (commit text 10:10 is off by 2 min)."
+   },
+   {
+    "title": "MDD values ('MDD 는 보고', §1) are not reproduced anywhere in §7",
+    "location": "conf/results/review_next/NEXT_EXPERIMENTS_P3.md:140-150 (§7.1 test table and §2.4 paragraph)",
+    "severity": "minor",
+    "evidence": "§1 line 32: \"판정은 p 로만, MDD 는 보고(n=1280 …)\". §7.1 reports a:b and p only. Source p3_rules_C2_m3.txt lines 40-81 carry MDD@n_d per test (H6a/H6b 11, H7 12/12/14/17, H8 V1 10/10/13, b* 11/14/16, gap 28/28/28/27).",
+    "fix": "Append the MDD@n_d column (or a one-line summary: judging-point MDD 10~17 blocks for the 17 tests, 27~28 for the gap tests) to §7.1, or state that MDD is in the cited txt."
+   }
+  ],
+  "verdicts": [
+   {
+    "title": "Selection-frequency fail/success split (§2.3 '필수 보고') not reproduced in the record",
+    "real": true,
+    "severity": "major",
+    "reason": "Confirmed. Pre-registration §2.3 (NEXT_EXPERIMENTS_P3.md:62, unchanged from d7e404ff) says \"선택 빈도표(실행별 선택 수, 실패·성공 블록 나눠서)는 필수 보고\". The record (§7.3 line 175) gives totals only: \"V1 기본 579 / b05 562 / fb05 139, b* 1006 / 148 / 126\"; §7.1 has no selection table at all. The fail/ok split appears only in p3_rules_C2_m3.txt:88 and :92. Recount from p3_rules_C2_m3.npz (`<prior>|sel|S-res` vs `<prior>|S-res`) reproduces exactly: V1 base 579 (42/537), b05 562 (43/519), fb05 139 (59/80); b* base 1006 (98/908), b05 148 (61/87), fb05 126 (114/12). The txt is cited generically as 산출물 but the required split is absent from the record text.",
+    "fix": "Append (do not edit) the fail/ok split to §7.1 or §7.3: V1 S-res 기본 579 (실패 42 / 성공 537), b05 562 (43/519), fb05 139 (59/80); b* 1006 (98/908), 148 (61/87), 126 (114/12); or add one line pointing to the `## selection frequency` section of p3_rules_<점>.txt."
+   },
+   {
+    "title": "§7.1 claim 'R-adapt == R32 in every block, all three points' is false for the bstar-b05 variant at C2 +6 dB",
+    "real": true,
+    "severity": "minor",
+    "reason": "Confirmed. NEXT_EXPERIMENTS_P3.md:138: \"R-adapt 의 결과는 모든 블록에서 R32 와 같다(블록별 일치; 세 점 모두).\" — unqualified. npz recount: base runs differ in 0 blocks at all three points (matches), but p3_rules_C2_p6.txt:29 \"bstar  b05  7  6  7\" and npz `bstar|b05|R32` (6) vs `bstar|b05|R-adapt` (7) differ in 1 block. The sentence can be read as referring to the table's base-run R-adapt column, but as written it is a universal statement that the source output contradicts for one variant.",
+    "fix": "Append a qualifier: \"기본 실행 기준; 변형은 C2 +6 dB bstar-b05 에서 1블록 다름(R32 6 / R-adapt 7)\"."
+   },
+   {
+    "title": "EXPERIMENTS.md row rounds the R16 gap p downward: 'p ≤ 2e-25' but the value is 2.21e-25",
+    "real": true,
+    "severity": "minor",
+    "reason": "Confirmed. docs/EXPERIMENTS.md:30 reads \"V1<b* 격차 전 규칙 유지(p ≤ 2e-25)\". Source p3_rules_C2_m3.txt:78 \"V1 vs b* (R16) … p = 2.21e-25\"; recount from npz (24:158 discordant, exact two-sided binomial) gives 2.208e-25 > 2e-25, so the bound as stated is false. §7.1:150 and commit d00bb877 give 2.2e-25 correctly.",
+    "fix": "Change to \"p ≤ 2.2e-25\" (or \"p ≤ 3e-25\")."
+   },
+   {
+    "title": "Test-set row judgement timestamp '01:05 KST' is later than both the output file and the commit",
+    "real": true,
+    "severity": "minor",
+    "reason": "Confirmed. docs/EXPERIMENTS.md:31 contains \"판정 01:05 KST\". p3_confirm_C2.txt:1 \"# date : 2026-09-24 01:02:57 KST\"; p3_confirm.log and p3_confirm_C2.txt mtime 01:02:57 KST; commit 13d353b5 (which already contains this row — `git show 13d353b5 -- docs/EXPERIMENTS.md` matches \"판정 01:05 KST\") is dated 2026-09-24 01:03:43 +0900. A judgement time later than the commit that records it is impossible.",
+    "fix": "Replace with \"판정 01:03 KST\" (01:02:57 per p3_confirm_C2.txt)."
+   },
+   {
+    "title": "Commit 2b599c14 message gives the test run start as 10:10 CDT; the log says 10:12 CDT",
+    "real": true,
+    "severity": "minor",
+    "reason": "Confirmed. `git show -s 2b599c14` line 8: \"- run_p3test.sh (실행 10:10 CDT~)\". conf/logs/review_next/run_p3test.log:1 and conf/logs/queue.log:62 both read \"[p3test 10:12 CDT] P3 test confirmation start (git d00bb877)\"; conf/code/run_p3test.sh itself was created 00:12:42 KST (= 10:12 CDT). NEXT_EXPERIMENTS_P3.md:104/181 and EXPERIMENTS.md:31 say 10:12~11:02 CDT, so the commit message is the only inconsistent one.",
+    "fix": "Commit is immutable; add a one-line note in DECISIONS.md or §7.4 that the run start is 10:12 CDT per log and the 10:10 in commit 2b599c14 is off by 2 min."
+   },
+   {
+    "title": "MDD values ('MDD 는 보고', §1) are not reproduced anywhere in §7",
+    "real": true,
+    "severity": "minor",
+    "reason": "Confirmed. §1 (NEXT_EXPERIMENTS_P3.md:32): \"**판정은 p 로만**, MDD 는 보고(n=1280, …)\". §7.1 (lines 140-150) reports a:b and p only; grep of §7 finds no MDD value. Source p3_rules_C2_m3.txt lines 40-81 carry MDD@n_d for every test: H6a/H6b 11, H7 12/12/14/17, H8 V1 10/10/13, b* 11/14/16, gap 28/28/28/27. Minor rather than major because MDD is explicitly non-judging and the cited txt is committed alongside.",
+    "fix": "Append to §7.1 a one-line summary (판정점 17개 검정의 MDD@n_d 10~17 블록, 격차 검정 27~28) or a note that MDD is in p3_rules_<점>.txt."
+   }
+  ]
+ },
+ {
+  "lens": "wording-conformance",
+  "findings": [
+   {
+    "title": "MDD (§1 '판정은 p 로만, MDD 는 보고') is not reported anywhere in §7 / EXPERIMENTS / DECISIONS",
+    "location": "conf/results/review_next/NEXT_EXPERIMENTS_P3.md:140-150 (§7.1 hypothesis table and §2.4 paragraph); docs/EXPERIMENTS.md:30",
+    "severity": "major",
+    "evidence": "Frozen §1 (line 32): \"**판정은 p 로만**, MDD 는 보고(n=1280, 불일치율 3~8%: 14~22 순 블록)\". §7.1 gives only a:b and p for all 17 tests; the word MDD does not occur in §7, the EXPERIMENTS row or DECISIONS. Source has it per test: conf/results/review_next/p3_rules_C2_m3.txt:40-81 \"MDD@n_d 11\" (H6a/H6b), 12/12/14/17 (H7), 10/10/13 and 11/14/16 (H8), 28/28/28/27 (V1 vs b* gap).",
+    "fix": "Append to §7.1 (additions only) one MDD column or a sentence listing MDD@n_d per test from p3_rules_C2_m3.txt:40-81, and note that the test-set confirmation output (p3_confirm_C2.txt) prints no MDD."
+   },
+   {
+    "title": "Selection-frequency table (§2.3 '필수 보고', split by 실패/성공) is missing from §7; only S-res totals appear as an aside in §7.3, no fail/ok split, no S-conf",
+    "location": "conf/results/review_next/NEXT_EXPERIMENTS_P3.md:175 (only place selection counts appear); §7.1 lines 129-154 have none",
+    "severity": "major",
+    "evidence": "Frozen §2.3 (line 62): \"선택 빈도표(실행별 선택 수, 실패·성공 블록 나눠서)는 필수 보고\"; §5.1 item 4 adds \"선택 빈도표는 각 규칙이 고른 실행의 반복 32 결과로 나눈다\". Record §7.3 line 175 only says \"선택 분포: V1 기본 579 / b05 562 / fb05 139, b\\* 1006 / 148 / 126\" inside the H8 prediction row. Source p3_rules_C2_m3.txt:88 \"V1 S-res base: 579 (fail 42 / ok 537) b05: 562 (fail 43 / ok 519) fb05: 139 (fail 59 / ok 80)\", :92 \"bstar S-res base: 1006 (fail 98 / ok 908) b05: 148 (fail 61 / ok 87) fb05: 126 (fail 114 / ok 12)\", :90/:94 S-conf rows, plus the report-only points (C2_p6.txt:88-95, C5_m3.txt:88-95).",
+    "fix": "Append the selection-frequency table (S-res and S-conf, per prior, fail/ok split, judging point; report-only points may cite the txt) to §7.1 as an addition."
+   },
+   {
+    "title": "EXPERIMENTS row gives the test-set judgement time as 01:05 KST; the source output is stamped 01:02:57 KST and the commit is 01:03:43 KST",
+    "location": "docs/EXPERIMENTS.md:31",
+    "severity": "minor",
+    "evidence": "EXPERIMENTS.md:31: \"2026-09-24 00:12 ~ 01:02 KST (…), 판정 01:05 KST\". conf/results/review_next/p3_confirm_C2.txt:1 \"# date : 2026-09-24 01:02:57 KST\"; conf/logs/review_next/p3_confirm.log mtime 01:02:57; git show 13d353b5 → committed 2026-09-24 01:03:43 +0900. A judgement at 01:05 would postdate the commit that records it.",
+    "fix": "Read/correct as 판정 01:03 KST (01:02:57)."
+   },
+   {
+    "title": "EXPERIMENTS row states the V1<b* gap holds with 'p ≤ 2e-25'; the largest source p is 2.21e-25",
+    "location": "docs/EXPERIMENTS.md:30",
+    "severity": "minor",
+    "evidence": "EXPERIMENTS.md:30: \"V1<b* 격차 전 규칙 유지(p ≤ 2e-25)\". Source p3_rules_C2_m3.txt:78 \"V1 vs b* (R16) … p = 2.21e-25\" (R32 4.07e-28, R-adapt 4.07e-28, S-res 4.23e-28). §7.1 line 150 and commit d00bb877 (\"p <= 2.2e-25\") are consistent with the source; the EXPERIMENTS bound is not.",
+    "fix": "Change to p ≤ 2.3e-25 (or quote 2.2e-25 as in §7.1)."
+   },
+   {
+    "title": "Three different start times for the test-confirmation run, and the recorded user decision (10:15 CDT) postdates the run start (10:12 CDT)",
+    "location": "conf/results/review_next/NEXT_EXPERIMENTS_P3.md:104, :179, :181; docs/EXPERIMENTS.md:31; conf/DECISIONS.md:151; commit 2b599c14 message",
+    "severity": "minor",
+    "evidence": "P3.md:104 \"테스트 집합 확증 (§3, 사용자 결정 10:15 CDT) … 실행 run_p3test.sh 10:12~11:02 CDT\"; :179 \"사용자 결정 2026-09-23 10:15 CDT \\\"지금 실행\\\"\"; EXPERIMENTS.md:31 \"00:12 ~ 01:02 KST … 사용자 결정 10:15 CDT\"; DECISIONS.md:151 \"[2026-09-24 00:15 KST] … 사용자 결정 2건 (2026-09-23 10:15 CDT)\"; commit 2b599c14: \"run_p3test.sh (실행 10:10 CDT~)\". Source conf/logs/review_next/run_p3test.log:1 \"[p3test 10:12 CDT] P3 test confirmation start (git d00bb877)\" and conf/logs/queue.log:62. So the run began at 10:12, before the decision time written everywhere as 10:15, and the commit message says 10:10.",
+    "fix": "Record the actual decision time (it must precede 10:12 CDT) in §5/§7.4/EXPERIMENTS/DECISIONS, or note that 10:15 CDT is the DECISIONS entry time rather than the decision time; note commit 2b599c14's '10:10' as an error (commit not rewritten)."
+   },
+   {
+    "title": "§7.1 'R-adapt == R32 in every block, all three points' is stated without restriction to the base runs; the b*-b05 variant differs in one block at C2 +6 dB",
+    "location": "conf/results/review_next/NEXT_EXPERIMENTS_P3.md:138",
+    "severity": "minor",
+    "evidence": "P3.md:138: \"R-adapt 의 결과는 모든 블록에서 R32 와 같다(블록별 일치; 세 점 모두).\" npz recount: base runs V1/b* at C2_m3, C2_p6, C5_m3 have 0 blockwise differences (claim true for base). But p3_rules_C2_p6.txt:29 \"bstar b05 7 6 7 16.01 19\" and npz 'bstar|b05|R-adapt' vs 'bstar|b05|R32': 1 block differs (R-adapt fails, R32 ok, stop t=19). The variants' R-adapt is computed and printed by the same code, so the unqualified sentence is false as written.",
+    "fix": "Qualify as \"기본 실행(V1, b\\*)에서 … 세 점 모두 (변형은 C2 +6 dB bstar-b05 1블록 다름)\"."
+   },
+   {
+    "title": "H7 verdict '반대 방향 → 지지 아님' is a fourth outcome outside §1's three, and EXPERIMENTS/commit add the gloss '변형이 나쁨'",
+    "location": "conf/results/review_next/NEXT_EXPERIMENTS_P3.md:144-145, :105; docs/EXPERIMENTS.md:30; commit d00bb877 message",
+    "severity": "minor",
+    "evidence": "Frozen §1 line 32: \"결과는 항상 셋 중 하나: 지지(p < 0.05, 실패 적음) / 판정 불가(p ≥ 0.05, n_d ≥ 6) / UNDECIDED(n_d < 6)\" — p < 0.05 with more failures maps to none of the three (pre-registration gap). §7.1:144 \"20:8, p = 0.036 → **반대 방향**(b05 실패가 많음) → 지지 아님\"; the label comes from p3_rules.py (present at f5856204, before data: git show f5856204:conf/code/p3_rules.py line 194), but §5.1 (the place for pre-data clarifications) does not record this gap. EXPERIMENTS.md:30 \"반대 방향(변형이 나쁨)\" and commit d00bb877 \"반대 방향(변형이 나쁨)\" go a step further than the source string \"반대 방향 (p < 0.05, 실패 많음) -> 지지 아님\" (p3_rules_C2_m3.txt:50,54).",
+    "fix": "Add to §5.1 (dated, as an addition) that p<0.05-with-more-failures is printed as '반대 방향 → 지지 아님' (code f5856204, pre-data); in EXPERIMENTS/§5 read '변형이 나쁨' as '변형 R16 의 실패가 많음(p < 0.05)', no quality claim."
+   },
+   {
+    "title": "§7.3 marks the H6b prediction '적중' although its '평균 반복 ≈ 18~20' component missed for V1 (17.80)",
+    "location": "conf/results/review_next/NEXT_EXPERIMENTS_P3.md:172",
+    "severity": "minor",
+    "evidence": "§6 line 119 (frozen): \"H6b: V1·b\\* 모두 지지; R-adapt 와 R32 의 순 차이 ≤ +3, 평균 반복 ≈ 18~20 → 채택 규칙 = R-adapt.\" §7.3:172: \"**적중** (net 0 / 0, 채택 R-adapt). 평균 반복 V1 17.80 은 예측 범위 하한보다 약간 낮고 b\\* 18.75 는 범위 안\". Source p3_rules_C2_m3.txt:19 mean t 17.80 (V1). The row records the miss in text but the verdict cell says 적중; §7.3's own header is \"빗나간 것도 그대로\".",
+    "fix": "Label the row '부분 적중 (지지·net·채택 적중; 평균 반복 V1 빗나감)'."
+   }
+  ],
+  "verdicts": [
+   {
+    "title": "MDD (§1 '판정은 p 로만, MDD 는 보고') is not reported anywhere in §7 / EXPERIMENTS / DECISIONS",
+    "real": true,
+    "severity": "major",
+    "reason": "Confirmed. Frozen §1 (NEXT_EXPERIMENTS_P3.md:32) says \"판정은 p 로만, MDD 는 보고\". The source prints MDD@n_d for every test (p3_rules_C2_m3.txt:40-81: 11/11/11/11 for H6a/H6b, 12/12/14/17 for H7, 10/10/13 and 11/14/16 for H8, 28/28/28/27 for the V1-vs-b* gap), but the string 'MDD' does not occur in §7.1-§7.4 (lines 125-192), in docs/EXPERIMENTS.md:30-31 or in the DECISIONS entries. p3_confirm_C2.txt prints no MDD at all. §7 restates every other §1:34 report-only item (S-conf, oracle, variant R32, cost, report-only points) but omits this one, so it is a demanded report item missing from the record, not just from a summary.",
+    "fix": "Append to §7.1 (additions only) an MDD column or one sentence listing MDD@n_d per test from p3_rules_C2_m3.txt:40-81, and note that the --confirm output (p3_confirm_C2.txt) does not print MDD."
+   },
+   {
+    "title": "Selection-frequency table (§2.3 '필수 보고', split by 실패/성공) is missing from §7; only S-res totals appear as an aside in §7.3, no fail/ok split, no S-conf",
+    "real": true,
+    "severity": "major",
+    "reason": "Confirmed. Frozen §2.3 (P3.md:62) \"선택 빈도표(실행별 선택 수, 실패·성공 블록 나눠서)는 필수 보고\"; §5.1 item 4 (P3.md:114) fixes the split as the chosen run's R32 outcome. The only selection counts in the record are §7.3 line 175 \"선택 분포: V1 기본 579 / b05 562 / fb05 139, b* 1006 / 148 / 126\" — totals only, S-res only, judging point only. Source p3_rules_C2_m3.txt:88 \"V1 S-res base: 579 (fail 42 / ok 537) b05: 562 (fail 43 / ok 519) fb05: 139 (fail 59 / ok 80)\", :92 \"bstar S-res base: 1006 (fail 98 / ok 908) b05: 148 (fail 61 / ok 87) fb05: 126 (fail 114 / ok 12)\", :90/:94 S-conf rows. The totals that are given match the source; the required split and S-conf rows are absent.",
+    "fix": "Append the selection-frequency table (S-res and S-conf, per prior, fail/ok split, judging point; report-only points may cite p3_rules_C2_p6.txt:88-95 and p3_rules_C5_m3.txt:88-95) to §7.1 as an addition."
+   },
+   {
+    "title": "EXPERIMENTS row gives the test-set judgement time as 01:05 KST; the source output is stamped 01:02:57 KST and the commit is 01:03:43 KST",
+    "real": true,
+    "severity": "minor",
+    "reason": "Confirmed. docs/EXPERIMENTS.md:31 \"판정 01:05 KST\". p3_confirm_C2.txt:1 \"# date : 2026-09-24 01:02:57 KST\"; conf/logs/review_next/p3_confirm.log mtime 2026-09-24 01:02:57 +0900; commit 13d353b5 (which adds p3_confirm_C2.txt and this EXPERIMENTS row) is dated 2026-09-24 01:03:43 +0900. A judgement at 01:05 would postdate the commit that records it; the other rows in the same file use the output file's timestamp (row 30: 판정 23:58 = p3_rules_C2_m3.txt:1 23:58:43).",
+    "fix": "Read/record the judgement time as 01:03 KST (01:02:57 per p3_confirm_C2.txt:1); since EXPERIMENTS rows are not rewritten, note the correction in DECISIONS or read it via this audit."
+   },
+   {
+    "title": "EXPERIMENTS row states the V1<b* gap holds with 'p ≤ 2e-25'; the largest source p is 2.21e-25",
+    "real": true,
+    "severity": "minor",
+    "reason": "Confirmed. docs/EXPERIMENTS.md:30 \"V1<b* 격차 전 규칙 유지(p ≤ 2e-25)\". Source p3_rules_C2_m3.txt:78 \"V1 vs b* (R16) … p = 2.21e-25\" (R32/R-adapt 4.07e-28, S-res 4.23e-28). 2.21e-25 > 2e-25, so the stated bound is false for the R16 rule. §7.1:150 (\"p = 2.2e-25\") and commit d00bb877 (\"p <= 2.2e-25\") round consistently with the source; only the EXPERIMENTS bound is off. The verdict (gap maintained, p < 0.05) is unaffected.",
+    "fix": "Read as p ≤ 2.3e-25 (or 'p ≤ 2.2e-25' as in §7.1 / d00bb877); one-digit truncation of 2.21e-25 to 2e-25 is the error."
+   },
+   {
+    "title": "Three different start times for the test-confirmation run, and the recorded user decision (10:15 CDT) postdates the run start (10:12 CDT)",
+    "real": true,
+    "severity": "minor",
+    "reason": "Confirmed. Run start: conf/logs/review_next/run_p3test.log:1 \"[p3test 10:12 CDT] P3 test confirmation start (git d00bb877)\" (written by run_p3test.sh via TZ=America/Chicago date at launch), conf/logs/queue.log:62 same, and conf/raw_review_next_P3test parent-dir mtime 2026-09-24 00:12:44 +0900 (= 10:12:44 CDT). Decision time recorded as 10:15 CDT in P3.md:104, :179, docs/EXPERIMENTS.md:31, conf/DECISIONS.md:151 and even in run_p3test.sh's own header comment. Commit 2b599c14 message says \"run_p3test.sh (실행 10:10 CDT~)\". So the record has 10:10 (commit), 10:12 (log), and a decision at 10:15 that follows the run it authorised. No number or verdict depends on it.",
+    "fix": "Add (append-only) a DECISIONS/§5 note that the actual decision preceded the 10:12 CDT launch and that '10:15 CDT' is the time the decision was logged (00:15 KST entry), and that commit 2b599c14's '10:10 CDT' is an error (log and raw mtimes say 10:12; commit not rewritten)."
+   },
+   {
+    "title": "§7.1 'R-adapt == R32 in every block, all three points' is stated without restriction to the base runs; the b*-b05 variant differs in one block at C2 +6 dB",
+    "real": true,
+    "severity": "minor",
+    "reason": "Confirmed by npz recount. For the base runs (V1|base, bstar|base) R-adapt vs R32 differ in 0 blocks at C2_m3, C2_p6 and C5_m3, and all V1 variants also differ in 0 blocks. But p3_rules_C2_p6.npz 'bstar|b05|R-adapt' vs 'bstar|b05|R32' differ in 1 block (7 vs 6 failures), matching p3_rules_C2_p6.txt:29 \"bstar b05 7 6 7 16.01 19\" (R-adapt stopped at t=19 on a block that R32 later solved). P3.md:138 \"R-adapt 의 결과는 모든 블록에서 R32 와 같다(블록별 일치; 세 점 모두)\" is unqualified, and the variants' R-adapt is computed and printed by the same code, so the sentence is false as written for the report-only point. Judgement-relevant claims (base runs at the judging point, H6b, net 0/0) are unaffected.",
+    "fix": "Qualify (addition) as: 기본 실행(V1, b*)에서 세 점 모두 블록별 일치; 변형은 C2 +6 dB bstar-b05 에서 1블록 다름(R-adapt 7, R32 6; p3_rules_C2_p6.txt:29)."
+   },
+   {
+    "title": "H7 verdict '반대 방향 → 지지 아님' is a fourth outcome outside §1's three, and EXPERIMENTS/commit add the gloss '변형이 나쁨'",
+    "real": true,
+    "severity": "minor",
+    "reason": "Confirmed. Frozen §1 (P3.md:32) says results are always one of 지지 (p<0.05, fewer failures) / 판정 불가 (p≥0.05, n_d≥6) / UNDECIDED (n_d<6); p<0.05 with more failures maps to none. git show f5856204:conf/code/p3_rules.py:194 already returns \"반대 방향 (p < 0.05, 실패 많음) -> 지지 아님\" (pre-data, so not post-hoc), and p3_rules_C2_m3.txt:50,54 print it for b* b05 (20:8, p=0.0357) and fb05 (37:18, p=0.0145). §7.1:144-145 reproduces the source label faithfully, but §5.1 (the designated place for pre-data clarifications) does not record this gap. docs/EXPERIMENTS.md:30 and commit d00bb877 write \"반대 방향(변형이 нbadness: 변형이 나쁨)\" — a quality gloss not present in the source string or the pre-registration; the correct reading is 'variant R16 has more failures at this point (p<0.05), H7 not supported'. No number is wrong.",
+    "fix": "Append to §5.1 (dated) that p<0.05-with-more-failures is printed as '반대 방향 → 지지 아님' (code f5856204, before data); read '변형이 나쁨' in EXPERIMENTS.md:30 / d00bb877 as '변형 R16 의 실패가 많음(p < 0.05), H7 지지 아님' with no quality claim."
+   },
+   {
+    "title": "§7.3 marks the H6b prediction '적중' although its '평균 반복 ≈ 18~20' component missed for V1 (17.80)",
+    "real": false,
+    "severity": "minor",
+    "reason": "Does not survive. §6 (P3.md:119) writes the iteration count with '≈' (\"평균 반복 ≈ 18~20\"), and 17.80 (p3_rules_C2_m3.txt:19) rounds to 18, so calling it a hit is within the stated tolerance; the decision-bearing components (both priors supported, net(R-adapt−R32) = 0/0 ≤ +3, adoption = R-adapt) are exactly met. The §7.3 cell (line 172) itself discloses \"평균 반복 V1 17.80 은 예측 범위 하한보다 약간 낮고 b* 18.75 는 범위 안\", so nothing is hidden and §6 is not misread. This is a wording preference, not a defect in the record.",
+    "fix": "No change required; optionally append '(평균 반복 V1 은 하한 근처)' to the verdict cell if a stricter label is wanted."
+   }
+  ]
+ }
+]

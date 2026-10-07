@@ -1,0 +1,42 @@
+# date        : 2026-09-23 13:33:24 KST
+# git commit  : b04db838
+# versions    : python 3.12.14  numpy 2.5.2  scipy 1.18.1  torch 2.14.0+cu130 (cuda_available=False)
+# device      : CPU (192 cores) | dtype: complex128 / float64 | deterministic: yes (fixed seeds, no GPU in the receiver)
+# testbed     : D2
+# seed rule   : default_rng([20260926, TBID[testbed], PID[prior], Nr, T, Tp, int(snr)+100])  (trials of a point = ONE stream)
+# code        : rate-1/2 conv (133,171)_8 nu=6 terminated, QPSK, outer iterations = 16 for EVERY arm
+# Demo/ hashes: t2_route_a.py=95a5408901ec125c  t2_trellis.py=31cd0ee9c68e972b  t2_gmm.py=d064e58c7510c769
+# content     : review_next P3 groundwork -- loop dynamics on the DEVELOPMENT set (descriptive, decides nothing); source = diag_p1_cavity merged npz
+
+=== D2_C1_S2_Nr8_T16_Tp2_dft_snr-3  (n = 640, trials 2560..3199)
+arm                     fail |         settled         2-cycle            slow          moving | lost 8->16  rescued | AUC(fail) of observable signals @16
+M-ours-dscore-C-V1       623 |      11 (f   7)       0 (f   0)       2 (f   1)     627 (f 615) |          0       13 | r16 0.98  alphaD 0.90  tauL 0.91  nuE 0.99  nu_q 1.00  alphaH 0.94  clip 0.52
+M-ours-dscore-C-V0       640 |      48 (f  48)       4 (f   4)      30 (f  30)     558 (f 558) |          0        0 | r16 nan  alphaD nan  tauL nan  nuE nan  nu_q nan  alphaH nan  clip nan
+M-ours-bstar-scalar      511 |     105 (f  23)       3 (f   2)      29 (f  14)     503 (f 472) |          0       28 | r16 0.94  alphaD 0.99  tauL 0.96  nuE 0.58  nu_q 0.89  alphaH 0.25
+M-ours-bstar             483 |     172 (f  24)       7 (f   7)      39 (f  38)     422 (f 414) |          0       20 | r16 1.00  alphaD 1.00  tauL 0.98  nuE 0.50
+
+=== D2_C2_S2_Nr8_T16_Tp4_dft_snr-3  (n = 640, trials 2560..3199)
+arm                     fail |         settled         2-cycle            slow          moving | lost 8->16  rescued | AUC(fail) of observable signals @16
+M-ours-dscore-C-V1        88 |     537 (f  14)       3 (f   1)      32 (f  13)      68 (f  60) |          0       11 | r16 0.98  alphaD 0.99  tauL 0.98  nuE 0.77  nu_q 0.96  alphaH 0.44  clip 0.54
+M-ours-dscore-C-V0       375 |     222 (f   8)       1 (f   0)      33 (f  26)     384 (f 341) |         11       44 | r16 0.91  alphaD 0.85  tauL 0.84  nuE 0.85  nu_q 0.95  alphaH 0.28  clip 0.50
+M-ours-bstar-scalar      135 |     510 (f  34)       6 (f   2)      33 (f  20)      91 (f  79) |          0       18 | r16 0.95  alphaD 0.98  tauL 0.96  nuE 0.51  nu_q 0.89  alphaH 0.22
+M-ours-bstar             132 |     521 (f  21)       3 (f   3)      22 (f  21)      94 (f  87) |          1       13 | r16 1.00  alphaD 0.99  tauL 0.97  nuE 0.50
+
+=== D2_C2_S2_Nr8_T16_Tp4_dft_snr6  (n = 640, trials 2560..3199)
+arm                     fail |         settled         2-cycle            slow          moving | lost 8->16  rescued | AUC(fail) of observable signals @16
+M-ours-dscore-C-V1         3 |     636 (f   0)       0 (f   0)       1 (f   0)       3 (f   3) |          0        0 | r16 1.00  alphaD 1.00  tauL 1.00  nuE 0.79  nu_q 1.00  alphaH 0.48  clip 0.63
+M-ours-dscore-C-V0       603 |       6 (f   0)       0 (f   0)       7 (f   4)     627 (f 599) |         15       28 | r16 0.69  alphaD 0.77  tauL 0.72  nuE 0.50  nu_q 0.78  alphaH 0.26  clip 0.50
+M-ours-bstar-scalar       10 |     628 (f   1)       3 (f   2)       4 (f   2)       5 (f   5) |          0        0 | r16 0.99  alphaD 0.85  tauL 0.98  nuE 0.33  nu_q 0.88  alphaH 0.19
+M-ours-bstar               9 |     632 (f   1)       1 (f   1)       1 (f   1)       6 (f   6) |          0        3 | r16 0.94  alphaD 0.78  tauL 0.91  nuE 0.50
+
+=== D2_C5_S2_Nr8_T16_Tp3_dft_snr-3  (n = 640, trials 2560..3199)
+arm                     fail |         settled         2-cycle            slow          moving | lost 8->16  rescued | AUC(fail) of observable signals @16
+M-ours-dscore-C-V1       257 |     345 (f  17)       5 (f   2)      53 (f  25)     237 (f 213) |          0       31 | r16 0.97  alphaD 0.99  tauL 0.98  nuE 0.83  nu_q 0.96  alphaH 0.51  clip 0.52
+M-ours-dscore-C-V0       488 |     122 (f   6)       1 (f   1)      22 (f  13)     495 (f 468) |          6       27 | r16 0.94  alphaD 0.89  tauL 0.89  nuE 0.91  nu_q 0.97  alphaH 0.24  clip 0.49
+M-ours-bstar-scalar      346 |     275 (f  36)      14 (f  11)      44 (f  20)     307 (f 279) |          0       30 | r16 0.93  alphaD 0.99  tauL 0.94  nuE 0.57  nu_q 0.85  alphaH 0.29
+M-ours-bstar             314 |     326 (f  17)       7 (f   7)      32 (f  32)     275 (f 258) |          0       29 | r16 0.99  alphaD 0.99  tauL 0.97  nuE 0.50
+
+classes: settled = max r_13..16 < 1e-3; 2-cycle = max c_15..16 < 1e-3 and min r_15..16 > 1e-2; slow = max r < 1e-2;
+         moving = rest.  '(f k)' = failures in that class.  lost 8->16 = decoded at iteration 8, failed at 16; rescued = opposite.
+AUC: P(signal larger on a failed block); 0.5 = no separation, <0.5 = smaller on failures.  Receiver-observable signals only.
+Descriptive groundwork for a P3 pre-registration; dev trials used here must NOT be reused to judge a P3 rule (use skip >= 3200).

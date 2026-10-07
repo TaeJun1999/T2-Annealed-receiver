@@ -1,0 +1,43 @@
+# date        : 2026-09-21 07:49:41 KST
+# git commit  : 86e43ef
+# versions    : python 3.12.14  numpy 2.5.2  scipy 1.18.1  torch 2.14.0+cu130 (cuda_available=True)
+# device      : CPU (192 cores) | dtype: complex128 / float64 | deterministic: yes (fixed seeds, no GPU in the receiver)
+# testbed     : D2
+# seed rule   : default_rng([20260926, TBID[testbed], PID[prior], Nr, T, Tp, int(snr)+100])  (trials of a point = ONE stream)
+# code        : rate-1/2 conv (133,171)_8 nu=6 terminated, QPSK, outer iterations = 16 for EVERY arm
+# Demo/ hashes: t2_route_a.py=95a5408901ec125c  t2_trellis.py=31cd0ee9c68e972b  t2_gmm.py=d064e58c7510c769
+# content     : GB' (04_SPEC §6) -- held-out denoising NMSE of the GMM prior vs the diffusion prior
+#               on the SAME frozen D2 sigma grid.  REPORT ONLY: never used to select anything.
+# *** The diffusion model here did NOT pass the D1 gates (best GC 0.2241 vs 0.15 over 959 trials).
+#     It is NOT an arm in any BLER table; M-ours-dscore stays BLOCKED on both testbeds. ***
+# architecture: copied verbatim from the best-D1-gate-score configuration, NOT re-searched (04_SPEC §6)
+#               {'arch': 'dit', 'param': 'vp', 'domain': 'angle', 'lr': 0.002238046051591068, 'ema': 0.999, 'batch': 256, 'emb': 256, 'width': 64, 'depth': 6, 'heads': 8, 'patch': 1}
+# GMM b*      : kron (kron K=512), selected by validation log-likelihood only
+
+# ====================================================================================================
+# CLAIM TESTBED -- sparse specular; conditional Gaussianity broken (see T2d). Upper bound = genie only.
+# ====================================================================================================
+
+  k       sigma          nu     nmse_gmm    nmse_diff   diff/gmm
+  0  3.3062e-02  2.1862e-03  1.96957e-03  1.16549e-03     0.5917
+  1  3.9212e-02  3.0751e-03  2.73720e-03  1.56801e-03     0.5729
+  2  4.6505e-02  4.3255e-03  3.79984e-03  2.11633e-03     0.5570
+  3  5.5155e-02  6.0842e-03  5.27361e-03  2.86655e-03     0.5436
+  4  6.5414e-02  8.5579e-03  7.31878e-03  3.89394e-03     0.5320
+  5  7.7581e-02  1.2038e-02  1.01162e-02  5.30787e-03     0.5247
+  6  9.2011e-02  1.6932e-02  1.39474e-02  7.25836e-03     0.5204
+  7  1.0912e-01  2.3816e-02  1.91830e-02  9.98491e-03     0.5205
+  8  1.2942e-01  3.3500e-02  2.62568e-02  1.38006e-02     0.5256
+  9  1.5349e-01  4.7121e-02  3.58583e-02  1.91536e-02     0.5341
+ 10  1.8204e-01  6.6280e-02  4.86677e-02  2.66213e-02     0.5470
+ 11  2.1590e-01  9.3229e-02  6.55153e-02  3.67515e-02     0.5610
+ 12  2.5606e-01  1.3114e-01  8.72491e-02  5.07014e-02     0.5811
+ 13  3.0369e-01  1.8445e-01  1.15346e-01  6.98788e-02     0.6058
+ 14  3.6018e-01  2.5945e-01  1.50367e-01  9.62760e-02     0.6403
+ 15  4.2717e-01  3.6495e-01  1.94292e-01  1.31876e-01     0.6788
+ 16  5.0662e-01  5.1333e-01  2.47904e-01  1.79593e-01     0.7244
+ 17  6.0085e-01  7.2205e-01  3.12058e-01  2.42089e-01     0.7758
+ 18  7.1261e-01  1.0156e+00  3.86964e-01  3.21072e-01     0.8297
+ 19  8.4516e-01  1.4286e+00  4.71370e-01  4.13908e-01     0.8781
+
+summary: {'testbed': 'D2', 'prior': 'S2', 'n_eval': 512, 'Nr': 8, 'Nt': 4, 'worst_excess': -0.12190518636709069, 'note': "GB' is REPORT-ONLY (04_SPEC §6); arm selection was fixed by the D1 gates"}

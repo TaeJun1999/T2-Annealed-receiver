@@ -1,0 +1,60 @@
+# conf/results/diag/ep-site-integration_summary.txt
+# DIAGNOSTIC ONLY -- nothing retrained, no hyperparameter touched, no gate threshold changed,
+# no pre-registered file written.  Checkpoint fixed: ckpt/d2sx_N10000_a1.pt (b* = kron, pilots = dft).
+# date 2026-09-21 KST | D2 cell C2 (8x4, T=16, Tp=4), prior S2, 16 outer iterations, beta=0.7, n=128 paired trials.
+# code: conf/code/diag_ep_site.py (factorial), conf/code/diag_ep_probe.py (site spectrum along the trajectory).
+#
+# HARNESS VALIDATION (bit-exact, 40 paired trials vs conf/raw_supp/D2_C2_S2_Nr8_T16_Tp4_dft_snr0_skip0_n40.npz):
+#   dscore|scorew == M-ours-dscore : blk_err identical, max|dNMSE| = 0.000e+00
+#   gmmB|epsite   == M-ours-bstar  : blk_err identical, max|dNMSE| = 0.000e+00
+#
+# FACTORIAL  {Module-H denoiser} x {EP-site wiring}.  Everything else identical.
+#   epsite = mode 'colored' + GMMPriorB.ep_site (anisotropic-cavity mixture EP)   [the M-ours-bstar path]
+#   scorew = mode 'scalar', scal 'belief', hsite 'matrix', RouteAClip(clip='eta') [the M-ours-dscore path]
+#   belsc  = scorew but hsite 'scalar'   -> D-13 belief scalarisation, NO D-14 matrix site
+#   sitesc = mode 'scalar', scal 'site', hsite 'scalar'  -> v0 SC-VAMP scalar Onsager path
+#
+#                       BLER@16                       NMSE_H median@16              NMSE_H mean@16 / frac(NMSE>1)
+# arm                 -3dB    0dB    6dB           -3dB     0dB     6dB          0 dB
+gmmB|epsite          0.320  0.117  0.016         0.1081  0.0536  0.0156           0.0644 / 0.000
+gmmB|scorew          0.297  0.109  0.023         0.1062  0.0532  0.0156           0.0607 / 0.000
+gmmB|belsc           0.312  0.109  0.023         0.1108  0.0529  0.0156           0.0640 / 0.000
+gmmB|sitesc          0.328  0.102  0.031         0.1140  0.0532  0.0158           0.0623 / 0.000
+dscore|scorew        0.852  0.914  0.773         0.2773  1.3474  1.2851       16673.0471 / 0.539
+dscore|belsc         0.203  0.055  0.008         0.0605  0.0280  0.0078           0.0338 / 0.000
+dscore|sitesc        0.203  0.055  0.000         0.0622  0.0288  0.0079           0.0354 / 0.000
+gauss|sitesc         0.344  0.117  0.031         0.1469  0.0678  0.0182           0.0840 / 0.000
+
+# clip statistics of the EP site (fraction of site calls whose eigenvalue floor lam_min=1e-6 fired,
+#  and the relative belief-mean shift |mu_clipped - mu_target|^2/|mu_target|^2 that clip='eta' then causes):
+# arm                            clip% -3/0/6 dB                    mean shift -3/0/6 dB
+# gmmB|epsite             75.8    68.3    51.1      5.241e-03   3.678e-03   1.083e-03
+# gmmB|scorew             82.6    73.7    51.5      5.326e-03   3.342e-03   1.212e-03
+# dscore|scorew           98.9   100.0   100.0      6.957e+03   2.879e+03   8.700e+02
+
+# MECHANISM (conf/results/diag/ep-site-integration_jacobian_psd_D2.npz, 32 held-out q per nu):
+#   A valid D-14 site needs the Wirtinger Jacobian J = Cov[h|q]/nu to be PSD.
+#   denoiser   nu        med min eig J   worst min eig J   med max eig J   mean #eig<0 of 32   frac q with J NOT PSD
+#   dscore     2.500e-01   4.9870e-04     -9.3570e-02        1.2949           1.69                 0.500
+#   gmmB       2.500e-01   3.4345e-02      3.0089e-04        1.5337           0.00                 0.000
+#   dscore     8.000e-02  -3.3735e-02     -1.5863e-01        1.1903           3.62                 0.906
+#   gmmB       8.000e-02   1.8442e-02      5.4821e-04        1.0314           0.00                 0.000
+#   dscore     3.000e-02  -7.4679e-02     -1.5365e-01        1.0775           6.59                 1.000
+#   gmmB       3.000e-02   4.4694e-02      1.1174e-03        1.0035           0.00                 0.000
+#   ScorePrior.query_stats over those 96 calls: herm_res = 0.1952, frac_out_of_grid = 0.0
+#     (herm_res = max relative |nu J - (nu J)^H|/|nu J| BEFORE the forced symmetrisation -> the learned
+#      score field is NOT conservative; frac_out_of_grid = 0 rules out sigma-grid extrapolation here.)
+#
+# SITE SPECTRUM ALONG THE ACTUAL RECEIVER TRAJECTORY (diag_ep_probe.py, 0 dB, 8 trials, medians):
+#   dscore|scorew  iter 2: nu_q 7.7e-02  alpha=trJ/N 0.507  min eig J -6.4e-03  min eig Lambda -2.28e+03  #eig(Lam)<0 = 7.0/32
+#   gmmB|scorew    iter 2: nu_q 8.6e-02  alpha=trJ/N 0.691  min eig J +4.2e-02  min eig Lambda -4.37e-01  #eig(Lam)<0 = 0.5/32
+#
+# DIVERGENCE GUARD ON THE MODULE-H PATH (question (d)): THERE IS NONE.
+#   t2_route_a.RouteA.run has no NMSE divergence test, no 'diverged' flag and no state freeze.  Compare
+#   conf/code/bigamp.py: DIVERGE_NMSE = 10.0 + stop_hits + frozen-state restore; conf/code/scvamp.py sets a
+#   'diverged' flag on non-finite NMSE.  The only guards the score path touches are the alphaH clip to
+#   [1e-6, 1-1e-6], the lam_min = 1e-6 eigenvalue floor (which fires on 100% of its site calls) and p_min /
+#   tauD_min on the symbol side.  The nu_max = 1e4 guard `Cq = inv(G + I/nu_max)` is inside
+#   `if use_scalar and (scal == 'site' or nu_sw is not None)` and is therefore NEVER executed for the score
+#   arm (scal='belief', nu_sw=None).  runner.run_task records '<arm>|diverged' only when the arm supplies it,
+#   so every RouteA arm carries NaN there: a diverging Module-H site is invisible to the analysis.

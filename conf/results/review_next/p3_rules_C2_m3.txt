@@ -1,0 +1,99 @@
+# date        : 2026-09-23 23:58:43 KST
+# git commit  : 39e13126
+# versions    : python 3.12.14  numpy 2.5.2  scipy 1.18.1  torch 2.14.0+cu130 (cuda_available=True)
+# device      : CPU (192 cores) | dtype: complex128 / float64 | deterministic: yes (fixed seeds, no GPU in the receiver)
+# testbed     : D2
+# seed rule   : default_rng([20260926, TBID[testbed], PID[prior], Nr, T, Tp, int(snr)+100])  (trials of a point = ONE stream)
+# code        : rate-1/2 conv (133,171)_8 nu=6 terminated, QPSK, outer iterations = 16 for EVERY arm
+# Demo/ hashes: t2_route_a.py=95a5408901ec125c  t2_trellis.py=31cd0ee9c68e972b  t2_gmm.py=d064e58c7510c769
+# content     : review_next P3 judgement (NEXT_EXPERIMENTS_P3 v2, frozen d7e404ff) -- loop rules applied offline
+# point       : C2 -3 dB  trials 3200..4479  n = 1280  -> JUDGING point
+# runs        : 32-iteration conf/raw_review_next_P3 (r_t), 16-iteration reference conf/raw_review_next_P3ref; acceptance PASSED (chunk plan, run params, checkpoint, b* kron K=1024, N_train 160000, variant loop constants, r_t, iterations 1..16 bit-identical to the reference)
+# checkpoint  : /home/HTJ/t2/conf/ckpt/d2sx_N160000_a1.pt (last-EMA, BEST_WEIGHTS_UNAVAILABLE)
+# house test  : exact two-sided sign test on discordant pairs, p < 0.05; n_d < 6 -> UNDECIDED; a:b = only-X : only-Y failures
+
+R5-genie failures @16 (reference run): 53/1280
+
+## failures per rule (blocks; divergence = guardH rule on nmse[:, :t], counted, never removed)
+  prior  run     R16   R32  R-adapt  mean t  max t  raised  div16  div32  divAd
+  V1     base    173   154      154   17.80     32       0      0      0      0
+  V1     b05     175   154      154   17.84     32       0      0      0      0
+  V1     fb05    183   169      169   17.95     32       0      0      0      0
+  V1     S-res           R32-of-chosen fail   144   div     0
+  V1     S-res|literal   R32-of-chosen fail   144   div     0
+  V1     S-conf          R32-of-chosen fail   139   div     0 (report only)
+  V1     S-conf|literal  R32-of-chosen fail   141   div     0 (report only)
+  V1     oracle          R32-of-chosen fail   135   div     0 (true bits, not an arm; div = all three runs diverged)
+  V1     readings: blocks where S-res PRIMARY != LITERAL choice 0, S-conf 2; b05 == fb05 < base on r_32 0 blocks, of which b05/fb05 differ at 32 on 0 (only these depend on the b05-before-fb05 order)
+  bstar  base    307   290      290   18.75     32       0      0      0      0
+  bstar  b05     319   299      299   18.76     32       0      0      0      0
+  bstar  fb05    326   307      307   19.01     32       0      0      0      0
+  bstar  S-res           R32-of-chosen fail   273   div     0
+  bstar  S-res|literal   R32-of-chosen fail   273   div     0
+  bstar  S-conf          R32-of-chosen fail   265   div     0 (report only)
+  bstar  S-conf|literal  R32-of-chosen fail   267   div     0 (report only)
+  bstar  oracle          R32-of-chosen fail   262   div     0 (true bits, not an arm; div = all three runs diverged)
+  bstar  readings: blocks where S-res PRIMARY != LITERAL choice 0, S-conf 2; b05 == fb05 < base on r_32 0 blocks, of which b05/fb05 differ at 32 on 0 (only these depend on the b05-before-fb05 order)
+
+## pre-registered tests (per prior; X vs Y, 'fail X vs Y', a = only X fails)
+H6a [V1]
+  R32 vs R16               fail  154 vs  173   a:b = 0:19  net -19  n_d 19  p = 3.81e-06  MDD@n_d 11  -> 지지
+H6a [bstar]
+  R32 vs R16               fail  290 vs  307   a:b = 1:18  net -17  n_d 19  p = 7.63e-05  MDD@n_d 11  -> 지지
+H6b [V1]
+  R-adapt vs R16           fail  154 vs  173   a:b = 0:19  net -19  n_d 19  p = 3.81e-06  MDD@n_d 11  -> 지지
+H6b [bstar]
+  R-adapt vs R16           fail  290 vs  307   a:b = 1:18  net -17  n_d 19  p = 7.63e-05  MDD@n_d 11  -> 지지
+H7-b05 [V1]
+  b05 R16 vs base R16      fail  175 vs  173   a:b = 13:11  net +2  n_d 24  p = 0.839  MDD@n_d 12  -> 판정 불가
+H7-b05 [bstar]
+  b05 R16 vs base R16      fail  319 vs  307   a:b = 20:8  net +12  n_d 28  p = 0.0357  MDD@n_d 12  -> 반대 방향 (p < 0.05, 실패 많음) -> 지지 아님
+H7-fb05 [V1]
+  fb05 R16 vs base R16     fail  183 vs  173   a:b = 26:16  net +10  n_d 42  p = 0.164  MDD@n_d 14  -> 판정 불가
+H7-fb05 [bstar]
+  fb05 R16 vs base R16     fail  326 vs  307   a:b = 37:18  net +19  n_d 55  p = 0.0145  MDD@n_d 17  -> 반대 방향 (p < 0.05, 실패 많음) -> 지지 아님
+H8 [V1]  => H8 지지 (V1)
+  S-res vs base R32        fail  144 vs  154   a:b = 2:12  net -10  n_d 14  p = 0.0129  MDD@n_d 10  -> 지지
+  S-res vs b05 R32         fail  144 vs  154   a:b = 4:14  net -10  n_d 18  p = 0.0309  MDD@n_d 10  -> 지지
+  S-res vs fb05 R32        fail  144 vs  169   a:b = 5:30  net -25  n_d 35  p = 2.24e-05  MDD@n_d 13  -> 지지
+H8 [bstar]  => H8 지지 (bstar)
+  S-res vs base R32        fail  273 vs  290   a:b = 3:20  net -17  n_d 23  p = 0.000488  MDD@n_d 11  -> 지지
+  S-res vs b05 R32         fail  273 vs  299   a:b = 3:29  net -26  n_d 32  p = 2.56e-06  MDD@n_d 14  -> 지지
+  S-res vs fb05 R32        fail  273 vs  307   a:b = 7:41  net -34  n_d 48  p = 6.24e-07  MDD@n_d 16  -> 지지
+H8|literal [V1]  => H8|literal 지지 (V1)  [reading check: same verdict as PRIMARY]
+  S-res(lit) vs base R32   fail  144 vs  154   a:b = 2:12  net -10  n_d 14  p = 0.0129  MDD@n_d 10  -> 지지
+  S-res(lit) vs b05 R32    fail  144 vs  154   a:b = 4:14  net -10  n_d 18  p = 0.0309  MDD@n_d 10  -> 지지
+  S-res(lit) vs fb05 R32   fail  144 vs  169   a:b = 5:30  net -25  n_d 35  p = 2.24e-05  MDD@n_d 13  -> 지지
+H8|literal [bstar]  => H8|literal 지지 (bstar)  [reading check: same verdict as PRIMARY]
+  S-res(lit) vs base R32   fail  273 vs  290   a:b = 3:20  net -17  n_d 23  p = 0.000488  MDD@n_d 11  -> 지지
+  S-res(lit) vs b05 R32    fail  273 vs  299   a:b = 3:29  net -26  n_d 32  p = 2.56e-06  MDD@n_d 14  -> 지지
+  S-res(lit) vs fb05 R32   fail  273 vs  307   a:b = 7:41  net -34  n_d 48  p = 6.24e-07  MDD@n_d 16  -> 지지
+
+## §2.4 prior-gain separation: d = (fV1^rule - fV1^R16) - (fb*^rule - fb*^R16), sign test on sign(d)
+  R32            #d>0 17  #d<0 19  n_d 36  p = 0.868  -> 판정 불가
+  R-adapt        #d>0 17  #d<0 19  n_d 36  p = 0.868  -> 판정 불가
+  S-res          #d>0 36  #d<0 30  n_d 66  p = 0.539  -> 판정 불가
+  S-res|literal  #d>0 36  #d<0 30  n_d 66  p = 0.539  -> 판정 불가  [reading check: same statement as PRIMARY]
+  report beside it (does not replace it): V1 vs b* gap per rule
+  V1 vs b* (R16)           fail  173 vs  307   a:b = 24:158  net -134  n_d 182  p = 2.21e-25  MDD@n_d 28  -> 지지
+  V1 vs b* (R32)           fail  154 vs  290   a:b = 18:154  net -136  n_d 172  p = 4.07e-28  MDD@n_d 28  -> 지지
+  V1 vs b* (R-adapt)       fail  154 vs  290   a:b = 18:154  net -136  n_d 172  p = 4.07e-28  MDD@n_d 28  -> 지지
+  V1 vs b* (S-res)         fail  144 vs  273   a:b = 14:143  net -129  n_d 157  p = 4.23e-28  MDD@n_d 27  -> 지지
+
+## §3 adoption (judging point)
+  net(R-adapt - R32): V1 +0  bstar +0  (<= +3 required)
+  -> test-set confirmation candidate: R-adapt
+
+## selection frequency (each row split by that rule's own outcome at 32: the R32 of the run it chose)
+  V1     S-res           base: 579 (fail 42 / ok 537)  b05: 562 (fail 43 / ok 519)  fb05: 139 (fail 59 / ok 80)
+  V1     S-res|literal   base: 579 (fail 42 / ok 537)  b05: 562 (fail 43 / ok 519)  fb05: 139 (fail 59 / ok 80)
+  V1     S-conf          base: 1161 (fail 64 / ok 1097)  b05: 51 (fail 37 / ok 14)  fb05: 68 (fail 38 / ok 30)
+  V1     S-conf|literal  base: 1163 (fail 66 / ok 1097)  b05: 49 (fail 37 / ok 12)  fb05: 68 (fail 38 / ok 30)
+  bstar  S-res           base: 1006 (fail 98 / ok 908)  b05: 148 (fail 61 / ok 87)  fb05: 126 (fail 114 / ok 12)
+  bstar  S-res|literal   base: 1006 (fail 98 / ok 908)  b05: 148 (fail 61 / ok 87)  fb05: 126 (fail 114 / ok 12)
+  bstar  S-conf          base: 1034 (fail 102 / ok 932)  b05: 108 (fail 82 / ok 26)  fb05: 138 (fail 81 / ok 57)
+  bstar  S-conf|literal  base: 1036 (fail 104 / ok 932)  b05: 106 (fail 82 / ok 24)  fb05: 138 (fail 81 / ok 57)
+
+## cost (report only): iterations and real-path block time, scaled from complexity_moduleH_ep.txt (16-iteration block at C2 -3 dB: V1 1006 ms, b* 754 ms) in proportion to the iteration count
+  V1     R16 16 it = 1006 ms | R32 32 it = 2012 ms | R-adapt mean 17.80 it (max 32) = 1119 ms | S-res / S-conf 3 x 32 it = 6036 ms
+  bstar  R16 16 it = 754 ms | R32 32 it = 1508 ms | R-adapt mean 18.75 it (max 32) = 884 ms | S-res / S-conf 3 x 32 it = 4524 ms

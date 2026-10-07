@@ -1,0 +1,19 @@
+== raw_review_next_K2test C1 -3 dB, registered trials 0..2559 (chunk 10) ==
+   acceptance: PASS
+   arms ['M-ours-dscore-C-V1 V1-edge V1-clamp M-ours-bstar M-ours-bstar-scalar gmmB-scorew-eta R5-genie']  meta(edge_kw, bg_kw, ckpt_sha, bstar, kron_K) [("[('M', 16), ('burn', 100), ('eps_frac', 0.05), ('keep', 100), ('n_jac', 16)]", "[('burn', 25), ('chains', 4), ('keep', 75), ('n_ph', 48), ('n_th', 96)]", '4443921ce8d5c4a1', 'kron', '1024.0')]
+   @16, n=2560
+   M-ours-bstar            1906 (0.7445)  gap position +0.000  F3 guard 3  exceptions 0  above-grid it1 0.00 it2-16 0.000
+   M-ours-bstar-scalar     2071 (0.8090)  gap position -0.091  F3 guard 0  exceptions 0  above-grid it1 1.00 it2-16 0.000
+   M-ours-dscore-C-V1      2515 (0.9824)  gap position -0.336  F3 guard 2560  exceptions 314  above-grid it1 0.88 it2-16 0.793
+   R5-genie                  95 (0.0371)  gap position +1.000  F3 guard 0  exceptions 0  above-grid it1 0.00 it2-16 0.000
+   V1-clamp                1783 (0.6965)  gap position +0.068  out-of-grid queries/block 1.00  F3 guard 0  exceptions 0  above-grid it1 1.00 it2-16 0.000
+   V1-edge                 1770 (0.6914)  gap position +0.075  out-of-grid queries/block 1.00  F3 guard 0  exceptions 0  above-grid it1 1.00 it2-16 0.000
+   gmmB-scorew-eta         2027 (0.7918)  gap position -0.067  F3 guard 0  exceptions 0  above-grid it1 1.00 it2-16 0.000
+             M-ours-bstar -> V1-edge                 400:264  p=1.5e-07
+       M-ours-dscore-C-V1 -> V1-edge                 758:13   p=8.1e-205
+          gmmB-scorew-eta -> V1-edge                 379:122  p=1.1e-31
+      M-ours-bstar-scalar -> V1-edge                 406:105  p=9.1e-43
+             M-ours-bstar -> V1-clamp                402:279  p=2.8e-06
+       M-ours-dscore-C-V1 -> V1-clamp                746:14   p=7.3e-200
+                 V1-clamp -> V1-edge                  75:62   p=0.31
+             M-ours-bstar -> M-ours-dscore-C-V1       20:629  p=4.8e-158

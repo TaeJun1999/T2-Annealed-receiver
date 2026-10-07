@@ -1,0 +1,5 @@
+# run_nscale git 68d4d353 2026-10-06 15:04 CDT: frontier_ci.py --paired raw_NR16B64e4:C6:-3,0,3 raw_NR16B16e4:C6:-3,0,3
+# PAIRED recovery R = (b* - V1)/(b* - genie) @16: same cell / trials at two budgets, ONE index draw per (cell, SNR) applied to both raws (three arms together); B=2000, seed=20260926
+  R1: raw_NR16B64e4 C6 SNR ['-3', '+0', '+3']  n=2560  b* 253 V1 87 genie 40  R = 0.779  [90% 0.721, 0.836]
+  R2: raw_NR16B16e4 C6 SNR ['-3', '+0', '+3']  n=2560  b* 277 V1 82 genie 40  R = 0.823  [90% 0.772, 0.874]
+  dR = R1 - R2 = -0.043  [90% paired -0.098, +0.010]  [95% paired -0.111, +0.020]  bootstrap two-sided p = 0.1830  undefined replicates 0

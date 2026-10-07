@@ -1,0 +1,563 @@
+# date        : 2026-10-06 23:25:32 KST
+# git commit  : 68d4d353
+# versions    : python 3.12.14  numpy 2.5.2  scipy 1.18.1  torch 2.14.0+cu130 (cuda_available=False)
+# device      : CPU (192 cores) | dtype: complex128 / float64 | deterministic: yes (fixed seeds, no GPU in the receiver)
+# testbed     : D2
+# seed rule   : default_rng([20260926, TBID[testbed], PID[prior], Nr, T, Tp, int(snr)+100])  (trials of a point = ONE stream)
+# code        : rate-1/2 conv (133,171)_8 nu=6 terminated, QPSK, outer iterations = 16 for EVERY arm
+# Demo/ hashes: t2_route_a.py=95a5408901ec125c  t2_trellis.py=31cd0ee9c68e972b  t2_gmm.py=d064e58c7510c769
+# arm list with per-arm notes (06_SPEC §5):
+#   R3-bigamp     : BiG-AMP prior: i.i.d. CN(0,1/Nr) -- correlated prior not supported by Table III (structural limitation)
+#   R4-llr        : same, Module B mode='llr' (the paper's 'LLR Turbo' ablation)
+#   R4-scvamp     : channel estimation = classical APP-LMMSE (no LOO); only the Onsager extrinsic interface follows arXiv:2604.19061
+#   R0-pilot      : 1-PASS arm -- reported at iteration index 0 ('R0-pilot (@1)'); 'pilot_C (@16)' is the
+#                   SAME receiver's 16-iteration trajectory, printed for context only.
+#   M-ours-*      : differ from R2-ours-G in Module H and nothing else (test M2); Module H, K and the clip
+#                   rule are in the run header of conf/results/ and in the raw meta of each point.
+# fit/training cost (GMM EM wall-clock) is a column of table A and is never left blank.
+# aggregates KEEP failed and diverged blocks; where a subset mean is printed, the full-set mean is beside it.
+# Stage C arms present in this run (10_SPEC §3b / §3c) -- the pre-registered Stage A/B verdicts are
+# UNCHANGED by this file and M-ours-dscore stays BLOCKED in the pre-registered table:
+#   M-ours-dscore-C-V0  : Stage C V0 (PRIMARY) -- learned prior at N', D-14 MATRIX site, pre-registered score wiring, unchanged
+#   M-ours-dscore-C-V1  : Stage C V1 -- V0 + (F1) symmetric-PSD projection of the D-14 site (ScorePrior(psd_project=True))
+#   M-ours-dscore-C-V4  : Stage C V4 -- D-14 matrix site REPLACED by the D-13 belief scalarisation (hsite=scalar, scal=belief); POST-HOC registered, observed in the H4 diagnostic BEFORE registration (10_SPEC §3c)
+#   M-ours-dscore-C-V4b : Stage C V4b -- as V4 but scal=site instead of scal=belief (10_SPEC §3c, "동일하되 scal=site. 부수 보고용"); registered with V4, wired only on 2026-09-21 after an audit found it had been dropped
+#   M-ours-bstar-scalar : Stage C CONTROL (10_SPEC §3c, MANDATORY) -- the b* GMM through V4's EXACT wiring: if scalarisation also helps the GMM, the gain belongs to the SITE, not to the learned prior
+# 
+# training budget (N_train, channel samples) of EVERY arm -- 10_SPEC A3.  The GMM arms and the learned arms are only equal-budget when their N_train below are EQUAL; read the numbers, not the arm names.  The GMM re-fit at N'=1.6e5 may not have finished when this table was written.
+# per-arm training budget (arms absent from the raw files are simply not listed):
+#   R0-pilot            : N_train=640000 -- the ONE channel set (GMM EM fit / its sample covariance Chat)
+#   R1-turbo            : N_train=640000 -- the ONE channel set (GMM EM fit / its sample covariance Chat)
+#   R2-ours-G           : N_train=640000 -- the ONE channel set (GMM EM fit / its sample covariance Chat)
+#   R3-bigamp           : N_train=0 -- i.i.d. CN(0,1/Nr) prior, fits nothing
+#   R4-llr              : N_train=640000 -- the ONE channel set (GMM EM fit / its sample covariance Chat)
+#   R4-scvamp           : N_train=640000 -- the ONE channel set (GMM EM fit / its sample covariance Chat)
+#   M-ours-gmm32        : N_train=640000 -- the ONE channel set (GMM EM fit / its sample covariance Chat)
+#   M-ours-bstar        : N_train=640000 -- the ONE channel set (GMM EM fit / its sample covariance Chat)
+#   M-ours-dscore-C-V0  : N_train=640000  rung=D2SX640000  ckpt=/home/HTJ/t2/conf/ckpt/d2sx_N640000_a1_best.pt  gate: NO GATE RECORD mentions d2sx_N640000_a1_best.pt -- UNVERIFIED here.  (GA-GD are measurable on D1 only, 10_SPEC §5: a D2 re-train is qualified by its D1 sibling's gate row, which this string cannot prove.)
+#   M-ours-dscore-C-V1  : N_train=640000  rung=D2SX640000  ckpt=/home/HTJ/t2/conf/ckpt/d2sx_N640000_a1_best.pt  gate: NO GATE RECORD mentions d2sx_N640000_a1_best.pt -- UNVERIFIED here.  (GA-GD are measurable on D1 only, 10_SPEC §5: a D2 re-train is qualified by its D1 sibling's gate row, which this string cannot prove.)
+#   M-ours-dscore-C-V4  : N_train=640000  rung=D2SX640000  ckpt=/home/HTJ/t2/conf/ckpt/d2sx_N640000_a1_best.pt  gate: NO GATE RECORD mentions d2sx_N640000_a1_best.pt -- UNVERIFIED here.  (GA-GD are measurable on D1 only, 10_SPEC §5: a D2 re-train is qualified by its D1 sibling's gate row, which this string cannot prove.)
+#   M-ours-dscore-C-V4b : N_train=640000 -- unclassified arm, quoting the point's channel-set size
+#   M-ours-bstar-scalar : N_train=640000 -- the ONE channel set (GMM EM fit / its sample covariance Chat)
+#   R5-genie            : N_train=n/a -- genie: the true H is given
+#   dscore_status       : ABSENT -- no GATE-PASSING checkpoint (04_SPEC §5 gates GA-GD): no gate-passing checkpoint for D2; recorded PASS rows: none (searched conf/results/gate_D2.txt and LADDER.md)
+#   stagec_ckpt         : /home/HTJ/t2/conf/ckpt/d2sx_N640000_a1_best.pt
+#   stagec_gate         : NO GATE RECORD mentions d2sx_N640000_a1_best.pt -- UNVERIFIED here.  (GA-GD are measurable on D1 only, 10_SPEC §5: a D2 re-train is qualified by its D1 sibling's gate row, which this string cannot prove.)
+#   stagec_status       : built from explicit ckpt /home/HTJ/t2/conf/ckpt/d2sx_N640000_a1_best.pt -- caller override, NOT verified against the gate record here (recorded PASS rows: none) | V1 (psd_project=True): built from explicit ckpt /home/HTJ/t2/conf/ckpt/d2sx_N640000_a1_best.pt -- caller override, NOT verified against the gate record here (recorded PASS rows: none)
+#   stagec_ckpt_id      : sha256[:16]=f6e4a6b000d35f5a epoch=1217 best_epoch=1217 role=best 8x4
+# cell C2: 8x4 T=16 Tp=4 prior S2  SNR grid ['-3', '+0', '+3', '+6', '+9', '+12', '+15'] dB  n=2560 per point  outer iterations=16  b*=kron (kron K=4096)
+#   run params as recorded in the raw file: beta=0.7  dtype=complex128/float64  git=68d4d353  iters=16  n=40  seed=20260926  skip=0  snr=-3.0  t_in=5
+# ====================================================================================================
+# CLAIM TESTBED -- sparse specular; conditional Gaussianity broken (see T2d). Reference = known-channel receiver (R5-genie: same EP detector + BCJR, true H); not a bound.
+# ====================================================================================================
+
+============================== TABLE A -- per-cell arm comparison (08_SPEC §1) ==============================
+cell entry = BLER (95% Wilson CI) / BER / NMSE_H  at the arm's reporting iteration
+reporting iteration: @16 for every arm except R0-pilot, which is the 1-PASS arm and is read @1;
+'pilot_C (@16)' is the SAME receiver's 16-iteration trajectory, printed for context only.
+
+--- cell C2 (8x4, T=16, Tp=4, K=42)  prior S2  testbed D2   n per SNR: [2560, 2560, 2560, 2560, 2560, 2560, 2560]   b* = kron
+  arms absent from the raw files (see 01_RULES §6 -- BLOCKED / FAILED-VERIFICATION): ['M-ours-dscore']
+  arm                              SNR -3 dB                            SNR +0 dB                            SNR +3 dB                            SNR +6 dB                            SNR +9 dB                            SNR +12 dB                           SNR +15 dB             
+  R0-pilot (@1)       0.750(0.732,0.766) 2.3e-01 3.18e-01  0.387(0.368,0.406) 1.1e-01 1.92e-01  0.180(0.166,0.195) 5.0e-02 1.09e-01  0.100(0.089,0.113) 2.7e-02 5.83e-02  0.064(0.056,0.075) 1.7e-02 3.00e-02  0.047(0.040,0.056) 1.3e-02 1.53e-02  0.036(0.030,0.044) 9.1e-03 7.78e-03 
+  pilot_C (@16)       0.478(0.459,0.497) 1.6e-01 3.18e-01  0.131(0.118,0.144) 4.6e-02 1.92e-01  0.042(0.035,0.051) 1.7e-02 1.09e-01  0.025(0.020,0.032) 9.4e-03 5.83e-02  0.013(0.009,0.018) 4.9e-03 3.00e-02  0.011(0.008,0.016) 4.4e-03 1.53e-02  0.005(0.003,0.009) 2.0e-03 7.78e-03 
+  R1-turbo            0.545(0.526,0.564) 1.9e-01 2.03e-01  0.212(0.197,0.228) 7.2e-02 7.14e-02  0.081(0.071,0.092) 2.8e-02 3.55e-02  0.039(0.032,0.047) 1.4e-02 1.80e-02  0.024(0.019,0.030) 8.9e-03 9.01e-03  0.018(0.013,0.023) 6.9e-03 4.51e-03  0.008(0.005,0.012) 3.4e-03 2.27e-03 
+  R2-ours-G           0.329(0.311,0.347) 1.3e-01 1.37e-01  0.102(0.091,0.115) 3.9e-02 6.81e-02  0.036(0.029,0.043) 1.3e-02 3.49e-02  0.024(0.019,0.030) 1.0e-02 1.80e-02  0.011(0.008,0.016) 4.5e-03 8.96e-03  0.012(0.008,0.017) 4.9e-03 4.50e-03  0.006(0.004,0.010) 2.6e-03 2.27e-03 
+  R3-bigamp           0.543(0.524,0.563) 2.0e-01 3.58e-01  0.211(0.195,0.227) 8.0e-02 1.66e-01  0.080(0.070,0.091) 3.1e-02 7.40e-02  0.053(0.045,0.062) 2.2e-02 3.13e-02  0.051(0.043,0.060) 2.1e-02 1.29e-02  0.057(0.049,0.067) 2.5e-02 5.67e-03  0.055(0.047,0.065) 2.5e-02 2.62e-03 
+  R4-llr              0.866(0.852,0.879) 5.0e-01 3.71e-01  0.834(0.819,0.848) 6.5e-01 1.41e+00  0.601(0.582,0.620) 5.2e-01 1.20e+00  0.400(0.381,0.419) 3.5e-01 2.23e-02  0.277(0.260,0.295) 2.4e-01 1.01e-02  0.196(0.181,0.212) 1.7e-01 4.85e-03  0.168(0.154,0.183) 1.5e-01 2.42e-03 
+  R4-scvamp           0.608(0.589,0.627) 2.2e-01 2.32e-01  0.303(0.286,0.321) 1.0e-01 7.50e-02  0.148(0.135,0.163) 5.1e-02 3.65e-02  0.095(0.084,0.107) 3.3e-02 1.85e-02  0.069(0.060,0.080) 2.4e-02 9.16e-03  0.049(0.041,0.058) 1.8e-02 4.56e-03  0.036(0.029,0.044) 1.2e-02 2.29e-03 
+  M-ours-gmm32        0.258(0.241,0.275) 9.7e-02 1.10e-01  0.083(0.073,0.094) 3.0e-02 5.61e-02  0.028(0.022,0.035) 1.0e-02 2.91e-02  0.016(0.012,0.022) 6.3e-03 1.54e-02  0.010(0.007,0.015) 4.3e-03 7.82e-03  0.010(0.007,0.014) 4.0e-03 4.05e-03  0.004(0.002,0.007) 1.6e-03 2.07e-03 
+  M-ours-bstar        0.231(0.215,0.248) 8.8e-02 9.42e-02  0.066(0.057,0.076) 2.5e-02 4.80e-02  0.018(0.013,0.023) 6.8e-03 2.58e-02  0.010(0.007,0.014) 3.9e-03 1.38e-02  0.007(0.005,0.012) 2.9e-03 7.13e-03  0.006(0.004,0.010) 2.3e-03 3.74e-03  0.002(0.001,0.005) 1.1e-03 1.94e-03 
+  M-ours-dscore-C-V0  0.788(0.772,0.803) 3.5e-01 2.30e-01  0.927(0.917,0.937) 4.3e-01 5.61e-01  0.972(0.965,0.978) 4.6e-01 3.51e+00  0.972(0.965,0.978) 4.6e-01 3.49e+00  0.923(0.912,0.932) 4.3e-01 1.68e+00  0.837(0.822,0.851) 3.8e-01 8.29e-01  0.503(0.484,0.522) 2.2e-01 2.33e-01 
+  M-ours-dscore-C-V1  0.145(0.131,0.159) 5.2e-02 5.54e-02  0.034(0.027,0.041) 1.2e-02 2.64e-02  0.009(0.006,0.014) 3.5e-03 1.29e-02  0.006(0.004,0.010) 2.0e-03 6.43e-03  0.001(0.000,0.003) 5.5e-04 3.07e-03  0.003(0.002,0.006) 1.4e-03 1.62e-03  0.001(0.000,0.003) 5.8e-04 8.75e-04 
+  M-ours-dscore-C-V4  0.150(0.137,0.164) 5.4e-02 5.19e-02  0.037(0.031,0.046) 1.3e-02 2.31e-02  0.011(0.008,0.016) 3.8e-03 1.11e-02  0.007(0.004,0.011) 2.1e-03 5.61e-03  0.002(0.001,0.004) 5.7e-04 2.80e-03  0.003(0.001,0.006) 8.5e-04 1.50e-03  0.001(0.000,0.003) 5.0e-04 8.34e-04 
+  M-ours-dscore-C-V4b 0.163(0.149,0.177) 5.9e-02 5.62e-02  0.038(0.031,0.046) 1.3e-02 2.47e-02  0.011(0.008,0.016) 3.8e-03 1.19e-02  0.007(0.005,0.012) 2.4e-03 5.96e-03  0.002(0.001,0.004) 6.3e-04 2.95e-03  0.003(0.001,0.006) 8.3e-04 1.58e-03  0.001(0.000,0.003) 3.3e-04 8.68e-04 
+  M-ours-bstar-scalar 0.239(0.223,0.256) 8.9e-02 9.42e-02  0.078(0.068,0.089) 2.8e-02 4.82e-02  0.023(0.018,0.030) 8.4e-03 2.54e-02  0.013(0.009,0.018) 4.1e-03 1.36e-02  0.008(0.005,0.013) 3.0e-03 6.98e-03  0.008(0.005,0.012) 2.6e-03 3.66e-03  0.003(0.002,0.006) 1.5e-03 1.89e-03 
+  R5-genie              0.034(0.028,0.042) 1.1e-02 nan       0.010(0.007,0.015) 3.8e-03 nan       0.005(0.003,0.008) 1.5e-03 nan       0.004(0.002,0.007) 1.3e-03 nan       0.001(0.000,0.003) 2.8e-04 nan       0.001(0.000,0.003) 1.7e-04 nan       0.001(0.000,0.003) 3.9e-04 nan    
+
+  per-point detail rows (exp_0921 convention M-1: BLER@1/@2/@8/@16, BER@16, NMSE median all / success-only, rescued/lost 2->16, tauL@1, failure-class %):
+   SNR -3 dB
+    R0-pilot             n=2560 BLER@1/@2/@8/@16 = 0.750 0.629 0.490 0.478 [0.459,0.497]  BER@16=1.64e-01  NMSE med@1/@16=0.3183/0.3183 ok=0.3021  resc/lost(2->16)=393/7  tauL@1=1.040  fail% stuck/cyc2/other=30.1/1.5/16.2
+    R1-turbo             n=2560 BLER@1/@2/@8/@16 = 0.750 0.604 0.548 0.545 [0.526,0.564]  BER@16=1.92e-01  NMSE med@1/@16=0.3183/0.2026 ok=0.1178  resc/lost(2->16)=151/0  tauL@1=1.040  fail% stuck/cyc2/other=53.0/0.0/1.4
+    R2-ours-G            n=2560 BLER@1/@2/@8/@16 = 0.750 0.549 0.364 0.329 [0.311,0.347]  BER@16=1.25e-01  NMSE med@1/@16=0.3183/0.1366 ok=0.1189  resc/lost(2->16)=565/1  tauL@1=1.040  fail% stuck/cyc2/other=8.4/6.2/18.3
+    R3-bigamp            n=2560 BLER@1/@2/@8/@16 = 0.801 0.665 0.557 0.543 [0.524,0.563]  BER@16=2.01e-01  NMSE med@1/@16=0.4004/0.3576 ok=0.2954  resc/lost(2->16)=317/6  tauL@1=1.705  fail% stuck/cyc2/other=41.9/3.4/9.1
+    R4-llr               n=2560 BLER@1/@2/@8/@16 = 0.760 0.660 0.867 0.866 [0.852,0.879]  BER@16=4.97e-01  NMSE med@1/@16=0.2328/0.3706 ok=0.1193  resc/lost(2->16)=42/570  tauL@1=0.703  fail% stuck/cyc2/other=40.8/43.8/2.0
+    R4-scvamp            n=2560 BLER@1/@2/@8/@16 = 0.760 0.647 0.608 0.608 [0.589,0.627]  BER@16=2.17e-01  NMSE med@1/@16=0.2328/0.2322 ok=0.1180  resc/lost(2->16)=99/0  tauL@1=0.703  fail% stuck/cyc2/other=58.7/0.5/1.6
+    M-ours-gmm32         n=2560 BLER@1/@2/@8/@16 = 0.727 0.486 0.287 0.258 [0.241,0.275]  BER@16=9.71e-02  NMSE med@1/@16=0.2605/0.1095 ok=0.0975  resc/lost(2->16)=584/0  tauL@1=1.180  fail% stuck/cyc2/other=7.1/4.4/14.3
+    M-ours-bstar         n=2560 BLER@1/@2/@8/@16 = 0.720 0.449 0.254 0.231 [0.215,0.248]  BER@16=8.76e-02  NMSE med@1/@16=0.2282/0.0942 ok=0.0841  resc/lost(2->16)=559/1  tauL@1=1.424  fail% stuck/cyc2/other=8.8/2.7/11.6
+    M-ours-dscore-C-V0   n=2560 BLER@1/@2/@8/@16 = 0.669 0.724 0.807 0.788 [0.772,0.803]  BER@16=3.53e-01  NMSE med@1/@16=0.2151/0.2304 ok=0.0784  resc/lost(2->16)=186/350  tauL@1=1.090  fail% stuck/cyc2/other=2.0/5.1/71.7
+    M-ours-dscore-C-V1   n=2560 BLER@1/@2/@8/@16 = 0.575 0.321 0.171 0.145 [0.131,0.159]  BER@16=5.24e-02  NMSE med@1/@16=0.1685/0.0554 ok=0.0498  resc/lost(2->16)=455/2  tauL@1=1.229  fail% stuck/cyc2/other=4.3/1.5/8.7
+    M-ours-dscore-C-V4   n=2560 BLER@1/@2/@8/@16 = 0.566 0.321 0.175 0.150 [0.137,0.164]  BER@16=5.36e-02  NMSE med@1/@16=0.1657/0.0519 ok=0.0464  resc/lost(2->16)=437/0  tauL@1=1.161  fail% stuck/cyc2/other=5.9/0.9/8.2
+    M-ours-dscore-C-V4b  n=2560 BLER@1/@2/@8/@16 = 0.566 0.333 0.183 0.163 [0.149,0.177]  BER@16=5.90e-02  NMSE med@1/@16=0.1657/0.0562 ok=0.0492  resc/lost(2->16)=436/0  tauL@1=1.161  fail% stuck/cyc2/other=5.6/1.2/9.5
+    M-ours-bstar-scalar  n=2560 BLER@1/@2/@8/@16 = 0.711 0.452 0.269 0.239 [0.223,0.256]  BER@16=8.95e-02  NMSE med@1/@16=0.2275/0.0942 ok=0.0841  resc/lost(2->16)=545/1  tauL@1=1.295  fail% stuck/cyc2/other=10.6/2.1/11.2
+    R5-genie             n=2560 BLER@1/@2/@8/@16 = 0.225 0.102 0.043 0.034 [0.028,0.042]  BER@16=1.14e-02  NMSE med@1/@16=nan/nan ok=nan  resc/lost(2->16)=175/0  tauL@1=0.771  fail% stuck/cyc2/other=1.4/0.2/1.8
+   SNR +0 dB
+    R0-pilot             n=2560 BLER@1/@2/@8/@16 = 0.387 0.242 0.149 0.131 [0.118,0.144]  BER@16=4.63e-02  NMSE med@1/@16=0.1923/0.1923 ok=0.1910  resc/lost(2->16)=285/0  tauL@1=0.623  fail% stuck/cyc2/other=3.0/1.2/8.8
+    R1-turbo             n=2560 BLER@1/@2/@8/@16 = 0.387 0.266 0.216 0.212 [0.197,0.228]  BER@16=7.23e-02  NMSE med@1/@16=0.1923/0.0714 ok=0.0657  resc/lost(2->16)=137/0  tauL@1=0.623  fail% stuck/cyc2/other=19.6/0.0/1.6
+    R2-ours-G            n=2560 BLER@1/@2/@8/@16 = 0.387 0.216 0.116 0.102 [0.091,0.115]  BER@16=3.91e-02  NMSE med@1/@16=0.1923/0.0681 ok=0.0659  resc/lost(2->16)=290/0  tauL@1=0.623  fail% stuck/cyc2/other=1.9/2.1/6.2
+    R3-bigamp            n=2560 BLER@1/@2/@8/@16 = 0.411 0.286 0.218 0.211 [0.195,0.227]  BER@16=8.04e-02  NMSE med@1/@16=0.2367/0.1655 ok=0.1570  resc/lost(2->16)=194/0  tauL@1=0.576  fail% stuck/cyc2/other=9.7/1.5/9.8
+    R4-llr               n=2560 BLER@1/@2/@8/@16 = 0.444 0.339 0.833 0.834 [0.819,0.848]  BER@16=6.47e-01  NMSE med@1/@16=0.0878/1.4140 ok=0.0657  resc/lost(2->16)=42/1307  tauL@1=0.409  fail% stuck/cyc2/other=11.8/67.6/4.0
+    R4-scvamp            n=2560 BLER@1/@2/@8/@16 = 0.444 0.339 0.306 0.303 [0.286,0.321]  BER@16=1.05e-01  NMSE med@1/@16=0.0878/0.0750 ok=0.0656  resc/lost(2->16)=93/0  tauL@1=0.409  fail% stuck/cyc2/other=27.9/1.0/1.4
+    M-ours-gmm32         n=2560 BLER@1/@2/@8/@16 = 0.366 0.191 0.095 0.083 [0.073,0.094]  BER@16=3.05e-02  NMSE med@1/@16=0.1541/0.0561 ok=0.0543  resc/lost(2->16)=276/0  tauL@1=0.726  fail% stuck/cyc2/other=2.1/0.9/5.3
+    M-ours-bstar         n=2560 BLER@1/@2/@8/@16 = 0.338 0.165 0.078 0.066 [0.057,0.076]  BER@16=2.47e-02  NMSE med@1/@16=0.1323/0.0480 ok=0.0466  resc/lost(2->16)=255/0  tauL@1=0.891  fail% stuck/cyc2/other=1.6/0.7/4.3
+    M-ours-dscore-C-V0   n=2560 BLER@1/@2/@8/@16 = 0.449 0.909 0.961 0.927 [0.917,0.937]  BER@16=4.27e-01  NMSE med@1/@16=0.1296/0.5609 ok=0.1386  resc/lost(2->16)=109/156  tauL@1=0.583  fail% stuck/cyc2/other=0.3/7.4/85.0
+    M-ours-dscore-C-V1   n=2560 BLER@1/@2/@8/@16 = 0.237 0.104 0.041 0.034 [0.027,0.041]  BER@16=1.25e-02  NMSE med@1/@16=0.0892/0.0264 ok=0.0257  resc/lost(2->16)=181/0  tauL@1=0.766  fail% stuck/cyc2/other=0.9/0.1/2.4
+    M-ours-dscore-C-V4   n=2560 BLER@1/@2/@8/@16 = 0.238 0.108 0.042 0.037 [0.031,0.046]  BER@16=1.27e-02  NMSE med@1/@16=0.0867/0.0231 ok=0.0225  resc/lost(2->16)=180/0  tauL@1=0.723  fail% stuck/cyc2/other=1.7/0.1/1.9
+    M-ours-dscore-C-V4b  n=2560 BLER@1/@2/@8/@16 = 0.238 0.109 0.045 0.038 [0.031,0.046]  BER@16=1.28e-02  NMSE med@1/@16=0.0867/0.0247 ok=0.0240  resc/lost(2->16)=181/0  tauL@1=0.723  fail% stuck/cyc2/other=1.6/0.2/2.1
+    M-ours-bstar-scalar  n=2560 BLER@1/@2/@8/@16 = 0.332 0.166 0.085 0.078 [0.068,0.089]  BER@16=2.81e-02  NMSE med@1/@16=0.1324/0.0482 ok=0.0466  resc/lost(2->16)=225/0  tauL@1=0.802  fail% stuck/cyc2/other=3.5/0.5/3.8
+    R5-genie             n=2560 BLER@1/@2/@8/@16 = 0.095 0.038 0.013 0.010 [0.007,0.015]  BER@16=3.84e-03  NMSE med@1/@16=nan/nan ok=nan  resc/lost(2->16)=72/0  tauL@1=0.527  fail% stuck/cyc2/other=0.4/0.1/0.6
+   SNR +3 dB
+    R0-pilot             n=2560 BLER@1/@2/@8/@16 = 0.180 0.100 0.049 0.042 [0.035,0.051]  BER@16=1.66e-02  NMSE med@1/@16=0.1090/0.1090 ok=0.1089  resc/lost(2->16)=148/0  tauL@1=0.399  fail% stuck/cyc2/other=0.8/0.4/3.0
+    R1-turbo             n=2560 BLER@1/@2/@8/@16 = 0.180 0.105 0.082 0.081 [0.071,0.092]  BER@16=2.83e-02  NMSE med@1/@16=0.1090/0.0355 ok=0.0345  resc/lost(2->16)=61/0  tauL@1=0.399  fail% stuck/cyc2/other=6.6/0.0/1.4
+    R2-ours-G            n=2560 BLER@1/@2/@8/@16 = 0.180 0.088 0.046 0.036 [0.029,0.043]  BER@16=1.28e-02  NMSE med@1/@16=0.1090/0.0349 ok=0.0345  resc/lost(2->16)=135/0  tauL@1=0.399  fail% stuck/cyc2/other=0.9/0.3/2.4
+    R3-bigamp            n=2560 BLER@1/@2/@8/@16 = 0.196 0.133 0.091 0.080 [0.070,0.091]  BER@16=3.13e-02  NMSE med@1/@16=0.1255/0.0740 ok=0.0725  resc/lost(2->16)=135/0  tauL@1=0.277  fail% stuck/cyc2/other=2.3/0.6/5.1
+    R4-llr               n=2560 BLER@1/@2/@8/@16 = 0.242 0.155 0.600 0.601 [0.582,0.620]  BER@16=5.17e-01  NMSE med@1/@16=0.0388/1.2029 ok=0.0349  resc/lost(2->16)=43/1183  tauL@1=0.258  fail% stuck/cyc2/other=2.0/55.1/3.0
+    R4-scvamp            n=2560 BLER@1/@2/@8/@16 = 0.242 0.171 0.150 0.148 [0.135,0.163]  BER@16=5.13e-02  NMSE med@1/@16=0.0388/0.0365 ok=0.0346  resc/lost(2->16)=59/0  tauL@1=0.258  fail% stuck/cyc2/other=12.7/0.7/1.4
+    M-ours-gmm32         n=2560 BLER@1/@2/@8/@16 = 0.153 0.074 0.034 0.028 [0.022,0.035]  BER@16=1.02e-02  NMSE med@1/@16=0.0882/0.0291 ok=0.0288  resc/lost(2->16)=117/0  tauL@1=0.469  fail% stuck/cyc2/other=0.8/0.5/1.5
+    M-ours-bstar         n=2560 BLER@1/@2/@8/@16 = 0.132 0.050 0.020 0.018 [0.013,0.023]  BER@16=6.81e-03  NMSE med@1/@16=0.0756/0.0258 ok=0.0256  resc/lost(2->16)=83/0  tauL@1=0.566  fail% stuck/cyc2/other=0.6/0.1/1.1
+    M-ours-dscore-C-V0   n=2560 BLER@1/@2/@8/@16 = 0.802 0.950 0.985 0.972 [0.965,0.978]  BER@16=4.64e-01  NMSE med@1/@16=12.5712/3.5108 ok=0.3040  resc/lost(2->16)=59/116  tauL@1=0.027  fail% stuck/cyc2/other=0.1/8.5/88.6
+    M-ours-dscore-C-V1   n=2560 BLER@1/@2/@8/@16 = 0.089 0.032 0.011 0.009 [0.006,0.014]  BER@16=3.54e-03  NMSE med@1/@16=0.0470/0.0129 ok=0.0128  resc/lost(2->16)=59/0  tauL@1=0.495  fail% stuck/cyc2/other=0.3/0.2/0.4
+    M-ours-dscore-C-V4   n=2560 BLER@1/@2/@8/@16 = 0.086 0.030 0.014 0.011 [0.008,0.016]  BER@16=3.78e-03  NMSE med@1/@16=0.0439/0.0111 ok=0.0111  resc/lost(2->16)=49/0  tauL@1=0.467  fail% stuck/cyc2/other=0.5/0.1/0.5
+    M-ours-dscore-C-V4b  n=2560 BLER@1/@2/@8/@16 = 0.086 0.030 0.012 0.011 [0.008,0.016]  BER@16=3.78e-03  NMSE med@1/@16=0.0439/0.0119 ok=0.0118  resc/lost(2->16)=48/0  tauL@1=0.467  fail% stuck/cyc2/other=0.4/0.0/0.6
+    M-ours-bstar-scalar  n=2560 BLER@1/@2/@8/@16 = 0.132 0.053 0.027 0.023 [0.018,0.030]  BER@16=8.42e-03  NMSE med@1/@16=0.0748/0.0254 ok=0.0252  resc/lost(2->16)=76/0  tauL@1=0.514  fail% stuck/cyc2/other=1.1/0.2/1.0
+    R5-genie             n=2560 BLER@1/@2/@8/@16 = 0.044 0.012 0.005 0.005 [0.003,0.008]  BER@16=1.53e-03  NMSE med@1/@16=nan/nan ok=nan  resc/lost(2->16)=18/0  tauL@1=0.387  fail% stuck/cyc2/other=0.2/0.0/0.3
+   SNR +6 dB
+    R0-pilot             n=2560 BLER@1/@2/@8/@16 = 0.100 0.057 0.030 0.025 [0.020,0.032]  BER@16=9.41e-03  NMSE med@1/@16=0.0583/0.0583 ok=0.0583  resc/lost(2->16)=81/0  tauL@1=0.280  fail% stuck/cyc2/other=0.5/0.6/1.4
+    R1-turbo             n=2560 BLER@1/@2/@8/@16 = 0.100 0.063 0.043 0.039 [0.032,0.047]  BER@16=1.41e-02  NMSE med@1/@16=0.0583/0.0180 ok=0.0179  resc/lost(2->16)=63/0  tauL@1=0.280  fail% stuck/cyc2/other=2.6/0.0/1.3
+    R2-ours-G            n=2560 BLER@1/@2/@8/@16 = 0.100 0.054 0.028 0.024 [0.019,0.030]  BER@16=1.02e-02  NMSE med@1/@16=0.0583/0.0180 ok=0.0179  resc/lost(2->16)=77/0  tauL@1=0.280  fail% stuck/cyc2/other=0.4/0.4/1.6
+    R3-bigamp            n=2560 BLER@1/@2/@8/@16 = 0.136 0.093 0.061 0.053 [0.045,0.062]  BER@16=2.23e-02  NMSE med@1/@16=0.0589/0.0313 ok=0.0309  resc/lost(2->16)=104/0  tauL@1=0.162  fail% stuck/cyc2/other=0.5/0.5/4.3
+    R4-llr               n=2560 BLER@1/@2/@8/@16 = 0.152 0.092 0.399 0.400 [0.381,0.419]  BER@16=3.46e-01  NMSE med@1/@16=0.0190/0.0223 ok=0.0179  resc/lost(2->16)=29/817  tauL@1=0.181  fail% stuck/cyc2/other=0.5/37.0/2.5
+    R4-scvamp            n=2560 BLER@1/@2/@8/@16 = 0.152 0.107 0.096 0.095 [0.084,0.107]  BER@16=3.25e-02  NMSE med@1/@16=0.0190/0.0185 ok=0.0179  resc/lost(2->16)=31/0  tauL@1=0.181  fail% stuck/cyc2/other=7.1/1.4/1.0
+    M-ours-gmm32         n=2560 BLER@1/@2/@8/@16 = 0.090 0.040 0.018 0.016 [0.012,0.022]  BER@16=6.28e-03  NMSE med@1/@16=0.0478/0.0154 ok=0.0153  resc/lost(2->16)=61/0  tauL@1=0.325  fail% stuck/cyc2/other=0.2/0.3/1.1
+    M-ours-bstar         n=2560 BLER@1/@2/@8/@16 = 0.071 0.025 0.011 0.010 [0.007,0.014]  BER@16=3.85e-03  NMSE med@1/@16=0.0416/0.0138 ok=0.0137  resc/lost(2->16)=39/0  tauL@1=0.390  fail% stuck/cyc2/other=0.2/0.0/0.7
+    M-ours-dscore-C-V0   n=2560 BLER@1/@2/@8/@16 = 0.927 0.918 0.973 0.972 [0.965,0.978]  BER@16=4.58e-01  NMSE med@1/@16=21.3454/3.4855 ok=0.3329  resc/lost(2->16)=53/191  tauL@1=0.008  fail% stuck/cyc2/other=0.4/9.7/87.1
+    M-ours-dscore-C-V1   n=2560 BLER@1/@2/@8/@16 = 0.048 0.017 0.007 0.006 [0.004,0.010]  BER@16=2.03e-03  NMSE med@1/@16=0.0240/0.0064 ok=0.0064  resc/lost(2->16)=27/0  tauL@1=0.369  fail% stuck/cyc2/other=0.4/0.1/0.1
+    M-ours-dscore-C-V4   n=2560 BLER@1/@2/@8/@16 = 0.044 0.017 0.007 0.007 [0.004,0.011]  BER@16=2.10e-03  NMSE med@1/@16=0.0209/0.0056 ok=0.0056  resc/lost(2->16)=26/0  tauL@1=0.349  fail% stuck/cyc2/other=0.5/0.0/0.2
+    M-ours-dscore-C-V4b  n=2560 BLER@1/@2/@8/@16 = 0.044 0.017 0.008 0.007 [0.005,0.012]  BER@16=2.44e-03  NMSE med@1/@16=0.0209/0.0060 ok=0.0059  resc/lost(2->16)=24/0  tauL@1=0.349  fail% stuck/cyc2/other=0.4/0.0/0.4
+    M-ours-bstar-scalar  n=2560 BLER@1/@2/@8/@16 = 0.074 0.028 0.014 0.013 [0.009,0.018]  BER@16=4.06e-03  NMSE med@1/@16=0.0415/0.0136 ok=0.0135  resc/lost(2->16)=39/0  tauL@1=0.362  fail% stuck/cyc2/other=0.8/0.1/0.3
+    R5-genie             n=2560 BLER@1/@2/@8/@16 = 0.032 0.007 0.004 0.004 [0.002,0.007]  BER@16=1.32e-03  NMSE med@1/@16=nan/nan ok=nan  resc/lost(2->16)=10/0  tauL@1=0.283  fail% stuck/cyc2/other=0.1/0.0/0.2
+   SNR +9 dB
+    R0-pilot             n=2560 BLER@1/@2/@8/@16 = 0.064 0.035 0.018 0.013 [0.009,0.018]  BER@16=4.91e-03  NMSE med@1/@16=0.0300/0.0300 ok=0.0300  resc/lost(2->16)=56/0  tauL@1=0.201  fail% stuck/cyc2/other=0.2/0.3/0.7
+    R1-turbo             n=2560 BLER@1/@2/@8/@16 = 0.064 0.036 0.025 0.024 [0.019,0.030]  BER@16=8.86e-03  NMSE med@1/@16=0.0300/0.0090 ok=0.0089  resc/lost(2->16)=31/0  tauL@1=0.201  fail% stuck/cyc2/other=1.7/0.1/0.6
+    R2-ours-G            n=2560 BLER@1/@2/@8/@16 = 0.064 0.030 0.014 0.011 [0.008,0.016]  BER@16=4.50e-03  NMSE med@1/@16=0.0300/0.0090 ok=0.0089  resc/lost(2->16)=49/0  tauL@1=0.201  fail% stuck/cyc2/other=0.1/0.2/0.8
+    R3-bigamp            n=2560 BLER@1/@2/@8/@16 = 0.107 0.072 0.055 0.051 [0.043,0.060]  BER@16=2.09e-02  NMSE med@1/@16=0.0238/0.0129 ok=0.0127  resc/lost(2->16)=55/0  tauL@1=0.111  fail% stuck/cyc2/other=0.4/0.4/4.4
+    R4-llr               n=2560 BLER@1/@2/@8/@16 = 0.105 0.066 0.277 0.277 [0.260,0.295]  BER@16=2.43e-01  NMSE med@1/@16=0.0093/0.0101 ok=0.0090  resc/lost(2->16)=21/563  tauL@1=0.130  fail% stuck/cyc2/other=0.2/26.4/1.2
+    R4-scvamp            n=2560 BLER@1/@2/@8/@16 = 0.105 0.077 0.070 0.069 [0.060,0.080]  BER@16=2.44e-02  NMSE med@1/@16=0.0093/0.0092 ok=0.0090  resc/lost(2->16)=20/0  tauL@1=0.130  fail% stuck/cyc2/other=5.4/1.1/0.4
+    M-ours-gmm32         n=2560 BLER@1/@2/@8/@16 = 0.059 0.026 0.012 0.010 [0.007,0.015]  BER@16=4.26e-03  NMSE med@1/@16=0.0252/0.0078 ok=0.0078  resc/lost(2->16)=41/0  tauL@1=0.227  fail% stuck/cyc2/other=0.1/0.2/0.7
+    M-ours-bstar         n=2560 BLER@1/@2/@8/@16 = 0.045 0.018 0.007 0.007 [0.005,0.012]  BER@16=2.87e-03  NMSE med@1/@16=0.0223/0.0071 ok=0.0071  resc/lost(2->16)=28/0  tauL@1=0.267  fail% stuck/cyc2/other=0.0/0.1/0.6
+    M-ours-dscore-C-V0   n=2560 BLER@1/@2/@8/@16 = 0.935 0.870 0.935 0.923 [0.912,0.932]  BER@16=4.26e-01  NMSE med@1/@16=20.5784/1.6816 ok=0.2935  resc/lost(2->16)=138/273  tauL@1=0.004  fail% stuck/cyc2/other=0.3/9.0/82.9
+    M-ours-dscore-C-V1   n=2560 BLER@1/@2/@8/@16 = 0.028 0.007 0.002 0.001 [0.000,0.003]  BER@16=5.49e-04  NMSE med@1/@16=0.0114/0.0031 ok=0.0031  resc/lost(2->16)=14/0  tauL@1=0.257  fail% stuck/cyc2/other=0.0/0.0/0.1
+    M-ours-dscore-C-V4   n=2560 BLER@1/@2/@8/@16 = 0.026 0.006 0.002 0.002 [0.001,0.004]  BER@16=5.67e-04  NMSE med@1/@16=0.0099/0.0028 ok=0.0028  resc/lost(2->16)=12/0  tauL@1=0.238  fail% stuck/cyc2/other=0.0/0.0/0.1
+    M-ours-dscore-C-V4b  n=2560 BLER@1/@2/@8/@16 = 0.026 0.006 0.002 0.002 [0.001,0.004]  BER@16=6.32e-04  NMSE med@1/@16=0.0099/0.0030 ok=0.0030  resc/lost(2->16)=12/0  tauL@1=0.238  fail% stuck/cyc2/other=0.1/0.0/0.1
+    M-ours-bstar-scalar  n=2560 BLER@1/@2/@8/@16 = 0.046 0.021 0.009 0.008 [0.005,0.013]  BER@16=3.00e-03  NMSE med@1/@16=0.0221/0.0070 ok=0.0070  resc/lost(2->16)=33/0  tauL@1=0.248  fail% stuck/cyc2/other=0.2/0.1/0.5
+    R5-genie             n=2560 BLER@1/@2/@8/@16 = 0.022 0.004 0.001 0.001 [0.000,0.003]  BER@16=2.79e-04  NMSE med@1/@16=nan/nan ok=nan  resc/lost(2->16)=7/0  tauL@1=0.189  fail% stuck/cyc2/other=0.0/0.0/0.0
+   SNR +12 dB
+    R0-pilot             n=2560 BLER@1/@2/@8/@16 = 0.047 0.026 0.014 0.011 [0.008,0.016]  BER@16=4.38e-03  NMSE med@1/@16=0.0153/0.0153 ok=0.0153  resc/lost(2->16)=37/0  tauL@1=0.147  fail% stuck/cyc2/other=0.1/0.3/0.7
+    R1-turbo             n=2560 BLER@1/@2/@8/@16 = 0.047 0.027 0.018 0.018 [0.013,0.023]  BER@16=6.91e-03  NMSE med@1/@16=0.0153/0.0045 ok=0.0045  resc/lost(2->16)=24/0  tauL@1=0.147  fail% stuck/cyc2/other=1.2/0.0/0.5
+    R2-ours-G            n=2560 BLER@1/@2/@8/@16 = 0.047 0.025 0.014 0.012 [0.008,0.017]  BER@16=4.92e-03  NMSE med@1/@16=0.0153/0.0045 ok=0.0045  resc/lost(2->16)=35/0  tauL@1=0.147  fail% stuck/cyc2/other=0.1/0.3/0.7
+    R3-bigamp            n=2560 BLER@1/@2/@8/@16 = 0.099 0.067 0.058 0.057 [0.049,0.067]  BER@16=2.54e-02  NMSE med@1/@16=0.0099/0.0057 ok=0.0056  resc/lost(2->16)=27/3  tauL@1=0.083  fail% stuck/cyc2/other=0.1/0.8/4.9
+    R4-llr               n=2560 BLER@1/@2/@8/@16 = 0.078 0.047 0.197 0.196 [0.181,0.212]  BER@16=1.73e-01  NMSE med@1/@16=0.0046/0.0048 ok=0.0045  resc/lost(2->16)=20/400  tauL@1=0.094  fail% stuck/cyc2/other=0.1/18.5/1.0
+    R4-scvamp            n=2560 BLER@1/@2/@8/@16 = 0.078 0.056 0.049 0.049 [0.041,0.058]  BER@16=1.75e-02  NMSE med@1/@16=0.0046/0.0046 ok=0.0045  resc/lost(2->16)=18/0  tauL@1=0.094  fail% stuck/cyc2/other=3.8/0.7/0.4
+    M-ours-gmm32         n=2560 BLER@1/@2/@8/@16 = 0.043 0.021 0.011 0.010 [0.007,0.014]  BER@16=3.96e-03  NMSE med@1/@16=0.0132/0.0041 ok=0.0040  resc/lost(2->16)=29/0  tauL@1=0.162  fail% stuck/cyc2/other=0.1/0.2/0.7
+    M-ours-bstar         n=2560 BLER@1/@2/@8/@16 = 0.034 0.013 0.006 0.006 [0.004,0.010]  BER@16=2.33e-03  NMSE med@1/@16=0.0119/0.0037 ok=0.0037  resc/lost(2->16)=16/0  tauL@1=0.189  fail% stuck/cyc2/other=0.2/0.1/0.3
+    M-ours-dscore-C-V0   n=2560 BLER@1/@2/@8/@16 = 0.918 0.804 0.856 0.837 [0.822,0.851]  BER@16=3.75e-01  NMSE med@1/@16=18.2087/0.8288 ok=0.2510  resc/lost(2->16)=244/330  tauL@1=0.002  fail% stuck/cyc2/other=0.7/8.2/74.8
+    M-ours-dscore-C-V1   n=2560 BLER@1/@2/@8/@16 = 0.020 0.006 0.004 0.003 [0.002,0.006]  BER@16=1.40e-03  NMSE med@1/@16=0.0056/0.0016 ok=0.0016  resc/lost(2->16)=8/0  tauL@1=0.171  fail% stuck/cyc2/other=0.0/0.0/0.3
+    M-ours-dscore-C-V4   n=2560 BLER@1/@2/@8/@16 = 0.020 0.007 0.003 0.003 [0.001,0.006]  BER@16=8.46e-04  NMSE med@1/@16=0.0051/0.0015 ok=0.0015  resc/lost(2->16)=10/0  tauL@1=0.157  fail% stuck/cyc2/other=0.1/0.0/0.1
+    M-ours-dscore-C-V4b  n=2560 BLER@1/@2/@8/@16 = 0.020 0.007 0.003 0.003 [0.001,0.006]  BER@16=8.28e-04  NMSE med@1/@16=0.0051/0.0016 ok=0.0016  resc/lost(2->16)=10/0  tauL@1=0.157  fail% stuck/cyc2/other=0.2/0.0/0.1
+    M-ours-bstar-scalar  n=2560 BLER@1/@2/@8/@16 = 0.036 0.013 0.008 0.008 [0.005,0.012]  BER@16=2.64e-03  NMSE med@1/@16=0.0117/0.0037 ok=0.0036  resc/lost(2->16)=12/0  tauL@1=0.174  fail% stuck/cyc2/other=0.4/0.0/0.4
+    R5-genie             n=2560 BLER@1/@2/@8/@16 = 0.015 0.004 0.001 0.001 [0.000,0.003]  BER@16=1.67e-04  NMSE med@1/@16=nan/nan ok=nan  resc/lost(2->16)=8/0  tauL@1=0.123  fail% stuck/cyc2/other=0.1/0.0/0.0
+   SNR +15 dB
+    R0-pilot             n=2560 BLER@1/@2/@8/@16 = 0.036 0.012 0.007 0.005 [0.003,0.009]  BER@16=1.99e-03  NMSE med@1/@16=0.0078/0.0078 ok=0.0078  resc/lost(2->16)=17/0  tauL@1=0.105  fail% stuck/cyc2/other=0.0/0.1/0.4
+    R1-turbo             n=2560 BLER@1/@2/@8/@16 = 0.036 0.014 0.009 0.008 [0.005,0.012]  BER@16=3.39e-03  NMSE med@1/@16=0.0078/0.0023 ok=0.0023  resc/lost(2->16)=15/0  tauL@1=0.105  fail% stuck/cyc2/other=0.5/0.0/0.3
+    R2-ours-G            n=2560 BLER@1/@2/@8/@16 = 0.036 0.011 0.007 0.006 [0.004,0.010]  BER@16=2.62e-03  NMSE med@1/@16=0.0078/0.0023 ok=0.0023  resc/lost(2->16)=13/0  tauL@1=0.105  fail% stuck/cyc2/other=0.0/0.1/0.5
+    R3-bigamp            n=2560 BLER@1/@2/@8/@16 = 0.105 0.075 0.058 0.055 [0.047,0.065]  BER@16=2.48e-02  NMSE med@1/@16=0.0048/0.0026 ok=0.0026  resc/lost(2->16)=50/1  tauL@1=0.071  fail% stuck/cyc2/other=0.2/0.9/4.5
+    R4-llr               n=2560 BLER@1/@2/@8/@16 = 0.067 0.036 0.168 0.168 [0.154,0.183]  BER@16=1.48e-01  NMSE med@1/@16=0.0023/0.0024 ok=0.0023  resc/lost(2->16)=11/351  tauL@1=0.065  fail% stuck/cyc2/other=0.0/16.1/0.7
+    R4-scvamp            n=2560 BLER@1/@2/@8/@16 = 0.067 0.044 0.037 0.036 [0.029,0.044]  BER@16=1.20e-02  NMSE med@1/@16=0.0023/0.0023 ok=0.0023  resc/lost(2->16)=21/0  tauL@1=0.065  fail% stuck/cyc2/other=3.0/0.3/0.3
+    M-ours-gmm32         n=2560 BLER@1/@2/@8/@16 = 0.034 0.012 0.005 0.004 [0.002,0.007]  BER@16=1.55e-03  NMSE med@1/@16=0.0069/0.0021 ok=0.0021  resc/lost(2->16)=21/0  tauL@1=0.109  fail% stuck/cyc2/other=0.0/0.1/0.3
+    M-ours-bstar         n=2560 BLER@1/@2/@8/@16 = 0.025 0.007 0.002 0.002 [0.001,0.005]  BER@16=1.05e-03  NMSE med@1/@16=0.0063/0.0019 ok=0.0019  resc/lost(2->16)=13/0  tauL@1=0.125  fail% stuck/cyc2/other=0.0/0.0/0.2
+    M-ours-dscore-C-V0   n=2560 BLER@1/@2/@8/@16 = 0.873 0.660 0.523 0.503 [0.484,0.522]  BER@16=2.20e-01  NMSE med@1/@16=12.3722/0.2331 ok=0.0016  resc/lost(2->16)=637/236  tauL@1=0.001  fail% stuck/cyc2/other=1.4/6.0/42.9
+    M-ours-dscore-C-V1   n=2560 BLER@1/@2/@8/@16 = 0.013 0.003 0.001 0.001 [0.000,0.003]  BER@16=5.77e-04  NMSE med@1/@16=0.0028/0.0009 ok=0.0009  resc/lost(2->16)=4/0  tauL@1=0.111  fail% stuck/cyc2/other=0.0/0.0/0.1
+    M-ours-dscore-C-V4   n=2560 BLER@1/@2/@8/@16 = 0.013 0.002 0.001 0.001 [0.000,0.003]  BER@16=5.02e-04  NMSE med@1/@16=0.0027/0.0008 ok=0.0008  resc/lost(2->16)=3/0  tauL@1=0.102  fail% stuck/cyc2/other=0.0/0.0/0.1
+    M-ours-dscore-C-V4b  n=2560 BLER@1/@2/@8/@16 = 0.013 0.002 0.001 0.001 [0.000,0.003]  BER@16=3.26e-04  NMSE med@1/@16=0.0027/0.0009 ok=0.0009  resc/lost(2->16)=4/0  tauL@1=0.102  fail% stuck/cyc2/other=0.0/0.0/0.1
+    M-ours-bstar-scalar  n=2560 BLER@1/@2/@8/@16 = 0.028 0.009 0.004 0.003 [0.002,0.006]  BER@16=1.52e-03  NMSE med@1/@16=0.0062/0.0019 ok=0.0019  resc/lost(2->16)=14/0  tauL@1=0.114  fail% stuck/cyc2/other=0.0/0.0/0.2
+    R5-genie             n=2560 BLER@1/@2/@8/@16 = 0.009 0.002 0.001 0.001 [0.000,0.003]  BER@16=3.91e-04  NMSE med@1/@16=nan/nan ok=nan  resc/lost(2->16)=4/0  tauL@1=0.075  fail% stuck/cyc2/other=0.0/0.0/0.0
+
+  SNR@BLER 0.1 (log-linear interpolation; '<=x' already below at the lowest grid point, '>x' never reached)
+  and the SNR@0.1 gain over R2-ours-G with a 90% PAIRED bootstrap CI (same resampled trials for both arms).
+  SIGN CONVENTION (spelled out the same way as table B, so it cannot be read inverted): the number is
+  SNR@0.1(this arm) MINUS SNR@0.1(R2-ours-G).  + dB = this arm needs MORE SNR than R2-ours-G to reach
+  BLER 0.1;  - dB = it needs LESS.
+    arm                  SNR@0.1   SNR@0.1 gap (this arm minus R2-ours-G)
+    R0-pilot (@1)           6.03   +5.96 dB  [90% paired bootstrap +5.45, +6.56; censored replicates 0%]
+    pilot_C (@16)           0.71   +0.65 dB  [90% paired bootstrap +0.46, +0.85; censored replicates 0%]
+    R1-turbo                2.34   +2.27 dB  [90% paired bootstrap +1.96, +2.64; censored replicates 0%]
+    R2-ours-G               0.07   -- (reference)
+    R3-bigamp               2.31   +2.24 dB  [90% paired bootstrap +1.92, +2.61; censored replicates 0%]
+    R4-llr                 >  15   >= +14.93 dB (R4-llr never reaches 0.1 on the grid)
+    R4-scvamp               5.65   +5.58 dB  [90% paired bootstrap +5.00, +6.31; censored replicates 0%]
+    M-ours-gmm32           -0.50   -0.56 dB  [90% paired bootstrap -0.74, -0.37; censored replicates 0%]
+    M-ours-bstar           -1.00   -1.07 dB  [90% paired bootstrap -1.26, -0.87; censored replicates 0%]
+    M-ours-dscore-C-V0     >  15   >= +14.93 dB (M-ours-dscore-C-V0 never reaches 0.1 on the grid)
+    M-ours-dscore-C-V1     -2.24   -2.31 dB  [90% paired bootstrap -2.55, -2.06; censored replicates 0%]
+    M-ours-dscore-C-V4     -2.12   -2.19 dB  [90% paired bootstrap -2.43, -1.94; censored replicates 0%]
+    M-ours-dscore-C-V4b    -2.00   -2.07 dB  [90% paired bootstrap -2.30, -1.82; censored replicates 0%]
+    M-ours-bstar-scalar    -0.67   -0.74 dB  [90% paired bootstrap -0.94, -0.51; censored replicates 0%]
+    R5-genie              <=  -3   n/a (<=  -3 vs 0.07) — extend the SNR grid
+
+  failure classes at @16, as a fraction of ALL blocks (exp_0921 operational definition; diverged = the arm's own flag, raised = the arm threw on that block (runner.py '<arm>|failed'); diverged AND raised blocks are KEPT in every mean above, a raised block counting as a block error):
+    arm  [stuck/cyc2/other/diverged/raised]              -3 dB                           +0 dB                           +3 dB                           +6 dB                           +9 dB                           +12 dB                          +15 dB             
+    R0-pilot (@1)                                         n/a                             n/a                             n/a                             n/a                             n/a                             n/a                             n/a                 (1-pass arm: no trajectory to classify)
+    pilot_C (@16)                            0.301/0.015/0.162/n/a  /0.000   0.030/0.012/0.088/n/a  /0.000   0.008/0.004/0.030/n/a  /0.000   0.005/0.006/0.014/n/a  /0.000   0.002/0.003/0.007/n/a  /0.000   0.001/0.003/0.007/n/a  /0.000   0.000/0.001/0.004/n/a  /0.000  
+    R1-turbo                                 0.530/0.000/0.014/n/a  /0.000   0.196/0.000/0.016/n/a  /0.000   0.066/0.000/0.014/n/a  /0.000   0.026/0.000/0.013/n/a  /0.000   0.017/0.001/0.006/n/a  /0.000   0.012/0.000/0.005/n/a  /0.000   0.005/0.000/0.003/n/a  /0.000  
+    R2-ours-G                                0.084/0.062/0.183/n/a  /0.000   0.019/0.021/0.062/n/a  /0.000   0.009/0.003/0.024/n/a  /0.000   0.004/0.004/0.016/n/a  /0.000   0.001/0.002/0.008/n/a  /0.000   0.001/0.003/0.007/n/a  /0.000   0.000/0.001/0.005/n/a  /0.000  
+    R3-bigamp                                0.419/0.034/0.091/0.000/0.000   0.097/0.015/0.098/0.000/0.000   0.023/0.006/0.051/0.000/0.000   0.005/0.005/0.043/0.000/0.000   0.004/0.004/0.044/0.000/0.000   0.001/0.008/0.049/0.000/0.000   0.002/0.009/0.045/0.000/0.000  
+    R4-llr                                   0.408/0.438/0.020/0.000/0.000   0.118/0.676/0.040/0.000/0.000   0.020/0.551/0.030/0.000/0.000   0.005/0.370/0.025/0.000/0.000   0.002/0.264/0.012/0.000/0.000   0.001/0.185/0.010/0.000/0.000   0.000/0.161/0.007/0.000/0.000  
+    R4-scvamp                                0.587/0.005/0.016/0.000/0.000   0.279/0.010/0.014/0.000/0.000   0.127/0.007/0.014/0.000/0.000   0.071/0.014/0.010/0.000/0.000   0.054/0.011/0.004/0.000/0.000   0.037/0.007/0.004/0.000/0.000   0.030/0.003/0.003/0.000/0.000  
+    M-ours-gmm32                             0.071/0.044/0.143/n/a  /0.000   0.021/0.009/0.053/n/a  /0.000   0.008/0.005/0.015/n/a  /0.000   0.002/0.003/0.011/n/a  /0.000   0.001/0.002/0.007/n/a  /0.000   0.001/0.002/0.007/n/a  /0.000   0.000/0.001/0.003/n/a  /0.000  
+    M-ours-bstar                             0.087/0.027/0.116/n/a  /0.000   0.016/0.007/0.043/n/a  /0.000   0.006/0.001/0.011/n/a  /0.000   0.002/0.000/0.007/n/a  /0.000   0.000/0.001/0.006/n/a  /0.000   0.002/0.001/0.003/n/a  /0.000   0.000/0.000/0.002/n/a  /0.000  
+    M-ours-dscore-C-V0                       0.020/0.051/0.717/n/a  /0.000   0.003/0.074/0.850/n/a  /0.000   0.001/0.085/0.886/n/a  /0.000   0.004/0.097/0.871/n/a  /0.000   0.003/0.090/0.829/n/a  /0.000   0.007/0.082/0.748/n/a  /0.000   0.014/0.060/0.429/n/a  /0.000  
+    M-ours-dscore-C-V1                       0.043/0.015/0.087/n/a  /0.000   0.009/0.001/0.024/n/a  /0.000   0.003/0.002/0.004/n/a  /0.000   0.004/0.001/0.001/n/a  /0.000   0.000/0.000/0.001/n/a  /0.000   0.000/0.000/0.003/n/a  /0.000   0.000/0.000/0.001/n/a  /0.000  
+    M-ours-dscore-C-V4                       0.059/0.009/0.082/n/a  /0.000   0.017/0.001/0.019/n/a  /0.000   0.005/0.001/0.005/n/a  /0.000   0.005/0.000/0.002/n/a  /0.000   0.000/0.000/0.001/n/a  /0.000   0.001/0.000/0.001/n/a  /0.000   0.000/0.000/0.001/n/a  /0.000  
+    M-ours-dscore-C-V4b                      0.056/0.012/0.095/n/a  /0.000   0.016/0.002/0.021/n/a  /0.000   0.004/0.000/0.006/n/a  /0.000   0.004/0.000/0.004/n/a  /0.000   0.001/0.000/0.001/n/a  /0.000   0.002/0.000/0.001/n/a  /0.000   0.000/0.000/0.001/n/a  /0.000  
+    M-ours-bstar-scalar                      0.106/0.021/0.112/n/a  /0.000   0.035/0.005/0.037/n/a  /0.000   0.011/0.002/0.010/n/a  /0.000   0.008/0.001/0.003/n/a  /0.000   0.002/0.001/0.005/n/a  /0.000   0.004/0.000/0.004/n/a  /0.000   0.000/0.000/0.002/n/a  /0.000  
+    R5-genie                                 0.014/0.002/0.018/n/a  /0.000   0.004/0.001/0.006/n/a  /0.000   0.002/0.000/0.003/n/a  /0.000   0.001/0.000/0.002/n/a  /0.000   0.000/0.000/0.000/n/a  /0.000   0.001/0.000/0.000/n/a  /0.000   0.000/0.000/0.000/n/a  /0.000  
+
+  clip firing rates, mean over trials x iterations (tauL = variance-floor clip of the detector site, alphaD = alpha^D clip to [eps, 1-eps]):
+    arm                             -3 dB             +0 dB             +3 dB             +6 dB             +9 dB            +12 dB            +15 dB
+    R0-pilot              0.0000/0.1335     0.0003/0.7535     0.0021/0.9174     0.0012/0.9549     0.0010/0.9755     0.0007/0.9827     0.0004/0.9887  
+    R1-turbo              0.0000/0.5849     0.0003/0.8404     0.0009/0.9330     0.0015/0.9612     0.0008/0.9793     0.0004/0.9847     0.0001/0.9902  
+    R2-ours-G             0.0000/0.5047     0.0004/0.8148     0.0016/0.9237     0.0020/0.9581     0.0010/0.9766     0.0008/0.9829     0.0004/0.9895  
+    R3-bigamp             0.0000/0.0000     0.0000/0.0000     0.0000/0.0000     0.0000/0.0000     0.0000/0.0000     0.0000/0.0000     0.0000/0.0000  
+    R4-llr                0.3057/0.0000     0.5035/0.0000     0.6323/0.0000     0.6869/0.0000     0.7211/0.0000     0.7402/0.0000     0.7458/0.0000  
+    R4-scvamp             0.2337/0.5192     0.3019/0.7219     0.3459/0.8571     0.3659/0.9163     0.3763/0.9490     0.3766/0.9632     0.3769/0.9726  
+    M-ours-gmm32          0.0000/0.5691     0.0003/0.8341     0.0009/0.9315     0.0006/0.9626     0.0005/0.9788     0.0007/0.9847     0.0002/0.9901  
+    M-ours-bstar          0.0000/0.5898     0.0001/0.8467     0.0005/0.9385     0.0003/0.9664     0.0006/0.9802     0.0001/0.9879     0.0001/0.9911  
+    M-ours-dscore-C-V0    0.1058/0.3763     0.1314/0.3893     0.0905/0.3999     0.0678/0.4537     0.0480/0.5580     0.0315/0.6817     0.0158/0.8220  
+    M-ours-dscore-C-V1    0.0000/0.7082     0.0001/0.8912     0.0001/0.9563     0.0000/0.9759     0.0000/0.9870     0.0001/0.9903     0.0000/0.9935  
+    M-ours-dscore-C-V4    0.0000/0.7167     0.0002/0.8949     0.0003/0.9580     0.0000/0.9775     0.0000/0.9878     0.0001/0.9910     0.0000/0.9940  
+    M-ours-dscore-C-V4b   0.0000/0.7069     0.0000/0.8932     0.0001/0.9580     0.0000/0.9770     0.0000/0.9880     0.0001/0.9909     0.0000/0.9939  
+    M-ours-bstar-scalar   0.0000/0.6056     0.0004/0.8506     0.0005/0.9402     0.0002/0.9680     0.0003/0.9809     0.0002/0.9876     0.0002/0.9908  
+    R5-genie              0.0000/0.8718     0.0000/0.9481     0.0000/0.9771     0.0000/0.9832     0.0000/0.9908     0.0000/0.9931     0.0000/0.9945  
+
+  NMSE_H@16 median, WITH and WITHOUT the failed blocks (08_SPEC §5: both versions, never only one):
+    arm                                   -3 dB                   +0 dB                   +3 dB                   +6 dB                   +9 dB                  +12 dB                  +15 dB     [all blocks / success-only]
+    R0-pilot                3.183e-01/3.021e-01     1.923e-01/1.910e-01     1.090e-01/1.089e-01     5.832e-02/5.833e-02     3.002e-02/3.001e-02     1.529e-02/1.529e-02     7.782e-03/7.782e-03
+    R1-turbo                2.026e-01/1.178e-01     7.136e-02/6.566e-02     3.548e-02/3.451e-02     1.805e-02/1.788e-02     9.008e-03/8.933e-03     4.509e-03/4.481e-03     2.272e-03/2.265e-03
+    R2-ours-G               1.366e-01/1.189e-01     6.811e-02/6.590e-02     3.489e-02/3.451e-02     1.798e-02/1.787e-02     8.957e-03/8.928e-03     4.501e-03/4.484e-03     2.268e-03/2.264e-03
+    R3-bigamp               3.576e-01/2.954e-01     1.655e-01/1.570e-01     7.403e-02/7.253e-02     3.130e-02/3.087e-02     1.292e-02/1.273e-02     5.669e-03/5.562e-03     2.619e-03/2.572e-03
+    R4-llr                  3.706e-01/1.193e-01     1.414e+00/6.571e-02     1.203e+00/3.489e-02     2.230e-02/1.791e-02     1.009e-02/8.952e-03     4.848e-03/4.507e-03     2.421e-03/2.274e-03
+    R4-scvamp               2.322e-01/1.180e-01     7.497e-02/6.564e-02     3.651e-02/3.459e-02     1.846e-02/1.787e-02     9.155e-03/8.956e-03     4.555e-03/4.489e-03     2.295e-03/2.265e-03
+    M-ours-gmm32            1.095e-01/9.752e-02     5.614e-02/5.426e-02     2.906e-02/2.879e-02     1.538e-02/1.532e-02     7.815e-03/7.784e-03     4.051e-03/4.030e-03     2.070e-03/2.067e-03
+    M-ours-bstar            9.420e-02/8.409e-02     4.796e-02/4.655e-02     2.581e-02/2.556e-02     1.380e-02/1.374e-02     7.127e-03/7.119e-03     3.742e-03/3.738e-03     1.936e-03/1.936e-03
+    M-ours-dscore-C-V0      2.304e-01/7.845e-02     5.609e-01/1.386e-01     3.511e+00/3.040e-01     3.485e+00/3.329e-01     1.682e+00/2.935e-01     8.288e-01/2.510e-01     2.331e-01/1.584e-03
+    M-ours-dscore-C-V1      5.542e-02/4.980e-02     2.642e-02/2.565e-02     1.292e-02/1.282e-02     6.427e-03/6.402e-03     3.073e-03/3.066e-03     1.617e-03/1.615e-03     8.750e-04/8.746e-04
+    M-ours-dscore-C-V4      5.192e-02/4.644e-02     2.311e-02/2.251e-02     1.114e-02/1.105e-02     5.610e-03/5.601e-03     2.796e-03/2.793e-03     1.497e-03/1.492e-03     8.336e-04/8.334e-04
+    M-ours-dscore-C-V4b     5.621e-02/4.921e-02     2.467e-02/2.401e-02     1.185e-02/1.177e-02     5.963e-03/5.941e-03     2.953e-03/2.951e-03     1.580e-03/1.578e-03     8.680e-04/8.676e-04
+    M-ours-bstar-scalar     9.417e-02/8.413e-02     4.817e-02/4.664e-02     2.541e-02/2.520e-02     1.359e-02/1.351e-02     6.983e-03/6.964e-03     3.661e-03/3.649e-03     1.893e-03/1.891e-03
+    R5-genie                            nan/nan                 nan/nan                 nan/nan                 nan/nan                 nan/nan                 nan/nan                 nan/nan
+
+  fit / training cost (GMM EM wall-clock, seconds; 01_RULES §5 -- not hidden, 'n/a' where there is no fit):
+    R0-pilot                  n/a s
+    R1-turbo                  n/a s
+    R2-ours-G                 n/a s
+    R3-bigamp                 n/a s
+    R4-llr                    n/a s
+    R4-scvamp                 n/a s
+    M-ours-gmm32           1564.3 s
+    M-ours-bstar          83127.3 s
+    M-ours-dscore-C-V0    58319.3 s
+    M-ours-dscore-C-V1    58319.3 s
+    M-ours-dscore-C-V4    58319.3 s
+    M-ours-dscore-C-V4b       n/a s
+    M-ours-bstar-scalar   83127.3 s
+    R5-genie                  n/a s
+
+============================== TABLE B -- paired comparisons (08_SPEC §2) ==============================
+Only the pairs listed in 08_SPEC §2 are computed; all-pairs is not done (multiple-comparison problem).
+Sign test is paired per block (same channel/noise realisation, 06_SPEC §2). 'a:b' = only-first-fails : only-second-fails.
+POWER GUARD (R6/R7, pre-registered): >= 3 decision points AND >= 6 discordant pairs at >= 2 of them,
+otherwise UNDECIDED is printed and no significance call is made.
+The decision SNRs of a pair are anchored on its BASELINE member (exp_0925's pre-registered rule; never on one
+of our arms, which would let our own arm choose where it is evaluated). The anchor arm is printed on every row.
+
+--- cell C2  prior S2  testbed D2   SNR grid ['-3', '+0', '+3', '+6', '+9', '+12', '+15']
+  R1-turbo -> R2-ours-G        [decision-point anchor arm: R1-turbo]
+    decision SNRs ['+0', '+3', '+6'] (anchor R1-turbo: |log10(BLER@16 of R1-turbo / 0.1)| smallest, BLER in [0.005, 0.9])
+    sign test @16: +0 dB 284:3 p=3.2e-80  +3 dB 116:0 p=2.4e-35  +6 dB 41:3 p=1.6e-09   pooled 441:6 p=6e-122
+    power guard: 3 decision points, 3 with >= 6 discordant pairs -> POWERED
+    two-sided sign test at p < .05: second arm fewer failures at 3/3 points, first arm fewer failures at 0/3 points -> significant
+    SNR@0.1 gap (R1-turbo minus R2-ours-G): +2.27 dB  [90% paired bootstrap +1.96, +2.64; censored replicates 0%]
+  R2-ours-G -> M-ours-gmm32        [decision-point anchor arm: R2-ours-G]
+    decision SNRs ['-3', '+0', '+3'] (anchor R2-ours-G: |log10(BLER@16 of R2-ours-G / 0.1)| smallest, BLER in [0.005, 0.9])
+    sign test @16: -3 dB 234:53 p=2.7e-28  +0 dB 90:40 p=1.4e-05  +3 dB 40:21 p=0.02   pooled 364:114 p=1.7e-31
+    power guard: 3 decision points, 3 with >= 6 discordant pairs -> POWERED
+    two-sided sign test at p < .05: second arm fewer failures at 3/3 points, first arm fewer failures at 0/3 points -> significant
+    SNR@0.1 gap (R2-ours-G minus M-ours-gmm32): +0.56 dB  [90% paired bootstrap +0.37, +0.74; censored replicates 0%]
+  R2-ours-G -> M-ours-bstar        [decision-point anchor arm: R2-ours-G]
+    decision SNRs ['-3', '+0', '+3'] (anchor R2-ours-G: |log10(BLER@16 of R2-ours-G / 0.1)| smallest, BLER in [0.005, 0.9])
+    sign test @16: -3 dB 314:64 p=1e-40  +0 dB 122:28 p=3.4e-15  +3 dB 60:14 p=6.2e-08   pooled 496:106 p=3.1e-61
+    power guard: 3 decision points, 3 with >= 6 discordant pairs -> POWERED
+    two-sided sign test at p < .05: second arm fewer failures at 3/3 points, first arm fewer failures at 0/3 points -> significant
+    SNR@0.1 gap (R2-ours-G minus M-ours-bstar): +1.07 dB  [90% paired bootstrap +0.87, +1.26; censored replicates 0%]
+  R2-ours-G -> R4-scvamp        [decision-point anchor arm: R2-ours-G]
+    decision SNRs ['-3', '+0', '+3'] (anchor R2-ours-G: |log10(BLER@16 of R2-ours-G / 0.1)| smallest, BLER in [0.005, 0.9])
+    sign test @16: -3 dB 4:720 p=2.6e-208  +0 dB 4:518 p=4.5e-148  +3 dB 4:293 p=2.5e-81   pooled 12:1531 p=0
+    power guard: 3 decision points, 3 with >= 6 discordant pairs -> POWERED
+    two-sided sign test at p < .05: second arm fewer failures at 0/3 points, first arm fewer failures at 3/3 points -> significant
+    SNR@0.1 gap (R2-ours-G minus R4-scvamp): -5.58 dB  [90% paired bootstrap -6.31, -5.00; censored replicates 0%]
+  R4-llr -> R4-scvamp        [decision-point anchor arm: R4-llr]
+    decision SNRs ['+9', '+12', '+15'] (anchor R4-llr: |log10(BLER@16 of R4-llr / 0.1)| smallest, BLER in [0.005, 0.9])
+    sign test @16: +9 dB 568:35 p=4.6e-125  +12 dB 405:30 p=4.7e-85  +15 dB 356:17 p=1.1e-83   pooled 1329:82 p=1.3e-290
+    power guard: 3 decision points, 3 with >= 6 discordant pairs -> POWERED
+    two-sided sign test at p < .05: second arm fewer failures at 3/3 points, first arm fewer failures at 0/3 points -> significant
+    SNR@0.1 gap (R4-llr minus R4-scvamp): >= +9.35 dB (R4-llr never reaches 0.1 on the grid)
+  R2-ours-G -> R3-bigamp        [decision-point anchor arm: R2-ours-G]
+    decision SNRs ['-3', '+0', '+3'] (anchor R2-ours-G: |log10(BLER@16 of R2-ours-G / 0.1)| smallest, BLER in [0.005, 0.9])
+    sign test @16: -3 dB 54:604 p=1.3e-118  +0 dB 34:311 p=3.8e-57  +3 dB 25:139 p=2.3e-20   pooled 113:1054 p=7e-192
+    power guard: 3 decision points, 3 with >= 6 discordant pairs -> POWERED
+    two-sided sign test at p < .05: second arm fewer failures at 0/3 points, first arm fewer failures at 3/3 points -> significant
+    SNR@0.1 gap (R2-ours-G minus R3-bigamp): -2.24 dB  [90% paired bootstrap -2.61, -1.92; censored replicates 0%]
+  M-ours-gmm32 -> R5-genie        [decision-point anchor arm: R5-genie]
+    decision SNRs ['-3', '+0'] (anchor R5-genie: |log10(BLER@16 of R5-genie / 0.1)| smallest, BLER in [0.005, 0.9])
+    sign test @16: -3 dB 582:9 p=5.7e-159  +0 dB 186:0 p=2e-56   pooled 768:9 p=6.9e-214
+    power guard: 2 decision points (needs 3), discordant-pair counts [591, 186] (needs >= 6 at >= 2) -> UNDECIDED
+    UNDECIDED -- no significance call is made (08_SPEC §2). Raise n or extend the SNR grid.
+    SNR@0.1 gap (M-ours-gmm32 minus R5-genie): >= +2.50 dB (R5-genie is already below 0.1 at the lowest grid SNR)
+  M-ours-bstar -> R5-genie        [decision-point anchor arm: R5-genie]
+    decision SNRs ['-3', '+0'] (anchor R5-genie: |log10(BLER@16 of R5-genie / 0.1)| smallest, BLER in [0.005, 0.9])
+    sign test @16: -3 dB 513:9 p=1.1e-138  +0 dB 144:2 p=2.4e-40   pooled 657:11 p=4.5e-178
+    power guard: 2 decision points (needs 3), discordant-pair counts [522, 146] (needs >= 6 at >= 2) -> UNDECIDED
+    UNDECIDED -- no significance call is made (08_SPEC §2). Raise n or extend the SNR grid.
+    SNR@0.1 gap (M-ours-bstar minus R5-genie): >= +2.00 dB (R5-genie is already below 0.1 at the lowest grid SNR)
+  R2-ours-G -> M-ours-dscore-C-V0        [decision-point anchor arm: R2-ours-G]
+    decision SNRs ['-3', '+0', '+3'] (anchor R2-ours-G: |log10(BLER@16 of R2-ours-G / 0.1)| smallest, BLER in [0.005, 0.9])
+    sign test @16: -3 dB 84:1260 p=7.3e-270  +0 dB 2:2114 p=0  +3 dB 0:2397 p=0   pooled 86:5771 p=0
+    power guard: 3 decision points, 3 with >= 6 discordant pairs -> POWERED
+    two-sided sign test at p < .05: second arm fewer failures at 0/3 points, first arm fewer failures at 3/3 points -> significant
+    SNR@0.1 gap (R2-ours-G minus M-ours-dscore-C-V0): n/a (0.07 vs >  15) — extend the SNR grid
+  R2-ours-G -> M-ours-dscore-C-V1        [decision-point anchor arm: R2-ours-G]
+    decision SNRs ['-3', '+0', '+3'] (anchor R2-ours-G: |log10(BLER@16 of R2-ours-G / 0.1)| smallest, BLER in [0.005, 0.9])
+    sign test @16: -3 dB 513:42 p=4.9e-104  +0 dB 188:12 p=8.1e-42  +3 dB 76:9 p=2.4e-14   pooled 777:63 p=2.3e-157
+    power guard: 3 decision points, 3 with >= 6 discordant pairs -> POWERED
+    two-sided sign test at p < .05: second arm fewer failures at 3/3 points, first arm fewer failures at 0/3 points -> significant
+    SNR@0.1 gap (R2-ours-G minus M-ours-dscore-C-V1): +2.31 dB  [90% paired bootstrap +2.06, +2.55; censored replicates 0%]
+  R2-ours-G -> M-ours-dscore-C-V4        [decision-point anchor arm: R2-ours-G]
+    decision SNRs ['-3', '+0', '+3'] (anchor R2-ours-G: |log10(BLER@16 of R2-ours-G / 0.1)| smallest, BLER in [0.005, 0.9])
+    sign test @16: -3 dB 509:52 p=2.8e-95  +0 dB 186:20 p=6.5e-35  +3 dB 74:11 p=1.3e-12   pooled 769:83 p=5.1e-140
+    power guard: 3 decision points, 3 with >= 6 discordant pairs -> POWERED
+    two-sided sign test at p < .05: second arm fewer failures at 3/3 points, first arm fewer failures at 0/3 points -> significant
+    SNR@0.1 gap (R2-ours-G minus M-ours-dscore-C-V4): +2.19 dB  [90% paired bootstrap +1.94, +2.43; censored replicates 0%]
+  R2-ours-G -> M-ours-dscore-C-V4b        [decision-point anchor arm: R2-ours-G]
+    decision SNRs ['-3', '+0', '+3'] (anchor R2-ours-G: |log10(BLER@16 of R2-ours-G / 0.1)| smallest, BLER in [0.005, 0.9])
+    sign test @16: -3 dB 476:51 p=1.7e-87  +0 dB 184:19 p=4.2e-35  +3 dB 75:12 p=2.7e-12   pooled 735:82 p=5.1e-132
+    power guard: 3 decision points, 3 with >= 6 discordant pairs -> POWERED
+    two-sided sign test at p < .05: second arm fewer failures at 3/3 points, first arm fewer failures at 0/3 points -> significant
+    SNR@0.1 gap (R2-ours-G minus M-ours-dscore-C-V4b): +2.07 dB  [90% paired bootstrap +1.82, +2.30; censored replicates 0%]
+  R2-ours-G -> M-ours-bstar-scalar        [decision-point anchor arm: R2-ours-G]
+    decision SNRs ['-3', '+0', '+3'] (anchor R2-ours-G: |log10(BLER@16 of R2-ours-G / 0.1)| smallest, BLER in [0.005, 0.9])
+    sign test @16: -3 dB 313:84 p=3.9e-32  +0 dB 117:54 p=1.6e-06  +3 dB 51:19 p=0.00017   pooled 481:157 p=3.9e-39
+    power guard: 3 decision points, 3 with >= 6 discordant pairs -> POWERED
+    two-sided sign test at p < .05: second arm fewer failures at 3/3 points, first arm fewer failures at 0/3 points -> significant
+    SNR@0.1 gap (R2-ours-G minus M-ours-bstar-scalar): +0.74 dB  [90% paired bootstrap +0.51, +0.94; censored replicates 0%]
+  M-ours-bstar -> M-ours-dscore-C-V0        [decision-point anchor arm: M-ours-bstar]
+    decision SNRs ['-3', '+0', '+3'] (anchor M-ours-bstar: |log10(BLER@16 of M-ours-bstar / 0.1)| smallest, BLER in [0.005, 0.9])
+    sign test @16: -3 dB 54:1480 p=0  +0 dB 2:2208 p=0  +3 dB 0:2443 p=0   pooled 56:6131 p=0
+    power guard: 3 decision points, 3 with >= 6 discordant pairs -> POWERED
+    two-sided sign test at p < .05: second arm fewer failures at 0/3 points, first arm fewer failures at 3/3 points -> significant
+    SNR@0.1 gap (M-ours-bstar minus M-ours-dscore-C-V0): n/a (-1.00 vs >  15) — extend the SNR grid
+  M-ours-bstar -> M-ours-dscore-C-V1        [decision-point anchor arm: M-ours-bstar]
+    decision SNRs ['-3', '+0', '+3'] (anchor M-ours-bstar: |log10(BLER@16 of M-ours-bstar / 0.1)| smallest, BLER in [0.005, 0.9])
+    sign test @16: -3 dB 269:48 p=1.9e-38  +0 dB 98:16 p=1.5e-15  +3 dB 27:6 p=0.00032   pooled 394:70 p=8e-56
+    power guard: 3 decision points, 3 with >= 6 discordant pairs -> POWERED
+    two-sided sign test at p < .05: second arm fewer failures at 3/3 points, first arm fewer failures at 0/3 points -> significant
+    SNR@0.1 gap (M-ours-bstar minus M-ours-dscore-C-V1): +1.24 dB  [90% paired bootstrap +1.06, +1.44; censored replicates 0%]
+  M-ours-bstar -> M-ours-dscore-C-V4        [decision-point anchor arm: M-ours-bstar]
+    decision SNRs ['-3', '+0', '+3'] (anchor M-ours-bstar: |log10(BLER@16 of M-ours-bstar / 0.1)| smallest, BLER in [0.005, 0.9])
+    sign test @16: -3 dB 268:61 p=4.3e-32  +0 dB 98:26 p=5e-11  +3 dB 26:9 p=0.006   pooled 392:96 p=1.8e-43
+    power guard: 3 decision points, 3 with >= 6 discordant pairs -> POWERED
+    two-sided sign test at p < .05: second arm fewer failures at 3/3 points, first arm fewer failures at 0/3 points -> significant
+    SNR@0.1 gap (M-ours-bstar minus M-ours-dscore-C-V4): +1.12 dB  [90% paired bootstrap +0.93, +1.33; censored replicates 0%]
+  M-ours-bstar -> M-ours-dscore-C-V4b        [decision-point anchor arm: M-ours-bstar]
+    decision SNRs ['-3', '+0', '+3'] (anchor M-ours-bstar: |log10(BLER@16 of M-ours-bstar / 0.1)| smallest, BLER in [0.005, 0.9])
+    sign test @16: -3 dB 241:66 p=1.4e-24  +0 dB 97:26 p=8e-11  +3 dB 25:8 p=0.0046   pooled 363:100 p=4.3e-36
+    power guard: 3 decision points, 3 with >= 6 discordant pairs -> POWERED
+    two-sided sign test at p < .05: second arm fewer failures at 3/3 points, first arm fewer failures at 0/3 points -> significant
+    SNR@0.1 gap (M-ours-bstar minus M-ours-dscore-C-V4b): +1.00 dB  [90% paired bootstrap +0.82, +1.19; censored replicates 0%]
+  M-ours-bstar -> M-ours-bstar-scalar        [decision-point anchor arm: M-ours-bstar]
+    decision SNRs ['-3', '+0', '+3'] (anchor M-ours-bstar: |log10(BLER@16 of M-ours-bstar / 0.1)| smallest, BLER in [0.005, 0.9])
+    sign test @16: -3 dB 63:84 p=0.099  +0 dB 26:57 p=0.00088  +3 dB 7:21 p=0.013   pooled 96:162 p=4.8e-05
+    power guard: 3 decision points, 3 with >= 6 discordant pairs -> POWERED
+    two-sided sign test at p < .05: second arm fewer failures at 0/3 points, first arm fewer failures at 2/3 points -> significant
+    SNR@0.1 gap (M-ours-bstar minus M-ours-bstar-scalar): -0.33 dB  [90% paired bootstrap -0.49, -0.18; censored replicates 0%]
+  M-ours-dscore-C-V0 -> R5-genie        [decision-point anchor arm: R5-genie]
+    decision SNRs ['-3', '+0'] (anchor R5-genie: |log10(BLER@16 of R5-genie / 0.1)| smallest, BLER in [0.005, 0.9])
+    sign test @16: -3 dB 1930:0 p=0  +0 dB 2348:0 p=0   pooled 4278:0 p=0
+    power guard: 2 decision points (needs 3), discordant-pair counts [1930, 2348] (needs >= 6 at >= 2) -> UNDECIDED
+    UNDECIDED -- no significance call is made (08_SPEC §2). Raise n or extend the SNR grid.
+    SNR@0.1 gap (M-ours-dscore-C-V0 minus R5-genie): n/a (>  15 vs <=  -3) — extend the SNR grid
+  M-ours-dscore-C-V1 -> R5-genie        [decision-point anchor arm: R5-genie]
+    decision SNRs ['-3', '+0'] (anchor R5-genie: |log10(BLER@16 of R5-genie / 0.1)| smallest, BLER in [0.005, 0.9])
+    sign test @16: -3 dB 296:13 p=5.8e-71  +0 dB 62:2 p=2.3e-16   pooled 358:15 p=2.3e-86
+    power guard: 2 decision points (needs 3), discordant-pair counts [309, 64] (needs >= 6 at >= 2) -> UNDECIDED
+    UNDECIDED -- no significance call is made (08_SPEC §2). Raise n or extend the SNR grid.
+    SNR@0.1 gap (M-ours-dscore-C-V1 minus R5-genie): >= +0.76 dB (R5-genie is already below 0.1 at the lowest grid SNR)
+  M-ours-dscore-C-V4 -> R5-genie        [decision-point anchor arm: R5-genie]
+    decision SNRs ['-3', '+0'] (anchor R5-genie: |log10(BLER@16 of R5-genie / 0.1)| smallest, BLER in [0.005, 0.9])
+    sign test @16: -3 dB 309:12 p=9.9e-76  +0 dB 74:4 p=1e-17   pooled 383:16 p=2.4e-92
+    power guard: 2 decision points (needs 3), discordant-pair counts [321, 78] (needs >= 6 at >= 2) -> UNDECIDED
+    UNDECIDED -- no significance call is made (08_SPEC §2). Raise n or extend the SNR grid.
+    SNR@0.1 gap (M-ours-dscore-C-V4 minus R5-genie): >= +0.88 dB (R5-genie is already below 0.1 at the lowest grid SNR)
+  M-ours-dscore-C-V4b -> R5-genie        [decision-point anchor arm: R5-genie]
+    decision SNRs ['-3', '+0'] (anchor R5-genie: |log10(BLER@16 of R5-genie / 0.1)| smallest, BLER in [0.005, 0.9])
+    sign test @16: -3 dB 341:12 p=7.3e-85  +0 dB 74:3 p=1e-18   pooled 415:15 p=1.4e-102
+    power guard: 2 decision points (needs 3), discordant-pair counts [353, 77] (needs >= 6 at >= 2) -> UNDECIDED
+    UNDECIDED -- no significance call is made (08_SPEC §2). Raise n or extend the SNR grid.
+    SNR@0.1 gap (M-ours-dscore-C-V4b minus R5-genie): >= +1.00 dB (R5-genie is already below 0.1 at the lowest grid SNR)
+  M-ours-bstar-scalar -> R5-genie        [decision-point anchor arm: R5-genie]
+    decision SNRs ['-3', '+0'] (anchor R5-genie: |log10(BLER@16 of R5-genie / 0.1)| smallest, BLER in [0.005, 0.9])
+    sign test @16: -3 dB 532:7 p=2.8e-147  +0 dB 173:0 p=1.7e-52   pooled 705:7 p=1.7e-198
+    power guard: 2 decision points (needs 3), discordant-pair counts [539, 173] (needs >= 6 at >= 2) -> UNDECIDED
+    UNDECIDED -- no significance call is made (08_SPEC §2). Raise n or extend the SNR grid.
+    SNR@0.1 gap (M-ours-bstar-scalar minus R5-genie): >= +2.33 dB (R5-genie is already below 0.1 at the lowest grid SNR)
+
+============================== TABLE C -- cross-Tp goodput envelope (08_SPEC §3) ==============================
+
+--- prior S2: cells C1 and C2 are not both present (C1: 0 points, C2: 7 points) -> envelope not computed
+
+============================== TABLE D -- training quality, independent of BLER (08_SPEC §3.5) ==============================
+D2: GB' = held-out denoising NMSE of the GMM prior vs the diffusion prior on the SAME sigma_t grid. This is a comparison one stage BEFORE BLER and stands on its own.
+
+  [GB' held-out denoising NMSE, GMM vs diffusion]  source: /home/HTJ/t2/conf/results/gate_D2.txt
+    # date        : 2026-09-21 07:49:41 KST
+    # git commit  : 86e43ef
+    # versions    : python 3.12.14  numpy 2.5.2  scipy 1.18.1  torch 2.14.0+cu130 (cuda_available=True)
+    # device      : CPU (192 cores) | dtype: complex128 / float64 | deterministic: yes (fixed seeds, no GPU in the receiver)
+    # testbed     : D2
+    # seed rule   : default_rng([20260926, TBID[testbed], PID[prior], Nr, T, Tp, int(snr)+100])  (trials of a point = ONE stream)
+    # code        : rate-1/2 conv (133,171)_8 nu=6 terminated, QPSK, outer iterations = 16 for EVERY arm
+    # Demo/ hashes: t2_route_a.py=95a5408901ec125c  t2_trellis.py=31cd0ee9c68e972b  t2_gmm.py=d064e58c7510c769
+    # content     : GB' (04_SPEC §6) -- held-out denoising NMSE of the GMM prior vs the diffusion prior
+    #               on the SAME frozen D2 sigma grid.  REPORT ONLY: never used to select anything.
+    # *** The diffusion model here did NOT pass the D1 gates (best GC 0.2241 vs 0.15 over 959 trials).
+    #     It is NOT an arm in any BLER table; M-ours-dscore stays BLOCKED on both testbeds. ***
+    # architecture: copied verbatim from the best-D1-gate-score configuration, NOT re-searched (04_SPEC §6)
+    #               {'arch': 'dit', 'param': 'vp', 'domain': 'angle', 'lr': 0.002238046051591068, 'ema': 0.999, 'batch': 256, 'emb': 256, 'width': 64, 'depth': 6, 'heads': 8, 'patch': 1}
+    # GMM b*      : kron (kron K=512), selected by validation log-likelihood only
+    
+    # ====================================================================================================
+    # CLAIM TESTBED -- sparse specular; conditional Gaussianity broken (see T2d). Upper bound = genie only.
+    # ====================================================================================================
+    
+      k       sigma          nu     nmse_gmm    nmse_diff   diff/gmm
+      0  3.3062e-02  2.1862e-03  1.96957e-03  1.16549e-03     0.5917
+      1  3.9212e-02  3.0751e-03  2.73720e-03  1.56801e-03     0.5729
+      2  4.6505e-02  4.3255e-03  3.79984e-03  2.11633e-03     0.5570
+      3  5.5155e-02  6.0842e-03  5.27361e-03  2.86655e-03     0.5436
+      4  6.5414e-02  8.5579e-03  7.31878e-03  3.89394e-03     0.5320
+      5  7.7581e-02  1.2038e-02  1.01162e-02  5.30787e-03     0.5247
+      6  9.2011e-02  1.6932e-02  1.39474e-02  7.25836e-03     0.5204
+      7  1.0912e-01  2.3816e-02  1.91830e-02  9.98491e-03     0.5205
+      8  1.2942e-01  3.3500e-02  2.62568e-02  1.38006e-02     0.5256
+      9  1.5349e-01  4.7121e-02  3.58583e-02  1.91536e-02     0.5341
+     10  1.8204e-01  6.6280e-02  4.86677e-02  2.66213e-02     0.5470
+     11  2.1590e-01  9.3229e-02  6.55153e-02  3.67515e-02     0.5610
+     12  2.5606e-01  1.3114e-01  8.72491e-02  5.07014e-02     0.5811
+     13  3.0369e-01  1.8445e-01  1.15346e-01  6.98788e-02     0.6058
+     14  3.6018e-01  2.5945e-01  1.50367e-01  9.62760e-02     0.6403
+     15  4.2717e-01  3.6495e-01  1.94292e-01  1.31876e-01     0.6788
+     16  5.0662e-01  5.1333e-01  2.47904e-01  1.79593e-01     0.7244
+     17  6.0085e-01  7.2205e-01  3.12058e-01  2.42089e-01     0.7758
+     18  7.1261e-01  1.0156e+00  3.86964e-01  3.21072e-01     0.8297
+     19  8.4516e-01  1.4286e+00  4.71370e-01  4.13908e-01     0.8781
+    
+    summary: {'testbed': 'D2', 'prior': 'S2', 'n_eval': 512, 'Nr': 8, 'Nt': 4, 'worst_excess': -0.12190518636709069, 'note': "GB' is REPORT-ONLY (04_SPEC §6); arm selection was fixed by the D1 gates"}
+
+  GMM fit table on D2, including the DEGRADATION RELATIVE TO D1 -- the second piece of evidence that the testbed actually broke conditional Gaussianity (08_SPEC §3.5):
+
+  [GMM fits on D2, per K, vs D1]  source: /home/HTJ/t2/conf/results/gmm_fit_D2.txt
+    # date        : 2026-09-20 14:27:54 KST
+    # git commit  : 3f81778
+    # versions    : python 3.12.14  numpy 2.5.2  scipy 1.18.1  torch 2.14.0+cu130 (cuda_available=True)
+    # device      : CPU (192 cores) | dtype: complex128 / float64 | deterministic: yes (fixed seeds, no GPU in the receiver)
+    # testbed     : D2
+    # seed rule   : default_rng([20260926, TBID[testbed], PID[prior], Nr, T, Tp, int(snr)+100])  (trials of a point = ONE stream)
+    # code        : rate-1/2 conv (133,171)_8 nu=6 terminated, QPSK, outer iterations = 16 for EVERY arm
+    # Demo/ hashes: t2_route_a.py=95a5408901ec125c  t2_trellis.py=31cd0ee9c68e972b  t2_gmm.py=d064e58c7510c769
+    # content     : conf/05_SPEC_testbed_D2.md §4 -- GMM re-fit on D2 (prior S2), K (16, 32, 64, 128, 256, 512) x {full, kron} x kappa (0, 16, 64, 256) x restarts, ntrain 10000, n_val = n_test = 5000
+    # selection   : VALIDATION log-likelihood only.  BLER is never consulted (01_RULES §5).
+    # D1 fits     : /home/HTJ/t2/Demo/exp_0925_fits (prior S, K (16, 32, 64)) -- reused verbatim, see DECISIONS
+    # ====================================================================================================
+    # CLAIM TESTBED -- sparse specular; conditional Gaussianity broken (see T2d). Upper bound = genie only.
+    # ====================================================================================================
+    
+    Nr = 4 x Nt = 4
+      fam      K  kappa   ll_train     ll_val      gap    ll_test   -gauss  reseed   EM min
+      full    16      0    -26.196    -26.875    0.679    -26.876    6.844       0      2.3
+      full    32      0    -23.934    -25.354    1.421    -25.346    8.374       0      4.6
+      full    64      0    -22.261    -25.140    2.880    -25.093    8.627       0      5.4
+      full   128      0    -21.174    -26.825    5.651    -26.704    7.017       0      6.1
+      full   256     16    -26.269    -28.036    1.767    -27.950    5.771    3935      4.2
+      full   512     16    -26.238    -28.039    1.801    -28.031    5.689   14363      7.8
+      kron    16      0    -27.615    -27.776    0.161    -27.600    6.121       0      2.2
+      kron    32      0    -26.027    -26.419    0.392    -26.246    7.475       0      5.3
+      kron    64      0    -24.666    -25.386    0.720    -25.215    8.506       0     11.1
+      kron   128      0    -23.442    -24.709    1.268    -24.482    9.239       0     19.1
+      kron   256      0    -22.154    -24.207    2.053    -24.058    9.663       0     32.0
+      kron   512      0    -21.254    -24.133    2.879    -23.941    9.779     970     22.7
+      b* (validation log-likelihood) = kron K=512   ll_val -24.133
+    
+      degradation relative to D1 (05_SPEC §4)
+      Absolute log-likelihoods of two DIFFERENT distributions are not comparable, so the
+      comparable quantity is what the mixture buys over the Gaussian sample-covariance prior
+      on the same held-out set:  G := ll_test(GMM) - ll_test(Gaussian)  [nat/sample].
+      fam      K     G(D2)     G(D1)     D2-D1   gap(D2)   gap(D1)    KL(D1)
+      full    16     6.844     3.276     3.569     0.679     0.477     0.291
+      full    32     8.374     3.245     5.129     1.421     0.270     0.321
+      full    64     8.627     3.239     5.388     2.880     0.321     0.327
+      full   128     7.017       nan       nan     5.651       nan       nan
+      full   256     5.771       nan       nan     1.767       nan       nan
+      full   512     5.689       nan       nan     1.801       nan       nan
+      kron    16     6.121     3.504     2.617     0.161     0.096     0.062
+      kron    32     7.475     3.511     3.963     0.392     0.128     0.055
+      kron    64     8.506     3.500     5.006     0.720     0.174     0.067
+      kron   128     9.239       nan       nan     1.268       nan       nan
+      kron   256     9.663       nan       nan     2.053       nan       nan
+      kron   512     9.779       nan       nan     2.879       nan       nan
+      KL(D1) = KL(true || fit) on the D1 test set [nat/sample]; D2 has no closed-form true
+      density, so no KL column exists there (05_SPEC §3).
+    
+    Nr = 8 x Nt = 4
+      fam      K  kappa   ll_train     ll_val      gap    ll_test   -gauss  reseed   EM min
+      full    16      0    -37.734    -39.932    2.198    -39.346   26.281       0      6.4
+      full    32      0    -32.768    -37.921    5.154    -37.272   28.355       0      8.1
+      full    64      0    -30.647    -40.448    9.801    -39.997   25.630       0      9.4
+      full   128      0    -32.167    -50.113   17.946    -49.492   16.135     103      8.3
+      full   256      0    -33.390    -47.350   13.960    -46.941   18.685    2802      6.9
+      full   512      0    -31.645    -38.853    7.208    -38.201   27.426   23891     16.3
+      kron    16      0    -38.958    -39.574    0.617    -38.927   26.699       0      3.8
+      kron    32      0    -32.368    -33.556    1.188    -32.878   32.749       0      8.7
+      kron    64      0    -26.935    -29.015    2.080    -28.518   37.109       0     21.4
+      kron   128      0    -22.557    -26.116    3.559    -25.820   39.807       0     58.1
+      kron   256      0    -18.080    -23.936    5.856    -23.666   41.961       0     48.4
+      kron   512      0    -14.339    -23.473    9.134    -23.144   42.482    1655     42.1
+      b* (validation log-likelihood) = kron K=512   ll_val -23.473
+    
+      degradation relative to D1 (05_SPEC §4)
+      Absolute log-likelihoods of two DIFFERENT distributions are not comparable, so the
+      comparable quantity is what the mixture buys over the Gaussian sample-covariance prior
+      on the same held-out set:  G := ll_test(GMM) - ll_test(Gaussian)  [nat/sample].
+      fam      K     G(D2)     G(D1)     D2-D1   gap(D2)   gap(D1)    KL(D1)
+      full    16    26.281     8.173    18.107     2.198     1.786     1.302
+      full    32    28.355     8.106    20.248     5.154     1.517     1.369
+      full    64    25.630     8.121    17.509     9.801     1.587     1.355
+      full   128    16.135       nan       nan    17.946       nan       nan
+      full   256    18.685       nan       nan    13.960       nan       nan
+      full   512    27.426       nan       nan     7.208       nan       nan
+      kron    16    26.699     9.233    17.466     0.617     0.082     0.242
+      kron    32    32.749     9.277    23.471     1.188     0.261     0.198
+      kron    64    37.109     9.188    27.920     2.080     0.497     0.287
+      kron   128    39.807       nan       nan     3.559       nan       nan
+      kron   256    41.961       nan       nan     5.856       nan       nan
+      kron   512    42.482       nan       nan     9.134       nan       nan
+      KL(D1) = KL(true || fit) on the D1 test set [nat/sample]; D2 has no closed-form true
+      density, so no KL column exists there (05_SPEC §3).
