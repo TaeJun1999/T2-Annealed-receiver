@@ -1,0 +1,180 @@
+F21 -- every baseline and the proposed V1 on every channel model; equal budget N_train = 1.6e5, n = 2560 per SNR, BLER@16 unless stated.  Recomputed from raw by code/figure_f21.py (read-only).
+
+(a) D2 sparse specular, 8×4 (headline) -- raw_B16e4k, cell C2, prior S2, D1-sibling gate PASS; b* = kron K=1024.  Failures / 2560 at SNR -3 +0 +3 +6 +9 +12 +15 dB:
+    SBL-loop            @16    705   222    77    48    25    27    10   (raw_SPB16e4k)
+    SBL-pilot           @16    934   244    69    51    27    28    10   (raw_SPB16e4k)
+    OMP-pilot           @16   1023   342   145    77    62    60    34   (raw_SPB16e4k)
+    R3-bigamp           @16   1391   539   205   135   130   147   142
+    R1-turbo            @16   1389   540   204   101    62    45    21
+    R2-ours-G           @16    839   261    97    57    31    29    15
+    M-ours-bstar        @16    623   184    57    28    17    16     8
+    M-ours-dscore-C-V1  @16    371    88    29    16     7     5     3
+    R5-genie            @16     87    26    12     9     2     2     2
+    (not drawn) R0-pilot               1220   340   105    63    35    28    14
+    (not drawn) R4-scvamp              1561   781   381   250   178   124    95
+    (not drawn) R4-llr                 2217  2131  1535  1021   702   497   437
+    (not drawn) M-ours-gmm32            675   214    86    39    30    24     9
+    (not drawn) M-ours-dscore-C-V0     1517  2162  2439  2428  2326  2091  1143
+    (not drawn) M-ours-dscore-C-V4      394    96    21    16     8     6     4
+    (not drawn) M-ours-dscore-C-V4b     413   101    25    16     7     5     5
+    (not drawn) M-ours-bstar-scalar     657   198    58    43    18    23     8
+    zero-failure points (not drawn on the log axis): none
+(b) D2 sparse specular, 16×4 (C6) -- raw_NR16B16e4, cell C6, prior S2, UNGATED; b* = kron K=4096.  Failures / 2560 at SNR -3 +0 +3 +6 +9 +12 +15 dB:
+    SBL-loop            @16    251    99    51    27     8    10     7   (raw_SPNR16)
+    SBL-pilot           @16    291   107    53    33    15    15     7   (raw_SPNR16)
+    OMP-pilot           @16    207   120    65    39    22    14    13   (raw_SPNR16)
+    R3-bigamp           @16   1066   479   237   147   134   163   130
+    R1-turbo            @16    663   269   140    79    40    29    12
+    R2-ours-G           @16    295   107    66    35    22    10     8
+    M-ours-bstar        @16    184    61    32    22    14    10     5
+    M-ours-dscore-C-V1  @16     53    20     9     6     2     2     2
+    R5-genie            @16     22    10     8     6     1     2     0
+    (not drawn) R0-pilot                376   120    70    41    22    12     8
+    (not drawn) R4-scvamp               814   367   235   145    91    71    52
+    (not drawn) R4-llr                 2153  1353   772   434   306   229   178
+    (not drawn) M-ours-gmm32            230    98    47    20    20    10     7
+    (not drawn) M-ours-dscore-C-V0     2560  2560  2560  2559  2555  2507  2331
+    (not drawn) M-ours-dscore-C-V4       65    23    12     6     1     2     2
+    (not drawn) M-ours-dscore-C-V4b      76    29    12     5     1     2     2
+    (not drawn) M-ours-bstar-scalar     207    95    38    26    16    13     6
+    zero-failure points (not drawn on the log axis): Perfect CSI +15
+(c) D3: D2 geometry, CN path gains -- raw_D3B16e4, cell C2, prior S2c, UNGATED; b* = kron K=4096.  Failures / 2560 at SNR -3 +0 +3 +6 +9 +12 +15 dB:
+    SBL-loop            @16   1352   617   242   143    62    53    16   (raw_SPD3)
+    SBL-pilot           @16   1528   735   287   154    67    47    16   (raw_SPD3)
+    OMP-pilot           @16   1575   817   370   221   116    71    49   (raw_SPD3)
+    R3-bigamp           @16   1902  1139   573   403   294   348   356
+    R1-turbo            @16   1810  1163   561   298   136    84    40
+    R2-ours-G           @16   1454   749   304   199    75    57    22
+    M-ours-bstar        @16   1298   586   226   111    53    36    12
+    M-ours-dscore-C-V1  @16   1000   404   129    64    27    22     5
+    R5-genie            @16    485   149    47    35    10    14     3
+    (not drawn) R0-pilot               1738   926   401   218    97    60    30
+    (not drawn) R4-scvamp              1932  1352   814   522   288   207   160
+    (not drawn) R4-llr                 2317  2167  1827  1496   980   754   541
+    (not drawn) M-ours-gmm32           1375   638   283   147    69    40    18
+    (not drawn) M-ours-dscore-C-V0     1496  1271  1642  1913  1914  1789  1302
+    (not drawn) M-ours-dscore-C-V4     1007   405   136    77    24    19     6
+    (not drawn) M-ours-dscore-C-V4b    1044   411   137    73    25    19     6
+    (not drawn) M-ours-bstar-scalar    1302   603   229   123    57    36    15
+    zero-failure points (not drawn on the log axis): none
+(d) SV8e: clustered Saleh–Valenzuela -- raw_SVB16e4, cell C2, prior SV8e, UNGATED; b* = full K=256.  Failures / 2560 at SNR -3 +0 +3 +6 +9 +12 +15 dB:
+    SBL-loop            @16    574    88    12     2     0     0     0   (raw_SPSV)
+    SBL-pilot           @16    926   143    24     3     0     0     0   (raw_SPSV)
+    OMP-pilot           @16   1493   379    64    12     1     0     0   (raw_SPSV)
+    R3-bigamp           @16   1181   263    56    25    17    14    26
+    R1-turbo            @16   1014   251    48     5     2     0     1
+    R2-ours-G           @16    599    82    15     2     0     0     0
+    M-ours-bstar        @16    464    60     7     0     0     0     0
+    M-ours-dscore-C-V1  @16    402    46     5     0     0     0     0
+    R5-genie            @16     31     3     0     1     0     0     0
+    (not drawn) R0-pilot               1010   154    23     6     1     0     0
+    (not drawn) R4-scvamp              1240   407   112    40     4     1     3
+    (not drawn) R4-llr                 2144  1901  1006   339   112    51    24
+    (not drawn) M-ours-gmm32            499    62     8     0     0     0     0
+    (not drawn) M-ours-dscore-C-V0      423   103    81    95    48    24    34
+    (not drawn) M-ours-dscore-C-V4      418    41     4     0     0     0     0
+    (not drawn) M-ours-dscore-C-V4b     429    38     4     0     0     0     0
+    (not drawn) M-ours-bstar-scalar     478    57     6     1     0     0     0
+    zero-failure points (not drawn on the log axis): SBL (in loop) +9; SBL (in loop) +12; SBL (in loop) +15; SBL (pilot-only) +9; SBL (pilot-only) +12; SBL (pilot-only) +15; OMP (pilot-only) +12; OMP (pilot-only) +15; Turbo LMMSE receiver +12; Gaussian prior +9; Gaussian prior +12; Gaussian prior +15; GMM prior +6; GMM prior +9; GMM prior +12; GMM prior +15; Proposed +6; Proposed +9; Proposed +12; Proposed +15; Perfect CSI +3; Perfect CSI +9; Perfect CSI +12; Perfect CSI +15
+(e) 3GPP 38.901 UMi 28 GHz -- raw_U28B16e4, cell C2, prior UMi28, UNGATED; b* = kron K=4096.  Failures / 2560 at SNR -3 +0 +3 +6 +9 +12 +15 dB:
+    SBL-loop            @16   1453   843   522   291   150    66    42   (raw_SPU28)
+    SBL-pilot           @16   1740   941   578   307   166    77    44   (raw_SPU28)
+    OMP-pilot           @16   2304  1377   797   492   278   152    80   (raw_SPU28)
+    R3-bigamp           @16   1864  1197   893   745   715   777   766
+    R1-turbo            @16   1821  1130   742   440   228   107    57
+    R2-ours-G           @16   1458   861   574   334   172    80    48
+    M-ours-bstar        @16   1270   714   431   243   126    69    27
+    M-ours-dscore-C-V1  @16   1228   656   393   215   104    44    24
+    R5-genie            @16    594   302   131    58    26     8     3
+    (not drawn) R0-pilot               1781   990   644   371   190    92    51
+    (not drawn) R4-scvamp              1956  1373   949   633   395   254   144
+    (not drawn) R4-llr                 2335  2170  1722  1256   928   655   434
+    (not drawn) M-ours-gmm32           1335   757   501   288   149    75    42
+    (not drawn) M-ours-dscore-C-V0     1704  1348  1196  1045   884   693   562
+    (not drawn) M-ours-dscore-C-V4     1243   677   390   223   101    38    23
+    (not drawn) M-ours-dscore-C-V4b    1240   690   400   219   104    42    24
+    (not drawn) M-ours-bstar-scalar    1289   712   440   255   129    67    26
+    zero-failure points (not drawn on the log axis): none
+(f) 3GPP 38.901 MIX3 (side point) -- raw_MXB16e4, cell C2, prior MIX3, UNGATED, report-only; b* = kron K=4096.  Failures / 2560 at SNR -3 +0 +3 +6 +9 +12 +15 dB:
+    SBL-loop            @16   1573   988   536   317   183    84    31   (raw_SPMX)
+    SBL-pilot           @16   1811  1152   606   351   193    94    40   (raw_SPMX)
+    OMP-pilot           @16   2215  1597   909   601   358   207    93   (raw_SPMX)
+    R3-bigamp           @16   1999  1426   970   758   753   793   785
+    R1-turbo            @16   1935  1377   877   540   303   140    79
+    R2-ours-G           @16   1613  1065   641   378   214   103    49
+    M-ours-bstar        @16   1421   844   425   243   135    58    16
+    M-ours-dscore-C-V1  @16   1354   789   379   193   104    41    17
+    R5-genie            @16    679   358   143    68    35    13     2
+    (not drawn) R0-pilot               1896  1227   694   408   236   113    58
+    (not drawn) R4-scvamp              2075  1609  1145   857   600   401   249
+    (not drawn) R4-llr                 2365  2258  1909  1472  1265   968   670
+    (not drawn) M-ours-gmm32           1458   894   497   279   163    78    25
+    (not drawn) M-ours-dscore-C-V0     2025  1808  1675  1491  1327  1091   856
+    (not drawn) M-ours-dscore-C-V4     1354   798   391   215   105    45    19
+    (not drawn) M-ours-dscore-C-V4b    1356   814   396   216   110    45    19
+    (not drawn) M-ours-bstar-scalar    1423   867   435   258   141    62    20
+    zero-failure points (not drawn on the log axis): none
+
+Only the registered comparison is tested (table B b* -> V1 per registration); every other arm is shown, not tested.  D2 C6 and every non-D2 channel model are UNGATED measurements; MIX3 is a registered report-only side point.  R3-bigamp cannot take a correlated prior (structural); R4 arms are interface adaptations of the cited method.  genie is a known-channel reference, not a bound.
+
+FIGHS16e4 merge (REPORT-ONLY, NEXT_EXPERIMENTS_FIGHS16e4 §1): the record above is the original raws' (n = 2560, unchanged; its zero-failure / 'not drawn' notes refer to those points).  Drawn: -3/0/+3 dB = those counts, +6/+9/+12/+15 dB = the counts below (new trials 10000..30479, n = 20480 per SNR; one point = one raw, never pooled).  'rising' = a cell of the drawn curve where BLER rises with SNR, with its one-sided Fisher p (independent trials per SNR; the +3 -> +6 dB cell compares the two trial sets; §1: reported, no smoothing / re-run / dropped point):
+  (a) raw_B16e4k + raw_SPB16e4k, cell C2:
+    SBL-loop            @16  363/20480 204/20480 116/20480 87/20480   (raw_FHSPB16e4k)
+    SBL-pilot           @16  378/20480 204/20480 140/20480 88/20480   (raw_FHSPB16e4k)
+    OMP-pilot           @16  618/20480 472/20480 368/20480 298/20480   (raw_FHSPB16e4k)
+    R3-bigamp           @16  1083/20480 1033/20480 1116/20480 1100/20480   (raw_HSB16e4k)   rising: +9->+12 dB p=0.035
+    R1-turbo            @16  903/20480 521/20480 291/20480 204/20480   (raw_HSB16e4k)
+    R2-ours-G           @16  467/20480 292/20480 182/20480 133/20480   (raw_HSB16e4k)
+    M-ours-bstar        @16  235/20480 149/20480 81/20480 72/20480   (raw_HSB16e4k)
+    M-ours-dscore-C-V1  @16  111/20480 59/20480 39/20480 23/20480   (raw_HSB16e4k)
+    R5-genie            @16  66/20480 36/20480 16/20480 13/20480   (raw_HSB16e4k)
+  (b) raw_NR16B16e4 + raw_SPNR16, cell C6:
+    SBL-loop            @16  251/20480 154/20480 102/20480 62/20480   (raw_FHSPNR16)
+    SBL-pilot           @16  260/20480 174/20480 119/20480 67/20480   (raw_FHSPNR16)
+    OMP-pilot           @16  390/20480 282/20480 164/20480 146/20480   (raw_FHSPNR16)
+    R3-bigamp           @16  1090/20480 1265/20480 1418/20480 1099/20480   (raw_HSNR16)   rising: +6->+9 dB p=0.00011; +9->+12 dB p=0.0012
+    R1-turbo            @16  621/20480 433/20480 264/20480 157/20480   (raw_HSNR16)
+    R2-ours-G           @16  309/20480 213/20480 125/20480 80/20480   (raw_HSNR16)
+    M-ours-bstar        @16  178/20480 130/20480 72/20480 46/20480   (raw_HSNR16)
+    M-ours-dscore-C-V1  @16  29/20480 24/20480 20/20480 13/20480   (raw_HSNR16)
+    R5-genie            @16  17/20480 16/20480 7/20480 7/20480   (raw_HSNR16)
+  (c) raw_D3B16e4 + raw_SPD3, cell C2:
+    SBL-loop            @16  1028/20480 500/20480 332/20480 167/20480   (raw_FHSPD3)
+    SBL-pilot           @16  1084/20480 551/20480 349/20480 164/20480   (raw_FHSPD3)
+    OMP-pilot           @16  1627/20480 1081/20480 645/20480 450/20480   (raw_FHSPD3)
+    R3-bigamp           @16  2991/20480 2656/20480 2882/20480 2720/20480   (raw_FHD3B16e4)   rising: +9->+12 dB p=0.00057
+    R1-turbo            @16  2148/20480 1164/20480 678/20480 380/20480   (raw_FHD3B16e4)
+    R2-ours-G           @16  1237/20480 750/20480 436/20480 234/20480   (raw_FHD3B16e4)
+    M-ours-bstar        @16  788/20480 429/20480 225/20480 142/20480   (raw_FHD3B16e4)
+    M-ours-dscore-C-V1  @16  399/20480 182/20480 101/20480 55/20480   (raw_FHD3B16e4)
+    R5-genie            @16  182/20480 107/20480 57/20480 26/20480   (raw_FHD3B16e4)
+  (d) raw_SVB16e4 + raw_SPSV, cell C2:
+    SBL-loop            @16  14/20480 5/20480 0/20480 0/20480   (raw_FHSPSV)
+    SBL-pilot           @16  12/20480 5/20480 0/20480 0/20480   (raw_FHSPSV)
+    OMP-pilot           @16  85/20480 17/20480 3/20480 1/20480   (raw_FHSPSV)
+    R3-bigamp           @16  181/20480 155/20480 120/20480 132/20480   (raw_FHSVB16e4)   rising: +12->+15 dB p=0.24
+    R1-turbo            @16  58/20480 22/20480 2/20480 0/20480   (raw_FHSVB16e4)
+    R2-ours-G           @16  14/20480 6/20480 0/20480 0/20480   (raw_FHSVB16e4)
+    M-ours-bstar        @16  10/20480 3/20480 0/20480 0/20480   (raw_FHSVB16e4)
+    M-ours-dscore-C-V1  @16  2/20480 1/20480 1/20480 0/20480   (raw_FHSVB16e4)
+    R5-genie            @16  1/20480 0/20480 0/20480 0/20480   (raw_FHSVB16e4)   rising: +3->+6 dB p=0.89
+  (e) raw_U28B16e4 + raw_SPU28, cell C2:
+    SBL-loop            @16  2392/20480 1293/20480 627/20480 236/20480   (raw_FHSPU28)
+    SBL-pilot           @16  2576/20480 1408/20480 669/20480 268/20480   (raw_FHSPU28)
+    OMP-pilot           @16  4006/20480 2290/20480 1186/20480 550/20480   (raw_FHSPU28)
+    R3-bigamp           @16  6021/20480 5791/20480 6126/20480 6030/20480   (raw_FHU28B16e4)   rising: +9->+12 dB p=0.00014
+    R1-turbo            @16  3585/20480 1911/20480 949/20480 392/20480   (raw_FHU28B16e4)
+    R2-ours-G           @16  2798/20480 1529/20480 769/20480 323/20480   (raw_FHU28B16e4)
+    M-ours-bstar        @16  2029/20480 1079/20480 546/20480 223/20480   (raw_FHU28B16e4)
+    M-ours-dscore-C-V1  @16  1746/20480 866/20480 386/20480 145/20480   (raw_FHU28B16e4)
+    R5-genie            @16  525/20480 216/20480 81/20480 23/20480   (raw_FHU28B16e4)
+  (f) raw_MXB16e4 + raw_SPMX, cell C2:
+    SBL-loop            @16  2480/20480 1265/20480 655/20480 320/20480   (raw_FHSPMX)
+    SBL-pilot           @16  2691/20480 1420/20480 723/20480 334/20480   (raw_FHSPMX)
+    OMP-pilot           @16  4606/20480 2693/20480 1555/20480 828/20480   (raw_FHSPMX)
+    R3-bigamp           @16  6258/20480 5952/20480 6266/20480 6284/20480   (raw_FHMXB16e4)   rising: +9->+12 dB p=0.00036; +12->+15 dB p=0.43
+    R1-turbo            @16  4063/20480 2233/20480 1220/20480 568/20480   (raw_FHMXB16e4)
+    R2-ours-G           @16  2876/20480 1603/20480 855/20480 428/20480   (raw_FHMXB16e4)
+    M-ours-bstar        @16  1840/20480 963/20480 444/20480 225/20480   (raw_FHMXB16e4)
+    M-ours-dscore-C-V1  @16  1499/20480 702/20480 313/20480 141/20480   (raw_FHMXB16e4)
+    R5-genie            @16  482/20480 184/20480 73/20480 42/20480   (raw_FHMXB16e4)
