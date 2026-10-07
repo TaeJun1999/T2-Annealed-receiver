@@ -41,3 +41,4 @@
 - 원격 옛 `conference` 브랜치는 지우지 않는다 (사용자 "일단 지우지 마").
 - F17: 그림은 그대로, 캡션에 가중치 종류를 밝힌다 (사용자 "캡션에 밝히는게 좋겠다").
 - 표 I: "너무 큰 table은 안돼" → 본문용 `conference/tables/table1_small.tex` (단 높이 0.41); 큰 판 둘은 arXiv 확장판용.
+- (2026-10-07 18:16 CDT) paper 브랜치에 **실험 결과 기록 전부**를 싣는다 (사용자 "실험 결과들 모두 paper 이쪽으로 push하자"): `conference/tools/sync_paper_branch.sh` 가 원고 자료에 더해 main 이 추적하는 `conf/results/`·`conf/figs/` 의 결과 기록 1388 파일 (표·수용·매니페스트·감사·기록판 그림) 을 함께 올린다. 싣지 않는 것: raw 시행 데이터 (git 밖, 서버에만), 배열 데이터 (.npz 등 — main 에는 있음), 실험 코드, 로그.
