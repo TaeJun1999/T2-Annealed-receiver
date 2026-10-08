@@ -47,6 +47,7 @@
 | SNR@0.1 격차 b\* − V1 | SNR gain at BLER 0.1 [dB] (> 0: proposed better) |
 | R, R_dp, R_X, "recovery … over the decision points", "b\*→genie gap closed by V1" | Fraction of the GMM-to-perfect-CSI gap closed (기준선이 GMM 이 아니면 "baseline-to-perfect-CSI gap") |
 | N_train, "equal training budget" | Training set size N_train (channels) — 동일예산은 캡션에 |
+| N_train — 한 단 판 (`…_col`; 지금은 `F16b_col`) 의 x 축 | Training set size N′ (channels) — 한 단 판의 x 축은 원고 표기 N′ 를 쓴다 (`$\mathit{N}$` + U+2032; 이 표의 N_train 에 대한 예외) |
 | kron K=… | K = … (GMM components) |
 
 ## 그림에서 지우는 것 (캡션이나 본문으로)
