@@ -1,0 +1,135 @@
+F16deep -- the headline cell: D2 C2 (Sparse specular 8x4, T=16, Tp=4), prior S2, BLER@16 unless stated; (a) at the equal budget N_train = 1.6e5 (checkpoint d2sx_N160000_a1.pt, last-epoch EMA; b* = kron K=1024), (b) at -3 dB over the six budgets.  Recomputed from raw by conference/figures/paper_f16deep.py (read-only; analysis.load_raw, a raised block = a failure); no number transcribed.
+
+F16deep_wide  7.16 x 2.75 in (515.52 x 198.00 pt), one figure* file, two panels, one legend; every panel draws the curves of that legend (11 curves).
+
+Selection.  User, 2026-10-09 CDT, in the session that made this file (verbatim): "모든 figure에 같은 legend의 그래프가 포함되어야 해."; "한 figure에 20개를 다 넣을 수는 없지 않아? 우리 proposed 가 잘 부각되는 것으로 골라서 그리자. 필수 baseline(OMP 등등)은 반드시 포함시키고".  Rule applied by the recorder: drawn = the seven curves of the present Fig. 2 (a) + the receivers / estimators in the form the literature gives them (Turbo LMMSE receiver, BiG-AMP, Pilot-only LMMSE, Annealed Langevin with the plug-in use of the estimate); not drawn = the authors' own variants, adaptations and controls (GMM prior with K = 32 / scalar site / pilots only; the two SC-VAMP adaptations; the error-aware Annealed Langevin variant; the proposed prior on the pilots only; V0; V4).  Selection condition (asserted, point estimates, exact in integers -- a condition the drawn set was chosen to meet, not a test result): the proposed curve is below every other drawn curve except Perfect CSI at each of the 7 SNRs of (a) and at each budget of (b), and above Perfect CSI everywhere.  This figure tests nothing; the registered paired tests are in the files named below.
+
+Drawn, in legend order (internal arm -> figure name; where it is in (b)) -- 11 curves:
+    M-ours-dscore-C-V1   -> Proposed (diffusion prior)   (b): the six budgets
+    ALD-pilot            -> Annealed Langevin (plug-in)  (b): N' = 1.6e5 only (no raw at the other budgets)
+    M-ours-bstar         -> GMM prior                    (b): the six budgets
+    R2-ours-G            -> Gaussian prior               (b): the six budgets
+    R1-turbo             -> Turbo LMMSE receiver         (b): the six budgets
+    R3-bigamp            -> BiG-AMP                      (b): the six budgets
+    R0-pilot@1           -> Pilot-only LMMSE             (b): the six budgets
+    SBL-loop             -> SBL (in loop)                (b): N' = 1.6e5 only (no raw at the other budgets)
+    SBL-pilot            -> SBL (pilot-only)             (b): N' = 1.6e5 only (no raw at the other budgets)
+    OMP-pilot            -> OMP (pilot-only)             (b): N' = 1.6e5 only (no raw at the other budgets)
+    R5-genie             -> Perfect CSI                  (b): the six budgets
+
+Registered SNR gain at BLER 0.1 of the proposed prior over each of the 16 baselines [dB] and the table-B label (results/review_next/pairB_SPB16e4k.txt), smallest gain first; * = not drawn:
+    *Proposed prior, pilot-only +0.92 (i); GMM prior +1.41 (i); *Annealed Langevin (error-aware) +1.54 (i); *GMM prior, scalar site +1.58 (i); *GMM prior (K = 32) +1.76 (i); Annealed Langevin (plug-in) +1.82 (i); SBL (in loop) +1.86 (i); *GMM prior, pilot-only +1.99 (i); SBL (pilot-only) +2.12 (i); Gaussian prior +2.29 (i); OMP (pilot-only) +3.24 (i); Turbo LMMSE receiver +4.53 (i); BiG-AMP +4.54 (i); *SC-VAMP +8.06 (i); Pilot-only LMMSE +8.25 (i); *SC-VAMP (LLR) >= +17.23 (i).
+    The 7 not-drawn baselines are ranks 1, 3, 4, 5, 8, 14, 16 of 16 (1 = nearest to the proposed prior).  Annealed Langevin: the drawn curve is the plug-in use; the error-aware variant (the authors' addition, the stronger of the two in NEXT_EXPERIMENTS_ALD16e4) is not drawn.  Diffusion prior, scalar site (V4) is a control, not one of the 16: SNR gain +0.14 dB, label (iii) = not decided (results/review_next/pairB_SITEB16e4k.txt; rule-fixed post-hoc computation SITE16e4).
+
+(a) Failures / trials per SNR -3 +0 +3 +6 +9 +12 +15 dB and the source raw of each point (one point = one raw, never pooled; FIGHS16e4 §1 through fighs_merge.merge; 'rising' = a cell where BLER rises with SNR, one-sided Fisher p, reported only):
+    M-ours-dscore-C-V1   371/2560 88/2560 29/2560 111/20480 59/20480 39/20480 23/20480   -3..+3 dB raw_B16e4k, +6..+15 dB raw_HSB16e4k
+    ALD-pilot            833/2560 213/2560 66/2560 39/2560 11/2560 11/2560 9/2560   -3..+3 dB raw_ALDB16e4k, +6..+15 dB raw_ALDB16e4k (n = 2560 at every SNR: no n = 20480 raw has this arm)
+    M-ours-bstar         623/2560 184/2560 57/2560 235/20480 149/20480 81/20480 72/20480   -3..+3 dB raw_B16e4k, +6..+15 dB raw_HSB16e4k
+    R2-ours-G            839/2560 261/2560 97/2560 467/20480 292/20480 182/20480 133/20480   -3..+3 dB raw_B16e4k, +6..+15 dB raw_HSB16e4k
+    R1-turbo             1389/2560 540/2560 204/2560 903/20480 521/20480 291/20480 204/20480   -3..+3 dB raw_B16e4k, +6..+15 dB raw_HSB16e4k
+    R3-bigamp            1391/2560 539/2560 205/2560 1083/20480 1033/20480 1116/20480 1100/20480   -3..+3 dB raw_B16e4k, +6..+15 dB raw_HSB16e4k   rising: +9->+12 dB p=0.035
+    R0-pilot@1           1918/2560 993/2560 462/2560 2216/20480 1379/20480 951/20480 715/20480   -3..+3 dB raw_B16e4k, +6..+15 dB raw_FHB16e4k
+    SBL-loop             705/2560 222/2560 77/2560 363/20480 204/20480 116/20480 87/20480   -3..+3 dB raw_SPB16e4k, +6..+15 dB raw_FHSPB16e4k
+    SBL-pilot            934/2560 244/2560 69/2560 378/20480 204/20480 140/20480 88/20480   -3..+3 dB raw_SPB16e4k, +6..+15 dB raw_FHSPB16e4k
+    OMP-pilot            1023/2560 342/2560 145/2560 618/20480 472/20480 368/20480 298/20480   -3..+3 dB raw_SPB16e4k, +6..+15 dB raw_FHSPB16e4k
+    R5-genie             87/2560 26/2560 12/2560 66/20480 36/20480 16/20480 13/20480   -3..+3 dB raw_B16e4k, +6..+15 dB raw_HSB16e4k
+
+(b) Failures / 2560 at -3 dB over the training budgets (test trials 0..2559 at every budget; last-epoch EMA weights; the GMM fit and the score network use the same N_train channels; the same six raws as F16 (b)):
+    N_train                  1e+04     4e+04   1.6e+05   3.2e+05   6.4e+05  1.28e+06
+    raw_                      B1e4     B4e4k    B16e4k B32e4last B64e4last B128e4last
+    K of the GMM prior         512      2048      1024      4096      4096      4096
+    D1-sibling gate           FAIL      FAIL      PASS      PASS      PASS      PASS   (recipe gate, as records/paper_f16.txt; FAIL = budget-axis measurement)
+    M-ours-dscore-C-V1         372       370       371       368       375       369
+    M-ours-bstar               646       635       623       610       591       583
+    R2-ours-G                  841       837       839       838       841       846
+    R1-turbo                  1374      1391      1389      1392      1395      1392
+    R3-bigamp                 1391      1391      1391      1391      1391      1391
+    R0-pilot@1                1927      1920      1918      1920      1919      1919
+    R5-genie                    87        87        87        87        87        87
+    ALD-pilot                    -         -       833         -         -         -   (raw_ALDB16e4k: N' = 1.6e5 only)
+    SBL-loop                     -         -       705         -         -         -   (raw_SPB16e4k: N' = 1.6e5 only)
+    SBL-pilot                    -         -       934         -         -         -   (raw_SPB16e4k: N' = 1.6e5 only)
+    OMP-pilot                    -         -      1023         -         -         -   (raw_SPB16e4k: N' = 1.6e5 only)
+  The sparse baselines use no training set and Annealed Langevin uses the 1.6e5 network of the proposed prior; they were run at 1.6e5 only, so (b) shows their one point.  Perfect CSI is the same at the six budgets (asserted).
+
+(a): +6..+15 dB from n = 20480 new trials (trials 10000..30479), 10 of the drawn curves: Proposed (diffusion prior) (raw_HSB16e4k); GMM prior (raw_HSB16e4k); Gaussian prior (raw_HSB16e4k); Turbo LMMSE receiver (raw_HSB16e4k); BiG-AMP (raw_HSB16e4k); Pilot-only LMMSE (raw_FHB16e4k); SBL (in loop) (raw_FHSPB16e4k); SBL (pilot-only) (raw_FHSPB16e4k); OMP (pilot-only) (raw_FHSPB16e4k); Perfect CSI (raw_HSB16e4k).
+(a): n = 2560 (the original test trials 0..2559) at EVERY SNR -- no n = 20480 raw has the arm -- 1 of the drawn curves, to be named in the caption: Annealed Langevin (plug-in).
+Pilot-only LMMSE = R0-pilot read after the FIRST iteration (alias 'R0-pilot@1' of analysis.load_raw = blk_err[:, 0]; the manuscript's definition and the registered baseline, pair_baselines --r0 at1).  raw_FHB16e4k holds R0-pilot with all 16 iterations, so this reading has n = 20480 points (asserted against the 'R0-pilot@1' rows of results/review_next/fighs_FHB16e4k.txt; the task prompt expected n = 2560).  NEXT_EXPERIMENTS_FIGHS16e4 §1 calls that alias row a reference row its own figures and predictions do not use (they read every arm @16; raw_FHB16e4k was run for the @16 reading of F22 (a)), and fighs_merge.hs_tag does not route the alias (this script maps it to its arm's raw): F16deep_wide is the first figure that draws those n = 20480 points -- the §1 'one point = one raw' rule extended to the @1 reading; same accepted raw, report-only.  From the original raw at every SNR the curve would be 1918/2560 993/2560 462/2560 257/2560 165/2560 121/2560 93/2560.  F22 (a) draws the same receiver after 16 iterations: R0-pilot             1220/2560 340/2560 105/2560 518/20480 311/20480 203/20480 137/20480   -3..+3 dB raw_B16e4k, +6..+15 dB raw_FHB16e4k.  At -3 dB: @1 1918/2560, @16 1220/2560.
+Error bars (95% Wilson, each point's own n): Proposed (diffusion prior); GMM prior; Gaussian prior; Perfect CSI only, in both panels; the other curves have none.
+Drawn curves with a cell where BLER rises with SNR: BiG-AMP (+9->+12 dB p=0.035).
+Zero-failure points: none (no arrow, no broken curve).
+y axis of (a): (0.0002, 1.2) -- the prompt's limit 0.0002 applied: lowest point 6.348e-04 (Perfect CSI, +15 dB), lowest error-bar end 3.710e-04 (Perfect CSI, +15 dB), zero-failure points 0.
+Markers of two drawn curves with centres closer than 1.5 pt (one hides or touches the other): (a) GMM prior / Annealed Langevin (plug-in) at +12 dB, +15 dB; Gaussian prior / Annealed Langevin (plug-in) at -3 dB; Gaussian prior / SBL (pilot-only) at +0 dB; Annealed Langevin (plug-in) / SBL (in loop) at +0 dB; Annealed Langevin (plug-in) / SBL (pilot-only) at +3 dB; Turbo LMMSE receiver / BiG-AMP at -3 dB, +0 dB, +3 dB; Turbo LMMSE receiver / OMP (pilot-only) at +9 dB; SBL (in loop) / SBL (pilot-only) at +0 dB, +6 dB, +9 dB, +15 dB; SBL (pilot-only) / OMP (pilot-only) at -3 dB; (b) Gaussian prior / Annealed Langevin (plug-in) at 1.6e+05; Turbo LMMSE receiver / BiG-AMP at 1e+04, 4e+04, 1.6e+05, 3.2e+05, 6.4e+05, 1.28e+06.
+
+Not drawn (9 of the 20 curves read; manuscript main c7b6762: Table I covers the 16 baselines of this cell in five rows -- GMM prior, Pilot-only proposed prior, Annealed Langevin (error-aware) and SBL (in loop) by name, the other 12 as one range row; V0 and V4 are in its text) -- counts as above; the points of (a) where the curve's point estimate is at or below the proposed curve's (failures/trials vs the proposed curve's), and the SNRs where it is above but inside the proposed curve's drawn 95% Wilson bar:
+    Diffusion prior, scalar site:
+        M-ours-dscore-C-V4   394/2560 96/2560 21/2560 16/2560 8/2560 6/2560 4/2560   -3..+3 dB raw_B16e4k, +6..+15 dB raw_B16e4k (n = 2560 at every SNR: no n = 20480 raw has this arm)
+        at or below the proposed curve: +3 dB 21/2560 vs 29/2560;  inside its bar: -3, +0, +6, +9, +12, +15 dB
+    Diffusion prior, unrepaired:
+        M-ours-dscore-C-V0   1517/2560 2162/2560 2439/2560 2428/2560 2326/2560 2091/2560 1143/2560   -3..+3 dB raw_B16e4k, +6..+15 dB raw_B16e4k (n = 2560 at every SNR: no n = 20480 raw has this arm)   rising: -3->+0 dB p=8.5e-92; +0->+3 dB p=2.1e-39
+        at or below the proposed curve: nowhere;  inside its bar: nowhere
+    Proposed prior, pilot-only:
+        V1-pilot             626/2560 128/2560 30/2560 119/20480 62/20480 33/20480 27/20480   -3..+3 dB raw_PILB16e4k, +6..+15 dB raw_FHPILB16e4k
+        at or below the proposed curve: +12 dB 33/20480 vs 39/20480;  inside its bar: +3, +6, +9, +15 dB
+    Annealed Langevin (error-aware):
+        ALDv-pilot           852/2560 179/2560 51/2560 21/2560 7/2560 6/2560 5/2560   -3..+3 dB raw_ALDB16e4k, +6..+15 dB raw_ALDB16e4k (n = 2560 at every SNR: no n = 20480 raw has this arm)
+        at or below the proposed curve: +9 dB 7/2560 vs 59/20480;  inside its bar: +12 dB
+    GMM prior (K = 32):
+        M-ours-gmm32         675/2560 214/2560 86/2560 39/2560 30/2560 24/2560 9/2560   -3..+3 dB raw_B16e4k, +6..+15 dB raw_B16e4k (n = 2560 at every SNR: no n = 20480 raw has this arm)
+        at or below the proposed curve: nowhere;  inside its bar: nowhere
+    GMM prior, scalar site:
+        M-ours-bstar-scalar  657/2560 198/2560 58/2560 43/2560 18/2560 23/2560 8/2560   -3..+3 dB raw_B16e4k, +6..+15 dB raw_B16e4k (n = 2560 at every SNR: no n = 20480 raw has this arm)   rising: +9->+12 dB p=0.27
+        at or below the proposed curve: nowhere;  inside its bar: nowhere
+    GMM prior, pilot-only:
+        bstar-pilot          978/2560 228/2560 55/2560 254/20480 152/20480 92/20480 82/20480   -3..+3 dB raw_PILB16e4k, +6..+15 dB raw_FHPILB16e4k
+        at or below the proposed curve: nowhere;  inside its bar: nowhere
+    SC-VAMP:
+        R4-scvamp            1561/2560 781/2560 381/2560 250/2560 178/2560 124/2560 95/2560   -3..+3 dB raw_B16e4k, +6..+15 dB raw_B16e4k (n = 2560 at every SNR: no n = 20480 raw has this arm)
+        at or below the proposed curve: nowhere;  inside its bar: nowhere
+    SC-VAMP (LLR):
+        R4-llr               2217/2560 2131/2560 1535/2560 1021/2560 702/2560 497/2560 437/2560   -3..+3 dB raw_B16e4k, +6..+15 dB raw_B16e4k (n = 2560 at every SNR: no n = 20480 raw has this arm)
+        at or below the proposed curve: nowhere;  inside its bar: nowhere
+  (b), -3 dB at the six budgets, for the 6 not-drawn arms the budget raws hold (failures / 2560; the proposed curve: 372 370 371 368 375 369):
+    M-ours-dscore-C-V4     390   395   394   396   382   392   at or below: nowhere;  inside its bar at raw_: B1e4, B4e4k, B16e4k, B32e4last, B64e4last, B128e4last
+    M-ours-dscore-C-V0    2019  1897  1517  1919  2098  1884   at or below: nowhere;  inside its bar at raw_: nowhere
+    M-ours-gmm32           707   683   675   677   660   667   at or below: nowhere;  inside its bar at raw_: nowhere
+    M-ours-bstar-scalar    668   663   657   628   612   618   at or below: nowhere;  inside its bar at raw_: nowhere
+    R4-scvamp             1569  1561  1561  1554  1557  1551   at or below: nowhere;  inside its bar at raw_: nowhere
+    R4-llr                2217  2228  2217  2219  2217  2219   at or below: nowhere;  inside its bar at raw_: nowhere
+    M-ours-dscore-C-V4b (Diffusion prior, scalar site (b)): not read as a curve -- it is not in the manuscript and its definition is not in the paper-branch records (prompt item 1).  In the code it is V4 with scal='site' instead of 'belief': the denoiser query comes from the likelihood-only site scalarisation instead of the belief (conf/code/arms.py:361, 366-367; Demo/t2_route_a.py:347-356).  Its counts (pairB_STB16e4k.txt): 413 101 25 16 7 5 5 / 2560.
+
+Asserts passed (the script stops before saving otherwise):
+  (a) n = 2560 counts = conf/results/review_next/pairB_STB16e4k.txt 'BLER@16 failures' table (17 arms x 7 SNRs; also R0-pilot @16), records/paper_f31.txt (b) (6 arms), records/paper_f21.txt (a) (15 arms), records/paper_f22.txt (a) (5 arms + R0-pilot @16); -3 dB = the task prompt's 20 values -- for all 20 curves, drawn or not.
+  (a) n = 20480 counts = their count tables (fighs_merge.merge) and the 'FIGHS16e4 merge' D2 C2 lines of records/paper_f16.txt, paper_f21.txt, paper_f22.txt (11 curves + R0-pilot @16); Pilot-only LMMSE (@1): count table only.
+  (b) BLER and Wilson interval of the 7 drawn and 6 not-drawn arms at the six budgets = the cell C2 block of conf/results/tables_D2_<raw tag>.txt (TABLE A, three decimals); GMM prior, Proposed, Perfect CSI = the (b) artists of paper_f16.main() (points, Wilson bar ends; rtol 1e-12); the 1.6e5 column = the -3 dB points of (a).
+  same trials: Perfect CSI error arrays of raw_PILB16e4k, raw_ALDB16e4k, raw_SPB16e4k = raw_B16e4k's at the seven SNRs.
+  paper_f16.main() record text = records/paper_f16.txt byte for byte; its (a) artists = the 7 curves it shares with (a) here (points, Wilson bar ends; rtol 1e-12).
+  drawn = counted: the points and the Wilson bar ends of every drawn curve are read back from the artists (rtol 1e-12).
+  shapes: curves already in a paper figure = that figure's ARMS table (paper_f16, f18, f21, f22, f24); distinct (colour, marker, line style, fill) and distinct (marker, line style, fill) over all 20 curves, so over the drawn ones.
+
+Shapes (colour, marker, line style, fill) of the 20 curves; 'new' = not in a paper figure before (colour = family, filled = in the loop / hollow = pilot-only, line style = variant).  Line width and marker size are not part of a shape: the proposed curve is drawn heavier (lw 1.6, marker 4.0 pt; the other bar curves lw 1.1, the rest lw 0.85), the two hexagons 3.8 pt:
+    Proposed (diffusion prior)       diffusion    #2a78d6  's'  '-'   filled  drawn     as paper_f16
+    Diffusion prior, scalar site     diffusion    #2a78d6  'o'  '-.'  filled  not drawn new
+    Diffusion prior, unrepaired      diffusion    #2a78d6  'X'  ':'   filled  not drawn new
+    Proposed prior, pilot-only       diffusion    #2a78d6  's'  '--'  hollow  not drawn as paper_f22
+    Annealed Langevin (plug-in)      diffusion    #4a3aa7  'P'  ':'   filled  drawn     as paper_f24
+    Annealed Langevin (error-aware)  diffusion    #4a3aa7  'P'  '--'  hollow  not drawn new
+    GMM prior                        GMM          #eb6834  'D'  '-'   filled  drawn     as paper_f16
+    GMM prior (K = 32)               GMM          #eb6834  'p'  ':'   filled  not drawn new
+    GMM prior, scalar site           GMM          #eb6834  'v'  '-.'  filled  not drawn as paper_f18 (points only there: line style new)
+    GMM prior, pilot-only            GMM          #eb6834  'D'  '--'  hollow  not drawn as paper_f22
+    Gaussian prior                   Gaussian     #7a7974  'o'  '--'  filled  drawn     as paper_f16
+    Turbo LMMSE receiver             Gaussian     #52514e  '^'  '-'   hollow  drawn     as paper_f21
+    BiG-AMP                          Gaussian     #52514e  'v'  '--'  hollow  drawn     as paper_f21
+    SC-VAMP                          Gaussian     #52514e  '<'  '-.'  filled  not drawn new
+    SC-VAMP (LLR)                    Gaussian     #52514e  '>'  ':'   filled  not drawn new
+    Pilot-only LMMSE                 Gaussian     #7a7974  'o'  '--'  hollow  drawn     as paper_f22
+    SBL (in loop)                    sparse       #1baf7a  'h'  '-'   filled  drawn     as paper_f16
+    SBL (pilot-only)                 sparse       #1baf7a  'h'  '--'  hollow  drawn     as paper_f16
+    OMP (pilot-only)                 sparse       #1baf7a  'X'  ':'   hollow  drawn     as paper_f16
+    Perfect CSI                      Perfect CSI  #0b0b0b  '*'  '-.'  filled  drawn     as paper_f16
+
+Layout: axes (left, bottom, right, top) [in] (a) [0.5, 0.36, 4.64, 2.14]; (b) [5.11, 0.36, 7.11, 2.14] -- the same bottom / top (asserted); legend band 0.58 in above the axes: one legend, 11 entries in 4 rows x 3 columns = the families (learned priors | Gaussian, LMMSE, AMP | sparse, Perfect CSI; one empty slot under the first column; asserted), 7 pt, no frame, line + marker handles (inside its band: asserted, [in] [1.542, 2.215, 5.618, 2.705]).
+  (a) x ticks -3 +0 +3 +6 +9 +12 +15 dB, x range (-4, 16); (b) x range (6e3, 2.2e6), y range (0, 0.9) (linear; F16b_col's 0.33 does not hold the other curves), K labels where K changes: 512 at 1e+04, 2048 at 4e+04, 1024 at 1.6e+05, 4096 at 3.2e+05 (K of the six budgets: 512 2048 1024 4096 4096 4096); each 1.0 pt under the lower bar end of its GMM point, centred on it (the first one moved right by 1.4 pt to keep 2 pt from the left axis), at least 2 pt apart; no curve centre line, marker box or bar within 0.5 pt of a label box (asserted).
+  panel labels (a), (b): bold 7.5 pt, upper-right corner at axes fraction (0.985, 0.97) in both panels (asserted); nearest drawn data (curve centre line, marker box, error bar) is farther than [pt]: (a) 32.5, (b) 8.5.
+  checks: every artist inside the canvas (tight bbox [in] [0.026, 0.024, 7.11, 2.705]); smallest visible text 7 pt (nominal size; the exponents of the 10^x tick labels and other sub/superscripts are smaller, about 5.6 pt, as in F16a_col); STIXGeneral / mathtext stix, TrueType in the PDF; saved at figsize, PNG 300 dpi.
