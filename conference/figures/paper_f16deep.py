@@ -79,6 +79,7 @@ from paper_f16 import FIG, S, wilson                          # FIG = this folde
 from scipy.stats import fisher_exact
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+NOTES = []                                                     # load_raw NOTE lines of the raws read (raised blocks, kept as failures)
 REC16 = os.path.join(HERE, "records", "paper_f16.txt")
 CELL, PRIOR, SNRS, N0 = "C2", "S2", [-3.0, 0.0, 3.0, 6.0, 9.0, 12.0, 15.0], 2560
 BLUE, ORANGE, GREEN, VIOLET, GREY, GREYL = S.V1["color"], S.GMM["color"], P.SPARSE, F24.ALD, F21.GREY, S.GAUSS["color"]
@@ -144,14 +145,17 @@ USER = ("모든 figure에 같은 legend의 그래프가 포함되어야 해.",  
 @functools.lru_cache(maxsize=None)                             # each raw is read once (the n = 20480 raws serve several arms)
 def raw(tag):
     d, _, w = load_raw("D2", root=os.path.join(M.CONF, f"raw_{tag}"))
-    assert not [x for x in w if "WARNING" in x], (tag, w)      # NOTE lines = raised blocks, kept as failures (fighs_merge._load)
+    assert not [x for x in w if "WARNING" in x], (tag, w)
+    NOTES.extend(f"raw_{tag}: {x.strip()}" for x in w if "NOTE" in x)   # raised blocks: load_raw turns their NaN rows into failures and says so
     return d
 
 
 def count(d, snr, arm):
-    """failures, trials, raised blocks of an arm at one SNR, read at its last iteration (the alias R0-pilot@1 has one column)"""
+    """failures, trials of an arm at one SNR, read at its last iteration (the alias R0-pilot@1 has one column); a raised block is a
+    failure -- load_raw has already made it one (NOTES)"""
     e = np.asarray(d[(CELL, PRIOR, snr)][arm]["blk_err"], float)[:, -1]
-    return int(np.where(np.isfinite(e), e, 1.0).sum()), len(e), int((~np.isfinite(e)).sum())   # a raised block is a failure
+    assert np.isfinite(e).all(), (snr, arm)
+    return int(e.sum()), len(e)
 
 
 def hs_source(orig, arm):
@@ -345,7 +349,7 @@ def main():
     cur, lines, checked = {}, {}, collections.Counter()
     for c in CURVES + [Curve("R0-pilot", "B16e4k", "(not drawn: the pilot-only LMMSE after 16 iterations, as F22 (a))", *[None] * 6)]:
         cnt = [count(src[c.orig], s, c.arm) for s in SNRS]
-        k0, n0, raised = np.array([x[0] for x in cnt]), np.array([x[1] for x in cnt]), sum(x[2] for x in cnt)
+        k0, n0 = np.array([x[0] for x in cnt]), np.array([x[1] for x in cnt])
         assert set(n0.tolist()) == {N0}, (c.arm, n0)
         for name, t in (("pairB_STB16e4k.txt", tab), ("paper_f31.txt (b)", f31), ("paper_f21.txt (a)", f21), ("paper_f22.txt (a)", f22)):
             if c.arm in t:
@@ -365,10 +369,9 @@ def main():
         else:
             k, n = k0.copy(), n0.copy()
         assert np.array_equal(k[:3], k0[:3]) and np.array_equal(n[:3], n0[:3]) and set(n[3:].tolist()) == ({M.N_HS} if tag else {N0})
-        cur[c.arm] = (k, n, tag, raised)
+        cur[c.arm] = (k, n, tag)
         lines[c.arm] = (f"    {c.arm:<21}" + " ".join(f"{a}/{b}" for a, b in zip(k, n)) + f"   -3..+3 dB raw_{c.orig}, +6..+15 dB "
                         + (f"raw_{tag}" if tag else f"raw_{c.orig} (n = 2560 at every SNR: no n = 20480 raw has this arm)")
-                        + (f"; raised blocks counted as failures: {raised}" if raised else "")
                         + (f"   rising: {'; '.join(rising(k, n))}" if rising(k, n) else ""))
     r16 = cur.pop("R0-pilot"); line16 = lines.pop("R0-pilot")
     assert all(checked[c.arm] >= (2 if cur[c.arm][2] and c.arm != "R0-pilot@1" else 1) for c in CURVES), checked
@@ -396,7 +399,7 @@ def main():
     for tag in tags:
         d, ta = raw(tag), rec_table_a(tag)
         for a in bud_k:
-            k, n, _ = count(d, -3.0, a)
+            k, n = count(d, -3.0, a)
             lo, hi = wilson(k, n)
             assert n == N0 and ta[a] == f"{k / n:.3f}({lo:.3f},{hi:.3f})", (tag, a, k, n, ta.get(a))   # = TABLE A of that budget
             bud_k[a].append(k)
@@ -547,6 +550,7 @@ def main():
             "Error bars (95% Wilson, each point's own n): " + fmt(BARS) + " only, in both panels; the other curves have none.",
             "Drawn curves with a cell where BLER rises with SNR: " + ("; ".join(f"{name(a)} ({'; '.join(rising(*cur[a][:2]))})" for a in SHOW if rising(*cur[a][:2])) or "none") + ".",
             "Zero-failure points: " + ("; ".join(f"{l} {s:+.0f} dB" for l, s in zero) + " -- the curve breaks there (Perfect CSI: fighs_merge.zero_arrows)" if zero else "none (no arrow, no broken curve)") + ".",
+            "Raised blocks (analysis.load_raw NOTE lines; a raised block is kept and counted as a failure) in the raws read: " + ("; ".join(NOTES) or "none") + ".",
             f"y axis of (a): ({ylim[0]:g}, {ylim[1]:g}) -- " + (f"the prompt's limit {YLIM[0]:g} applied" if cond else f"the prompt's limit {YLIM[0]:g} NOT applied, FIGHS16e4 §1 limit {Q.YLO_RULE:g} instead")
             + f": lowest point {low[0]:.3e} ({low[1]}, {low[2]:+.0f} dB), lowest error-bar end {lowbar[0]:.3e} ({lowbar[1]}, {lowbar[2]:+.0f} dB), zero-failure points {len(zero)}.",
             f"Markers of two drawn curves with centres closer than {NEAR_PT} pt (one hides or touches the other): (a) " + near_a + "; (b) " + near_b + ".",
