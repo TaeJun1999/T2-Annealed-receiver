@@ -1,0 +1,129 @@
+F21sel -- the six static scenarios of F21 with the one legend of F16deep_wide: equal budget N_train = 1.6e5, BLER@16 (Pilot-only LMMSE: after the first iteration), failures / trials per SNR -3 +0 +3 +6 +9 +12 +15 dB.  Recomputed from raw by conference/figures/paper_f21sel.py (read-only; analysis.load_raw, a raised block = a failure); no number transcribed.
+
+F21sel_wide  7.16 x 4.57 in (515.52 x 329.04 pt), six panels, one legend; every panel draws the 11 curves of that legend (paper_f16deep.SHOW, with its shapes and sizes; no error bars, as F21).
+User, 2026-10-09 CDT (verbatim; paper_f16deep.USER): "모든 figure에 같은 legend의 그래프가 포함되어야 해."; "한 figure에 20개를 다 넣을 수는 없지 않아? 우리 proposed 가 잘 부각되는 것으로 골라서 그리자. 필수 baseline(OMP 등등)은 반드시 포함시키고".  In the same session the user then chose this figure -- the recorder's option 'six scenarios x the same 11 curves' -- and wrote on the number of curves (verbatim): "확정은 11 곡성으로 하는게 좋을 거 같은ㄷ게".
+
+Curves (internal arm -> figure name): M-ours-dscore-C-V1 -> Proposed (diffusion prior); ALD-pilot -> Annealed Langevin (plug-in); M-ours-bstar -> GMM prior; R2-ours-G -> Gaussian prior; R1-turbo -> Turbo LMMSE receiver; R3-bigamp -> BiG-AMP; R0-pilot@1 -> Pilot-only LMMSE; SBL-loop -> SBL (in loop); SBL-pilot -> SBL (pilot-only); OMP-pilot -> OMP (pilot-only); R5-genie -> Perfect CSI.
+
+Panels (the line in brackets is the panel line of records/paper_f21.txt) and counts, with the source raw of each point (one point = one raw, never pooled; FIGHS16e4 §1 through fighs_merge.merge; 'rising' = a cell where BLER rises with SNR, one-sided Fisher p, reported only):
+(a) Sparse specular, 8x4  [raw_B16e4k, cell C2, prior S2, D1-sibling gate PASS; b* = kron K=1024; + raw_ALDB16e4k]:
+    M-ours-dscore-C-V1   371/2560 88/2560 29/2560 111/20480 59/20480 39/20480 23/20480   -3..+3 dB raw_B16e4k, +6..+15 dB raw_HSB16e4k
+    ALD-pilot            833/2560 213/2560 66/2560 39/2560 11/2560 11/2560 9/2560   -3..+3 dB raw_ALDB16e4k, +6..+15 dB raw_ALDB16e4k (n = 2560 at every SNR)
+    M-ours-bstar         623/2560 184/2560 57/2560 235/20480 149/20480 81/20480 72/20480   -3..+3 dB raw_B16e4k, +6..+15 dB raw_HSB16e4k
+    R2-ours-G            839/2560 261/2560 97/2560 467/20480 292/20480 182/20480 133/20480   -3..+3 dB raw_B16e4k, +6..+15 dB raw_HSB16e4k
+    R1-turbo             1389/2560 540/2560 204/2560 903/20480 521/20480 291/20480 204/20480   -3..+3 dB raw_B16e4k, +6..+15 dB raw_HSB16e4k
+    R3-bigamp            1391/2560 539/2560 205/2560 1083/20480 1033/20480 1116/20480 1100/20480   -3..+3 dB raw_B16e4k, +6..+15 dB raw_HSB16e4k   rising: +9->+12 dB p=0.035
+    R0-pilot@1           1918/2560 993/2560 462/2560 2216/20480 1379/20480 951/20480 715/20480   -3..+3 dB raw_B16e4k, +6..+15 dB raw_FHB16e4k
+    SBL-loop             705/2560 222/2560 77/2560 363/20480 204/20480 116/20480 87/20480   -3..+3 dB raw_SPB16e4k, +6..+15 dB raw_FHSPB16e4k
+    SBL-pilot            934/2560 244/2560 69/2560 378/20480 204/20480 140/20480 88/20480   -3..+3 dB raw_SPB16e4k, +6..+15 dB raw_FHSPB16e4k
+    OMP-pilot            1023/2560 342/2560 145/2560 618/20480 472/20480 368/20480 298/20480   -3..+3 dB raw_SPB16e4k, +6..+15 dB raw_FHSPB16e4k
+    R5-genie             87/2560 26/2560 12/2560 66/20480 36/20480 16/20480 13/20480   -3..+3 dB raw_B16e4k, +6..+15 dB raw_HSB16e4k
+(b) Sparse specular, 16x4  [raw_NR16B16e4, cell C6, prior S2, UNGATED; b* = kron K=4096; + raw_ALDNR16]:
+    M-ours-dscore-C-V1   53/2560 20/2560 9/2560 29/20480 24/20480 20/20480 13/20480   -3..+3 dB raw_NR16B16e4, +6..+15 dB raw_HSNR16
+    ALD-pilot            249/2560 79/2560 50/2560 19/2560 5/2560 3/2560 4/2560   -3..+3 dB raw_ALDNR16, +6..+15 dB raw_ALDNR16 (n = 2560 at every SNR)   rising: +12->+15 dB p=0.5
+    M-ours-bstar         184/2560 61/2560 32/2560 178/20480 130/20480 72/20480 46/20480   -3..+3 dB raw_NR16B16e4, +6..+15 dB raw_HSNR16
+    R2-ours-G            295/2560 107/2560 66/2560 309/20480 213/20480 125/20480 80/20480   -3..+3 dB raw_NR16B16e4, +6..+15 dB raw_HSNR16
+    R1-turbo             663/2560 269/2560 140/2560 621/20480 433/20480 264/20480 157/20480   -3..+3 dB raw_NR16B16e4, +6..+15 dB raw_HSNR16
+    R3-bigamp            1066/2560 479/2560 237/2560 1090/20480 1265/20480 1418/20480 1099/20480   -3..+3 dB raw_NR16B16e4, +6..+15 dB raw_HSNR16   rising: +6->+9 dB p=0.00011; +9->+12 dB p=0.0012
+    R0-pilot@1           1005/2560 429/2560 252/2560 1179/20480 867/20480 598/20480 398/20480   -3..+3 dB raw_NR16B16e4, +6..+15 dB raw_FHNR16B16e4
+    SBL-loop             251/2560 99/2560 51/2560 251/20480 154/20480 102/20480 62/20480   -3..+3 dB raw_SPNR16, +6..+15 dB raw_FHSPNR16
+    SBL-pilot            291/2560 107/2560 53/2560 260/20480 174/20480 119/20480 67/20480   -3..+3 dB raw_SPNR16, +6..+15 dB raw_FHSPNR16
+    OMP-pilot            207/2560 120/2560 65/2560 390/20480 282/20480 164/20480 146/20480   -3..+3 dB raw_SPNR16, +6..+15 dB raw_FHSPNR16
+    R5-genie             22/2560 10/2560 8/2560 17/20480 16/20480 7/20480 7/20480   -3..+3 dB raw_NR16B16e4, +6..+15 dB raw_HSNR16
+(c) Sparse specular, CN gains  [raw_D3B16e4, cell C2, prior S2c, UNGATED; b* = kron K=4096; + raw_ALDD3]:
+    M-ours-dscore-C-V1   1000/2560 404/2560 129/2560 399/20480 182/20480 101/20480 55/20480   -3..+3 dB raw_D3B16e4, +6..+15 dB raw_FHD3B16e4
+    ALD-pilot            1429/2560 642/2560 233/2560 110/2560 34/2560 29/2560 13/2560   -3..+3 dB raw_ALDD3, +6..+15 dB raw_ALDD3 (n = 2560 at every SNR)
+    M-ours-bstar         1298/2560 586/2560 226/2560 788/20480 429/20480 225/20480 142/20480   -3..+3 dB raw_D3B16e4, +6..+15 dB raw_FHD3B16e4
+    R2-ours-G            1454/2560 749/2560 304/2560 1237/20480 750/20480 436/20480 234/20480   -3..+3 dB raw_D3B16e4, +6..+15 dB raw_FHD3B16e4
+    R1-turbo             1810/2560 1163/2560 561/2560 2148/20480 1164/20480 678/20480 380/20480   -3..+3 dB raw_D3B16e4, +6..+15 dB raw_FHD3B16e4
+    R3-bigamp            1902/2560 1139/2560 573/2560 2991/20480 2656/20480 2882/20480 2720/20480   -3..+3 dB raw_D3B16e4, +6..+15 dB raw_FHD3B16e4   rising: +9->+12 dB p=0.00057
+    R0-pilot@1           2164/2560 1585/2560 976/2560 4477/20480 2636/20480 1730/20480 1115/20480   -3..+3 dB raw_D3B16e4, +6..+15 dB raw_FHD3B16e4
+    SBL-loop             1352/2560 617/2560 242/2560 1028/20480 500/20480 332/20480 167/20480   -3..+3 dB raw_SPD3, +6..+15 dB raw_FHSPD3
+    SBL-pilot            1528/2560 735/2560 287/2560 1084/20480 551/20480 349/20480 164/20480   -3..+3 dB raw_SPD3, +6..+15 dB raw_FHSPD3
+    OMP-pilot            1575/2560 817/2560 370/2560 1627/20480 1081/20480 645/20480 450/20480   -3..+3 dB raw_SPD3, +6..+15 dB raw_FHSPD3
+    R5-genie             485/2560 149/2560 47/2560 182/20480 107/20480 57/20480 26/20480   -3..+3 dB raw_D3B16e4, +6..+15 dB raw_FHD3B16e4
+(d) Clustered SV  [raw_SVB16e4, cell C2, prior SV8e, UNGATED; b* = full K=256; + raw_ALDSV]:
+    M-ours-dscore-C-V1   402/2560 46/2560 5/2560 2/20480 1/20480 1/20480 0/20480   -3..+3 dB raw_SVB16e4, +6..+15 dB raw_FHSVB16e4
+    ALD-pilot            855/2560 127/2560 21/2560 1/2560 0/2560 0/2560 0/2560   -3..+3 dB raw_ALDSV, +6..+15 dB raw_ALDSV (n = 2560 at every SNR)
+    M-ours-bstar         464/2560 60/2560 7/2560 10/20480 3/20480 0/20480 0/20480   -3..+3 dB raw_SVB16e4, +6..+15 dB raw_FHSVB16e4
+    R2-ours-G            599/2560 82/2560 15/2560 14/20480 6/20480 0/20480 0/20480   -3..+3 dB raw_SVB16e4, +6..+15 dB raw_FHSVB16e4
+    R1-turbo             1014/2560 251/2560 48/2560 58/20480 22/20480 2/20480 0/20480   -3..+3 dB raw_SVB16e4, +6..+15 dB raw_FHSVB16e4
+    R3-bigamp            1181/2560 263/2560 56/2560 181/20480 155/20480 120/20480 132/20480   -3..+3 dB raw_SVB16e4, +6..+15 dB raw_FHSVB16e4   rising: +12->+15 dB p=0.24
+    R0-pilot@1           1616/2560 556/2560 139/2560 250/20480 69/20480 17/20480 6/20480   -3..+3 dB raw_SVB16e4, +6..+15 dB raw_FHSVB16e4
+    SBL-loop             574/2560 88/2560 12/2560 14/20480 5/20480 0/20480 0/20480   -3..+3 dB raw_SPSV, +6..+15 dB raw_FHSPSV
+    SBL-pilot            926/2560 143/2560 24/2560 12/20480 5/20480 0/20480 0/20480   -3..+3 dB raw_SPSV, +6..+15 dB raw_FHSPSV
+    OMP-pilot            1493/2560 379/2560 64/2560 85/20480 17/20480 3/20480 1/20480   -3..+3 dB raw_SPSV, +6..+15 dB raw_FHSPSV
+    R5-genie             31/2560 3/2560 0/2560 1/20480 0/20480 0/20480 0/20480   -3..+3 dB raw_SVB16e4, +6..+15 dB raw_FHSVB16e4   rising: +3->+6 dB p=0.89
+(e) 3GPP UMi 28 GHz  [raw_U28B16e4, cell C2, prior UMi28, UNGATED; b* = kron K=4096; + raw_ALDU28]:
+    M-ours-dscore-C-V1   1228/2560 656/2560 393/2560 1746/20480 866/20480 386/20480 145/20480   -3..+3 dB raw_U28B16e4, +6..+15 dB raw_FHU28B16e4
+    ALD-pilot            1660/2560 826/2560 495/2560 250/2560 123/2560 62/2560 35/2560   -3..+3 dB raw_ALDU28, +6..+15 dB raw_ALDU28 (n = 2560 at every SNR)
+    M-ours-bstar         1270/2560 714/2560 431/2560 2029/20480 1079/20480 546/20480 223/20480   -3..+3 dB raw_U28B16e4, +6..+15 dB raw_FHU28B16e4
+    R2-ours-G            1458/2560 861/2560 574/2560 2798/20480 1529/20480 769/20480 323/20480   -3..+3 dB raw_U28B16e4, +6..+15 dB raw_FHU28B16e4
+    R1-turbo             1821/2560 1130/2560 742/2560 3585/20480 1911/20480 949/20480 392/20480   -3..+3 dB raw_U28B16e4, +6..+15 dB raw_FHU28B16e4
+    R3-bigamp            1864/2560 1197/2560 893/2560 6021/20480 5791/20480 6126/20480 6030/20480   -3..+3 dB raw_U28B16e4, +6..+15 dB raw_FHU28B16e4   rising: +9->+12 dB p=0.00014
+    R0-pilot@1           2152/2560 1483/2560 1008/2560 5569/20480 3534/20480 2077/20480 1039/20480   -3..+3 dB raw_U28B16e4, +6..+15 dB raw_FHU28B16e4
+    SBL-loop             1453/2560 843/2560 522/2560 2392/20480 1293/20480 627/20480 236/20480   -3..+3 dB raw_SPU28, +6..+15 dB raw_FHSPU28
+    SBL-pilot            1740/2560 941/2560 578/2560 2576/20480 1408/20480 669/20480 268/20480   -3..+3 dB raw_SPU28, +6..+15 dB raw_FHSPU28
+    OMP-pilot            2304/2560 1377/2560 797/2560 4006/20480 2290/20480 1186/20480 550/20480   -3..+3 dB raw_SPU28, +6..+15 dB raw_FHSPU28
+    R5-genie             594/2560 302/2560 131/2560 525/20480 216/20480 81/20480 23/20480   -3..+3 dB raw_U28B16e4, +6..+15 dB raw_FHU28B16e4
+(f) 3GPP mixed  [raw_MXB16e4, cell C2, prior MIX3, UNGATED, report-only; b* = kron K=4096; + raw_ALDMX]:
+    M-ours-dscore-C-V1   1354/2560 789/2560 379/2560 1499/20480 702/20480 313/20480 141/20480   -3..+3 dB raw_MXB16e4, +6..+15 dB raw_FHMXB16e4
+    ALD-pilot            1796/2560 998/2560 488/2560 263/2560 136/2560 67/2560 34/2560   -3..+3 dB raw_ALDMX, +6..+15 dB raw_ALDMX (n = 2560 at every SNR)
+    M-ours-bstar         1421/2560 844/2560 425/2560 1840/20480 963/20480 444/20480 225/20480   -3..+3 dB raw_MXB16e4, +6..+15 dB raw_FHMXB16e4
+    R2-ours-G            1613/2560 1065/2560 641/2560 2876/20480 1603/20480 855/20480 428/20480   -3..+3 dB raw_MXB16e4, +6..+15 dB raw_FHMXB16e4
+    R1-turbo             1935/2560 1377/2560 877/2560 4063/20480 2233/20480 1220/20480 568/20480   -3..+3 dB raw_MXB16e4, +6..+15 dB raw_FHMXB16e4
+    R3-bigamp            1999/2560 1426/2560 970/2560 6258/20480 5952/20480 6266/20480 6284/20480   -3..+3 dB raw_MXB16e4, +6..+15 dB raw_FHMXB16e4   rising: +9->+12 dB p=0.00036; +12->+15 dB p=0.43
+    R0-pilot@1           2264/2560 1761/2560 1250/2560 7048/20480 4735/20480 3116/20480 1875/20480   -3..+3 dB raw_MXB16e4, +6..+15 dB raw_FHMXB16e4
+    SBL-loop             1573/2560 988/2560 536/2560 2480/20480 1265/20480 655/20480 320/20480   -3..+3 dB raw_SPMX, +6..+15 dB raw_FHSPMX
+    SBL-pilot            1811/2560 1152/2560 606/2560 2691/20480 1420/20480 723/20480 334/20480   -3..+3 dB raw_SPMX, +6..+15 dB raw_FHSPMX
+    OMP-pilot            2215/2560 1597/2560 909/2560 4606/20480 2693/20480 1555/20480 828/20480   -3..+3 dB raw_SPMX, +6..+15 dB raw_FHSPMX
+    R5-genie             679/2560 358/2560 143/2560 482/20480 184/20480 73/20480 42/20480   -3..+3 dB raw_MXB16e4, +6..+15 dB raw_FHMXB16e4
+
++6..+15 dB from n = 20480 new trials (trials 10000..30479) in every panel, 10 curves: Proposed (diffusion prior); GMM prior; Gaussian prior; Turbo LMMSE receiver; BiG-AMP; Pilot-only LMMSE; SBL (in loop); SBL (pilot-only); OMP (pilot-only); Perfect CSI.
+n = 2560 (the original test trials 0..2559) at EVERY SNR in every panel -- no n = 20480 raw has the arm -- 1 curve(s), to be named in the caption: Annealed Langevin (plug-in).
+Pilot-only LMMSE = R0-pilot read after the FIRST iteration (alias 'R0-pilot@1'); its n = 20480 points come from the base tag's raw_FH<tag> / raw_FHNR16B16e4 / raw_FHB16e4k (the alias rows of their count tables; NEXT_EXPERIMENTS_FIGHS16e4 §1 calls them reference rows its own figures do not use -- the same extension as in F16deep_wide, see records/paper_f16deep.txt).  F21 does not draw this curve; F22 draws the same receiver after 16 iterations.
+Annealed Langevin = the plug-in use (ALD-pilot); the error-aware variant is not drawn (as in F16deep_wide).
+Zero-failure points (the curve breaks there; Perfect CSI: a downward arrow from the 95% Wilson bound of the point's own n): (d) Proposed (diffusion prior) +15 dB (0/20480); (d) Annealed Langevin (plug-in) +9 dB (0/2560); (d) Annealed Langevin (plug-in) +12 dB (0/2560); (d) Annealed Langevin (plug-in) +15 dB (0/2560); (d) GMM prior +12 dB (0/20480); (d) GMM prior +15 dB (0/20480); (d) Gaussian prior +12 dB (0/20480); (d) Gaussian prior +15 dB (0/20480); (d) Turbo LMMSE receiver +15 dB (0/20480); (d) SBL (in loop) +12 dB (0/20480); (d) SBL (in loop) +15 dB (0/20480); (d) SBL (pilot-only) +12 dB (0/20480); (d) SBL (pilot-only) +15 dB (0/20480); (d) Perfect CSI +3 dB (0/2560); (d) Perfect CSI +9 dB (0/20480); (d) Perfect CSI +12 dB (0/20480); (d) Perfect CSI +15 dB (0/20480).
+Raised blocks (analysis.load_raw NOTE lines; a raised block is kept and counted as a failure) in the raws read: none.
+
+Drawn curves at or below the proposed curve (point estimates, exact in integers; failures/trials vs the proposed curve's) -- reported only, nothing is tested here; the registered paired tests are in conf/results/review_next/pairB_ST<tag>.txt and pairB_SP<suffix>.txt:
+    (a) none
+    (b) none
+    (c) none
+    (d) Annealed Langevin (plug-in) at +9 dB (0/2560 vs 1/20480), +12 dB (0/2560 vs 1/20480), +15 dB (0/2560 vs 0/20480); GMM prior at +12 dB (0/20480 vs 1/20480), +15 dB (0/20480 vs 0/20480); Gaussian prior at +12 dB (0/20480 vs 1/20480), +15 dB (0/20480 vs 0/20480); Turbo LMMSE receiver at +15 dB (0/20480 vs 0/20480); SBL (in loop) at +12 dB (0/20480 vs 1/20480), +15 dB (0/20480 vs 0/20480); SBL (pilot-only) at +12 dB (0/20480 vs 1/20480), +15 dB (0/20480 vs 0/20480);  proposed at or below Perfect CSI at +15 dB (0/20480 vs Perfect CSI 0/20480)
+    (e) none
+    (f) none
+
+Registered table-B labels against the proposed prior (conf/results/review_next/pairB_SP<suffix>.txt; (i) = the proposed prior fails less, (iii) / (iv) = not decided) of the 9 drawn baselines (every drawn curve but the proposed one and Perfect CSI, a reference without a label) and of the 7 registered baselines that are not drawn, per panel:
+    (a) drawn: all (i);  not drawn: all (i);  (i) for 16 of the 16
+    (b) drawn: all (i);  not drawn: Proposed prior, pilot-only (iv); the others (i);  (i) for 15 of the 16
+    (c) drawn: all (i);  not drawn: all (i);  (i) for 16 of the 16
+    (d) drawn: GMM prior (iv); SBL (in loop) (iv); the others (i);  not drawn: GMM prior, scalar site (iv); GMM prior (K = 32) (iv); Proposed prior, pilot-only (iv); the others (i);  (i) for 11 of the 16
+    (e) drawn: all (i);  not drawn: all (i);  (i) for 16 of the 16
+    (f) drawn: all (i);  not drawn: all (i);  (i) for 16 of the 16
+
+Markers of two curves with centres closer than 1.5 pt at the same SNR (one hides or touches the other):
+    (a) Annealed Langevin (plug-in) / GMM prior at +12, +15 dB; Annealed Langevin (plug-in) / Gaussian prior at -3 dB; Annealed Langevin (plug-in) / SBL (in loop) at +0 dB; Annealed Langevin (plug-in) / SBL (pilot-only) at -3, +3 dB; GMM prior / SBL (in loop) at -3 dB; Gaussian prior / SBL (pilot-only) at -3, +0 dB; Turbo LMMSE receiver / BiG-AMP at -3, +0, +3 dB; Turbo LMMSE receiver / OMP (pilot-only) at +9 dB; SBL (in loop) / SBL (pilot-only) at +0, +3, +6, +9, +15 dB; SBL (pilot-only) / OMP (pilot-only) at -3 dB
+    (b) Proposed (diffusion prior) / Perfect CSI at +3 dB; Annealed Langevin (plug-in) / SBL (in loop) at -3, +3 dB; Annealed Langevin (plug-in) / SBL (pilot-only) at +3 dB; GMM prior / OMP (pilot-only) at -3 dB; Gaussian prior / SBL (in loop) at +0 dB; Gaussian prior / SBL (pilot-only) at -3, +0, +12 dB; Gaussian prior / OMP (pilot-only) at +0, +3 dB; Turbo LMMSE receiver / OMP (pilot-only) at +15 dB; BiG-AMP / Pilot-only LMMSE at -3, +0, +3, +6 dB; SBL (in loop) / SBL (pilot-only) at +0, +3, +6, +9, +15 dB; SBL (pilot-only) / OMP (pilot-only) at +0 dB
+    (c) Annealed Langevin (plug-in) / GMM prior at -3, +0, +3, +6, +12 dB; Annealed Langevin (plug-in) / Gaussian prior at -3 dB; Annealed Langevin (plug-in) / SBL (in loop) at -3, +0, +3 dB; Annealed Langevin (plug-in) / SBL (pilot-only) at -3 dB; Annealed Langevin (plug-in) / OMP (pilot-only) at -3 dB; GMM prior / Gaussian prior at -3 dB; GMM prior / SBL (in loop) at -3, +0, +3 dB; Gaussian prior / SBL (in loop) at -3 dB; Gaussian prior / SBL (pilot-only) at -3, +0, +3 dB; Gaussian prior / OMP (pilot-only) at -3, +0 dB; Turbo LMMSE receiver / BiG-AMP at -3, +0, +3 dB; Turbo LMMSE receiver / OMP (pilot-only) at +9, +12 dB; BiG-AMP / Pilot-only LMMSE at +9 dB; SBL (in loop) / SBL (pilot-only) at -3, +6, +9, +12, +15 dB; SBL (pilot-only) / OMP (pilot-only) at -3, +0 dB
+    (d) Annealed Langevin (plug-in) / SBL (pilot-only) at -3, +0 dB; Gaussian prior / SBL (in loop) at -3, +0, +6 dB; Turbo LMMSE receiver / BiG-AMP at +0 dB; Turbo LMMSE receiver / SBL (pilot-only) at -3 dB; Pilot-only LMMSE / OMP (pilot-only) at -3 dB; SBL (in loop) / SBL (pilot-only) at +9 dB
+    (e) Proposed (diffusion prior) / GMM prior at -3, +0, +3 dB; Annealed Langevin (plug-in) / GMM prior at +6, +9, +12 dB; Annealed Langevin (plug-in) / Gaussian prior at +0 dB; Annealed Langevin (plug-in) / Turbo LMMSE receiver at -3 dB; Annealed Langevin (plug-in) / BiG-AMP at -3 dB; Annealed Langevin (plug-in) / SBL (in loop) at +0, +3 dB; Annealed Langevin (plug-in) / SBL (pilot-only) at -3, +15 dB; GMM prior / SBL (in loop) at +15 dB; Gaussian prior / SBL (in loop) at -3, +0, +3 dB; Gaussian prior / SBL (pilot-only) at +0, +3, +6, +9 dB; Turbo LMMSE receiver / BiG-AMP at -3, +0 dB; Turbo LMMSE receiver / SBL (pilot-only) at -3 dB; Turbo LMMSE receiver / OMP (pilot-only) at +3, +6 dB; BiG-AMP / Pilot-only LMMSE at +3, +6 dB; BiG-AMP / SBL (pilot-only) at -3 dB; BiG-AMP / OMP (pilot-only) at +3 dB; Pilot-only LMMSE / OMP (pilot-only) at -3, +0 dB; SBL (in loop) / SBL (pilot-only) at +0, +3, +6, +9, +12 dB
+    (f) Proposed (diffusion prior) / GMM prior at -3, +0, +3 dB; Annealed Langevin (plug-in) / GMM prior at +9 dB; Annealed Langevin (plug-in) / Gaussian prior at -3, +0 dB; Annealed Langevin (plug-in) / Turbo LMMSE receiver at -3 dB; Annealed Langevin (plug-in) / BiG-AMP at -3 dB; Annealed Langevin (plug-in) / SBL (in loop) at +0, +3 dB; Annealed Langevin (plug-in) / SBL (pilot-only) at -3 dB; GMM prior / SBL (in loop) at -3 dB; Gaussian prior / SBL (in loop) at -3, +0 dB; Gaussian prior / SBL (pilot-only) at -3, +0, +3, +6, +9 dB; Turbo LMMSE receiver / BiG-AMP at -3, +0, +3 dB; Turbo LMMSE receiver / SBL (pilot-only) at -3 dB; Turbo LMMSE receiver / OMP (pilot-only) at +3 dB; BiG-AMP / Pilot-only LMMSE at -3, +6 dB; BiG-AMP / SBL (pilot-only) at -3 dB; BiG-AMP / OMP (pilot-only) at -3, +0, +3 dB; Pilot-only LMMSE / OMP (pilot-only) at -3, +0 dB; SBL (in loop) / SBL (pilot-only) at +3, +6, +9, +12, +15 dB
+
+Curves with such a neighbour at EVERY drawn point (their markers are nowhere free; they read by line colour and style):
+    (a) none
+    (b) SBL (pilot-only)
+    (c) SBL (in loop); SBL (pilot-only)
+    (d) none
+    (e) Annealed Langevin (plug-in); GMM prior; SBL (in loop); SBL (pilot-only)
+    (f) SBL (in loop); SBL (pilot-only)
+
+Asserts passed (the script stops before saving otherwise):
+  n = 2560 counts = conf/results/review_next/pairB_ST<tag>.txt 'BLER@16 failures' tables (8 arms x 7 SNRs per scenario) and the panel blocks of records/paper_f21.txt (the sparse three and the six core arms); each drawn count is checked against one of the two, the six core arms against both.
+  n = 20480 counts = their count tables (fighs_merge.merge) and the 'FIGHS16e4 merge' blocks of records/paper_f21.txt (nine curves per panel); Pilot-only LMMSE (@1): count table only.
+  same trials: Perfect CSI error arrays of raw_SP<suffix> and raw_ALD<suffix> = the base raw's at the seven SNRs, in every scenario.
+  drawn = counted (points read back from the artists; rtol 1e-12); every panel holds exactly the curves of the legend; shapes = paper_f16deep's table (its check against the paper figures run here too).
+
+Layout: 2 x 3 axes, each 2.1500 x 1.7500 in (asserted), shared x and y; x ticks -3 +0 +3 +6 +9 +12 +15 dB, x range (-4, 16), y log (3e-05, 1.05) (FIGHS16e4 §1, as F21); legend band 0.58 in above the axes = the legend of F16deep_wide (11 entries, 4 rows x 3 columns = the families; inside its band: asserted, [in] [1.542, 4.035, 5.618, 4.525]).
+  panel labels (a)-(f): bold 7.5 pt, lower-left corner at axes fraction (0.04, 0.035) in every panel (asserted); nearest drawn data (curve centre line, marker box) is farther than [pt]: (a) 40, (b) 40, (c) 40, (d) 29, (e) 40, (f) 40.
+  checks: every artist inside the canvas (tight bbox [in] [0.026, 0.041, 7.11, 4.525]); smallest visible text 7 pt (nominal size; the exponents of the 10^x tick labels are smaller, about 5.6 pt); STIXGeneral / mathtext stix, TrueType in the PDF; saved at figsize, PNG 300 dpi.
