@@ -1,0 +1,23 @@
+# run_site16e4 git 9c4b6fe7 2026-10-08 23:08 CDT  script sha256[:16] b3bee226cf046878  (code/run_site16e4.sh)
+# step 1 -- drift check: the two recorded pairs, recomputed (anchor rule)
+# base V1 checkpoint id: manifest (none), file d2sx_N160000_a1.pt 4443921ce8d5c4a1
+# pair_baselines raw_B16e4k + raw_PILB16e4k + raw_ALDB16e4k, cell C2, prior S2, rotation (none), doppler (none), git base=manifest-head:cd241b7e/chunks-sha:78cbb59fc01ce520 pil=manifest-head:92d26757/chunks-sha:e1ff7ae11ab9eda1 ald=manifest-head:7e64f5cc/chunks-sha:d7a8d327661b00b5; integrity: OK
+M-ours-bstar -> M-ours-dscore-C-V1  [anchor M-ours-bstar]  decision SNRs ['-3', '+0', '+3']
+    sign test @16: -3 dB 302:50 p=4.7e-45  +0 dB 117:21 p=2.4e-17  +3 dB 35:7 p=1.5e-05   pooled 454:78 p=1.7e-65
+    POWERED=True  second arm fewer at 3/3, first arm fewer at 0/3  -> (i)
+    SNR@0.1 gap (M-ours-bstar minus M-ours-dscore-C-V1): +1.41 dB  [90% paired bootstrap +1.22, +1.64; censored replicates 0%]
+    failures@16 at the decision SNRs: M-ours-bstar 623/184/57  M-ours-dscore-C-V1 371/88/29
+M-ours-bstar -> M-ours-dscore-C-V4  [anchor M-ours-bstar]  decision SNRs ['-3', '+0', '+3']
+    sign test @16: -3 dB 285:56 p=4.5e-38  +0 dB 111:23 p=5e-15  +3 dB 42:6 p=1e-07   pooled 438:85 p=2.8e-58
+    POWERED=True  second arm fewer at 3/3, first arm fewer at 0/3  -> (i)
+    SNR@0.1 gap (M-ours-bstar minus M-ours-dscore-C-V4): +1.27 dB  [90% paired bootstrap +1.08, +1.50; censored replicates 0%]
+    failures@16 at the decision SNRs: M-ours-bstar 623/184/57  M-ours-dscore-C-V4 394/96/21
+# DRIFT CHECK: OK -- 8 recorded lines reproduced character for character (4 of them = lines of HEAD:conf/results/tables_D2_B16e4k.txt), both labels (i) 3/3
+# step 2 -- the registered pair, decision SNRs fixed at -3 / 0 / +3 dB (NEXT_EXPERIMENTS_SITE16e4 §1)
+# base V1 checkpoint id: manifest (none), file d2sx_N160000_a1.pt 4443921ce8d5c4a1
+# pair_baselines raw_B16e4k + raw_PILB16e4k + raw_ALDB16e4k, cell C2, prior S2, rotation (none), doppler (none), git base=manifest-head:cd241b7e/chunks-sha:78cbb59fc01ce520 pil=manifest-head:92d26757/chunks-sha:e1ff7ae11ab9eda1 ald=manifest-head:7e64f5cc/chunks-sha:d7a8d327661b00b5; integrity: OK
+M-ours-dscore-C-V4 -> M-ours-dscore-C-V1  [decision SNRs FIXED; check: the anchor rule on M-ours-dscore-C-V4 gives ['-3', '+0', '+3']]  decision SNRs ['-3', '+0', '+3']
+    sign test @16: -3 dB 56:33 p=0.019  +0 dB 23:15 p=0.26  +3 dB 6:14 p=0.12   pooled 85:62 p=0.069
+    POWERED=True  second arm fewer at 1/3, first arm fewer at 0/3  -> (iii)
+    SNR@0.1 gap (M-ours-dscore-C-V4 minus M-ours-dscore-C-V1): +0.14 dB  [90% paired bootstrap +0.06, +0.23; censored replicates 0%]
+    failures@16 at the decision SNRs: M-ours-dscore-C-V4 394/96/21  M-ours-dscore-C-V1 371/88/29
