@@ -112,3 +112,73 @@
 | 스크립트 고정 | `code/run_site16e4.sh` sha256[:16] = b3bee226cf046878 (출력 첫 줄의 값과 같아야 한다; 다르면 다른 사본이 돈 것) |
 
 ## 6. 결과 (이 절은 추가만 한다)
+
+### 6.1 결과 (기록 2026-10-08 23:10 CDT (= 10-09 13:10 KST), Opus 5.5 — 전사만, 해석 없음; 원본 `results/review_next/pairB_SITEB16e4k.txt` (sha256[:16] e3d1e6a00b45f5e9), 로그 `logs/run_site16e4.log`)
+
+**실행** (`bash code/run_site16e4.sh`, 한 번; 로그 그대로):
+
+    [site 10-08 23:08 CDT] start (git 9c4b6fe7)
+    [site 10-08 23:09 CDT] drift check OK
+    [site 10-08 23:09 CDT] SITE_DONE rc=0 (    POWERED=True  second arm fewer at 1/3, first arm fewer at 0/3  -> (iii))
+
+- 동결 커밋 9c4b6fe7 (커밋 시각 2026-10-08 23:08:42 CDT; push (reflog 23:08:47 CDT) 와 같은 분에 실행 — 로그의 start 에 초가 없어 push 와의 초 단위 순서는 기록에 없다; 스크립트의 'HEAD = 동결 커밋' 검사 통과). 출력 첫 줄: `# run_site16e4 git 9c4b6fe7 2026-10-08 23:08 CDT  script sha256[:16] b3bee226cf046878  (code/run_site16e4.sh)` — git = 동결 커밋, 스크립트 sha256[:16] = §5 의 값, 경로 = 저장소의 스크립트. 실행 뒤 HEAD 9c4b6fe7 (그대로), conf/code·Demo 청결. 재실행·ABORT 없음 (로그 3 줄, `start` 1 회).
+- 무결성 (출력 머리말, 두 단계 모두): `integrity: OK`; base `manifest-head:cd241b7e/chunks-sha:78cbb59fc01ce520`; V1 체크포인트 `d2sx_N160000_a1.pt 4443921ce8d5c4a1` (출력 3·17 행; §5 와 같다). V4 가 같은 파일을 쓴 것은 출력이 아니라 raw 의 `meta|budget|M-ours-dscore-C-V4` 의 ckpt 경로 (§0) 로 확인된다.
+- **드리프트 검사** (V4 → V1 계산 전): `# DRIFT CHECK: OK -- 8 recorded lines reproduced character for character (4 of them = lines of HEAD:conf/results/tables_D2_B16e4k.txt), both labels (i) 3/3` — `b* → V1` 302:50 · 117:21 · 35:7, pooled 454:78, +1.41 dB [+1.22, +1.64], 실패 623/184/57·371/88/29; `b* → V4` 285:56 · 111:23 · 42:6, pooled 438:85, +1.27 dB [+1.08, +1.50], 실패 623/184/57·394/96/21 (출력 5–14 행; §0 과 같다).
+
+**V4 → V1** (출력 그대로): `M-ours-dscore-C-V4 -> M-ours-dscore-C-V1  [decision SNRs FIXED; check: the anchor rule on M-ours-dscore-C-V4 gives ['-3', '+0', '+3']]  decision SNRs ['-3', '+0', '+3']`
+
+| 항목 | −3 dB | 0 dB | +3 dB | pooled (보고 전용) |
+|---|---|---|---|---|
+| a:b (a = V4 만 실패, b = V1 만 실패) | 56:33 | 23:15 | 6:14 | 85:62 |
+| exact 양측 부호검정 p | 0.019 | 0.26 | 0.12 | 0.069 |
+| 방향 · p < .05 | V1 쪽 유의 | V1 쪽, 유의 아님 | V4 쪽, 유의 아님 | V1 쪽, 유의 아님 |
+| 불일치 쌍 수 D = a + b (산술) | 89 | 38 | 20 | 147 |
+| 실패 수 @16 V4 · V1 | 394 · 371 | 96 · 88 | 21 · 29 | — |
+
+- power guard: `POWERED=True  second arm fewer at 1/3, first arm fewer at 0/3  -> (iii)` — 판정점 3 개, 세 점 모두 불일치 쌍 ≥ 6 → POWERED.
+- **라벨: (iii) "판정하지 못함 (유의 방향 없음)"** — V1 쪽 유의 1/3, V4 쪽 유의 0/3. 혼합 결과 (어느 한 점이 반대쪽 유의): 해당 없음.
+- SNR@0.1 격차 (V4 − V1): `SNR@0.1 gap (M-ours-dscore-C-V4 minus M-ours-dscore-C-V1): +0.14 dB  [90% paired bootstrap +0.06, +0.23; censored replicates 0%]`. (미반올림 +0.1425 [+0.0567, +0.2334] — §6.2 감사의 독립 재계산; 기록·원고 문장은 `gain` 문자열의 세 수 그대로.)
+- 판정점 확인 줄: V4 기준 자동 규칙도 `['-3', '+0', '+3']` (고정 판정점과 같은 셋).
+
+**§2 의 규칙이 라벨로 정한 문장 (채운 꼴; 결과를 본 뒤 고른 것이 없다; 원고 IV-F 의 "It attains BLER 0.1 at a 1.27\,dB [$+1.08$, $+1.50$] lower SNR." 바로 뒤)**
+
+    In paired sign tests, the comparison between the \ours{} and the \scdiff{} is not decided.
+    The SNR gain $\Delta_{0.1}$ of the \ours{} over the \scdiff{} is 0.14\,dB [$+0.06$, $+0.23$].
+
+(첫 문장 = 라벨 (iii) 의 고정 문장; 둘째 문장의 x·l·u = `gain` 출력의 세 수, censored replicates 0%.)
+
+**§3 예측 채점** (기록자의 예측; 두 arm 의 BLER 표·실패 수를 본 뒤의 것)
+
+| # | 예측 | 결정하는 수 | 채점 |
+|---|---|---|---|
+| 1 | 라벨 = (iii) | 라벨 (iii) | ✓ |
+| 2 | −3 dB: V1 쪽 유의 (p < .05) | 56:33 p=0.019 (D = 89) | ✓ |
+| 3 | 0 dB: 유의 아님 (p ≥ .05) | 23:15 p=0.26 (D = 38) | ✓ |
+| 4 | +3 dB: 유의 아님 (p ≥ .05) — 혼합 결과가 아니다 | 6:14 p=0.12 (D = 20) | ✓ |
+| 5 | pooled: p ≥ .05 | 85:62 p=0.069 (pooled D = 147) | ✓ |
+| 6 | SNR@0.1 격차 (V4 − V1) 의 90% 구간 하한 > 0 | [+0.06, +0.23] | ✓ |
+
+합계: 적중 6, 빗나감 0 (항목 7 의 빗나갈 경로 — 무결성 실패·드리프트 실패 — 는 일어나지 않았다). 항목 0 (이미 정해진 것) 의 확인: a − b = +23 / +8 / −8, pooled +23; SNR@0.1 점추정 +0.14; 라벨은 (ii)·(iv) 가 아니다.
+
+**편차·주의 (사실만)**:
+- 라벨 (iii) 은 "판정하지 못함" 이다 — 비긴다·동등·차이 없음이 아니다 (§2). pooled 줄은 보고 전용이며 라벨에 쓰이지 않았다.
+- 이 쌍은 `08_SPEC` §2 의 쌍 목록 밖이며 이 등록이 하나 더한 것이다; 검정 규칙·함수는 표 B 의 것 그대로 (`pair_baselines.py --pairs`; 기본 경로는 커밋본 `pairB_STB16e4k.txt` 와 비트 동일 — §4).
+- 지위: 규칙 고정 사후 계산 — 두 arm 의 BLER 표·실패 수를 본 뒤에 규칙을 고정했다. a − b 와 SNR@0.1 점추정은 실행 전에 이미 정해져 있었고 (머리말 (a)(b)), 이 실행이 새로 정한 것은 불일치 쌍 수 (→ p·라벨) 와 bootstrap 구간이다.
+- 범위: 헤드라인 셀 하나 (D2 C2 8×4, N′ = 1.6e5, `raw_B16e4k`, last-EMA 가중치), 판정점 −3 / 0 / +3 dB. C6·다른 예산·다른 쌍은 계산하지 않았다.
+- 프롬프트 §배경과 `docs/paper/CONTRIBUTIONS.md` §0 :34 는 "V4 가 든 기록 쌍" 을 둘이라 적었으나 셋이다 (`V4 → R5-genie` :403 포함; 적대적 검토 MUST-2). V1 과 V4 를 함께 든 쌍이 없다는 것은 맞다.
+- 혼합 결과 규칙에 대한 사용자 알림 (적대적 검토 SHOULD-1) 뒤 답을 기다리지 않고 동결했다 (DECISIONS 동결 줄); 결과는 혼합이 아니다.
+- 이 결과는 헤드라인·기존 등록의 §1–§3·기존 라벨을 바꾸지 않는다. ICC 원고 저장소는 고치지 않았다 (원고 반영은 원고 채팅).
+
+### 6.2 기록 감사 (Fable 5.1 서브에이전트, 2026-10-08 23:22 CDT = 10-09 13:22 KST; `prereg_audit_2026-10-08/audit_SITE16e4.md` (`recompute_site.py` → `recompute_site.out`); raw npz 448 청크에서 독립 재계산 — pair_baselines·analysis·Demo 미import)
+
+판정: **반증 실패. MUST 0 · SHOULD 1 · NIT 5** — 수치 정정 없음. 독립 재계산 (자체 로더·`math.comb`/`scipy.stats.binomtest` 부호검정·자체 power guard·라벨·앵커 규칙·자체 보간과 bootstrap) 이 실패 수 (V4 394/96/21, V1 371/88/29), a:b (56:33 · 23:15 · 6:14, pooled 85:62; a = V4 만 실패는 코드 `paired(x=V4, y=V1)` 로 확인), p (0.019187 / 0.255875 / 0.115318 / pooled 0.069233), D (89/38/20/147), POWERED, 라벨 (iii), 혼합 아님, V4 기준 앵커 규칙 `['-3', '+0', '+3']`, SNR@0.1 격차 +0.1425 [+0.0567, +0.2334] (censored 0%; B 2000, `default_rng(20260925)`, 같은 설정의 재구현) 를 마지막 자리까지 재현했고, 드리프트 쌍 8 줄도 재현했다. 출처: 출력 첫 줄 git 9c4b6fe7 = 동결 커밋, 스크립트 sha256[:16] `git show 9c4b6fe7:` = 작업 사본 = b3bee226cf046878, conf/code·Demo 청결, 등록 diff vs 9c4b6fe7 는 추가만, 로그 start 1·`SITE_DONE rc=0` 1·ABORT 0, 출력의 쌍은 셋뿐 (b\*→V1, b\*→V4, V4→V1), chunks-sha 재계산 78cbb59fc01ce520, raw 청크 mtime 2026-09-22 (실행 뒤 바뀐 파일 0), ckpt sha 4443921ce8d5c4a1. 짝: V1·V4 는 같은 청크 파일의 열 (448 파일, 2560 시행/SNR, raised 0). §2: 두 문장은 §2 의 고정 문장·채움 규칙과 바이트 동일, 부호 (격차 > 0 ⟺ V1 이 더 낮은 SNR 에서 BLER 0.1) 확인. §3: "적중 6, 빗나감 0" 맞음.
+
+반영한 정정 (§6.1 은 첫 커밋 전이라 제자리에서 고쳤다; 수치는 하나도 바뀌지 않았다):
+- SHOULD-1: 무결성 줄의 "V1·V4 체크포인트 … (출력 머리말)" → 출력 머리말은 V1 만 말한다; V4 가 같은 파일을 쓴 근거는 raw 의 `meta|budget|M-ours-dscore-C-V4` (§0) 로 출처를 고쳐 적음.
+- NIT-1: 항목 0 확인 줄의 "-8" (ASCII) → "−8".
+- NIT-2: "push 뒤 실행" → push (reflog 23:08:47 CDT) 와 같은 분; 초 단위 순서는 기록에 없음 (커밋 뒤 실행은 스크립트의 HEAD 검사로 확정).
+- NIT-3: "§2 에서 고른 문장" → "§2 의 규칙이 라벨로 정한 문장".
+- NIT-4: SNR@0.1 격차 줄에 미반올림 값 병기 (점추정 +0.1425 은 둘째 자리 반올림 경계 근처; `gain` 문자열은 +0.14).
+- NIT-5: 원본 출력 `pairB_SITEB16e4k.txt` 를 이 기록과 같은 커밋에 넣는다. 실행 로그 `logs/run_site16e4.log` 는 저장소 규칙 (등록 실행 로그는 커밋하지 않는다; `run_static16e4.log`·`run_fighs16e4.log` 와 같음) 대로 커밋하지 않으며, 그 세 줄 전부가 §6.1 에 옮겨져 있다.
+
+감사가 확인하지 못한 것 (그대로 옮김): (1) `\ours` = V1·`\scdiff` = V4 라는 매크로 정의 — 원고 저장소에 있고 이 저장소에는 .tex 가 없다 (§0 과 기존 문장 관례로만 확인). (2) §4 의 회귀 "기본 경로는 커밋본 `pairB_STB16e4k.txt` 와 비트 동일" — 산출물이 세션 스크래치패드에 있어 재현하지 않았다 (범위 밖). (3) 짝의 의미적 동일성 — raw 에 H·잡음이 없어 같은 청크 파일·`run|seed`·`runner.run_task` 구조로만 확인.

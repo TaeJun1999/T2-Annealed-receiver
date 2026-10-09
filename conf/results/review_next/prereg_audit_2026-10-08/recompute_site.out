@@ -1,0 +1,50 @@
+== 1. raw structure (own loader) ==
+files 448; SNR grid ['-3', '+0', '+3', '+6', '+9', '+12', '+15']; trials/SNR [2560, 2560, 2560, 2560, 2560, 2560, 2560]
+raised blocks (<arm>|failed) V4/V1/b* per SNR: [('-3', 0, 0, 0), ('+0', 0, 0, 0), ('+3', 0, 0, 0), ('+6', 0, 0, 0), ('+9', 0, 0, 0), ('+12', 0, 0, 0), ('+15', 0, 0, 0)]
+structural problems: none
+pairing: V1 and V4 are columns of the SAME chunk files (same run|seed/skip/n per chunk; runner.run_task draws one (H, u, perm, Y) per trial for every arm) -> paired by construction; no separate seed per arm exists in the raw.
+
+== 2. provenance hashes (own code) ==
+chunks-sha (sha256 of concatenated per-chunk sha256 hex, files sorted by name) = 78cbb59fc01ce520
+manifest git_commit=cd241b7e n_raw_files=448 written=2026-09-23 07:36:44 KST stagec sha256_16=4443921ce8d5c4a1 stored_epoch=1784
+checkpoint file sha256[:16] = 4443921ce8d5c4a1  (d2sx_N160000_a1.pt)
+chunk mtimes (KST): min 2026-09-22 21:23:28.921532  max 2026-09-22 21:39:55.332361; newer than manifest: 0
+raw meta|budget|M-ours-dscore-C-V1: ckpt= .../ckpt/d2sx_N160000_a1.pt
+raw meta|budget|M-ours-dscore-C-V4: ckpt= .../ckpt/d2sx_N160000_a1.pt
+
+== 3. the registered pair V4 -> V1 at the FIXED decision SNRs -3 / 0 / +3 dB ==
+orientation: a = blocks where ONLY V4 fails, b = blocks where ONLY V1 fails (x = V4 first, y = V1 second)
+  -3 dB: F_V4=394 F_V1=371  a:b=56:33  both=338  D=a+b=89  a-b=+23  p=0.019 (=0.019187)  direction=V1 fewer  sig=yes
+  +0 dB: F_V4=96 F_V1=88  a:b=23:15  both=73  D=a+b=38  a-b=+8  p=0.26 (=0.255875)  direction=V1 fewer  sig=no
+  +3 dB: F_V4=21 F_V1=29  a:b=6:14  both=15  D=a+b=20  a-b=-8  p=0.12 (=0.115318)  direction=V4 fewer  sig=no
+  pooled (report-only): 85:62  D=147  a-b=+23  p=0.069 (=0.069233)  sig=no
+  power guard: 3 points, 3 with D >= 6 -> POWERED=True
+  V1-side significant (a>b, p<.05): 1/3; V4-side significant (b>a, p<.05): 0/3  -> label (iii)
+  mixed result (opposite-direction significant points): False
+  cross-check scipy.stats.binomtest two-sided p: -3 dB 0.019187  +0 dB 0.255875  +3 dB 0.115318  pooled 0.069233
+
+  anchor rule on V4 (BLER in [0.005, 0.9], 3 smallest |log10(BLER/0.1)|): ['-3', '+0', '+3']  (V4 BLER@16: -3:0.1539, +0:0.0375, +3:0.0082, +6:0.0063, +9:0.0031, +12:0.0023, +15:0.0016)
+  anchor rule on b* (drift pairs): ['-3', '+0', '+3']
+
+== 4. SNR@0.1 gap (V4 minus V1), 90% paired bootstrap ==
+  SNR@0.1: V4 -2.0839 (ok)  V1 -2.2264 (ok)  gap +0.1425 dB -> +0.14
+  90% paired bootstrap (B=2000, default_rng(20260925), 5/95 nanpercentile): [+0.0567, +0.2334] -> [+0.06, +0.23]; censored 0%
+  formatted as `gain` would: +0.14 dB  [90% paired bootstrap +0.06, +0.23; censored replicates 0%]
+  sign: gap > 0 <=> V4 needs a HIGHER SNR for BLER 0.1 <=> V1 reaches 0.1 at a lower SNR (gain of V1 over V4 = +gap)
+  robustness (NOT the registered setting; seed=1, B=2000): [+0.05, +0.24]
+
+== 5. drift pairs b* -> V1, b* -> V4 (anchor rule on b*), own code ==
+  M-ours-bstar -> M-ours-dscore-C-V1: -3 dB 302:50 p=4.7e-45  +0 dB 117:21 p=2.4e-17  +3 dB 35:7 p=1.5e-05   pooled 454:78 p=1.7e-65  POWERED=True wy=3 wx=0 -> (i)
+      SNR@0.1 gap: +1.41 dB  [90% paired bootstrap +1.22, +1.64; censored replicates 0%]   failures@16 M-ours-bstar 623/184/57  M-ours-dscore-C-V1 371/88/29
+  M-ours-bstar -> M-ours-dscore-C-V4: -3 dB 285:56 p=4.5e-38  +0 dB 111:23 p=5e-15  +3 dB 42:6 p=1e-07   pooled 438:85 p=2.8e-58  POWERED=True wy=3 wx=0 -> (i)
+      SNR@0.1 gap: +1.27 dB  [90% paired bootstrap +1.08, +1.50; censored replicates 0%]   failures@16 M-ours-bstar 623/184/57  M-ours-dscore-C-V4 394/96/21
+
+== 6. registration-header arithmetic ((c)(d)(e)) checked with the own sign test ==
+  10:2 p=0.0386
+  11:3 p=0.0574
+  74:51 p=0.0487
+  75:52 p=0.0505
+  a-b=23: largest D with p<.05 = 125
+  a-b=8: largest D with p<.05 = 12
+  overlap c (both fail) at -3/0/+3: 338/73/15  (thresholds 320/86/19; pooled Σc=426 vs 437)
+  (e) -3 dB: b*∩V1=321 b*∩V4=338 F_b*=623 -> c(-3) >= 36
