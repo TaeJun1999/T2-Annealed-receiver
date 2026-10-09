@@ -84,8 +84,9 @@ def manifest_check(root, bad, role):
 MANI = {}                                              # raw role -> manifest dict (--provenance manifest only)
 
 
-def table_b(data, cell, prior, snrs, x, y):
-    cand = decision_points(data, cell, prior, snrs, x)          # anchor = the first member (08_SPEC §2)
+def table_b(data, cell, prior, snrs, x, y, cand=None):
+    if cand is None:                                            # default; cand given = decision SNRs fixed by a registration (--pairs)
+        cand = decision_points(data, cell, prior, snrs, x)      # anchor = the first member (08_SPEC §2)
     res = [paired(data[(cell, prior, s)], x, y) for s in cand]
     powered = len(cand) == 3 and sum(1 for r in res if r[0] + r[1] >= MIN_DISC) >= 2
     wy = sum(1 for r in res if r[0] > r[1] and r[2] < 0.05); wx = sum(1 for r in res if r[1] > r[0] and r[2] < 0.05)
@@ -120,6 +121,10 @@ def main():
                          "2026-09-29 CDT) = for raws written BEFORE run|git existed (no chunk carries the key): each raw must have "
                          "results/review_next/run_manifest_<tag>.json with n_raw_files == its chunk count and a git_commit, printed "
                          "in the header; a raw that DOES carry run|git is still held to the one-clean-commit rule")
+    ap.add_argument("--pairs", nargs="+", default=None, metavar="X>Y[@S1,S2,S3]",
+                    help="SITE16e4: after the integrity checks, table B for exactly these pairs `X -> Y` (a = only X fails) and "
+                         "nothing else (no baseline loop, no summary); '@S1,S2,S3' fixes the decision SNRs (the anchor rule on X is "
+                         "then printed as a check only), without it the anchor rule on X applies.  Default: unchanged behaviour")
     ap.add_argument("--legacy", action="store_true", help="VALIDATION ONLY on raws older than run|git (DOP/ROT code): skip "
                     "the one-clean-commit check.  Never used for a registered tag.")
     a = ap.parse_args()
@@ -214,6 +219,24 @@ def main():
     if a.r0 == "at1":
         print("# R0-pilot read at @1 (1-pass, 08_SPEC §1; load_raw alias 'R0-pilot@1'), SUPP16e4 §1")
     snrs = [k[2] for k in keys]
+    if a.pairs:                                         # SITE16e4: only the listed pairs, same table_b / paired / gain as below
+        for spec in a.pairs:
+            xy, _, pts = spec.partition("@"); x, y = xy.split(">")
+            fixed = sorted(float(s) for s in pts.split(",")) if pts else None
+            if x not in data[keys[0]] or y not in data[keys[0]] or (fixed and not set(fixed) <= set(snrs)):
+                print(f"# --pairs {spec}: arm missing or a fixed decision SNR off the grid {snrs} -- refusing"); sys.exit(1)
+            cand, res, powered, wy, wx, lab = table_b(data, a.cell, a.prior, snrs, x, y, fixed)
+            A, Bn = sum(r[0] for r in res), sum(r[1] for r in res)
+            auto = [f"{s:+.0f}" for s in decision_points(data, a.cell, a.prior, snrs, x)]
+            print(f"{x} -> {y}  [" + (f"decision SNRs FIXED; check: the anchor rule on {x} gives {auto}" if fixed else f"anchor {x}")
+                  + f"]  decision SNRs {[f'{s:+.0f}' for s in cand]}")
+            print("    sign test @16: " + "  ".join(f"{s:+.0f} dB {r[0]}:{r[1]} p={r[2]:.2g}" for s, r in zip(cand, res))
+                  + f"   pooled {A}:{Bn} p={sign_p(A, Bn):.2g}")
+            print(f"    POWERED={powered}  second arm fewer at {wy}/{len(cand)}, first arm fewer at {wx}/{len(cand)}  -> {lab}")
+            print(f"    SNR@0.1 gap ({x} minus {y}): {gain(data, a.cell, a.prior, snrs, x, y)['text']}")
+            print("    failures@16 at the decision SNRs: " + "  ".join(
+                f"{arm} " + "/".join(str(int(fails(data[(a.cell, a.prior, s)], arm).sum())) for s in cand) for arm in (x, y)))
+        return
     k3 = (a.cell, a.prior, -3.0)
     rows, labs = [], {}
     fv3, fg3 = (fails(data[k3], arm) for arm in (V1, GENIE))

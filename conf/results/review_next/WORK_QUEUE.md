@@ -13,6 +13,7 @@
 ## 진행 중
 | 작업 | 자원 | 상태 |
 |---|---|---|
+| SITE16e4 — 헤드라인 셀 V4 → V1 짝 검정 (규칙 고정 사후 계산; 사용자 결정 10-08 22:21 CDT; 결과가 어떻든 등록 §2 문장을 원고 IV-F 에) | CPU 수 분 | 동결 (2026-10-08 23:08 CDT, 이 커밋) → `bash code/run_site16e4.sh` 한 번 → §6 → Fable 기록 감사 → RESULTS §24·EXPERIMENTS·CONTRIBUTIONS §0 한 줄 |
 | 원고 (IEEE ICC 2027, 마감 2026-10-16) — 웹 채팅에서 사용자가 작성, 자료는 paper 브랜치 (`conference/tools/sync_paper_branch.sh`) | — | 진행 중. 실험 큐·GPU 큐 비어 있음 |
 
 ## 대기열 (순서대로)
