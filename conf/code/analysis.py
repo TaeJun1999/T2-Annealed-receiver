@@ -57,7 +57,7 @@ RAW = os.path.join(C.CONF, "raw")
 
 # prior group [A-Z]\d?c?: the trailing 'c' is the D3 prior S2c (2026-09-25); every older file name parses as before.
 # |SV8e: the second testbed SV (2026-09-26), tried only after the first alternative fails, so old names are unaffected.
-PAT = re.compile(r"^(D1|D2)_(C\d)_([A-Z]\d?c?|S2v|SV8e|MIX3|UMi28)_Nr(\d+)_T(\d+)_Tp(\d+)_(dft|eig)_snr(-?\d+)_skip(\d+)_n(\d+)\.npz$")
+PAT = re.compile(r"^(D1|D2)_(C\d)_([A-Z]\d?c?|S2v|SV8e|MIX3|UMi28|DMC)_Nr(\d+)_T(\d+)_Tp(\d+)_(dft|eig)_snr(-?\d+)_skip(\d+)_n(\d+)\.npz$")
 
 # ----------------------------------------------------------------------------- arm sets (06_SPEC §1)
 # D2 has NO R6-exactEP (no exact EP site for the true prior) and NO M-ours-score (no exact score).
@@ -527,6 +527,11 @@ def table_D(testbed, out, results_dir=None, priors=()):
         _p(out, f"38.901 ({', '.join(sorted(priors))}): the D2 files gate_D2.txt / gmm_fit_D2.txt describe the D2 (S2) testbed and are "
                 f"NOT echoed here. {q} training quality: GB' in results/d2_gbprime_{q}.csv (+ d2_gbprime_{q}_*.npz), GMM "
                 f"grid in results/gmm_fits_D2_<tag>/fit_{q}_*, testbed verification in results/testbed_{q}.txt.")
+    elif priors and set(priors) <= set(C.DM_PRIORS):
+        q = "/".join(sorted(priors))
+        _p(out, f"DeepMIMO ({q}): the D2 files gate_D2.txt / gmm_fit_D2.txt describe the D2 (S2) testbed and are NOT echoed "
+                f"here. {q} training quality: GB' in results/d2_gbprime_{q}.csv (+ d2_gbprime_{q}_*.npz), GMM grid in "
+                f"results/gmm_fits_D2_<tag>/fit_{q}_*, testbed verification in results/testbed_{q}.txt.")
     elif priors and set(priors) <= set(C.SV_PRIORS):
         _p(out, f"SV ({', '.join(sorted(priors))}): the D2 files gate_D2.txt / gmm_fit_D2.txt describe the D2 (S2) testbed and are "
                 "NOT echoed here. SV training quality: GB' in results/d2_gbprime_SV8e.csv (+ d2_gbprime_SV8e_*.npz), GMM "
@@ -662,7 +667,7 @@ def main(testbed, tag="", root=None, out_dir=None, results_dir=None):
     pri = {p for _, p in _groups(data)}
     if testbed == "D1":
         _p(out, D1_WARNING)
-    if testbed != "D1" and (pri - {"S2c"} - set(C.SV_PRIORS) - set(C.MIX3_PRIORS) or not pri):     # D2 proper: printed exactly as before
+    if testbed != "D1" and (pri - {"S2c"} - set(C.SV_PRIORS) - set(C.MIX3_PRIORS) - set(C.DM_PRIORS) or not pri):     # D2 proper: printed exactly as before
         _p(out, D2_WARNING)
     if testbed != "D1" and "S2c" in pri:                    # D3 = prior S2c: conditional Gaussianity RESTORED
         _p(out, D3_WARNING)
@@ -670,6 +675,8 @@ def main(testbed, tag="", root=None, out_dir=None, results_dir=None):
         _p(out, C.SV_WARNING)
     for p in sorted(pri & set(C.MIX3_PRIORS)) if testbed != "D1" else ():   # 38.901 MIX3 / UMi28: never the 'sparse specular' banner
         _p(out, C.MIX3_WARNINGS[p])
+    if testbed != "D1" and pri & set(C.DM_PRIORS):         # DeepMIMO ray-traced pool: never the 'sparse specular' banner
+        _p(out, C.DM_WARNING)
     for w in warns:
         _p(out, w)
     if not _groups(data):

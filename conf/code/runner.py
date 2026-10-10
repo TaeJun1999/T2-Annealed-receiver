@@ -1001,6 +1001,9 @@ def cmd_testbed(a):
     if prior in C.SV_PRIORS:
         sys.exit(f"prior {prior} is the SV testbed: its verification is code/testbed_sv.py -> results/testbed_SV.txt "
                  "(T2a..T2e are D2 sparse-specular tests)")
+    if prior in C.DM_PRIORS:
+        sys.exit(f"prior {prior} is the DeepMIMO testbed: its verification is code/testbed_dm.py -> results/testbed_{prior}.txt "
+                 "(T2a..T2e are D2 sparse-specular tests)")
     if prior in C.MIX3_PRIORS:
         sys.exit(f"prior {prior} is the 38.901 MIX3 testbed: its verification is code/testbed_mix3.py -> results/testbed_MIX3.txt "
                  "(T2a..T2e are D2 sparse-specular tests)")

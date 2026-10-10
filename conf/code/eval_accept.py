@@ -59,7 +59,7 @@ def main():
     ap.add_argument("--points", action="append", default=[], help="CELL:s1,s2,... expected SNR set override (repeatable)")
     ap.add_argument("--ref-cells", nargs="+", default=None, help="cells checked against --ref-raw (default: all)")
     ap.add_argument("--ref-arms", default="R5-genie", help="'R5-genie' (default: 4 keys) or 'all' (every arm x KEYS_RAW)")
-    ap.add_argument("--prior", default="S2", help="prior in the fit file names (D3: S2c, SV: SV8e, 38.901: UMi28 / MIX3)")
+    ap.add_argument("--prior", default="S2", help="prior in the fit file names (D3: S2c, SV: SV8e, 38.901: UMi28 / MIX3, DeepMIMO: DMC)")
     ap.add_argument("--bstar", default="kron", help="expected meta|bstar: 'kron' (default, every earlier tag) or a full-K name such as gmm256")
     a = ap.parse_args()
     if a.bstar == "kron" and a.kron_K is None:
