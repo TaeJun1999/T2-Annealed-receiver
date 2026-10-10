@@ -22,6 +22,11 @@ Block split [frozen in split.npy]: 20 m position tiles; TEST tiles hold >= 15 % 
         train stream 8  -> validation pool, n distinct pairs (GMM validation; same tiles as the fit pool, disjoint pairs)
         train stream 10 -> TEST pool, i.i.d. with replacement (held-out reporting / GB')
         trial streams   -> TEST pool, i.i.d. with replacement (one index per trial)
+        sparse_tune.py's development stream [20260930, TBID, PID, Nr, snr + 100] -> TEST pool, i.i.d. with replacement
+            (added 2026-10-10 CDT for the baseline extension, after the DMC16e4 freeze and before any DMC BLER: baseline
+            hyper-parameters are tuned on test-pool channels, like ALD's development TRIALS 2560.. of the trial stream --
+            the same footing as every other dataset, whose development draws come from the test generator; it favours
+            the baselines, never V1 / b*.  No existing stream changes.)
     Any other seed layout raises: a draw must never fall on the wrong side of the split silently.
     sample(rng) == sample_vecs(rng, 1)[0] (as a matrix) on every test stream.
 Norm : ENSEMBLE normalisation E||H||_F^2 = Nr Nt: H = H_pool / sqrt(P_RAW), P_RAW = mean ||H_pool||_F^2 / (Nr Nt) over the
@@ -101,7 +106,9 @@ def _which(rng, prior, Nr):
         return {7: "fit", 8: "val", 10: "test"}[e[2]]
     if len(e) == 7 and e[:2] == head and e[2:4] == [C.PID[prior], Nr]:
         return "test"
-    raise ValueError(f"DMC draws only from common.train_rng (streams 7 / 8 / 10) or common.trial_rng of prior {prior}, Nr={Nr}; "
+    if len(e) == 5 and e[:4] == [20260930, C.TBID["D2"], C.PID[prior], Nr]:      # sparse_tune.py development stream
+        return "test"
+    raise ValueError(f"DMC draws only from common.train_rng (streams 7 / 8 / 10), common.trial_rng or sparse_tune's stream of prior {prior}, Nr={Nr}; "
                      f"got seed layout {e} -- the block split cannot be honoured for an unknown stream")
 
 
