@@ -13,7 +13,7 @@
 | M-ours-bstar-scalar | GMM prior, scalar site | |
 | M-ours-gmm32 | GMM prior (K = 32) | |
 | R2, R2-ours-G | Gaussian prior | 같은 EP 수신기 |
-| R0, R0-pilot | Pilot-only LMMSE | 판독 시점이 둘이다: 첫 반복 뒤 (`R0-pilot@1`; 원고 IV-A 정의, 등록 baseline) = `F16deep_wide` 의 곡선과 F29 의 행, 16 회 뒤 = F22 의 곡선 — 캡션에 적는다 |
+| R0, R0-pilot | Pilot-only LMMSE | 판독 시점이 둘이다: 첫 반복 뒤 (`R0-pilot@1`; 원고 IV-A 정의, 등록 baseline) = `F16deep_wide`·`F21sel_wide`·`F2a_snr`·`F2b_budget` 의 곡선과 F29 의 행, 16 회 뒤 = F22 의 곡선 — 캡션에 적는다 |
 | R1 | Turbo LMMSE receiver | |
 | R3 | BiG-AMP | |
 | R4 | SC-VAMP (LLR 판이면 SC-VAMP (LLR)) | |
@@ -47,7 +47,7 @@
 | SNR@0.1 격차 b\* − V1 | SNR gain at BLER 0.1 [dB] (> 0: proposed better) |
 | R, R_dp, R_X, "recovery … over the decision points", "b\*→genie gap closed by V1" | Fraction of the GMM-to-perfect-CSI gap closed (기준선이 GMM 이 아니면 "baseline-to-perfect-CSI gap") |
 | N_train, "equal training budget" | Training set size N_train (channels) — 동일예산은 캡션에 |
-| N_train — 원고 Fig. 2 용 판 (한 단 판 `F16b_col`, 두 단 판 `F16deep_wide` (b)) 의 x 축 | Training set size N′ (channels) — 원고 Fig. 2 용 판의 x 축은 원고 표기 N′ 를 쓴다 (`$\mathit{N}$` + U+2032; 이 표의 N_train 에 대한 예외) |
+| N_train — 원고 Fig. 2 용 판 (한 단 판 `F16b_col`, 두 단 판 `F16deep_wide` (b), subfigure 판 `F2b_budget`) 의 x 축 | Training set size N′ (channels) — 원고 Fig. 2 용 판의 x 축은 원고 표기 N′ 를 쓴다 (`$\mathit{N}$` + U+2032; 이 표의 N_train 에 대한 예외) |
 | kron K=… | K = … (GMM components) |
 
 ## 그림에서 지우는 것 (캡션이나 본문으로)
