@@ -1,0 +1,28 @@
+F2sub -- Fig. 2 of the manuscript as three \subfloat panels under one legend band: (a) = F16deep_wide (a), (b) = F16deep_wide (b), (c) = F30one_col.  Nothing recomputed or transcribed: paper_f16deep.main() and paper_f30one.main() ran in fresh interpreters with Figure.savefig disabled, and every curve here is drawn from the artists of those runs.
+
+Reference record texts = the record files, byte for byte (asserted): paper_f16deep.main() = records/paper_f16deep.txt (136 lines, sha256[:16] 2d34a9ce08a13f22); paper_f30one.main() = records/paper_f30one.txt (96 lines, sha256[:16] 1ee31eae3266aac5).
+
+Files (saved at exactly figsize; PNG 300 dpi; PDF with TrueType fonts):
+  F2legend_wide  7.05 x 0.4 in (507.60 x 28.80 pt)
+  F2a_snr        3.0 x 2.0 in (216.00 x 144.00 pt)
+  F2b_budget     2.05 x 2.0 in (147.60 x 144.00 pt)
+  F2c_scale      2.0 x 2.0 in (144.00 x 144.00 pt)
+  panel widths 3.0 + 2.05 + 2.0 = 7.05 in = the legend band's width (asserted); IEEEtran conference \textwidth = 516 pt = 7.14 in.
+
+Axes of the three panels, from the bottom of the file [in] (left, bottom, right, top):
+  F2a_snr        [0.50, 0.36, 2.94, 1.95]
+  F2b_budget     [0.47, 0.36, 1.98, 1.95]
+  F2c_scale      [0.61, 0.36, 1.96, 1.95]
+  the same height 2.0 in and the same axes bottom 0.36 in / top 1.95 in in all three (asserted): placed side by side the three axes line up.  No panel label and no title in any file (decision 3).
+
+(a) F2a_snr: the 11 curves of F16deep_wide (a) -- Proposed (diffusion prior); GMM prior; Gaussian prior; Perfect CSI; Annealed Langevin (plug-in); Turbo LMMSE receiver; BiG-AMP; Pilot-only LMMSE; SBL (in loop); SBL (pilot-only); OMP (pilot-only) -- x (np.float64(-4.0), np.float64(16.0)), ticks -3 +0 +3 +6 +9 +12 +15 dB; y log (0.0002, 1.2); error bars on Proposed (diffusion prior); GMM prior; Gaussian prior; Perfect CSI.
+(b) F2b_budget: the same 11 curves as F16deep_wide (b); x log (np.float64(6000.0), np.float64(2200000.0)), y linear (np.float64(0.0), np.float64(0.9)); error bars on Proposed (diffusion prior); GMM prior; Gaussian prior; Perfect CSI; curves with one point (1.6e5 only): Annealed Langevin (plug-in); SBL (in loop); SBL (pilot-only); OMP (pilot-only).
+(c) F2c_scale: the two curves of F30one_col -- Sparse specular; 3GPP UMi 28 GHz -- with their 90% bars; x log2 (np.float64(6.3), np.float64(45.0)), ticks 8 16 32; y (np.float64(0.0), np.float64(1.0)); its two-entry legend inside the axes at 'lower right', 7.5 pt (F30one_col: 7.5 pt) -- the first of lower right, upper left, center right, lower center, upper center that is 1 pt clear of the points, bars and lines, tried at its own size and then at 7 pt -- no frame.
+
+Decision 4, K labels of (b): NOT DRAWN -- all under the GMM points: collide: [('$K$ = 512', '2048'), ('1024', '4096')]; over the data (curve, marker or bar within 0.5 pt): ["1024: ['_nolegend_']", "4096: ['_nolegend_', 'error bar']"]; staggered (2048, 4096 above): collide: none; over the data (curve, marker or bar within 0.5 pt): ["2048: ['_nolegend_', 'error bar']", "1024: ['_nolegend_']", "4096: ['_nolegend_', 'error bar']"].  The caption carries K: 512 at 1e+04, 2048 at 4e+04, 1024 at 1.6e+05, 4096 at 3.2e+05 (4096 from there on).
+Decision 5, the Annealed Langevin (plug-in) point of (b) at 1.6e5: its marker centre is 0.30 pt from the Gaussian prior point's (0.3254 vs 0.3277; positions unchanged).  It is drawn over the Gaussian prior point (zorder 2.85 > 2.75, as in F16deep_wide): the smaller plus (3 pt) sits on the larger circle (3.4 pt), so both show -- pixels of each colour within 2.2 pt of the point on the 200 dpi canvas: Gaussian prior 26 (counted outside the bands of its dashed line and its error bar), Annealed Langevin 64 (asserted >= 15 each).  A white outline around the plus was tried and left out: it covers the circle (the outline's corners reach past the circle's radius).
+Decision 6, value labels of (c): NOT DRAWN -- they would overlap: 0.509 / ['_nolegend_'].  The values are in the manuscript text and in records/paper_f30one.txt.
+
+F2legend_wide: the 11 entries of the legend of F16deep_wide with their shapes and sizes, 4 columns x 3 rows, no frame, 7 pt; columns = the families, column by column: Proposed (diffusion prior); Annealed Langevin (plug-in); GMM prior | Gaussian prior; Turbo LMMSE receiver; BiG-AMP | Pilot-only LMMSE; Perfect CSI | SBL (in loop); SBL (pilot-only); OMP (pilot-only).  (F16deep_wide lists Perfect CSI last; here it sits under Pilot-only LMMSE so that the sparse three share a column -- the entries and their shapes are unchanged.)
+
+Asserts passed (the script stops before saving otherwise): the two record texts above; every redrawn curve = its reference artist (x, y, error-bar ends rtol 1e-12; colour, marker, line style, fill, edge, line width, marker size, cap size, zorder equal); panel sizes and axes edges as listed; every artist inside its canvas (tight bbox [in]: F2a_snr [0.026, 0.041, 2.94, 1.967]; F2b_budget [0.066, 0.024, 1.98, 1.95]; F2c_scale [0.009, 0.041, 1.96, 1.992]; F2legend_wide [0.799, 0.017, 6.251, 0.383]); smallest visible text 7 pt (nominal size; the exponents of the 10^x tick labels and other sub/superscripts are smaller, as in the reference figures); STIXGeneral / mathtext stix.
