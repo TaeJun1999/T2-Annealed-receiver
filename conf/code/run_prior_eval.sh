@@ -6,7 +6,7 @@
 # identity, R5-genie replay of the last tag against the best tag, grid completeness) and the unpaired recovery
 # difference against the D2 headline (frontier_ci.py --recovery).
 # Usage: run_prior_eval.sh <prior> <TAG> <ckpt_stem> <bstar> <kron_K|-> <ll_val> <best_sha> <last_sha> <grid>
-#   prior  S2c | SV8e | UMi28 | MIX3         bstar  kron | gmm<K>        kron_K  '-' when bstar is a full family
+#   prior  S2c | SV8e | UMi28 | MIX3 | DMC   bstar  kron | gmm<K>        kron_K  '-' when bstar is a full family
 #   grid   e.g. "full:16,32,64,128,256,512 kron:16,32,64,128,256,512,1024,2048[,4096]" -- REQUIRED, as registered in §1
 cd /home/HTJ/t2/conf
 P=~/miniforge3/envs/torch/bin/python

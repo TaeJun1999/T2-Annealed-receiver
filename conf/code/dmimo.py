@@ -47,7 +47,7 @@ P_RAW = {}                                # (prior, Nr, Nt) -> mean ||H_pool||_F
 RT = {}                                   # (prior, Nr, Nt) -> Rt = mean H^H H / Nr   (normalised channels, Hermitian)
 RR = {}                                   # (prior, Nr, Nt) -> Rr = mean H H^H / Nt
 TRAIN_SHA = {}                            # (prior, Nr, Nt) -> sha256[:16] of sample_vecs(train stream 7, N_CAL)
-# frozen: calibrate DMC Nr=8 x Nt=4, n=160000, 1 s  (python dmimo.py calibrate 8; P_RAW ~ 1/512 = DeepMIMO's 1/N_subcarriers amplitude factor)
+# frozen: calibrate DMC Nr=8 x Nt=4, n=160000, 1 s  (python dmimo.py calibrate 8; P_RAW ~ 1/512: DeepMIMO path amplitude sqrt(p / N_sc), N_sc = 512 -> power 1/512)
 P_RAW[('DMC', 8, 4)] = 0.0019541542355243444
 TRAIN_SHA[('DMC', 8, 4)] = 'e6ddafc27367f975'
 RT[('DMC', 8, 4)] = np.array([[(1.000039414249332+0j), (-0.28155460551233913-0.001045608803496259j), (0.19479615876211734-0.0001079555576519018j), (-0.153760465027511-0.0004346331598943059j)],
