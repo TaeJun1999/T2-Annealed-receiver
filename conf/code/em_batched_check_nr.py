@@ -62,7 +62,7 @@ def main():
     ap = argparse.ArgumentParser(description="batched vs exact kron M-step at Nr 16/32 (GPU, no BLER)")
     ap.add_argument("--nr", type=int, choices=(8, 16, 32), default=16)
     ap.add_argument("--ntrain", type=int, default=160000)
-    ap.add_argument("--prior", choices=("S2", "UMi28"), default="S2")
+    ap.add_argument("--prior", choices=("S2", "UMi28", "DMC"), default="S2")
     a = ap.parse_args()
     NR, PRIOR = a.nr, a.prior
     n = a.ntrain; sfx = "" if (n == 160000 and NR != 8) else f"_n{n}"

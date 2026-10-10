@@ -1,0 +1,17 @@
+# date        : 2026-10-11 07:39:20 KST
+# git commit  : 25f74c0a
+# content     : testbed_dm.py -- DeepMIMO v4 DMC (code/dmimo.py, pool by code/dmimo_build.py), Nr=8 x Nt=4; streams from common.train_rng('D2','DMC',...)
+# pool        : sha H.npy / split.npy = ('709a6346b0ea763b', '9f3237f1997d6b91'); pairs 342597 = fit 270425 + val 20000 + test 52172
+# calibration : P_RAW=0.0019541542355243444  TRAIN_SHA=e6ddafc27367f975  (n=160000, train stream 7)
+
+TDMa normalisation (val stream 8, n=20000): mean ||H||^2/(Nr Nt) = 1.00214 (s.e. 0.00281; 4 s.e. band) -> PASS;  per-block power CV 0.396
+TDMb per-entry E|H_ab|^2: min 0.9960 max 1.0110 (report only)
+TDMc pool vs probe: pairs 342597 vs 342597; 18 BS yaws max |diff| 0.10 deg; LoS fraction 0.281290 vs 0.281290 -> PASS
+TDMd pilot-stage K=1 Gaussian NMSE @ -3 dB (nu = sigma^2/Nt, val draw): 0.3161 vs probe 0.3218 (|diff| <= 0.02) -> PASS
+TDMe erank(Rt) = 3.422 / 4 (T2b threshold 3.6) -> pilots 'eig' for Tp<=Nt;  erank(C_ens) = 25.27 / 32 (probe 25.14);  beamspace top-4 energy median 0.872 mean 0.854 (probe mean 0.844)
+TDMf block split: pools disjoint and exhaustive, no 20 m tile on both sides (564 tiles, 88 test; test share 0.1523) -> PASS
+TDMg split shift (report): LoS fraction fit+val side 0.2819 / test side 0.2780; outage P(MI<4 bit) @ -3 dB val 0.2170 / test 0.1905 (probe 0.2362); K=1 NMSE @ -3 dB val 0.3161 / test 0.3164;  mean ||H||^2/(Nr Nt) test 1.0017
+TDMh leakage (report): nearest training channel of 2000 test draws (N' = 160000): median normalised squared distance 0.1261, share < 0.1 = 0.433 (probe 0.411 vs its whole train pool)
+TDMi cost: sample() 0.01 ms/call, sample_vecs 160000 in 0.1 s, val draw 20000 in 0.0 s
+
+ALL PASS (4 s CPU)
