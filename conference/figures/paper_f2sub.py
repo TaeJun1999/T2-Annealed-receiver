@@ -12,15 +12,16 @@ Figure.savefig disabled -- the state of a stand-alone run, and none of their fig
 record text and the drawn content of their axes (points, error-bar ends, shapes, sizes, axis set-up, labels).  Asserted, else
 the script stops before anything is saved: the two record texts = records/paper_f16deep.txt and records/paper_f30one.txt byte
 for byte; every curve redrawn here = the reference artist (x, y, bar ends rtol 1e-12; colour, marker, line style, fill, sizes,
-zorder equal); the three panel files have the same height and the same axes bottom / top (so the axes line up in a row); every
+zorder equal); the reference axes and figures hold nothing that is not read (no other collection, patch, image, inset or
+figure-level text); the three panel files have the same height and the same axes bottom / top (so the axes line up in a row); every
 artist inside its canvas; every visible text >= 7 pt (nominal).
 Decided for these files (conf/DECISIONS.md, 2026-10-09 CDT; the web chat's prompt after the user's decisions of 21:46-21:50 CDT):
-no panel labels, no titles; the legend's columns are the families; (b) a K label only where K changes, staggered above / below
+no panel labels, no titles; the legend keeps a family in one column where three rows allow it; (b) a K label only where K changes, staggered above / below
 the GMM curve where two would collide, left out altogether if they still collide (the record says which; the caption then
 carries K); (b) the Annealed Langevin point at 1.6e5 lies on the Gaussian prior point -- positions unchanged, the smaller plus is drawn
 on top of the larger circle (zorder, as in F16deep_wide) and the pixels of both markers that show are counted and asserted (a
-white outline was tried and left out: it hides the circle); (c) the value labels above the points stay only if they are clear of the points,
-bars, each other and the legend; STIXGeneral, TrueType in the PDF, saved at exactly figsize, PNG at 300 dpi.
+white outline was tried and left out: it hides the circle); (c) the value labels above the points stay only if they are clear of the curves
+(lines, points, bars), each other and the legend; STIXGeneral, TrueType in the PDF, saved at exactly figsize, PNG at 300 dpi.
 Output next to this script, or in $FIG_OUTDIR.
 Run (CPU, about 2 minutes):
   cd ~/t2/conf && CUDA_VISIBLE_DEVICES= ~/miniforge3/envs/torch/bin/python -B ~/t2/conference/figures/paper_f2sub.py \\
@@ -75,6 +76,8 @@ def grab(ax):
         if id(l) not in own:                                       # plain labelled lines; anything else (zero-failure caps, reference lines) stops
             assert not l.get_label().startswith("_") and l.get_label() not in curves, l.get_label()
             curves[l.get_label()] = dict(x=np.asarray(l.get_xdata(), float), y=np.asarray(l.get_ydata(), float), lo=None, hi=None, **style(l))
+    assert len(ax.collections) == sum(isinstance(c, ErrorbarContainer) for c in ax.containers) and not (
+        ax.patches or ax.artists or ax.images or ax.tables or ax.child_axes), "content grab() does not read"   # nothing is dropped silently
     texts = [dict(note=isinstance(t, matplotlib.text.Annotation), in_axes=t.get_transform() == ax.transAxes, s=t.get_text(),
                   pos=tuple(t.xy) if isinstance(t, matplotlib.text.Annotation) else t.get_position(), size=t.get_fontsize(),
                   color=t.get_color(), ha=t.get_ha(), va=t.get_va()) for t in ax.texts]
@@ -97,6 +100,7 @@ def ref(name):
     with mock.patch.object(matplotlib.figure.Figure, "savefig"), contextlib.redirect_stdout(buf):
         mod.main()
     fig = plt.gcf()                                                # the figure the script made last = the one it saves
+    assert not (fig.texts or fig.lines or fig.patches or fig.artists or fig.images), "figure-level content ref() does not read"
     return buf.getvalue(), [grab(a) for a in fig.axes], [[t.get_text() for t in g.get_texts()] for g in fig.legends], dict(mod.RC)
 
 
@@ -109,6 +113,40 @@ def draw(ax, c, lab, **over):
     else:                                                          # errorbar puts its data line at zorder + 0.1: bars and caps at ezorder
         ax.errorbar(c["x"], c["y"], yerr=[np.maximum(c["y"] - c["lo"], 0), c["hi"] - c["y"]], capsize=c["capsize"],
                     elinewidth=c["elinewidth"], zorder=c["ezorder"], **kw)
+
+
+def touched(D, ax, bb, pad):
+    """what paper_f16deep.hits() finds within `pad` px of the box, by curve: 'name' when a marker, cap or bar of the curve is that near,
+    'name (line only)' when only its connecting line is -- the same test, so no decision changes (asserted)"""
+    import numpy as np
+    from matplotlib.container import ErrorbarContainer
+    from matplotlib.path import Path
+    from matplotlib.transforms import Bbox
+    box = Bbox.from_extents(bb.x0 - pad, bb.y0 - pad, bb.x1 + pad, bb.y1 + pad)
+
+    def near(l):                                                   # (a marker or cap box, a line segment) of one Line2D
+        xy = l.get_transform().transform(l.get_xydata())
+        fin = np.isfinite(xy).all(axis=1)
+        r = l.get_markersize() / 2 * ax.figure.dpi / 72 if l.get_marker() not in ("None", "", None) else 0.0
+        ry = 0.0 if l.get_marker() == "_" else r
+        solid = any(box.overlaps(Bbox.from_extents(x - r, y - ry, x + r, y + ry)) or box.contains(x, y) for x, y in xy[fin])
+        line = l.get_linestyle() not in ("None", "", " ") and any(
+            fin[i] and fin[i + 1] and Path(xy[i:i + 2]).intersects_bbox(box, filled=False) for i in range(len(xy) - 1))
+        return solid, line
+    out, own = [], set()
+    for c in ax.containers:
+        if isinstance(c, ErrorbarContainer):
+            line, caps, bars = c.lines
+            own |= {id(line), *map(id, caps)}
+            solid, ln = near(line)
+            solid = solid or any(near(k)[0] for k in caps) or any(
+                len(g) and Path(b.get_transform().transform(g)).intersects_bbox(box, filled=False) for b in bars for g in b.get_segments())
+            out += [c.get_label() + ("" if solid else " (line only)")] if solid or ln else []
+    for l in ax.lines:
+        if id(l) not in own and any(near(l)):
+            out.append(l.get_label() + ("" if near(l)[0] else " (line only)"))
+    assert bool(out) == bool(D.hits(ax, bb, pad)), (out, D.hits(ax, bb, pad))
+    return out
 
 
 def same_curves(ax, refc, Q):
@@ -212,15 +250,15 @@ def main():
         box = [t.get_window_extent() for t in kt]
         wide = [Bbox.from_extents(e.x0 - 1.0 / px, e.y0, e.x1 + 1.0 / px, e.y1) for e in box]   # 2 pt between two labels side by side
         clash = [(i, j) for i in range(len(kt)) for j in range(i + 1, len(kt)) if wide[i].overlaps(wide[j])]
-        over = [f"{t['s']}: {D.hits(bx, e, 0.5 / px) or 'outside the axes'}" for t, e in zip(kref, box)
+        over = [f"{t['s']} -- {', '.join(touched(D, bx, e, 0.5 / px)) or 'outside the axes'}" for t, e in zip(kref, box)
                 if D.hits(bx, e, 0.5 / px) or e.y1 > bx.get_window_extent().y1]
         if clash or over:
             for t in kt:
                 t.remove()
             kt = None
         return kt, clash, over
-    say = lambda clash, over: (f"collide: {[(kref[i]['s'], kref[j]['s']) for i, j in clash] or 'none'}; over the data (curve, marker or bar "
-                               f"within 0.5 pt): {over or 'none'}")
+    say = lambda clash, over: (f"labels that collide: {', '.join(kref[i]['s'] + ' / ' + kref[j]['s'] for i, j in clash) or 'none'}; labels within 0.5 pt "
+                               f"of a curve (its line, marker, bar or cap): {'; '.join(over) or 'none'}")
     kt, clash0, over0 = k_try(())
     k_how = "all under their GMM points, as in F16deep_wide"
     if kt is None:                                                 # stagger: a label that collides with its left neighbour goes above its point
@@ -232,6 +270,8 @@ def main():
                      f"{say(clash1, over1)}.  The caption carries K: " + ", ".join(f"{t['s'].replace('$K$ = ', '')} at {gm['x'][i]:.3g}" for t, i in zip(kref, ki))
                      + " (4096 from there on)")
     notes["K"] = k_how
+    near = ["; ".join(f"{a} / {b} at " + ", ".join(f(x) for x in at) for a, b, at in D.coincide(a_, D.NEAR_PT)) or "none"
+            for a_, f in ((ax, lambda x: f"{x:+.0f} dB"), (bx, lambda x: f"{x:.3g}"))]   # as the F16deep_wide record, at these panel sizes
 
     # ---------------- F2c_scale = F30one_col ----------------
     fc, cx = panel("F2c_scale")
@@ -255,16 +295,18 @@ def main():
     vb, lbox = [t.get_window_extent() for t in vt], leg_c.get_window_extent()
     v_bad = ([f"{C['texts'][i]['s']} / {C['texts'][j]['s']}" for i in range(6) for j in range(i + 1, 6) if vb[i].overlaps(vb[j])]
              + [f"{t['s']} / legend" for t, e in zip(C["texts"], vb) if e.overlaps(lbox)]
-             + [f"{t['s']} / {D.hits(cx, e, 0.0)}" for t, e in zip(C["texts"], vb) if D.hits(cx, e, 0.0)]
+             + [f"{t['s']} / {', '.join(touched(D, cx, e, 0.0))}" for t, e in zip(C["texts"], vb) if D.hits(cx, e, 0.0)]
              + [f"{t['s']} / outside the axes" for t, e in zip(C["texts"], vb) if e.y1 > cx.get_window_extent().y1])
-    if v_bad:                                                      # decision 6: the value labels stay only if they are clear of everything
+    if v_bad:                                                      # decision 6: the value labels stay only if they are clear of everything (lines too)
         for t in vt:
             t.remove()
-    notes["values"] = ("drawn above the points as in F30one_col (clear of the points, bars, each other and the legend: asserted)" if not v_bad
-                       else "NOT DRAWN -- they would overlap: " + "; ".join(v_bad) + ".  The values are in the manuscript text and in records/paper_f30one.txt")
+    notes["values"] = ("drawn above the points as in F30one_col (clear of the curves' lines, points and bars, of each other and of the legend: asserted)"
+                       if not v_bad else "NOT DRAWN -- a label box would touch (tested against the curves' connecting lines as well as the points, bars, "
+                       "other labels and legend the decision names): " + "; ".join(v_bad) + ".  The six values and their 90% intervals are in "
+                       "records/paper_f30one.txt; the caption or the text has to carry them")
     notes["legend_c"] = f"'{loc}', {size:g} pt (F30one_col: {C['legend']['size']:g} pt)"
 
-    # ---------------- F2legend_wide = the legend of F16deep_wide, 4 columns x 3 rows, columns = the families ----------------
+    # ---------------- F2legend_wide = the legend of F16deep_wide, 4 columns x 3 rows, a family per column where it fits ----------------
     fam = [order[:3], order[4:8], order[8:11], order[11:]]         # learned priors | Gaussian, LMMSE, AMP | sparse | Perfect CSI (order[3] = its empty slot)
     assert order[3] == "" and [len(f) for f in fam] == [3, 4, 3, 1], order
     seq = fam[0] + fam[1][:3] + [fam[1][3], fam[3][0], ""] + fam[2]   # column by column; Perfect CSI under the fourth entry of the second family
@@ -299,6 +341,7 @@ def main():
 
     # ---------------- record ----------------
     b0, t0 = next(iter(edge.values()))
+    lim = lambda v: "(" + ", ".join(f"{float(x):g}" for x in v) + ")"
     txt = ["F2sub -- Fig. 2 of the manuscript as three \\subfloat panels under one legend band: (a) = F16deep_wide (a), (b) = F16deep_wide (b), "
            "(c) = F30one_col.  Nothing recomputed or transcribed: paper_f16deep.main() and paper_f30one.main() ran in fresh interpreters with "
            "Figure.savefig disabled, and every curve here is drawn from the artists of those runs.", "",
@@ -312,14 +355,14 @@ def main():
     txt += [f"  {n:<14} [{SIDE[n][0]:.2f}, {edge[n][0]:.2f}, {SIZE[n][0] - SIDE[n][1]:.2f}, {edge[n][1]:.2f}]" for n in SIDE]
     txt += [f"  the same height {SIZE['F2a_snr'][1]} in and the same axes bottom {b0:.2f} in / top {t0:.2f} in in all three (asserted): placed side by "
             "side the three axes line up.  No panel label and no title in any file (decision 3).",
-            "", f"(a) F2a_snr: the {len(A['curves'])} curves of F16deep_wide (a) -- " + "; ".join(A["curves"]) + f" -- x {A['xlim']}, ticks "
-            + " ".join(f"{v:+.0f}" for v in A["xticks"]) + f" dB; y {A['yscale']} {tuple(float(v) for v in A['ylim'])}; error bars on "
+            "", f"(a) F2a_snr: the {len(A['curves'])} curves of F16deep_wide (a) -- " + "; ".join(A["curves"]) + f" -- x {lim(A['xlim'])}, ticks "
+            + " ".join(f"{v:+.0f}" for v in A["xticks"]) + f" dB; y {A['yscale']} {lim(A['ylim'])}; error bars on "
             + "; ".join(l for l, c in A["curves"].items() if c["lo"] is not None) + ".",
-            f"(b) F2b_budget: the same {len(B['curves'])} curves as F16deep_wide (b); x {B['xscale']} {B['xlim']}, y linear {B['ylim']}; error bars on "
+            f"(b) F2b_budget: the same {len(B['curves'])} curves as F16deep_wide (b); x {B['xscale']} {lim(B['xlim'])}, y linear {lim(B['ylim'])}; error bars on "
             + "; ".join(l for l, c in B["curves"].items() if c["lo"] is not None) + "; curves with one point (1.6e5 only): "
             + "; ".join(l for l, c in B["curves"].items() if len(c["x"]) == 1) + ".",
-            f"(c) F2c_scale: the two curves of F30one_col -- " + "; ".join(C["curves"]) + f" -- with their 90% bars; x log2 {C['xlim']}, ticks "
-            + " ".join(C["xticklabels"]) + f"; y {C['ylim']}; its two-entry legend inside the axes at {notes['legend_c']} -- the first of "
+            f"(c) F2c_scale: the two curves of F30one_col -- " + "; ".join(C["curves"]) + f" -- with their 90% bars; x log2 {lim(C['xlim'])}, ticks "
+            + " ".join(C["xticklabels"]) + f"; y {lim(C['ylim'])}; its two-entry legend inside the axes at {notes['legend_c']} -- the first of "
             + ", ".join(LEG_LOCS) + " that is 1 pt clear of the points, bars and lines, tried at its own size and then at 7 pt -- no frame.",
             "", "Decision 4, K labels of (b): " + notes["K"] + ".",
             f"Decision 5, the Annealed Langevin (plug-in) point of (b) at 1.6e5: its marker centre is {gap_pt:.2f} pt from the Gaussian prior "
@@ -329,10 +372,14 @@ def main():
             f"{seen[GAUSS]} (counted outside the bands of its dashed line and its error bar), Annealed Langevin {seen[ALD]} (asserted >= {SEE_PX} each).  A white "
             "outline around the plus was tried and left out: it covers the circle (the outline's corners reach past the circle's radius).",
             "Decision 6, value labels of (c): " + notes["values"] + ".",
+            f"Markers of two drawn curves with centres closer than {D.NEAR_PT} pt at these panel sizes (the list of the F16deep_wide record, "
+            "recomputed): (a) " + near[0] + "; (b) " + near[1] + ".",
             "", "F2legend_wide: the 11 entries of the legend of F16deep_wide with their shapes and sizes, 4 columns x 3 rows, no frame, "
-            f"{plt.rcParams['legend.fontsize']:g} pt; columns = the families, column by column: " + " | ".join("; ".join(cols[x]) for x in sorted(cols))
-            + ".  (F16deep_wide lists Perfect CSI last; here it sits under Pilot-only LMMSE so that the sparse three share a column -- the "
-            "entries and their shapes are unchanged.)",
+            f"{plt.rcParams['legend.fontsize']:g} pt; column by column: " + " | ".join("; ".join(cols[x]) for x in sorted(cols))
+            + ".  One family per column where the three rows allow it: the learned priors, three of the four Gaussian / LMMSE / AMP entries, and "
+            "the sparse three; the third column holds the fourth entry of that family (Pilot-only LMMSE) and Perfect CSI.  (F16deep_wide lists "
+            "Perfect CSI last; here it sits under Pilot-only LMMSE so that the sparse three share a column -- the entries and their shapes "
+            "are unchanged.)",
             "", "Asserts passed (the script stops before saving otherwise): the two record texts above; every redrawn curve = its reference "
             "artist (x, y, error-bar ends rtol 1e-12; colour, marker, line style, fill, edge, line width, marker size, cap size, zorder equal); "
             "panel sizes and axes edges as listed; every artist inside its canvas (tight bbox [in]: " + "; ".join(
