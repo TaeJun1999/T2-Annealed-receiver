@@ -13,7 +13,7 @@
 ## 진행 중
 | 작업 | 자원 | 상태 |
 |---|---|---|
-| 시드 학습 (등록 밖, 학습만): Sionna RT V1 시드 a2 → a3 → DeepMIMO a2·a3 재개 (epoch 394 부터) | GPU 2, tmux `seedsrt` (`code/run_srt_seeds_train.sh 2`, HT 쌍 22,118 고정; 10-11 06:33 CDT 시작) | 진행 중 (`logs/seeds_SRT_train.log`, 끝 표시 `SEEDS_TRAIN_DONE`; 발산하면 §3d 사다리로 자동 이어 돎). BLER 평가는 별도 등록 + 사용자 결정 |
+| **ROOM16e4** (고정 기지국 1 곳·방 ray-traced 풀 둘: Sionna RT `box` = prior SRB, DeepMIMO `i1_2p4` = prior DMI; 각각 주 실행 + baseline 전부; `NEXT_EXPERIMENTS_ROOM16e4.md` v2 동결) | GPU 0·1·2 (tmux `tb2room`: 학습 2 + GMM 격자 42 작업, 10-11 11:03 CDT 시작) + CPU 2 스레드 × 2 (tmux `sptsrb` · `sptdmi`) → CPU 192 (BLER, SRB 먼저 → DMI) | 순서 (prior 마다): 적합 21 작업·학습 끝 → `bash code/run_<p>_post_select.sh <동결 커밋>` → `run_<p>_post_gpu.sh <k> ALD <GPU>` → §5 채움·커밋 (`run_<p>_eval.sh` 인자 채움) → `run_<p>_eval.sh` (+ `run_<p>_post_gpu.sh <k> GBP <GPU>`) → 수용 → `run_<p>_base.sh` (7 인자) → §6 → Fable 기록 감사 → `paper_f21dmc.py <P>`·`paper_f33cdf.py <P>`. 동결 전·§5 전에는 ll_val·pick·조정 점수·GB′ 를 읽지 않는다. 풀 `~/data/sionna_rt/srb_Nr8/` · `~/data/deepmimo/dmi_Nr8/` (git 밖, sha 고정). 시드 학습 (SRT a2·a3, DMC a2 끝; DMC a3 epoch 675 에서 멈춤) 은 이 실험 뒤 GPU 가 비면 재개 가능 (`run_srt_seeds_train.sh`) |
 | 원고 (IEEE ICC 2027, 마감 2026-10-16) — 웹 채팅에서 사용자가 작성, 자료는 paper 브랜치 (`conference/tools/sync_paper_branch.sh`) | — | 진행 중. 실험 큐·GPU 큐 비어 있음 |
 
 ## 대기열 (순서대로)

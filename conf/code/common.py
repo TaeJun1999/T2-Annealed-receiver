@@ -105,7 +105,7 @@ PID = {"U": 0, "S": 1, "P": 2, "U2": 3, "S2": 4,      # prior id inside the seed
        "DMC": 11,                                     # DeepMIMO v4, 6 cities 28 GHz, block split (dmimo.py), run as a D2 prior: NEW streams
        "SRT": 12,                                     # Sionna RT 2.1, built-in city scenes 28 GHz, block split (srt_build.py + dmimo.py): NEW streams
        "SRB": 13,                                     # Sionna RT 2.1, built-in room scene `box` 28 GHz, ONE fixed BS, 1 m block split (srb_build.py): NEW streams
-       "DMI": 14}                                     # DeepMIMO v4 indoor scenario i1_2p4, five fixed BSs, 0.5 m block split (dmi_build.py): NEW streams
+       "DMI": 14}                                     # DeepMIMO v4 indoor scenario i1_2p4, ONE fixed BS x 5 UE yaws, 0.5 m block split (dmi_build.py): NEW streams
 SV_PRIORS = ("SV8e",)                                  # priors served by sv.SVGen / sv.ensemble_sides_sv (== sv.PRIORS)
 MIX3_PRIORS = ("MIX3", "UMi28")                              # priors served by mix3.MIX3Gen / mix3.ensemble_sides_mix3 (== mix3.PRIORS)
 DM_PRIORS = ("DMC", "SRT", "SRB", "DMI")                           # priors served by dmimo.DMGen / dmimo.ensemble_sides_dm (== dmimo.PRIORS): ray-traced pools
@@ -357,9 +357,9 @@ SRB_WARNING = (
 )
 DMI_WARNING = (
     "# " + "=" * 100 + "\n"
-    "# SITE-SPECIFIC RAY-TRACED TESTBED (prior DMI) -- DeepMIMO v4 (Wireless InSite), INDOOR scenario i1_2p4 at 2.4 GHz, FIVE fixed\n"
-    "# BS positions x the 7 m x 1 m user grid (1 cm spacing), channels by DeepMIMO's own compute_channels (BS ULA facing its users,\n"
-    "# UE yaw uniform, per-pair path powers normalised, narrowband at the carrier, ensemble-normalised; code/dmi_build.py +\n"
+    "# SITE-SPECIFIC RAY-TRACED TESTBED (prior DMI) -- DeepMIMO v4 (Wireless InSite), INDOOR scenario i1_2p4 at 2.4 GHz, ONE fixed\n"
+    "# BS (dataset 120) x its 7 m x 1 m user grid (1 cm spacing), FIVE frozen UE yaws per position, channels by DeepMIMO's own\n"
+    "# compute_channels (BS ULA facing its users, per-pair path powers normalised, narrowband at the carrier, ensemble-normalised; code/dmi_build.py +\n"
     "# code/dmimo.py). Chosen by channel statistics and a Perfect-CSI-only screening so that the BLER level is low. A FIXED pool\n"
     "# with a 0.5 m BLOCK SPLIT on the user position: training / GMM-validation channels and test channels come from disjoint\n"
     "# position tiles. Not the D2 synthetic testbed.\n"

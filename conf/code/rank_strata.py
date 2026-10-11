@@ -1,5 +1,5 @@
 """conf/code/rank_strata.py -- REPORT-ONLY (no label, no test, no CI): BLER@16 of b*, V1 and Perfect CSI by the rank of the trial's
-channel, for a ray-traced pool prior (DMC / SRT).  Registered as a report-only item in NEXT_EXPERIMENTS_SRT16e4 §1; on DeepMIMO
+channel, for a ray-traced pool prior (DMC / SRT / SRB / DMI).  Registered as a report-only item in NEXT_EXPERIMENTS_SRT16e4 §1; on DeepMIMO
 the same split was made post hoc (results/review_next/DMCB16e4_genie_rank.txt, prereg_audit_2026-10-10/genie_rank.py).
 
 At -3 dB and at the decision SNRs of the measurement tag (results/tables_D2_<TAG>.txt, the registered b* -> V1 pair) every test

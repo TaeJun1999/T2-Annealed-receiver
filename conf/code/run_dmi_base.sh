@@ -16,7 +16,7 @@
 #   e.g. run_dmi_base.sh d2sx_DMI_N160000_a1 <sha> <sha of results/sparse/pick_DMI_C2.json> <sha of results/ald/tune_PILDMI.json>
 cd /home/HTJ/t2/conf || exit 1
 P=~/miniforge3/envs/torch/bin/python; L=logs/run_dmi_base.log
-PR=DMI; CELL=C2; BT=DMIB16e4; BASE=raw_$BT; BS=$5; KK=$6; LL=$7        # b* of DMI16e4 §5: family (kron | gmm<K>), kron K (or -), ll_val
+PR=DMI; CELL=C2; BT=DMIB16e4; BASE=raw_$BT; BS=$5; KK=$6; LL=$7        # b* of ROOM16e4 §5: family (kron | gmm<K>), kron K (or -), ll_val
 ST=$1; SHA=$2; PSHA=$3; TSHA=$4; CK=ckpt/${ST}_best.pt; SP=results/sparse/pick_${PR}_$CELL.json; TJ=results/ald/tune_PILDMI.json
 REG=results/review_next/NEXT_EXPERIMENTS_ROOM16e4.md
 log () { echo "[dmi_base $(TZ=America/Chicago date '+%m-%d %H:%M %Z')] $*" | tee -a $L >> logs/queue.log; }

@@ -39,7 +39,7 @@ SETS = {"SRT": ("SRTB16e4", "SPSRT", "ALDSRT", "SRT", "F21srt",
                 "Sionna RT (prior SRT: Sionna RT 2.1, built-in scenes munich / etoile / florence at 28 GHz, 20 m block split", "NEXT_EXPERIMENTS_SRT16e4 §1"),
         # room pools, ONE fixed BS (NEXT_EXPERIMENTS_ROOM16e4 §1 "그림"): the y axis of F16deep_wide (a), not the ladder -- see ROOM below
         "SRB": ("SRBB16e4", "SPSRB", "ALDSRB", "SRB", "F21srb",
-                "Sionna RT room (prior SRB: Sionna RT 2.1, built-in scene box at 28 GHz, one fixed BS, 1 m block split", "NEXT_EXPERIMENTS_ROOM16e4 §1"),
+                "Sionna RT room (prior SRB: Sionna RT 2.1, built-in scene box with its metal walls as shipped at 28 GHz, LoS + first-order reflections, one fixed BS, 1 m block split", "NEXT_EXPERIMENTS_ROOM16e4 §1"),
         "DMI": ("DMIB16e4", "SPDMI", "ALDDMI", "DMI", "F21dmi",
                 "DeepMIMO indoor (prior DMI: DeepMIMO v4 scenario i1_2p4 at 2.4 GHz, one fixed BS, 0.5 m block split", "NEXT_EXPERIMENTS_ROOM16e4 §1")}
 ROOM = ("SRB", "DMI")                                           # y by the rule of paper_f16deep (a): (Q.YLO, 1.2) while no zero-failure point and

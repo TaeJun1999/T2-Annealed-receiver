@@ -73,7 +73,7 @@ def main():
         import srb_build
         c = len(los) == srb_build.TARGET and list(m["scenes"]) == [srb_build.SCENE]
         ok &= c
-        L.append(f"TDMc pool identity: pairs {len(los)} (== TARGET {srb_build.TARGET}), scene {srb_build.SCENE}, ONE BS at {np.round(m['bs'], 3).tolist()}, "
+        L.append(f"TDMc pool identity: pairs {len(los)} (== TARGET {srb_build.TARGET}), scene {srb_build.SCENE}, ONE BS at {[round(float(x), 3) for x in m['bs']]}, "
                  f"LoS fraction {los.mean():.6f}, mean paths {m['npath'].mean():.2f} -> {'PASS' if c else 'FAIL'}")
         pr = nanp
     elif pr is None and PRIOR == "DMI":                          # indoor pool: identity from dmi_build's constants
@@ -82,7 +82,7 @@ def main():
              and bool(np.allclose(m["tx"], dmi_build.TX_POS, atol=0.01)) and len(set(m["posi"].tolist())) == dmi_build.N_GRID)
         ok &= c
         L.append(f"TDMc pool identity: pairs {len(los)} (== {dmi_build.N_GRID} grid positions x {dmi_build.NYAW} yaws), scenario {dmi_build.SCEN} dataset "
-                 f"{dmi_build.DS}, ONE BS at {np.round(m['tx'], 2).tolist()}, LoS fraction {los.mean():.6f}, mean paths {m['npath'].mean():.2f} -> {'PASS' if c else 'FAIL'}")
+                 f"{dmi_build.DS}, ONE BS at {[round(float(x), 2) for x in m['tx']]}, LoS fraction {los.mean():.6f}, mean paths {m['npath'].mean():.2f} -> {'PASS' if c else 'FAIL'}")
         pr = nanp
     elif pr is None:                                             # SRT: pool identity from the builder's constants
         import srt_build
