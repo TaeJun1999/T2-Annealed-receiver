@@ -1,0 +1,52 @@
+# recompute_path_s5.py -- §5 fits table / selection / timeline / stop-rule analysis
+
+## 1. fits table vs the npz files (final files; candidates for K >= 1024)
+  full    16: ll_val 215.543354 r0 n_iter 21 it_best 0 reseed 120 kappa 256  mtime 10-12 02:59:10 KST
+  full    32: ll_val 220.594002 r2 n_iter 21 it_best 0 reseed 268 kappa 16  mtime 10-12 02:58:44 KST
+  full    64: ll_val 226.189233 r2 n_iter 21 it_best 0 reseed 557 kappa 256  mtime 10-12 02:58:01 KST
+  full   128: ll_val 230.616409 r1 n_iter 21 it_best 0 reseed 1160 kappa 16  mtime 10-12 02:56:46 KST
+  full   256: ll_val 234.869023 r1 n_iter 21 it_best 0 reseed 2377 kappa 64  mtime 10-12 02:54:27 KST
+  full   512: ll_val 237.956814 r1 n_iter 22 it_best 0 reseed 5091 kappa 64  mtime 10-12 02:51:58 KST
+  kron    16: ll_val 214.940120 r1 n_iter 41 it_best 0 reseed 0 kappa 0  mtime 10-12 02:59:27 KST
+  kron    32: ll_val 220.873876 r1 n_iter 21 it_best 0 reseed 272 kappa 0  mtime 10-12 02:59:18 KST
+  kron    64: ll_val 225.439384 r0 n_iter 21 it_best 0 reseed 547 kappa 0  mtime 10-12 02:58:56 KST
+  kron   128: ll_val 230.241007 r1 n_iter 21 it_best 0 reseed 1112 kappa 0  mtime 10-12 02:58:20 KST
+  kron   256: ll_val 234.306053 r1 n_iter 21 it_best 0 reseed 2297 kappa 0  mtime 10-12 02:57:20 KST
+  kron   512: ll_val 238.038272 r2 n_iter 21 it_best 0 reseed 4657 kappa 0  mtime 10-12 02:55:29 KST
+  kron  1024: ll_val 240.370088 r2 n_iter 21 it_best 0 reseed 9406 kappa 0  mtime 10-12 03:13:14 KST
+  kron  2048: ll_val 242.520642 r1 n_iter 21 it_best 0 reseed 18956 kappa 0  mtime 10-12 03:13:19 KST
+  kron  4096: ll_val 244.193286 r1 n_iter 21 it_best 0 reseed 38140 kappa 0  mtime 10-12 03:13:25 KST
+
+## 2. which stopping rule fired (gmm_em_gpu: val every 10 it, patience 40 on it_best; train-ll tol rule from it >= 20)
+  fam  K      last_it it_best  tol_rule  patience_rule   ll[0]      ll[1]      ll[-2]     ll[-1]     max(ll) @it
+  full    16     20     0     True      False         214.859     86.151    201.763    200.305    214.859 @0
+  full    32     20     0     True      False         219.813    108.099    206.887    205.433    219.813 @0
+  full    64     20     0     True      False         225.594     90.172    213.697    208.028    225.594 @0
+  full   128     20     0     True      False         229.858    113.641    219.368    215.038    229.858 @0
+  full   256     20     0     True      False         234.628     93.786    223.784    221.244    234.628 @0
+  full   512     21     0     True      False         237.662     86.887    227.831    226.244    237.662 @0
+  kron    16     40     0     False     True          214.426    -23.453     32.933     32.939    214.426 @0
+  kron    32     20     0     True      False         220.341     -9.595    209.880    195.228    220.341 @0
+  kron    64     20     0     True      False         224.809     -0.222    215.037    199.625    224.809 @0
+  kron   128     20     0     True      False         229.792     24.368    221.294    209.733    229.792 @0
+  kron   256     20     0     True      False         233.943     32.736    225.308    216.045    233.943 @0
+  kron   512     20     0     True      False         237.730     37.875    230.402    222.123    237.730 @0
+  kron  1024     20     0     True      False         240.140     44.924    233.890    227.738    240.140 @0
+  kron  2048     20     0     True      False         242.482     49.385    236.918    231.817    242.482 @0
+  kron  4096     20     0     True      False         244.218     53.111    239.259    236.101    244.218 @0
+  -> stopped by the train-ll tolerance rule (ll[-1]-ll[-2] < tol*|ll|, i.e. train ll fell or stalled at it >= 20): 14 of 15; by validation patience ((it - it_best) >= 40 at a validation iteration): 1
+
+## 3. what the selected b* (kron 4096, it_best 0) is: pi, covs structure
+  64 random components: max s2/s1 of (cov_k - 0.5 Chat) = 1.37e-16 (rank-1 => seed_cov structure 0.5 Chat + 0.5 c s s^H); Kronecker rearrangement s2/s1 min/median/max = 0.150 / 0.434 / 0.951 (1 - 0 would mean kron(T, R))
+  train ll trajectory of the selected candidate: it0 244.218, it1 53.111, then oscillating 235.87..239.29; ll_val (init) 244.1933, gauss_val 215.8772, ll_train stored 244.2177
+
+## 4. sigma grid, manifests, commit times, run-log timing lines
+  manifest SRPB16e4: git 99039ef5 config_hash 3e6061f4e4f2b4f6 n_raw 448 written 2026-10-12 05:04:43 KST Demo {'t2_route_a.py': '95a5408901ec125c', 't2_trellis.py': '31cd0ee9c68e972b', 't2_gmm.py': 'd064e58c7510c769'}
+  manifest SRPB16e4last: git 99039ef5 config_hash 3e6061f4e4f2b4f6 n_raw 448 written 2026-10-12 05:04:58 KST Demo {'t2_route_a.py': '95a5408901ec125c', 't2_trellis.py': '31cd0ee9c68e972b', 't2_gmm.py': 'd064e58c7510c769'}
+  manifest PILSRP: git 9ad4caa0 config_hash 6b12b56f55a3319e n_raw 448 written 2026-10-12 05:08:49 KST Demo {'t2_route_a.py': '95a5408901ec125c', 't2_trellis.py': '31cd0ee9c68e972b', 't2_gmm.py': 'd064e58c7510c769'}
+  manifest ALDSRP: git 9ad4caa0 config_hash 6b12b56f55a3319e n_raw 448 written 2026-10-12 05:10:13 KST Demo {'t2_route_a.py': '95a5408901ec125c', 't2_trellis.py': '31cd0ee9c68e972b', 't2_gmm.py': 'd064e58c7510c769'}
+  manifest SPSRP: git 9ad4caa0 config_hash 6b12b56f55a3319e n_raw 448 written 2026-10-12 05:21:17 KST Demo {'t2_route_a.py': '95a5408901ec125c', 't2_trellis.py': '31cd0ee9c68e972b', 't2_gmm.py': 'd064e58c7510c769'}
+  commits: 45c4ae07 2026-10-12 02:26:27 +0900 | 99039ef5 2026-10-12 03:29:30 +0900 | 9ad4caa0 2026-10-12 05:06:43 +0900
+  first raw_SRPB16e4 chunk 03:35:59 KST (run commit 99039ef5 at 03:29:30 KST); first raw_PILSRP chunk 05:07:08 KST (commit 9ad4caa0 at 05:06:43 KST); last raw_SPSRP chunk 05:21:13 KST
+
+## SUMMARY: 139 values checked, 0 differ from the record
