@@ -45,7 +45,9 @@ SETS = {"SRT": ("SRTB16e4", "SPSRT", "ALDSRT", "SRT", "F21srt",
         "SRP": ("SRPB16e4", "SPSRP", "ALDSRP", "SRP", "F21srp",
                 "Sionna RT room, moving UE (prior SRP: Sionna RT 2.1, built-in scene box with its metal walls as shipped at 28 GHz, LoS + first-order "
                 "reflections, one fixed BS, one UE on a lawn-mower route, split by time with no guard band", "NEXT_EXPERIMENTS_PATH16e4 §1")}
-ROOM = ("SRB", "DMI", "SRP")                                         # y by the rule of paper_f16deep (a): (Q.YLO, 1.2) while no zero-failure point and
+ROOM = ("SRB", "DMI", "SRP")
+HS = False                                                      # `paper_f21dmc.py <PRIOR> hs` (NEXT_EXPERIMENTS_FIGHSROOM16e4 §1): the +6..+15 dB
+#                                                               points are the n = 20480 raws raw_FH<tag> (fighs_merge.merge), figure <NAME>hs_col                                         # y by the rule of paper_f16deep (a): (Q.YLO, 1.2) while no zero-failure point and
 #                                                               nothing below Q.YLO, else (Q.YLO_RULE, 1.2); zero-failure points as paper_f16deep.draw
 YLADDER = (0.5, 0.3, 0.2, 0.1, 0.05, 0.02, 0.01, 0.005, 0.002, 0.001)
 
@@ -65,13 +67,15 @@ def main():
     with open(os.path.join(M.RV, f"pairB_{SP}.txt"), encoding="utf-8") as f:   # the registered table-B labels of the 16 baselines vs V1
         lab = dict(re.findall(r"(\S+)=(\([iv]+\))", next(l for l in f.read().split("\n") if l.startswith("    M-ours-bstar=("))))
     assert set(SHOW) <= set(tab) and {a for a in SHOW if a not in (V1, GE)} <= set(lab), (sorted(tab), sorted(lab))
-    cur, txt = {}, []
+    cur, txt, fh = {}, [], []
     for a in SHOW:
         orig = {"SPB16e4k": SP, "ALDB16e4k": ALD}.get(BY[a].orig, TAG)
         e = [np.asarray(raws[orig][key][a]["blk_err"], float)[:, -1] for key in keys]   # last iteration (R0-pilot@1 has one column)
         assert all(np.isfinite(x).all() for x in e), a
         k, n = np.array([int(x.sum()) for x in e]), np.array([len(x) for x in e])
         assert set(n.tolist()) == {N0} and k.tolist() == tab[a], (a, k.tolist(), tab[a])
+        if HS:                                                 # +6..+15 dB from the n = 20480 raw (asserted against its count table)
+            k, n, line = M.merge(SNRS, k, N0, orig, CELL, PRIOR, a); fh.append(line)
         p = D.draw(ax, BY[a], SNRS, k, n, {V1: 5, D.BS: 4, GE: 3}.get(a, 2.9 - 0.05 * SHOW.index(a)))
         assert (p[np.isfinite(p)] >= YLIM[0]).all() and (p[np.isfinite(p)] <= YLIM[1]).all(), (a, p)   # a zero-failure point is NaN (the curve breaks there)
         cur[a] = k
@@ -101,8 +105,9 @@ def main():
          + " ".join(f"{s:+.0f}" for s in SNRS) + " dB.  Recomputed from raw by conference/figures/paper_f21dmc.py (read-only; "
          "analysis.load_raw, a raised block = a failure); no number transcribed.", "",
          f"{NAME}_col  {W} x {H} in, one panel, legend above; the {len(SHOW)} curves of paper_f16deep.SHOW with its shapes and sizes; "
-         "95% Wilson bars on " + ", ".join(BY[a].label for a in D.BARS) + f".  n = {N0} (test trials 0..2559) at EVERY SNR for every "
-         f"curve (no n = 20480 raw on {PRIOR}; {REG}).", "",
+         "95% Wilson bars on " + ", ".join(BY[a].label for a in D.BARS) + (f".  n = {N0} (test trials 0..2559) at EVERY SNR for every "
+         f"curve (no n = 20480 raw on {PRIOR}; {REG})." if not HS else f".  n = {N0} (test trials 0..2559) at -3/0/+3 dB and n = 20480 (new "
+         f"trials 10000..30479) at +6..+15 dB for every curve (NEXT_EXPERIMENTS_FIGHSROOM16e4 §1; block below)."), "",
          "Curves (internal arm -> figure name): " + "; ".join(f"{a} -> {BY[a].label}" for a in SHOW) + ".", "", "Counts:"] + txt
         + ["", "Drawn baseline curves (Perfect CSI excluded) at or below the proposed curve (point estimates; failures vs the proposed curve's) -- reported only, nothing is "
            "tested here; the registered paired tests are in conf/results/review_next/pairB_" + SP + ".txt: " + ("; ".join(below) or "none") + ".",
@@ -116,7 +121,10 @@ def main():
            f"and raw_{SP} = raw_{TAG}'s; drawn = counted; the panel holds exactly the curves of the legend; no point outside the y range.",
            f"Layout: x ticks at the SNR points, x range {XLIM}; y log {YLIM}, ticks {YTICKS}; legend band {BAND} in above the axes, 2 columns "
            f"(inside its band: asserted, [in] {np.round(lb, 3).tolist()}); every artist inside the canvas (tight bbox [in] "
-           f"{np.round(bb, 3).tolist()}); smallest visible text {small:g} pt; saved at figsize, PNG 300 dpi."]))
+           f"{np.round(bb, 3).tolist()}); smallest visible text {small:g} pt; saved at figsize, PNG 300 dpi."]
+        + (["", "FIGHSROOM16e4 merge (REPORT-ONLY, NEXT_EXPERIMENTS_FIGHSROOM16e4 §1): -3/0/+3 dB = the original test trials 0..2559 (n = 2560, the "
+            "registered judgement); +6/+9/+12/+15 dB = new trials 10000..30479 (n = 20480 per SNR; one point = one raw, never pooled).  "
+            "'rising' = a cell where BLER rises with SNR, with its one-sided Fisher p (reported; no smoothing, no dropped point):"] + fh if HS else [])))
 
 
 if __name__ == "__main__":
@@ -129,9 +137,15 @@ if __name__ == "__main__":
             k = np.array([np.asarray(d[o][(CELL, PRIOR, s)][a]["blk_err"], float)[:, -1].sum() for s in SNRS])
             lows.append((D.wilson(k, np.full(len(k), N0))[0] if a in D.BARS else k / N0).min())
         if sys.argv[1] in ROOM:
-            zero = any((np.array([np.asarray(d[{"SPB16e4k": SP, "ALDB16e4k": ALD}.get(BY[a].orig, TAG)][(CELL, PRIOR, s)][a]["blk_err"], float)[:, -1].sum()
-                                  for s in SNRS]) == 0).any() for a in SHOW)
-            pos = [x for x in lows if x > 0]
+            HS = len(sys.argv) > 2 and sys.argv[2] == "hs"
+            KN = {}
+            for a in SHOW:                                         # the drawn counts (merged when HS) decide the y range
+                o = {"SPB16e4k": SP, "ALDB16e4k": ALD}.get(BY[a].orig, TAG)
+                k = np.array([int(np.asarray(d[o][(CELL, PRIOR, s)][a]["blk_err"], float)[:, -1].sum()) for s in SNRS]); n = np.full(len(k), N0)
+                KN[a] = M.merge(SNRS, k, N0, o, CELL, PRIOR, a)[:2] if HS else (k, n)
+            zero = any((k == 0).any() for k, n in KN.values())
+            pos = [float(x) for a, (k, n) in KN.items() for x in ((D.wilson(k, n)[0] if a in D.BARS else k / n)[k > 0])]
+            NAME = NAME + ("hs" if HS else "")
             YLIM, YTICKS = ((Q.YLO, 1.2) if not zero and min(pos) > Q.YLO else (Q.YLO_RULE, 1.2)), None
             main()
             sys.exit(0)
