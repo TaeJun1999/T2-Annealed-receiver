@@ -1,0 +1,39 @@
+# date        : 2026-10-11 11:52:45 KST
+# git commit  : 27737b62
+# versions    : python 3.12.14  numpy 2.5.2  scipy 1.18.1  torch 2.14.0+cu130 (cuda_available=False)
+# device      : CPU (192 cores) | dtype: complex128 / float64 | deterministic: yes (fixed seeds, no GPU in the receiver)
+# testbed     : D2
+# seed rule   : default_rng([20260926, TBID[testbed], PID[prior], Nr, T, Tp, int(snr)+100])  (trials of a point = ONE stream)
+# code        : rate-1/2 conv (133,171)_8 nu=6 terminated, QPSK, outer iterations = 16 for EVERY arm
+# Demo/ hashes: t2_route_a.py=95a5408901ec125c  t2_trellis.py=31cd0ee9c68e972b  t2_gmm.py=d064e58c7510c769
+# content     : (F3) Module H divergence guard firings, DIVERGE_NMSE = 10.0 (reused from code/bigamp.py, NOT re-chosen)
+# raw         : raw_DMCB16e4last
+# rule        : a trial fires the guard if NMSE > 10.0 or non-finite at ANY of the 16 iterations.
+# status      : DETECTION AND CLASSIFICATION ONLY -- no arm's trajectory is altered, so every
+#               number recorded before this guard existed remains valid.
+# read-only   : the raw files are not rewritten.
+
+cell    SNR arm                        fired     of    rate  worst NMSE seen
+------------------------------------------------------------------------------
+C2       -3 M-ours-dscore-C-V0          2290   2560   0.895  3.86e+09
+C2       -3 M-ours-dscore-C-V1             1   2560   0.000  11.44
+C2       -3 M-ours-dscore-C-V4             1   2560   0.000  11.93
+C2       -3 M-ours-dscore-C-V4b            1   2560   0.000  10.51
+C2       -3 M-ours-gmm32                   1   2560   0.000  11.49
+C2       -3 R1-turbo                       1   2560   0.000  18.51
+C2       -3 R2-ours-G                      1   2560   0.000  18.45
+C2       -3 R4-llr                         1   2560   0.000  17.65
+C2       -3 R4-scvamp                      1   2560   0.000  17.65
+C2       +0 M-ours-dscore-C-V0          2153   2560   0.841  1.608e+09
+C2       +0 R1-turbo                       1   2560   0.000  10.65
+C2       +0 R2-ours-G                      1   2560   0.000  10.8
+C2       +0 R4-llr                         1   2560   0.000  10.3
+C2       +0 R4-scvamp                      1   2560   0.000  10.3
+C2       +3 M-ours-dscore-C-V0          1823   2560   0.712  2.676e+09
+C2       +6 M-ours-dscore-C-V0          1683   2560   0.657  1.904e+07
+C2       +9 M-ours-dscore-C-V0          1478   2560   0.577  7.29e+09
+C2      +12 M-ours-dscore-C-V0          1418   2560   0.554  7.794e+08
+C2      +15 M-ours-dscore-C-V0          1114   2560   0.435  7.912e+10
+
+arms that NEVER fired the guard anywhere in this raw set (4): M-ours-bstar, M-ours-bstar-scalar, R0-pilot, R3-bigamp
+not applicable -- no channel estimate, so no Module H path (1): R5-genie

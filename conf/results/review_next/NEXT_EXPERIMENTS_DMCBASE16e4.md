@@ -36,15 +36,26 @@
 | 항목 | 상태 |
 |---|---|
 | `dmimo._which` 에 sparse_tune 개발 스트림 → 테스트 풀, `run_dmc_sparse_tune.sh` | 완료·커밋 ae880c27 |
-| SPARSE 조정 (tmux `sptdmc`, CPU 2 스레드) | 진행 중: 10-10 18:35 CDT 시작 → `results/sparse/{tune,pick}_DMC_C2.json` |
+| SPARSE 조정 (tmux `sptdmc`, CPU 2 스레드) | 완료: 10-10 18:35 → 21:28 CDT (`SPARSE_TUNE_DONE rc=0`) → `results/sparse/{tune,pick}_DMC_C2.json` (§5) |
 | `run_dmc_base.sh` (세 스크립트의 행 본문을 DMC 한 행으로) | 커밋 2b88eb53, 검토 반영(M1·N2·N6) = v2 동결 커밋 |
-| ALD 개발 사이트 재생성·조정 (`ald.py regen --set dev`, `ald.py tune`; GPU 한 장) | 대기: V1 `_best` 체크포인트(학습 종료) 뒤 |
+| ALD 개발 사이트 재생성·조정 (`ald.py regen --set dev`, `ald.py tune`; GPU 한 장) | 완료: 10-10 19:17 → 19:26 CDT (`code/run_dmc_post_gpu.sh`, GPU 1; 학습 정지 19:17 CDT 뒤) → `results/ald/tune_PILDMC.json` (§5) |
 | 적대적 검토(Fable) → v2 → 동결 커밋 | 검토 끝(10-10 18:55 CDT 보고; MUST 1 · SHOULD 5 · NIT 7). 반영: M1 재개 키(`out` 헬퍼; 통과한 단계만 제 이름), S1 "멀어진다" 조건, S2 β 규칙 0.1 dB, S3 순서·열람 규칙, S4 ALD 조정 명령 원문, S5 예측 채점, N2 pairB 덮어쓰기 금지, N3·N4·N5·N7 문구, N6 b\* 상수 사전 검사. 반영하지 않은 것: N1 (`CUDA_DEVICE_ORDER`; 원본 `run_ald16e4.sh` 와 같게 둔다 — 동일 GPU 6 장, Exclusive_Process 라 어긋나면 오류로 멈춘다). **동결 시점(2026-10-10 19:02 CDT)의 관측 상태**: DMC 의 BLER 없음(주 실행 미시작; 학습 epoch 696, `tb2_train_state_DMC.txt` = none); `results/sparse/{tune,pick}_DMC_C2.json` 아직 없음(조정 진행 중; 로그의 점수·pick 을 읽지 않았다 — 읽은 것은 프로세스 생존과 줄 수뿐); `results/ald/tune_PILDMC.json` 없음(조정 전) |
-| 주 실행 DMCB16e4 `PRIOR_EVAL_DONE`·ACCEPT OK → §5 → `run_dmc_base.sh` → §6 → 기록 감사(Fable) | 대기 |
+| 주 실행 DMCB16e4 `PRIOR_EVAL_DONE`·ACCEPT OK → §5 → `run_dmc_base.sh` → §6 → 기록 감사(Fable) | 주 실행 10-10 20:04 → 21:53 CDT `PRIOR_EVAL_DONE`, `ACCEPT: OK -- DMCB16e4, DMCB16e4last`; §5 채움(10-10 21:54 CDT) → 이 커밋 뒤 `run_dmc_base.sh` |
 
 ## 5. 평가 전 고정 기록 (실행 전에 채우고 커밋한다)
 
-(체크포인트 stem·sha, pick·tune JSON sha, ALD 조정 기록 sha 와 고른 값(c, β, 멈춤 단계, v), SPARSE 고른 값(ρ, SNR 별 n_em·L, 끝값 여부), 스크립트 인자 원문.)
+갱신 2026-10-10 21:53 CDT (Opus 5.5). 값은 파일에서 읽었다(`results/sparse/pick_DMC_C2.json`·`tune_DMC_C2.json`, `results/ald/tune_PILDMC.json`, `sha256sum`, 파일 mtime).
+
+| 항목 | 값 |
+|---|---|
+| 체크포인트 (DMC16e4 §5 와 같음) | stem `d2sx_DMC_N160000_a1`, best `ckpt/d2sx_DMC_N160000_a1_best.pt` sha256[:16] **65b26ddd4f6437f4** (epoch 812). GMM = 주 실행의 b\* kron K = 4096, ll_val 122.37953759128766 |
+| SPARSE 조정 (`sparse_tune.py --prior DMC --cell C2 --n 256`, tmux `sptdmc`, CPU 2 스레드) | 10-10 18:35 → 21:28 CDT (`logs/sparse_tune.log` `SPARSE_TUNE_DONE rc=0`; wall_sec 10367.1), 시작 커밋 ae880c27. `results/sparse/pick_DMC_C2.json` sha256[:16] **ff25622dfcb0c7d5**, `tune_DMC_C2.json` **a16ae2aad0db242d** (둘 다 mtime 10-10 21:28:44 CDT — v2 동결 19:02 CDT 뒤; 주 실행 BLER(20:04–21:52 CDT)과 겹쳐 돌았다 — 조정 점수는 개발 채널 추정 NMSE 뿐이고 BLER 을 읽지 않는다) |
+| SPARSE 고른 값 (`per_snr_pick`, v2b 격자) | **SBL**: ρ = 8 (끝값 아님; 점수 −15.408 dB), n_em −3 dB 3 · 0…15 dB 5 (끝값 없음), 개발 NMSE −7.08 / −9.77 / −12.67 / −15.33 / −17.94 / −21.11 / −23.96 dB. **OMP**: **ρ = 16 = 격자 끝(`edge_rho_omp` true) → 끝값 + 캐비엇, §1 대로 확장하지 않는다**(점수 −14.202 dB), L −3…15 dB = 2 / 2 / 3 / 4 / 6 / 8 / 12 (끝값 없음), 개발 NMSE −7.74 / −9.93 / −11.87 / −13.87 / −15.97 / −18.77 / −21.26 dB |
+| ALD 조정 (`ald.py regen --set dev` → `ald.py tune --tag PILDMC --ckpt ckpt/d2sx_DMC_N160000_a1_best.pt`; `code/run_dmc_post_gpu.sh`, GPU 1) | `results/ald/tune_PILDMC.json` sha256[:16] **8c92ea491d654012** (mtime 10-10 19:26:40 CDT, git 48803fe6, ckpt_sha 65b26ddd4f6437f4, `ald_py_sha` 5d38e28679cc7542, n_dev 512, dev_skip 2560), `tune_PILDMC_curves.npz` 5a8c367b695c979f. 고른 값: **c = 0.01, β = 0.005** — 개발 최적은 c = 0.01, β = 0.0001 (−16.180 dB)이나 저자 기본값 β = 0.005 가 0.1 dB 안(−16.171 dB)이라 규칙대로 유지; β 축을 0.0001·1e-05 로 두 번 확장, 확장 뒤 끝값 없음(`optimum_at_edge_after_extension` 빈 목록). 멈춤 단계 −3…15 dB = 384 / 453 / 504 / 598 / 600 / 600 / 600 (L 200 × M 3 = 600 이 상한), v = 0.1332 / 0.0662 / 0.0362 / 0.0190 / 0.0104 / 0.0056 / 0.0035, 개발 NMSE −8.06 / −11.02 / −13.52 / −16.46 / −18.94 / −21.44 / −23.75 dB |
+| 주 실행 전제 | `logs/run_prior_eval_DMCB16e4.log` `PRIOR_EVAL_DONE`, `results/review_next/DMCB16e4_accept.txt` 첫 줄 `ACCEPT: OK` (스크립트가 검사; 이 커밋 시점에 충족 — DMC16e4 §6) |
+| §2 예측 가운데 BLER 전에 채점되는 것 | 2 의 앞 문장(OMP 의 L 이 −3·0 dB 에서 ≤ 4): **적중** (2 / 2). 나머지는 실행 뒤 |
+| **v2 동결 뒤·이 실행 전에 관측한 것(공개)** | 주 실행 `DMCB16e4` 의 BLER·표 B(14 arm; 11 곡선 가운데 일곱)를 이 §5 를 쓰기 전에 읽었다 — §1·§2 는 그 전에 동결됐고(501e0635) 이 §5 의 값은 모두 동결된 절차가 정한 것이다(조정 규칙·격자·끝 처리 불변, 재조정 없음) |
+| 스크립트 인자 원문 | `bash code/run_dmc_base.sh d2sx_DMC_N160000_a1 65b26ddd4f6437f4 ff25622dfcb0c7d5 8c92ea491d654012` (tmux; ALD 추정에 빈 GPU 한 장) |
 
 ## 6. 결과 (실행 뒤 전사)
 
