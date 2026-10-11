@@ -29,9 +29,15 @@ import numpy as np
 from paper_f16deep import BY, FIG, GE, M, N0, Q, SHOW, SNRS, V1
 
 TAG, SP, ALD, CELL, PRIOR = "DMCB16e4", "SPDMC", "ALDDMC", "C2", "DMC"
+NAME, WHAT, REG = "F21dmc", "DeepMIMO (prior DMC: DeepMIMO v4, six city scenarios at 28 GHz, 20 m block split", "NEXT_EXPERIMENTS_DMCBASE16e4 §1"
 W, H = 3.5, 3.45
 LEFT, RIGHT, BOTTOM, BAND, TOP = 0.56, 0.06, 0.36, 0.86, 0.03  # in; BAND = the legend band above the axes
 YLIM, YTICKS, XLIM = (0.2, 1.05), [0.2, 0.3, 0.5, 0.7, 1.0], (-4, 16)
+# `paper_f21dmc.py SRT` (NEXT_EXPERIMENTS_SRT16e4 §1 "그림"): the same panel for the Sionna RT pool.  Its y range is set by rule
+# from the data -- the largest ladder value below every point and every lower Wilson bar end (YLADDER) -- never by eye.
+SETS = {"SRT": ("SRTB16e4", "SPSRT", "ALDSRT", "SRT", "F21srt",
+                "Sionna RT (prior SRT: Sionna RT 2.1, built-in scenes munich / etoile / florence at 28 GHz, 20 m block split", "NEXT_EXPERIMENTS_SRT16e4 §1")}
+YLADDER = (0.5, 0.3, 0.2, 0.1, 0.05, 0.02, 0.01, 0.005, 0.002, 0.001)
 
 
 def main():
@@ -68,35 +74,45 @@ def main():
     leg = fig.legend(hl, [x.get_label() for x in hl], loc="center", ncol=2, frameon=False, fontsize=7,
                      bbox_to_anchor=(0.5, (H - BAND / 2) / H), handlelength=2.3, columnspacing=1.2, labelspacing=0.28,
                      borderpad=0.1, handletextpad=0.5)
-    bb, small = Q.check(fig, "F21dmc_col")                        # every artist inside the canvas; every visible text >= 7 pt
+    bb, small = Q.check(fig, f"{NAME}_col")                        # every artist inside the canvas; every visible text >= 7 pt
     lb = Q.inch(fig, leg.get_window_extent())
     assert lb[1] >= H - BAND and lb[3] <= H and lb[0] >= 0 and lb[2] <= W, ("legend outside its band", lb)
     for ext in ("pdf", "png"):
-        fig.savefig(os.path.join(FIG, f"F21dmc_col.{ext}"), dpi=300, **({"metadata": {"CreationDate": None}} if ext == "pdf" else {}))
+        fig.savefig(os.path.join(FIG, f"{NAME}_col.{ext}"), dpi=300, **({"metadata": {"CreationDate": None}} if ext == "pdf" else {}))
 
     below = [f"{BY[a].label} at " + ", ".join(f"{s:+.0f} dB ({x} vs {y})" for s, x, y in zip(SNRS, cur[a], cur[V1]) if x <= y)
              for a in SHOW if a not in (V1, GE) and (cur[a] <= cur[V1]).any()]
     odd = [f"{BY[a].label} {lab[a]}" for a in SHOW if a not in (V1, GE) and lab[a] != "(i)"]
     print("\n".join(
-        ["F21dmc -- DeepMIMO (prior DMC: DeepMIMO v4, six city scenarios at 28 GHz, 20 m block split; cell C2 = 8x4, N_train = 1.6e5) with the "
+        [f"{NAME} -- {WHAT}; cell C2 = 8x4, N_train = 1.6e5) with the "
          "one legend of F16deep_wide: BLER@16 (Pilot-only LMMSE: after the first iteration), failures / trials per SNR "
          + " ".join(f"{s:+.0f}" for s in SNRS) + " dB.  Recomputed from raw by conference/figures/paper_f21dmc.py (read-only; "
          "analysis.load_raw, a raised block = a failure); no number transcribed.", "",
-         f"F21dmc_col  {W} x {H} in, one panel, legend above; the {len(SHOW)} curves of paper_f16deep.SHOW with its shapes and sizes; "
+         f"{NAME}_col  {W} x {H} in, one panel, legend above; the {len(SHOW)} curves of paper_f16deep.SHOW with its shapes and sizes; "
          "95% Wilson bars on " + ", ".join(BY[a].label for a in D.BARS) + f".  n = {N0} (test trials 0..2559) at EVERY SNR for every "
-         "curve (no n = 20480 raw on DMC; NEXT_EXPERIMENTS_DMCBASE16e4 §1).", "",
+         f"curve (no n = 20480 raw on {PRIOR}; {REG}).", "",
          "Curves (internal arm -> figure name): " + "; ".join(f"{a} -> {BY[a].label}" for a in SHOW) + ".", "", "Counts:"] + txt
         + ["", "Drawn baseline curves (Perfect CSI excluded) at or below the proposed curve (point estimates; failures vs the proposed curve's) -- reported only, nothing is "
-           "tested here; the registered paired tests are in conf/results/review_next/pairB_SPDMC.txt: " + ("; ".join(below) or "none") + ".",
-           f"Registered table-B labels against the proposed prior (pairB_SPDMC.txt) of the {len(SHOW) - 2} drawn baselines: "
+           "tested here; the registered paired tests are in conf/results/review_next/pairB_" + SP + ".txt: " + ("; ".join(below) or "none") + ".",
+           f"Registered table-B labels against the proposed prior (pairB_{SP}.txt) of the {len(SHOW) - 2} drawn baselines: "
            + ("all (i)" if not odd else "; ".join(odd) + "; the others (i)") + ".",
            "Raised blocks (analysis.load_raw NOTE lines; kept and counted as failures) in the raws read: " + ("; ".join(D.NOTES) or "none") + ".",
-           "", "Asserts passed: counts = pairB_SPDMC.txt 'BLER@16 failures' table (11 arms x 7 SNRs); Perfect CSI error arrays of raw_ALDDMC "
-           "and raw_SPDMC = raw_DMCB16e4's; drawn = counted; the panel holds exactly the curves of the legend; no point outside the y range.",
+           "", f"Asserts passed: counts = pairB_{SP}.txt 'BLER@16 failures' table (11 arms x 7 SNRs); Perfect CSI error arrays of raw_{ALD} "
+           f"and raw_{SP} = raw_{TAG}'s; drawn = counted; the panel holds exactly the curves of the legend; no point outside the y range.",
            f"Layout: x ticks at the SNR points, x range {XLIM}; y log {YLIM}, ticks {YTICKS}; legend band {BAND} in above the axes, 2 columns "
            f"(inside its band: asserted, [in] {np.round(lb, 3).tolist()}); every artist inside the canvas (tight bbox [in] "
            f"{np.round(bb, 3).tolist()}); smallest visible text {small:g} pt; saved at figsize, PNG 300 dpi."]))
 
 
 if __name__ == "__main__":
+    if len(sys.argv) > 1 and sys.argv[1] != "DMC":
+        TAG, SP, ALD, PRIOR, NAME, WHAT, REG = SETS[sys.argv[1]]
+        d = {t: D.raw(t) for t in (TAG, SP, ALD)}                  # the y range by rule: below every point and lower Wilson bar end
+        lows = []
+        for a in SHOW:
+            o = {"SPB16e4k": SP, "ALDB16e4k": ALD}.get(BY[a].orig, TAG)
+            k = np.array([np.asarray(d[o][(CELL, PRIOR, s)][a]["blk_err"], float)[:, -1].sum() for s in SNRS])
+            lows.append((D.wilson(k, np.full(len(k), N0))[0] if a in D.BARS else k / N0).min())
+        YLIM = (next(y for y in YLADDER if y < min(lows)), 1.05)
+        YTICKS = [y for y in (0.001, 0.002, 0.005, 0.01, 0.02, 0.05, 0.1, 0.2, 0.3, 0.5, 0.7, 1.0) if YLIM[0] <= y and (y >= 0.2 or y in (0.001, 0.01, 0.1) or YLIM[0] >= 0.05)]
     main()
