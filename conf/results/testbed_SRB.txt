@@ -1,0 +1,17 @@
+# date        : 2026-10-12 00:47:22 KST
+# git commit  : 36e0a264
+# content     : testbed_dm.py -- Sionna RT 2.1 SRB (code/dmimo.py, pool by code/srb_build.py), Nr=8 x Nt=4; streams from common.train_rng('D2','SRB',...)
+# pool        : sha H.npy / split.npy = ('ae1c023605d002b4', '24c202836d56b34e'); pairs 345600 = fit 273247 + val 20000 + test 52353
+# calibration : P_RAW=1.0005289046575756  TRAIN_SHA=2544c37a719436e2  (n=160000, train stream 7)
+
+TDMa normalisation (val stream 8, n=20000): mean ||H||^2/(Nr Nt) = 0.99984 (s.e. 0.00311; 4 s.e. band) -> PASS;  per-block power CV 0.440
+TDMb per-entry E|H_ab|^2: min 0.9848 max 1.0145 (report only)
+TDMc pool identity: pairs 345600 (== TARGET 345600), scene box, ONE BS at [-3.0, -2.0, 4.0], LoS fraction 1.000000, mean paths 7.00 -> PASS
+TDMd pilot-stage K=1 Gaussian NMSE @ -3 dB (nu = sigma^2/Nt, val draw): 0.3134 (report only: no probe of this configuration; phase-0 single-scene depth-2 'rs' rows: see report_rt.md)
+TDMe erank(Rt) = 3.991 / 4 (T2b threshold 3.6) -> pilots 'dft' for Tp<=Nt;  erank(C_ens) = 25.95 / 32 (probe nan);  beamspace top-4 energy median 0.748 mean 0.741 (probe mean nan)
+TDMf block split: pools disjoint and exhaustive, no tile on both sides (100 tiles, 16 test; test share 0.1515) -> PASS
+TDMg split shift (report): LoS fraction fit+val side 1.0000 / test side 1.0000; outage P(MI<4 bit) @ -3 dB val 0.0231 / test 0.0304 (probe nan); K=1 NMSE @ -3 dB val 0.3134 / test 0.3371;  mean ||H||^2/(Nr Nt) test 0.9989
+TDMh leakage (report): nearest training channel of 2000 test draws (N' = 160000): median normalised squared distance 0.3509, share < 0.1 = 0.004 (probe nan vs its whole train pool)
+TDMi cost: sample() 0.01 ms/call, sample_vecs 160000 in 0.1 s, val draw 20000 in 0.0 s
+
+ALL PASS (3 s CPU)

@@ -90,6 +90,8 @@ def main():
                                                           + (("mix3.py",) if priors & set(C.MIX3_PRIORS) else ())
                                                           + (("dmimo.py", "dmimo_build.py") if "DMC" in priors else ())
                                                           + (("dmimo.py", "srt_build.py") if "SRT" in priors else ())
+                                                          + (("dmimo.py", "srb_build.py") if "SRB" in priors else ())
+                                                          + (("dmimo.py", "dmi_build.py") if "DMI" in priors else ())
                                                           if os.path.isfile(os.path.join(C.CONF, "code", f))}),
         channel_model=dict(testbed=a.testbed, prior=one(meta.get("prior", set()) or priors or {"S2"}),
                            description=(("UMi28 = D2-pipeline prior UMi28, 3GPP TR 38.901 via Sionna 2.1 (code/mix3.py): UMi 28 GHz only, "
@@ -102,6 +104,21 @@ def main():
                                          "LoS/NLoS by the model, UE yaw ~ U[-pi,pi), pathloss/shadowing off, narrowband snapshot (CIR summed at "
                                          "the first time sample), ensemble-normalised E||H||^2 = Nr Nt")
                                         if priors & set(C.MIX3_PRIORS) else
+                                        ("SRB = D2-pipeline prior SRB, Sionna RT 2.1 ray-traced channels (code/srb_build.py -> pool read by "
+                                         "code/dmimo.py, sha " + "/".join(__import__("dmimo").POOL_SHA.get(("SRB", 8), ("?", "?"))) + "): built-in "
+                                         "room scene `box` (10 x 10 x 5 m, metal walls as shipped) at 28 GHz, PathSolver depth 1 (LoS + first-order specular, 1e8 samples), ONE "
+                                         "fixed BS, UE positions uniform over the floor plan at 1.5 m, Sionna PlanarArray ULAs (BS Nr, UE 4 with a "
+                                         "frozen yaw ~ U[-pi,pi)), isotropic V pol, half-wavelength, Paths.cfr at the carrier, per-pair path powers "
+                                         "normalised, uplink by reciprocity, ensemble-normalised E||H||^2 = Nr Nt; FIXED pool with a 1 m block "
+                                         "split (fit / validation / test pools from disjoint tiles)")
+                                        if "SRB" in priors else
+                                        ("DMI = D2-pipeline prior DMI, DeepMIMO v4.0.5 ray-traced channels (Wireless InSite; code/dmimo.py, "
+                                         "pool built by code/dmi_build.py, sha " + "/".join(__import__("dmimo").POOL_SHA.get(("DMI", 8), ("?", "?"))) + "): indoor "
+                                         "scenario i1_2p4 at 2.4 GHz, ONE fixed BS (dataset 120) x its 7 m x 1 m user grid (1 cm spacing), five frozen "
+                                         "UE yaws ~ U[-180,180) deg per position, DeepMIMO compute_channels, BS ULA Nr facing its users, UE ULA 4, "
+                                         "isotropic, half-wavelength, 25 paths, narrowband at the carrier, per-pair path powers normalised, "
+                                         "ensemble-normalised E||H||^2 = Nr Nt; FIXED pool with a 0.5 m block split on the user position")
+                                        if "DMI" in priors else
                                         ("SRT = D2-pipeline prior SRT, Sionna RT 2.1 ray-traced channels (code/srt_build.py -> pool read by "
                                          "code/dmimo.py, sha " + "/".join(__import__("dmimo").POOL_SHA.get(("SRT", 8), ("?", "?"))) + "): built-in "
                                          "city scenes munich / etoile / florence at 28 GHz, PathSolver depth 2 (LoS + specular), random ground "

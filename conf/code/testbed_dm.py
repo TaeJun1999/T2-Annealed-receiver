@@ -48,12 +48,12 @@ def main():
     t_start = time.time()
     g = C.make_gen("D2", PRIOR, NR, NT)
     m = np.load(os.path.join(dmimo.pool_dir(PRIOR, NR), "meta.npz"))
-    pr = json.load(open(PROBE)) if PRIOR == "DMC" else None      # SRT: no phase-0 probe of this pooled configuration -> report only
+    pr = json.load(open(PROBE)) if PRIOR == "DMC" else None      # SRT / SRB / DMI: no phase-0 probe of this configuration -> report only
     nanp = {"n_pairs": float("nan"), "los_frac": float("nan"), "erank_ens": float("nan"), "beam_top4": float("nan"), "outage_m3dB": float("nan"),
             "leak_chan_frac_lt0.1": float("nan")}
     L = [f"# date        : {time.strftime('%Y-%m-%d %H:%M:%S KST')}",
          f"# git commit  : {subprocess.run(['git', '-C', C.CONF, 'rev-parse', '--short=8', 'HEAD'], capture_output=True, text=True).stdout.strip()}",
-         f"# content     : testbed_dm.py -- {'DeepMIMO v4' if PRIOR == 'DMC' else 'Sionna RT 2.1'} {PRIOR} (code/dmimo.py, pool by code/{'dmimo_build.py' if PRIOR == 'DMC' else 'srt_build.py'}), Nr={NR} x Nt={NT}; streams from common.train_rng('D2','{PRIOR}',...)",
+         f"# content     : testbed_dm.py -- {'DeepMIMO v4' if PRIOR in ('DMC', 'DMI') else 'Sionna RT 2.1'} {PRIOR} (code/dmimo.py, pool by code/{dict(DMC='dmimo_build.py', SRT='srt_build.py', SRB='srb_build.py', DMI='dmi_build.py')[PRIOR]}), Nr={NR} x Nt={NT}; streams from common.train_rng('D2','{PRIOR}',...)",
          f"# pool        : sha H.npy / split.npy = {dmimo.POOL_SHA[(PRIOR, NR)]}; pairs {len(m['los'])} = fit {len(g.idx['fit'])} + val {len(g.idx['val'])} + test {len(g.idx['test'])}",
          f"# calibration : P_RAW={dmimo.P_RAW[(PRIOR, NR, NT)]!r}  TRAIN_SHA={dmimo.TRAIN_SHA[(PRIOR, NR, NT)]}  (n={dmimo.N_CAL}, train stream 7)", ""]
     ok = True
@@ -69,7 +69,22 @@ def main():
     E = np.mean(np.abs(H) ** 2, 0)
     L.append(f"TDMb per-entry E|H_ab|^2: min {E.min():.4f} max {E.max():.4f} (report only)")
     los = m["los"] == 1
-    if pr is None:                                               # SRT: pool identity from the builder's constants
+    if pr is None and PRIOR == "SRB":                            # room pool: identity from srb_build's constants
+        import srb_build
+        c = len(los) == srb_build.TARGET and list(m["scenes"]) == [srb_build.SCENE]
+        ok &= c
+        L.append(f"TDMc pool identity: pairs {len(los)} (== TARGET {srb_build.TARGET}), scene {srb_build.SCENE}, ONE BS at {np.round(m['bs'], 3).tolist()}, "
+                 f"LoS fraction {los.mean():.6f}, mean paths {m['npath'].mean():.2f} -> {'PASS' if c else 'FAIL'}")
+        pr = nanp
+    elif pr is None and PRIOR == "DMI":                          # indoor pool: identity from dmi_build's constants
+        import dmi_build
+        c = (len(los) == dmi_build.N_GRID * dmi_build.NYAW and list(m["scenarios"]) == [dmi_build.SCEN]
+             and bool(np.allclose(m["tx"], dmi_build.TX_POS, atol=0.01)) and len(set(m["posi"].tolist())) == dmi_build.N_GRID)
+        ok &= c
+        L.append(f"TDMc pool identity: pairs {len(los)} (== {dmi_build.N_GRID} grid positions x {dmi_build.NYAW} yaws), scenario {dmi_build.SCEN} dataset "
+                 f"{dmi_build.DS}, ONE BS at {np.round(m['tx'], 2).tolist()}, LoS fraction {los.mean():.6f}, mean paths {m['npath'].mean():.2f} -> {'PASS' if c else 'FAIL'}")
+        pr = nanp
+    elif pr is None:                                             # SRT: pool identity from the builder's constants
         import srt_build
         cnt = np.bincount(m["scen"], minlength=len(srt_build.SCENES))
         c = bool((cnt == srt_build.TARGET).all()) and list(m["scenes"]) == list(srt_build.SCENES)
@@ -112,7 +127,7 @@ def main():
     f_ = (not (fit & val or fit & test or val & test) and len(fit | val | test) == len(los)
           and not set(key[g.idx["test"]].tolist()) & set(key[np.concatenate([g.idx["fit"], g.idx["val"]])].tolist()))
     ok &= f_
-    L.append(f"TDMf block split: pools disjoint and exhaustive, no 20 m tile on both sides ({len(set(key.tolist()))} tiles, "
+    L.append(f"TDMf block split: pools disjoint and exhaustive, no tile on both sides ({len(set(key.tolist()))} tiles, "
              f"{len(set(key[g.idx['test']].tolist()))} test; test share {len(test) / len(los):.4f}) -> {'PASS' if f_ else 'FAIL'}")
     Ht = g._draw(C.train_rng("D2", PRIOR, NR, 10), N_VAL)
     ht = Ht.transpose(0, 2, 1).reshape(N_VAL, NR * NT)

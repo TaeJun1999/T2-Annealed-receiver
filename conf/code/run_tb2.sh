@@ -22,8 +22,10 @@ train_chain () {
   local g=$1 prior=$2 tag=$3 fb ck s
   for fb in 1 2 3; do
     ck=ckpt/d2sx_${prior}_N${N}_a1$([ $fb -gt 1 ] && echo _fb$fb).pt
-    CUDA_VISIBLE_DEVICES=$g $P code/run_d2_sx.py --prior $prior --ntrain $N --tag $tag --fallback $fb --no-gbprime \
-      >> logs/tb2_gpu$g.log 2>&1
+    # started under taskset on one hyper-thread pair of the GPU's NUMA node (GPU 0-3: node0, 4-5: node2), so every attempt of the
+    # chain keeps the pin (result-neutral: CPU placement only; an unpinned attempt ran 3.3x slower, SRT16e4 §5)
+    CUDA_VISIBLE_DEVICES=$g taskset -c $([ $g -le 3 ] && echo $((20 + g)),$((116 + g)) || echo $((64 + g)),$((160 + g))) \
+      $P code/run_d2_sx.py --prior $prior --ntrain $N --tag $tag --fallback $fb --no-gbprime >> logs/tb2_gpu$g.log 2>&1
     s=$(CUDA_VISIBLE_DEVICES= $P -c "import torch; print(torch.load('$ck', map_location='cpu', weights_only=False).get('stopped_by'))" 2>/dev/null)
     log "train $prior fallback $fb: stopped_by=${s:-NO_CHECKPOINT} ($ck)"
     [ "$s" = diverged ] && [ $fb -lt 3 ] && { log "§3d: $prior fallback $fb DIVERGED -> fallback $((fb + 1)) on GPU $g"; continue; }

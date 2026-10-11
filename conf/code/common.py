@@ -103,10 +103,12 @@ PID = {"U": 0, "S": 1, "P": 2, "U2": 3, "S2": 4,      # prior id inside the seed
        "S2v": 9,                                      # C: S2 + receive-side visibility windows (d2.D2VisGen): NEW streams
        "S2d": 10,                                     # B': S2 + per-block receive rotation U[0, 30 deg] (d2.DRIFT): NEW streams
        "DMC": 11,                                     # DeepMIMO v4, 6 cities 28 GHz, block split (dmimo.py), run as a D2 prior: NEW streams
-       "SRT": 12}                                     # Sionna RT 2.1, built-in city scenes 28 GHz, block split (srt_build.py + dmimo.py): NEW streams
+       "SRT": 12,                                     # Sionna RT 2.1, built-in city scenes 28 GHz, block split (srt_build.py + dmimo.py): NEW streams
+       "SRB": 13,                                     # Sionna RT 2.1, built-in room scene `box` 28 GHz, ONE fixed BS, 1 m block split (srb_build.py): NEW streams
+       "DMI": 14}                                     # DeepMIMO v4 indoor scenario i1_2p4, five fixed BSs, 0.5 m block split (dmi_build.py): NEW streams
 SV_PRIORS = ("SV8e",)                                  # priors served by sv.SVGen / sv.ensemble_sides_sv (== sv.PRIORS)
 MIX3_PRIORS = ("MIX3", "UMi28")                              # priors served by mix3.MIX3Gen / mix3.ensemble_sides_mix3 (== mix3.PRIORS)
-DM_PRIORS = ("DMC", "SRT")                             # priors served by dmimo.DMGen / dmimo.ensemble_sides_dm (== dmimo.PRIORS): ray-traced pools
+DM_PRIORS = ("DMC", "SRT", "SRB", "DMI")                           # priors served by dmimo.DMGen / dmimo.ensemble_sides_dm (== dmimo.PRIORS): ray-traced pools
 TBID = {"D1": 1, "D2": 2}
 PRIOR_OF = {"D1": "S", "D2": "S2"}                     # primary prior per testbed (06_SPEC §2)
 
@@ -342,7 +344,29 @@ SRT_WARNING = (
     "# Reference = known-channel receiver (R5-genie: same EP detector + BCJR, true H); not a bound.\n"
     "# " + "=" * 100
 )
-DM_WARNINGS = {"DMC": DM_WARNING, "SRT": SRT_WARNING}
+SRB_WARNING = (
+    "# " + "=" * 100 + "\n"
+    "# SITE-SPECIFIC RAY-TRACED TESTBED (prior SRB) -- Sionna RT 2.1 PathSolver, built-in ROOM scene `box` (10 x 10 x 5 m, empty, metal walls\n"
+    "# as shipped) at 28 GHz (LoS + first-order specular reflection, depth 1), ONE fixed BS, UE positions uniform over the floor plan, channels by Sionna's own\n"
+    "# arrays and Paths.cfr (BS ULA, UE ULA with uniform yaw, per-pair path powers normalised, narrowband at the carrier,\n"
+    "# ensemble-normalised; code/srb_build.py + code/dmimo.py). Chosen by channel statistics and a Perfect-CSI-only screening\n"
+    "# so that the BLER level is low (no prior-dependent arm). A FIXED pool with a 1 m BLOCK SPLIT: training / GMM-validation channels and test channels come\n"
+    "# from disjoint position tiles. Not the D2 synthetic testbed.\n"
+    "# Reference = known-channel receiver (R5-genie: same EP detector + BCJR, true H); not a bound.\n"
+    "# " + "=" * 100
+)
+DMI_WARNING = (
+    "# " + "=" * 100 + "\n"
+    "# SITE-SPECIFIC RAY-TRACED TESTBED (prior DMI) -- DeepMIMO v4 (Wireless InSite), INDOOR scenario i1_2p4 at 2.4 GHz, FIVE fixed\n"
+    "# BS positions x the 7 m x 1 m user grid (1 cm spacing), channels by DeepMIMO's own compute_channels (BS ULA facing its users,\n"
+    "# UE yaw uniform, per-pair path powers normalised, narrowband at the carrier, ensemble-normalised; code/dmi_build.py +\n"
+    "# code/dmimo.py). Chosen by channel statistics and a Perfect-CSI-only screening so that the BLER level is low. A FIXED pool\n"
+    "# with a 0.5 m BLOCK SPLIT on the user position: training / GMM-validation channels and test channels come from disjoint\n"
+    "# position tiles. Not the D2 synthetic testbed.\n"
+    "# Reference = known-channel receiver (R5-genie: same EP detector + BCJR, true H); not a bound.\n"
+    "# " + "=" * 100
+)
+DM_WARNINGS = {"DMC": DM_WARNING, "SRT": SRT_WARNING, "SRB": SRB_WARNING, "DMI": DMI_WARNING}
 
 
 def banner(testbed, prior):
