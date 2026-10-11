@@ -143,7 +143,7 @@ ald_new () {  # --ald-file rows: the ALD estimate of the new trials (ald.py --se
   fi
   G=$(nvidia-smi --query-gpu=index,memory.used --format=csv,noheader,nounits | awk -F', ' '$2 < 100 {print $1; exit}')
   [ -n "$G" ] || { log "$TAG ABORT: no free GPU for the ALD estimate (resume later; no automatic retry)"; return 1; }
-  log "$TAG ALD $T: regen (CPU) + estimate (GPU $G) on trials $SK.., rotation $V (tune record results/ald/tune_$T.json)"
+  log "$TAG ALD $T: regen (CPU) + estimate (GPU $G) on trials $SK.., rotation ${V:-none} (tune record results/ald/tune_$T.json)"
   CUDA_VISIBLE_DEVICES= $P code/ald.py regen --tag $T --prior $PR --cell $CELL --fits-tag $BF ${V:+--rotation $V} --set hisnr >> $L 2>&1 < /dev/null \
     && CUDA_VISIBLE_DEVICES=$G $P code/ald.py estimate --tag $T --ckpt $CK --set hisnr >> $L 2>&1 < /dev/null && [ -f $E ] \
     || { log "$TAG ABORT: ALD regen/estimate failed (see $L)"; return 1; }; }
