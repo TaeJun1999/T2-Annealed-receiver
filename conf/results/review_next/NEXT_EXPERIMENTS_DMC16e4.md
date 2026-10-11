@@ -102,16 +102,32 @@
 |---|---|
 | DeepMIMO 설치·다운로드·풀 빌드(`dmimo_build.py 8`), DMC 연결(`dmimo.py`, PID 11, 보정 상수, `testbed_dm.py`), 기존 경로 비트 동일(`selftest_sv.py` 742 배열·`selftest_mix3.py` 968 배열 IDENTICAL vs 6cf9d698) | **완료·커밋 25f74c0a** (10-10 17:39 CDT 무렵) |
 | σ 격자 · 일괄 kron EM 검사 · GPU 큐 스크립트 `run_dmc_gpu.sh` | **완료·커밋 08a3e81d** |
-| 학습 DMC (`@train DMC DMCB16e4`, tmux `tb2dmc`, GPU 1) | 진행 중: 큐 시작 10-10 17:44 CDT, 학습 루프 머리말 2026-10-11 07:44:57 KST (= 10-10 17:44 CDT), split_hash 6fc8339a144a6d55, E‖H‖² 1.000000, σ 격자 [3.3459e-02, 8.6642e-01]; 17:46 CDT 에 `taskset -a -p -c 20,116` 으로 HT 쌍 하나에 고정(결과 중립; epoch 22.9 s → 6.5 s) |
-| GMM 격자 DMC (21 작업, `logs/tb2_queue.txt`, GPU 0·2–5 → 학습 뒤 GPU 1 도) | 진행 중 → `results/gmm_fits_D2_DMCB16e4/`. 2026-10-10 18:12 CDT: 큐 22 작업 중 16 개 종료(rc=0), 큐 비었음, 남은 것 = 학습 + kron 2048·4096 후보 일부(실행 중) |
+| 학습 DMC (`@train DMC DMCB16e4`, tmux `tb2dmc`, GPU 1) | **끝** (19:17 CDT, 832 epoch, patience; §5). 큐 시작 10-10 17:44 CDT, 학습 루프 머리말 2026-10-11 07:44:57 KST (= 10-10 17:44 CDT), split_hash 6fc8339a144a6d55, E‖H‖² 1.000000, σ 격자 [3.3459e-02, 8.6642e-01]; 17:46 CDT 에 `taskset -a -p -c 20,116` 으로 HT 쌍 하나에 고정(결과 중립; epoch 22.9 s → 6.5 s) |
+| GMM 격자 DMC (21 작업, `logs/tb2_queue.txt`, GPU 0·2–5 → 학습 뒤 GPU 1 도) | 진행 중 → `results/gmm_fits_D2_DMCB16e4/`. 2026-10-10 18:12 CDT: 큐 22 작업 중 16 개 종료(rc=0), 큐 비었음, 남은 것 = 학습 + kron 2048·4096 후보 일부(실행 중) → **끝**: 21 적합 작업 모두 rc=0, 마지막(kron 4096 r2) 18:32 CDT (`logs/tb2.log`) |
 | **순서 규칙** (검토 M1) | v2 동결 커밋 → kron 1024·2048 병합·b\* 선택 → (격자 끝이면 4096 병합) → GB′ 재개 → §5 채움·커밋 → 실행. 병합 파일(`fit_DMC_Nr8_kronK{1024,2048,4096}_n160000.npz`)·`d2_gbprime_DMC*.npz` 의 mtime 이 동결 커밋 시각보다 뒤여야 한다(§5 에 나란히 적는다) |
-| 병합·격자 끝 규칙·GB′ (수동, C6·D3·38.901 관례; 로그 `logs/tb2_post_DMC.log`) | 대기(동결 뒤): kron 1024·2048 병합 → b\* 선택 → 격자 끝이면 4096 병합 → 멈춤 → GB′ 재개 실행 → §5 |
+| 병합·격자 끝 규칙·GB′ (수동, C6·D3·38.901 관례; 로그 `logs/tb2_post_DMC.log`) | **끝** (모두 동결 뒤): 18:24 CDT 병합·선택 → 18:33 CDT 4096 병합·최종 b\* = kron 4096 → 19:17–20:02 CDT GB′ → §5 |
 | 적대적 검토(Fable) → v2 → 동결 커밋 | 검토 끝(10-10 18:07 CDT 보고; MUST 1 · SHOULD 6 · NIT 6 전부 반영 — M1 순서 규칙, S1 (7) 타일 안 선택, S2 예측 2 채점, S3 도시 비중, S4 누수 층화 구현 규칙, S5 빌드 로그 sha, S6 `run_prior_eval.sh` 머리말 주석, N1–N6 문구). 동결 커밋에 주석만 바뀐 코드 두 줄이 함께 들어간다: `run_prior_eval.sh:9` prior 목록에 DMC, `dmimo.py` 의 P_RAW 주석(진폭 → 전력); 생성기 동작·상수 불변(`dmimo.py selfcheck` 재실행 OK) |
-| §5 채우기 → 커밋 → 실행 ①~⑤ → §6 (+ 누수 층화) → 기록 감사(Fable) | 대기 |
+| §5 채우기 → 커밋 → 실행 ①~⑤ → §6 (+ 누수 층화) → 기록 감사(Fable) | §5 채움 2026-10-10 20:04 CDT → 이 커밋 뒤 `run_prior_eval.sh` 한 번 |
 
 ## 5. 평가 전 고정 기록 (실행 전에 채우고 커밋한다; 갱신 시각을 적는다)
 
-(격자·학습 완료 뒤 채운다: PID·rung·σ 격자, 보정 상수, testbed 검증, 파일럿, 격자 표(K 별 ll_val·n_iter·it_best·재시드·구현 경로·수렴 규칙), 확장 결정과 시각, 최종 b\*(정확한 float)·격자 끝 캐비엇, 체크포인트 sha·epoch·best_epoch·stopped_by, §3d 적용 여부, GB′, 선행 코드 커밋·fits 링크·평가 스크립트 인자 원문.)
+갱신 2026-10-10 20:04 CDT (Opus 5.5). 값은 파일에서 읽었다(격자·시각: 스크래치 생성기 `s5_gen.py` 가 fit 파일·mtime 을 읽어 찍은 출력; 체크포인트: `torch.load`; GB′: `results/d2_gbprime_DMC.csv`).
+
+| 항목 | DMC (DMCB16e4) |
+|---|---|
+| PID · rung · σ 격자 태그 | 11 · D2SXDMC160000 (ix 1694) · `DMC` σ_t [3.345935741219877e-02, 8.664248974696948e-01] (20 점, @25f74c0a) |
+| 보정 상수(학습 스트림 7, n = 160000) | P_RAW 0.0019541542355243444, TRAIN_SHA e6ddafc27367f975; 풀 sha H.npy 709a6346b0ea763b / split.npy 9f3237f1997d6b91 |
+| testbed 검증 | ALL PASS @25f74c0a (§0 표) |
+| 파일럿 | eigen 정렬 (erank Rt 3.422) |
+| 격자: K 별 ll_val (재시작, n_iter/it_best, 재시드, κ) · 구현 경로 | **full** (정확 경로, κ 격자 × 재시작 3, 전부 κ = 0 선택): 16 27.454 (r1, 112/110, 재시드 0) / 32 42.857 (r0, 135/130, 0) / 64 55.627 (r1, 199/190, 0) / 128 66.455 (r0, 278/270, 0) / 256 74.445 (r2, 275/240, 10) / 512 78.547 (r2, 90/80, 3,464). **kron** (일괄 경로, κ = 0, 재시작 3): 16 31.413 (r0, 113/110, 0) / 32 49.133 (r1, 131/90, 0) / 64 65.934 (r0, 228/190, 0) / 128 81.459 (r0, 301/260, 0) / 256 94.668 (r2, 133/130, 0) / 512 105.503 (r1, 159/150, 0) / **1024 114.2507863086192** (r2, 198/190, rs 191; r0 114.044 167/160 rs 408, r1 113.528 150/140 rs 839) / **2048 119.64315086954201** (r1, 214/200, rs 48,967; r0 119.395 161/150 rs 38,012, r2 119.637 248/240 rs 54,743) / **4096 122.37953759128766** (r2, 200/170, rs 303,355; r0 121.298 111/110 rs 164,041, r1 122.005 128/120 rs 194,376). 상한 500 정지 없음(전 파일 최대 301 반복). 파일 24 개 = full 6 + kron 16..512 6 + 후보 9 + 병합 3 |
+| 확장 결정과 시각 (`logs/tb2_post_DMC.log`; **순서 규칙**: 동결 9d4c3b4a = 10-10 18:12:28 CDT 가 먼저) | 병합 파일 mtime: kron 1024 10-10 18:24:26 CDT · 2048 18:24:30 CDT → 18:24 CDT b\* = kron 2048 (119.6432, 기본 격자 끝) → 규칙대로 kron 4096 (후보 mtime 18:14:58 / 18:16:50 / 18:32:53 CDT) 병합 18:33:24 CDT → 18:33 CDT b\* = kron 4096 → **4096 에서 멈춤**. full 계열 끝 규칙은 발동하지 않음(b\* 가 kron; full 512 78.547 < kron 4096). 모두 동결 뒤 ✓. (kron 2048·4096 후보 가운데 일부는 동결 전에 **적합이 끝나** 파일이 있었으나, 작성자는 동결 전 그 ll_val 을 읽지 않았다 — §3 머리말) |
+| 최종 b\*: 계열·K·ll_val, 격자 끝 캐비엇, 미병합 후보 | **b\* = kron K = 4096, ll_val 122.37953759128766** (재시작 2). **격자 끝**(2048 대비 +2.736 nat, 오르는 중) + **수렴 캐비엇**(재시드 30.3 만; 4096 후보 셋의 ll_val 이 121.30–122.38 로 재시작 간 1.08 nat 벌어짐 — 덜 수렴된 GMM 일 수 있고 방향은 V1 유리). 미병합 후보 없음. 수용 검사 `--bstar kron --kron-K 4096 --ll-val 122.37953759128766` |
+| 체크포인트 | best `ckpt/d2sx_DMC_N160000_a1_best.pt` **65b26ddd4f6437f4** (epoch 812, role best, best val 0.250690221786499); last `…_a1.pt` **92dc9f53c31af875** (epoch 832, best_epoch 812 = best.epoch ✓, stopped_by patience, 로그 done 줄 aborted=False, role last, grad_clip 0.0); prior DMC, sigma_tag DMC, rung D2SXDMC160000, attempt 1. 학습 10-10 17:44 ~ 19:17 CDT, 5,528.0 s, 6.644 s/epoch; split_hash 6fc8339a144a6d55. 실행 사실: 17:46 CDT (epoch 4 무렵)에 `taskset -a -p -c 20,116` 으로 HT 쌍 하나에 고정(결과 중립; epoch 22.9 s → 6.5 s) |
+| §3d 사다리 적용 여부 | 미발동(시행 1 patience; `logs/tb2_train_state_DMC.txt` = `1 patience`) |
+| GB′ (격자 확정 뒤 재개본) | 10-10 19:17 CDT GPU 1 재개 실행(학습 없음, last 파일; `code/run_dmc_post_gpu.sh`) → 20:02 CDT rc=0: `GMM b* = kron (kron K=4096)` = 최종 b\* ✓, 확산/GMM 디노이징 NMSE 비 **min 0.6963 · max 0.8982 · median 0.7148**, worst excess **−0.1018** (20 점 모두 비 < 1; held-out = 스트림 10 = 테스트 풀, n_eval 4096; 보고 전용 값, 판정 무관); `results/d2_gbprime_DMC.csv`, `d2_gbprime_DMC_N160000_a1.npz` (mtime 10-10 20:02:57 CDT, 격자 확정 18:33:24 CDT·동결 18:12:28 CDT 뒤 → 수용 (e)·순서 규칙 충족; `logs/gbprime_DMCB16e4.log`) |
+| §3 예측 가운데 BLER 전에 이미 채점되는 것 | **5 (GB′ median ≥ 0.9): 빗나감** — 0.7148 (확산 prior 가 b\* 보다 디노이징 NMSE 가 낮다; D3 0.559 와 UMi28 0.920 사이). **6 (patience 정지·epoch ≤ 600): 반만 적중** — patience 정지 ✓·발산 없음 ✓, epoch 832 > 600 ✗. **7 (b\* = kron 격자 끝 4096): 적중**. 1~4·8·9 는 실행 뒤 |
+| 선행 코드 커밋, fits 링크, 평가 스크립트 인자 원문 | 코드: 25f74c0a (DMC 연결) · 08a3e81d · 동결 9d4c3b4a (주석 두 줄) · dcf94166 (`dmc_leak_strata.py`). **동결 뒤·BLER 전의 코드 추가(등록된 주 실행의 동작 불변)**: ae880c27 `dmimo._which` 에 sparse_tune 개발 스트림 배치 하나 추가(주 실행이 쓰지 않는 스트림; `dmimo.py selfcheck` OK, TRAIN_SHA 동일) + `run_dmc_sparse_tune.sh`, 2b88eb53·501e0635 `run_dmc_base.sh`, 48803fe6 `run_dmc_post_gpu.sh` — 모두 baseline 확장(`NEXT_EXPERIMENTS_DMCBASE16e4.md`)용. 실행 커밋 = 이 §5 커밋. 링크 `gmm_fits_D2_DMCB16e4last` 10-10 18:33 CDT. 인자: `CUDA_VISIBLE_DEVICES= code/run_prior_eval.sh DMC DMCB16e4 d2sx_DMC_N160000_a1 kron 4096 122.37953759128766 65b26ddd4f6437f4 92dc9f53c31af875 "full:16,32,64,128,256,512 kron:16,32,64,128,256,512,1024,2048,4096"` |
+| 실행 중 함께 도는 것(공개) | 희소 baseline 조정 `sparse_tune.py --prior DMC --cell C2` (tmux `sptdmc`, CPU 2 스레드, 10-10 18:35 CDT 시작; BLER 없음) 이 주 실행과 겹친다 — 수신기 결과는 결정적이라 수치 영향 없음. 주 실행이 도는 동안 main 에 커밋하지 않는다(raw 의 `run\|git` 이 한 커밋이도록) |
 
 ## 6. 결과 (실행 뒤 전사; 생성기와 기록 감사)
 
