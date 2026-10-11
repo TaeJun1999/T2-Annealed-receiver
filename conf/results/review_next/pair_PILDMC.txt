@@ -1,0 +1,24 @@
+# pair_cross raw_PILDMC x raw_DMCB16e4, cell C2, prior DMC, n=2560 per SNR, git 3ddb0831; raised trials {'V1-pilot': 0, 'bstar-pilot': 0}; integrity (point set, genie identical, pilot-only @1 == loop @1, fixed channel estimate): OK
+P1: pilot-only V1 -> loop V1: V1-pilot -> M-ours-dscore-C-V1  [anchor V1-pilot]  decision SNRs ['+9', '+12', '+15']
+    sign test @16: +9 dB 35:25 p=0.25  +12 dB 21:9 p=0.043  +15 dB 14:8 p=0.29   pooled 70:42 p=0.01
+    POWERED=True  second arm fewer at 1/3, first arm fewer at 0/3  -> (iii) no direction
+    SNR@0.1 gap (V1-pilot minus M-ours-dscore-C-V1): n/a (>  15 vs >  15) — extend the SNR grid
+P2: pilot-only b* -> pilot-only V1: bstar-pilot -> V1-pilot  [anchor bstar-pilot]  decision SNRs ['+9', '+12', '+15']
+    sign test @16: +9 dB 136:51 p=4.1e-10  +12 dB 121:45 p=3.1e-09  +15 dB 126:30 p=3.4e-15   pooled 383:126 p=3.7e-31
+    POWERED=True  second arm fewer at 3/3, first arm fewer at 0/3  -> (i) second arm fewer
+    SNR@0.1 gap (bstar-pilot minus V1-pilot): n/a (>  15 vs >  15) — extend the SNR grid
+report: pilot-only b* -> loop b*: bstar-pilot -> M-ours-bstar  [anchor bstar-pilot]  decision SNRs ['+9', '+12', '+15']
+    sign test @16: +9 dB 44:30 p=0.13  +12 dB 36:17 p=0.013  +15 dB 35:16 p=0.011   pooled 115:63 p=0.00012
+    POWERED=True  second arm fewer at 2/3, first arm fewer at 0/3  -> (i) second arm fewer
+    SNR@0.1 gap (bstar-pilot minus M-ours-bstar): n/a (>  15 vs >  15) — extend the SNR grid
+report: pilot-only V1 -> loop b*: V1-pilot -> M-ours-bstar  [anchor V1-pilot]  decision SNRs ['+9', '+12', '+15']
+    sign test @16: +9 dB 50:121 p=5.6e-08  +12 dB 51:108 p=7.2e-06  +15 dB 40:117 p=5.9e-10   pooled 141:346 p=6.2e-21
+    POWERED=True  second arm fewer at 0/3, first arm fewer at 3/3  -> (ii) first arm fewer
+    SNR@0.1 gap (V1-pilot minus M-ours-bstar): n/a (>  15 vs >  15) — extend the SNR grid
+-3 dB BLER@16: R0-pilot 0.943  M-ours-bstar 0.872  bstar-pilot 0.907  M-ours-dscore-C-V1 0.834  V1-pilot 0.881  R5-genie 0.686
+report-only, median NMSE@16 of the channel estimate per SNR -3 +0 +3 +6 +9 +12 +15 dB:
+    R0-pilot            3.26e-01 1.98e-01 1.11e-01 5.85e-02 3.09e-02 1.60e-02 7.99e-03
+    M-ours-bstar        7.09e-02 3.66e-02 2.03e-02 1.13e-02 6.29e-03 3.41e-03 1.80e-03
+    bstar-pilot         9.79e-02 5.66e-02 3.54e-02 2.02e-02 1.18e-02 7.13e-03 3.84e-03
+    M-ours-dscore-C-V1  5.05e-02 2.61e-02 1.38e-02 7.49e-03 4.17e-03 2.27e-03 1.18e-03
+    V1-pilot            8.21e-02 4.60e-02 2.68e-02 1.47e-02 8.63e-03 5.09e-03 2.76e-03

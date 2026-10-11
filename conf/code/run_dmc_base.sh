@@ -55,8 +55,15 @@ if [ ! -f results/review_next/pair_$T.txt ]; then
 fi
 
 # ---------------------------------------------------------------- ALD (run_ald16e4.sh body)
-ET=PILDMC; RT=ALDDMC; E=results/ald/ald_$ET.npz
-if [ ! -f results/review_next/pair_$RT.txt ]; then
+ET=PILDMC; RT=ALDDMC; E=results/ald/ald_$ET.npz; ALD_PENDING=0
+# DEFER_ALD=1 (DECISIONS.md 2026-10-11 KST; not the registered default): when the estimate is missing and no GPU is free, the ALD
+# stage is postponed instead of stopping the script -- SP runs first and the script ends with DMC_BASE_PARTIAL; a later run
+# (PIL / SP skipped by their key files) does ALD and pair_baselines.  The stages are independent, so no number changes.
+if [ "$DEFER_ALD" = 1 ] && [ ! -f results/review_next/pair_$RT.txt ] && { [ ! -f $E ] || [ ! $E -nt $TJ ]; } \
+   && [ -z "$(nvidia-smi --query-gpu=index,memory.used --format=csv,noheader,nounits | awk -F', ' '$2 < 100 {print $1; exit}')" ]; then
+  ALD_PENDING=1; log "ALD deferred: no free GPU (DEFER_ALD=1) -- SP first; re-run when a GPU is free"
+fi
+if [ $ALD_PENDING = 0 ] && [ ! -f results/review_next/pair_$RT.txt ]; then
   [ -f results/ald/pilots_${ET}_test.npz ] || $P code/ald.py regen --tag $ET --prior $PR --cell $CELL --fits-tag $BT --set test >> $L 2>&1 \
     || die "ALD regen (test sites) failed"
   if [ ! -f $E ] || [ ! $E -nt $TJ ]; then           # an estimate older than its tune record is recomputed
@@ -118,6 +125,7 @@ fi
 # ---------------------------------------------------------------- pair_baselines (15 baselines + b*; R0-pilot at iteration 1)
 O=results/review_next/pairB_SPDMC.txt
 [ -f $O ] && die "$O exists (re-run needs user approval)"
+[ $ALD_PENDING = 1 ] && { log "DMC_BASE_PARTIAL (ALD pending: re-run this script when a GPU is free)"; exit 0; }
 echo "# run_dmc_base git $(git rev-parse --short HEAD) $(TZ=America/Chicago date '+%Y-%m-%d %H:%M %Z')" > $O
 $P code/pair_baselines.py --base $BASE --pil raw_PILDMC --ald raw_ALDDMC --est PILDMC --extra raw_SPDMC \
   --add-baselines SBL-loop SBL-pilot OMP-pilot --cell $CELL --prior $PR --r0 at1 --provenance manifest >> $O 2>&1 < /dev/null
