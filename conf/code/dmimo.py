@@ -35,19 +35,30 @@ Norm : ENSEMBLE normalisation E||H||_F^2 = Nr Nt: H = H_pool / sqrt(P_RAW), P_RA
 Pilot decision: the D2 T2b rule of common.make_pilots on Rt = E[H^H H] / Nr, estimated on the same N_CAL training channels and
     frozen below.  Constants exist for Nr = 8 x Nt = 4 only; another array raises (it needs its own build + calibrate + decision).
 The testbed is FROZEN by the user decision: change nothing here without a new decision and a new prior id.
+Second pool, prior 'SRT' (user instruction 2026-10-10 CDT: "Sionna에서도 진행하자"): Sionna RT 2.1 ray tracing, built ONCE by
+    conf/code/srt_build.py (every choice is stated there) into ~/data/sionna_rt/srt_Nr<Nr>/{H.npy, split.npy}: the same file
+    format, the same 20 m block split, the same stream -> pool mapping, calibration and pilot rule as DMC; its own PID (12),
+    its own pinned sha and frozen constants below.  Nothing of DMC changes (`python dmimo.py selfcheck 8 DMC`).
 """
 import hashlib
 import os
 
 import numpy as np
 
-PRIORS = ("DMC",)                         # == common.DM_PRIORS
+PRIORS = ("DMC", "SRT")                   # == common.DM_PRIORS; SRT = Sionna RT 2.1 pool (srt_build.py), added 2026-10-10 CDT
 N_CAL = 160000                            # calibration set = train stream 7, the equal-budget N'
-POOL_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "data", "deepmimo")
+DATA = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "data")
+POOL_DIR = os.path.join(DATA, "deepmimo")
+POOLS = {"DMC": ("deepmimo", "dmc"), "SRT": ("sionna_rt", "srt")}        # prior -> (folder under ~/data, pool stem)
+
+
+def pool_dir(prior, Nr):
+    return os.path.join(DATA, POOLS[prior][0], f"{POOLS[prior][1]}_Nr{Nr}")
+
 
 # ---- frozen pool identity (python dmimo_build.py 8) and calibration (python dmimo.py calibrate 8) -------------------------
-POOL_SHA = {}                             # Nr -> (sha256[:16] of H.npy, of split.npy)
-POOL_SHA[8] = ('709a6346b0ea763b', '9f3237f1997d6b91')      # dmimo_build.py 8: 342597 pairs = fit 270425 + val 20000 + test 52172
+POOL_SHA = {}                             # (prior, Nr) -> (sha256[:16] of H.npy, of split.npy)
+POOL_SHA[('DMC', 8)] = ('709a6346b0ea763b', '9f3237f1997d6b91')      # dmimo_build.py 8: 342597 pairs = fit 270425 + val 20000 + test 52172
 P_RAW = {}                                # (prior, Nr, Nt) -> mean ||H_pool||_F^2 / (Nr Nt) over the N_CAL training channels
 RT = {}                                   # (prior, Nr, Nt) -> Rt = mean H^H H / Nr   (normalised channels, Hermitian)
 RR = {}                                   # (prior, Nr, Nt) -> Rr = mean H H^H / Nt
@@ -79,20 +90,20 @@ def _sha16(path):
     return h.hexdigest()[:16]
 
 
-def _pool(Nr, check=True):
+def _pool(prior, Nr, check=True):
     """(H memory-mapped (pairs, Nr, Nt) complex64, {'fit' | 'val' | 'test': pair indices}), loaded once per process."""
-    if Nr not in _POOL:
-        d = os.path.join(POOL_DIR, f"dmc_Nr{Nr}")
+    if (prior, Nr) not in _POOL:
+        d = pool_dir(prior, Nr)
         hp, mp = os.path.join(d, "H.npy"), os.path.join(d, "split.npy")
         if check:
-            if Nr not in POOL_SHA:
-                raise ValueError(f"DMC pool is pinned for Nr in {sorted(POOL_SHA)} only, not Nr={Nr} (dmimo.py docstring)")
+            if (prior, Nr) not in POOL_SHA:
+                raise ValueError(f"{prior} pool is pinned for {sorted(POOL_SHA)} only, not Nr={Nr} (dmimo.py docstring)")
             got = (_sha16(hp), _sha16(mp))
-            if got != POOL_SHA[Nr]:
-                raise ValueError(f"DMC pool {d} has sha {got}, pinned {POOL_SHA[Nr]}: rebuild with dmimo_build.py or restore")
+            if got != POOL_SHA[(prior, Nr)]:
+                raise ValueError(f"{prior} pool {d} has sha {got}, pinned {POOL_SHA[(prior, Nr)]}: rebuild with its builder or restore")
         split = np.load(mp)                                                  # 0 fit / 1 validation / 2 test per pair
-        _POOL[Nr] = (np.load(hp, mmap_mode="r"), {k: np.where(split == c)[0] for c, k in enumerate(("fit", "val", "test"))})
-    return _POOL[Nr]
+        _POOL[(prior, Nr)] = (np.load(hp, mmap_mode="r"), {k: np.where(split == c)[0] for c, k in enumerate(("fit", "val", "test"))})
+    return _POOL[(prior, Nr)]
 
 
 def _which(rng, prior, Nr):
@@ -108,7 +119,7 @@ def _which(rng, prior, Nr):
         return "test"
     if len(e) == 5 and e[:4] == [20260930, C.TBID["D2"], C.PID[prior], Nr]:      # sparse_tune.py development stream
         return "test"
-    raise ValueError(f"DMC draws only from common.train_rng (streams 7 / 8 / 10), common.trial_rng or sparse_tune's stream of prior {prior}, Nr={Nr}; "
+    raise ValueError(f"{prior} draws only from common.train_rng (streams 7 / 8 / 10), common.trial_rng or sparse_tune's stream of prior {prior}, Nr={Nr}; "
                      f"got seed layout {e} -- the block split cannot be honoured for an unknown stream")
 
 
@@ -125,7 +136,7 @@ class DMGen:
                              "dmimo_build.py, `python dmimo.py calibrate <Nr>` and a decision (dmimo.py docstring)")
         self.kind = prior
         self.Nr, self.Nt, self.N = Nr, Nt, Nr * Nt
-        self.H, self.idx = _pool(Nr, check=not raw)
+        self.H, self.idx = _pool(prior, Nr, check=not raw)
         assert self.H.shape[1:] == (Nr, Nt), self.H.shape
         self.s = 1.0 if raw else float(np.sqrt(P_RAW[(prior, Nr, Nt)]))      # raw=True: calibration only
 
@@ -137,7 +148,7 @@ class DMGen:
             i = ix[rng.integers(0, len(ix), n)]
         else:
             if n > len(ix):
-                raise ValueError(f"DMC {w} pool has {len(ix)} pairs, {n} distinct pairs requested")
+                raise ValueError(f"{self.kind} {w} pool has {len(ix)} pairs, {n} distinct pairs requested")
             i = ix[rng.permutation(len(ix))[:n]]
         return np.asarray(self.H[i], dtype=complex) / self.s
 
@@ -180,30 +191,31 @@ if __name__ == "__main__":
     sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
     import common as C                    # noqa: F401  (thread env before numpy's BLAS is used)
     Nr = int(sys.argv[2]) if len(sys.argv) > 2 else 8
+    PR = sys.argv[3] if len(sys.argv) > 3 else "DMC"                # python dmimo.py calibrate|selfcheck [Nr] [prior]
     if sys.argv[1:2] == ["calibrate"]:
         t0 = time.time()
-        p, Rt, Rr, sha = calibrate("DMC", Nr, C.NT)
+        p, Rt, Rr, sha = calibrate(PR, Nr, C.NT)
         lit = lambda A: "np.array([" + ",\n    ".join("[" + ", ".join(repr(complex(x)) for x in row) + "]" for row in A) + "])"
-        print(f"# calibrate DMC Nr={Nr} x Nt={C.NT}, n={N_CAL}, {time.time() - t0:.0f} s")
-        k = f"('DMC', {Nr}, {C.NT})"
+        print(f"# calibrate {PR} Nr={Nr} x Nt={C.NT}, n={N_CAL}, {time.time() - t0:.0f} s")
+        k = f"('{PR}', {Nr}, {C.NT})"
         print(f"P_RAW[{k}] = {p!r}\nTRAIN_SHA[{k}] = {sha!r}")
         print(f"RT[{k}] = {lit(Rt)}\nRR[{k}] = {lit(Rr)}")
     else:                                 # self-check: split honoured, contracts, determinism
-        g = DMGen("DMC", Nr, C.NT)
+        g = DMGen(PR, Nr, C.NT)
         fit, val, test = (set(g.idx[k].tolist()) for k in ("fit", "val", "test"))
         assert not (fit & val or fit & test or val & test), "pools overlap"
-        key = np.load(os.path.join(POOL_DIR, f"dmc_Nr{Nr}", "meta.npz"))["key"]
+        key = np.load(os.path.join(pool_dir(PR, Nr), "meta.npz"))["key"]
         assert not set(key[g.idx["test"]]) & (set(key[g.idx["fit"]]) | set(key[g.idx["val"]])), "a tile is on both sides"
-        X = g.sample_vecs(C.train_rng("D2", "DMC", Nr, 7), N_CAL)
-        assert hashlib.sha256(np.ascontiguousarray(X).tobytes()).hexdigest()[:16] == TRAIN_SHA[("DMC", Nr, C.NT)]
+        X = g.sample_vecs(C.train_rng("D2", PR, Nr, 7), N_CAL)
+        assert hashlib.sha256(np.ascontiguousarray(X).tobytes()).hexdigest()[:16] == TRAIN_SHA[(PR, Nr, C.NT)]
         assert abs(np.mean(np.sum(np.abs(X) ** 2, 1)) / g.N - 1) < 1e-12
-        r1, r2 = C.trial_rng("D2", "DMC", Nr, 16, 4, -3), C.trial_rng("D2", "DMC", Nr, 16, 4, -3)
+        r1, r2 = C.trial_rng("D2", PR, Nr, 16, 4, -3), C.trial_rng("D2", PR, Nr, 16, 4, -3)
         H1 = g.sample(r1)
         assert np.array_equal(H1.reshape(-1, order="F"), g.sample_vecs(r2, 1)[0]), "sample != sample_vecs(1)"
-        for bad in (np.random.default_rng(0), C.train_rng("D2", "DMC", Nr, 11), C.trial_rng("D2", "S2", Nr, 16, 4, -3)):
+        for bad in (np.random.default_rng(0), C.train_rng("D2", PR, Nr, 11), C.trial_rng("D2", "S2", Nr, 16, 4, -3)):
             try:
                 g.sample(bad)
                 raise AssertionError("an unknown stream was served")
             except ValueError:
                 pass
-        print(f"dmimo selfcheck OK | pools fit {len(fit)} val {len(val)} test {len(test)} | train sha {TRAIN_SHA[('DMC', Nr, C.NT)]}")
+        print(f"dmimo selfcheck OK ({PR}) | pools fit {len(fit)} val {len(val)} test {len(test)} | train sha {TRAIN_SHA[(PR, Nr, C.NT)]}")

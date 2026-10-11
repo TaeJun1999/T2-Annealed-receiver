@@ -102,10 +102,11 @@ PID = {"U": 0, "S": 1, "P": 2, "U2": 3, "S2": 4,      # prior id inside the seed
        "UMi28": 8,                                    # 3GPP TR 38.901 UMi 28 GHz only (mix3.py), run as a D2 prior: NEW streams
        "S2v": 9,                                      # C: S2 + receive-side visibility windows (d2.D2VisGen): NEW streams
        "S2d": 10,                                     # B': S2 + per-block receive rotation U[0, 30 deg] (d2.DRIFT): NEW streams
-       "DMC": 11}                                     # DeepMIMO v4, 6 cities 28 GHz, block split (dmimo.py), run as a D2 prior: NEW streams
+       "DMC": 11,                                     # DeepMIMO v4, 6 cities 28 GHz, block split (dmimo.py), run as a D2 prior: NEW streams
+       "SRT": 12}                                     # Sionna RT 2.1, built-in city scenes 28 GHz, block split (srt_build.py + dmimo.py): NEW streams
 SV_PRIORS = ("SV8e",)                                  # priors served by sv.SVGen / sv.ensemble_sides_sv (== sv.PRIORS)
 MIX3_PRIORS = ("MIX3", "UMi28")                              # priors served by mix3.MIX3Gen / mix3.ensemble_sides_mix3 (== mix3.PRIORS)
-DM_PRIORS = ("DMC",)                                   # priors served by dmimo.DMGen / dmimo.ensemble_sides_dm (== dmimo.PRIORS)
+DM_PRIORS = ("DMC", "SRT")                             # priors served by dmimo.DMGen / dmimo.ensemble_sides_dm (== dmimo.PRIORS): ray-traced pools
 TBID = {"D1": 1, "D2": 2}
 PRIOR_OF = {"D1": "S", "D2": "S2"}                     # primary prior per testbed (06_SPEC §2)
 
@@ -331,13 +332,24 @@ DM_WARNING = (
     "# Reference = known-channel receiver (R5-genie: same EP detector + BCJR, true H); not a bound.\n"
     "# " + "=" * 100
 )
+SRT_WARNING = (
+    "# " + "=" * 100 + "\n"
+    "# SITE-SPECIFIC RAY-TRACED TESTBED (prior SRT) -- Sionna RT 2.1 PathSolver, built-in city scenes munich / etoile / florence at\n"
+    "# 28 GHz (LoS + specular reflection, depth 2), random ground BS sites, outdoor UEs in a 120 deg sector annulus, channels by\n"
+    "# Sionna's own arrays and Paths.cfr (BS ULA, UE ULA with uniform yaw, per-pair path powers normalised, narrowband at the\n"
+    "# carrier, ensemble-normalised; code/srt_build.py + code/dmimo.py). A FIXED pool with a 20 m BLOCK SPLIT: training /\n"
+    "# GMM-validation channels and test channels come from disjoint position tiles. Not the D2 synthetic testbed.\n"
+    "# Reference = known-channel receiver (R5-genie: same EP detector + BCJR, true H); not a bound.\n"
+    "# " + "=" * 100
+)
+DM_WARNINGS = {"DMC": DM_WARNING, "SRT": SRT_WARNING}
 
 
 def banner(testbed, prior):
     """Testbed warning under a results header.  SV / MIX3 / DeepMIMO priors get their own text (never D2's 'sparse specular' text); every
     other (testbed, prior) gets exactly what it got before SV existed (D1 -> D1_WARNING, D2 -> D2_WARNING)."""
     return (D1_WARNING if testbed == "D1" else SV_WARNING if prior in SV_PRIORS else MIX3_WARNINGS[prior] if prior in MIX3_PRIORS
-            else DM_WARNING if prior in DM_PRIORS else D2_WARNING)
+            else DM_WARNINGS[prior] if prior in DM_PRIORS else D2_WARNING)
 
 
 ARM_NOTES = {

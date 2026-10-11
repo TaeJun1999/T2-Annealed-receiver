@@ -24,7 +24,7 @@ import common as C
 import d2
 import dmimo
 
-PRIOR, NR, NT, N_VAL = "DMC", 8, 4, 20000
+PRIOR, NR, NT, N_VAL = (sys.argv[1] if len(sys.argv) > 1 else "DMC"), 8, 4, 20000      # python testbed_dm.py [DMC | SRT]
 OUT = os.path.join(C.CONF, "results", f"testbed_{PRIOR}.txt")
 PROBE = os.path.join(C.CONF, "results", "review_next", "testbed2_phase0", "json",
                      "res_city_0_newyork_28+city_6_miami_28+city_1_losangeles_28+city_2_chicago_28+city_3_houston_28+"
@@ -47,12 +47,14 @@ def outage(H, snr_db=-3):
 def main():
     t_start = time.time()
     g = C.make_gen("D2", PRIOR, NR, NT)
-    m = np.load(os.path.join(dmimo.POOL_DIR, f"dmc_Nr{NR}", "meta.npz"))
-    pr = json.load(open(PROBE))
+    m = np.load(os.path.join(dmimo.pool_dir(PRIOR, NR), "meta.npz"))
+    pr = json.load(open(PROBE)) if PRIOR == "DMC" else None      # SRT: no phase-0 probe of this pooled configuration -> report only
+    nanp = {"n_pairs": float("nan"), "los_frac": float("nan"), "erank_ens": float("nan"), "beam_top4": float("nan"), "outage_m3dB": float("nan"),
+            "leak_chan_frac_lt0.1": float("nan")}
     L = [f"# date        : {time.strftime('%Y-%m-%d %H:%M:%S KST')}",
          f"# git commit  : {subprocess.run(['git', '-C', C.CONF, 'rev-parse', '--short=8', 'HEAD'], capture_output=True, text=True).stdout.strip()}",
-         f"# content     : testbed_dm.py -- DeepMIMO v4 {PRIOR} (code/dmimo.py, pool by code/dmimo_build.py), Nr={NR} x Nt={NT}; streams from common.train_rng('D2','{PRIOR}',...)",
-         f"# pool        : sha H.npy / split.npy = {dmimo.POOL_SHA[NR]}; pairs {len(m['los'])} = fit {len(g.idx['fit'])} + val {len(g.idx['val'])} + test {len(g.idx['test'])}",
+         f"# content     : testbed_dm.py -- {'DeepMIMO v4' if PRIOR == 'DMC' else 'Sionna RT 2.1'} {PRIOR} (code/dmimo.py, pool by code/{'dmimo_build.py' if PRIOR == 'DMC' else 'srt_build.py'}), Nr={NR} x Nt={NT}; streams from common.train_rng('D2','{PRIOR}',...)",
+         f"# pool        : sha H.npy / split.npy = {dmimo.POOL_SHA[(PRIOR, NR)]}; pairs {len(m['los'])} = fit {len(g.idx['fit'])} + val {len(g.idx['val'])} + test {len(g.idx['test'])}",
          f"# calibration : P_RAW={dmimo.P_RAW[(PRIOR, NR, NT)]!r}  TRAIN_SHA={dmimo.TRAIN_SHA[(PRIOR, NR, NT)]}  (n={dmimo.N_CAL}, train stream 7)", ""]
     ok = True
     t0 = time.time()
@@ -67,22 +69,36 @@ def main():
     E = np.mean(np.abs(H) ** 2, 0)
     L.append(f"TDMb per-entry E|H_ab|^2: min {E.min():.4f} max {E.max():.4f} (report only)")
     los = m["los"] == 1
-    yaws = sorted(set(np.round(m["bsyaw"], 1).tolist()))
-    c = (len(los) == pr["n_pairs"] and len(yaws) == len(pr["bsrot_deg"]) and np.allclose(yaws, pr["bsrot_deg"], atol=0.1001)
-         and abs(los.mean() - pr["los_frac"]) < 1e-6)
-    ok &= c
-    L.append(f"TDMc pool vs probe: pairs {len(los)} vs {pr['n_pairs']}; {len(yaws)} BS yaws max |diff| "
-             f"{np.max(np.abs(np.array(yaws) - np.array(pr['bsrot_deg']))) if len(yaws) == len(pr['bsrot_deg']) else float('nan'):.2f} deg; "
-             f"LoS fraction {los.mean():.6f} vs {pr['los_frac']:.6f} -> {'PASS' if c else 'FAIL'}")
+    if pr is None:                                               # SRT: pool identity from the builder's constants
+        import srt_build
+        cnt = np.bincount(m["scen"], minlength=len(srt_build.SCENES))
+        c = bool((cnt == srt_build.TARGET).all()) and list(m["scenes"]) == list(srt_build.SCENES)
+        ok &= c
+        L.append(f"TDMc pool identity: pairs per scene {dict(zip(srt_build.SCENES, cnt.tolist()))} (== TARGET {srt_build.TARGET}), sites per scene "
+                 f"{[int(len(set(m['site'][m['scen'] == i].tolist()))) for i in range(len(cnt))]}, LoS fraction {los.mean():.6f}, mean paths "
+                 f"{m['npath'].mean():.2f} -> {'PASS' if c else 'FAIL'}")
+        pr = nanp
+    else:
+        yaws = sorted(set(np.round(m["bsyaw"], 1).tolist()))
+        c = (len(los) == pr["n_pairs"] and len(yaws) == len(pr["bsrot_deg"]) and np.allclose(yaws, pr["bsrot_deg"], atol=0.1001)
+             and abs(los.mean() - pr["los_frac"]) < 1e-6)
+        ok &= c
+        L.append(f"TDMc pool vs probe: pairs {len(los)} vs {pr['n_pairs']}; {len(yaws)} BS yaws max |diff| "
+                 f"{np.max(np.abs(np.array(yaws) - np.array(pr['bsrot_deg']))) if len(yaws) == len(pr['bsrot_deg']) else float('nan'):.2f} deg; "
+                 f"LoS fraction {los.mean():.6f} vs {pr['los_frac']:.6f} -> {'PASS' if c else 'FAIL'}")
     Xtr = g.sample_vecs(C.train_rng("D2", PRIOR, NR, 7), dmimo.N_CAL)
     Chat = Xtr[:40000].T @ Xtr[:40000].conj() / 40000
     h = H.transpose(0, 2, 1).reshape(N_VAL, NR * NT)
     nm = k1_nmse(Chat, h)
-    kp = pr["headroom"]["-3dB/all"]["nmse"]["K1"]
-    dd = abs(nm - kp) <= 0.02
-    ok &= dd
-    L.append(f"TDMd pilot-stage K=1 Gaussian NMSE @ -3 dB (nu = sigma^2/Nt, val draw): {nm:.4f} vs probe {kp:.4f} (|diff| <= 0.02) "
-             f"-> {'PASS' if dd else 'FAIL'}")
+    if "headroom" in pr:
+        kp = pr["headroom"]["-3dB/all"]["nmse"]["K1"]
+        dd = abs(nm - kp) <= 0.02
+        ok &= dd
+        L.append(f"TDMd pilot-stage K=1 Gaussian NMSE @ -3 dB (nu = sigma^2/Nt, val draw): {nm:.4f} vs probe {kp:.4f} (|diff| <= 0.02) "
+                 f"-> {'PASS' if dd else 'FAIL'}")
+    else:
+        L.append(f"TDMd pilot-stage K=1 Gaussian NMSE @ -3 dB (nu = sigma^2/Nt, val draw): {nm:.4f} (report only: no probe of this configuration; "
+                 f"phase-0 single-scene depth-2 'rs' rows: see report_rt.md)")
     Rt, Rr, inf = dmimo.ensemble_sides_dm(PRIOR, NR, NT)
     pil, _ = C.make_pilots("D2", PRIOR, NT, 4, NR)
     F = np.fft.fft(np.fft.fft(H, axis=1, norm="ortho"), axis=2, norm="ortho")
