@@ -9,8 +9,9 @@
 #   SP   (SPARSE16e4 §1) SBL-loop SBL-pilot OMP-pilot R5-genie (--sparse-file pick) -> raw_SPDMC -> manifest, eval_accept,
 #                        meta|sparse == pick
 #   then pair_baselines over the 15 baselines (12 + the 3 sparse arms), R0-pilot read at iteration 1.
-# CPU receiver, GPUs hidden except the ALD estimate.  Each stage is skipped when its output file exists (resume); a failed
-# stage stops the script.  Log logs/run_dmc_base.log, end marker "DMC_BASE_DONE".
+# CPU receiver, GPUs hidden except the ALD estimate.  Resume: a stage's output files (accept / pair) exist ONLY when that stage
+# passed (a failed step leaves <file>.part) and a stage whose key file exists is skipped; a failed stage stops the script; an
+# existing pairB_SPDMC.txt stops it too (a re-run needs user approval).  Log logs/run_dmc_base.log, end marker "DMC_BASE_DONE".
 # Usage: run_dmc_base.sh <ckpt_stem> <best_sha16> <pick_sha16> <tune_ald_sha16>
 #   e.g. run_dmc_base.sh d2sx_DMC_N160000_a1 <sha> <sha of results/sparse/pick_DMC_C2.json> <sha of results/ald/tune_PILDMC.json>
 cd /home/HTJ/t2/conf || exit 1
@@ -20,6 +21,7 @@ ST=$1; SHA=$2; PSHA=$3; TSHA=$4; CK=ckpt/${ST}_best.pt; SP=results/sparse/pick_$
 REG=results/review_next/NEXT_EXPERIMENTS_DMCBASE16e4.md
 log () { echo "[dmc_base $(TZ=America/Chicago date '+%m-%d %H:%M %Z')] $*" | tee -a $L >> logs/queue.log; }
 die () { log "ABORT: $*"; exit 1; }
+out () { local f=$1; shift; "$@" > $f.part 2>&1 && mv $f.part $f; }   # a stage output exists ONLY when that step passed (resume key)
 [ $# -eq 4 ] || die "usage (4 arguments)"
 [ -n "$(git -C /home/HTJ/t2 status --porcelain conf/code Demo)" ] && die "conf/code or Demo dirty"
 for f in $REG DECISIONS.md $SP ${SP/pick_/tune_} $TJ; do
@@ -28,6 +30,8 @@ done
 grep -q PRIOR_EVAL_DONE logs/run_prior_eval_$BT.log 2>/dev/null || die "the base run $BT is not finished"
 [ "$(head -1 results/review_next/${BT}_accept.txt | cut -c1-10)" = "ACCEPT: OK" ] || die "the base run $BT did not pass acceptance"
 [ "$(sha256sum $CK | cut -c1-16)" = "$SHA" ] || die "ckpt sha differs"
+[ "$($P -c "import numpy as np; print(repr(float(np.load('results/gmm_fits_D2_$BT/fit_${PR}_Nr8_kronK${KK}_n160000.npz')['ll_val'])))")" = "$LL" ] \
+  || die "ll_val of kron $KK != LL"
 [ "$(sha256sum $SP | cut -c1-16)" = "$PSHA" ] || die "pick sha differs from §5"
 [ "$(sha256sum $TJ | cut -c1-16)" = "$TSHA" ] || die "ALD tune sha differs from §5"
 export CUDA_VISIBLE_DEVICES=
@@ -42,11 +46,11 @@ if [ ! -f results/review_next/pair_$T.txt ]; then
   $P code/runner.py run $COMMON --stagec-ckpt /home/HTJ/t2/conf/$CK --pilot-arms --arm V1-pilot bstar-pilot R5-genie --tag $T \
     > logs/run_D2_$T.log 2>&1 || die "PIL run failed"
   $P code/run_manifest.py --tag $T >> $L 2>&1
-  $P code/eval_accept.py --prior $PR --tag $T:best:$SHA:$CELL --ntrain 160000 --bstar $BS $KARG --ll-val $LL --ref-raw $BASE \
-    > results/review_next/${T}_accept.txt 2>&1 || die "PIL acceptance failed ($(head -1 results/review_next/${T}_accept.txt))"
+  out results/review_next/${T}_accept.txt $P code/eval_accept.py --prior $PR --tag $T:best:$SHA:$CELL --ntrain 160000 --bstar $BS $KARG \
+    --ll-val $LL --ref-raw $BASE || die "PIL acceptance failed ($(head -1 results/review_next/${T}_accept.txt.part))"
   log "PIL acceptance ($(head -1 results/review_next/${T}_accept.txt))"
-  $P code/pair_cross.py --base $BASE --pilot raw_$T --cell $CELL --prior $PR > results/review_next/pair_$T.txt 2>&1 \
-    || die "PIL pair_cross integrity failed"
+  out results/review_next/pair_$T.txt $P code/pair_cross.py --base $BASE --pilot raw_$T --cell $CELL --prior $PR \
+    || die "PIL pair_cross integrity failed ($(head -1 results/review_next/pair_$T.txt.part | cut -c1-160))"
   log "PIL pair_cross ($(head -1 results/review_next/pair_$T.txt | cut -c1-160))"
 fi
 
@@ -65,11 +69,11 @@ if [ ! -f results/review_next/pair_$RT.txt ]; then
   $P code/runner.py run $COMMON --stagec-ckpt /home/HTJ/t2/conf/$CK --ald-file /home/HTJ/t2/conf/$E \
     --arm ALD-pilot ALDv-pilot R5-genie --tag $RT > logs/run_D2_$RT.log 2>&1 || die "ALD run failed"
   $P code/run_manifest.py --tag $RT >> $L 2>&1
-  $P code/eval_accept.py --prior $PR --tag $RT:best:$SHA:$CELL --ntrain 160000 --bstar $BS $KARG --ll-val $LL --ref-raw $BASE \
-    > results/review_next/${RT}_accept.txt 2>&1 || die "ALD acceptance failed ($(head -1 results/review_next/${RT}_accept.txt))"
+  out results/review_next/${RT}_accept.txt $P code/eval_accept.py --prior $PR --tag $RT:best:$SHA:$CELL --ntrain 160000 --bstar $BS $KARG \
+    --ll-val $LL --ref-raw $BASE || die "ALD acceptance failed ($(head -1 results/review_next/${RT}_accept.txt.part))"
   log "ALD acceptance ($(head -1 results/review_next/${RT}_accept.txt))"
-  $P code/pair_ald.py --base $BASE --pil raw_PILDMC --ald raw_$RT --est $ET --cell $CELL --prior $PR \
-    > results/review_next/pair_$RT.txt 2>&1 || die "ALD pair_ald integrity failed"
+  out results/review_next/pair_$RT.txt $P code/pair_ald.py --base $BASE --pil raw_PILDMC --ald raw_$RT --est $ET --cell $CELL --prior $PR \
+    || die "ALD pair_ald integrity failed ($(head -1 results/review_next/pair_$RT.txt.part | cut -c1-160))"
   log "ALD pair_ald ($(head -1 results/review_next/pair_$RT.txt | cut -c1-160))"
 fi
 
@@ -106,13 +110,14 @@ for f in glob.glob(f"{raw}/*.npz"):
 print(f"[sparse] raised trials per new arm (= failures, 01_RULES §4; report only, §6): {ex}")
 print(f"[sparse] meta|sparse check {raw}: {bad} mismatching chunks"); sys.exit(1 if bad else 0)
 PY
-  $P code/eval_accept.py --prior $PR --ntrain 160000 --bstar $BS $KARG --ll-val $LL --ref-raw $BASE --tag $T:-:-:$CELL \
-    > results/review_next/${T}_accept.txt 2>&1 < /dev/null || die "SP acceptance failed ($(head -1 results/review_next/${T}_accept.txt | cut -c1-80))"
+  out results/review_next/${T}_accept.txt $P code/eval_accept.py --prior $PR --ntrain 160000 --bstar $BS $KARG --ll-val $LL --ref-raw $BASE \
+    --tag $T:-:-:$CELL < /dev/null || die "SP acceptance failed ($(head -1 results/review_next/${T}_accept.txt.part | cut -c1-80))"
   log "SP acceptance ($(head -1 results/review_next/${T}_accept.txt | cut -c1-80))"
 fi
 
 # ---------------------------------------------------------------- pair_baselines (15 baselines + b*; R0-pilot at iteration 1)
 O=results/review_next/pairB_SPDMC.txt
+[ -f $O ] && die "$O exists (re-run needs user approval)"
 echo "# run_dmc_base git $(git rev-parse --short HEAD) $(TZ=America/Chicago date '+%Y-%m-%d %H:%M %Z')" > $O
 $P code/pair_baselines.py --base $BASE --pil raw_PILDMC --ald raw_ALDDMC --est PILDMC --extra raw_SPDMC \
   --add-baselines SBL-loop SBL-pilot OMP-pilot --cell $CELL --prior $PR --r0 at1 --provenance manifest >> $O 2>&1 < /dev/null
