@@ -40,7 +40,7 @@
 | `run_dmc_base.sh` (세 스크립트의 행 본문을 DMC 한 행으로) | 커밋 2b88eb53, 검토 반영(M1·N2·N6) = v2 동결 커밋 |
 | ALD 개발 사이트 재생성·조정 (`ald.py regen --set dev`, `ald.py tune`; GPU 한 장) | 완료: 10-10 19:17 → 19:26 CDT (`code/run_dmc_post_gpu.sh`, GPU 1; 학습 정지 19:17 CDT 뒤) → `results/ald/tune_PILDMC.json` (§5) |
 | 적대적 검토(Fable) → v2 → 동결 커밋 | 검토 끝(10-10 18:55 CDT 보고; MUST 1 · SHOULD 5 · NIT 7). 반영: M1 재개 키(`out` 헬퍼; 통과한 단계만 제 이름), S1 "멀어진다" 조건, S2 β 규칙 0.1 dB, S3 순서·열람 규칙, S4 ALD 조정 명령 원문, S5 예측 채점, N2 pairB 덮어쓰기 금지, N3·N4·N5·N7 문구, N6 b\* 상수 사전 검사. 반영하지 않은 것: N1 (`CUDA_DEVICE_ORDER`; 원본 `run_ald16e4.sh` 와 같게 둔다 — 동일 GPU 6 장, Exclusive_Process 라 어긋나면 오류로 멈춘다). **동결 시점(2026-10-10 19:02 CDT)의 관측 상태**: DMC 의 BLER 없음(주 실행 미시작; 학습 epoch 696, `tb2_train_state_DMC.txt` = none); `results/sparse/{tune,pick}_DMC_C2.json` 아직 없음(조정 진행 중; 로그의 점수·pick 을 읽지 않았다 — 읽은 것은 프로세스 생존과 줄 수뿐); `results/ald/tune_PILDMC.json` 없음(조정 전) |
-| 주 실행 DMCB16e4 `PRIOR_EVAL_DONE`·ACCEPT OK → §5 → `run_dmc_base.sh` → §6 → 기록 감사(Fable) | 주 실행 10-10 20:04 → 21:53 CDT `PRIOR_EVAL_DONE`, `ACCEPT: OK -- DMCB16e4, DMCB16e4last`; §5 채움(10-10 21:54 CDT) → 이 커밋 뒤 `run_dmc_base.sh` |
+| 주 실행 DMCB16e4 `PRIOR_EVAL_DONE`·ACCEPT OK → §5 → `run_dmc_base.sh` → §6 → 기록 감사(Fable) | 주 실행 10-10 20:04 → 21:53 CDT `PRIOR_EVAL_DONE`, `ACCEPT: OK -- DMCB16e4, DMCB16e4last`; §5 채움(10-10 21:53 CDT; 커밋 3ddb0831 21:55 CDT) → 이 커밋 뒤 `run_dmc_base.sh` |
 | 실행 (갱신 10-10 22:22 CDT) | `run_dmc_base.sh` 10-10 21:55 CDT 시작(git 3ddb0831) → PIL 통과(21:57 CDT `ACCEPT: OK -- PILDMC`) → ALD 단계에서 `ABORT: no free GPU for the ALD estimate` (GPU 6 장이 컨테이너 밖 프로세스로 점유; 등록된 동작). 사용자 지시 "GPU 다 우리거니까 지금은, 계속 진행해" 뒤 GPU 5 에 컨텍스트 한 번 시도 → `cudaErrorDevicesUnavailable`. **편차(수치 불변; `DECISIONS.md` 같은 시각 줄)**: ALD 를 미루고 SP 를 먼저 — `DEFER_ALD=1 bash code/run_dmc_base.sh <§5 인자>` (옵트인 스위치, 기본 동작 불변) → SP 뒤 `DMC_BASE_PARTIAL`; GPU 가 비면 같은 스크립트로 ALD → `pair_baselines` |
 | SP 단계 (갱신 10-10 22:30 CDT) | 10-10 22:22 CDT 시작(git 5aa7b9b4, `ALD deferred`) → runner 5.6 분 → 22:28 CDT `ACCEPT: OK -- SPDMC` (pick 규칙 재현, `meta\|sparse` 불일치 0, raised 0 / 0 / 0) → `DMC_BASE_PARTIAL`. 남은 것: ALD 단계(GPU 한 장) → `pair_baselines` |
 
@@ -59,7 +59,7 @@
 | **v2 동결 뒤·이 실행 전에 관측한 것(공개)** | 주 실행 `DMCB16e4` 의 BLER·표 B(14 arm; 11 곡선 가운데 일곱)를 이 §5 를 쓰기 전에 읽었다 — §1·§2 는 그 전에 동결됐고(501e0635) 이 §5 의 값은 모두 동결된 절차가 정한 것이다(조정 규칙·격자·끝 처리 불변, 재조정 없음) |
 | 스크립트 인자 원문 | `bash code/run_dmc_base.sh d2sx_DMC_N160000_a1 65b26ddd4f6437f4 ff25622dfcb0c7d5 8c92ea491d654012` (tmux; ALD 추정에 빈 GPU 한 장) |
 
-## 6. 결과 (2026-10-10 21:55~22:48 CDT, `run_dmc_base.sh` 세 번 시작; 이 절은 추가만 한다; 기록 2026-10-10 22:51 CDT, Opus 5.5 — 전사만, 해석 없음)
+## 6. 결과 (2026-10-10 21:55~22:48 CDT, `run_dmc_base.sh` 세 번 시작; 이 절은 추가만 한다; 전사 커밋 3e91b94b (10-10 22:53 CDT); 기록 2026-10-10 22:51 CDT, Opus 5.5 — 전사만, 해석 없음)
 
 수치의 출처: `results/review_next/pairB_SPDMC.txt` (표·요약 줄을 정규식으로 읽어 옮김), `pair_PILDMC.txt`, `pair_ALDDMC.txt`, `{PILDMC,ALDDMC,SPDMC}_accept.txt`, `logs/run_dmc_base.log`, `logs/run_D2_{PILDMC,ALDDMC,SPDMC}.log`.
 
@@ -67,7 +67,7 @@
 - **시작 1** 10-10 21:55 CDT (git 3ddb0831 = §5 커밋): PIL runner 2.2 분 → 21:57 CDT `ACCEPT: OK -- PILDMC`, `pair_cross` 무결성 OK(raised 0 / 0) → ALD 시험 사이트 재생성(CPU) → `ABORT: no free GPU for the ALD estimate` (등록된 동작). GPU 6 장은 21:55 CDT 직전부터 이 컨테이너 밖 프로세스가 점유(장당 39,689 MiB, Exclusive_Process).
 - **편차 1 — 단계 순서**(`DECISIONS.md` 10-11 12:22 KST 줄; 사용자 "GPU 다 우리거니까 지금은, 계속 진행해" · "그러네. GPU 안쓰는거 먼저 해보자"): 사용자 지시 뒤 GPU 5 에 CUDA 컨텍스트를 한 번 시도 → `cudaErrorDevicesUnavailable` (재시도 없음). 등록 순서 PIL → ALD → SP 대신 **PIL → SP → ALD**. 구현 = `run_dmc_base.sh` 의 옵트인 스위치 `DEFER_ALD=1` (커밋 5aa7b9b4; 기본 동작은 등록 그대로; `git diff 3ddb0831 ff736ea2 -- conf/code Demo` = 이 스크립트 한 파일 +10 −2 줄). 단계는 서로의 출력을 읽지 않는다.
 - **시작 2** 10-10 22:22 CDT (git 5aa7b9b4, `DEFER_ALD=1`): `ALD deferred` → pick 규칙 재현(`rule-reproduced=True`, 메모리 필요 ≈ 264 GB / 가용 1021 GB) → SP runner 5.6 분 → `meta|sparse` 불일치 0, raised 0 / 0 / 0 → 22:28 CDT `ACCEPT: OK -- SPDMC` → `DMC_BASE_PARTIAL`.
-- **시작 3** 10-10 22:46 CDT (git ff736ea2; GPU 0·1·2 가 빈 것을 `nvidia-smi` 로 확인한 뒤, 스위치 없이): ALD 추정 GPU 0 (22:47 CDT; `results/ald/ald_PILDMC.npz` sha256[:16] ddee100645e9d8ab) → ALD runner 0.4 분 → `ACCEPT: OK -- ALDDMC`, `pair_ald` 무결성 OK(raised ALD 시행 없음) → `pair_baselines` rc 0 → 22:48 CDT `DMC_BASE_DONE rc=0`.
+- **시작 3** 10-10 22:46 CDT (git ff736ea2; GPU 0·1·2 가 빈 것을 `nvidia-smi` 로 확인한 뒤, 스위치 없이 — 확인은 로그 외 사실; ALD 시험 사이트 파일 `pilots_PILDMC_test.npz` 는 시작 1 의 것(21:57 CDT)을 재사용): ALD 추정 GPU 0 (22:47 CDT; `results/ald/ald_PILDMC.npz` sha256[:16] ddee100645e9d8ab) → ALD runner 0.4 분 → `ACCEPT: OK -- ALDDMC`, `pair_ald` 무결성 OK(raised ALD 시행 없음) → `pair_baselines` rc 0 → 22:48 CDT `DMC_BASE_DONE rc=0`.
 - **편차 2 — 단계 사이 커밋**: 5aa7b9b4 (22:22 CDT, 시작 2 직전)와 ff736ea2 (22:31 CDT, 시작 2 종료 뒤·시작 3 전)는 runner 가 돌지 않을 때 했다. raw 마다 깨끗한 커밋 하나: `pair_baselines` 머리말 `git base=27737b62 extra0=5aa7b9b4 pil=3ddb0831 ald=ff736ea2; integrity: OK`.
 - **편차 3 — 부분 결과 열람**: ALD 단계 전에 `pair_PILDMC.txt` 와 raw 에서 읽은 10 곡선의 실패 수(미리보기 그림 포함)를 봤다. §5 뒤라 조정값·규칙·명령은 이미 고정돼 있었고 바꾼 것이 없다.
 - 비용: §1 추정 PIL ≈ 10 분 · ALD ≈ 5 분 · SP ≈ 30 분 → runner 실측 2.2 · 0.4 · 5.6 분.
@@ -94,10 +94,10 @@
 | OMP-pilot | +9 / +12 / +15 | 396:32 · 411:13 · 481:6 | 1288:51 (1.2e-310) | POWERED, V1 3/3 · X 0/3 | **(i)** | 177 | 정의 안 됨 (범위 밖: 0.9035) | 0.672 [0.652, 0.693] |
 
 - **요약 줄(원문)**: `SUMMARY-B (baselines without b*, 15): (i) 14, (ii) 0, not decided 1; b* -> V1 (i)` · `SUMMARY registered baselines 16 (b* + 𝔅 15): (i) 15, (ii) 0, not decided 1`.
-- **"전부" 문장: 쓰지 않는다**(§1 조건 불충족). 그대로 적는 것: **(i) 14 / 15 (b\* 포함 15 / 16), (ii) 0; (i) 가 아닌 arm = `V1-pilot` (iii) "판정하지 못함 (유의 방향 없음)"** — 35:25 (p 0.25) · 21:9 (0.043) · 14:8 (0.29), pooled 70:42 (p 0.01), POWERED, V1 이 1/3 점에서만 유의. "비긴다"·"동등" 이 아니다.
-- **"멀어진다" 문장: 쓰지 않는다** — `'등록된 baseline 전부와 멀어진다' condition (k = 16, (ii) = 0, R_X* CI lower > 0): NOT met` (X\* = M-ours-bstar, F = 2232; R_X\*(−3 dB) = 0.202 [0.166, 0.240] 이나 k = 16 이 (i) 가 아님).
+- **"전부" 문장: 쓰지 않는다**(§1 조건 불충족). 그대로 적는 것: **(i) 14 / 15 (b\* 포함 15 / 16), (ii) 0; (i) 가 아닌 arm = `V1-pilot` (iii) "판정하지 못함 (유의 방향 없음)"** — 35:25 (p 0.25) · 21:9 (0.043) · 14:8 (0.29), pooled 70:42 (p 0.01), POWERED, V1 이 1/3 점에서만 유의. §1 이 금지한 동치 문구는 쓰지 않는다.
+- **"멀어진다" 문장: 쓰지 않는다** — `'등록된 baseline 전부와 멀어진다' condition (k = 16, (ii) = 0, R_X* CI lower > 0): NOT met` (X\* = M-ours-bstar, F = 2232; R_X\*(−3 dB) = 0.202 [0.166, 0.240] 이나 (i) 가 16 개 중 15 개(k = 15 ≠ 16)라 조건 불충족).
 - **드리프트 검사**: `b* → V1` 을 `pair_baselines` 가 다시 낸 값(127:46 · 111:42 · 119:36, pooled 357:124, (i), R 0.202 [0.166, 0.240], 판정점 합 0.279 [0.241, 0.316]) = DMC16e4 §6.1 → 드리프트 없음.
-- SNR@0.1 격차는 16 쌍 모두 n/a (두 arm 모두 > 15 dB). R_X(−3 dB) 는 X 의 −3 dB BLER 이 0.9 를 넘는 10 개에서 정의되지 않는다(포화 가드).
+- SNR@0.1 격차는 16 쌍 모두 n/a (두 arm 모두 > 15 dB). R_X(−3 dB) 는 X 의 −3 dB BLER 이 0.9 를 넘는 **11 개**(R0-pilot@1 · R1-turbo · R2-ours-G · R3-bigamp · R4-llr · R4-scvamp · bstar-pilot · ALD-pilot · ALDv-pilot · SBL-pilot · OMP-pilot)에서 정의되지 않는다(포화 가드); 정의되는 5 개 = b\* · b\*-scalar · gmm32 · V1-pilot · SBL-loop [감사 M1 정정: 처음에는 "10 개" 로 잘못 셌다].
 - 라벨에 붙는 것(§1): DMC16e4 §1 "DMC 고유 사항" (1)(2)(3) — 유한 풀(테스트 52,172 쌍 복원 추출) · 누수 0.433 · outage(genie BLER −3 dB 0.686) — 과 "DMC 고유 1"(조정용 개발 채널이 테스트 풀에서 나옴; baseline 에 유리한 방향). 범위: 이 풀·이 split·이 크기 한정.
 
 ### 6.2 원고 범례 11 곡선 — BLER@16 실패 수 / 2560 (`pairB_SPDMC.txt` 의 표; 전 SNR n = 2560)
@@ -117,7 +117,7 @@
 | Perfect CSI = genie | 1756 | 1457 | 1238 | 1048 | 927 | 754 | 611 |
 
 - 11 곡선에 없는 등록 arm (같은 순서): V1-pilot 2256 / 1837 / 1559 / 1311 / 1152 / 964 / 807; bstar-pilot 2323 / 1933 / 1637 / 1391 / 1237 / 1040 / 903; ALDv-pilot 2345 / 1927 / 1621 / 1363 / 1211 / 1043 / 938; M-ours-bstar-scalar 2249 / 1837 / 1597 / 1383 / 1220 / 1020 / 887; M-ours-gmm32 2270 / 1951 / 1693 / 1463 / 1325 / 1106 / 973; R4-scvamp 2477 / 2322 / 2125 / 1978 / 1820 / 1656 / 1554; R4-llr 2523 / 2455 / 2358 / 2266 / 2184 / 2025 / 1945.
-- 그림: `conference/figures/F21dmc_col.{pdf,png}` (`paper_f21dmc.py`, 기록 `records/paper_f21dmc.txt`): 실패 수 = 위 표(assert), 세 raw 의 Perfect CSI 오류 배열 동일(assert), 그려진 baseline 9 개의 라벨 모두 (i), 제안 곡선 이하인 그려진 곡선 없음(점추정).
+- 그림: `conference/figures/F21dmc_col.{pdf,png}` (`paper_f21dmc.py`, 기록 `records/paper_f21dmc.txt`): 실패 수 = 위 표(assert), 세 raw 의 Perfect CSI 오류 배열 동일(assert), 그려진 baseline 9 개의 라벨 모두 (i), 제안 곡선 이하인 그려진 **baseline** 곡선 없음(Perfect CSI 제외; 점추정).
 
 ### 6.3 보고 전용
 
@@ -125,7 +125,7 @@
 - `pair_ALDDMC.txt` (ALD16e4 형식): A1 `ALDv-pilot → V1` 108:39 · 126:35 · 164:27 → (i); A2 `ALD-pilot → V1` 123:43 · 150:37 · 208:28 → (i); A3 `ALDv-pilot → V1-pilot` 104:45 · 113:34 · 158:27, pooled 375:106 → (i); `ALDv-pilot → b*` 97:109 · 103:81 · 124:70 → (iii); `bstar-pilot → ALDv-pilot` 120:94 · 89:92 · 76:111 → (iii); `ALD-pilot → ALDv-pilot` 38:27 · 40:18 · 64:21 → (i) (2/3). 시험 ALD NMSE(추정 파일 평균) −8.07 / −10.94 / −13.41 / −16.22 / −18.99 / −21.26 / −23.92 dB.
 - 조정 표: §5 (SBL ρ 8; OMP ρ 16 = 격자 끝 + 캐비엇; ALD c 0.01 · β 0.005).
 - raised trials: PIL 0 / 0, ALD 0, SP 0 / 0 / 0.
-- **등록 외 진단(보고 전용 — 라벨·검정·CI 없음; 결과를 본 뒤 사용자 질문으로 한 사후 분할)**: `results/review_next/DMCB16e4_genie_rank.txt` (`prereg_audit_2026-10-10/genie_rank.py`) — 주 실행의 시행을 채널의 최대 특이값 에너지 비중으로 나눈 Perfect CSI · V1 · b\* 의 BLER@16.
+- **등록 외 진단(보고 전용 — 라벨·검정·CI 없음; 결과를 본 뒤 사용자 질문으로 한 사후 분할)**: `results/review_next/DMCB16e4_genie_rank.txt` (`prereg_audit_2026-10-10/genie_rank.py`) — 주 실행의 시행을 채널의 최대 특이값 에너지 비중으로 나눈 Perfect CSI · V1 · b\* 의 BLER@16 (주 실행의 진단; 같은 공개를 DMC16e4 §6.4 에 둔다; 스크립트는 감사 산출물이 아니라 이 세션이 쓴 것).
 
 ### 6.4 §2 예측 채점
 
@@ -134,3 +134,8 @@
 3. −3 · 0 · +3 dB 모두 `ALD-pilot` > `V1-pilot` 실패 수 (2331 > 2256, 1910 > 1837, 1610 > 1559) → **적중**; `pair_ALDDMC.txt` A3 = (i) → **적중**.
 4. 빗나갈 경로((ii) 가 하나라도): 미발동.
 
+### 6.5 기록 감사 (Fable 5.1 서브에이전트, 2026-10-10 23:11 CDT 보고; `prereg_audit_2026-10-10/audit_DMCBASE16e4.md`, 재계산 `recompute_dmcbase.py` → `recompute_dmcbase.out`, 등록 도구 재실행 `rerun_pairB_SPDMC.txt`)
+
+감사 대상 = 커밋 3e91b94b 의 §4·§5·§6. 독립 재계산(네 raw 를 numpy 로 직접 읽음; `pair_baselines.py` 미사용, `pairB_SPDMC.txt` 미열람; 부트스트랩 재구현): 자동 비교 521 값 중 **불일치 1** (아래 M1 — 본문 한 줄의 개수; 표·라벨은 일치); 등록 도구 재실행은 머리말 줄을 빼고 커밋본과 바이트 동일. **16 라벨 전부 재현**(V1-pilot (iii) 포함), "전부"·"멀어진다" 문장 보류가 §1 규칙과 일치, 드리프트 없음, §2 예측 채점 전부 재현. 무결성: 청크 계획, raw 마다 깨끗한 커밋 하나(27737b62 / 3ddb0831 / 5aa7b9b4 / ff736ea2), R5-genie 세 raw 가 주 실행과 비트 동일, `meta|sparse` 448 청크 = pick, pick = `per_snr_pick(tune)`, sha 7 개, ALD 추정 파일의 출처 = `tune_PILDMC.json`. 편차(단계 순서·단계 사이 커밋·부분 결과 열람)는 로그·git 과 일치하고, 단계가 서로의 출력을 읽지 않아 순서가 수치를 바꿀 수 없음을 확인.
+
+**MUST 1 · SHOULD 2 · NIT 7 — 모두 반영(라벨·표의 수치 불변; 기록 2026-10-10 23:13 CDT, Opus 5.5)**: M1 §6.1 본문의 "R_X(−3 dB) 가 정의되지 않는 baseline 수" 10 → 11 (표는 처음부터 11 행); S1 등록 외 진단(`DMCB16e4_genie_rank.txt`)의 공개를 DMC16e4 §6.4 에도 추가; S2 "제안 곡선 이하인 그려진 곡선 없음" → "baseline 곡선(Perfect CSI 제외)" (이 기록과 `paper_f21dmc.py` 의 기록 문구; 그림·수치 불변, 기록 재생성); N1 k 표현; N2 §4 의 §5 채움 시각; N3 ALD 시험 사이트 파일 재사용; N4 "로그 외 사실" 표시; N5 `docs/EXPERIMENTS.md` 행; N6 전사 커밋 해시; N7 금지 문구를 글자로 옮기지 않게 수정. 감사가 확인하지 못한 것: GPU 점유·컨텍스트 시도·`nvidia-smi` 확인(로그 산출물 없음), 사용자 인용의 원문, ALD 추정의 GPU 결정성(코드의 assert 만 확인).

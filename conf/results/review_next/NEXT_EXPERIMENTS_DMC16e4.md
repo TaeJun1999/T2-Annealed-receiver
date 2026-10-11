@@ -208,6 +208,7 @@
 - 주 실행은 한 번 돌았고 재실행·중단·재개가 없다(`logs/run_D2_DMCB16e4{,last}.log` 각 448/448 done, exists 줄 없음).
 - 판정점이 SNR 격자의 위쪽 끝 3 점이고 모든 arm 의 SNR@0.1 이 격자 밖이다 — §1 "결과 뒤 격자를 늘리지 않는다" 를 그대로 지켰다.
 - 이 §6 은 baseline 확장(`NEXT_EXPERIMENTS_DMCBASE16e4.md`)의 PIL 단계 결과(`pair_PILDMC.txt`)가 나온 뒤에 썼다 — 이 절의 수치는 모두 주 실행의 파일에서 나오며 baseline 결과를 쓰지 않는다.
+- **등록 외 진단(보고 전용 — 라벨·검정·CI 없음; 결과를 본 뒤 사용자 질문 "perfect CSI에서도 높다는 건, 수신기 자체가 잘못된 걸 수도 있나?" 로 한 사후 분할, 10-10 22:50 CDT, git ff736ea2; DMCBASE16e4 감사 S1 로 여기에 추가)**: `results/review_next/DMCB16e4_genie_rank.txt` — 시행을 채널 최대 특이값의 에너지 비중으로 나눈 Perfect CSI · V1 · b\* 의 BLER@16 (−3 · +9 · +15 dB). 스크립트 `prereg_audit_2026-10-10/genie_rank.py` (감사 산출물이 아니라 이 세션이 쓴 것).
 
 ### 6.5 기록 감사 (Fable 5.1 서브에이전트, 2026-10-10 22:27 CDT 보고; `prereg_audit_2026-10-10/audit_DMC16e4.md`, 재계산 `recompute_dmc.py` → `recompute_dmc.out`, `recompute_leak.py` → `recompute_leak.out`, 도구 재실행 `rerun_*.txt`)
 

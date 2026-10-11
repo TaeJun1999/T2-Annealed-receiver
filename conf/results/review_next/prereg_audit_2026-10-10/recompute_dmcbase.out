@@ -1,0 +1,135 @@
+# recompute_dmcbase.py -- independent recomputation (direct numpy read of the chunk files; pair_baselines.py not imported)
+
+## 0. chunk plan {(40k,40): k=0..63} x 7 SNR, run|git, meta per raw
+  raw_DMCB16e4: problems = none (plan OK, no |failed key, no non-finite blk_err, keys complete)
+    run|n = ['40']
+    run|iters = ['16']
+    run|seed = ['20260926']
+    run|beta = ['0.7']
+    run|t_in = ['5']
+    run|dtype = ['complex128/float64']
+    arms with blk_err (14): ['M-ours-bstar', 'M-ours-bstar-scalar', 'M-ours-dscore-C-V0', 'M-ours-dscore-C-V1', 'M-ours-dscore-C-V4', 'M-ours-dscore-C-V4b', 'M-ours-gmm32', 'R0-pilot', 'R1-turbo', 'R2-ours-G', 'R3-bigamp', 'R4-llr', 'R4-scvamp', 'R5-genie']
+  raw_PILDMC: problems = none (plan OK, no |failed key, no non-finite blk_err, keys complete)
+    run|n = ['40']
+    run|iters = ['16']
+    run|seed = ['20260926']
+    run|beta = ['0.7']
+    run|t_in = ['5']
+    run|dtype = ['complex128/float64']
+    arms with blk_err (3): ['R5-genie', 'V1-pilot', 'bstar-pilot']
+  raw_ALDDMC: problems = none (plan OK, no |failed key, no non-finite blk_err, keys complete)
+    run|n = ['40']
+    run|iters = ['16']
+    run|seed = ['20260926']
+    run|beta = ['0.7']
+    run|t_in = ['5']
+    run|dtype = ['complex128/float64']
+    arms with blk_err (3): ['ALD-pilot', 'ALDv-pilot', 'R5-genie']
+  raw_SPDMC: problems = none (plan OK, no |failed key, no non-finite blk_err, keys complete)
+    run|n = ['40']
+    run|iters = ['16']
+    run|seed = ['20260926']
+    run|beta = ['0.7']
+    run|t_in = ['5']
+    run|dtype = ['complex128/float64']
+    arms with blk_err (4): ['OMP-pilot', 'R5-genie', 'SBL-loop', 'SBL-pilot']
+
+## 1. R5-genie of raw_PILDMC / raw_ALDDMC / raw_SPDMC bit-identical to raw_DMCB16e4 (8 keys x 7 SNR x 2560)
+  raw_PILDMC: identical = True
+  raw_ALDDMC: identical = True
+  raw_SPDMC: identical = True
+
+## 2. meta|sparse of every SPDMC chunk == pick at its SNR; pick == sparse_tune.per_snr_pick(tune JSON)
+  pick: rho_sbl 8 rho_omp 16 (edge True), n_em [3, 5, 5, 5, 5, 5, 5], L [2, 2, 3, 4, 6, 8, 12]
+
+## 3. sha256[:16] of §5/§6 files; ALD tune record vs the estimate file
+  estimate-file nmse per SNR ['0.156074', '0.080543', '0.0456042', '0.0238678', '0.012612', '0.00748826', '0.00405387']
+  raw ALD-pilot nmse@1 mean   ['0.156074', '0.080543', '0.0456042', '0.0238678', '0.012612', '0.00748826', '0.00405387']  (definition may differ; printed, not counted)
+  estimate prov: {'ckpt_sha': '65b26ddd4f6437f4', 'ald_py_sha': '5d38e28679cc7542', 'git': 'ff736ea2', 'device': 'NVIDIA RTX PRO 6000 Blackwell Server Edition', 'precision': 'float32/complex64, deterministic, TF32 off', 'rotation': -1.0, 'train_prior': 'DMC', 'doppler': -1.0}
+
+## 4. BLER@16 failure counts / 2560 (22 rows: pairB table order)
+  R5-genie                1756  1457  1238  1048   927   754   611
+  M-ours-dscore-C-V1      2136  1742  1505  1281  1142   952   801
+  M-ours-bstar            2232  1826  1586  1372  1223  1021   884
+  M-ours-bstar-scalar     2249  1837  1597  1383  1220  1020   887
+  M-ours-gmm32            2270  1951  1693  1463  1325  1106   973
+  R0-pilot@1              2527  2413  2227  2077  1913  1705  1590
+  R1-turbo                2451  2246  1976  1739  1532  1293  1158
+  R2-ours-G               2330  2050  1801  1592  1440  1209  1090
+  R3-bigamp               2461  2224  2028  1913  1929  1910  1957
+  R4-llr                  2523  2455  2358  2266  2184  2025  1945
+  R4-scvamp               2477  2322  2125  1978  1820  1656  1554
+  bstar-pilot             2323  1933  1637  1391  1237  1040   903
+  V1-pilot                2256  1837  1559  1311  1152   964   807
+  ALD-pilot               2331  1910  1610  1366  1222  1065   981
+  ALDv-pilot              2345  1927  1621  1363  1211  1043   938
+  SBL-loop                2272  1969  1710  1504  1335  1137   975
+  SBL-pilot               2355  2021  1743  1523  1346  1145   999
+  OMP-pilot               2313  2039  1800  1618  1506  1350  1276
+  R0-pilot                2413  2117  1838  1618  1451  1256  1119
+  M-ours-dscore-C-V0      2484  2375  2277  2200  2091  1991  1785
+  M-ours-dscore-C-V4      2148  1749  1515  1287  1136   962   793
+  M-ours-dscore-C-V4b     2142  1771  1510  1293  1141   961   801
+
+## 5. table B X -> V1 (anchor X; exact two-sided sign test; power guard; label; F_X - F_V1 @-3; R_X -3 dB and decision points)
+  M-ours-bstar -> V1  dp [9, 12, 15]  BLER@16 {-3:0.8719, +0:0.7133, +3:0.6195, +6:0.5359, +9:0.4777, +12:0.3988, +15:0.3453}
+      +9 dB 127:46 p=5.8e-10  +12 dB 111:42 p=2.2e-08  +15 dB 119:36 p=1.4e-11   pooled 357:124 p=3.4e-27   POWERED V1 fewer 3/3, X fewer 0/3 -> (i);  F_X-F_V1@-3 96;  R-3 0.202 [0.166, 0.240];  R dp 0.279 [0.241, 0.316]
+  M-ours-bstar-scalar -> V1  dp [9, 12, 15]  BLER@16 {-3:0.8785, +0:0.7176, +3:0.6238, +6:0.5402, +9:0.4766, +12:0.3984, +15:0.3465}
+      +9 dB 130:52 p=6.8e-09  +12 dB 113:45 p=6.2e-08  +15 dB 119:33 p=1.3e-12   pooled 362:130 p=2.4e-26   POWERED V1 fewer 3/3, X fewer 0/3 -> (i);  F_X-F_V1@-3 113;  R-3 0.229 [0.193, 0.267];  R dp 0.278 [0.241, 0.315]
+  M-ours-gmm32 -> V1  dp [9, 12, 15]  BLER@16 {-3:0.8867, +0:0.7621, +3:0.6613, +6:0.5715, +9:0.5176, +12:0.4320, +15:0.3801}
+      +9 dB 221:38 p=1.5e-32  +12 dB 185:31 p=6.7e-28  +15 dB 209:37 p=2.6e-30   pooled 615:106 p=4.9e-88   POWERED V1 fewer 3/3, X fewer 0/3 -> (i);  F_X-F_V1@-3 134;  R-3 0.261 [0.222, 0.299];  R dp 0.458 [0.428, 0.489]
+  R0-pilot@1 -> V1  dp [9, 12, 15]  BLER@16 {-3:0.9871, +0:0.9426, +3:0.8699, +6:0.8113, +9:0.7473, +12:0.6660, +15:0.6211}
+      +9 dB 772:1 p=3.1e-230  +12 dB 754:1 p=8e-225  +15 dB 789:0 p=6.1e-238   pooled 2315:2 p=0   POWERED V1 fewer 3/3, X fewer 0/3 -> (i);  F_X-F_V1@-3 391;  R-3 undefined (BLER 0.9871);  R dp 0.793 [0.780, 0.807]
+  R1-turbo -> V1  dp [9, 12, 15]  BLER@16 {-3:0.9574, +0:0.8773, +3:0.7719, +6:0.6793, +9:0.5984, +12:0.5051, +15:0.4523}
+      +9 dB 406:16 p=7e-99  +12 dB 362:21 p=2.1e-81  +15 dB 374:17 p=9.6e-89   pooled 1142:54 p=4e-266   POWERED V1 fewer 3/3, X fewer 0/3 -> (i);  F_X-F_V1@-3 315;  R-3 undefined (BLER 0.9574);  R dp 0.643 [0.621, 0.667]
+  R2-ours-G -> V1  dp [9, 12, 15]  BLER@16 {-3:0.9102, +0:0.8008, +3:0.7035, +6:0.6219, +9:0.5625, +12:0.4723, +15:0.4258}
+      +9 dB 325:27 p=4.5e-66  +12 dB 279:22 p=7.3e-58  +15 dB 310:21 p=4.1e-67   pooled 914:70 p=2.9e-188   POWERED V1 fewer 3/3, X fewer 0/3 -> (i);  F_X-F_V1@-3 194;  R-3 undefined (BLER 0.9102);  R dp 0.583 [0.558, 0.610]
+  R3-bigamp -> V1  dp [6, 9, 12]  BLER@16 {-3:0.9613, +0:0.8688, +3:0.7922, +6:0.7473, +9:0.7535, +12:0.7461, +15:0.7645}
+      +6 dB 638:6 p=2.7e-180  +9 dB 791:4 p=1.6e-229  +12 dB 960:2 p=2.4e-284   pooled 2389:12 p=0   POWERED V1 fewer 3/3, X fewer 0/3 -> (i);  F_X-F_V1@-3 325;  R-3 undefined (BLER 0.9613);  R dp 0.786 [0.773, 0.800]
+  R4-llr -> V1  dp [9, 12, 15]  BLER@16 {-3:0.9855, +0:0.9590, +3:0.9211, +6:0.8852, +9:0.8531, +12:0.7910, +15:0.7598}
+      +9 dB 1044:2 p=1.5e-309  +12 dB 1076:3 p=6.5e-317  +15 dB 1149:5 p=0   pooled 3269:10 p=0   POWERED V1 fewer 3/3, X fewer 0/3 -> (i);  F_X-F_V1@-3 387;  R-3 undefined (BLER 0.9855);  R dp 0.844 [0.833, 0.854]
+  R4-scvamp -> V1  dp [9, 12, 15]  BLER@16 {-3:0.9676, +0:0.9070, +3:0.8301, +6:0.7727, +9:0.7109, +12:0.6469, +15:0.6070}
+      +9 dB 682:4 p=5.7e-197  +12 dB 708:4 p=9.9e-205  +15 dB 756:3 p=4.8e-221   pooled 2146:11 p=0   POWERED V1 fewer 3/3, X fewer 0/3 -> (i);  F_X-F_V1@-3 341;  R-3 undefined (BLER 0.9676);  R dp 0.780 [0.765, 0.795]
+  bstar-pilot -> V1  dp [9, 12, 15]  BLER@16 {-3:0.9074, +0:0.7551, +3:0.6395, +6:0.5434, +9:0.4832, +12:0.4062, +15:0.3527}
+      +9 dB 147:52 p=1.1e-11  +12 dB 129:41 p=8.5e-12  +15 dB 131:29 p=1.1e-16   pooled 407:122 p=7.8e-37   POWERED V1 fewer 3/3, X fewer 0/3 -> (i);  F_X-F_V1@-3 187;  R-3 undefined (BLER 0.9074);  R dp 0.321 [0.285, 0.356]
+  V1-pilot -> V1  dp [9, 12, 15]  BLER@16 {-3:0.8812, +0:0.7176, +3:0.6090, +6:0.5121, +9:0.4500, +12:0.3766, +15:0.3152}
+      +9 dB 35:25 p=0.25  +12 dB 21:9 p=0.043  +15 dB 14:8 p=0.29   pooled 70:42 p=0.01   POWERED V1 fewer 1/3, X fewer 0/3 -> (iii);  F_X-F_V1@-3 120;  R-3 0.240 [0.204, 0.277];  R dp 0.044 [0.015, 0.072]
+  ALD-pilot -> V1  dp [9, 12, 15]  BLER@16 {-3:0.9105, +0:0.7461, +3:0.6289, +6:0.5336, +9:0.4773, +12:0.4160, +15:0.3832}
+      +9 dB 123:43 p=4e-10  +12 dB 150:37 p=2.5e-17  +15 dB 208:28 p=3.6e-35   pooled 481:108 p=4.1e-57   POWERED V1 fewer 3/3, X fewer 0/3 -> (i);  F_X-F_V1@-3 195;  R-3 undefined (BLER 0.9105);  R dp 0.382 [0.347, 0.415]
+  ALDv-pilot -> V1  dp [9, 12, 15]  BLER@16 {-3:0.9160, +0:0.7527, +3:0.6332, +6:0.5324, +9:0.4730, +12:0.4074, +15:0.3664}
+      +9 dB 108:39 p=1.1e-08  +12 dB 126:35 p=2.9e-13  +15 dB 164:27 p=3.9e-25   pooled 398:101 p=1.1e-42   POWERED V1 fewer 3/3, X fewer 0/3 -> (i);  F_X-F_V1@-3 209;  R-3 undefined (BLER 0.9160);  R dp 0.330 [0.295, 0.364]
+  SBL-loop -> V1  dp [9, 12, 15]  BLER@16 {-3:0.8875, +0:0.7691, +3:0.6680, +6:0.5875, +9:0.5215, +12:0.4441, +15:0.3809}
+      +9 dB 235:42 p=1e-33  +12 dB 211:26 p=3.4e-37  +15 dB 212:38 p=1.8e-30   pooled 658:106 p=4.2e-98   POWERED V1 fewer 3/3, X fewer 0/3 -> (i);  F_X-F_V1@-3 136;  R-3 0.264 [0.220, 0.305];  R dp 0.478 [0.448, 0.508]
+  SBL-pilot -> V1  dp [9, 12, 15]  BLER@16 {-3:0.9199, +0:0.7895, +3:0.6809, +6:0.5949, +9:0.5258, +12:0.4473, +15:0.3902}
+      +9 dB 247:43 p=5.8e-36  +12 dB 218:25 p=1.3e-39  +15 dB 230:32 p=4e-38   pooled 695:100 p=2e-110   POWERED V1 fewer 3/3, X fewer 0/3 -> (i);  F_X-F_V1@-3 219;  R-3 undefined (BLER 0.9199);  R dp 0.497 [0.466, 0.527]
+  OMP-pilot -> V1  dp [9, 12, 15]  BLER@16 {-3:0.9035, +0:0.7965, +3:0.7031, +6:0.6320, +9:0.5883, +12:0.5273, +15:0.4984}
+      +9 dB 396:32 p=5.8e-81  +12 dB 411:13 p=9.1e-104  +15 dB 481:6 p=9.1e-134   pooled 1288:51 p=1.2e-310   POWERED V1 fewer 3/3, X fewer 0/3 -> (i);  F_X-F_V1@-3 177;  R-3 undefined (BLER 0.9035);  R dp 0.672 [0.652, 0.693]
+  SUMMARY-B (15 without b*): (i) 14, (ii) 0, not decided 1; b* -> V1 (i)
+  SUMMARY 16: (i) 15, (ii) 0, not decided 1
+  X* = M-ours-bstar (F=2232); R_X* -3 dB = 0.202 [0.166, 0.240]; '멀어진다' condition (k=16 all (i), (ii)=0, CI lower>0): NOT met  (k=15, lower>0 True)
+  undefined R_X(-3 dB) count over the 16 X: 11  (record §6.1: '0.9 를 넘는 10 개')
+    DIFF  number of X with R_X(-3 dB) undefined (record says 10): recomputed 11  record 10
+  SNR@0.1 flags: {'M-ours-bstar': 'hi', 'M-ours-bstar-scalar': 'hi', 'M-ours-gmm32': 'hi', 'R0-pilot@1': 'hi', 'R1-turbo': 'hi', 'R2-ours-G': 'hi', 'R3-bigamp': 'hi', 'R4-llr': 'hi', 'R4-scvamp': 'hi', 'bstar-pilot': 'hi', 'V1-pilot': 'hi', 'ALD-pilot': 'hi', 'ALDv-pilot': 'hi', 'SBL-loop': 'hi', 'SBL-pilot': 'hi', 'OMP-pilot': 'hi', 'M-ours-dscore-C-V1': 'hi'}
+
+## 6. report-only pairs quoted in §6.3 (pair_cross / pair_ald format; anchor = first arm)
+  bstar-pilot -> V1-pilot  dp [9, 12, 15]  +9 dB 136:51 p=4.1e-10  +12 dB 121:45 p=3.1e-09  +15 dB 126:30 p=3.4e-15   pooled 383:126 p=3.7e-31  POWERED second fewer 3/3 first fewer 0/3 -> (i)
+  bstar-pilot -> M-ours-bstar  dp [9, 12, 15]  +9 dB 44:30 p=0.13  +12 dB 36:17 p=0.013  +15 dB 35:16 p=0.011   pooled 115:63 p=0.00012  POWERED second fewer 2/3 first fewer 0/3 -> (i)
+  V1-pilot -> M-ours-bstar  dp [9, 12, 15]  +9 dB 50:121 p=5.6e-08  +12 dB 51:108 p=7.2e-06  +15 dB 40:117 p=5.9e-10   pooled 141:346 p=6.2e-21  POWERED second fewer 0/3 first fewer 3/3 -> (ii)
+  ALDv-pilot -> M-ours-dscore-C-V1  dp [9, 12, 15]  +9 dB 108:39 p=1.1e-08  +12 dB 126:35 p=2.9e-13  +15 dB 164:27 p=3.9e-25   pooled 398:101 p=1.1e-42  POWERED second fewer 3/3 first fewer 0/3 -> (i)
+  ALD-pilot -> M-ours-dscore-C-V1  dp [9, 12, 15]  +9 dB 123:43 p=4e-10  +12 dB 150:37 p=2.5e-17  +15 dB 208:28 p=3.6e-35   pooled 481:108 p=4.1e-57  POWERED second fewer 3/3 first fewer 0/3 -> (i)
+  ALDv-pilot -> V1-pilot  dp [9, 12, 15]  +9 dB 104:45 p=1.5e-06  +12 dB 113:34 p=4.2e-11  +15 dB 158:27 p=1e-23   pooled 375:106 p=2.9e-36  POWERED second fewer 3/3 first fewer 0/3 -> (i)
+  ALDv-pilot -> M-ours-bstar  dp [9, 12, 15]  +9 dB 97:109 p=0.44  +12 dB 103:81 p=0.12  +15 dB 124:70 p=0.00013   pooled 324:260 p=0.0091  POWERED second fewer 1/3 first fewer 0/3 -> (iii)
+  bstar-pilot -> ALDv-pilot  dp [9, 12, 15]  +9 dB 120:94 p=0.087  +12 dB 89:92 p=0.88  +15 dB 76:111 p=0.013   pooled 285:297 p=0.65  POWERED second fewer 0/3 first fewer 1/3 -> (iii)
+  ALD-pilot -> ALDv-pilot  dp [9, 12, 15]  +9 dB 38:27 p=0.21  +12 dB 40:18 p=0.0054  +15 dB 64:21 p=3.3e-06   pooled 142:66 p=1.5e-07  POWERED second fewer 2/3 first fewer 0/3 -> (i)
+
+## 7. §2 predictions re-scored from the data
+  1. (ii) 0 and (i) >= 13 among the 15: (ii) 0, (i) 14 -> HIT
+  2a. OMP L at -3/0 dB <= 4: 2, 2 -> HIT
+  2b. -3/0 dB OMP-pilot < R0-pilot@1 ([2313, 2039] vs [2527, 2413]) and SBL-pilot < R0-pilot@1 ([2355, 2021]) -> HIT
+  3. ALD-pilot > V1-pilot at -3/0/+3 ([2331, 1910, 1610] vs [2256, 1837, 1559]) -> HIT; A3 ALDv-pilot -> V1-pilot = (i) -> HIT
+  4. any (ii)? False -> not triggered
+
+## 8. figure record paper_f21dmc.txt: 11 count rows; 'at or below' statement; labels of the 9 drawn baselines
+  drawn baselines (9) at or below V1 at any SNR: none; Perfect CSI below V1 at all SNR: True
+
+## SUMMARY: 521 values checked, 1 differ from the record

@@ -86,7 +86,7 @@ def main():
          "95% Wilson bars on " + ", ".join(BY[a].label for a in D.BARS) + f".  n = {N0} (test trials 0..2559) at EVERY SNR for every "
          "curve (no n = 20480 raw on DMC; NEXT_EXPERIMENTS_DMCBASE16e4 §1).", "",
          "Curves (internal arm -> figure name): " + "; ".join(f"{a} -> {BY[a].label}" for a in SHOW) + ".", "", "Counts:"] + txt
-        + ["", "Drawn curves at or below the proposed curve (point estimates; failures vs the proposed curve's) -- reported only, nothing is "
+        + ["", "Drawn baseline curves (Perfect CSI excluded) at or below the proposed curve (point estimates; failures vs the proposed curve's) -- reported only, nothing is "
            "tested here; the registered paired tests are in conf/results/review_next/pairB_SPDMC.txt: " + ("; ".join(below) or "none") + ".",
            f"Registered table-B labels against the proposed prior (pairB_SPDMC.txt) of the {len(SHOW) - 2} drawn baselines: "
            + ("all (i)" if not odd else "; ".join(odd) + "; the others (i)") + ".",
