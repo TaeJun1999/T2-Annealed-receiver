@@ -111,7 +111,7 @@
 
 ## 5. 평가 전 고정 기록 (실행 전에 채우고 커밋한다; 갱신 시각을 적는다)
 
-갱신 2026-10-10 20:04 CDT (Opus 5.5). 값은 파일에서 읽었다(격자·시각: 스크래치 생성기 `s5_gen.py` 가 fit 파일·mtime 을 읽어 찍은 출력; 체크포인트: `torch.load`; GB′: `results/d2_gbprime_DMC.csv`).
+갱신 2026-10-10 20:04 CDT (Opus 5.5). 값은 파일에서 읽었다(격자·시각: 생성기 `prereg_audit_2026-10-10/s5_gen.py` (작성 당시에는 세션 스크래치에만 있었고 감사 뒤 이 경로로 복사) 가 fit 파일·mtime 을 읽어 찍은 출력; 체크포인트: `torch.load`; GB′: `results/d2_gbprime_DMC.csv`).
 
 | 항목 | DMC (DMCB16e4) |
 |---|---|
@@ -120,13 +120,13 @@
 | testbed 검증 | ALL PASS @25f74c0a (§0 표) |
 | 파일럿 | eigen 정렬 (erank Rt 3.422) |
 | 격자: K 별 ll_val (재시작, n_iter/it_best, 재시드, κ) · 구현 경로 | **full** (정확 경로, κ 격자 × 재시작 3, 전부 κ = 0 선택): 16 27.454 (r1, 112/110, 재시드 0) / 32 42.857 (r0, 135/130, 0) / 64 55.627 (r1, 199/190, 0) / 128 66.455 (r0, 278/270, 0) / 256 74.445 (r2, 275/240, 10) / 512 78.547 (r2, 90/80, 3,464). **kron** (일괄 경로, κ = 0, 재시작 3): 16 31.413 (r0, 113/110, 0) / 32 49.133 (r1, 131/90, 0) / 64 65.934 (r0, 228/190, 0) / 128 81.459 (r0, 301/260, 0) / 256 94.668 (r2, 133/130, 0) / 512 105.503 (r1, 159/150, 0) / **1024 114.2507863086192** (r2, 198/190, rs 191; r0 114.044 167/160 rs 408, r1 113.528 150/140 rs 839) / **2048 119.64315086954201** (r1, 214/200, rs 48,967; r0 119.395 161/150 rs 38,012, r2 119.637 248/240 rs 54,743) / **4096 122.37953759128766** (r2, 200/170, rs 303,355; r0 121.298 111/110 rs 164,041, r1 122.005 128/120 rs 194,376). 상한 500 정지 없음(전 파일 최대 301 반복). 파일 24 개 = full 6 + kron 16..512 6 + 후보 9 + 병합 3 |
-| 확장 결정과 시각 (`logs/tb2_post_DMC.log`; **순서 규칙**: 동결 9d4c3b4a = 10-10 18:12:28 CDT 가 먼저) | 병합 파일 mtime: kron 1024 10-10 18:24:26 CDT · 2048 18:24:30 CDT → 18:24 CDT b\* = kron 2048 (119.6432, 기본 격자 끝) → 규칙대로 kron 4096 (후보 mtime 18:14:58 / 18:16:50 / 18:32:53 CDT) 병합 18:33:24 CDT → 18:33 CDT b\* = kron 4096 → **4096 에서 멈춤**. full 계열 끝 규칙은 발동하지 않음(b\* 가 kron; full 512 78.547 < kron 4096). 모두 동결 뒤 ✓. (kron 2048·4096 후보 가운데 일부는 동결 전에 **적합이 끝나** 파일이 있었으나, 작성자는 동결 전 그 ll_val 을 읽지 않았다 — §3 머리말) |
+| 확장 결정과 시각 (`logs/tb2_post_DMC.log`; **순서 규칙**: 동결 9d4c3b4a = 10-10 18:12:28 CDT 가 먼저) | 병합 파일 mtime: kron 1024 10-10 18:24:26 CDT · 2048 18:24:30 CDT → 18:24 CDT b\* = kron 2048 (119.6432, 기본 격자 끝) → 규칙대로 kron 4096 (후보 mtime 18:14:58 / 18:16:50 / 18:32:53 CDT) 병합 18:33:24 CDT → 18:33 CDT b\* = kron 4096 → **4096 에서 멈춤**. full 계열 끝 규칙은 발동하지 않음(b\* 가 kron; full 512 78.547 < kron 4096). 모두 동결 뒤 ✓. (동결 전에 적합이 끝난 K ≥ 2048 후보는 kron 2048 r0 하나(18:09 CDT; 파일 mtime·`logs/tb2.log`)뿐이고, 2048 r1·r2(18:13·18:15 CDT)와 4096 셋(18:14:58 · 18:16:50 · 18:32:53 CDT)은 동결 뒤 끝났다; 작성자는 동결 전 어떤 ll_val 도 읽지 않았다 — §3 머리말) [감사 S2 정정] |
 | 최종 b\*: 계열·K·ll_val, 격자 끝 캐비엇, 미병합 후보 | **b\* = kron K = 4096, ll_val 122.37953759128766** (재시작 2). **격자 끝**(2048 대비 +2.736 nat, 오르는 중) + **수렴 캐비엇**(재시드 30.3 만; 4096 후보 셋의 ll_val 이 121.30–122.38 로 재시작 간 1.08 nat 벌어짐 — 덜 수렴된 GMM 일 수 있고 방향은 V1 유리). 미병합 후보 없음. 수용 검사 `--bstar kron --kron-K 4096 --ll-val 122.37953759128766` |
 | 체크포인트 | best `ckpt/d2sx_DMC_N160000_a1_best.pt` **65b26ddd4f6437f4** (epoch 812, role best, best val 0.250690221786499); last `…_a1.pt` **92dc9f53c31af875** (epoch 832, best_epoch 812 = best.epoch ✓, stopped_by patience, 로그 done 줄 aborted=False, role last, grad_clip 0.0); prior DMC, sigma_tag DMC, rung D2SXDMC160000, attempt 1. 학습 10-10 17:44 ~ 19:17 CDT, 5,528.0 s, 6.644 s/epoch; split_hash 6fc8339a144a6d55. 실행 사실: 17:46 CDT (epoch 4 무렵)에 `taskset -a -p -c 20,116` 으로 HT 쌍 하나에 고정(결과 중립; epoch 22.9 s → 6.5 s) |
 | §3d 사다리 적용 여부 | 미발동(시행 1 patience; `logs/tb2_train_state_DMC.txt` = `1 patience`) |
-| GB′ (격자 확정 뒤 재개본) | 10-10 19:17 CDT GPU 1 재개 실행(학습 없음, last 파일; `code/run_dmc_post_gpu.sh`) → 20:02 CDT rc=0: `GMM b* = kron (kron K=4096)` = 최종 b\* ✓, 확산/GMM 디노이징 NMSE 비 **min 0.6963 · max 0.8982 · median 0.7148**, worst excess **−0.1018** (20 점 모두 비 < 1; held-out = 스트림 10 = 테스트 풀, n_eval 4096; 보고 전용 값, 판정 무관); `results/d2_gbprime_DMC.csv`, `d2_gbprime_DMC_N160000_a1.npz` (mtime 10-10 20:02:57 CDT, 격자 확정 18:33:24 CDT·동결 18:12:28 CDT 뒤 → 수용 (e)·순서 규칙 충족; `logs/gbprime_DMCB16e4.log`) |
-| §3 예측 가운데 BLER 전에 이미 채점되는 것 | **5 (GB′ median ≥ 0.9): 빗나감** — 0.7148 (확산 prior 가 b\* 보다 디노이징 NMSE 가 낮다; D3 0.559 와 UMi28 0.920 사이). **6 (patience 정지·epoch ≤ 600): 반만 적중** — patience 정지 ✓·발산 없음 ✓, epoch 832 > 600 ✗. **7 (b\* = kron 격자 끝 4096): 적중**. 1~4·8·9 는 실행 뒤 |
-| 선행 코드 커밋, fits 링크, 평가 스크립트 인자 원문 | 코드: 25f74c0a (DMC 연결) · 08a3e81d · 동결 9d4c3b4a (주석 두 줄) · dcf94166 (`dmc_leak_strata.py`). **동결 뒤·BLER 전의 코드 추가(등록된 주 실행의 동작 불변)**: ae880c27 `dmimo._which` 에 sparse_tune 개발 스트림 배치 하나 추가(주 실행이 쓰지 않는 스트림; `dmimo.py selfcheck` OK, TRAIN_SHA 동일) + `run_dmc_sparse_tune.sh`, 2b88eb53·501e0635 `run_dmc_base.sh`, 48803fe6 `run_dmc_post_gpu.sh` — 모두 baseline 확장(`NEXT_EXPERIMENTS_DMCBASE16e4.md`)용. 실행 커밋 = 이 §5 커밋. 링크 `gmm_fits_D2_DMCB16e4last` 10-10 18:33 CDT. 인자: `CUDA_VISIBLE_DEVICES= code/run_prior_eval.sh DMC DMCB16e4 d2sx_DMC_N160000_a1 kron 4096 122.37953759128766 65b26ddd4f6437f4 92dc9f53c31af875 "full:16,32,64,128,256,512 kron:16,32,64,128,256,512,1024,2048,4096"` |
+| GB′ (격자 확정 뒤 재개본) | 10-10 19:17 CDT GPU 1 재개 실행(학습 없음, last 파일; `code/run_dmc_post_gpu.sh`) → 20:02 CDT rc=0: `GMM b* = kron (kron K=4096)` = 최종 b\* ✓, 확산/GMM 디노이징 NMSE 비 **min 0.6963 · max 0.8982 · median 0.7148**, worst excess **−0.1018** (20 점 모두 비 < 1; held-out = 스트림 10 = 테스트 풀, n_eval 4096; 보고 전용 값, 판정 무관); `results/d2_gbprime_DMC.csv`, `d2_gbprime_DMC_N160000_a1.npz` (mtime 10-10 20:02:57 CDT, 격자 확정 18:33:24 CDT·동결 18:12:28 CDT 뒤 → 수용 (e)·순서 규칙 충족; `logs/gbprime_DMCB16e4.log`). 같은 `run_dmc_post_gpu.sh` 가 GPU 0 에서 ALD 개발 재생성·조정(DMCBASE16e4 용)을 19:17–19:26 CDT 에 함께 돌렸다; GB′ 실행 시 HEAD 48803fe6 [감사 N6 보충] |
+| §3 예측 가운데 BLER 전에 이미 채점되는 것 | **5 (GB′ median ≥ 0.9): 빗나감** — 0.7148 (확산 prior 가 b\* 보다 디노이징 NMSE 가 낮다; D3 0.559 와 UMi28 0.920 사이). **6 (patience 정지·epoch ≤ 600): 빗나감** (부분: 발산 없음 ✓ · patience 정지 ✓ · epoch ≤ 600 ✗ 832) [감사 N2 정정: 처음에는 "반만 적중" 으로 적었다 — 접속 예측에 부분 점수 규정이 없다]. **7 (b\* = kron 격자 끝 4096): 적중**. 1~4·8·9 는 실행 뒤 |
+| 선행 코드 커밋, fits 링크, 평가 스크립트 인자 원문 | 코드: 25f74c0a (DMC 연결) · 08a3e81d · 동결 9d4c3b4a (주석 두 줄) · dcf94166 (`dmc_leak_strata.py`). **동결 뒤·BLER 전의 코드 추가(등록된 주 실행의 동작 불변)**: ae880c27 `dmimo._which` 에 sparse_tune 개발 스트림 배치 하나 추가(주 실행이 쓰지 않는 스트림; `dmimo.py selfcheck` OK, TRAIN_SHA 동일) + `run_dmc_sparse_tune.sh`, 2b88eb53·501e0635 `run_dmc_base.sh`, 48803fe6 `run_dmc_post_gpu.sh` — 모두 baseline 확장(`NEXT_EXPERIMENTS_DMCBASE16e4.md`)용. 실행 커밋 = 이 §5 커밋. 링크 `gmm_fits_D2_DMCB16e4last` lstat mtime 10-10 20:03:45 CDT (§5 커밋 직전; 처음에는 "18:33 CDT" 로 적었다 — 그때 만든 링크라면 그 뒤 다시 만들어진 것이며 경위 기록은 없다) [감사 S1 정정]. 인자: `CUDA_VISIBLE_DEVICES= code/run_prior_eval.sh DMC DMCB16e4 d2sx_DMC_N160000_a1 kron 4096 122.37953759128766 65b26ddd4f6437f4 92dc9f53c31af875 "full:16,32,64,128,256,512 kron:16,32,64,128,256,512,1024,2048,4096"` |
 | 실행 중 함께 도는 것(공개) | 희소 baseline 조정 `sparse_tune.py --prior DMC --cell C2` (tmux `sptdmc`, CPU 2 스레드, 10-10 18:35 CDT 시작; BLER 없음) 이 주 실행과 겹친다 — 수신기 결과는 결정적이라 수치 영향 없음. 주 실행이 도는 동안 main 에 커밋하지 않는다(raw 의 `run\|git` 이 한 커밋이도록) |
 
 ## 6. 결과 (2026-10-10 20:04~21:53 CDT, `run_prior_eval.sh` @27737b62 = §5 커밋; 이 절은 추가만 한다; 기록 2026-10-10 22:01 CDT, Opus 5.5 — 전사만, 해석 없음)
@@ -135,7 +135,7 @@
 
 **실행·운영 기록**: `code/run_dmc_eval.sh` (= §5 의 인자 원문) 한 번, tmux `dmceval`, 10-10 20:04 CDT 시작(git 27737b62 = §5 커밋, `conf/code` clean). 측정 태그 `DMCB16e4` (`_best`) 20:04 → 21:00 CDT (runner 55.9 분), 보고 태그 `DMCB16e4last` 21:00 → 21:52 CDT (51.5 분), 각각 448 작업 · 192 워커; 수용 검사 21:53 CDT, `PRIOR_EVAL_DONE` 21:53 CDT. manifest `run_manifest_DMCB16e4{,last}.json` 둘 다 git 27737b62 · config_hash e840f96a01f9bca2. 실행 중 main 커밋 없음(다음 커밋 3ddb0831 은 `PRIOR_EVAL_DONE` 뒤). 함께 돈 것(§5 에 미리 공개): 희소 baseline 조정 `sparse_tune.py --prior DMC` (CPU 2 스레드) 이 21:28 CDT 까지 겹침. 비용: §1 추정 태그당 ≈ 35 분 → 실측 55.9 · 51.5 분.
 
-**수용 검사**: **`ACCEPT: OK -- DMCB16e4, DMCB16e4last`** (`results/review_next/DMCB16e4_accept.txt`; `eval_accept.py` rc 0 — §1 (a)~(d): 격자 full 6 + kron 9 · K ≥ 1024 후보 3 개, 청크 {(40k, 40)} × 7 SNR, meta ntrain 160000 / bstar kron / kron_K 4096 / ll_val = §5, 체크포인트 sha·role, last 의 R5-genie 가 best 와 비트 동일; (e) GB′ 는 §5). analysis 머리말에 `DM_WARNING` 배너, raw 이름에 `DMC`, 학습 예산 줄 `N_train=160000`. 판정점(앵커 b\*, 자동): **+9 / +12 / +15 dB** (SNR 격자의 위쪽 끝 3 점).
+**수용 검사**: **`ACCEPT: OK -- DMCB16e4, DMCB16e4last`** (`results/review_next/DMCB16e4_accept.txt`; `eval_accept.py` rc 0 — §1 (a)~(d): 격자 full 6 + kron 9 · K ≥ 1024 후보 3 개, 청크 {(40k, 40)} × 7 SNR, meta ntrain 160000 / bstar kron / kron_K 4096 / ll_val = §5, 체크포인트 sha·role, last 의 R5-genie 가 best 와 비트 동일; (e) GB′ 는 §5). §1 (c) 가운데 `eval_accept.py` 가 검사하지 않는 항목은 표·manifest·체크포인트를 읽어 확인했다: analysis 머리말에 `DM_WARNING` 배너(D2 의 "CLAIM TESTBED -- sparse specular" 배너 없음), raw 이름에 `DMC`, 학습 예산 줄 `N_train=160000`, 저장된 prior·sigma_tag = DMC (§5), 두 태그의 Demo 해시·manifest `code_hashes` 동일. **문구 주**: §1 (c) 의 괄호 '("sparse specular" 문구 없음)' 은 글자 그대로는 맞지 않는다 — `DM_WARNING` 자체가 "NOT sparse specular" 를 담고 있어(동결 전 커밋 25f74c0a 의 배너 문구) 두 표에 그 문자열이 한 번씩 나온다; D2 배너가 없다는 뜻으로 읽어 통과로 적었다 [감사 N4]. 판정점(앵커 b\*, 자동): **+9 / +12 / +15 dB** (SNR 격자의 위쪽 끝 3 점).
 
 ### 6.1 측정 판정 — 표 B `b* → V1` (C2, 태그 DMCB16e4 = `_best`, UNGATED)
 
@@ -173,13 +173,13 @@
 | V0 | 0.970 (2484) | 0.928 (2375) | 0.889 (2277) | 0.859 (2200) | 0.817 (2091) | 0.778 (1991) | 0.697 (1785) |
 | **genie** | 0.686 (1756) | 0.569 (1457) | 0.484 (1238) | 0.409 (1048) | 0.362 (927) | 0.295 (754) | 0.239 (611) |
 
-- **SNR@0.1**: 14 arm 과 genie 모두 "> 15" (격자 안에서 BLER 0.1 에 닿지 않음) → 격차는 전부 n/a. §1 대로 격자를 늘리지 않았다.
+- **SNR@0.1**: 14 arm(genie 포함; R0-pilot 은 @1 · @16 두 읽기) 모두 "> 15" (격자 안에서 BLER 0.1 에 닿지 않음) → 격차는 전부 n/a. §1 대로 격자를 늘리지 않았다.
 - **V4 · V4b · V0 (앵커 b\*, +9 / +12 / +15)**: `b* → V4` 131:44 · 110:51 · 124:33, pooled 365:128, second arm fewer 3/3; `b* → V4b` 132:50 · 112:52 · 123:40, pooled 367:142, 3/3; `b* → V0` 17:885 · 15:985 · 28:929, pooled 60:2799, first arm (b\*) fewer 3/3. 판정점 3 점 실패 수 합: V1 2895 / V4 2891 / V4b 2903; 7 SNR 합: V1 9559 / V4 9590 / V4b 9619 (검정 없음).
 - **`V1 → genie`** (앵커 genie, +9 / +12 / +15): 237:22 · 215:17 · 208:18, pooled 660:57, genie 가 3/3 에서 적게 실패. `b* → genie`: 319:23 · 289:22 · 282:9, pooled 890:54.
 - **best 대 last V1 짝 부호검정** (+9 / +12 / +15; a = best 만 실패, b = last 만 실패): 18:17 (p 1) · 10:15 (0.42) · 17:12 (0.46), pooled 45:44 (p 1) → 판정하지 못함.
 - **F3 가드 발동률** (`results/guard_D2_DMCB16e4{,last}.txt`; NMSE > 10 또는 비유한): V0 만 대량 — best −3 … +15 dB 0.896 / 0.852 / 0.713 / 0.677 / 0.578 / 0.548 / 0.418, last 0.895 / 0.841 / 0.712 / 0.657 / 0.577 / 0.554 / 0.435. 그 밖: −3 dB 에서 V1 · V4 · V4b · gmm32 · R1-turbo · R2-ours-G · R4-llr · R4-scvamp 각 1 시행, 0 dB 에서 R1-turbo · R2-ours-G · R4-llr · R4-scvamp 각 1 시행(두 태그 같음). b\* · b\*-scalar · R0-pilot · R3-bigamp 는 발동 없음.
 - **동일예산 GB′** (§5, last 파일): median 0.7148 (min 0.6963 · max 0.8982; D3 0.559 · SV8e 0.918 · UMi28 0.920 과 나란히).
-- **누수 층화** (보고 전용 — 라벨·검정·CI 없음; `code/dmc_leak_strata.py` @dcf94166, 10-10 21:57 CDT 실행 → `results/review_next/DMCB16e4_leak_strata.txt`; 정렬 검사(R5-genie 처음 40 시행, raw 와 비트 동일) 세 SNR 모두 OK). 칸 = n: b\* / V1 / genie 실패 수 → 점추정 R:
+- **누수 층화** (보고 전용 — 라벨·검정·CI 없음; `code/dmc_leak_strata.py` @dcf94166 (스크립트 커밋, 그 뒤 변경 없음), 10-10 21:57 CDT 실행(실행 시 HEAD 3ddb0831, 출력 머리말 10-10 21:56:46 CDT) → `results/review_next/DMCB16e4_leak_strata.txt`; 정렬 검사(R5-genie 처음 40 시행, raw 와 비트 동일) 세 SNR 모두 OK). 칸 = n: b\* / V1 / genie 실패 수 → 점추정 R:
 
 | SNR | d 중앙값 | d < 0.1 비율 | d < 0.1 | d ≥ 0.1 |
 |---|---|---|---|---|
@@ -195,9 +195,9 @@
 3. `R2-ours-G → b*` b\* 우세 → **적중** (b\* 가 3/3 에서 적게 실패). 문구 주: 예측의 괄호 "(first arm fewer ≥ 2/3)" 은 이 쌍의 방향과 맞지 않는다 — b\* 는 second arm 이고 결과 줄은 "second arm fewer failures at 3/3" 이다; 본문 "b\* 우세" 로 채점했다(동결 문구는 고치지 않음).
 4. genie BLER(−3 dB) ≥ 0.10 → **적중** (0.686); 판정점 3 개 모두 0 dB 이상 → **적중** (+9 / +12 / +15).
 5. GB′ median ≥ 0.9 → **빗나감** (0.7148; §5).
-6. 학습: 발산 없음 ✓ · patience 정지 ✓ · epoch ≤ 600 ✗ (832) → **반만 적중** (§5).
+6. 학습: 발산 없음 ✓ · patience 정지 ✓ · epoch ≤ 600 ✗ (832) → **빗나감** (부분 점수 규정 없음; §5) [감사 N2 정정: 처음에는 "반만 적중"].
 7. b\* = kron 격자 끝 4096 → **적중** (§5).
-8. V0 가드 발동 ✓ (발동률 0.896 … 0.418); "낮은 SNR 에서 BLER ≥ 0.9" ✓ (−3 dB 0.970 · 0 dB 0.928; +3 dB 0.889). V4 · V4b 는 V1 과 비슷하거나 나쁨 ✓ (판정점 실패 수 합 V1 2895 / V4 2891 / V4b 2903, 7 SNR 합 9559 / 9590 / 9619; 등록된 검정·문턱 없음 — "비슷" 으로 읽음). best 대 last V1 판정하지 못함 ✓ (pooled 45:44, p 1).
+8. V0 가드 발동 ✓ (발동률 0.896 … 0.418); "낮은 SNR 에서 BLER ≥ 0.9" ✓ (−3 dB 0.970 · 0 dB 0.928; +3 dB 0.889). V4 · V4b 는 V1 과 비슷하거나 나쁨 ✓ (판정점 실패 수 합 V1 2895 / V4 2891 / V4b 2903, 7 SNR 합 9559 / 9590 / 9619; 등록된 검정·문턱 없음 — "비슷" 으로 읽음; 판정점 합에서는 V4 가 V1 보다 4 개 적다 — 문턱이 없어 반증 가능한 예측이 아니었다 [감사 N3]). best 대 last V1 판정하지 못함 ✓ (pooled 45:44, p 1).
 9. 대조군 `b* → b*-scalar` b\* 우세 → **빗나감** (0/3 · 0/3, pooled 116:115 — 유의 방향 없음).
 10. 누수 층화: 예측 없음(수치는 6.2).
 11. 빗나갈 경로 (a)~(e): 모두 미발동((i); R > 0; POWERED; 발산 없음; b\* 는 kron).
@@ -208,3 +208,9 @@
 - 주 실행은 한 번 돌았고 재실행·중단·재개가 없다(`logs/run_D2_DMCB16e4{,last}.log` 각 448/448 done, exists 줄 없음).
 - 판정점이 SNR 격자의 위쪽 끝 3 점이고 모든 arm 의 SNR@0.1 이 격자 밖이다 — §1 "결과 뒤 격자를 늘리지 않는다" 를 그대로 지켰다.
 - 이 §6 은 baseline 확장(`NEXT_EXPERIMENTS_DMCBASE16e4.md`)의 PIL 단계 결과(`pair_PILDMC.txt`)가 나온 뒤에 썼다 — 이 절의 수치는 모두 주 실행의 파일에서 나오며 baseline 결과를 쓰지 않는다.
+
+### 6.5 기록 감사 (Fable 5.1 서브에이전트, 2026-10-10 22:27 CDT 보고; `prereg_audit_2026-10-10/audit_DMC16e4.md`, 재계산 `recompute_dmc.py` → `recompute_dmc.out`, `recompute_leak.py` → `recompute_leak.out`, 도구 재실행 `rerun_*.txt`)
+
+감사 대상 = 커밋 5aa7b9b4 의 §5·§6 (감사 중에 전사 초안을 그대로 커밋함). 독립 재계산(raw 청크를 numpy 로 직접 읽음; 생성기 `s6_dmc.py`·`tables_*.txt` 미사용): 자동 비교 357 값(실패 수·BLER 231, 부호검정·p 52, 회수율·ΔR·격차 30, 가드 발동 56 등) **불일치 0**; `recovery_ci.py`·`frontier_ci.py --recovery` 재실행 3 파일 커밋본과 바이트 동일; `eval_accept.py` 재실행 rc 0; last 의 R5-genie 와 체크포인트를 쓰지 않는 9 arm 이 두 태그에서 비트 동일; 누수 층화 25 값 독립 재현; §5 의 격자 표·체크포인트·GB′·풀 sha·보정 상수 일치. 규칙 재적용: **라벨 (i) 재현**, 포화 가드 미발동, ΔR 라벨 재현; §6.3 채점 11 항목 재현(관대한 채점 없음). `git log 9d4c3b4a..HEAD` 의 커밋은 모두 §5/§6 에 공개돼 있고 실행 창 안의 main 커밋은 없다.
+
+**MUST 0 · SHOULD 2 · NIT 8 — 모두 반영(수치·라벨 불변; 기록 2026-10-10 22:30 CDT, Opus 5.5)**: S1 §5 의 fits 링크 시각(18:33 → lstat mtime 20:03:45 CDT); S2 §5 의 "동결 전에 적합이 끝난 후보" 를 사실대로(kron 2048 r0 하나); N1 "14 arm 과 genie" 표현; N2 예측 6 을 "반만 적중" → "빗나감(부분 ✓ 병기)" (§5·§6.3); N3 예측 8 의 V4 주; N4 수용 검사 (c) 가운데 `eval_accept.py` 밖 항목의 확인 방법과 §1 (c) 괄호 문구의 글자 불일치 공개; N5 누수 층화 실행 시 HEAD; N6 GB′ 와 같은 스크립트가 돌린 ALD 개발 조정; N7 `s5_gen.py` 를 감사 폴더로 복사; N8 `DECISIONS.md` 에 실행·전사·감사 줄 추가. 감사가 확인하지 못한 것(감사 보고 §3): tmux 세션 이름, taskset 고정의 정확한 시각, "동결 전 ll_val 을 읽지 않았다" 는 작성자 진술, 부트스트랩 CI 의 별도 구현(등록 도구 재실행으로만 확인).

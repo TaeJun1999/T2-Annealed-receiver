@@ -1,6 +1,6 @@
 # 작업 큐 (review_next 이후; 갱신할 때마다 맨 위 시각을 바꾼다)
 
-갱신 2026-10-10 17:53 CDT (Opus 5.5). **DeepMIMO 수신기 BLER (prior DMC, 등록 `NEXT_EXPERIMENTS_DMC16e4.md`) 진행 중 — 사용자 결정 10-10 CDT "DeepMIMO 만"·"DeepMIMO 자체 생성기"·"기존 실험과 같은 사이즈".** 그 전 상태: 실험 단계 끝 — 원고 (웹 채팅, paper 브랜치); 마지막 실행 = SITE16e4 (10-08 23:08 ~ 23:09 CDT, 라벨 (iii), 기록·감사 끝). 사용자 지시 2026-09-29 CDT: "추천 순서로 계속, 남는 자원에는 계속 작업 할당, 빈 곳도 계획에 올려 적절한 순서로"; 09-30 CDT: 규모 확장 2단계는 "차례가 오면 승인 없이" (DECISIONS 6b1de688). 모든 판정 실험은 사전 등록 → Fable 적대적 검토(서브에이전트) → 동결 → 실행 → §6 전사 → Fable 기록 감사.
+갱신 2026-10-10 22:31 CDT (Opus 5.5). **DeepMIMO: 주 실행 DMC16e4 끝 (라벨 (i), 기록·감사 끝); baseline 확장 `NEXT_EXPERIMENTS_DMCBASE16e4.md` 는 PIL·SP 통과, ALD 단계만 GPU 대기 (GPU 6 장이 컨테이너 밖 프로세스로 점유; 비면 `bash code/run_dmc_base.sh d2sx_DMC_N160000_a1 65b26ddd4f6437f4 ff25622dfcb0c7d5 8c92ea491d654012` 재실행 → ALD → `pair_baselines` → §6 → Fable 기록 감사 → `conference/figures/paper_f21dmc.py`) — 사용자 결정 10-10 CDT "DeepMIMO 만"·"DeepMIMO 자체 생성기"·"기존 실험과 같은 사이즈".** 그 전 상태: 실험 단계 끝 — 원고 (웹 채팅, paper 브랜치); 마지막 실행 = SITE16e4 (10-08 23:08 ~ 23:09 CDT, 라벨 (iii), 기록·감사 끝). 사용자 지시 2026-09-29 CDT: "추천 순서로 계속, 남는 자원에는 계속 작업 할당, 빈 곳도 계획에 올려 적절한 순서로"; 09-30 CDT: 규모 확장 2단계는 "차례가 오면 승인 없이" (DECISIONS 6b1de688). 모든 판정 실험은 사전 등록 → Fable 적대적 검토(서브에이전트) → 동결 → 실행 → §6 전사 → Fable 기록 감사.
 
 ## 원고 목표 (사용자 10-05 CDT)
 - **IEEE ICC 2027** (Washington DC). 공식 call 페이지 기준 투고 마감 **2026-10-16**, 통지 2027-01-15, 최종본 2027-02-19. 투고본 **6 쪽 (10 pt) 상한** — 넘으면 심사 없이 거절. 저널판 없음 (DECISIONS 3a64d0ae) → 6 쪽에 못 넣는 것은 arXiv 확장판.
@@ -13,7 +13,7 @@
 ## 진행 중
 | 작업 | 자원 | 상태 |
 |---|---|---|
-| **DMC16e4** (DeepMIMO 6 개 도시 28 GHz block split, C2, N′ 1.6e5; `NEXT_EXPERIMENTS_DMC16e4.md`) | GPU 0–5 (tmux `tb2dmc`: 학습 + GMM 격자 22 작업, 10-10 17:44 CDT 시작) → CPU 192 (BLER, 동결 뒤) | 코드 25f74c0a·선행 측정 08a3e81d; 등록 초안 v1 → Fable 적대적 검토 중 → 동결 → `run_prior_eval.sh DMC DMCB16e4 …` → §6 → Fable 기록 감사. 풀 `~/data/deepmimo/dmc_Nr8/` (git 밖, sha 고정). 컨테이너가 다시 만들어지면: 풀·체크포인트·fits 는 홈에 남는다 — `code/run_dmc_gpu.sh` 는 큐가 비어 있을 때만 다시 채우므로 남은 작업만 `logs/tb2_queue.txt` 에 적어 `run_tb2.sh` 로 잇는다 (fit_gpu 는 있는 파일을 덮어쓰지 않고, 학습은 체크포인트에서 재개) |
+| **DMCBASE16e4** (DeepMIMO 에서 등록된 baseline 전부 = 원고 범례 11 곡선; `NEXT_EXPERIMENTS_DMCBASE16e4.md` v2, §5 3ddb0831) | CPU 192 (PIL·SP 끝) → **GPU 한 장 (ALD 추정, 수 분)** → CPU | PIL 10-10 21:57 CDT ACCEPT OK, SP 22:28 CDT ACCEPT OK (`DEFER_ALD=1`, DECISIONS 10-11 12:22 KST 줄). **ALD 단계 대기: 빈 GPU 없음** (10-10 21:55 CDT 부터 6 장 모두 컨테이너 밖 프로세스). GPU 가 비면 위 명령 재실행 (PIL·SP 는 키 파일로 건너뜀; `pairB_SPDMC.txt` 가 생기면 끝). 그 사이 main 커밋은 runner 가 돌지 않을 때만. 주 실행 DMC16e4 는 끝: 라벨 (i) 357:124, §6·감사 반영 (EXPERIMENTS 행 있음) |
 | 원고 (IEEE ICC 2027, 마감 2026-10-16) — 웹 채팅에서 사용자가 작성, 자료는 paper 브랜치 (`conference/tools/sync_paper_branch.sh`) | — | 진행 중. 실험 큐·GPU 큐 비어 있음 |
 
 ## 대기열 (순서대로)

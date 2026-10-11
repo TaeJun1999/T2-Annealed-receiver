@@ -1,0 +1,24 @@
+# recompute_leak.py -- committed file parsed: [12.0, 15.0, 9.0, 'pooled']
+training set: shape (160000, 32) dtype complex128; mean ||x||^2/(NrNt) = 1.000000
+vec convention check: sample().reshape(F) == sample_vecs()[0]: True
+
++9 dB: replay alignment R5-genie trials 0..39 True, trials 1000..1039 True; d (blocked) vs direct on 24 trials: max |diff| 5.41e-16
+  d median 0.1242  share d < 0.1 = 0.438   (committed 0.1242, 0.438, alignment OK)
+  d < 0.1: n 1121  b* 904  V1 860  genie 716  R 0.234   (committed (1121, 904, 860, 716, 0.234))
+  d >= 0.1: n 1439  b* 319  V1 282  genie 211  R 0.343   (committed (1439, 319, 282, 211, 0.343))
+
++12 dB: replay alignment R5-genie trials 0..39 True, trials 1000..1039 True; d (blocked) vs direct on 24 trials: max |diff| 4.44e-16
+  d median 0.1431  share d < 0.1 = 0.396   (committed 0.1431, 0.396, alignment OK)
+  d < 0.1: n 1013  b* 759  V1 723  genie 594  R 0.218   (committed (1013, 759, 723, 594, 0.218))
+  d >= 0.1: n 1547  b* 262  V1 229  genie 160  R 0.324   (committed (1547, 262, 229, 160, 0.324))
+
++15 dB: replay alignment R5-genie trials 0..39 True, trials 1000..1039 True; d (blocked) vs direct on 24 trials: max |diff| 4.44e-16
+  d median 0.1258  share d < 0.1 = 0.433   (committed 0.1258, 0.433, alignment OK)
+  d < 0.1: n 1109  b* 713  V1 654  genie 525  R 0.314   (committed (1109, 713, 654, 525, 0.314))
+  d >= 0.1: n 1451  b* 171  V1 147  genie 86  R 0.282   (committed (1451, 171, 147, 86, 0.282))
+
+pooled over the 3 decision SNRs
+  d < 0.1: n 3243  b* 2376  V1 2237  genie 1835  R 0.257   (committed (3243, 2376, 2237, 1835, 0.257))
+  d >= 0.1: n 4437  b* 752  V1 658  genie 457  R 0.319   (committed (4437, 752, 658, 457, 0.319))
+
+## SUMMARY: 25 values checked, 0 differ from the committed leak-strata file
