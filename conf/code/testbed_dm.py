@@ -53,7 +53,7 @@ def main():
             "leak_chan_frac_lt0.1": float("nan")}
     L = [f"# date        : {time.strftime('%Y-%m-%d %H:%M:%S KST')}",
          f"# git commit  : {subprocess.run(['git', '-C', C.CONF, 'rev-parse', '--short=8', 'HEAD'], capture_output=True, text=True).stdout.strip()}",
-         f"# content     : testbed_dm.py -- {'DeepMIMO v4' if PRIOR in ('DMC', 'DMI') else 'Sionna RT 2.1'} {PRIOR} (code/dmimo.py, pool by code/{dict(DMC='dmimo_build.py', SRT='srt_build.py', SRB='srb_build.py', DMI='dmi_build.py')[PRIOR]}), Nr={NR} x Nt={NT}; streams from common.train_rng('D2','{PRIOR}',...)",
+         f"# content     : testbed_dm.py -- {'DeepMIMO v4' if PRIOR in ('DMC', 'DMI') else 'Sionna RT 2.1'} {PRIOR} (code/dmimo.py, pool by code/{dict(DMC='dmimo_build.py', SRT='srt_build.py', SRB='srb_build.py', DMI='dmi_build.py', SRP='srp_build.py')[PRIOR]}), Nr={NR} x Nt={NT}; streams from common.train_rng('D2','{PRIOR}',...)",
          f"# pool        : sha H.npy / split.npy = {dmimo.POOL_SHA[(PRIOR, NR)]}; pairs {len(m['los'])} = fit {len(g.idx['fit'])} + val {len(g.idx['val'])} + test {len(g.idx['test'])}",
          f"# calibration : P_RAW={dmimo.P_RAW[(PRIOR, NR, NT)]!r}  TRAIN_SHA={dmimo.TRAIN_SHA[(PRIOR, NR, NT)]}  (n={dmimo.N_CAL}, train stream 7)", ""]
     ok = True
@@ -69,7 +69,17 @@ def main():
     E = np.mean(np.abs(H) ** 2, 0)
     L.append(f"TDMb per-entry E|H_ab|^2: min {E.min():.4f} max {E.max():.4f} (report only)")
     los = m["los"] == 1
-    if pr is None and PRIOR == "SRB":                            # room pool: identity from srb_build's constants
+    if pr is None and PRIOR == "SRP":                            # room path pool: identity from srp_build's constants; the route is in time order
+        import srp_build
+        tt = m["t"][g.idx["test"]]
+        c = (len(los) == srp_build.TARGET and list(m["scenes"]) == [srp_build.SCENE] and bool((np.diff(m["t"]) == 1).all())
+             and int(tt.min()) > int(max(m["t"][g.idx["fit"]].max(), m["t"][g.idx["val"]].max())) and len(np.unique(np.round(m["pos"] / srp_build.STEP * 2), axis=0)) == len(los))
+        ok &= c
+        L.append(f"TDMc pool identity: snapshots {len(los)} (== {srp_build.NY} rows x {srp_build.NX}), scene {srp_build.SCENE}, ONE BS at {[round(float(x), 3) for x in m['bs']]}, "
+                 f"no position twice, test pool = the END of the route (t >= {int(tt.min())}, y >= {float(m['pos'][g.idx['test'], 1].min()):.4f} m), LoS fraction "
+                 f"{los.mean():.6f}, mean paths {m['npath'].mean():.2f} -> {'PASS' if c else 'FAIL'}")
+        pr = nanp
+    elif pr is None and PRIOR == "SRB":                          # room pool: identity from srb_build's constants
         import srb_build
         c = len(los) == srb_build.TARGET and list(m["scenes"]) == [srb_build.SCENE]
         ok &= c

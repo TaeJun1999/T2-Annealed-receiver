@@ -105,10 +105,11 @@ PID = {"U": 0, "S": 1, "P": 2, "U2": 3, "S2": 4,      # prior id inside the seed
        "DMC": 11,                                     # DeepMIMO v4, 6 cities 28 GHz, block split (dmimo.py), run as a D2 prior: NEW streams
        "SRT": 12,                                     # Sionna RT 2.1, built-in city scenes 28 GHz, block split (srt_build.py + dmimo.py): NEW streams
        "SRB": 13,                                     # Sionna RT 2.1, built-in room scene `box` 28 GHz, ONE fixed BS, 1 m block split (srb_build.py): NEW streams
-       "DMI": 14}                                     # DeepMIMO v4 indoor scenario i1_2p4, ONE fixed BS x 5 UE yaws, 0.5 m block split (dmi_build.py): NEW streams
+       "DMI": 14,                                     # DeepMIMO v4 indoor scenario i1_2p4, ONE fixed BS x 5 UE yaws, 0.5 m block split (dmi_build.py): NEW streams
+       "SRP": 15}                                     # Sionna RT room `box`, ONE fixed BS, a UE moving along a lawn-mower route, split by time (srp_build.py): NEW streams
 SV_PRIORS = ("SV8e",)                                  # priors served by sv.SVGen / sv.ensemble_sides_sv (== sv.PRIORS)
 MIX3_PRIORS = ("MIX3", "UMi28")                              # priors served by mix3.MIX3Gen / mix3.ensemble_sides_mix3 (== mix3.PRIORS)
-DM_PRIORS = ("DMC", "SRT", "SRB", "DMI")                           # priors served by dmimo.DMGen / dmimo.ensemble_sides_dm (== dmimo.PRIORS): ray-traced pools
+DM_PRIORS = ("DMC", "SRT", "SRB", "DMI", "SRP")                           # priors served by dmimo.DMGen / dmimo.ensemble_sides_dm (== dmimo.PRIORS): ray-traced pools
 TBID = {"D1": 1, "D2": 2}
 PRIOR_OF = {"D1": "S", "D2": "S2"}                     # primary prior per testbed (06_SPEC §2)
 
@@ -366,7 +367,18 @@ DMI_WARNING = (
     "# Reference = known-channel receiver (R5-genie: same EP detector + BCJR, true H); not a bound.\n"
     "# " + "=" * 100
 )
-DM_WARNINGS = {"DMC": DM_WARNING, "SRT": SRT_WARNING, "SRB": SRB_WARNING, "DMI": DMI_WARNING}
+SRP_WARNING = (
+    "# " + "=" * 100 + "\n"
+    "# SITE-SPECIFIC RAY-TRACED TESTBED (prior SRP) -- Sionna RT 2.1 PathSolver, built-in ROOM scene `box` (10 x 10 x 5 m, empty, metal walls\n"
+    "# as shipped) at 28 GHz (LoS + first-order specular reflection, depth 1), ONE fixed BS, ONE UE MOVING along a lawn-mower route over the\n"
+    "# floor (345600 snapshots in time order, 1.5 cm apart, no position twice; UE array aligned with the direction of travel), channels by\n"
+    "# Sionna's own arrays and Paths.cfr (per-pair path powers normalised, narrowband at the carrier, ensemble-normalised;\n"
+    "# code/srp_build.py + code/dmimo.py). The receiver treats every block on its own (no tracking). A FIXED pool SPLIT BY TIME: the\n"
+    "# test channels are the LAST 15 % of the route, an area the UE has not entered before. Not the D2 synthetic testbed.\n"
+    "# Reference = known-channel receiver (R5-genie: same EP detector + BCJR, true H); not a bound.\n"
+    "# " + "=" * 100
+)
+DM_WARNINGS = {"DMC": DM_WARNING, "SRT": SRT_WARNING, "SRB": SRB_WARNING, "DMI": DMI_WARNING, "SRP": SRP_WARNING}
 
 
 def banner(testbed, prior):

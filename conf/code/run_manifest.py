@@ -92,6 +92,7 @@ def main():
                                                           + (("dmimo.py", "srt_build.py") if "SRT" in priors else ())
                                                           + (("dmimo.py", "srb_build.py") if "SRB" in priors else ())
                                                           + (("dmimo.py", "dmi_build.py") if "DMI" in priors else ())
+                                                          + (("dmimo.py", "srp_build.py", "srb_build.py") if "SRP" in priors else ())
                                                           if os.path.isfile(os.path.join(C.CONF, "code", f))}),
         channel_model=dict(testbed=a.testbed, prior=one(meta.get("prior", set()) or priors or {"S2"}),
                            description=(("UMi28 = D2-pipeline prior UMi28, 3GPP TR 38.901 via Sionna 2.1 (code/mix3.py): UMi 28 GHz only, "
@@ -104,6 +105,15 @@ def main():
                                          "LoS/NLoS by the model, UE yaw ~ U[-pi,pi), pathloss/shadowing off, narrowband snapshot (CIR summed at "
                                          "the first time sample), ensemble-normalised E||H||^2 = Nr Nt")
                                         if priors & set(C.MIX3_PRIORS) else
+                                        ("SRP = D2-pipeline prior SRP, Sionna RT 2.1 ray-traced channels (code/srp_build.py -> pool read by "
+                                         "code/dmimo.py, sha " + "/".join(__import__("dmimo").POOL_SHA.get(("SRP", 8), ("?", "?"))) + "): the room of prior "
+                                         "SRB (scene `box`, metal walls as shipped, 28 GHz, PathSolver depth 1, 1e8 samples, ONE fixed BS) with ONE UE "
+                                         "moving along a lawn-mower route (576 rows x 600 snapshots, 1.5 cm apart, no position twice; UE array aligned "
+                                         "with the direction of travel), Sionna PlanarArray ULAs (BS Nr, UE 4), isotropic V pol, half-wavelength, "
+                                         "Paths.cfr at the carrier, per-pair path powers normalised, uplink by reciprocity, ensemble-normalised "
+                                         "E||H||^2 = Nr Nt; FIXED pool split BY TIME (test = the last 15 % of the route); the receiver treats every block "
+                                         "on its own")
+                                        if "SRP" in priors else
                                         ("SRB = D2-pipeline prior SRB, Sionna RT 2.1 ray-traced channels (code/srb_build.py -> pool read by "
                                          "code/dmimo.py, sha " + "/".join(__import__("dmimo").POOL_SHA.get(("SRB", 8), ("?", "?"))) + "): built-in "
                                          "room scene `box` (10 x 10 x 5 m, metal walls as shipped) at 28 GHz, PathSolver depth 1 (LoS + first-order specular, 1e8 samples), ONE "
