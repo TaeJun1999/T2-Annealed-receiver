@@ -56,7 +56,7 @@ def main():
     snrs = decision_snrs(a.tag)
     X = A.training_set("D2", a.prior, c["Nr"], c["Nt"], a.ntrain)
     L = [C.header("D2", extra=[f"content     : dmc_leak_strata.py -- leakage strata of raw_{a.tag} (prior {a.prior}, cell {a.cell}), "
-                               f"REPORT-ONLY (NEXT_EXPERIMENTS_DMC16e4 §1): d = min_train ||h - h_train||^2 / ||h||^2, N' = {a.ntrain} "
+                               f"REPORT-ONLY ({'NEXT_EXPERIMENTS_DMC16e4 §1' if a.prior == 'DMC' else 'the NEXT_EXPERIMENTS_DMC16e4 §1 definition, registered for ' + a.prior}): d = min_train ||h - h_train||^2 / ||h||^2, N' = {a.ntrain} "
                                f"(stream 7), strata d < {THR} / d >= {THR}; decision SNRs {snrs} from tables_D2_{a.tag}.txt"]), ""]
     tot = {s: np.zeros(4) for s in ("lt", "ge")}
     ok = True

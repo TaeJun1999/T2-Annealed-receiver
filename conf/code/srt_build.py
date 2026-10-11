@@ -16,7 +16,11 @@ conf/results/review_next/testbed2_phase0/report_rt.md, pooled over the built-in 
   sites       "rs": for every batch a NEW BS site, uniform over the scene's xy bounding box and kept only if it stands on the
               ground (the surface seen from above at (x, y) is below GROUND m: not on / in a building), height H_BS above z = 0,
               boresight ~ U[-pi, pi); NC candidate UEs per site, uniform over the OUTDOOR part (same ground test) of the
-              120 deg sector annulus R0..R1 m around the boresight, height H_UE
+              120 deg sector annulus R0..R1 m around the boresight, height H_UE.  The NC candidates are the first NC outdoor
+              points among 4 NC uniform draws; a site with fewer than NC outdoor points among them (outdoor share of its
+              sector annulus below about 25 %) is SKIPPED -- sites in densely built places are under-represented.  The
+              ground test looks only from above: a courtyard-like spot enclosed by walls passes it, and such a BS site then
+              reaches almost no UE (the pair rule drops the UEs without a path)
   pairs       the candidates with at least one path, at most NB per site in candidate order (phase 0: "a new site for every
               batch of 1000 UEs"; the cap keeps one open-area site from dominating); the scene loop stops at TARGET pairs per
               scene (the last site is truncated)

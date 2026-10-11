@@ -12,17 +12,18 @@
 # CPU receiver, GPUs hidden except the ALD estimate.  Resume: a stage's output files (accept / pair) exist ONLY when that stage
 # passed (a failed step leaves <file>.part) and a stage whose key file exists is skipped; a failed stage stops the script; an
 # existing pairB_SPSRT.txt stops it too (a re-run needs user approval).  Log logs/run_srt_base.log, end marker "SRT_BASE_DONE".
-# Usage: run_srt_base.sh <ckpt_stem> <best_sha16> <pick_sha16> <tune_ald_sha16> <kron_K of b*> <ll_val of b*>
+# Usage: run_srt_base.sh <ckpt_stem> <best_sha16> <pick_sha16> <tune_ald_sha16> <bstar: kron | gmm<K>> <kron_K | -> <ll_val of b*>
 #   e.g. run_srt_base.sh d2sx_SRT_N160000_a1 <sha> <sha of results/sparse/pick_SRT_C2.json> <sha of results/ald/tune_PILSRT.json>
 cd /home/HTJ/t2/conf || exit 1
 P=~/miniforge3/envs/torch/bin/python; L=logs/run_srt_base.log
-PR=SRT; CELL=C2; BT=SRTB16e4; BASE=raw_$BT; BS=kron; KK=$5; LL=$6      # b* of SRT16e4 §5: kron K and its ll_val (this script assumes a kron b*)
+PR=SRT; CELL=C2; BT=SRTB16e4; BASE=raw_$BT; BS=$5; KK=$6; LL=$7        # b* of SRT16e4 §5: family (kron | gmm<K>), kron K (or -), ll_val
 ST=$1; SHA=$2; PSHA=$3; TSHA=$4; CK=ckpt/${ST}_best.pt; SP=results/sparse/pick_${PR}_$CELL.json; TJ=results/ald/tune_PILSRT.json
 REG=results/review_next/NEXT_EXPERIMENTS_SRT16e4.md
 log () { echo "[srt_base $(TZ=America/Chicago date '+%m-%d %H:%M %Z')] $*" | tee -a $L >> logs/queue.log; }
 die () { log "ABORT: $*"; exit 1; }
 out () { local f=$1; shift; "$@" > $f.part 2>&1 && mv $f.part $f; }   # a stage output exists ONLY when that step passed (resume key)
-[ $# -eq 6 ] || die "usage (6 arguments: ckpt_stem best_sha16 pick_sha16 tune_ald_sha16 kron_K ll_val)"
+[ $# -eq 7 ] || die "usage (7 arguments: ckpt_stem best_sha16 pick_sha16 tune_ald_sha16 bstar kron_K|- ll_val)"
+if [ "$BS" = kron ]; then FITF=fit_${PR}_Nr8_kronK${KK}_n160000.npz; else [ "$KK" = "-" ] || die "bstar $BS (full family) wants kron_K = -"; FITF=fit_${PR}_Nr8_fullK${BS#gmm}_n160000.npz; fi
 [ -n "$(git -C /home/HTJ/t2 status --porcelain conf/code Demo)" ] && die "conf/code or Demo dirty"
 for f in $REG DECISIONS.md $SP ${SP/pick_/tune_} $TJ; do
   [ -n "$(git ls-files $f)" ] && [ -z "$(git status --porcelain $f)" ] || die "$f not tracked+clean (freeze first)"
@@ -30,13 +31,13 @@ done
 grep -q PRIOR_EVAL_DONE logs/run_prior_eval_$BT.log 2>/dev/null || die "the base run $BT is not finished"
 [ "$(head -1 results/review_next/${BT}_accept.txt | cut -c1-10)" = "ACCEPT: OK" ] || die "the base run $BT did not pass acceptance"
 [ "$(sha256sum $CK | cut -c1-16)" = "$SHA" ] || die "ckpt sha differs"
-[ "$($P -c "import numpy as np; print(repr(float(np.load('results/gmm_fits_D2_$BT/fit_${PR}_Nr8_kronK${KK}_n160000.npz')['ll_val'])))")" = "$LL" ] \
-  || die "ll_val of kron $KK != LL"
+[ "$($P -c "import numpy as np; print(repr(float(np.load('results/gmm_fits_D2_$BT/$FITF')['ll_val'])))")" = "$LL" ] \
+  || die "ll_val of $FITF != LL"
 [ "$(sha256sum $SP | cut -c1-16)" = "$PSHA" ] || die "pick sha differs from §5"
 [ "$(sha256sum $TJ | cut -c1-16)" = "$TSHA" ] || die "ALD tune sha differs from §5"
 export CUDA_VISIBLE_DEVICES=
 COMMON="--testbed D2 --prior $PR --cell $CELL --n 2560 --chunk 40 --ntrain 160000"
-KARG="--kron-K $KK"
+KARG=""; [ "$KK" != "-" ] && KARG="--kron-K $KK"
 log "start (git $(git rev-parse --short HEAD)) ckpt=$ST best=$SHA pick=$PSHA ald_tune=$TSHA"
 
 # ---------------------------------------------------------------- PIL (run_pilot16e4.sh body)
@@ -56,7 +57,7 @@ fi
 
 # ---------------------------------------------------------------- ALD (run_ald16e4.sh body)
 ET=PILSRT; RT=ALDSRT; E=results/ald/ald_$ET.npz; ALD_PENDING=0
-# DEFER_ALD=1 (DECISIONS.md 2026-10-11 KST; not the registered default): when the estimate is missing and no GPU is free, the ALD
+# DEFER_ALD=1 (a REGISTERED option of NEXT_EXPERIMENTS_SRT16e4 §1; not the default): when the estimate is missing and no GPU is free, the ALD
 # stage is postponed instead of stopping the script -- SP runs first and the script ends with SRT_BASE_PARTIAL; a later run
 # (PIL / SP skipped by their key files) does ALD and pair_baselines.  The stages are independent, so no number changes.
 if [ "$DEFER_ALD" = 1 ] && [ ! -f results/review_next/pair_$RT.txt ] && { [ ! -f $E ] || [ ! $E -nt $TJ ]; } \
