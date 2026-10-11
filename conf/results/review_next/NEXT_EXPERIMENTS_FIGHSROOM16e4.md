@@ -35,6 +35,68 @@
 
 v2 2026-10-11 16:54 CDT (Opus 5.5). 검토(MUST 1 · SHOULD 3 · NIT 8) 반영: **M-1** baseline 판정점에 +6 dB 이상이 들어 있다는 사실과 "다시 판정하지 않는다" 를 머리말·§1 에 정정; S-1 `DECISIONS.md` 에 사용자 결정 줄; S-2 풀 prior 에서 새 시행의 뜻; S-3 그림 명령 원문; N-1 스크립트의 회전 로그 문구(`rotation ${V:-none}`; 동작 불변); N-3 절대 경로; N-5 잘리는 막대; N-6 · N-7 절 번호와 단계 C; N-8 비용 문구; N-2 · N-4 는 메모로 남김(조정 기록은 추적·clean 검사로 고정; 그림 기록의 `raw_<원 태그>` 꼬리표는 덧붙는 블록이 설명). 검토가 확인한 것: `bash -n`, 원 스크립트와의 diff = 머리말에 적은 변경뿐, 모든 sha·파일·전제(HEAD 1404d315 기준), `ald.py --set hisnr`, `eval_accept` 의 gmm1024, SP 행의 `-:-`, genie 재생, `dmimo` 의 시행 → 테스트 풀, 집계표의 `R0-pilot@1`, `hs_tag`, 그림의 y 규칙. **실행 커밋 = 이 문서를 담은 커밋**(그 뒤 `FIGHS_DONE` 까지 main 커밋 없음). 실행 시작 전 상태: `raw_FHSRBB16e4` · `raw_FHSPSRB` · `raw_FHALDSRB` · `ald_PILSRB_hisnr.npz` 없음.
 
-## 6. 결과
+## 6. 결과 (기록 2026-10-11 18:32 CDT, Opus 5.5 — 전사만, 해석 없음; 이 절은 추가만 한다)
 
-(실행 뒤 채운다.)
+### 6.1 실행·운영 기록 (생성기 `prereg_audit_2026-10-11/s6_fighsroom_gen.py`; 수치는 모두 기록 파일에서 읽음)
+
+`bash code/run_fighsroom16e4.sh` **한 번**, tmux `fighsroom`, 10-11 17:01 CDT 시작(git 193776a1 = 실행 커밋; 시작 줄 하나, 재개 없음). 단계 C (관측된 시험 청크 0 의 대조) 10-11 17:03 CDT: 3 receiver control(s) OK, 1 ALD estimator control(s) OK. `FIGHS_DONE ok=3 fail=0` 10-11 18:31 CDT. ABORT · SKIP · INVALID 줄: 0 개.
+
+| 행 | 시작 (CDT) | runner | 작업 (done / exists) | 수용 (CDT) | 수용 판정 | manifest git · config_hash | 대조 |
+|---|---|---|---|---|---|---|---|
+| FHSRBB16e4 | 10-11 17:03 | 39.0 분 · 2048 작업 · 192 워커 | 2048 / 0 | 10-11 17:42 | rc=0; ACCEPT: OK -- FHSRBB16e4; ACCEPT (f): OK | 193776a1 · cef74db071b50187 | CONTROL: OK |
+| FHSPSRB | 10-11 17:42 | 41.6 분 · 2048 작업 · 192 워커 | 2048 / 0 | 10-11 18:24 | rc=0; ACCEPT: OK -- FHSPSRB; ACCEPT (f): OK | 193776a1 · cef74db071b50187 | CONTROL: OK |
+| FHALDSRB | 10-11 18:28 | 1.5 분 · 2048 작업 · 192 워커 | 2048 / 0 | 10-11 18:31 | rc=0; ACCEPT: OK -- FHALDSRB; ACCEPT (f): OK | 193776a1 · cef74db071b50187 | CONTROL: OK · CONTROL-ALD: OK |
+
+수용 파일의 (f) 줄(raw 당 청크 수 · `run|git` · pick · ald · raised):
+
+- `(f) raw_FHSRBB16e4: 2048 chunk files, run|git ['193776a1']; pick -; rotation -; ald -; raised trials per arm (= failures, report only) 0`
+- `(f) raw_FHSPSRB: 2048 chunk files, run|git ['193776a1']; pick results/sparse/pick_SRB_C2.json; rotation -; ald -; raised trials per arm (= failures, report only) 0`
+- `(f) raw_FHALDSRB: 2048 chunk files, run|git ['193776a1']; pick -; rotation -; ald /home/HTJ/t2/conf/results/ald/ald_PILSRB_hisnr.npz; raised trials per arm (= failures, report only) 0`
+
+집계표 머리말:
+
+- `# run_fighsroom16e4 git 193776a1 raw_FHSRBB16e4 C2: failures@16 / n, BLER, 95% Wilson -- REPORT-ONLY (FIGHSROOM16e4 §1); load_raw warnings 0`
+- `# run_fighsroom16e4 git 193776a1 raw_FHSPSRB C2: failures@16 / n, BLER, 95% Wilson -- REPORT-ONLY (FIGHSROOM16e4 §1); load_raw warnings 0`
+- `# run_fighsroom16e4 git 193776a1 raw_FHALDSRB C2: failures@16 / n, BLER, 95% Wilson -- REPORT-ONLY (FIGHSROOM16e4 §1); load_raw warnings 0`
+
+### 6.2 원고 범례 11 곡선 — BLER@16 실패 수 (+6 / +9 / +12 / +15 dB; 새 시행 n = 20480 과 원 raw n = 2560)
+
+| 곡선 (arm) | 출처 | +6 dB: k / 20480 (BLER, 95 % Wilson) | +9 dB: k / 20480 (BLER, 95 % Wilson) | +12 dB: k / 20480 (BLER, 95 % Wilson) | +15 dB: k / 20480 (BLER, 95 % Wilson) | 원 raw k / 2560 (+6 / +9 / +12 / +15) |
+|---|---|---|---|---|---|---|
+| M-ours-dscore-C-V1 | raw_FHSRBB16e4 | 45 (2.20e-03, [1.64e-03, 2.94e-03]) | 10 (4.88e-04, [2.65e-04, 8.99e-04]) | 3 (1.46e-04, [4.98e-05, 4.31e-04]) | 4 (1.95e-04, [7.60e-05, 5.02e-04]) | 3 / 4 / 0 / 0 |
+| ALD-pilot | raw_FHALDSRB | 81 (3.96e-03, [3.18e-03, 4.91e-03]) | 25 (1.22e-03, [8.27e-04, 1.80e-03]) | 7 (3.42e-04, [1.66e-04, 7.05e-04]) | 11 (5.37e-04, [3.00e-04, 9.62e-04]) | 11 / 3 / 2 / 0 |
+| M-ours-bstar | raw_FHSRBB16e4 | 90 (4.39e-03, [3.58e-03, 5.40e-03]) | 23 (1.12e-03, [7.48e-04, 1.68e-03]) | 11 (5.37e-04, [3.00e-04, 9.62e-04]) | 6 (2.93e-04, [1.34e-04, 6.39e-04]) | 6 / 5 / 1 / 1 |
+| R2-ours-G | raw_FHSRBB16e4 | 438 (2.14e-02, [1.95e-02, 2.35e-02]) | 135 (6.59e-03, [5.57e-03, 7.80e-03]) | 37 (1.81e-03, [1.31e-03, 2.49e-03]) | 19 (9.28e-04, [5.94e-04, 1.45e-03]) | 49 / 18 / 4 / 2 |
+| R1-turbo | raw_FHSRBB16e4 | 917 (4.48e-02, [4.20e-02, 4.77e-02]) | 287 (1.40e-02, [1.25e-02, 1.57e-02]) | 87 (4.25e-03, [3.45e-03, 5.24e-03]) | 34 (1.66e-03, [1.19e-03, 2.32e-03]) | 108 / 44 / 10 / 6 |
+| R3-bigamp | raw_FHSRBB16e4 | 2861 (1.40e-01, [1.35e-01, 1.45e-01]) | 2507 (1.22e-01, [1.18e-01, 1.27e-01]) | 2813 (1.37e-01, [1.33e-01, 1.42e-01]) | 2481 (1.21e-01, [1.17e-01, 1.26e-01]) | 382 / 291 / 342 / 331 |
+| R0-pilot@1 | raw_FHSRBB16e4 | 2630 (1.28e-01, [1.24e-01, 1.33e-01]) | 978 (4.78e-02, [4.49e-02, 5.08e-02]) | 376 (1.84e-02, [1.66e-02, 2.03e-02]) | 173 (8.45e-03, [7.28e-03, 9.80e-03]) | 318 / 140 / 53 / 17 |
+| SBL-loop | raw_FHSPSRB | 261 (1.27e-02, [1.13e-02, 1.44e-02]) | 73 (3.56e-03, [2.84e-03, 4.48e-03]) | 17 (8.30e-04, [5.18e-04, 1.33e-03]) | 13 (6.35e-04, [3.71e-04, 1.09e-03]) | 22 / 7 / 3 / 4 |
+| SBL-pilot | raw_FHSPSRB | 306 (1.49e-02, [1.34e-02, 1.67e-02]) | 85 (4.15e-03, [3.36e-03, 5.13e-03]) | 23 (1.12e-03, [7.48e-04, 1.68e-03]) | 13 (6.35e-04, [3.71e-04, 1.09e-03]) | 35 / 12 / 4 / 2 |
+| OMP-pilot | raw_FHSPSRB | 607 (2.96e-02, [2.74e-02, 3.21e-02]) | 217 (1.06e-02, [9.28e-03, 1.21e-02]) | 63 (3.08e-03, [2.41e-03, 3.93e-03]) | 53 (2.59e-03, [1.98e-03, 3.38e-03]) | 76 / 39 / 8 / 6 |
+| R5-genie | raw_FHSRBB16e4 | 17 (8.30e-04, [5.18e-04, 1.33e-03]) | 5 (2.44e-04, [1.04e-04, 5.71e-04]) | 1 (4.88e-05, [8.62e-06, 2.77e-04]) | 1 (4.88e-05, [8.62e-06, 2.77e-04]) | 1 / 0 / 0 / 0 |
+
+Perfect CSI (R5-genie) 의 실패 수는 세 raw 에서 같다: FHSRBB16e4 [17, 5, 1, 1] · FHSPSRB [17, 5, 1, 1] · FHALDSRB [17, 5, 1, 1] → 동일.
+
+0 실패 점 (n = 20480): 없음.
+
+그림 기록 `records/paper_f21srbhs.txt` 의 '오르는 칸' (SNR 이 오를 때 BLER 이 오르는 칸, 한쪽 Fisher p; 보고만): 3 줄.
+- `M-ours-dscore-C-V1  @16  45/20480 10/20480 3/20480 4/20480   (raw_FHSRBB16e4)   rising: +12->+15 dB p=0.5`
+- `ALD-pilot           @16  81/20480 25/20480 7/20480 11/20480   (raw_FHALDSRB)   rising: +12->+15 dB p=0.24`
+- `R3-bigamp           @16  2861/20480 2507/20480 2813/20480 2481/20480   (raw_FHSRBB16e4)   rising: +9->+12 dB p=3.7e-06`
+
+### 6.3 §3 예측 채점
+
+1. V1 의 실패 수 +6 dB > +9 dB → **적중** (45 대 10).
+2. V1 · b\* · Perfect CSI 에 Fisher p < 0.05 인 오르는 칸 없음 → **적중** (오르는 칸의 p: M-ours-dscore-C-V1 [0.5], M-ours-bstar 없음, R5-genie 없음).
+3. +6 · +9 dB 에서 실패 수 V1 ≤ b\* → **적중** (45 대 90, 10 대 23).
+4. +15 dB 에서 V1 실패 수 ≤ 5 / 20480 → **적중** (4).
+5. `FIGHS_DONE ok=3 fail=0` → **적중** (ok=3 fail=0).
+
+### 6.4 그림과 공개 사항
+
+- **그림** `conference/figures/F21srbhs_col.{pdf,png}`, 기록 `records/paper_f21srbhs.txt` (§1 의 명령 그대로, `FIGHS_DONE` 뒤): 실패 수 = 집계표(assert), y 축 (3e-05, 1.2) — 0 실패 점은 없지만 Perfect CSI 의 +12 · +15 dB 점(1 / 20480 = 4.9e-05)이 2e-4 아래라서 규칙의 둘째 범위. −3 / 0 / +3 dB 는 원 raw (n = 2560) 그대로다.
+- 그림 스크립트 `paper_f21dmc.py` 는 이 그림을 만들 때 작업 트리에 미커밋 변경 하나가 있었다: 기록 문구의 등록 이름을 prior 별로 넣는 `HSREG` (SRP 의 같은 보강 `NEXT_EXPERIMENTS_FIGHSPATH16e4.md` 를 위해; 이 §6 과 같은 커밋). SRB 의 출력은 그대로다 — 바뀐 스크립트로 `paper_f21dmc.py SRB` 를 다시 돌린 기록이 커밋된 `paper_f21srb.txt` 와 바이트 동일.
+- 새 시행의 ALD 추정 파일 `results/ald/ald_PILSRB_hisnr.npz` sha256[:16] a7b2c943b3968846 (git 밖).
+- 실행 중 main 커밋 없음(HEAD 193776a1 그대로; 스크립트의 HEAD 검사 통과). 함께 돈 것(결과 중립 — 수신기는 CPU 결정적): SRP 시드 학습(GPU 0, 등록 밖), ROOM16e4 의 기록 감사(17:01 CDT 까지)와 FIGHSPATH16e4 의 사전 검토(둘 다 Fable 서브에이전트, CPU 3 스레드 이하, 읽기 전용), 그림 스크립트의 회귀 확인 렌더 두 번(스크래치 출력).
+- 실행 중 작성자는 이 실행의 진행 줄 수(`grep -c done`)와 운영 로그만 봤고 결과 파일은 `FIGHS_DONE` 뒤에 처음 열었다. 그 사이 사용자에게 SRP 의 n = 2560 미리보기 한 장을 보냈다(SRB 의 새 결과와 무관).
+- 기록 감사(Fable)는 이 절을 쓴 뒤에 받는다 — 결과는 추가 줄로 적는다.

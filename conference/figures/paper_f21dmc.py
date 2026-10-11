@@ -46,7 +46,8 @@ SETS = {"SRT": ("SRTB16e4", "SPSRT", "ALDSRT", "SRT", "F21srt",
                 "Sionna RT room, moving UE (prior SRP: Sionna RT 2.1, built-in scene box with its metal walls as shipped at 28 GHz, LoS + first-order "
                 "reflections, one fixed BS, one UE on a lawn-mower route, split by time with no guard band", "NEXT_EXPERIMENTS_PATH16e4 §1")}
 ROOM = ("SRB", "DMI", "SRP")
-HS = False                                                      # `paper_f21dmc.py <PRIOR> hs` (NEXT_EXPERIMENTS_FIGHSROOM16e4 §1): the +6..+15 dB
+HSREG = {"SRB": "FIGHSROOM16e4", "SRP": "FIGHSPATH16e4"}        # the n = 20480 figure supplements (REPORT-ONLY registrations)
+HS = False                                                      # `paper_f21dmc.py <PRIOR> hs` (NEXT_EXPERIMENTS_<HSREG[PRIOR]> §1): the +6..+15 dB
 #                                                               points are the n = 20480 raws raw_FH<tag> (fighs_merge.merge), figure <NAME>hs_col                                         # y by the rule of paper_f16deep (a): (Q.YLO, 1.2) while no zero-failure point and
 #                                                               nothing below Q.YLO, else (Q.YLO_RULE, 1.2); zero-failure points as paper_f16deep.draw
 YLADDER = (0.5, 0.3, 0.2, 0.1, 0.05, 0.02, 0.01, 0.005, 0.002, 0.001)
@@ -107,7 +108,7 @@ def main():
          f"{NAME}_col  {W} x {H} in, one panel, legend above; the {len(SHOW)} curves of paper_f16deep.SHOW with its shapes and sizes; "
          "95% Wilson bars on " + ", ".join(BY[a].label for a in D.BARS) + (f".  n = {N0} (test trials 0..2559) at EVERY SNR for every "
          f"curve (no n = 20480 raw on {PRIOR}; {REG})." if not HS else f".  n = {N0} (test trials 0..2559) at -3/0/+3 dB and n = 20480 (new "
-         f"trials 10000..30479) at +6..+15 dB for every curve (NEXT_EXPERIMENTS_FIGHSROOM16e4 §1; block below)."), "",
+         f"trials 10000..30479) at +6..+15 dB for every curve (NEXT_EXPERIMENTS_{HSREG[PRIOR]} §1; block below)."), "",
          "Curves (internal arm -> figure name): " + "; ".join(f"{a} -> {BY[a].label}" for a in SHOW) + ".", "", "Counts:"] + txt
         + ["", "Drawn baseline curves (Perfect CSI excluded) at or below the proposed curve (point estimates; failures vs the proposed curve's) -- reported only, nothing is "
            "tested here; the registered paired tests are in conf/results/review_next/pairB_" + SP + ".txt: " + ("; ".join(below) or "none") + ".",
@@ -122,7 +123,7 @@ def main():
            f"Layout: x ticks at the SNR points, x range {XLIM}; y log {YLIM}, ticks {YTICKS}; legend band {BAND} in above the axes, 2 columns "
            f"(inside its band: asserted, [in] {np.round(lb, 3).tolist()}); every artist inside the canvas (tight bbox [in] "
            f"{np.round(bb, 3).tolist()}); smallest visible text {small:g} pt; saved at figsize, PNG 300 dpi."]
-        + (["", "FIGHSROOM16e4 merge (REPORT-ONLY, NEXT_EXPERIMENTS_FIGHSROOM16e4 §1): -3/0/+3 dB = the original test trials 0..2559 (n = 2560, the "
+        + (["", f"{HSREG[PRIOR]} merge (REPORT-ONLY, NEXT_EXPERIMENTS_{HSREG[PRIOR]} §1): -3/0/+3 dB = the original test trials 0..2559 (n = 2560, the "
             "registered judgement); +6/+9/+12/+15 dB = new trials 10000..30479 (n = 20480 per SNR; one point = one raw, never pooled).  "
             "'rising' = a cell where BLER rises with SNR, with its one-sided Fisher p (reported; no smoothing, no dropped point):"] + fh if HS else [])))
 
