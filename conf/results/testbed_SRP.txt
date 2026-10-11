@@ -1,12 +1,12 @@
-# date        : 2026-10-12 02:06:12 KST
-# git commit  : b737fd55
+# date        : 2026-10-12 02:24:57 KST
+# git commit  : 2ce67eb1
 # content     : testbed_dm.py -- Sionna RT 2.1 SRP (code/dmimo.py, pool by code/srp_build.py), Nr=8 x Nt=4; streams from common.train_rng('D2','SRP',...)
 # pool        : sha H.npy / split.npy = ('4969fb3ccfba2865', '3ea97198c47b43b5'); pairs 345600 = fit 273400 + val 20000 + test 52200
 # calibration : P_RAW=1.001616597866095  TRAIN_SHA=29cbb1dc7940bc2e  (n=160000, train stream 7)
 
 TDMa normalisation (val stream 8, n=20000): mean ||H||^2/(Nr Nt) = 0.99954 (s.e. 0.00392; 4 s.e. band) -> PASS;  per-block power CV 0.554
 TDMb per-entry E|H_ab|^2: min 0.9881 max 1.0155 (report only)
-TDMc pool identity: snapshots 345600 (== 576 rows x 600), scene box, ONE BS at [-3.0, -2.0, 4.0], no position twice, test pool = the END of the route (t >= 293400, y >= 3.0225 m), LoS fraction 1.000000, mean paths 7.00 -> PASS
+TDMc pool identity: snapshots 345600 (== 576 rows x 600), scene box, ONE BS at [-3.0, -2.0, 4.0], consecutive snapshots 1.5 cm apart, no position twice, test pool = the END of the route (t >= 293400, y >= 3.0225 m), LoS fraction 1.000000, mean paths 7.00 -> PASS
 TDMd pilot-stage K=1 Gaussian NMSE @ -3 dB (nu = sigma^2/Nt, val draw): 0.2076 (report only: no probe of this configuration; phase-0 single-scene depth-2 'rs' rows: see report_rt.md)
 TDMe erank(Rt) = 3.756 / 4 (T2b threshold 3.6) -> pilots 'dft' for Tp<=Nt;  erank(C_ens) = 12.34 / 32 (probe nan);  beamspace top-4 energy median 0.777 mean 0.772 (probe mean nan)
 TDMf block split: pools disjoint and exhaustive, no tile on both sides (576 tiles, 87 test; test share 0.1510) -> PASS

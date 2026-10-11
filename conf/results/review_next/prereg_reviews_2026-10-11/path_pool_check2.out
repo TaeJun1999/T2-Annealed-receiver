@@ -1,0 +1,17 @@
+all 345599 consecutive steps = 1.5 cm: True | row turns (dy != 0): 575 at t = k*600-1: True | dx at turns = 0: True | x at turns: [-4.4925  4.4925]
+DMGen idx sizes: {'fit': 273400, 'val': 20000, 'test': 52200} | test idx == split 2: True | fit idx == split 0: True
+trial stream -> pool: test
+stream 7: 160000 distinct: True | all in fit pool: True | rows covered: 489 of 489 | max row 488
+'SITE-SPECIFIC RAY-TRACED TESTBED (prior SRP)' in banner: True
+'ONE UE MOVING along a lawn-mower route' in banner: True
+'CLAIM TESTBED -- sparse specular' in banner: False
+'FIVE' in banner: False
+'ONE fixed BS' in banner: True
+|<h_t, h_t+1>| / norms, same row (1.5 cm along): median 0.709 p10 0.363 p90 0.926
+row 488 (last train) vs row 489 (first test) at the same x (1.5 cm across, yaw flipped): median 0.193 p90 0.470; x diff max 0.0e+00
+same, after reversing the UE elements of row 489: median 0.586 p90 0.800
+TDMh-style leakage, test stratum first 29 rows (489-517, next to training): median 0.2862, share < 0.1 = 0.013
+TDMh-style leakage, test stratum middle 29 (518-546): median 0.2997, share < 0.1 = 0.013
+TDMh-style leakage, test stratum last 29 (547-575): median 0.3161, share < 0.1 = 0.002
+TDMh-style leakage, whole test pool (600 draws): median 0.2997, share < 0.1 = 0.000  (testbed_SRP.txt: 0.1833 / 0.073 on 2000 draws)
+done

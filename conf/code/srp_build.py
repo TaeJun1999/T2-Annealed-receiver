@@ -10,13 +10,16 @@ per-pair normalisation by the sum of the path powers.
 The path (fixed before any SRP BLER):
   UE          one UE moves along a boustrophedon (lawn-mower) route over the floor at height 1.5 m: NY = 576 rows 1.5 cm apart,
               NX = 600 snapshots 1.5 cm apart on each row, alternate rows walked in opposite directions -- 345600 snapshots in
-              time order, no position is visited twice (1.5 cm = 1.4 wavelengths at 28 GHz: neighbouring snapshots are already
-              different channels).  The lattice is centred in the room (x in [-4.4925, 4.4925], y in [-4.3125, 4.3125] m).
+              time order, no position is visited twice (1.5 cm = 1.4 wavelengths at 28 GHz).  Neighbouring snapshots are
+              distinct but correlated: |<h_t, h_t+1>| / norms has median 0.71 along a row, against 0.62-0.63 for snapshots
+              3 cm to 60 cm apart on the same row (the common LoS-dominated structure) and 0.20 for the same x on adjacent
+              rows (opposite headings).  The lattice is centred in the room (x in [-4.4925, 4.4925], y in [-4.3125, 4.3125] m).
   yaw         the UE array keeps its orientation relative to the direction of travel: yaw = heading = 0 on the rows walked in
               +x, pi on the rows walked in -x (no random orientation)
   split       BY TIME: the LAST 87 rows of the route (the smallest number of final rows holding >= 15 % of the snapshots: 52200
               = an area the UE has not entered before) are the TEST pool; of the earlier snapshots a frozen random
-              N_VAL_POOL = 20000 are the validation pool, the rest the fit pool (dmimo.py's stream -> pool map).  The tile key
+              N_VAL_POOL = 20000 are the validation pool, the rest the fit pool (dmimo.py's stream -> pool map): ONLY the test
+              pool is held out in time -- the validation snapshots are interleaved with the fit snapshots.  The tile key
               of dmimo's self-check is the row index.
   rng         default_rng([SEED, TBID["D2"], 12, PID["SRP"], 1]) for the validation draw only (the route is deterministic);
               solver seed = chunk index.  The solver's candidate generator is not deterministic: a rebuild need not reproduce

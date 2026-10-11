@@ -1,0 +1,26 @@
+sha H/split: 4969fb3ccfba2865 3ea97198c47b43b5 POOL_SHA: ('4969fb3ccfba2865', '3ea97198c47b43b5')
+H.npy 10-12 02:06:00 KST
+split.npy 10-12 02:06:00 KST
+meta.npz 10-12 02:06:00 KST
+n 345600 (345600, 8, 4) complex64 counts fit/val/test [np.int64(273400), np.int64(20000), np.int64(52200)]
+pos == recomputed lattice: 0.0 | t == arange: True | row == r: True
+x range -4.4925 4.4925 y range -4.3125 4.3125
+yaw values: [0.         3.14159265] | yaw == (row odd)*pi: True
+unique positions: 345600
+consecutive step: min 0.0150 max 0.0150; steps != 0.015 (row turns): 0 (expected 575)
+row turns at t = [] ... all at (k*600-1): False turn step = []
+x at a turn (should be the room edge +-4.4925): [] []
+test: t min 293400 max 345599 contiguous end: True rows 489 - 575 y min 3.0225
+test rows == 87: 87 | smallest #rows with >=15%: 87 | 86 rows = 51600 < 0.15 n = 51840.0
+val: rows 0 - 488 | val in time order? spread over 489 rows; fit rows 489
+val draw reproduced: True | fit reproduced: True
+PID SRP 15 | DM_PRIORS ('DMC', 'SRT', 'SRB', 'DMI', 'SRP') | dmimo.PRIORS ('DMC', 'SRT', 'SRB', 'DMI', 'SRP')
+||H||^2/(NrNt) per pair: mean 1.00073 median 0.8805 min 0.0506 max 4.1391
+Traceback (most recent call last):
+  File "/home/HTJ/t2/conf/results/review_next/prereg_reviews_2026-10-11/path_pool_check.py", line 42, in <module>
+    g = dmimo.DMGen("D2", "SRP", 8, 4) if hasattr(dmimo, "DMGen") else None
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/HTJ/t2/conf/code/dmimo.py", line 201, in __init__
+    assert prior in PRIORS, f"DeepMIMO priors are {PRIORS}, got {prior!r}"
+           ^^^^^^^^^^^^^^^
+AssertionError: DeepMIMO priors are ('DMC', 'SRT', 'SRB', 'DMI', 'SRP'), got 'D2'

@@ -44,7 +44,7 @@ SETS = {"SRT": ("SRTB16e4", "SPSRT", "ALDSRT", "SRT", "F21srt",
                 "DeepMIMO indoor (prior DMI: DeepMIMO v4 scenario i1_2p4 at 2.4 GHz, one fixed BS, 0.5 m block split", "NEXT_EXPERIMENTS_ROOM16e4 §1"),
         "SRP": ("SRPB16e4", "SPSRP", "ALDSRP", "SRP", "F21srp",
                 "Sionna RT room, moving UE (prior SRP: Sionna RT 2.1, built-in scene box with its metal walls as shipped at 28 GHz, LoS + first-order "
-                "reflections, one fixed BS, one UE on a lawn-mower route, split by time", "NEXT_EXPERIMENTS_PATH16e4 §1")}
+                "reflections, one fixed BS, one UE on a lawn-mower route, split by time with no guard band", "NEXT_EXPERIMENTS_PATH16e4 §1")}
 ROOM = ("SRB", "DMI", "SRP")                                         # y by the rule of paper_f16deep (a): (Q.YLO, 1.2) while no zero-failure point and
 #                                                               nothing below Q.YLO, else (Q.YLO_RULE, 1.2); zero-failure points as paper_f16deep.draw
 YLADDER = (0.5, 0.3, 0.2, 0.1, 0.05, 0.02, 0.01, 0.005, 0.002, 0.001)
