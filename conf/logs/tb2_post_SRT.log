@@ -1,0 +1,39 @@
+[post SRT 10-11 04:18 CDT] freeze 2e50f269 (10-10 23:56:31 CDT) done; 21 fit files present -> merge kron 1024 / 2048 (registered base grid), select b*
+[gpu-fit] tag='SRTB16e4'  out=/home/HTJ/t2/conf/results/gmm_fits_D2_SRTB16e4/fit_SRT_Nr8_kronK1024_n160000.npz  MERGE
+[gpu-fit] SRT Nr=8 kron K=1024: kappa   0 restart 0 best@190 train-val gap  2.308  ll_test - ll_test(Gaussian) = 263.515 nat  pi_min 0.0001  (0.0 min GPU over 3 EM runs) -> /home/HTJ/t2/conf/results/gmm_fits_D2_SRTB16e4/fit_SRT_Nr8_kronK1024_n160000.npz
+[gpu-fit] tag='SRTB16e4'  out=/home/HTJ/t2/conf/results/gmm_fits_D2_SRTB16e4/fit_SRT_Nr8_kronK2048_n160000.npz  MERGE
+[gpu-fit] SRT Nr=8 kron K=2048: kappa   0 restart 0 best@250 train-val gap  3.838  ll_test - ll_test(Gaussian) = 270.366 nat  pi_min 0.0000  (0.0 min GPU over 3 EM runs) -> /home/HTJ/t2/conf/results/gmm_fits_D2_SRTB16e4/fit_SRT_Nr8_kronK2048_n160000.npz
+ll_val by arm: {'gmm16': 66.7882, 'gmm32': 85.9079, 'gmm64': 100.1218, 'gmm128': 110.8448, 'gmm256': 119.9677, 'gmm512': 124.7799, 'kron': 206.7566} | kron ll_val by K: {16: 76.1493, 32: 103.787, 64: 130.9619, 128: 152.8493, 256: 172.9057, 512: 188.6622, 1024: 199.6126, 2048: 206.7566}
+SELECT b* = kron kron_K = 2048 ll_val = 206.7566280497025 | full best: (124.77994099578774, 'gmm512')
+[post SRT 10-11 04:18 CDT] b* = kron 2048 = base-grid edge -> merge kron 4096 (registered rule; STOP at 4096)
+[gpu-fit] tag='SRTB16e4'  out=/home/HTJ/t2/conf/results/gmm_fits_D2_SRTB16e4/fit_SRT_Nr8_kronK4096_n160000.npz  MERGE
+[gpu-fit] SRT Nr=8 kron K=4096: kappa   0 restart 2 best@260 train-val gap  4.028  ll_test - ll_test(Gaussian) = 270.569 nat  pi_min 0.0000  (0.1 min GPU over 3 EM runs) -> /home/HTJ/t2/conf/results/gmm_fits_D2_SRTB16e4/fit_SRT_Nr8_kronK4096_n160000.npz
+ll_val by arm: {'gmm16': 66.7882, 'gmm32': 85.9079, 'gmm64': 100.1218, 'gmm128': 110.8448, 'gmm256': 119.9677, 'gmm512': 124.7799, 'kron': 208.1279} | kron ll_val by K: {16: 76.1493, 32: 103.787, 64: 130.9619, 128: 152.8493, 256: 172.9057, 512: 188.6622, 1024: 199.6126, 2048: 206.7566, 4096: 208.1279}
+SELECT b* = kron kron_K = 4096 ll_val = 208.1279194544014 | full best: (124.77994099578774, 'gmm512')
+fit_SRT_Nr8_fullK128_n160000.npz 110.84482687187379 n_iter 257 it_best 250 reseed 2 kappa 0 restart 2 mtime 10-11 14:03:17 KST
+fit_SRT_Nr8_fullK16_n160000.npz 66.78820821629228 n_iter 102 it_best 90 reseed 0 kappa 0 restart 2 mtime 10-11 14:12:34 KST
+fit_SRT_Nr8_fullK256_n160000.npz 119.9677011364744 n_iter 235 it_best 230 reseed 17 kappa 0 restart 2 mtime 10-11 13:53:40 KST
+fit_SRT_Nr8_fullK32_n160000.npz 85.90793672861763 n_iter 227 it_best 200 reseed 0 kappa 0 restart 1 mtime 10-11 14:12:09 KST
+fit_SRT_Nr8_fullK512_n160000.npz 124.77994099578774 n_iter 120 it_best 110 reseed 5163 kappa 0 restart 2 mtime 10-11 13:55:06 KST
+fit_SRT_Nr8_fullK64_n160000.npz 100.12175813832978 n_iter 396 it_best 370 reseed 0 kappa 0 restart 1 mtime 10-11 14:10:17 KST
+fit_SRT_Nr8_kronK1024_n160000.k0r0.npz 199.61260681203092 n_iter 195 it_best 190 reseed 147 kappa - restart - mtime 10-11 13:37:43 KST
+fit_SRT_Nr8_kronK1024_n160000.k0r1.npz 198.6624964495985 n_iter 147 it_best 140 reseed 45 kappa - restart - mtime 10-11 13:36:21 KST
+fit_SRT_Nr8_kronK1024_n160000.k0r2.npz 199.29898642740125 n_iter 162 it_best 160 reseed 35 kappa - restart - mtime 10-11 13:41:10 KST
+fit_SRT_Nr8_kronK1024_n160000.npz 199.61260681203092 n_iter 195 it_best 190 reseed 147 kappa 0 restart 0 mtime 10-11 18:18:18 KST
+fit_SRT_Nr8_kronK128_n160000.npz 152.8492560457274 n_iter 115 it_best 110 reseed 0 kappa 0 restart 1 mtime 10-11 14:08:53 KST
+fit_SRT_Nr8_kronK16_n160000.npz 76.14926597078596 n_iter 69 it_best 60 reseed 0 kappa 0 restart 2 mtime 10-11 14:12:39 KST
+fit_SRT_Nr8_kronK2048_n160000.k0r0.npz 206.7566280497025 n_iter 259 it_best 250 reseed 51196 kappa - restart - mtime 10-11 14:28:05 KST
+fit_SRT_Nr8_kronK2048_n160000.k0r1.npz 206.2943565622134 n_iter 270 it_best 260 reseed 58610 kappa - restart - mtime 10-11 14:28:42 KST
+fit_SRT_Nr8_kronK2048_n160000.k0r2.npz 205.8344591883395 n_iter 208 it_best 190 reseed 42715 kappa - restart - mtime 10-11 14:40:34 KST
+fit_SRT_Nr8_kronK2048_n160000.npz 206.7566280497025 n_iter 259 it_best 250 reseed 51196 kappa 0 restart 0 mtime 10-11 18:18:22 KST
+fit_SRT_Nr8_kronK256_n160000.npz 172.90572480662289 n_iter 193 it_best 190 reseed 0 kappa 0 restart 0 mtime 10-11 14:07:23 KST
+fit_SRT_Nr8_kronK32_n160000.npz 103.78698253006777 n_iter 93 it_best 90 reseed 0 kappa 0 restart 1 mtime 10-11 14:12:27 KST
+fit_SRT_Nr8_kronK4096_n160000.k0r0.npz 207.6082262830143 n_iter 233 it_best 230 reseed 413092 kappa - restart - mtime 10-11 14:56:11 KST
+fit_SRT_Nr8_kronK4096_n160000.k0r1.npz 207.55108825246063 n_iter 299 it_best 290 reseed 532037 kappa - restart - mtime 10-11 15:16:02 KST
+fit_SRT_Nr8_kronK4096_n160000.k0r2.npz 208.1279194544014 n_iter 266 it_best 260 reseed 481555 kappa - restart - mtime 10-11 15:27:33 KST
+fit_SRT_Nr8_kronK4096_n160000.npz 208.1279194544014 n_iter 266 it_best 260 reseed 481555 kappa 0 restart 2 mtime 10-11 18:18:28 KST
+fit_SRT_Nr8_kronK512_n160000.npz 188.66219317447104 n_iter 231 it_best 230 reseed 0 kappa 0 restart 0 mtime 10-11 14:03:46 KST
+fit_SRT_Nr8_kronK64_n160000.npz 130.96190421608236 n_iter 154 it_best 150 reseed 0 kappa 0 restart 1 mtime 10-11 14:11:09 KST
+[post SRT 10-11 04:18 CDT] final b* (family kron_K ll_val) = kron 4096 208.1279194544014; link gmm_fits_D2_SRTB16e4last created; POST_SELECT_DONE
+[post SRT 10-11 04:18 CDT] ALD dev regen (CPU) + tune on GPU 2 (ckpt d2sx_SRT_N160000_a1_fb2, git 2e50f269)
+[post SRT 10-11 04:28 CDT] ALD tune rc=0; POST_ALD_DONE

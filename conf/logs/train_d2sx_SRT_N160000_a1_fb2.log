@@ -1,0 +1,625 @@
+
+# ===== 2026-10-11 14:25:53 KST  D2SXSRT160000 attempt 1  testbed D2 prior SRT  Nr=8 Nt=4
+# DEVICE      : cuda | cuda_available=True | NVIDIA RTX PRO 6000 Blackwell Server Edition | torch 2.14.0+cu130 | train dtype float32 (01_RULES §9.5)
+# data        : n_train=144000 n_val=16000 split_hash=5ef5dca3dca07cf3 E||H||_F^2/(NrNt)=1.000000 (04_SPEC §2)
+# sigma grid  : MEASURED, 20 points, log-uniform draw over [3.3679e-02, 8.5515e-01]
+# hp          : {'arch': 'dit', 'param': 'vp', 'domain': 'angle', 'lr': 0.002238046051591068, 'ema': 0.999, 'batch': 256, 'emb': 256, 'width': 64, 'depth': 6, 'heads': 8, 'patch': 1}  params=479426
+# stopping    : patience 20 on val loss, never before 200 epochs, max 3000 (01_RULES §5)
+epoch    1 | train 5.262603e-01 | val 8.692262e-01 |  22.801 s | best 8.692262e-01 @1 * | gnorm mean 3.636e-01 max 1.857e+00
+epoch    2 | train 3.057234e-01 | val 6.164760e-01 |  22.418 s | best 6.164760e-01 @2 * | gnorm mean 4.089e-01 max 9.781e-01
+epoch    3 | train 2.562453e-01 | val 4.960711e-01 |  22.423 s | best 4.960711e-01 @3 * | gnorm mean 3.537e-01 max 6.380e-01
+epoch    4 | train 2.343242e-01 | val 3.664660e-01 |  22.375 s | best 3.664660e-01 @4 * | gnorm mean 3.520e-01 max 7.024e-01
+epoch    5 | train 2.196871e-01 | val 2.759465e-01 |  22.431 s | best 2.759465e-01 @5 * | gnorm mean 3.282e-01 max 6.534e-01
+epoch    6 | train 2.101264e-01 | val 2.334706e-01 |  22.291 s | best 2.334706e-01 @6 * | gnorm mean 3.148e-01 max 7.160e-01
+epoch    7 | train 2.020863e-01 | val 2.114942e-01 |  22.391 s | best 2.114942e-01 @7 * | gnorm mean 3.130e-01 max 7.457e-01
+epoch    8 | train 1.965604e-01 | val 1.990305e-01 |  22.310 s | best 1.990305e-01 @8 * | gnorm mean 2.905e-01 max 5.924e-01
+epoch    9 | train 1.917754e-01 | val 1.906706e-01 |  22.434 s | best 1.906706e-01 @9 * | gnorm mean 2.798e-01 max 5.799e-01
+epoch   10 | train 1.880500e-01 | val 1.847284e-01 |  22.378 s | best 1.847284e-01 @10 * | gnorm mean 2.777e-01 max 5.428e-01
+epoch   11 | train 1.850821e-01 | val 1.804288e-01 |  22.323 s | best 1.804288e-01 @11 * | gnorm mean 2.624e-01 max 5.826e-01
+epoch   12 | train 1.825075e-01 | val 1.770643e-01 |  22.344 s | best 1.770643e-01 @12 * | gnorm mean 2.611e-01 max 5.921e-01
+epoch   13 | train 1.800314e-01 | val 1.744138e-01 |  22.344 s | best 1.744138e-01 @13 * | gnorm mean 2.507e-01 max 5.317e-01
+epoch   14 | train 1.788899e-01 | val 1.721470e-01 |  22.335 s | best 1.721470e-01 @14 * | gnorm mean 2.533e-01 max 5.235e-01
+epoch   15 | train 1.765088e-01 | val 1.700929e-01 |  22.337 s | best 1.700929e-01 @15 * | gnorm mean 2.496e-01 max 4.883e-01
+epoch   16 | train 1.745134e-01 | val 1.683622e-01 |  22.800 s | best 1.683622e-01 @16 * | gnorm mean 2.470e-01 max 4.987e-01
+epoch   17 | train 1.728849e-01 | val 1.668637e-01 |  21.980 s | best 1.668637e-01 @17 * | gnorm mean 2.378e-01 max 5.346e-01
+epoch   18 | train 1.719683e-01 | val 1.655763e-01 |  21.961 s | best 1.655763e-01 @18 * | gnorm mean 2.387e-01 max 5.376e-01
+epoch   19 | train 1.709187e-01 | val 1.644496e-01 |  21.906 s | best 1.644496e-01 @19 * | gnorm mean 2.342e-01 max 4.588e-01
+epoch   20 | train 1.698107e-01 | val 1.634838e-01 |  21.821 s | best 1.634838e-01 @20 * | gnorm mean 2.356e-01 max 4.633e-01
+epoch   21 | train 1.688779e-01 | val 1.625220e-01 |  21.808 s | best 1.625220e-01 @21 * | gnorm mean 2.333e-01 max 5.464e-01
+epoch   22 | train 1.681505e-01 | val 1.616885e-01 |  22.425 s | best 1.616885e-01 @22 * | gnorm mean 2.350e-01 max 6.252e-01
+epoch   23 | train 1.670934e-01 | val 1.608858e-01 |  22.419 s | best 1.608858e-01 @23 * | gnorm mean 2.247e-01 max 4.710e-01
+epoch   24 | train 1.662849e-01 | val 1.602053e-01 |  22.522 s | best 1.602053e-01 @24 * | gnorm mean 2.216e-01 max 5.011e-01
+epoch   25 | train 1.660350e-01 | val 1.596475e-01 |  22.369 s | best 1.596475e-01 @25 * | gnorm mean 2.272e-01 max 4.735e-01
+epoch   26 | train 1.647733e-01 | val 1.591070e-01 |  22.391 s | best 1.591070e-01 @26 * | gnorm mean 2.177e-01 max 4.600e-01
+epoch   27 | train 1.648654e-01 | val 1.586503e-01 |  22.390 s | best 1.586503e-01 @27 * | gnorm mean 2.105e-01 max 3.865e-01
+epoch   28 | train 1.635143e-01 | val 1.581455e-01 |  22.412 s | best 1.581455e-01 @28 * | gnorm mean 2.042e-01 max 4.013e-01
+epoch   29 | train 1.631392e-01 | val 1.576791e-01 |  22.362 s | best 1.576791e-01 @29 * | gnorm mean 2.039e-01 max 5.023e-01
+epoch   30 | train 1.629940e-01 | val 1.572495e-01 |  22.384 s | best 1.572495e-01 @30 * | gnorm mean 2.177e-01 max 4.983e-01
+epoch   31 | train 1.626514e-01 | val 1.569254e-01 |  22.397 s | best 1.569254e-01 @31 * | gnorm mean 2.170e-01 max 4.518e-01
+epoch   32 | train 1.621378e-01 | val 1.565523e-01 |  22.392 s | best 1.565523e-01 @32 * | gnorm mean 2.160e-01 max 4.356e-01
+epoch   33 | train 1.617782e-01 | val 1.561882e-01 |  22.404 s | best 1.561882e-01 @33 * | gnorm mean 2.036e-01 max 3.869e-01
+epoch   34 | train 1.611526e-01 | val 1.558830e-01 |  22.404 s | best 1.558830e-01 @34 * | gnorm mean 2.029e-01 max 4.621e-01
+epoch   35 | train 1.608189e-01 | val 1.555793e-01 |  22.411 s | best 1.555793e-01 @35 * | gnorm mean 2.062e-01 max 3.891e-01
+epoch   36 | train 1.604193e-01 | val 1.552515e-01 |  22.514 s | best 1.552515e-01 @36 * | gnorm mean 1.965e-01 max 3.725e-01
+epoch   37 | train 1.601503e-01 | val 1.549120e-01 |  22.447 s | best 1.549120e-01 @37 * | gnorm mean 2.049e-01 max 4.133e-01
+epoch   38 | train 1.597105e-01 | val 1.547132e-01 |  22.615 s | best 1.547132e-01 @38 * | gnorm mean 2.008e-01 max 4.541e-01
+epoch   39 | train 1.594218e-01 | val 1.545028e-01 |  22.445 s | best 1.545028e-01 @39 * | gnorm mean 2.009e-01 max 3.915e-01
+epoch   40 | train 1.594418e-01 | val 1.542704e-01 |  22.392 s | best 1.542704e-01 @40 * | gnorm mean 2.016e-01 max 4.068e-01
+epoch   41 | train 1.591648e-01 | val 1.540342e-01 |  22.477 s | best 1.540342e-01 @41 * | gnorm mean 1.981e-01 max 3.757e-01
+epoch   42 | train 1.588143e-01 | val 1.537943e-01 |  22.438 s | best 1.537943e-01 @42 * | gnorm mean 2.003e-01 max 4.476e-01
+epoch   43 | train 1.579655e-01 | val 1.535715e-01 |  22.455 s | best 1.535715e-01 @43 * | gnorm mean 1.958e-01 max 3.991e-01
+epoch   44 | train 1.575567e-01 | val 1.533956e-01 |  22.416 s | best 1.533956e-01 @44 * | gnorm mean 1.930e-01 max 3.919e-01
+epoch   45 | train 1.578002e-01 | val 1.532376e-01 |  22.431 s | best 1.532376e-01 @45 * | gnorm mean 1.981e-01 max 3.836e-01
+epoch   46 | train 1.577397e-01 | val 1.530520e-01 |  22.425 s | best 1.530520e-01 @46 * | gnorm mean 1.930e-01 max 3.738e-01
+epoch   47 | train 1.574931e-01 | val 1.529212e-01 |  21.845 s | best 1.529212e-01 @47 * | gnorm mean 1.904e-01 max 3.606e-01
+epoch   48 | train 1.574294e-01 | val 1.527379e-01 |  22.479 s | best 1.527379e-01 @48 * | gnorm mean 1.904e-01 max 4.238e-01
+epoch   49 | train 1.567852e-01 | val 1.525431e-01 |  22.404 s | best 1.525431e-01 @49 * | gnorm mean 1.849e-01 max 3.608e-01
+epoch   50 | train 1.566538e-01 | val 1.523998e-01 |  19.139 s | best 1.523998e-01 @50 * | gnorm mean 1.907e-01 max 3.695e-01
+epoch   51 | train 1.562859e-01 | val 1.522394e-01 |   6.287 s | best 1.522394e-01 @51 * | gnorm mean 1.833e-01 max 3.662e-01
+epoch   52 | train 1.567186e-01 | val 1.521030e-01 |  22.408 s | best 1.521030e-01 @52 * | gnorm mean 1.926e-01 max 4.274e-01
+epoch   53 | train 1.562920e-01 | val 1.519739e-01 |  22.216 s | best 1.519739e-01 @53 * | gnorm mean 1.856e-01 max 4.454e-01
+epoch   54 | train 1.559455e-01 | val 1.518303e-01 |  22.247 s | best 1.518303e-01 @54 * | gnorm mean 1.865e-01 max 3.967e-01
+epoch   55 | train 1.555461e-01 | val 1.516843e-01 |  22.329 s | best 1.516843e-01 @55 * | gnorm mean 1.897e-01 max 3.932e-01
+epoch   56 | train 1.557110e-01 | val 1.515497e-01 |  22.295 s | best 1.515497e-01 @56 * | gnorm mean 1.865e-01 max 3.719e-01
+epoch   57 | train 1.551057e-01 | val 1.514044e-01 |  22.306 s | best 1.514044e-01 @57 * | gnorm mean 1.764e-01 max 3.268e-01
+epoch   58 | train 1.553958e-01 | val 1.512796e-01 |  22.328 s | best 1.512796e-01 @58 * | gnorm mean 1.906e-01 max 3.913e-01
+epoch   59 | train 1.556422e-01 | val 1.511453e-01 |  22.474 s | best 1.511453e-01 @59 * | gnorm mean 1.837e-01 max 3.522e-01
+epoch   60 | train 1.545293e-01 | val 1.510081e-01 |  22.386 s | best 1.510081e-01 @60 * | gnorm mean 1.764e-01 max 3.033e-01
+epoch   61 | train 1.551476e-01 | val 1.509384e-01 |  21.835 s | best 1.509384e-01 @61 * | gnorm mean 1.797e-01 max 3.470e-01
+epoch   62 | train 1.550494e-01 | val 1.508570e-01 |  21.806 s | best 1.508570e-01 @62 * | gnorm mean 1.873e-01 max 3.604e-01
+epoch   63 | train 1.544246e-01 | val 1.507593e-01 |  21.739 s | best 1.507593e-01 @63 * | gnorm mean 1.797e-01 max 3.447e-01
+epoch   64 | train 1.546831e-01 | val 1.506596e-01 |  21.754 s | best 1.506596e-01 @64 * | gnorm mean 1.747e-01 max 3.312e-01
+epoch   65 | train 1.545244e-01 | val 1.505794e-01 |  22.322 s | best 1.505794e-01 @65 * | gnorm mean 1.822e-01 max 3.152e-01
+epoch   66 | train 1.542616e-01 | val 1.505017e-01 |  22.335 s | best 1.505017e-01 @66 * | gnorm mean 1.768e-01 max 3.318e-01
+epoch   67 | train 1.540126e-01 | val 1.503654e-01 |  22.379 s | best 1.503654e-01 @67 * | gnorm mean 1.789e-01 max 3.289e-01
+epoch   68 | train 1.541172e-01 | val 1.502793e-01 |  22.561 s | best 1.502793e-01 @68 * | gnorm mean 1.806e-01 max 3.232e-01
+epoch   69 | train 1.537057e-01 | val 1.501831e-01 |  22.363 s | best 1.501831e-01 @69 * | gnorm mean 1.792e-01 max 3.351e-01
+epoch   70 | train 1.532447e-01 | val 1.500865e-01 |  22.366 s | best 1.500865e-01 @70 * | gnorm mean 1.820e-01 max 3.081e-01
+epoch   71 | train 1.537610e-01 | val 1.499986e-01 |  22.342 s | best 1.499986e-01 @71 * | gnorm mean 1.775e-01 max 3.662e-01
+epoch   72 | train 1.536977e-01 | val 1.498999e-01 |  22.351 s | best 1.498999e-01 @72 * | gnorm mean 1.747e-01 max 3.429e-01
+epoch   73 | train 1.534996e-01 | val 1.498106e-01 |  22.357 s | best 1.498106e-01 @73 * | gnorm mean 1.784e-01 max 3.701e-01
+epoch   74 | train 1.533357e-01 | val 1.497438e-01 |  22.343 s | best 1.497438e-01 @74 * | gnorm mean 1.795e-01 max 3.081e-01
+epoch   75 | train 1.528185e-01 | val 1.496537e-01 |  22.363 s | best 1.496537e-01 @75 * | gnorm mean 1.717e-01 max 3.525e-01
+epoch   76 | train 1.530267e-01 | val 1.495714e-01 |  22.343 s | best 1.495714e-01 @76 * | gnorm mean 1.752e-01 max 3.412e-01
+epoch   77 | train 1.525568e-01 | val 1.494834e-01 |  22.352 s | best 1.494834e-01 @77 * | gnorm mean 1.711e-01 max 3.162e-01
+epoch   78 | train 1.529749e-01 | val 1.494077e-01 |  22.361 s | best 1.494077e-01 @78 * | gnorm mean 1.739e-01 max 3.412e-01
+epoch   79 | train 1.527955e-01 | val 1.493280e-01 |  22.349 s | best 1.493280e-01 @79 * | gnorm mean 1.755e-01 max 3.282e-01
+epoch   80 | train 1.525333e-01 | val 1.492223e-01 |  22.356 s | best 1.492223e-01 @80 * | gnorm mean 1.738e-01 max 3.093e-01
+epoch   81 | train 1.522478e-01 | val 1.491368e-01 |  22.401 s | best 1.491368e-01 @81 * | gnorm mean 1.718e-01 max 3.196e-01
+epoch   82 | train 1.520692e-01 | val 1.491119e-01 |  22.312 s | best 1.491119e-01 @82 * | gnorm mean 1.696e-01 max 3.275e-01
+epoch   83 | train 1.524843e-01 | val 1.490513e-01 |  22.354 s | best 1.490513e-01 @83 * | gnorm mean 1.714e-01 max 3.420e-01
+epoch   84 | train 1.520041e-01 | val 1.489656e-01 |  22.356 s | best 1.489656e-01 @84 * | gnorm mean 1.717e-01 max 3.787e-01
+epoch   85 | train 1.521673e-01 | val 1.488967e-01 |  22.363 s | best 1.488967e-01 @85 * | gnorm mean 1.744e-01 max 3.203e-01
+epoch   86 | train 1.517969e-01 | val 1.488308e-01 |  22.371 s | best 1.488308e-01 @86 * | gnorm mean 1.731e-01 max 3.010e-01
+epoch   87 | train 1.517537e-01 | val 1.487718e-01 |  22.346 s | best 1.487718e-01 @87 * | gnorm mean 1.706e-01 max 3.760e-01
+epoch   88 | train 1.522476e-01 | val 1.487045e-01 |  22.335 s | best 1.487045e-01 @88 * | gnorm mean 1.767e-01 max 3.300e-01
+epoch   89 | train 1.516560e-01 | val 1.486609e-01 |  22.336 s | best 1.486609e-01 @89 * | gnorm mean 1.680e-01 max 3.259e-01
+epoch   90 | train 1.520160e-01 | val 1.485636e-01 |  22.369 s | best 1.485636e-01 @90 * | gnorm mean 1.685e-01 max 4.412e-01
+epoch   91 | train 1.519545e-01 | val 1.485280e-01 |  22.331 s | best 1.485280e-01 @91 * | gnorm mean 1.740e-01 max 3.267e-01
+epoch   92 | train 1.513536e-01 | val 1.485043e-01 |  22.363 s | best 1.485043e-01 @92 * | gnorm mean 1.633e-01 max 3.853e-01
+epoch   93 | train 1.513570e-01 | val 1.484917e-01 |  22.340 s | best 1.484917e-01 @93 * | gnorm mean 1.589e-01 max 3.454e-01
+epoch   94 | train 1.512992e-01 | val 1.484150e-01 |  22.345 s | best 1.484150e-01 @94 * | gnorm mean 1.769e-01 max 3.314e-01
+epoch   95 | train 1.506620e-01 | val 1.483288e-01 |  22.322 s | best 1.483288e-01 @95 * | gnorm mean 1.693e-01 max 3.048e-01
+epoch   96 | train 1.510415e-01 | val 1.482685e-01 |  22.573 s | best 1.482685e-01 @96 * | gnorm mean 1.658e-01 max 3.585e-01
+epoch   97 | train 1.508026e-01 | val 1.482108e-01 |  22.310 s | best 1.482108e-01 @97 * | gnorm mean 1.688e-01 max 2.860e-01
+epoch   98 | train 1.509061e-01 | val 1.481565e-01 |  22.325 s | best 1.481565e-01 @98 * | gnorm mean 1.632e-01 max 3.401e-01
+epoch   99 | train 1.510977e-01 | val 1.481066e-01 |  22.319 s | best 1.481066e-01 @99 * | gnorm mean 1.626e-01 max 3.367e-01
+epoch  100 | train 1.509601e-01 | val 1.480475e-01 |  22.335 s | best 1.480475e-01 @100 * | gnorm mean 1.630e-01 max 2.954e-01
+epoch  101 | train 1.506275e-01 | val 1.480028e-01 |  22.515 s | best 1.480028e-01 @101 * | gnorm mean 1.708e-01 max 3.357e-01
+epoch  102 | train 1.509262e-01 | val 1.479305e-01 |  22.427 s | best 1.479305e-01 @102 * | gnorm mean 1.698e-01 max 3.328e-01
+epoch  103 | train 1.504245e-01 | val 1.478821e-01 |  21.853 s | best 1.478821e-01 @103 * | gnorm mean 1.611e-01 max 3.382e-01
+epoch  104 | train 1.502333e-01 | val 1.478377e-01 |  21.890 s | best 1.478377e-01 @104 * | gnorm mean 1.767e-01 max 3.422e-01
+epoch  105 | train 1.504448e-01 | val 1.477777e-01 |  21.749 s | best 1.477777e-01 @105 * | gnorm mean 1.681e-01 max 3.870e-01
+epoch  106 | train 1.505255e-01 | val 1.477285e-01 |  21.757 s | best 1.477285e-01 @106 * | gnorm mean 1.684e-01 max 3.670e-01
+epoch  107 | train 1.504178e-01 | val 1.477228e-01 |  22.107 s | best 1.477228e-01 @107 * | gnorm mean 1.723e-01 max 3.289e-01
+epoch  108 | train 1.498795e-01 | val 1.476840e-01 |  22.391 s | best 1.476840e-01 @108 * | gnorm mean 1.619e-01 max 3.120e-01
+epoch  109 | train 1.505658e-01 | val 1.476334e-01 |  21.569 s | best 1.476334e-01 @109 * | gnorm mean 1.732e-01 max 2.878e-01
+epoch  110 | train 1.498026e-01 | val 1.475594e-01 |  22.370 s | best 1.475594e-01 @110 * | gnorm mean 1.633e-01 max 3.042e-01
+epoch  111 | train 1.501786e-01 | val 1.475106e-01 |  22.356 s | best 1.475106e-01 @111 * | gnorm mean 1.629e-01 max 3.274e-01
+epoch  112 | train 1.503202e-01 | val 1.474596e-01 |  22.397 s | best 1.474596e-01 @112 * | gnorm mean 1.684e-01 max 3.117e-01
+epoch  113 | train 1.501262e-01 | val 1.474557e-01 |  22.338 s | best 1.474557e-01 @113 * | gnorm mean 1.712e-01 max 3.310e-01
+epoch  114 | train 1.499777e-01 | val 1.474102e-01 |  22.365 s | best 1.474102e-01 @114 * | gnorm mean 1.631e-01 max 2.923e-01
+epoch  115 | train 1.497812e-01 | val 1.473259e-01 |  22.371 s | best 1.473259e-01 @115 * | gnorm mean 1.584e-01 max 3.336e-01
+epoch  116 | train 1.496642e-01 | val 1.472573e-01 |  22.364 s | best 1.472573e-01 @116 * | gnorm mean 1.674e-01 max 3.196e-01
+epoch  117 | train 1.497983e-01 | val 1.472106e-01 |  22.335 s | best 1.472106e-01 @117 * | gnorm mean 1.634e-01 max 3.328e-01
+epoch  118 | train 1.499415e-01 | val 1.471597e-01 |  22.351 s | best 1.471597e-01 @118 * | gnorm mean 1.666e-01 max 3.007e-01
+epoch  119 | train 1.495520e-01 | val 1.471516e-01 |  22.367 s | best 1.471516e-01 @119 * | gnorm mean 1.604e-01 max 3.595e-01
+epoch  120 | train 1.492784e-01 | val 1.471086e-01 |  22.358 s | best 1.471086e-01 @120 * | gnorm mean 1.637e-01 max 2.974e-01
+epoch  121 | train 1.491335e-01 | val 1.470687e-01 |  22.384 s | best 1.470687e-01 @121 * | gnorm mean 1.626e-01 max 3.183e-01
+epoch  122 | train 1.492535e-01 | val 1.470413e-01 |  22.373 s | best 1.470413e-01 @122 * | gnorm mean 1.677e-01 max 3.123e-01
+epoch  123 | train 1.492848e-01 | val 1.469644e-01 |  22.350 s | best 1.469644e-01 @123 * | gnorm mean 1.641e-01 max 3.055e-01
+epoch  124 | train 1.491598e-01 | val 1.470355e-01 |  22.347 s | best 1.469644e-01 @123 | gnorm mean 1.698e-01 max 3.338e-01
+epoch  125 | train 1.490991e-01 | val 1.470143e-01 |  22.413 s | best 1.469644e-01 @123 | gnorm mean 1.644e-01 max 3.332e-01
+epoch  126 | train 1.496019e-01 | val 1.469048e-01 |  22.008 s | best 1.469048e-01 @126 * | gnorm mean 1.613e-01 max 3.069e-01
+epoch  127 | train 1.492279e-01 | val 1.468286e-01 |  20.948 s | best 1.468286e-01 @127 * | gnorm mean 1.614e-01 max 3.191e-01
+epoch  128 | train 1.492316e-01 | val 1.467918e-01 |  22.297 s | best 1.467918e-01 @128 * | gnorm mean 1.607e-01 max 2.726e-01
+epoch  129 | train 1.486360e-01 | val 1.467311e-01 |  22.297 s | best 1.467311e-01 @129 * | gnorm mean 1.567e-01 max 3.314e-01
+epoch  130 | train 1.489443e-01 | val 1.466578e-01 |  22.315 s | best 1.466578e-01 @130 * | gnorm mean 1.586e-01 max 2.817e-01
+epoch  131 | train 1.490793e-01 | val 1.466619e-01 |  22.316 s | best 1.466578e-01 @130 | gnorm mean 1.699e-01 max 3.422e-01
+epoch  132 | train 1.486008e-01 | val 1.466330e-01 |  22.320 s | best 1.466330e-01 @132 * | gnorm mean 1.629e-01 max 3.120e-01
+epoch  133 | train 1.491621e-01 | val 1.465824e-01 |  22.313 s | best 1.465824e-01 @133 * | gnorm mean 1.648e-01 max 3.056e-01
+epoch  134 | train 1.485315e-01 | val 1.465336e-01 |  22.309 s | best 1.465336e-01 @134 * | gnorm mean 1.574e-01 max 2.806e-01
+epoch  135 | train 1.486601e-01 | val 1.464665e-01 |  22.284 s | best 1.464665e-01 @135 * | gnorm mean 1.597e-01 max 2.922e-01
+epoch  136 | train 1.492728e-01 | val 1.464836e-01 |  22.203 s | best 1.464665e-01 @135 | gnorm mean 1.646e-01 max 3.074e-01
+epoch  137 | train 1.490080e-01 | val 1.464515e-01 |  22.289 s | best 1.464515e-01 @137 * | gnorm mean 1.618e-01 max 3.117e-01
+epoch  138 | train 1.484162e-01 | val 1.464644e-01 |  22.299 s | best 1.464515e-01 @137 | gnorm mean 1.587e-01 max 3.052e-01
+epoch  139 | train 1.484524e-01 | val 1.463969e-01 |  19.341 s | best 1.463969e-01 @139 * | gnorm mean 1.630e-01 max 2.944e-01
+epoch  140 | train 1.482582e-01 | val 1.463677e-01 |  22.321 s | best 1.463677e-01 @140 * | gnorm mean 1.588e-01 max 3.318e-01
+epoch  141 | train 1.486991e-01 | val 1.463228e-01 |  22.233 s | best 1.463228e-01 @141 * | gnorm mean 1.569e-01 max 2.911e-01
+epoch  142 | train 1.483946e-01 | val 1.462416e-01 |  22.323 s | best 1.462416e-01 @142 * | gnorm mean 1.612e-01 max 3.074e-01
+epoch  143 | train 1.484806e-01 | val 1.462274e-01 |  22.277 s | best 1.462274e-01 @143 * | gnorm mean 1.673e-01 max 3.063e-01
+epoch  144 | train 1.480878e-01 | val 1.461869e-01 |  22.347 s | best 1.461869e-01 @144 * | gnorm mean 1.569e-01 max 3.072e-01
+epoch  145 | train 1.481387e-01 | val 1.461612e-01 |  22.369 s | best 1.461612e-01 @145 * | gnorm mean 1.653e-01 max 3.843e-01
+epoch  146 | train 1.483824e-01 | val 1.461079e-01 |  22.373 s | best 1.461079e-01 @146 * | gnorm mean 1.597e-01 max 3.419e-01
+epoch  147 | train 1.482826e-01 | val 1.461038e-01 |  22.370 s | best 1.461038e-01 @147 * | gnorm mean 1.693e-01 max 3.259e-01
+epoch  148 | train 1.484314e-01 | val 1.461397e-01 |  22.383 s | best 1.461038e-01 @147 | gnorm mean 1.618e-01 max 3.256e-01
+epoch  149 | train 1.482646e-01 | val 1.460945e-01 |  22.404 s | best 1.460945e-01 @149 * | gnorm mean 1.563e-01 max 2.908e-01
+epoch  150 | train 1.483508e-01 | val 1.460294e-01 |  22.379 s | best 1.460294e-01 @150 * | gnorm mean 1.567e-01 max 3.304e-01
+epoch  151 | train 1.479143e-01 | val 1.459942e-01 |  22.374 s | best 1.459942e-01 @151 * | gnorm mean 1.582e-01 max 3.137e-01
+epoch  152 | train 1.483907e-01 | val 1.459783e-01 |  22.400 s | best 1.459783e-01 @152 * | gnorm mean 1.628e-01 max 3.322e-01
+epoch  153 | train 1.479818e-01 | val 1.459406e-01 |  22.373 s | best 1.459406e-01 @153 * | gnorm mean 1.608e-01 max 3.007e-01
+epoch  154 | train 1.483550e-01 | val 1.458715e-01 |  22.381 s | best 1.458715e-01 @154 * | gnorm mean 1.641e-01 max 3.096e-01
+epoch  155 | train 1.475014e-01 | val 1.458568e-01 |  22.901 s | best 1.458568e-01 @155 * | gnorm mean 1.590e-01 max 3.291e-01
+epoch  156 | train 1.475497e-01 | val 1.458323e-01 |  22.392 s | best 1.458323e-01 @156 * | gnorm mean 1.566e-01 max 2.849e-01
+epoch  157 | train 1.476630e-01 | val 1.458387e-01 |  22.411 s | best 1.458323e-01 @156 | gnorm mean 1.607e-01 max 3.442e-01
+epoch  158 | train 1.479110e-01 | val 1.458029e-01 |  22.440 s | best 1.458029e-01 @158 * | gnorm mean 1.635e-01 max 3.829e-01
+epoch  159 | train 1.475666e-01 | val 1.457827e-01 |  22.407 s | best 1.457827e-01 @159 * | gnorm mean 1.615e-01 max 2.838e-01
+epoch  160 | train 1.476138e-01 | val 1.457667e-01 |  22.446 s | best 1.457667e-01 @160 * | gnorm mean 1.612e-01 max 3.036e-01
+epoch  161 | train 1.474575e-01 | val 1.457236e-01 |  22.420 s | best 1.457236e-01 @161 * | gnorm mean 1.564e-01 max 2.937e-01
+epoch  162 | train 1.479109e-01 | val 1.457191e-01 |  22.425 s | best 1.457191e-01 @162 * | gnorm mean 1.638e-01 max 2.963e-01
+epoch  163 | train 1.472675e-01 | val 1.456768e-01 |  22.394 s | best 1.456768e-01 @163 * | gnorm mean 1.603e-01 max 2.843e-01
+epoch  164 | train 1.476238e-01 | val 1.456336e-01 |  22.401 s | best 1.456336e-01 @164 * | gnorm mean 1.558e-01 max 2.931e-01
+epoch  165 | train 1.474701e-01 | val 1.456709e-01 |  22.414 s | best 1.456336e-01 @164 | gnorm mean 1.635e-01 max 5.009e-01
+epoch  166 | train 1.472367e-01 | val 1.456523e-01 |  22.375 s | best 1.456336e-01 @164 | gnorm mean 1.541e-01 max 2.830e-01
+epoch  167 | train 1.476766e-01 | val 1.456349e-01 |  22.306 s | best 1.456336e-01 @164 | gnorm mean 1.656e-01 max 2.909e-01
+epoch  168 | train 1.469633e-01 | val 1.455556e-01 |  22.635 s | best 1.455556e-01 @168 * | gnorm mean 1.583e-01 max 2.880e-01
+epoch  169 | train 1.472849e-01 | val 1.455013e-01 |  22.659 s | best 1.455013e-01 @169 * | gnorm mean 1.538e-01 max 2.956e-01
+epoch  170 | train 1.473537e-01 | val 1.454513e-01 |  22.487 s | best 1.454513e-01 @170 * | gnorm mean 1.606e-01 max 2.865e-01
+epoch  171 | train 1.473177e-01 | val 1.454533e-01 |  22.459 s | best 1.454513e-01 @170 | gnorm mean 1.662e-01 max 3.211e-01
+epoch  172 | train 1.472487e-01 | val 1.454255e-01 |  22.480 s | best 1.454255e-01 @172 * | gnorm mean 1.627e-01 max 2.823e-01
+epoch  173 | train 1.469972e-01 | val 1.454180e-01 |  22.481 s | best 1.454180e-01 @173 * | gnorm mean 1.569e-01 max 3.459e-01
+epoch  174 | train 1.480649e-01 | val 1.454297e-01 |  22.447 s | best 1.454180e-01 @173 | gnorm mean 1.783e-01 max 4.125e+00
+epoch  175 | train 1.473047e-01 | val 1.454173e-01 |  22.441 s | best 1.454173e-01 @175 * | gnorm mean 1.605e-01 max 3.337e-01
+epoch  176 | train 1.470729e-01 | val 1.453527e-01 |  22.401 s | best 1.453527e-01 @176 * | gnorm mean 1.570e-01 max 2.986e-01
+epoch  177 | train 1.471230e-01 | val 1.453070e-01 |  22.431 s | best 1.453070e-01 @177 * | gnorm mean 1.528e-01 max 2.915e-01
+epoch  178 | train 1.468991e-01 | val 1.452407e-01 |  22.407 s | best 1.452407e-01 @178 * | gnorm mean 1.527e-01 max 2.767e-01
+epoch  179 | train 1.469651e-01 | val 1.452521e-01 |  22.456 s | best 1.452407e-01 @178 | gnorm mean 1.606e-01 max 3.375e-01
+epoch  180 | train 1.471720e-01 | val 1.452123e-01 |  22.465 s | best 1.452123e-01 @180 * | gnorm mean 1.584e-01 max 2.875e-01
+epoch  181 | train 1.469492e-01 | val 1.452042e-01 |  22.423 s | best 1.452042e-01 @181 * | gnorm mean 1.599e-01 max 2.890e-01
+epoch  182 | train 1.472206e-01 | val 1.452110e-01 |  22.433 s | best 1.452042e-01 @181 | gnorm mean 1.633e-01 max 2.966e-01
+epoch  183 | train 1.468165e-01 | val 1.452109e-01 |  22.841 s | best 1.452042e-01 @181 | gnorm mean 1.558e-01 max 3.160e-01
+epoch  184 | train 1.470026e-01 | val 1.452043e-01 |  22.462 s | best 1.452042e-01 @181 | gnorm mean 1.619e-01 max 3.439e-01
+epoch  185 | train 1.463772e-01 | val 1.451967e-01 |  22.485 s | best 1.451967e-01 @185 * | gnorm mean 1.596e-01 max 2.977e-01
+epoch  186 | train 1.468109e-01 | val 1.451852e-01 |  22.496 s | best 1.451852e-01 @186 * | gnorm mean 1.594e-01 max 3.045e-01
+epoch  187 | train 1.467821e-01 | val 1.451819e-01 |  22.478 s | best 1.451819e-01 @187 * | gnorm mean 1.532e-01 max 2.963e-01
+epoch  188 | train 1.465065e-01 | val 1.451657e-01 |  22.470 s | best 1.451657e-01 @188 * | gnorm mean 1.596e-01 max 2.965e-01
+epoch  189 | train 1.469177e-01 | val 1.451210e-01 |  22.456 s | best 1.451210e-01 @189 * | gnorm mean 1.587e-01 max 3.194e-01
+epoch  190 | train 1.465341e-01 | val 1.450804e-01 |  22.475 s | best 1.450804e-01 @190 * | gnorm mean 1.555e-01 max 2.856e-01
+epoch  191 | train 1.462498e-01 | val 1.450279e-01 |  22.442 s | best 1.450279e-01 @191 * | gnorm mean 1.537e-01 max 3.139e-01
+epoch  192 | train 1.465010e-01 | val 1.450116e-01 |  22.459 s | best 1.450116e-01 @192 * | gnorm mean 1.587e-01 max 3.306e-01
+epoch  193 | train 1.466583e-01 | val 1.449545e-01 |  22.472 s | best 1.449545e-01 @193 * | gnorm mean 1.592e-01 max 4.156e-01
+epoch  194 | train 1.464434e-01 | val 1.449644e-01 |  22.452 s | best 1.449545e-01 @193 | gnorm mean 1.565e-01 max 3.145e-01
+epoch  195 | train 1.466740e-01 | val 1.449582e-01 |  22.480 s | best 1.449545e-01 @193 | gnorm mean 1.607e-01 max 2.800e-01
+epoch  196 | train 1.468861e-01 | val 1.449168e-01 |  22.488 s | best 1.449168e-01 @196 * | gnorm mean 1.596e-01 max 3.732e-01
+epoch  197 | train 1.465974e-01 | val 1.448772e-01 |  22.738 s | best 1.448772e-01 @197 * | gnorm mean 1.582e-01 max 3.078e-01
+epoch  198 | train 1.460329e-01 | val 1.448331e-01 |  22.438 s | best 1.448331e-01 @198 * | gnorm mean 1.557e-01 max 3.364e-01
+epoch  199 | train 1.467491e-01 | val 1.447928e-01 |  22.423 s | best 1.447928e-01 @199 * | gnorm mean 1.555e-01 max 2.991e-01
+epoch  200 | train 1.466857e-01 | val 1.447808e-01 |  22.473 s | best 1.447808e-01 @200 * | gnorm mean 1.588e-01 max 3.160e-01
+epoch  201 | train 1.465583e-01 | val 1.448185e-01 |  22.432 s | best 1.447808e-01 @200 | gnorm mean 1.559e-01 max 3.238e-01
+epoch  202 | train 1.464394e-01 | val 1.447951e-01 |  22.451 s | best 1.447808e-01 @200 | gnorm mean 1.721e-01 max 3.399e-01
+epoch  203 | train 1.464399e-01 | val 1.447915e-01 |  22.480 s | best 1.447808e-01 @200 | gnorm mean 1.559e-01 max 3.196e-01
+epoch  204 | train 1.465824e-01 | val 1.447889e-01 |  22.456 s | best 1.447808e-01 @200 | gnorm mean 1.557e-01 max 2.774e-01
+epoch  205 | train 1.459697e-01 | val 1.447609e-01 |  22.486 s | best 1.447609e-01 @205 * | gnorm mean 1.625e-01 max 3.250e-01
+epoch  206 | train 1.458631e-01 | val 1.446860e-01 |  22.445 s | best 1.446860e-01 @206 * | gnorm mean 1.627e-01 max 3.522e-01
+epoch  207 | train 1.463606e-01 | val 1.446702e-01 |  22.429 s | best 1.446702e-01 @207 * | gnorm mean 1.613e-01 max 3.315e-01
+epoch  208 | train 1.460815e-01 | val 1.446349e-01 |  22.450 s | best 1.446349e-01 @208 * | gnorm mean 1.550e-01 max 2.946e-01
+epoch  209 | train 1.459854e-01 | val 1.446515e-01 |  22.459 s | best 1.446349e-01 @208 | gnorm mean 1.572e-01 max 2.906e-01
+epoch  210 | train 1.460687e-01 | val 1.446361e-01 |  22.492 s | best 1.446349e-01 @208 | gnorm mean 1.619e-01 max 3.056e-01
+epoch  211 | train 1.462613e-01 | val 1.446238e-01 |  22.855 s | best 1.446238e-01 @211 * | gnorm mean 1.640e-01 max 3.192e-01
+epoch  212 | train 1.458727e-01 | val 1.446037e-01 |  22.472 s | best 1.446037e-01 @212 * | gnorm mean 1.659e-01 max 3.971e-01
+epoch  213 | train 1.462721e-01 | val 1.445708e-01 |  22.455 s | best 1.445708e-01 @213 * | gnorm mean 1.610e-01 max 2.803e-01
+epoch  214 | train 1.454663e-01 | val 1.445570e-01 |  22.446 s | best 1.445570e-01 @214 * | gnorm mean 1.547e-01 max 3.303e-01
+epoch  215 | train 1.457111e-01 | val 1.445274e-01 |  22.492 s | best 1.445274e-01 @215 * | gnorm mean 1.571e-01 max 2.824e-01
+epoch  216 | train 1.459691e-01 | val 1.444958e-01 |  22.473 s | best 1.444958e-01 @216 * | gnorm mean 1.578e-01 max 2.841e-01
+epoch  217 | train 1.457709e-01 | val 1.444928e-01 |  22.469 s | best 1.444928e-01 @217 * | gnorm mean 1.579e-01 max 3.768e-01
+epoch  218 | train 1.458287e-01 | val 1.444957e-01 |  22.476 s | best 1.444928e-01 @217 | gnorm mean 1.612e-01 max 3.243e-01
+epoch  219 | train 1.456929e-01 | val 1.444941e-01 |  22.459 s | best 1.444928e-01 @217 | gnorm mean 1.573e-01 max 3.370e-01
+epoch  220 | train 1.459931e-01 | val 1.444816e-01 |  22.487 s | best 1.444816e-01 @220 * | gnorm mean 1.592e-01 max 3.617e-01
+epoch  221 | train 1.457810e-01 | val 1.444639e-01 |  22.447 s | best 1.444639e-01 @221 * | gnorm mean 1.634e-01 max 3.295e-01
+epoch  222 | train 1.457235e-01 | val 1.444615e-01 |  22.447 s | best 1.444615e-01 @222 * | gnorm mean 1.660e-01 max 2.977e-01
+epoch  223 | train 1.460572e-01 | val 1.444676e-01 |  22.453 s | best 1.444615e-01 @222 | gnorm mean 1.592e-01 max 3.417e-01
+epoch  224 | train 1.456640e-01 | val 1.444356e-01 |  22.458 s | best 1.444356e-01 @224 * | gnorm mean 1.556e-01 max 3.440e-01
+epoch  225 | train 1.459149e-01 | val 1.444096e-01 |  13.696 s | best 1.444096e-01 @225 * | gnorm mean 1.650e-01 max 2.886e-01
+epoch  226 | train 1.456648e-01 | val 1.443873e-01 |  22.588 s | best 1.443873e-01 @226 * | gnorm mean 1.604e-01 max 3.496e-01
+epoch  227 | train 1.453935e-01 | val 1.443561e-01 |  22.546 s | best 1.443561e-01 @227 * | gnorm mean 1.600e-01 max 3.172e-01
+epoch  228 | train 1.454851e-01 | val 1.443890e-01 |  22.537 s | best 1.443561e-01 @227 | gnorm mean 1.573e-01 max 5.157e-01
+epoch  229 | train 1.452287e-01 | val 1.446405e-01 |  22.545 s | best 1.443561e-01 @227 | gnorm mean 1.556e-01 max 4.257e-01
+epoch  230 | train 1.458219e-01 | val 1.444592e-01 |  22.579 s | best 1.443561e-01 @227 | gnorm mean 1.553e-01 max 3.258e-01
+epoch  231 | train 1.455458e-01 | val 1.443706e-01 |  22.587 s | best 1.443561e-01 @227 | gnorm mean 1.685e-01 max 3.125e-01
+epoch  232 | train 1.454530e-01 | val 1.443213e-01 |  22.541 s | best 1.443213e-01 @232 * | gnorm mean 1.613e-01 max 3.978e-01
+epoch  233 | train 1.453602e-01 | val 1.443015e-01 |  22.553 s | best 1.443015e-01 @233 * | gnorm mean 1.617e-01 max 3.007e-01
+epoch  234 | train 1.454962e-01 | val 1.442900e-01 |  22.535 s | best 1.442900e-01 @234 * | gnorm mean 1.653e-01 max 4.429e-01
+epoch  235 | train 1.454647e-01 | val 1.442654e-01 |  22.567 s | best 1.442654e-01 @235 * | gnorm mean 1.493e-01 max 2.811e-01
+epoch  236 | train 1.455935e-01 | val 1.442468e-01 |  22.528 s | best 1.442468e-01 @236 * | gnorm mean 1.657e-01 max 3.558e-01
+epoch  237 | train 1.455697e-01 | val 1.442581e-01 |  22.488 s | best 1.442468e-01 @236 | gnorm mean 1.617e-01 max 3.495e-01
+epoch  238 | train 1.452576e-01 | val 1.442461e-01 |  22.558 s | best 1.442461e-01 @238 * | gnorm mean 1.571e-01 max 3.142e-01
+epoch  239 | train 1.449945e-01 | val 1.442355e-01 |  22.674 s | best 1.442355e-01 @239 * | gnorm mean 1.592e-01 max 3.121e-01
+epoch  240 | train 1.453017e-01 | val 1.442249e-01 |  21.348 s | best 1.442249e-01 @240 * | gnorm mean 1.631e-01 max 3.499e-01
+epoch  241 | train 1.457761e-01 | val 1.441576e-01 |  22.428 s | best 1.441576e-01 @241 * | gnorm mean 1.587e-01 max 3.521e-01
+epoch  242 | train 1.455214e-01 | val 1.441022e-01 |  22.439 s | best 1.441022e-01 @242 * | gnorm mean 1.576e-01 max 3.216e-01
+epoch  243 | train 1.458884e-01 | val 1.440737e-01 |  22.436 s | best 1.440737e-01 @243 * | gnorm mean 1.669e-01 max 3.125e-01
+epoch  244 | train 1.453672e-01 | val 1.440598e-01 |  22.420 s | best 1.440598e-01 @244 * | gnorm mean 1.578e-01 max 2.724e-01
+epoch  245 | train 1.456515e-01 | val 1.440676e-01 |  22.456 s | best 1.440598e-01 @244 | gnorm mean 1.673e-01 max 3.268e-01
+epoch  246 | train 1.451615e-01 | val 1.440555e-01 |  22.436 s | best 1.440555e-01 @246 * | gnorm mean 1.596e-01 max 3.179e-01
+epoch  247 | train 1.451276e-01 | val 1.440013e-01 |  22.422 s | best 1.440013e-01 @247 * | gnorm mean 1.629e-01 max 2.954e-01
+epoch  248 | train 1.450742e-01 | val 1.439982e-01 |  22.446 s | best 1.439982e-01 @248 * | gnorm mean 1.627e-01 max 3.268e-01
+epoch  249 | train 1.451459e-01 | val 1.439894e-01 |  22.448 s | best 1.439894e-01 @249 * | gnorm mean 1.644e-01 max 3.154e-01
+epoch  250 | train 1.448779e-01 | val 1.439801e-01 |  22.450 s | best 1.439801e-01 @250 * | gnorm mean 1.605e-01 max 2.845e-01
+epoch  251 | train 1.450919e-01 | val 1.439629e-01 |  22.446 s | best 1.439629e-01 @251 * | gnorm mean 1.626e-01 max 2.999e-01
+epoch  252 | train 1.450062e-01 | val 1.439443e-01 |  22.441 s | best 1.439443e-01 @252 * | gnorm mean 1.597e-01 max 2.976e-01
+epoch  253 | train 1.452758e-01 | val 1.439279e-01 |  22.449 s | best 1.439279e-01 @253 * | gnorm mean 1.648e-01 max 3.381e-01
+epoch  254 | train 1.451067e-01 | val 1.439088e-01 |  22.751 s | best 1.439088e-01 @254 * | gnorm mean 1.619e-01 max 3.153e-01
+epoch  255 | train 1.449014e-01 | val 1.439223e-01 |  22.446 s | best 1.439088e-01 @254 | gnorm mean 1.601e-01 max 3.087e-01
+epoch  256 | train 1.449911e-01 | val 1.439460e-01 |  22.431 s | best 1.439088e-01 @254 | gnorm mean 1.590e-01 max 2.981e-01
+epoch  257 | train 1.452348e-01 | val 1.439557e-01 |  22.424 s | best 1.439088e-01 @254 | gnorm mean 1.625e-01 max 3.048e-01
+epoch  258 | train 1.450231e-01 | val 1.439645e-01 |  22.475 s | best 1.439088e-01 @254 | gnorm mean 1.628e-01 max 2.996e-01
+epoch  259 | train 1.448940e-01 | val 1.439573e-01 |  22.436 s | best 1.439088e-01 @254 | gnorm mean 1.615e-01 max 3.593e-01
+epoch  260 | train 1.447143e-01 | val 1.438919e-01 |  22.475 s | best 1.438919e-01 @260 * | gnorm mean 1.576e-01 max 3.016e-01
+epoch  261 | train 1.448717e-01 | val 1.438540e-01 |  22.408 s | best 1.438540e-01 @261 * | gnorm mean 1.637e-01 max 3.282e-01
+epoch  262 | train 1.449820e-01 | val 1.438554e-01 |  22.418 s | best 1.438540e-01 @261 | gnorm mean 1.672e-01 max 3.482e-01
+epoch  263 | train 1.450467e-01 | val 1.438776e-01 |  22.409 s | best 1.438540e-01 @261 | gnorm mean 1.566e-01 max 3.395e-01
+epoch  264 | train 1.444654e-01 | val 1.438545e-01 |  22.462 s | best 1.438540e-01 @261 | gnorm mean 1.621e-01 max 3.315e-01
+epoch  265 | train 1.447572e-01 | val 1.438566e-01 |  22.458 s | best 1.438540e-01 @261 | gnorm mean 1.698e-01 max 3.060e-01
+epoch  266 | train 1.449916e-01 | val 1.438701e-01 |  22.418 s | best 1.438540e-01 @261 | gnorm mean 1.648e-01 max 3.144e-01
+epoch  267 | train 1.448530e-01 | val 1.438388e-01 |  22.444 s | best 1.438388e-01 @267 * | gnorm mean 1.621e-01 max 3.567e-01
+epoch  268 | train 1.447512e-01 | val 1.438571e-01 |  22.565 s | best 1.438388e-01 @267 | gnorm mean 1.660e-01 max 3.338e-01
+epoch  269 | train 1.446479e-01 | val 1.438080e-01 |  22.606 s | best 1.438080e-01 @269 * | gnorm mean 1.735e-01 max 4.089e-01
+epoch  270 | train 1.448134e-01 | val 1.437745e-01 |  22.430 s | best 1.437745e-01 @270 * | gnorm mean 1.556e-01 max 3.361e-01
+epoch  271 | train 1.447509e-01 | val 1.437886e-01 |  22.401 s | best 1.437745e-01 @270 | gnorm mean 1.641e-01 max 3.155e-01
+epoch  272 | train 1.452883e-01 | val 1.437741e-01 |  22.433 s | best 1.437741e-01 @272 * | gnorm mean 1.636e-01 max 3.294e-01
+epoch  273 | train 1.443312e-01 | val 1.437448e-01 |  22.393 s | best 1.437448e-01 @273 * | gnorm mean 1.658e-01 max 3.454e-01
+epoch  274 | train 1.447794e-01 | val 1.437460e-01 |  22.414 s | best 1.437448e-01 @273 | gnorm mean 1.619e-01 max 3.887e-01
+epoch  275 | train 1.446283e-01 | val 1.437490e-01 |  22.434 s | best 1.437448e-01 @273 | gnorm mean 1.578e-01 max 2.986e-01
+epoch  276 | train 1.443441e-01 | val 1.437006e-01 |  22.428 s | best 1.437006e-01 @276 * | gnorm mean 1.546e-01 max 3.132e-01
+epoch  277 | train 1.442798e-01 | val 1.437035e-01 |  22.396 s | best 1.437006e-01 @276 | gnorm mean 1.690e-01 max 3.221e-01
+epoch  278 | train 1.448340e-01 | val 1.437067e-01 |  22.404 s | best 1.437006e-01 @276 | gnorm mean 1.616e-01 max 3.224e-01
+epoch  279 | train 1.446218e-01 | val 1.436957e-01 |  22.414 s | best 1.436957e-01 @279 * | gnorm mean 1.596e-01 max 3.245e-01
+epoch  280 | train 1.447447e-01 | val 1.436552e-01 |  22.397 s | best 1.436552e-01 @280 * | gnorm mean 1.599e-01 max 3.069e-01
+epoch  281 | train 1.447000e-01 | val 1.436058e-01 |  22.430 s | best 1.436058e-01 @281 * | gnorm mean 1.696e-01 max 3.481e-01
+epoch  282 | train 1.446134e-01 | val 1.436105e-01 |  22.454 s | best 1.436058e-01 @281 | gnorm mean 1.639e-01 max 3.049e-01
+epoch  283 | train 1.446653e-01 | val 1.435936e-01 |  22.658 s | best 1.435936e-01 @283 * | gnorm mean 1.649e-01 max 2.946e-01
+epoch  284 | train 1.441492e-01 | val 1.435846e-01 |  22.584 s | best 1.435846e-01 @284 * | gnorm mean 1.547e-01 max 3.298e-01
+epoch  285 | train 1.448765e-01 | val 1.435853e-01 |  22.464 s | best 1.435846e-01 @284 | gnorm mean 1.668e-01 max 3.303e-01
+epoch  286 | train 1.446792e-01 | val 1.435787e-01 |  22.478 s | best 1.435787e-01 @286 * | gnorm mean 1.619e-01 max 3.187e-01
+epoch  287 | train 1.446101e-01 | val 1.435821e-01 |  22.429 s | best 1.435787e-01 @286 | gnorm mean 1.676e-01 max 3.369e-01
+epoch  288 | train 1.440387e-01 | val 1.435572e-01 |  22.442 s | best 1.435572e-01 @288 * | gnorm mean 1.585e-01 max 3.177e-01
+epoch  289 | train 1.445001e-01 | val 1.435334e-01 |  22.444 s | best 1.435334e-01 @289 * | gnorm mean 1.644e-01 max 3.356e-01
+epoch  290 | train 1.443194e-01 | val 1.435176e-01 |  22.441 s | best 1.435176e-01 @290 * | gnorm mean 1.658e-01 max 3.472e-01
+epoch  291 | train 1.442952e-01 | val 1.435337e-01 |  22.470 s | best 1.435176e-01 @290 | gnorm mean 1.648e-01 max 3.230e-01
+epoch  292 | train 1.444129e-01 | val 1.435536e-01 |  22.473 s | best 1.435176e-01 @290 | gnorm mean 1.699e-01 max 3.531e-01
+epoch  293 | train 1.442534e-01 | val 1.435374e-01 |  22.439 s | best 1.435176e-01 @290 | gnorm mean 1.645e-01 max 3.242e-01
+epoch  294 | train 1.442284e-01 | val 1.434998e-01 |  22.458 s | best 1.434998e-01 @294 * | gnorm mean 1.645e-01 max 4.708e-01
+epoch  295 | train 1.446106e-01 | val 1.435027e-01 |  22.466 s | best 1.434998e-01 @294 | gnorm mean 1.691e-01 max 3.719e-01
+epoch  296 | train 1.440619e-01 | val 1.434942e-01 |  22.474 s | best 1.434942e-01 @296 * | gnorm mean 1.583e-01 max 3.263e-01
+epoch  297 | train 1.443257e-01 | val 1.435018e-01 |  22.474 s | best 1.434942e-01 @296 | gnorm mean 1.671e-01 max 3.164e-01
+epoch  298 | train 1.443799e-01 | val 1.435088e-01 |  22.899 s | best 1.434942e-01 @296 | gnorm mean 1.663e-01 max 3.394e-01
+epoch  299 | train 1.441040e-01 | val 1.434734e-01 |  22.487 s | best 1.434734e-01 @299 * | gnorm mean 1.617e-01 max 3.357e-01
+epoch  300 | train 1.446543e-01 | val 1.434729e-01 |  22.448 s | best 1.434729e-01 @300 * | gnorm mean 1.692e-01 max 3.529e-01
+epoch  301 | train 1.443992e-01 | val 1.434783e-01 |  22.461 s | best 1.434729e-01 @300 | gnorm mean 1.666e-01 max 3.507e-01
+epoch  302 | train 1.445183e-01 | val 1.434837e-01 |  22.490 s | best 1.434729e-01 @300 | gnorm mean 1.623e-01 max 3.315e-01
+epoch  303 | train 1.443994e-01 | val 1.434657e-01 |  22.486 s | best 1.434657e-01 @303 * | gnorm mean 1.698e-01 max 3.295e-01
+epoch  304 | train 1.445758e-01 | val 1.434000e-01 |  22.464 s | best 1.434000e-01 @304 * | gnorm mean 1.669e-01 max 3.250e-01
+epoch  305 | train 1.445462e-01 | val 1.433483e-01 |  22.476 s | best 1.433483e-01 @305 * | gnorm mean 1.621e-01 max 3.211e-01
+epoch  306 | train 1.440389e-01 | val 1.433288e-01 |  22.471 s | best 1.433288e-01 @306 * | gnorm mean 1.678e-01 max 3.260e-01
+epoch  307 | train 1.442059e-01 | val 1.433421e-01 |  22.474 s | best 1.433288e-01 @306 | gnorm mean 1.582e-01 max 3.431e-01
+epoch  308 | train 1.442497e-01 | val 1.433005e-01 |  22.474 s | best 1.433005e-01 @308 * | gnorm mean 1.680e-01 max 3.062e-01
+epoch  309 | train 1.440774e-01 | val 1.433076e-01 |  22.475 s | best 1.433005e-01 @308 | gnorm mean 1.581e-01 max 3.257e-01
+epoch  310 | train 1.443054e-01 | val 1.433195e-01 |  22.486 s | best 1.433005e-01 @308 | gnorm mean 1.644e-01 max 3.229e-01
+epoch  311 | train 1.443654e-01 | val 1.432951e-01 |  22.851 s | best 1.432951e-01 @311 * | gnorm mean 1.643e-01 max 3.618e-01
+epoch  312 | train 1.442839e-01 | val 1.433156e-01 |  22.648 s | best 1.432951e-01 @311 | gnorm mean 1.651e-01 max 4.134e-01
+epoch  313 | train 1.435917e-01 | val 1.433078e-01 |  22.462 s | best 1.432951e-01 @311 | gnorm mean 1.579e-01 max 2.906e-01
+epoch  314 | train 1.440707e-01 | val 1.433135e-01 |  22.493 s | best 1.432951e-01 @311 | gnorm mean 1.678e-01 max 3.455e-01
+epoch  315 | train 1.443537e-01 | val 1.433068e-01 |  22.448 s | best 1.432951e-01 @311 | gnorm mean 1.689e-01 max 3.647e-01
+epoch  316 | train 1.443780e-01 | val 1.432948e-01 |  22.468 s | best 1.432948e-01 @316 * | gnorm mean 1.627e-01 max 3.035e-01
+epoch  317 | train 1.440664e-01 | val 1.433326e-01 |  22.429 s | best 1.432948e-01 @316 | gnorm mean 1.658e-01 max 3.122e-01
+epoch  318 | train 1.439103e-01 | val 1.433328e-01 |  22.467 s | best 1.432948e-01 @316 | gnorm mean 1.614e-01 max 3.327e-01
+epoch  319 | train 1.442477e-01 | val 1.433264e-01 |  22.468 s | best 1.432948e-01 @316 | gnorm mean 1.753e-01 max 6.036e-01
+epoch  320 | train 1.442305e-01 | val 1.434252e-01 |  22.454 s | best 1.432948e-01 @316 | gnorm mean 1.643e-01 max 3.911e-01
+epoch  321 | train 1.441177e-01 | val 1.433787e-01 |  22.452 s | best 1.432948e-01 @316 | gnorm mean 1.726e-01 max 3.389e-01
+epoch  322 | train 1.444165e-01 | val 1.433230e-01 |  22.467 s | best 1.432948e-01 @316 | gnorm mean 1.670e-01 max 3.376e-01
+epoch  323 | train 1.438146e-01 | val 1.432807e-01 |  22.467 s | best 1.432807e-01 @323 * | gnorm mean 1.666e-01 max 3.555e-01
+epoch  324 | train 1.440591e-01 | val 1.432175e-01 |  22.471 s | best 1.432175e-01 @324 * | gnorm mean 1.622e-01 max 2.929e-01
+epoch  325 | train 1.439637e-01 | val 1.431963e-01 |  22.454 s | best 1.431963e-01 @325 * | gnorm mean 1.668e-01 max 3.056e-01
+epoch  326 | train 1.438429e-01 | val 1.431641e-01 |  22.992 s | best 1.431641e-01 @326 * | gnorm mean 1.646e-01 max 3.504e-01
+epoch  327 | train 1.439740e-01 | val 1.433673e-01 |  22.480 s | best 1.431641e-01 @326 | gnorm mean 1.693e-01 max 3.782e-01
+epoch  328 | train 1.439115e-01 | val 1.433436e-01 |  22.463 s | best 1.431641e-01 @326 | gnorm mean 1.660e-01 max 3.954e-01
+epoch  329 | train 1.435770e-01 | val 1.432146e-01 |  22.504 s | best 1.431641e-01 @326 | gnorm mean 1.640e-01 max 3.036e-01
+epoch  330 | train 1.443638e-01 | val 1.431591e-01 |  22.503 s | best 1.431591e-01 @330 * | gnorm mean 1.632e-01 max 2.950e-01
+epoch  331 | train 1.440161e-01 | val 1.431564e-01 |  22.487 s | best 1.431564e-01 @331 * | gnorm mean 1.708e-01 max 3.278e-01
+epoch  332 | train 1.438839e-01 | val 1.431657e-01 |  22.480 s | best 1.431564e-01 @331 | gnorm mean 1.705e-01 max 3.637e-01
+epoch  333 | train 1.438822e-01 | val 1.431385e-01 |  22.482 s | best 1.431385e-01 @333 * | gnorm mean 1.733e-01 max 3.566e-01
+epoch  334 | train 1.444095e-01 | val 1.431156e-01 |  22.498 s | best 1.431156e-01 @334 * | gnorm mean 1.727e-01 max 3.817e-01
+epoch  335 | train 1.438789e-01 | val 1.430797e-01 |  22.473 s | best 1.430797e-01 @335 * | gnorm mean 1.654e-01 max 3.359e-01
+epoch  336 | train 1.440559e-01 | val 1.430912e-01 |  22.467 s | best 1.430797e-01 @335 | gnorm mean 1.621e-01 max 3.152e-01
+epoch  337 | train 1.439030e-01 | val 1.431013e-01 |  22.502 s | best 1.430797e-01 @335 | gnorm mean 1.705e-01 max 3.506e-01
+epoch  338 | train 1.444045e-01 | val 1.431110e-01 |  22.508 s | best 1.430797e-01 @335 | gnorm mean 1.741e-01 max 3.498e-01
+epoch  339 | train 1.437510e-01 | val 1.431221e-01 |  22.529 s | best 1.430797e-01 @335 | gnorm mean 1.675e-01 max 3.456e-01
+epoch  340 | train 1.438304e-01 | val 1.430988e-01 |  22.488 s | best 1.430797e-01 @335 | gnorm mean 1.668e-01 max 3.294e-01
+epoch  341 | train 1.438000e-01 | val 1.430729e-01 |  23.001 s | best 1.430729e-01 @341 * | gnorm mean 1.599e-01 max 3.252e-01
+epoch  342 | train 1.436138e-01 | val 1.431032e-01 |  22.502 s | best 1.430729e-01 @341 | gnorm mean 1.754e-01 max 3.773e-01
+epoch  343 | train 1.440156e-01 | val 1.430956e-01 |  22.481 s | best 1.430729e-01 @341 | gnorm mean 1.626e-01 max 3.331e-01
+epoch  344 | train 1.438308e-01 | val 1.430894e-01 |  22.496 s | best 1.430729e-01 @341 | gnorm mean 1.732e-01 max 3.205e-01
+epoch  345 | train 1.433399e-01 | val 1.430770e-01 |  22.498 s | best 1.430729e-01 @341 | gnorm mean 1.687e-01 max 3.491e-01
+epoch  346 | train 1.438090e-01 | val 1.430759e-01 |  22.464 s | best 1.430729e-01 @341 | gnorm mean 1.798e-01 max 3.514e-01
+epoch  347 | train 1.437330e-01 | val 1.430536e-01 |  22.436 s | best 1.430536e-01 @347 * | gnorm mean 1.658e-01 max 3.340e-01
+epoch  348 | train 1.437569e-01 | val 1.430285e-01 |  22.447 s | best 1.430285e-01 @348 * | gnorm mean 1.575e-01 max 2.950e-01
+epoch  349 | train 1.437322e-01 | val 1.430138e-01 |  22.476 s | best 1.430138e-01 @349 * | gnorm mean 1.735e-01 max 3.459e-01
+epoch  350 | train 1.439003e-01 | val 1.429942e-01 |  22.441 s | best 1.429942e-01 @350 * | gnorm mean 1.669e-01 max 3.070e-01
+epoch  351 | train 1.435205e-01 | val 1.430044e-01 |  22.425 s | best 1.429942e-01 @350 | gnorm mean 1.660e-01 max 3.492e-01
+epoch  352 | train 1.435895e-01 | val 1.429969e-01 |  22.466 s | best 1.429942e-01 @350 | gnorm mean 1.676e-01 max 3.342e-01
+epoch  353 | train 1.438387e-01 | val 1.429850e-01 |  22.439 s | best 1.429850e-01 @353 * | gnorm mean 1.776e-01 max 3.617e-01
+epoch  354 | train 1.439516e-01 | val 1.429753e-01 |  22.460 s | best 1.429753e-01 @354 * | gnorm mean 1.684e-01 max 3.395e-01
+epoch  355 | train 1.432058e-01 | val 1.429738e-01 |  22.975 s | best 1.429738e-01 @355 * | gnorm mean 1.648e-01 max 3.135e-01
+epoch  356 | train 1.436729e-01 | val 1.429719e-01 |  22.452 s | best 1.429719e-01 @356 * | gnorm mean 1.640e-01 max 3.289e-01
+epoch  357 | train 1.437096e-01 | val 1.429758e-01 |  22.503 s | best 1.429719e-01 @356 | gnorm mean 1.673e-01 max 3.530e-01
+epoch  358 | train 1.439078e-01 | val 1.429781e-01 |  22.491 s | best 1.429719e-01 @356 | gnorm mean 1.607e-01 max 3.155e-01
+epoch  359 | train 1.434113e-01 | val 1.429550e-01 |  22.466 s | best 1.429550e-01 @359 * | gnorm mean 1.760e-01 max 3.523e-01
+epoch  360 | train 1.434008e-01 | val 1.429742e-01 |  22.437 s | best 1.429550e-01 @359 | gnorm mean 1.770e-01 max 3.355e-01
+epoch  361 | train 1.435752e-01 | val 1.429467e-01 |  22.443 s | best 1.429467e-01 @361 * | gnorm mean 1.694e-01 max 3.353e-01
+epoch  362 | train 1.437456e-01 | val 1.429540e-01 |  22.418 s | best 1.429467e-01 @361 | gnorm mean 1.646e-01 max 3.287e-01
+epoch  363 | train 1.435807e-01 | val 1.429421e-01 |  22.438 s | best 1.429421e-01 @363 * | gnorm mean 1.709e-01 max 3.359e-01
+epoch  364 | train 1.436071e-01 | val 1.429143e-01 |  22.479 s | best 1.429143e-01 @364 * | gnorm mean 1.719e-01 max 3.512e-01
+epoch  365 | train 1.434474e-01 | val 1.428951e-01 |  22.501 s | best 1.428951e-01 @365 * | gnorm mean 1.642e-01 max 3.546e-01
+epoch  366 | train 1.439494e-01 | val 1.429218e-01 |  22.512 s | best 1.428951e-01 @365 | gnorm mean 1.772e-01 max 3.558e-01
+epoch  367 | train 1.436681e-01 | val 1.429171e-01 |  22.520 s | best 1.428951e-01 @365 | gnorm mean 1.724e-01 max 3.569e-01
+epoch  368 | train 1.431891e-01 | val 1.429115e-01 |  22.789 s | best 1.428951e-01 @365 | gnorm mean 1.672e-01 max 2.911e-01
+epoch  369 | train 1.433381e-01 | val 1.429151e-01 |  22.711 s | best 1.428951e-01 @365 | gnorm mean 1.665e-01 max 3.426e-01
+epoch  370 | train 1.430037e-01 | val 1.428668e-01 |  22.521 s | best 1.428668e-01 @370 * | gnorm mean 1.771e-01 max 3.965e-01
+epoch  371 | train 1.435260e-01 | val 1.428669e-01 |  22.513 s | best 1.428668e-01 @370 | gnorm mean 1.690e-01 max 3.137e-01
+epoch  372 | train 1.434068e-01 | val 1.428599e-01 |  22.514 s | best 1.428599e-01 @372 * | gnorm mean 1.659e-01 max 3.044e-01
+epoch  373 | train 1.437189e-01 | val 1.428427e-01 |  22.491 s | best 1.428427e-01 @373 * | gnorm mean 1.615e-01 max 3.022e-01
+epoch  374 | train 1.437619e-01 | val 1.428571e-01 |  22.503 s | best 1.428427e-01 @373 | gnorm mean 1.756e-01 max 3.494e-01
+epoch  375 | train 1.434418e-01 | val 1.428546e-01 |  22.494 s | best 1.428427e-01 @373 | gnorm mean 1.679e-01 max 3.430e-01
+epoch  376 | train 1.432460e-01 | val 1.428435e-01 |  22.510 s | best 1.428427e-01 @373 | gnorm mean 1.700e-01 max 3.492e-01
+epoch  377 | train 1.434013e-01 | val 1.428523e-01 |  22.329 s | best 1.428427e-01 @373 | gnorm mean 1.627e-01 max 3.415e-01
+epoch  378 | train 1.434614e-01 | val 1.428793e-01 |  22.308 s | best 1.428427e-01 @373 | gnorm mean 1.760e-01 max 3.728e-01
+epoch  379 | train 1.430328e-01 | val 1.428377e-01 |  22.158 s | best 1.428377e-01 @379 * | gnorm mean 1.678e-01 max 3.154e-01
+epoch  380 | train 1.436657e-01 | val 1.428293e-01 |  22.127 s | best 1.428293e-01 @380 * | gnorm mean 1.625e-01 max 3.222e-01
+epoch  381 | train 1.431532e-01 | val 1.427980e-01 |  22.006 s | best 1.427980e-01 @381 * | gnorm mean 1.694e-01 max 3.460e-01
+epoch  382 | train 1.431095e-01 | val 1.427541e-01 |  16.881 s | best 1.427541e-01 @382 * | gnorm mean 1.690e-01 max 3.441e-01
+epoch  383 | train 1.432325e-01 | val 1.427513e-01 |  18.763 s | best 1.427513e-01 @383 * | gnorm mean 1.706e-01 max 3.220e-01
+epoch  384 | train 1.432259e-01 | val 1.427533e-01 |  22.175 s | best 1.427513e-01 @383 | gnorm mean 1.701e-01 max 3.792e-01
+epoch  385 | train 1.438029e-01 | val 1.427344e-01 |  22.269 s | best 1.427344e-01 @385 * | gnorm mean 1.651e-01 max 3.569e-01
+epoch  386 | train 1.434791e-01 | val 1.427425e-01 |  22.210 s | best 1.427344e-01 @385 | gnorm mean 1.670e-01 max 3.794e-01
+epoch  387 | train 1.435003e-01 | val 1.427454e-01 |  19.159 s | best 1.427344e-01 @385 | gnorm mean 1.721e-01 max 3.768e-01
+epoch  388 | train 1.431773e-01 | val 1.427521e-01 |  22.559 s | best 1.427344e-01 @385 | gnorm mean 1.639e-01 max 3.188e-01
+epoch  389 | train 1.433505e-01 | val 1.427417e-01 |  22.484 s | best 1.427344e-01 @385 | gnorm mean 1.659e-01 max 3.297e-01
+epoch  390 | train 1.432345e-01 | val 1.427186e-01 |  22.509 s | best 1.427186e-01 @390 * | gnorm mean 1.687e-01 max 3.238e-01
+epoch  391 | train 1.431966e-01 | val 1.427190e-01 |  22.475 s | best 1.427186e-01 @390 | gnorm mean 1.713e-01 max 3.401e-01
+epoch  392 | train 1.434935e-01 | val 1.427249e-01 |  22.513 s | best 1.427186e-01 @390 | gnorm mean 1.683e-01 max 3.381e-01
+epoch  393 | train 1.428570e-01 | val 1.427101e-01 |  22.582 s | best 1.427101e-01 @393 * | gnorm mean 1.607e-01 max 3.035e-01
+epoch  394 | train 1.433380e-01 | val 1.427027e-01 |  22.565 s | best 1.427027e-01 @394 * | gnorm mean 1.723e-01 max 3.211e-01
+epoch  395 | train 1.432535e-01 | val 1.427072e-01 |  22.362 s | best 1.427027e-01 @394 | gnorm mean 1.715e-01 max 3.546e-01
+epoch  396 | train 1.431642e-01 | val 1.426927e-01 |  22.634 s | best 1.426927e-01 @396 * | gnorm mean 1.669e-01 max 3.612e-01
+epoch  397 | train 1.432934e-01 | val 1.426848e-01 |  22.865 s | best 1.426848e-01 @397 * | gnorm mean 1.757e-01 max 3.862e-01
+epoch  398 | train 1.433050e-01 | val 1.426584e-01 |  22.340 s | best 1.426584e-01 @398 * | gnorm mean 1.648e-01 max 3.185e-01
+epoch  399 | train 1.438324e-01 | val 1.426374e-01 |  22.517 s | best 1.426374e-01 @399 * | gnorm mean 1.691e-01 max 3.313e-01
+epoch  400 | train 1.431606e-01 | val 1.426127e-01 |  22.460 s | best 1.426127e-01 @400 * | gnorm mean 1.691e-01 max 3.786e-01
+epoch  401 | train 1.433425e-01 | val 1.426112e-01 |  22.574 s | best 1.426112e-01 @401 * | gnorm mean 1.680e-01 max 3.394e-01
+epoch  402 | train 1.429318e-01 | val 1.425801e-01 |  22.454 s | best 1.425801e-01 @402 * | gnorm mean 1.661e-01 max 3.851e-01
+epoch  403 | train 1.434213e-01 | val 1.425729e-01 |  22.447 s | best 1.425729e-01 @403 * | gnorm mean 1.789e-01 max 3.726e-01
+epoch  404 | train 1.430385e-01 | val 1.425614e-01 |  22.507 s | best 1.425614e-01 @404 * | gnorm mean 1.735e-01 max 3.643e-01
+epoch  405 | train 1.426569e-01 | val 1.425661e-01 |  22.764 s | best 1.425614e-01 @404 | gnorm mean 1.756e-01 max 3.549e-01
+epoch  406 | train 1.434329e-01 | val 1.425487e-01 |  22.803 s | best 1.425487e-01 @406 * | gnorm mean 1.685e-01 max 3.321e-01
+epoch  407 | train 1.432545e-01 | val 1.425582e-01 |  22.846 s | best 1.425487e-01 @406 | gnorm mean 1.766e-01 max 4.279e-01
+epoch  408 | train 1.430799e-01 | val 1.425593e-01 |  22.923 s | best 1.425487e-01 @406 | gnorm mean 1.752e-01 max 4.067e-01
+epoch  409 | train 1.429595e-01 | val 1.425288e-01 |  22.834 s | best 1.425288e-01 @409 * | gnorm mean 1.594e-01 max 2.817e-01
+epoch  410 | train 1.428072e-01 | val 1.425614e-01 |  22.938 s | best 1.425288e-01 @409 | gnorm mean 1.717e-01 max 3.552e-01
+epoch  411 | train 1.428372e-01 | val 1.425784e-01 |  22.973 s | best 1.425288e-01 @409 | gnorm mean 1.664e-01 max 3.296e-01
+epoch  412 | train 1.429556e-01 | val 1.425665e-01 |  22.491 s | best 1.425288e-01 @409 | gnorm mean 1.713e-01 max 3.471e-01
+epoch  413 | train 1.431944e-01 | val 1.425264e-01 |  22.028 s | best 1.425264e-01 @413 * | gnorm mean 1.681e-01 max 3.508e-01
+epoch  414 | train 1.428799e-01 | val 1.425267e-01 |  22.471 s | best 1.425264e-01 @413 | gnorm mean 1.714e-01 max 3.311e-01
+epoch  415 | train 1.431250e-01 | val 1.425380e-01 |  22.226 s | best 1.425264e-01 @413 | gnorm mean 1.689e-01 max 3.175e-01
+epoch  416 | train 1.430028e-01 | val 1.425297e-01 |  22.377 s | best 1.425264e-01 @413 | gnorm mean 1.590e-01 max 3.683e-01
+epoch  417 | train 1.430919e-01 | val 1.425224e-01 |  22.399 s | best 1.425224e-01 @417 * | gnorm mean 1.632e-01 max 3.417e-01
+epoch  418 | train 1.430596e-01 | val 1.424808e-01 |  22.258 s | best 1.424808e-01 @418 * | gnorm mean 1.778e-01 max 3.711e-01
+epoch  419 | train 1.425441e-01 | val 1.424692e-01 |  22.488 s | best 1.424692e-01 @419 * | gnorm mean 1.705e-01 max 3.654e-01
+epoch  420 | train 1.427065e-01 | val 1.424896e-01 |  22.414 s | best 1.424692e-01 @419 | gnorm mean 1.662e-01 max 3.495e-01
+epoch  421 | train 1.430851e-01 | val 1.424914e-01 |  22.322 s | best 1.424692e-01 @419 | gnorm mean 1.713e-01 max 3.350e-01
+epoch  422 | train 1.429375e-01 | val 1.424614e-01 |  16.384 s | best 1.424614e-01 @422 * | gnorm mean 1.673e-01 max 3.573e-01
+epoch  423 | train 1.426027e-01 | val 1.424801e-01 |  22.539 s | best 1.424614e-01 @422 | gnorm mean 1.657e-01 max 3.182e-01
+epoch  424 | train 1.430661e-01 | val 1.425098e-01 |  22.572 s | best 1.424614e-01 @422 | gnorm mean 1.741e-01 max 4.298e-01
+epoch  425 | train 1.429742e-01 | val 1.425088e-01 |  22.558 s | best 1.424614e-01 @422 | gnorm mean 1.748e-01 max 3.378e-01
+epoch  426 | train 1.426683e-01 | val 1.425010e-01 |  22.485 s | best 1.424614e-01 @422 | gnorm mean 1.677e-01 max 3.338e-01
+epoch  427 | train 1.432122e-01 | val 1.425206e-01 |  13.710 s | best 1.424614e-01 @422 | gnorm mean 1.698e-01 max 3.412e-01
+epoch  428 | train 1.427988e-01 | val 1.425121e-01 |   6.934 s | best 1.424614e-01 @422 | gnorm mean 1.748e-01 max 4.348e-01
+epoch  429 | train 1.430077e-01 | val 1.424992e-01 |  20.117 s | best 1.424614e-01 @422 | gnorm mean 1.651e-01 max 3.159e-01
+epoch  430 | train 1.432582e-01 | val 1.424999e-01 |  21.641 s | best 1.424614e-01 @422 | gnorm mean 1.655e-01 max 3.191e-01
+epoch  431 | train 1.431521e-01 | val 1.424740e-01 |  22.474 s | best 1.424614e-01 @422 | gnorm mean 1.675e-01 max 3.488e-01
+epoch  432 | train 1.430558e-01 | val 1.424600e-01 |  22.535 s | best 1.424600e-01 @432 * | gnorm mean 1.738e-01 max 3.163e-01
+epoch  433 | train 1.428654e-01 | val 1.424528e-01 |  22.353 s | best 1.424528e-01 @433 * | gnorm mean 1.688e-01 max 3.670e-01
+epoch  434 | train 1.426254e-01 | val 1.424737e-01 |  18.678 s | best 1.424528e-01 @433 | gnorm mean 1.732e-01 max 3.607e-01
+epoch  435 | train 1.427089e-01 | val 1.424855e-01 |  22.214 s | best 1.424528e-01 @433 | gnorm mean 1.676e-01 max 3.326e-01
+epoch  436 | train 1.427159e-01 | val 1.424531e-01 |  22.664 s | best 1.424528e-01 @433 | gnorm mean 1.652e-01 max 3.812e-01
+epoch  437 | train 1.431118e-01 | val 1.424702e-01 |  22.643 s | best 1.424528e-01 @433 | gnorm mean 1.760e-01 max 5.566e-01
+epoch  438 | train 1.433344e-01 | val 1.426523e-01 |  22.652 s | best 1.424528e-01 @433 | gnorm mean 1.693e-01 max 3.472e-01
+epoch  439 | train 1.428313e-01 | val 1.425801e-01 |  22.649 s | best 1.424528e-01 @433 | gnorm mean 1.714e-01 max 3.578e-01
+epoch  440 | train 1.429744e-01 | val 1.424531e-01 |  22.663 s | best 1.424528e-01 @433 | gnorm mean 1.753e-01 max 3.394e-01
+epoch  441 | train 1.428254e-01 | val 1.424185e-01 |  22.634 s | best 1.424185e-01 @441 * | gnorm mean 1.661e-01 max 3.036e-01
+epoch  442 | train 1.426472e-01 | val 1.424262e-01 |  22.841 s | best 1.424185e-01 @441 | gnorm mean 1.662e-01 max 3.428e-01
+epoch  443 | train 1.424705e-01 | val 1.424486e-01 |  22.813 s | best 1.424185e-01 @441 | gnorm mean 1.615e-01 max 3.006e-01
+epoch  444 | train 1.428013e-01 | val 1.424234e-01 |  22.532 s | best 1.424185e-01 @441 | gnorm mean 1.709e-01 max 3.412e-01
+epoch  445 | train 1.430148e-01 | val 1.424104e-01 |  22.497 s | best 1.424104e-01 @445 * | gnorm mean 1.701e-01 max 3.499e-01
+epoch  446 | train 1.426649e-01 | val 1.424237e-01 |  22.494 s | best 1.424104e-01 @445 | gnorm mean 1.711e-01 max 3.182e-01
+epoch  447 | train 1.427622e-01 | val 1.424142e-01 |  22.548 s | best 1.424104e-01 @445 | gnorm mean 1.714e-01 max 3.880e-01
+epoch  448 | train 1.426922e-01 | val 1.423888e-01 |  22.540 s | best 1.423888e-01 @448 * | gnorm mean 1.545e-01 max 2.937e-01
+epoch  449 | train 1.427126e-01 | val 1.423782e-01 |  22.497 s | best 1.423782e-01 @449 * | gnorm mean 1.688e-01 max 3.156e-01
+epoch  450 | train 1.426668e-01 | val 1.423702e-01 |  22.506 s | best 1.423702e-01 @450 * | gnorm mean 1.760e-01 max 3.322e-01
+epoch  451 | train 1.427432e-01 | val 1.423771e-01 |  22.500 s | best 1.423702e-01 @450 | gnorm mean 1.641e-01 max 3.305e-01
+epoch  452 | train 1.424431e-01 | val 1.423721e-01 |  22.488 s | best 1.423702e-01 @450 | gnorm mean 1.736e-01 max 3.528e-01
+epoch  453 | train 1.430565e-01 | val 1.423559e-01 |  22.498 s | best 1.423559e-01 @453 * | gnorm mean 1.763e-01 max 3.858e-01
+epoch  454 | train 1.428828e-01 | val 1.423605e-01 |  22.494 s | best 1.423559e-01 @453 | gnorm mean 1.734e-01 max 3.506e-01
+epoch  455 | train 1.425713e-01 | val 1.423843e-01 |  22.504 s | best 1.423559e-01 @453 | gnorm mean 1.655e-01 max 3.569e-01
+epoch  456 | train 1.425994e-01 | val 1.424035e-01 |  22.833 s | best 1.423559e-01 @453 | gnorm mean 1.717e-01 max 3.702e-01
+epoch  457 | train 1.421839e-01 | val 1.423667e-01 |  22.852 s | best 1.423559e-01 @453 | gnorm mean 1.653e-01 max 3.470e-01
+epoch  458 | train 1.428873e-01 | val 1.423686e-01 |  22.518 s | best 1.423559e-01 @453 | gnorm mean 1.684e-01 max 3.714e-01
+epoch  459 | train 1.431358e-01 | val 1.423589e-01 |  22.516 s | best 1.423559e-01 @453 | gnorm mean 1.711e-01 max 3.641e-01
+epoch  460 | train 1.427095e-01 | val 1.423597e-01 |  22.498 s | best 1.423559e-01 @453 | gnorm mean 1.766e-01 max 4.074e-01
+epoch  461 | train 1.424540e-01 | val 1.423559e-01 |  22.533 s | best 1.423559e-01 @461 * | gnorm mean 1.717e-01 max 3.692e-01
+epoch  462 | train 1.428314e-01 | val 1.423243e-01 |  22.506 s | best 1.423243e-01 @462 * | gnorm mean 1.735e-01 max 3.418e-01
+epoch  463 | train 1.426338e-01 | val 1.423186e-01 |  22.491 s | best 1.423186e-01 @463 * | gnorm mean 1.698e-01 max 3.350e-01
+epoch  464 | train 1.429164e-01 | val 1.423354e-01 |  22.509 s | best 1.423186e-01 @463 | gnorm mean 1.715e-01 max 3.893e-01
+epoch  465 | train 1.424212e-01 | val 1.423725e-01 |  22.509 s | best 1.423186e-01 @463 | gnorm mean 1.728e-01 max 3.475e-01
+epoch  466 | train 1.428805e-01 | val 1.423810e-01 |  22.591 s | best 1.423186e-01 @463 | gnorm mean 1.763e-01 max 3.515e-01
+epoch  467 | train 1.422440e-01 | val 1.423476e-01 |  22.613 s | best 1.423186e-01 @463 | gnorm mean 1.695e-01 max 3.746e-01
+epoch  468 | train 1.431420e-01 | val 1.423424e-01 |  22.613 s | best 1.423186e-01 @463 | gnorm mean 1.746e-01 max 3.282e-01
+epoch  469 | train 1.422139e-01 | val 1.423534e-01 |  22.601 s | best 1.423186e-01 @463 | gnorm mean 1.757e-01 max 3.393e-01
+epoch  470 | train 1.426042e-01 | val 1.423443e-01 |  22.729 s | best 1.423186e-01 @463 | gnorm mean 1.646e-01 max 3.038e-01
+epoch  471 | train 1.423846e-01 | val 1.423505e-01 |  22.836 s | best 1.423186e-01 @463 | gnorm mean 1.712e-01 max 3.715e-01
+epoch  472 | train 1.427687e-01 | val 1.423624e-01 |  22.637 s | best 1.423186e-01 @463 | gnorm mean 1.720e-01 max 3.635e-01
+epoch  473 | train 1.422172e-01 | val 1.423986e-01 |  22.637 s | best 1.423186e-01 @463 | gnorm mean 1.665e-01 max 3.356e-01
+epoch  474 | train 1.425918e-01 | val 1.423726e-01 |  22.633 s | best 1.423186e-01 @463 | gnorm mean 1.719e-01 max 3.529e-01
+epoch  475 | train 1.427839e-01 | val 1.423236e-01 |  22.637 s | best 1.423186e-01 @463 | gnorm mean 1.727e-01 max 3.248e-01
+epoch  476 | train 1.424381e-01 | val 1.422962e-01 |  22.630 s | best 1.422962e-01 @476 * | gnorm mean 1.734e-01 max 3.787e-01
+epoch  477 | train 1.423842e-01 | val 1.422485e-01 |  22.630 s | best 1.422485e-01 @477 * | gnorm mean 1.708e-01 max 3.497e-01
+epoch  478 | train 1.426779e-01 | val 1.422401e-01 |  22.730 s | best 1.422401e-01 @478 * | gnorm mean 1.725e-01 max 3.685e-01
+epoch  479 | train 1.421217e-01 | val 1.422528e-01 |  22.683 s | best 1.422401e-01 @478 | gnorm mean 1.685e-01 max 3.271e-01
+epoch  480 | train 1.418732e-01 | val 1.422452e-01 |  22.737 s | best 1.422401e-01 @478 | gnorm mean 1.612e-01 max 3.170e-01
+epoch  481 | train 1.424146e-01 | val 1.422643e-01 |  22.709 s | best 1.422401e-01 @478 | gnorm mean 1.733e-01 max 3.440e-01
+epoch  482 | train 1.424881e-01 | val 1.422820e-01 |  22.728 s | best 1.422401e-01 @478 | gnorm mean 1.709e-01 max 3.467e-01
+epoch  483 | train 1.427833e-01 | val 1.422962e-01 |  22.723 s | best 1.422401e-01 @478 | gnorm mean 1.710e-01 max 3.380e-01
+epoch  484 | train 1.423658e-01 | val 1.422904e-01 |  22.733 s | best 1.422401e-01 @478 | gnorm mean 1.802e-01 max 3.666e-01
+epoch  485 | train 1.421517e-01 | val 1.422637e-01 |  22.897 s | best 1.422401e-01 @478 | gnorm mean 1.722e-01 max 3.959e-01
+epoch  486 | train 1.424111e-01 | val 1.422377e-01 |  22.555 s | best 1.422377e-01 @486 * | gnorm mean 1.623e-01 max 3.908e-01
+epoch  487 | train 1.425992e-01 | val 1.422245e-01 |  22.468 s | best 1.422245e-01 @487 * | gnorm mean 1.705e-01 max 3.206e-01
+epoch  488 | train 1.424820e-01 | val 1.422210e-01 |  22.548 s | best 1.422210e-01 @488 * | gnorm mean 1.607e-01 max 3.372e-01
+epoch  489 | train 1.424389e-01 | val 1.421930e-01 |  22.511 s | best 1.421930e-01 @489 * | gnorm mean 1.736e-01 max 3.546e-01
+epoch  490 | train 1.424890e-01 | val 1.422034e-01 |  22.451 s | best 1.421930e-01 @489 | gnorm mean 1.641e-01 max 3.203e-01
+epoch  491 | train 1.428168e-01 | val 1.422346e-01 |  22.444 s | best 1.421930e-01 @489 | gnorm mean 1.715e-01 max 3.116e-01
+epoch  492 | train 1.425449e-01 | val 1.422096e-01 |  22.487 s | best 1.421930e-01 @489 | gnorm mean 1.726e-01 max 4.033e-01
+epoch  493 | train 1.421594e-01 | val 1.421650e-01 |  22.457 s | best 1.421650e-01 @493 * | gnorm mean 1.752e-01 max 3.220e-01
+epoch  494 | train 1.422805e-01 | val 1.421794e-01 |  22.448 s | best 1.421650e-01 @493 | gnorm mean 1.712e-01 max 3.554e-01
+epoch  495 | train 1.421689e-01 | val 1.421726e-01 |  22.490 s | best 1.421650e-01 @493 | gnorm mean 1.661e-01 max 3.538e-01
+epoch  496 | train 1.422385e-01 | val 1.421952e-01 |  22.508 s | best 1.421650e-01 @493 | gnorm mean 1.731e-01 max 3.149e-01
+epoch  497 | train 1.422096e-01 | val 1.421752e-01 |  22.570 s | best 1.421650e-01 @493 | gnorm mean 1.782e-01 max 3.915e-01
+epoch  498 | train 1.423217e-01 | val 1.421575e-01 |  22.549 s | best 1.421575e-01 @498 * | gnorm mean 1.775e-01 max 3.752e-01
+epoch  499 | train 1.420248e-01 | val 1.421576e-01 |  23.079 s | best 1.421575e-01 @498 | gnorm mean 1.689e-01 max 3.206e-01
+epoch  500 | train 1.425345e-01 | val 1.421539e-01 |  22.496 s | best 1.421539e-01 @500 * | gnorm mean 1.660e-01 max 3.405e-01
+epoch  501 | train 1.426821e-01 | val 1.421622e-01 |  22.450 s | best 1.421539e-01 @500 | gnorm mean 1.772e-01 max 3.524e-01
+epoch  502 | train 1.423834e-01 | val 1.421589e-01 |  22.440 s | best 1.421539e-01 @500 | gnorm mean 1.735e-01 max 3.348e-01
+epoch  503 | train 1.426908e-01 | val 1.421204e-01 |  22.455 s | best 1.421204e-01 @503 * | gnorm mean 1.726e-01 max 3.552e-01
+epoch  504 | train 1.422203e-01 | val 1.421450e-01 |  22.448 s | best 1.421204e-01 @503 | gnorm mean 1.615e-01 max 3.762e-01
+epoch  505 | train 1.425904e-01 | val 1.421573e-01 |  22.464 s | best 1.421204e-01 @503 | gnorm mean 1.743e-01 max 3.696e-01
+epoch  506 | train 1.421068e-01 | val 1.421889e-01 |  22.470 s | best 1.421204e-01 @503 | gnorm mean 1.639e-01 max 3.243e-01
+epoch  507 | train 1.423666e-01 | val 1.422056e-01 |  22.439 s | best 1.421204e-01 @503 | gnorm mean 1.661e-01 max 3.509e-01
+epoch  508 | train 1.421690e-01 | val 1.421860e-01 |  22.460 s | best 1.421204e-01 @503 | gnorm mean 1.690e-01 max 3.279e-01
+epoch  509 | train 1.425307e-01 | val 1.421733e-01 |  22.445 s | best 1.421204e-01 @503 | gnorm mean 1.736e-01 max 3.266e-01
+epoch  510 | train 1.424986e-01 | val 1.421831e-01 |  22.458 s | best 1.421204e-01 @503 | gnorm mean 1.702e-01 max 3.105e-01
+epoch  511 | train 1.422321e-01 | val 1.421492e-01 |  22.435 s | best 1.421204e-01 @503 | gnorm mean 1.618e-01 max 3.007e-01
+epoch  512 | train 1.423234e-01 | val 1.421451e-01 |  22.440 s | best 1.421204e-01 @503 | gnorm mean 1.701e-01 max 3.501e-01
+epoch  513 | train 1.422545e-01 | val 1.421189e-01 |  22.584 s | best 1.421189e-01 @513 * | gnorm mean 1.765e-01 max 3.204e-01
+epoch  514 | train 1.426070e-01 | val 1.420945e-01 |  23.046 s | best 1.420945e-01 @514 * | gnorm mean 1.611e-01 max 3.570e-01
+epoch  515 | train 1.421685e-01 | val 1.420911e-01 |  22.551 s | best 1.420911e-01 @515 * | gnorm mean 1.735e-01 max 3.257e-01
+epoch  516 | train 1.424698e-01 | val 1.421212e-01 |  22.525 s | best 1.420911e-01 @515 | gnorm mean 1.788e-01 max 3.745e-01
+epoch  517 | train 1.424908e-01 | val 1.421299e-01 |  22.540 s | best 1.420911e-01 @515 | gnorm mean 1.677e-01 max 3.319e-01
+epoch  518 | train 1.419878e-01 | val 1.421447e-01 |  22.537 s | best 1.420911e-01 @515 | gnorm mean 1.716e-01 max 3.518e-01
+epoch  519 | train 1.420577e-01 | val 1.421378e-01 |  22.534 s | best 1.420911e-01 @515 | gnorm mean 1.740e-01 max 4.125e-01
+epoch  520 | train 1.423506e-01 | val 1.421152e-01 |  22.549 s | best 1.420911e-01 @515 | gnorm mean 1.626e-01 max 3.003e-01
+epoch  521 | train 1.418693e-01 | val 1.421161e-01 |  22.499 s | best 1.420911e-01 @515 | gnorm mean 1.729e-01 max 3.415e-01
+epoch  522 | train 1.422919e-01 | val 1.421510e-01 |  22.520 s | best 1.420911e-01 @515 | gnorm mean 1.671e-01 max 3.742e-01
+epoch  523 | train 1.425857e-01 | val 1.421583e-01 |  22.516 s | best 1.420911e-01 @515 | gnorm mean 1.754e-01 max 3.701e-01
+epoch  524 | train 1.424595e-01 | val 1.421533e-01 |  22.493 s | best 1.420911e-01 @515 | gnorm mean 1.730e-01 max 3.995e-01
+epoch  525 | train 1.420359e-01 | val 1.421625e-01 |  22.512 s | best 1.420911e-01 @515 | gnorm mean 1.739e-01 max 3.640e-01
+epoch  526 | train 1.423619e-01 | val 1.421657e-01 |  22.481 s | best 1.420911e-01 @515 | gnorm mean 1.687e-01 max 3.652e-01
+epoch  527 | train 1.420130e-01 | val 1.421473e-01 |  22.973 s | best 1.420911e-01 @515 | gnorm mean 1.754e-01 max 3.606e-01
+epoch  528 | train 1.420227e-01 | val 1.421287e-01 |  22.581 s | best 1.420911e-01 @515 | gnorm mean 1.709e-01 max 3.430e-01
+epoch  529 | train 1.420399e-01 | val 1.421152e-01 |  22.470 s | best 1.420911e-01 @515 | gnorm mean 1.665e-01 max 3.452e-01
+epoch  530 | train 1.420383e-01 | val 1.421062e-01 |  22.489 s | best 1.420911e-01 @515 | gnorm mean 1.643e-01 max 3.256e-01
+epoch  531 | train 1.419345e-01 | val 1.420973e-01 |  22.467 s | best 1.420911e-01 @515 | gnorm mean 1.676e-01 max 3.311e-01
+epoch  532 | train 1.421150e-01 | val 1.421167e-01 |  22.512 s | best 1.420911e-01 @515 | gnorm mean 1.709e-01 max 3.562e-01
+epoch  533 | train 1.420173e-01 | val 1.421054e-01 |  22.548 s | best 1.420911e-01 @515 | gnorm mean 1.683e-01 max 3.482e-01
+epoch  534 | train 1.420887e-01 | val 1.420974e-01 |  22.562 s | best 1.420911e-01 @515 | gnorm mean 1.716e-01 max 3.265e-01
+epoch  535 | train 1.419027e-01 | val 1.420620e-01 |  22.514 s | best 1.420620e-01 @535 * | gnorm mean 1.654e-01 max 3.233e-01
+epoch  536 | train 1.419563e-01 | val 1.420552e-01 |  22.511 s | best 1.420552e-01 @536 * | gnorm mean 1.724e-01 max 3.249e-01
+epoch  537 | train 1.421989e-01 | val 1.420626e-01 |  22.482 s | best 1.420552e-01 @536 | gnorm mean 1.673e-01 max 3.828e-01
+epoch  538 | train 1.421745e-01 | val 1.420898e-01 |  22.506 s | best 1.420552e-01 @536 | gnorm mean 1.661e-01 max 3.203e-01
+epoch  539 | train 1.421821e-01 | val 1.420965e-01 |  22.491 s | best 1.420552e-01 @536 | gnorm mean 1.658e-01 max 3.807e-01
+epoch  540 | train 1.420249e-01 | val 1.420500e-01 |  22.491 s | best 1.420500e-01 @540 * | gnorm mean 1.773e-01 max 3.459e-01
+epoch  541 | train 1.422732e-01 | val 1.420032e-01 |  22.459 s | best 1.420032e-01 @541 * | gnorm mean 1.731e-01 max 4.079e-01
+epoch  542 | train 1.421256e-01 | val 1.420015e-01 |  22.648 s | best 1.420015e-01 @542 * | gnorm mean 1.716e-01 max 3.380e-01
+epoch  543 | train 1.422470e-01 | val 1.420335e-01 |  22.855 s | best 1.420015e-01 @542 | gnorm mean 1.723e-01 max 3.297e-01
+epoch  544 | train 1.422194e-01 | val 1.420560e-01 |  22.492 s | best 1.420015e-01 @542 | gnorm mean 1.627e-01 max 3.250e-01
+epoch  545 | train 1.423980e-01 | val 1.420510e-01 |  22.455 s | best 1.420015e-01 @542 | gnorm mean 1.720e-01 max 3.571e-01
+epoch  546 | train 1.421184e-01 | val 1.420561e-01 |  22.486 s | best 1.420015e-01 @542 | gnorm mean 1.764e-01 max 3.271e-01
+epoch  547 | train 1.424222e-01 | val 1.420615e-01 |  22.472 s | best 1.420015e-01 @542 | gnorm mean 1.786e-01 max 3.583e-01
+epoch  548 | train 1.425138e-01 | val 1.420835e-01 |  22.488 s | best 1.420015e-01 @542 | gnorm mean 1.747e-01 max 3.261e-01
+epoch  549 | train 1.418215e-01 | val 1.420671e-01 |  22.484 s | best 1.420015e-01 @542 | gnorm mean 1.715e-01 max 3.496e-01
+epoch  550 | train 1.419375e-01 | val 1.420853e-01 |  22.529 s | best 1.420015e-01 @542 | gnorm mean 1.737e-01 max 3.452e-01
+epoch  551 | train 1.421497e-01 | val 1.420579e-01 |  22.467 s | best 1.420015e-01 @542 | gnorm mean 1.724e-01 max 4.144e-01
+epoch  552 | train 1.421730e-01 | val 1.420583e-01 |  22.434 s | best 1.420015e-01 @542 | gnorm mean 1.741e-01 max 3.219e-01
+epoch  553 | train 1.416818e-01 | val 1.420460e-01 |  22.464 s | best 1.420015e-01 @542 | gnorm mean 1.719e-01 max 3.303e-01
+epoch  554 | train 1.417005e-01 | val 1.420363e-01 |  22.471 s | best 1.420015e-01 @542 | gnorm mean 1.667e-01 max 3.559e-01
+epoch  555 | train 1.420648e-01 | val 1.419850e-01 |  22.490 s | best 1.419850e-01 @555 * | gnorm mean 1.640e-01 max 3.811e-01
+epoch  556 | train 1.422227e-01 | val 1.419976e-01 |  21.434 s | best 1.419850e-01 @555 | gnorm mean 1.831e-01 max 6.458e-01
+epoch  557 | train 1.419684e-01 | val 1.420002e-01 |  25.014 s | best 1.419850e-01 @555 | gnorm mean 1.673e-01 max 3.370e-01
+epoch  558 | train 1.422095e-01 | val 1.419718e-01 |  24.224 s | best 1.419718e-01 @558 * | gnorm mean 1.702e-01 max 3.480e-01
+epoch  559 | train 1.416518e-01 | val 1.419845e-01 |  23.168 s | best 1.419718e-01 @558 | gnorm mean 1.752e-01 max 3.739e-01
+epoch  560 | train 1.423971e-01 | val 1.419708e-01 |  23.256 s | best 1.419708e-01 @560 * | gnorm mean 1.691e-01 max 3.490e-01
+epoch  561 | train 1.419888e-01 | val 1.419710e-01 |  23.287 s | best 1.419708e-01 @560 | gnorm mean 1.780e-01 max 3.928e-01
+epoch  562 | train 1.421573e-01 | val 1.419730e-01 |  23.236 s | best 1.419708e-01 @560 | gnorm mean 1.684e-01 max 3.844e-01
+epoch  563 | train 1.420642e-01 | val 1.419774e-01 |  23.224 s | best 1.419708e-01 @560 | gnorm mean 1.659e-01 max 3.446e-01
+epoch  564 | train 1.420110e-01 | val 1.419737e-01 |  23.282 s | best 1.419708e-01 @560 | gnorm mean 1.716e-01 max 3.673e-01
+epoch  565 | train 1.419758e-01 | val 1.419927e-01 |  23.321 s | best 1.419708e-01 @560 | gnorm mean 1.644e-01 max 3.441e-01
+epoch  566 | train 1.418609e-01 | val 1.420204e-01 |  23.268 s | best 1.419708e-01 @560 | gnorm mean 1.769e-01 max 3.941e-01
+epoch  567 | train 1.418315e-01 | val 1.420160e-01 |  23.251 s | best 1.419708e-01 @560 | gnorm mean 1.734e-01 max 3.798e-01
+epoch  568 | train 1.425813e-01 | val 1.419906e-01 |  23.249 s | best 1.419708e-01 @560 | gnorm mean 1.691e-01 max 3.778e-01
+epoch  569 | train 1.419085e-01 | val 1.419486e-01 |  23.238 s | best 1.419486e-01 @569 * | gnorm mean 1.665e-01 max 3.516e-01
+epoch  570 | train 1.420031e-01 | val 1.419414e-01 |  23.235 s | best 1.419414e-01 @570 * | gnorm mean 1.732e-01 max 3.171e-01
+epoch  571 | train 1.418463e-01 | val 1.419323e-01 |  23.241 s | best 1.419323e-01 @571 * | gnorm mean 1.669e-01 max 3.930e-01
+epoch  572 | train 1.418460e-01 | val 1.419429e-01 |  23.222 s | best 1.419323e-01 @571 | gnorm mean 1.699e-01 max 4.141e-01
+epoch  573 | train 1.416012e-01 | val 1.419340e-01 |  23.238 s | best 1.419323e-01 @571 | gnorm mean 1.675e-01 max 3.824e-01
+epoch  574 | train 1.420148e-01 | val 1.419377e-01 |  23.264 s | best 1.419323e-01 @571 | gnorm mean 1.725e-01 max 3.607e-01
+epoch  575 | train 1.424356e-01 | val 1.419222e-01 |  23.262 s | best 1.419222e-01 @575 * | gnorm mean 1.685e-01 max 3.545e-01
+epoch  576 | train 1.418770e-01 | val 1.419087e-01 |  23.223 s | best 1.419087e-01 @576 * | gnorm mean 1.704e-01 max 3.324e-01
+epoch  577 | train 1.420458e-01 | val 1.418890e-01 |  23.126 s | best 1.418890e-01 @577 * | gnorm mean 1.678e-01 max 4.092e-01
+epoch  578 | train 1.421992e-01 | val 1.418778e-01 |  23.131 s | best 1.418778e-01 @578 * | gnorm mean 1.749e-01 max 3.924e-01
+epoch  579 | train 1.418539e-01 | val 1.418722e-01 |  23.102 s | best 1.418722e-01 @579 * | gnorm mean 1.682e-01 max 3.182e-01
+epoch  580 | train 1.420888e-01 | val 1.418843e-01 |  23.176 s | best 1.418722e-01 @579 | gnorm mean 1.803e-01 max 4.086e-01
+epoch  581 | train 1.419998e-01 | val 1.419055e-01 |  23.134 s | best 1.418722e-01 @579 | gnorm mean 1.696e-01 max 3.260e-01
+epoch  582 | train 1.416783e-01 | val 1.419117e-01 |  23.176 s | best 1.418722e-01 @579 | gnorm mean 1.718e-01 max 3.396e-01
+epoch  583 | train 1.420440e-01 | val 1.418872e-01 |  23.155 s | best 1.418722e-01 @579 | gnorm mean 1.628e-01 max 3.234e-01
+epoch  584 | train 1.419204e-01 | val 1.418745e-01 |  23.106 s | best 1.418722e-01 @579 | gnorm mean 1.664e-01 max 3.037e-01
+epoch  585 | train 1.417310e-01 | val 1.418810e-01 |  23.293 s | best 1.418722e-01 @579 | gnorm mean 1.704e-01 max 3.539e-01
+epoch  586 | train 1.418039e-01 | val 1.419241e-01 |  23.301 s | best 1.418722e-01 @579 | gnorm mean 1.739e-01 max 3.780e-01
+epoch  587 | train 1.421419e-01 | val 1.419441e-01 |  23.250 s | best 1.418722e-01 @579 | gnorm mean 1.691e-01 max 3.369e-01
+epoch  588 | train 1.419613e-01 | val 1.419436e-01 |  23.267 s | best 1.418722e-01 @579 | gnorm mean 1.714e-01 max 3.554e-01
+epoch  589 | train 1.416139e-01 | val 1.419171e-01 |  23.279 s | best 1.418722e-01 @579 | gnorm mean 1.668e-01 max 3.498e-01
+epoch  590 | train 1.420597e-01 | val 1.418897e-01 |  23.304 s | best 1.418722e-01 @579 | gnorm mean 1.745e-01 max 3.390e-01
+epoch  591 | train 1.418324e-01 | val 1.418763e-01 |  23.265 s | best 1.418722e-01 @579 | gnorm mean 1.706e-01 max 3.920e-01
+epoch  592 | train 1.421010e-01 | val 1.418692e-01 |  23.284 s | best 1.418692e-01 @592 * | gnorm mean 1.755e-01 max 3.577e-01
+epoch  593 | train 1.419032e-01 | val 1.418514e-01 |  23.236 s | best 1.418514e-01 @593 * | gnorm mean 1.680e-01 max 3.756e-01
+epoch  594 | train 1.421582e-01 | val 1.418512e-01 |  23.303 s | best 1.418512e-01 @594 * | gnorm mean 1.719e-01 max 3.538e-01
+epoch  595 | train 1.416507e-01 | val 1.418320e-01 |  23.227 s | best 1.418320e-01 @595 * | gnorm mean 1.665e-01 max 3.537e-01
+epoch  596 | train 1.419476e-01 | val 1.418258e-01 |  23.230 s | best 1.418258e-01 @596 * | gnorm mean 1.711e-01 max 3.797e-01
+epoch  597 | train 1.414250e-01 | val 1.418077e-01 |  23.293 s | best 1.418077e-01 @597 * | gnorm mean 1.698e-01 max 3.439e-01
+epoch  598 | train 1.416336e-01 | val 1.418400e-01 |  23.391 s | best 1.418077e-01 @597 | gnorm mean 1.680e-01 max 3.141e-01
+epoch  599 | train 1.415236e-01 | val 1.418649e-01 |  23.226 s | best 1.418077e-01 @597 | gnorm mean 1.700e-01 max 3.930e-01
+epoch  600 | train 1.418855e-01 | val 1.418380e-01 |  23.204 s | best 1.418077e-01 @597 | gnorm mean 1.666e-01 max 3.558e-01
+epoch  601 | train 1.418216e-01 | val 1.418471e-01 |  23.186 s | best 1.418077e-01 @597 | gnorm mean 1.692e-01 max 3.666e-01
+epoch  602 | train 1.415640e-01 | val 1.418424e-01 |  23.187 s | best 1.418077e-01 @597 | gnorm mean 1.736e-01 max 3.718e-01
+epoch  603 | train 1.415539e-01 | val 1.418514e-01 |  23.206 s | best 1.418077e-01 @597 | gnorm mean 1.765e-01 max 3.508e-01
+epoch  604 | train 1.420720e-01 | val 1.418894e-01 |  23.214 s | best 1.418077e-01 @597 | gnorm mean 1.721e-01 max 3.605e-01
+epoch  605 | train 1.418133e-01 | val 1.418983e-01 |  23.227 s | best 1.418077e-01 @597 | gnorm mean 1.734e-01 max 3.736e-01
+epoch  606 | train 1.413698e-01 | val 1.418605e-01 |  23.198 s | best 1.418077e-01 @597 | gnorm mean 1.726e-01 max 3.502e-01
+epoch  607 | train 1.419743e-01 | val 1.418431e-01 |  23.201 s | best 1.418077e-01 @597 | gnorm mean 1.654e-01 max 3.146e-01
+epoch  608 | train 1.417945e-01 | val 1.418378e-01 |  23.214 s | best 1.418077e-01 @597 | gnorm mean 1.671e-01 max 3.376e-01
+epoch  609 | train 1.415747e-01 | val 1.418325e-01 |  23.195 s | best 1.418077e-01 @597 | gnorm mean 1.724e-01 max 3.720e-01
+epoch  610 | train 1.414662e-01 | val 1.418304e-01 |  23.220 s | best 1.418077e-01 @597 | gnorm mean 1.661e-01 max 3.237e-01
+epoch  611 | train 1.417700e-01 | val 1.418310e-01 |  23.239 s | best 1.418077e-01 @597 | gnorm mean 1.758e-01 max 3.679e-01
+epoch  612 | train 1.417738e-01 | val 1.418501e-01 |  23.332 s | best 1.418077e-01 @597 | gnorm mean 1.636e-01 max 3.201e-01
+epoch  613 | train 1.416681e-01 | val 1.418674e-01 |  23.126 s | best 1.418077e-01 @597 | gnorm mean 1.756e-01 max 3.658e-01
+epoch  614 | train 1.419845e-01 | val 1.418646e-01 |  23.178 s | best 1.418077e-01 @597 | gnorm mean 1.738e-01 max 3.772e-01
+epoch  615 | train 1.414434e-01 | val 1.418594e-01 |  23.131 s | best 1.418077e-01 @597 | gnorm mean 1.707e-01 max 3.533e-01
+epoch  616 | train 1.418853e-01 | val 1.418589e-01 |  23.169 s | best 1.418077e-01 @597 | gnorm mean 1.699e-01 max 3.604e-01
+epoch  617 | train 1.417133e-01 | val 1.418439e-01 |  23.145 s | best 1.418077e-01 @597 | gnorm mean 1.728e-01 max 3.899e-01
+# done        : 617 epochs, stopped_by=patience, aborted=False, best val 1.418077e-01 @ epoch 597, wall 13862.3 s, 22.467 s/epoch
