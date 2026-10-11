@@ -1,0 +1,25 @@
+# date        : 2026-10-11 20:12:27 KST
+# git commit  : 28f38d55
+# versions    : python 3.12.14  numpy 2.5.2  scipy 1.18.1  torch 2.14.0+cu130 (cuda_available=False)
+# device      : CPU (192 cores) | dtype: complex128 / float64 | deterministic: yes (fixed seeds, no GPU in the receiver)
+# testbed     : D2
+# seed rule   : default_rng([20260926, TBID[testbed], PID[prior], Nr, T, Tp, int(snr)+100])  (trials of a point = ONE stream)
+# code        : rate-1/2 conv (133,171)_8 nu=6 terminated, QPSK, outer iterations = 16 for EVERY arm
+# Demo/ hashes: t2_route_a.py=95a5408901ec125c  t2_trellis.py=31cd0ee9c68e972b  t2_gmm.py=d064e58c7510c769
+# content     : dmc_leak_strata.py -- leakage strata of raw_SRTB16e4 (prior SRT, cell C2), REPORT-ONLY (the NEXT_EXPERIMENTS_DMC16e4 §1 definition, registered for SRT): d = min_train ||h - h_train||^2 / ||h||^2, N' = 160000 (stream 7), strata d < 0.1 / d >= 0.1; decision SNRs [9.0, 12.0, 15.0] from tables_D2_SRTB16e4.txt
+
++9 dB  n=2560  alignment (R5-genie, first 40 replayed trials vs raw, bit-identical): OK;  d median 0.0545, share d < 0.1 = 0.597
+    d < 0.1    n= 1529  failures b* 1294  V1 1231  genie 1188  R = 0.594
+    d >= 0.1   n= 1031  failures b*  317  V1  273  genie  228  R = 0.494
++12 dB  n=2560  alignment (R5-genie, first 40 replayed trials vs raw, bit-identical): OK;  d median 0.0577, share d < 0.1 = 0.607
+    d < 0.1    n= 1553  failures b* 1241  V1 1189  genie 1143  R = 0.531
+    d >= 0.1   n= 1007  failures b*  254  V1  202  genie  184  R = 0.743
++15 dB  n=2560  alignment (R5-genie, first 40 replayed trials vs raw, bit-identical): OK;  d median 0.0520, share d < 0.1 = 0.620
+    d < 0.1    n= 1587  failures b* 1243  V1 1169  genie 1145  R = 0.755
+    d >= 0.1   n=  973  failures b*  187  V1  162  genie  132  R = 0.455
+pooled over the 3 decision SNRs
+    d < 0.1    n= 4669  failures b* 3778  V1 3589  genie 3476  R = 0.626
+    d >= 0.1   n= 3011  failures b*  758  V1  637  genie  544  R = 0.565
+
+alignment OK at every SNR
+report-only: no label, no test, no CI; interpretation is the user's.

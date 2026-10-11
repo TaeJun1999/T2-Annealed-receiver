@@ -1,0 +1,133 @@
+{
+ "manifest_version": 1,
+ "written": "2026-10-11 12:28:35 KST",
+ "git_commit": "5aa7b9b4",
+ "result_tag": "SPDMC",
+ "testbed": "D2",
+ "raw_dir": "/home/HTJ/t2/conf/raw_SPDMC",
+ "n_raw_files": 448,
+ "config_hash": "eb0caca3afabbf35",
+ "code_hashes": {
+  "Demo": {
+   "t2_route_a.py": "95a5408901ec125c",
+   "t2_trellis.py": "31cd0ee9c68e972b",
+   "t2_gmm.py": "d064e58c7510c769"
+  },
+  "conf_code": {
+   "runner.py": "ce43daf517c50eba",
+   "arms.py": "7ad16d731778f6b6",
+   "score.py": "f5379bdf8a085fc9",
+   "common.py": "b521c589b19dfc75",
+   "d2.py": "93e475c4118366bc",
+   "analysis.py": "c44b92fed5e09a43",
+   "rt_tap.py": "5d97dc7124150423",
+   "p3_rules.py": "a06e952b1eddf3ad",
+   "dmimo.py": "7743595578f66bcb",
+   "dmimo_build.py": "ba50631ab69d1f8b"
+  }
+ },
+ "channel_model": {
+  "testbed": "D2",
+  "prior": "DMC",
+  "description": "DMC = D2-pipeline prior DMC, DeepMIMO v4.0.5 ray-traced channels (Wireless InSite; code/dmimo.py, pool built by code/dmimo_build.py, sha 709a6346b0ea763b/9f3237f1997d6b91): 6 city scenarios at 28 GHz, every BS x grid user with a path, DeepMIMO compute_channels, BS ULA Nr facing its users, UE ULA 4 with a frozen yaw ~ U[-180,180) deg, isotropic, half-wavelength, 25 paths, narrowband at the carrier, per-pair path powers normalised, uplink by reciprocity, ensemble-normalised E||H||^2 = Nr Nt; FIXED pool with a 20 m block split (fit / validation / test pools from disjoint tiles)"
+ },
+ "cells": {
+  "C2": {
+   "Nr": 8,
+   "Nt": 4,
+   "T": 16,
+   "Tp": 4,
+   "snrs": [
+    -3,
+    0,
+    3,
+    6,
+    9,
+    12,
+    15
+   ]
+  }
+ },
+ "points": {
+  "D2_C2_DMC_Nr8_T16_Tp4_eig_snr-3": 2560,
+  "D2_C2_DMC_Nr8_T16_Tp4_eig_snr0": 2560,
+  "D2_C2_DMC_Nr8_T16_Tp4_eig_snr12": 2560,
+  "D2_C2_DMC_Nr8_T16_Tp4_eig_snr15": 2560,
+  "D2_C2_DMC_Nr8_T16_Tp4_eig_snr3": 2560,
+  "D2_C2_DMC_Nr8_T16_Tp4_eig_snr6": 2560,
+  "D2_C2_DMC_Nr8_T16_Tp4_eig_snr9": 2560
+ },
+ "trial_stream": {
+  "rule": "default_rng([20260926, TBID[testbed], PID[prior], Nr, T, Tp, int(snr)+100])",
+  "skip_min": 0,
+  "skip_max_end": 2560,
+  "split": "TEST set (trials from 0; paired across arms)"
+ },
+ "run_params": {
+  "beta": "0.7",
+  "dtype": "complex128/float64",
+  "git": "5aa7b9b4",
+  "iters": "16",
+  "n": "40",
+  "seed": "20260926",
+  "snr": [
+   "-3.0",
+   "0.0",
+   "12.0",
+   "15.0",
+   "3.0",
+   "6.0",
+   "9.0"
+  ],
+  "t_in": "5",
+  "n_chunks": 448
+ },
+ "receiver": {
+  "outer_iterations": 16,
+  "beta": 0.7,
+  "arm_overrides": "(none)",
+  "t_in_bigamp": 5,
+  "n_inner_routeA": 1,
+  "dtype": "complex128/float64",
+  "device": "CPU, one thread per worker",
+  "code": "conv (133,171)_8 nu=6 terminated, QPSK"
+ },
+ "gmm": {
+  "bstar": "kron",
+  "kron_K": "4096",
+  "ntrain": 160000.0,
+  "selection": "validation log-likelihood over the pre-registered K grid (BLER never consulted)",
+  "fits_dir": "/home/HTJ/t2/conf/results/gmm_fits_D2_SPDMC",
+  "em_sec": "10073.224403858185"
+ },
+ "sample_counts": {
+  "train_channels": 160000,
+  "score_train": 144000,
+  "score_val": 16000,
+  "test_trials_per_point": [
+   2560
+  ]
+ },
+ "stagec_checkpoint": null,
+ "stagec_status": "not requested (--stagec-ckpt not given) -- arm set is the pre-registered one",
+ "stagec_gate": "(none)",
+ "stagec_ckpt_id": "(none)",
+ "arms": [
+  "OMP-pilot",
+  "R5-genie",
+  "SBL-loop",
+  "SBL-pilot"
+ ],
+ "versions": {
+  "python": "3.12.14",
+  "numpy": "2.5.2",
+  "torch": "2.14.0+cu130",
+  "host": "262d04c812cc",
+  "cpu_count": 192
+ },
+ "output_paths": {
+  "tables": "/home/HTJ/t2/conf/results/tables_D2_SPDMC.txt",
+  "guard": "/home/HTJ/t2/conf/results/guard_D2_SPDMC.txt",
+  "log": "/home/HTJ/t2/conf/logs/run_D2_SPDMC.log"
+ }
+}

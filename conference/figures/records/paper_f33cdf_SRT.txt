@@ -1,0 +1,53 @@
+F33cdf -- Sionna RT (prior SRT: Sionna RT 2.1, built-in scenes munich / etoile / florence at 28 GHz, 20 m block split; cell C2 = 8x4, N_train = 1.6e5): empirical CDF over the 2560 test trials of the per-trial channel-estimation NMSE at the reporting iteration (@16; Pilot-only LMMSE @1).  REPORT-ONLY: no label, no test, no CI.  Recomputed from raw by conference/figures/paper_f33cdf.py (read-only; analysis.load_raw); no number transcribed.
+
+F33cdf_SRT_wide  7.16 x 2.55 in, four panels: SNR -3 +9 +12 +15 dB = -3 dB and the decision SNRs of the registered b* -> V1 pair (conf/results/tables_D2_SRTB16e4.txt); 10 curves = paper_f16deep.SHOW without Perfect CSI (no estimate), same colours and line styles; x drawn over (-35.0, 5.0) dB (clipped in the drawing only).
+
+Curves (internal arm -> figure name): M-ours-dscore-C-V1 -> Proposed (diffusion prior); ALD-pilot -> Annealed Langevin (plug-in); M-ours-bstar -> GMM prior; R2-ours-G -> Gaussian prior; R1-turbo -> Turbo LMMSE receiver; R3-bigamp -> BiG-AMP; R0-pilot@1 -> Pilot-only LMMSE; SBL-loop -> SBL (in loop); SBL-pilot -> SBL (pilot-only); OMP-pilot -> OMP (pilot-only).
+
+  SNR -3 dB (median / 90th percentile of 10 log10 NMSE [dB]; non-finite or non-positive trials):
+    M-ours-dscore-C-V1     -14.76    -8.86   0
+    ALD-pilot              -11.14    -6.06   0
+    M-ours-bstar           -12.76    -7.65   0
+    R2-ours-G               -5.70    -3.56   0
+    R1-turbo                -5.17    -3.37   0
+    R3-bigamp               -4.15    -3.21   0
+    R0-pilot@1              -4.91    -3.21   0
+    SBL-loop                -7.30    -4.81   0
+    SBL-pilot               -7.41    -4.83   0
+    OMP-pilot              -11.92    -4.00   0
+  SNR +9 dB (median / 90th percentile of 10 log10 NMSE [dB]; non-finite or non-positive trials):
+    M-ours-dscore-C-V1     -26.88   -19.58   0
+    ALD-pilot              -23.46   -17.34   0
+    M-ours-bstar           -23.23   -18.51   0
+    R2-ours-G              -15.42    -8.31   0
+    R1-turbo               -14.43    -7.60   0
+    R3-bigamp               -9.59    -5.89   0
+    R0-pilot@1             -15.09   -13.12   0
+    SBL-loop               -20.23    -9.83   0
+    SBL-pilot              -18.99   -16.08   0
+    OMP-pilot              -17.91   -14.22   0
+  SNR +12 dB (median / 90th percentile of 10 log10 NMSE [dB]; non-finite or non-positive trials):
+    M-ours-dscore-C-V1     -29.90   -23.13   0
+    ALD-pilot              -25.71   -20.25   0
+    M-ours-bstar           -25.90   -21.07   0
+    R2-ours-G              -18.51    -8.77   0
+    R1-turbo               -18.01    -8.54   0
+    R3-bigamp               -8.69    -5.03   0
+    R0-pilot@1             -18.02   -15.93   0
+    SBL-loop               -23.53   -10.70   0
+    SBL-pilot              -21.93   -19.03   0
+    OMP-pilot              -20.78   -16.23   0
+  SNR +15 dB (median / 90th percentile of 10 log10 NMSE [dB]; non-finite or non-positive trials):
+    M-ours-dscore-C-V1     -32.53   -26.54   0
+    ALD-pilot              -27.66   -23.09   0
+    M-ours-bstar           -28.86   -23.56   0
+    R2-ours-G              -21.72   -10.02   0
+    R1-turbo               -21.37    -9.50   0
+    R3-bigamp               -9.14    -5.88   0
+    R0-pilot@1             -21.04   -19.29   0
+    SBL-loop               -26.54   -11.67   0
+    SBL-pilot              -25.02   -22.27   0
+    OMP-pilot              -22.73   -19.43   0
+
+Raised blocks (analysis.load_raw NOTE lines) in the raws read: none.
+Layout: legend band 0.52 in (inside its band: asserted, [in] [0.537, 2.169, 6.623, 2.411]); every artist inside the canvas (tight bbox [in] [0.066, 0.041, 7.1, 2.411]); smallest visible text 7 pt; saved at figsize, PNG 300 dpi.

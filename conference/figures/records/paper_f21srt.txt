@@ -1,0 +1,25 @@
+F21srt -- Sionna RT (prior SRT: Sionna RT 2.1, built-in scenes munich / etoile / florence at 28 GHz, 20 m block split; cell C2 = 8x4, N_train = 1.6e5) with the one legend of F16deep_wide: BLER@16 (Pilot-only LMMSE: after the first iteration), failures / trials per SNR -3 +0 +3 +6 +9 +12 +15 dB.  Recomputed from raw by conference/figures/paper_f21dmc.py (read-only; analysis.load_raw, a raised block = a failure); no number transcribed.
+
+F21srt_col  3.5 x 3.45 in, one panel, legend above; the 11 curves of paper_f16deep.SHOW with its shapes and sizes; 95% Wilson bars on Proposed (diffusion prior), GMM prior, Gaussian prior, Perfect CSI.  n = 2560 (test trials 0..2559) at EVERY SNR for every curve (no n = 20480 raw on SRT; NEXT_EXPERIMENTS_SRT16e4 §1).
+
+Curves (internal arm -> figure name): M-ours-dscore-C-V1 -> Proposed (diffusion prior); ALD-pilot -> Annealed Langevin (plug-in); M-ours-bstar -> GMM prior; R2-ours-G -> Gaussian prior; R1-turbo -> Turbo LMMSE receiver; R3-bigamp -> BiG-AMP; R0-pilot@1 -> Pilot-only LMMSE; SBL-loop -> SBL (in loop); SBL-pilot -> SBL (pilot-only); OMP-pilot -> OMP (pilot-only); R5-genie -> Perfect CSI.
+
+Counts:
+    M-ours-dscore-C-V1   2320/2560 2056/2560 1781/2560 1661/2560 1504/2560 1391/2560 1331/2560   raw_SRTB16e4
+    ALD-pilot            2441/2560 2188/2560 1907/2560 1738/2560 1558/2560 1496/2560 1514/2560   raw_ALDSRT
+    M-ours-bstar         2404/2560 2169/2560 1941/2560 1774/2560 1611/2560 1495/2560 1430/2560   raw_SRTB16e4
+    R2-ours-G            2461/2560 2291/2560 2093/2560 1924/2560 1822/2560 1692/2560 1607/2560   raw_SRTB16e4
+    R1-turbo             2507/2560 2396/2560 2205/2560 2047/2560 1906/2560 1754/2560 1676/2560   raw_SRTB16e4
+    R3-bigamp            2502/2560 2399/2560 2284/2560 2191/2560 2187/2560 2214/2560 2232/2560   raw_SRTB16e4
+    R0-pilot@1           2547/2560 2500/2560 2389/2560 2289/2560 2202/2560 2092/2560 2029/2560   raw_SRTB16e4
+    SBL-loop             2423/2560 2212/2560 2001/2560 1846/2560 1684/2560 1585/2560 1535/2560   raw_SPSRT
+    SBL-pilot            2456/2560 2253/2560 2028/2560 1854/2560 1718/2560 1599/2560 1528/2560   raw_SPSRT
+    OMP-pilot            2535/2560 2211/2560 1974/2560 1878/2560 1759/2560 1655/2560 1647/2560   raw_SPSRT
+    R5-genie             2091/2560 1871/2560 1626/2560 1546/2560 1416/2560 1327/2560 1277/2560   raw_SRTB16e4
+
+Drawn baseline curves (Perfect CSI excluded) at or below the proposed curve (point estimates; failures vs the proposed curve's) -- reported only, nothing is tested here; the registered paired tests are in conf/results/review_next/pairB_SPSRT.txt: none.
+Registered table-B labels against the proposed prior (pairB_SPSRT.txt) of the 9 drawn baselines: all (i).
+Raised blocks (analysis.load_raw NOTE lines; kept and counted as failures) in the raws read: none.
+
+Asserts passed: counts = pairB_SPSRT.txt 'BLER@16 failures' table (11 arms x 7 SNRs); Perfect CSI error arrays of raw_ALDSRT and raw_SPSRT = raw_SRTB16e4's; drawn = counted; the panel holds exactly the curves of the legend; no point outside the y range.
+Layout: x ticks at the SNR points, x range (-4, 16); y log (0.3, 1.05), ticks [0.3, 0.5, 0.7, 1.0]; legend band 0.86 in above the axes, 2 columns (inside its band: asserted, [in] [0.435, 2.651, 3.065, 3.389]); every artist inside the canvas (tight bbox [in] [0.156, 0.041, 3.44, 3.389]); smallest visible text 7 pt; saved at figsize, PNG 300 dpi.

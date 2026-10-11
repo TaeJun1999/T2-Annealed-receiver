@@ -1,0 +1,25 @@
+# date        : 2026-10-11 11:56:46 KST
+# git commit  : 3ddb0831
+# versions    : python 3.12.14  numpy 2.5.2  scipy 1.18.1  torch 2.14.0+cu130 (cuda_available=False)
+# device      : CPU (192 cores) | dtype: complex128 / float64 | deterministic: yes (fixed seeds, no GPU in the receiver)
+# testbed     : D2
+# seed rule   : default_rng([20260926, TBID[testbed], PID[prior], Nr, T, Tp, int(snr)+100])  (trials of a point = ONE stream)
+# code        : rate-1/2 conv (133,171)_8 nu=6 terminated, QPSK, outer iterations = 16 for EVERY arm
+# Demo/ hashes: t2_route_a.py=95a5408901ec125c  t2_trellis.py=31cd0ee9c68e972b  t2_gmm.py=d064e58c7510c769
+# content     : dmc_leak_strata.py -- leakage strata of raw_DMCB16e4 (prior DMC, cell C2), REPORT-ONLY (NEXT_EXPERIMENTS_DMC16e4 §1): d = min_train ||h - h_train||^2 / ||h||^2, N' = 160000 (stream 7), strata d < 0.1 / d >= 0.1; decision SNRs [9.0, 12.0, 15.0] from tables_D2_DMCB16e4.txt
+
++9 dB  n=2560  alignment (R5-genie, first 40 replayed trials vs raw, bit-identical): OK;  d median 0.1242, share d < 0.1 = 0.438
+    d < 0.1    n= 1121  failures b*  904  V1  860  genie  716  R = 0.234
+    d >= 0.1   n= 1439  failures b*  319  V1  282  genie  211  R = 0.343
++12 dB  n=2560  alignment (R5-genie, first 40 replayed trials vs raw, bit-identical): OK;  d median 0.1431, share d < 0.1 = 0.396
+    d < 0.1    n= 1013  failures b*  759  V1  723  genie  594  R = 0.218
+    d >= 0.1   n= 1547  failures b*  262  V1  229  genie  160  R = 0.324
++15 dB  n=2560  alignment (R5-genie, first 40 replayed trials vs raw, bit-identical): OK;  d median 0.1258, share d < 0.1 = 0.433
+    d < 0.1    n= 1109  failures b*  713  V1  654  genie  525  R = 0.314
+    d >= 0.1   n= 1451  failures b*  171  V1  147  genie   86  R = 0.282
+pooled over the 3 decision SNRs
+    d < 0.1    n= 3243  failures b* 2376  V1 2237  genie 1835  R = 0.257
+    d >= 0.1   n= 4437  failures b*  752  V1  658  genie  457  R = 0.319
+
+alignment OK at every SNR
+report-only: no label, no test, no CI; interpretation is the user's.

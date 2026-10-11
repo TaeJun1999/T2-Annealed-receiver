@@ -1,0 +1,25 @@
+sha H.npy b9f47f1c7c10a014 split.npy bd7019926eb03e6f pinned ('b9f47f1c7c10a014', 'bd7019926eb03e6f')
+part_munich.npz sha e3de2857fba8986b
+part_etoile.npz sha b5c927eed23b0527
+part_florence.npz sha d9c04a5449711167
+pairs 345600 shape (345600, 8, 4) complex64
+fit / val / test [273748, 20000, 51852] test share 0.1500
+tiles 5982 test tiles 911 overlap tiles 0
+distinct (scene, tx, ty) 5982 == distinct keys 5982
+munich: pairs 115200, sites with pairs 139, max site id 138, LoS 0.8686, mean paths 3.117, per-site pairs max 1000, test share 0.1602
+etoile: pairs 115200, sites with pairs 124, max site id 125, LoS 0.8073, mean paths 2.690, per-site pairs max 1000, test share 0.1436
+florence: pairs 115200, sites with pairs 139, max site id 144, LoS 0.8673, mean paths 3.050, per-site pairs max 1000, test share 0.1463
+LoS all 0.8477  train-side (fit+val) 0.8476  test-side 0.8482
+mean paths all 2.953
+raw ||H||^2/(NrNt): mean 1.026179  median 1.000000  CV 0.350  min 0.0022  max 8.1042
+P_RAW recomputed 1.027118787916483  frozen 1.027118787916483  diff 0.00e+00
+TRAIN_SHA recomputed d15b033bc915cf88 frozen d15b033bc915cf88
+stream 7: distinct True all fit True
+TDMa val stream 8 n=20000: mean 0.99564  s.e. 0.00249  block power CV 0.354
+test stream 10 n=20000: mean ||H||^2/(NrNt) 0.9917
+rank share fit pool: >=0.95 0.815  0.80-0.95 0.147  <0.80 0.039  (0.60-0.80 0.036, <0.60 0.003)  median 0.9998
+rank share test pool: >=0.95 0.796  0.80-0.95 0.159  <0.80 0.045  (0.60-0.80 0.042, <0.60 0.003)  median 0.9997
+rank share val pool: >=0.95 0.816  0.80-0.95 0.145  <0.80 0.039  (0.60-0.80 0.036, <0.60 0.003)  median 0.9998
+TDMh (stream 10 first 2000 vs stream 7): d median 0.0500  share < 0.1 0.634
+expected duplicates among 2560 draws from 51852: 63.2
+done 5 s
