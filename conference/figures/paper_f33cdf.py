@@ -43,8 +43,11 @@ def decision_snrs(tag):
 
 def main(prior):
     tag, sp, ald, prior, name, what, _ = (F.TAG, F.SP, F.ALD, F.PRIOR, F.NAME, F.WHAT, F.REG) if prior == "DMC" else F.SETS[prior]
-    snrs = sorted({-3.0, *decision_snrs(tag)})
-    assert len(snrs) == 4, snrs                                # -3 dB + three decision SNRs (a decision point at -3 dB would need another layout)
+    dec = decision_snrs(tag)
+    snrs = sorted({-3.0, *dec})
+    if len(snrs) == 3:                                         # -3 dB is itself a decision SNR (NEXT_EXPERIMENTS_ROOM16e4 §1): the fourth panel
+        snrs.append(next(s for s in F.SNRS if s > max(dec)))   # = the next grid SNR above the decision SNRs
+    assert len(snrs) == 4, snrs
     D.check_styles()
     plt.rcParams.update(D.RC)
     raws = {t: D.raw(t) for t in (tag, sp, ald)}

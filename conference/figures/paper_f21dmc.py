@@ -36,7 +36,14 @@ YLIM, YTICKS, XLIM = (0.2, 1.05), [0.2, 0.3, 0.5, 0.7, 1.0], (-4, 16)
 # `paper_f21dmc.py SRT` (NEXT_EXPERIMENTS_SRT16e4 §1 "그림"): the same panel for the Sionna RT pool.  Its y range is set by rule
 # from the data -- the largest ladder value below every point and every lower Wilson bar end (YLADDER) -- never by eye.
 SETS = {"SRT": ("SRTB16e4", "SPSRT", "ALDSRT", "SRT", "F21srt",
-                "Sionna RT (prior SRT: Sionna RT 2.1, built-in scenes munich / etoile / florence at 28 GHz, 20 m block split", "NEXT_EXPERIMENTS_SRT16e4 §1")}
+                "Sionna RT (prior SRT: Sionna RT 2.1, built-in scenes munich / etoile / florence at 28 GHz, 20 m block split", "NEXT_EXPERIMENTS_SRT16e4 §1"),
+        # room pools, ONE fixed BS (NEXT_EXPERIMENTS_ROOM16e4 §1 "그림"): the y axis of F16deep_wide (a), not the ladder -- see ROOM below
+        "SRB": ("SRBB16e4", "SPSRB", "ALDSRB", "SRB", "F21srb",
+                "Sionna RT room (prior SRB: Sionna RT 2.1, built-in scene box at 28 GHz, one fixed BS, 1 m block split", "NEXT_EXPERIMENTS_ROOM16e4 §1"),
+        "DMI": ("DMIB16e4", "SPDMI", "ALDDMI", "DMI", "F21dmi",
+                "DeepMIMO indoor (prior DMI: DeepMIMO v4 scenario i1_2p4 at 2.4 GHz, one fixed BS, 0.5 m block split", "NEXT_EXPERIMENTS_ROOM16e4 §1")}
+ROOM = ("SRB", "DMI")                                           # y by the rule of paper_f16deep (a): (Q.YLO, 1.2) while no zero-failure point and
+#                                                               nothing below Q.YLO, else (Q.YLO_RULE, 1.2); zero-failure points as paper_f16deep.draw
 YLADDER = (0.5, 0.3, 0.2, 0.1, 0.05, 0.02, 0.01, 0.005, 0.002, 0.001)
 
 
@@ -63,12 +70,14 @@ def main():
         k, n = np.array([int(x.sum()) for x in e]), np.array([len(x) for x in e])
         assert set(n.tolist()) == {N0} and k.tolist() == tab[a], (a, k.tolist(), tab[a])
         p = D.draw(ax, BY[a], SNRS, k, n, {V1: 5, D.BS: 4, GE: 3}.get(a, 2.9 - 0.05 * SHOW.index(a)))
-        assert (p >= YLIM[0]).all() and (p <= YLIM[1]).all(), (a, p)
+        assert (p[np.isfinite(p)] >= YLIM[0]).all() and (p[np.isfinite(p)] <= YLIM[1]).all(), (a, p)   # a zero-failure point is NaN (the curve breaks there)
         cur[a] = k
         txt.append(f"    {a:<21}" + " ".join(f"{x}/{m}" for x, m in zip(k, n)) + f"   raw_{orig}")
     assert sorted(Q.curves(ax)) == sorted(BY[a].label for a in SHOW)   # the panel holds exactly the curves of the legend
-    ax.set_yscale("log"); ax.set_ylim(*YLIM); ax.set_yticks(YTICKS); ax.set_yticklabels([f"{y:g}" for y in YTICKS])
-    ax.minorticks_off(); ax.set_xticks(SNRS); ax.set_xlim(*XLIM)
+    ax.set_yscale("log"); ax.set_ylim(*YLIM)
+    if YTICKS is not None:                                         # the room pools keep the decade ticks of F16deep_wide (a)
+        ax.set_yticks(YTICKS); ax.set_yticklabels([f"{y:g}" for y in YTICKS]); ax.minorticks_off()
+    ax.set_xticks(SNRS); ax.set_xlim(*XLIM)
     ax.tick_params(axis="x", pad=Q.XTPAD); ax.set_xlabel("SNR [dB]", labelpad=Q.XPAD); ax.set_ylabel("BLER")
     hl = [D.proxy(BY[a]) for a in SHOW]
     leg = fig.legend(hl, [x.get_label() for x in hl], loc="center", ncol=2, frameon=False, fontsize=7,
@@ -96,7 +105,10 @@ def main():
            "tested here; the registered paired tests are in conf/results/review_next/pairB_" + SP + ".txt: " + ("; ".join(below) or "none") + ".",
            f"Registered table-B labels against the proposed prior (pairB_{SP}.txt) of the {len(SHOW) - 2} drawn baselines: "
            + ("all (i)" if not odd else "; ".join(odd) + "; the others (i)") + ".",
-           "Raised blocks (analysis.load_raw NOTE lines; kept and counted as failures) in the raws read: " + ("; ".join(D.NOTES) or "none") + ".",
+           "Raised blocks (analysis.load_raw NOTE lines; kept and counted as failures) in the raws read: " + ("; ".join(D.NOTES) or "none") + "."]
+        + (["Zero-failure points (the curve breaks there; Perfect CSI: fighs_merge.zero_arrows): "
+            + "; ".join(f"{BY[a].label} {s:+.0f} dB" for a in SHOW for s, x in zip(SNRS, cur[a]) if x == 0) + "."] if any((cur[a] == 0).any() for a in SHOW) else [])
+        + [
            "", f"Asserts passed: counts = pairB_{SP}.txt 'BLER@16 failures' table (11 arms x 7 SNRs); Perfect CSI error arrays of raw_{ALD} "
            f"and raw_{SP} = raw_{TAG}'s; drawn = counted; the panel holds exactly the curves of the legend; no point outside the y range.",
            f"Layout: x ticks at the SNR points, x range {XLIM}; y log {YLIM}, ticks {YTICKS}; legend band {BAND} in above the axes, 2 columns "
@@ -113,6 +125,13 @@ if __name__ == "__main__":
             o = {"SPB16e4k": SP, "ALDB16e4k": ALD}.get(BY[a].orig, TAG)
             k = np.array([np.asarray(d[o][(CELL, PRIOR, s)][a]["blk_err"], float)[:, -1].sum() for s in SNRS])
             lows.append((D.wilson(k, np.full(len(k), N0))[0] if a in D.BARS else k / N0).min())
+        if sys.argv[1] in ROOM:
+            zero = any((np.array([np.asarray(d[{"SPB16e4k": SP, "ALDB16e4k": ALD}.get(BY[a].orig, TAG)][(CELL, PRIOR, s)][a]["blk_err"], float)[:, -1].sum()
+                                  for s in SNRS]) == 0).any() for a in SHOW)
+            pos = [x for x in lows if x > 0]
+            YLIM, YTICKS = ((Q.YLO, 1.2) if not zero and min(pos) > Q.YLO else (Q.YLO_RULE, 1.2)), None
+            main()
+            sys.exit(0)
         YLIM = (next(y for y in YLADDER if y < min(lows)), 1.05)
         YTICKS = [y for y in (0.001, 0.002, 0.005, 0.01, 0.02, 0.05, 0.1, 0.2, 0.3, 0.5, 0.7, 1.0) if YLIM[0] <= y and (y >= 0.2 or y in (0.001, 0.01, 0.1) or YLIM[0] >= 0.05)]
     main()
