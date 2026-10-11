@@ -623,3 +623,12 @@ epoch  615 | train 1.414434e-01 | val 1.418594e-01 |  23.131 s | best 1.418077e-
 epoch  616 | train 1.418853e-01 | val 1.418589e-01 |  23.169 s | best 1.418077e-01 @597 | gnorm mean 1.699e-01 max 3.604e-01
 epoch  617 | train 1.417133e-01 | val 1.418439e-01 |  23.145 s | best 1.418077e-01 @597 | gnorm mean 1.728e-01 max 3.899e-01
 # done        : 617 epochs, stopped_by=patience, aborted=False, best val 1.418077e-01 @ epoch 597, wall 13862.3 s, 22.467 s/epoch
+
+# ===== 2026-10-11 18:30:11 KST  D2SXSRT160000 attempt 1  testbed D2 prior SRT  Nr=8 Nt=4
+# DEVICE      : cuda | cuda_available=True | NVIDIA RTX PRO 6000 Blackwell Server Edition | torch 2.14.0+cu130 | train dtype float32 (01_RULES §9.5)
+# data        : n_train=144000 n_val=16000 split_hash=5ef5dca3dca07cf3 E||H||_F^2/(NrNt)=1.000000 (04_SPEC §2)
+# sigma grid  : MEASURED, 20 points, log-uniform draw over [3.3679e-02, 8.5515e-01]
+# hp          : {'arch': 'dit', 'param': 'vp', 'domain': 'angle', 'lr': 0.002238046051591068, 'ema': 0.999, 'batch': 256, 'emb': 256, 'width': 64, 'depth': 6, 'heads': 8, 'patch': 1}  params=479426
+# stopping    : patience 20 on val loss, never before 200 epochs, max 3000 (01_RULES §5)
+# resume      : checkpoint already meets stopped_by=patience at epoch 617 -- no epoch trained, /home/HTJ/t2/conf/ckpt/d2sx_SRT_N160000_a1_fb2.pt left untouched
+# done        : 617 epochs, stopped_by=patience, aborted=False, best val 1.418077e-01 @ epoch 597, wall 3.7 s, 3.728 s/epoch

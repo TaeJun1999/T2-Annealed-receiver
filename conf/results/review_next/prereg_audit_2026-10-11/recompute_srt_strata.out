@@ -1,0 +1,40 @@
+# recompute_srt_strata.py -- trial-stream replay; leak strata (d < 0.1 / d >= 0.1) and rank strata (share of s1^2)
+  training set (stream 7): (160000, 32) complex128; mean ||x||^2/(NrNt) = 1.00000
+
+  -3 dB: share median 0.9997; BLER genie 0.817 V1 0.906 b* 0.939
+    share [0.95, 1.00)  n= 2063 (0.806)  BLER g/V1/b* 0.948 / 0.984 / 0.990  failures 1955 / 2029 / 2043
+    share [0.80, 0.95)  n=  386 (0.151)  BLER g/V1/b* 0.313 / 0.661 / 0.785  failures 121 / 255 / 303
+    share [0.60, 0.80)  n=  107 (0.042)  BLER g/V1/b* 0.131 / 0.318 / 0.523  failures 14 / 34 / 56
+    share [0.00, 0.60)  n=    4 (0.002)  BLER g/V1/b* 0.250 / 0.500 / 0.500  failures 1 / 2 / 2
+
+  +9 dB: share median 0.9997; BLER genie 0.553 V1 0.588 b* 0.629
+    share [0.95, 1.00)  n= 2014 (0.787)  BLER g/V1/b* 0.700 / 0.738 / 0.788  failures 1410 / 1487 / 1587
+    share [0.80, 0.95)  n=  422 (0.165)  BLER g/V1/b* 0.014 / 0.031 / 0.055  failures 6 / 13 / 23
+    share [0.60, 0.80)  n=  117 (0.046)  BLER g/V1/b* 0.000 / 0.026 / 0.009  failures 0 / 3 / 1
+    share [0.00, 0.60)  n=    7 (0.003)  BLER g/V1/b* 0.000 / 0.143 / 0.000  failures 0 / 1 / 0
+    leak: d median 0.0545, share d < 0.1 = 0.597; plain-loop check max|diff| 6.3e-16
+    d < 0.1  n=1529  b* 1294  V1 1231  genie 1188  R = 0.594
+    d >= 0.1  n=1031  b* 317  V1 273  genie 228  R = 0.494
+
+  +12 dB: share median 0.9996; BLER genie 0.518 V1 0.543 b* 0.584
+    share [0.95, 1.00)  n= 2022 (0.790)  BLER g/V1/b* 0.654 / 0.686 / 0.728  failures 1322 / 1387 / 1473
+    share [0.80, 0.95)  n=  410 (0.160)  BLER g/V1/b* 0.007 / 0.005 / 0.037  failures 3 / 2 / 15
+    share [0.60, 0.80)  n=  120 (0.047)  BLER g/V1/b* 0.017 / 0.017 / 0.058  failures 2 / 2 / 7
+    share [0.00, 0.60)  n=    8 (0.003)  BLER g/V1/b* 0.000 / 0.000 / 0.000  failures 0 / 0 / 0
+    leak: d median 0.0577, share d < 0.1 = 0.607; plain-loop check max|diff| 9.0e-16
+    d < 0.1  n=1553  b* 1241  V1 1189  genie 1143  R = 0.531
+    d >= 0.1  n=1007  b* 254  V1 202  genie 184  R = 0.743
+
+  +15 dB: share median 0.9997; BLER genie 0.499 V1 0.520 b* 0.559
+    share [0.95, 1.00)  n= 2055 (0.803)  BLER g/V1/b* 0.620 / 0.645 / 0.691  failures 1274 / 1326 / 1419
+    share [0.80, 0.95)  n=  401 (0.157)  BLER g/V1/b* 0.007 / 0.010 / 0.025  failures 3 / 4 / 10
+    share [0.60, 0.80)  n=   99 (0.039)  BLER g/V1/b* 0.000 / 0.010 / 0.010  failures 0 / 1 / 1
+    share [0.00, 0.60)  n=    5 (0.002)  BLER g/V1/b* 0.000 / 0.000 / 0.000  failures 0 / 0 / 0
+    +15 dB share < 0.80: n 104, genie failures 0 -> 0.0000
+    leak: d median 0.0520, share d < 0.1 = 0.620; plain-loop check max|diff| 7.9e-16
+    d < 0.1  n=1587  b* 1243  V1 1169  genie 1145  R = 0.755
+    d >= 0.1  n=973  b* 187  V1 162  genie 132  R = 0.455
+  pooled d < 0.1  n=4669  b* 3778  V1 3589  genie 3476  R = 0.626
+  pooled d >= 0.1  n=3011  b* 758  V1 637  genie 544  R = 0.565
+
+## SUMMARY: 99 values checked, 0 differ from the record

@@ -13,7 +13,7 @@
 ## 진행 중
 | 작업 | 자원 | 상태 |
 |---|---|---|
-| **SRT16e4** (Sionna RT 내장 도시 장면 3 개 28 GHz, block split, C2, N′ 1.6e5; 주 실행 + baseline 전부; `NEXT_EXPERIMENTS_SRT16e4.md` v2 동결) | GPU 0·1·2 (tmux `tb2srt`: 학습 + GMM 격자, 10-10 23:29 CDT 시작) + CPU 2 스레드 (tmux `sptsrt`: 희소 조정) → CPU 192 (BLER) | 순서: 적합 21 작업·학습 끝 → `bash code/run_srt_post_select.sh <동결 커밋>` → `run_srt_post_gpu.sh 1 ALD <GPU>` → §5 채움·커밋 (`run_srt_eval.sh` 인자 채움) → `run_srt_eval.sh` (+ `run_srt_post_gpu.sh 1 GBP <GPU>`) → 수용 → `run_srt_base.sh` (7 인자) → §6 → Fable 기록 감사 → `paper_f21dmc.py SRT`·`paper_f33cdf.py SRT`. 동결 전·§5 전에는 ll_val·pick·조정 점수·GB′ 를 읽지 않는다. 풀 `~/data/sionna_rt/srt_Nr8/` (git 밖, sha 고정). DeepMIMO (DMC16e4·DMCBASE16e4) 는 끝 — 기록·감사·EXPERIMENTS 행 있음; DMC 시드 a2·a3 학습은 epoch 394 에서 멈춰 둠 (`logs/seeds_DMC_train.log`) |
+| 시드 학습 (등록 밖, 학습만): Sionna RT V1 시드 a2 → a3 → DeepMIMO a2·a3 재개 (epoch 394 부터) | GPU 2, tmux `seedsrt` (`code/run_srt_seeds_train.sh 2`, HT 쌍 22,118 고정; 10-11 06:33 CDT 시작) | 진행 중 (`logs/seeds_SRT_train.log`, 끝 표시 `SEEDS_TRAIN_DONE`; 발산하면 §3d 사다리로 자동 이어 돎). BLER 평가는 별도 등록 + 사용자 결정 |
 | 원고 (IEEE ICC 2027, 마감 2026-10-16) — 웹 채팅에서 사용자가 작성, 자료는 paper 브랜치 (`conference/tools/sync_paper_branch.sh`) | — | 진행 중. 실험 큐·GPU 큐 비어 있음 |
 
 ## 대기열 (순서대로)
@@ -22,6 +22,7 @@
 | 4 | RESULTS.md: SEEDS3·HISNR·SPARSE·SCALE 반영, CONTRIBUTIONS.md (09-27 이전에 머묾), 결과 요약 artifact 페이지, 그림 | — | 사용자 요청 시 (규칙: 요청 때 갱신) | |
 
 ## 완료 (최근)
+- **SRT16e4** (2026-10-11 06:59 CDT 기록): 동결 2e50f269 → §5 = 실행 커밋 28f38d55 → 주 실행 10-11 04:30–06:11 CDT (ACCEPT OK) 표 B `b* → V1` **(i)** 403:93, 판정점 +9/+12/+15; baseline @6cbf9a5e 06:13–06:27 CDT 16 개 중 (i) 14 · `V1-pilot` (iii) · `R4-llr` (iv) → §6 전사 2cb2dca6 + Fable 감사 MUST 0 → 그림 `F21srt_col` · `F33cdf_SRT_wide`, EXPERIMENTS 두 행. DeepMIMO (DMC16e4 · DMCBASE16e4) 도 같은 날 끝.
 - SITE16e4 (2026-10-08 23:23 CDT 기록): 동결 = 실행 커밋 9c4b6fe7 → `run_site16e4.sh` 한 번 (10-08 23:08 CDT; 드리프트 검사 OK) → 표 B `V4 → V1` 라벨 (iii) "판정하지 못함 (유의 방향 없음)", −3 dB 56:33 p=0.019 · 0 dB 23:15 p=0.26 · +3 dB 6:14 p=0.12, pooled 85:62 p=0.069, SNR@0.1 격차 +0.14 dB [90% +0.06, +0.23] → §6.1 + §6.2 Fable 감사 (MUST 0 · SHOULD 1 · NIT 5 반영, 수치 정정 없음) → RESULTS §24·EXPERIMENTS·CONTRIBUTIONS §0 한 줄 (이 커밋). 원고 IV-F 의 §2 문장 반영은 원고 채팅 몫.
 - FIGHS16e4 (2026-10-07 17:09 CDT 기록): 실행 커밋 331f6e57 → 10-06 19:30 CDT 시작, 20:38 CDT 컨테이너 재생성으로 중단, 21:15 CDT `--resume` → 10-07 16:12 CDT `FIGHS_DONE ok=24 fail=0` → §6.1 (생성기 `prereg_audit_2026-10-07/s6_gen.py`) + §6.2 Fable 감사 MUST 0 → 논문 그림 7 개 (F16 (a)·F17·F20 (b)·F21·F22·F24 (c)(d)·F31 (b)) 의 +6..+15 dB 점 = n 20480, 기록 `conference/figures/records/`, 캡션 메모 `conference/figures/README.md` 'FIGHS16e4 merge'.
 - NSCALE (2026-10-06 15:46 CDT 기록): §5 = 실행 커밋 68d4d353 → eval 10-06 08:11–15:06 CDT `NSCALE_DONE ok=89 fail=0` → §6.1 (생성기 s6_gen.py) + §6.2 Fable 감사 MUST 0 (c69222a5) → RESULTS §23 (7adcee92); 논문 F16 (b) 에 6.4e5·1.28e6 점 (35e9b293), 표 I 초안·F30top (46a7477d).
@@ -37,6 +38,9 @@
 1. (사용자가 직접 처리: 저장소 공개 여부 — 목록에서 제외)
 2. (해결 10-05 CDT, 사용자: "저널까지 확장하는 건 무리 — paper 에 쓸 좋은 source·결과는 모두 conference 에") → 저널판 없음, 비정상 묶음 포함 학회 원고. DECISIONS 같은 날 줄
 3. (선택) 불일치 20 조합 전부, A′ 시공간 prior, C9 N-스케일링 (SEEDSNR 끝남) — 저널판이 없으므로 하려면 학회 원고 일정 안에서
+4. (10-11 CDT) ray-traced 두 풀 (DeepMIMO · Sionna RT): NMSE CDF 그림 (`F33cdf_{DMC,SRT}_wide`) 을 원고에 넣을지·어느 SNR 을 보일지
+5. (10-11 CDT) DMC·SRT 시드 강건성 BLER (시드 a2·a3 학습은 GPU 2 에서 진행 중) 을 등록·실행할지
+6. (10-11 CDT) BLER 이 낮은 구성 (스트림 수를 줄이는 등) 을 ray-traced 풀에 새로 등록할지; DMC16e4 수용 (c) 문구 판단 (감사 N4)
 
 ## 원고 결정 기록 (2026-10-06 15:50 CDT)
 - GitHub 기본 브랜치 = `paper` (사용자가 바꿈).
