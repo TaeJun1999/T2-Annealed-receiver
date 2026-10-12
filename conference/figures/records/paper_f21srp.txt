@@ -1,0 +1,26 @@
+F21srp -- Sionna RT room, moving UE (prior SRP: Sionna RT 2.1, built-in scene box with its metal walls as shipped at 28 GHz, LoS + first-order reflections, one fixed BS, one UE on a lawn-mower route, split by time with no guard band; cell C2 = 8x4, N_train = 1.6e5) with the one legend of F16deep_wide: BLER@16 (Pilot-only LMMSE: after the first iteration), failures / trials per SNR -3 +0 +3 +6 +9 +12 +15 dB.  Recomputed from raw by conference/figures/paper_f21dmc.py (read-only; analysis.load_raw, a raised block = a failure); no number transcribed.
+
+F21srp_col  3.5 x 3.45 in, one panel, legend above; the 11 curves of paper_f16deep.SHOW with its shapes and sizes; 95% Wilson bars on Proposed (diffusion prior), GMM prior, Gaussian prior, Perfect CSI.  n = 2560 (test trials 0..2559) at EVERY SNR for every curve (no n = 20480 raw on SRP; NEXT_EXPERIMENTS_PATH16e4 §1).
+
+Curves (internal arm -> figure name): M-ours-dscore-C-V1 -> Proposed (diffusion prior); ALD-pilot -> Annealed Langevin (plug-in); M-ours-bstar -> GMM prior; R2-ours-G -> Gaussian prior; R1-turbo -> Turbo LMMSE receiver; R3-bigamp -> BiG-AMP; R0-pilot@1 -> Pilot-only LMMSE; SBL-loop -> SBL (in loop); SBL-pilot -> SBL (pilot-only); OMP-pilot -> OMP (pilot-only); R5-genie -> Perfect CSI.
+
+Counts:
+    M-ours-dscore-C-V1   812/2560 204/2560 24/2560 4/2560 0/2560 0/2560 0/2560   raw_SRPB16e4
+    ALD-pilot            1315/2560 360/2560 64/2560 15/2560 1/2560 0/2560 0/2560   raw_ALDSRP
+    M-ours-bstar         1356/2560 498/2560 133/2560 29/2560 3/2560 2/2560 0/2560   raw_SRPB16e4
+    R2-ours-G            1491/2560 544/2560 139/2560 27/2560 1/2560 2/2560 0/2560   raw_SRPB16e4
+    R1-turbo             1792/2560 930/2560 283/2560 60/2560 6/2560 6/2560 0/2560   raw_SRPB16e4
+    R3-bigamp            2311/2560 1583/2560 763/2560 410/2560 298/2560 356/2560 332/2560   raw_SRPB16e4
+    R0-pilot@1           2351/2560 1755/2560 882/2560 313/2560 53/2560 30/2560 4/2560   raw_SRPB16e4
+    SBL-loop             1621/2560 623/2560 154/2560 32/2560 2/2560 0/2560 0/2560   raw_SPSRP
+    SBL-pilot            1857/2560 799/2560 224/2560 33/2560 2/2560 0/2560 0/2560   raw_SPSRP
+    OMP-pilot            2020/2560 940/2560 271/2560 81/2560 9/2560 3/2560 1/2560   raw_SPSRP
+    R5-genie             428/2560 81/2560 7/2560 1/2560 0/2560 0/2560 0/2560   raw_SRPB16e4
+
+Drawn baseline curves (Perfect CSI excluded) at or below the proposed curve (point estimates; failures vs the proposed curve's) -- reported only, nothing is tested here; the registered paired tests are in conf/results/review_next/pairB_SPSRP.txt: Annealed Langevin (plug-in) at +12 dB (0 vs 0), +15 dB (0 vs 0); GMM prior at +15 dB (0 vs 0); Gaussian prior at +15 dB (0 vs 0); Turbo LMMSE receiver at +15 dB (0 vs 0); SBL (in loop) at +12 dB (0 vs 0), +15 dB (0 vs 0); SBL (pilot-only) at +12 dB (0 vs 0), +15 dB (0 vs 0).
+Registered table-B labels against the proposed prior (pairB_SPSRP.txt) of the 9 drawn baselines: all (i).
+Raised blocks (analysis.load_raw NOTE lines; kept and counted as failures) in the raws read: none.
+Zero-failure points (the curve breaks there; Perfect CSI: fighs_merge.zero_arrows): Proposed (diffusion prior) +9 dB; Proposed (diffusion prior) +12 dB; Proposed (diffusion prior) +15 dB; Annealed Langevin (plug-in) +12 dB; Annealed Langevin (plug-in) +15 dB; GMM prior +15 dB; Gaussian prior +15 dB; Turbo LMMSE receiver +15 dB; SBL (in loop) +12 dB; SBL (in loop) +15 dB; SBL (pilot-only) +12 dB; SBL (pilot-only) +15 dB; Perfect CSI +9 dB; Perfect CSI +12 dB; Perfect CSI +15 dB.
+
+Asserts passed: counts = pairB_SPSRP.txt 'BLER@16 failures' table (11 arms x 7 SNRs); Perfect CSI error arrays of raw_ALDSRP and raw_SPSRP = raw_SRPB16e4's; drawn = counted; the panel holds exactly the curves of the legend; no point outside the y range.
+Layout: x ticks at the SNR points, x range (-4, 16); y log (3e-05, 1.2), ticks None; legend band 0.86 in above the axes, 2 columns (inside its band: asserted, [in] [0.435, 2.651, 3.065, 3.389]); every artist inside the canvas (tight bbox [in] [0.086, 0.041, 3.44, 3.389]); smallest visible text 7 pt; saved at figsize, PNG 300 dpi.

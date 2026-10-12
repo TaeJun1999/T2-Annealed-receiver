@@ -1,0 +1,26 @@
+F21srb -- Sionna RT room (prior SRB: Sionna RT 2.1, built-in scene box with its metal walls as shipped at 28 GHz, LoS + first-order reflections, one fixed BS, 1 m block split; cell C2 = 8x4, N_train = 1.6e5) with the one legend of F16deep_wide: BLER@16 (Pilot-only LMMSE: after the first iteration), failures / trials per SNR -3 +0 +3 +6 +9 +12 +15 dB.  Recomputed from raw by conference/figures/paper_f21dmc.py (read-only; analysis.load_raw, a raised block = a failure); no number transcribed.
+
+F21srb_col  3.5 x 3.45 in, one panel, legend above; the 11 curves of paper_f16deep.SHOW with its shapes and sizes; 95% Wilson bars on Proposed (diffusion prior), GMM prior, Gaussian prior, Perfect CSI.  n = 2560 (test trials 0..2559) at EVERY SNR for every curve (no n = 20480 raw on SRB; NEXT_EXPERIMENTS_ROOM16e4 §1).
+
+Curves (internal arm -> figure name): M-ours-dscore-C-V1 -> Proposed (diffusion prior); ALD-pilot -> Annealed Langevin (plug-in); M-ours-bstar -> GMM prior; R2-ours-G -> Gaussian prior; R1-turbo -> Turbo LMMSE receiver; R3-bigamp -> BiG-AMP; R0-pilot@1 -> Pilot-only LMMSE; SBL-loop -> SBL (in loop); SBL-pilot -> SBL (pilot-only); OMP-pilot -> OMP (pilot-only); R5-genie -> Perfect CSI.
+
+Counts:
+    M-ours-dscore-C-V1   704/2560 126/2560 17/2560 3/2560 4/2560 0/2560 0/2560   raw_SRBB16e4
+    ALD-pilot            1316/2560 287/2560 55/2560 11/2560 3/2560 2/2560 0/2560   raw_ALDSRB
+    M-ours-bstar         827/2560 153/2560 40/2560 6/2560 5/2560 1/2560 1/2560   raw_SRBB16e4
+    R2-ours-G            1685/2560 670/2560 178/2560 49/2560 18/2560 4/2560 2/2560   raw_SRBB16e4
+    R1-turbo             2089/2560 1198/2560 406/2560 108/2560 44/2560 10/2560 6/2560   raw_SRBB16e4
+    R3-bigamp            2252/2560 1369/2560 634/2560 382/2560 291/2560 342/2560 331/2560   raw_SRBB16e4
+    R0-pilot@1           2420/2560 1807/2560 860/2560 318/2560 140/2560 53/2560 17/2560   raw_SRBB16e4
+    SBL-loop             1423/2560 510/2560 126/2560 22/2560 7/2560 3/2560 4/2560   raw_SPSRB
+    SBL-pilot            1774/2560 650/2560 137/2560 35/2560 12/2560 4/2560 2/2560   raw_SPSRB
+    OMP-pilot            1924/2560 888/2560 288/2560 76/2560 39/2560 8/2560 6/2560   raw_SPSRB
+    R5-genie             299/2560 36/2560 9/2560 1/2560 0/2560 0/2560 0/2560   raw_SRBB16e4
+
+Drawn baseline curves (Perfect CSI excluded) at or below the proposed curve (point estimates; failures vs the proposed curve's) -- reported only, nothing is tested here; the registered paired tests are in conf/results/review_next/pairB_SPSRB.txt: Annealed Langevin (plug-in) at +9 dB (3 vs 4), +15 dB (0 vs 0).
+Registered table-B labels against the proposed prior (pairB_SPSRB.txt) of the 9 drawn baselines: all (i).
+Raised blocks (analysis.load_raw NOTE lines; kept and counted as failures) in the raws read: none.
+Zero-failure points (the curve breaks there; Perfect CSI: fighs_merge.zero_arrows): Proposed (diffusion prior) +12 dB; Proposed (diffusion prior) +15 dB; Annealed Langevin (plug-in) +15 dB; Perfect CSI +9 dB; Perfect CSI +12 dB; Perfect CSI +15 dB.
+
+Asserts passed: counts = pairB_SPSRB.txt 'BLER@16 failures' table (11 arms x 7 SNRs); Perfect CSI error arrays of raw_ALDSRB and raw_SPSRB = raw_SRBB16e4's; drawn = counted; the panel holds exactly the curves of the legend; no point outside the y range.
+Layout: x ticks at the SNR points, x range (-4, 16); y log (3e-05, 1.2), ticks None; legend band 0.86 in above the axes, 2 columns (inside its band: asserted, [in] [0.435, 2.651, 3.065, 3.389]); every artist inside the canvas (tight bbox [in] [0.086, 0.041, 3.44, 3.389]); smallest visible text 7 pt; saved at figsize, PNG 300 dpi.

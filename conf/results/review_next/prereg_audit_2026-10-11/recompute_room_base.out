@@ -1,0 +1,79 @@
+# recompute_room_base.py -- independent recomputation (direct numpy read of the four raw sets), prior SRB
+
+## 0. chunk plan / run|git / genie identity / raised trials / meta|sparse == pick / ALD estimate
+  raw_SRBB16e4: problems = none;  run|git = ['9ad4caa0']
+  raw_PILSRB: problems = none;  run|git = ['7d524638']
+  raw_ALDSRB: problems = none;  run|git = ['7d524638']
+  raw_SPSRB: problems = none;  run|git = ['7d524638']
+  ald_PILSRB.npz keys ['snrs', 'skip', 'b', 'hhat', 'v', 'nmse', 'tune', 'prov', 'ckpt_sha', 'rotation', 'train_prior', 'doppler']; ckpt_sha ed437f21af15c305
+  test ALD NMSE (mean over trials, dB): [np.float64(-7.22), np.float64(-11.11), np.float64(-14.34), np.float64(-17.17), np.float64(-19.66), np.float64(-22.15), np.float64(-24.36)]
+
+## 1. failures @16 per arm (R0-pilot@1 at iteration 1) -- §6.4 table, the 7 'other arms', V0/V4/V4b/R0@16
+  M-ours-dscore-C-V1       704   126    17     3     4     0     0
+  ALD-pilot               1316   287    55    11     3     2     0
+  M-ours-bstar             827   153    40     6     5     1     1
+  R2-ours-G               1685   670   178    49    18     4     2
+  R1-turbo                2089  1198   406   108    44    10     6
+  R3-bigamp               2252  1369   634   382   291   342   331
+  R0-pilot@1              2420  1807   860   318   140    53    17
+  SBL-loop                1423   510   126    22     7     3     4
+  SBL-pilot               1774   650   137    35    12     4     2
+  OMP-pilot               1924   888   288    76    39     8     6
+  R5-genie                 299    36     9     1     0     0     0
+  V1-pilot                1087   195    22     6     3     0     0
+  bstar-pilot             1196   238    41     6     6     1     1
+  ALDv-pilot              1315   271    44     9     5     1     0
+  M-ours-bstar-scalar      865   184    48    10     4     0     1
+  M-ours-gmm32            1242   345    82    15    11     1     3
+  R4-scvamp               2228  1482   690   301   149    73    21
+  R4-llr                  2401  2174  2003  1500   931   531   273
+  R0-pilot                2061   931   246    69    21     7     3
+  M-ours-dscore-C-V0      2560  2560  2559  2557  2519  2304  1674
+  M-ours-dscore-C-V4       742   133    27     4     4     0     0
+  M-ours-dscore-C-V4b      740   130    23     4     3     0     0
+  -3 dB BLER of the 16 X: {M-ours-bstar: 0.3230, M-ours-bstar-scalar: 0.3379, M-ours-gmm32: 0.4852, R0-pilot@1: 0.9453, R1-turbo: 0.8160, R2-ours-G: 0.6582, R3-bigamp: 0.8797, R4-llr: 0.9379, R4-scvamp: 0.8703, bstar-pilot: 0.4672, V1-pilot: 0.4246, ALD-pilot: 0.5141, ALDv-pilot: 0.5137, SBL-loop: 0.5559, SBL-pilot: 0.6930, OMP-pilot: 0.7516}
+
+## 2. table B X -> V1 (anchor X): decision SNRs, a:b, p, power guard, label, F_X-F_V1 @-3, R_X -3 dB guard, R_X decision points
+  genie -3 dB failures 299 >= V1 704? False
+  M-ours-bstar           dp [-3, 0, 3]  -3 209:86 p=5.6e-13  +0 65:38 p=0.01  +3 28:5 p=6.6e-05  pooled 302:129 p=4.5e-17  POWERED V1 3/3 X 0/3 -> (i)  gap 123  R-3 (np.float64(0.233), np.float64(0.187), np.float64(0.2793))  Rdp 0.256 [0.212, 0.299] undef-rep 0
+  M-ours-bstar-scalar    dp [-3, 0, 3]  -3 243:82 p=1.2e-19  +0 94:36 p=3.7e-07  +3 36:5 p=7.8e-07  pooled 373:123 p=2.7e-30  POWERED V1 3/3 X 0/3 -> (i)  gap 161  R-3 (np.float64(0.2845), np.float64(0.2407), np.float64(0.3278))  Rdp 0.332 [0.292, 0.373] undef-rep 0
+  M-ours-gmm32           dp [-3, 0, 3]  -3 581:43 p=1.8e-121  +0 244:25 p=2.7e-46  +3 68:3 p=5.1e-17  pooled 893:71 p=8.6e-182  POWERED V1 3/3 X 0/3 -> (i)  gap 538  R-3 (np.float64(0.5705), np.float64(0.5434), np.float64(0.6013))  Rdp 0.620 [0.596, 0.646] undef-rep 0
+  R0-pilot@1             dp [3, 6, 9]  +3 843:0 p=3.4e-254  +6 315:0 p=3e-95  +9 136:0 p=2.3e-41  pooled 1294:0 p=0  POWERED V1 3/3 X 0/3 -> (i)  gap 1716  R-3 ('undef', np.float64(0.9453))  Rdp 0.989 [0.983, 0.995] undef-rep 0
+  R1-turbo               dp [0, 3, 6]  +0 1075:3 p=1.3e-316  +3 391:2 p=7.7e-114  +6 106:1 p=1.3e-30  pooled 1572:6 p=0  POWERED V1 3/3 X 0/3 -> (i)  gap 1385  R-3 (np.float64(0.7737), np.float64(0.7571), np.float64(0.7919))  Rdp 0.940 [0.930, 0.950] undef-rep 0
+  R2-ours-G              dp [0, 3, 6]  +0 555:11 p=3.7e-148  +3 164:3 p=8.3e-45  +6 47:1 p=3.5e-13  pooled 766:15 p=2.6e-204  POWERED V1 3/3 X 0/3 -> (i)  gap 981  R-3 (np.float64(0.7078), np.float64(0.6864), np.float64(0.7308))  Rdp 0.882 [0.863, 0.901] undef-rep 0
+  R3-bigamp              dp [9, 12, 15]  +9 288:1 p=5.8e-85  +12 342:0 p=2.2e-103  +15 331:0 p=4.6e-100  pooled 961:1 p=4.9e-287  POWERED V1 3/3 X 0/3 -> (i)  gap 1548  R-3 (np.float64(0.7926), np.float64(0.7771), np.float64(0.8093))  Rdp 0.996 [0.992, 0.999] undef-rep 0
+  R4-llr                 dp [9, 12, 15]  +9 927:0 p=1.8e-279  +12 531:0 p=2.8e-160  +15 273:0 p=1.3e-82  pooled 1731:0 p=0  POWERED V1 3/3 X 0/3 -> (i)  gap 1697  R-3 ('undef', np.float64(0.9379))  Rdp 0.998 [0.996, 0.999] undef-rep 0
+  R4-scvamp              dp [3, 6, 9]  +3 674:1 p=8.6e-201  +6 298:0 p=3.9e-90  +9 145:0 p=4.5e-44  pooled 1117:1 p=0  POWERED V1 3/3 X 0/3 -> (i)  gap 1524  R-3 (np.float64(0.79), np.float64(0.7743), np.float64(0.8075))  Rdp 0.988 [0.981, 0.994] undef-rep 0
+  bstar-pilot            dp [-3, 0, 3]  -3 535:43 p=4.2e-109  +0 138:26 p=1.2e-19  +3 28:4 p=1.9e-05  pooled 701:73 p=1.1e-129  POWERED V1 3/3 X 0/3 -> (i)  gap 492  R-3 (np.float64(0.5485), np.float64(0.5182), np.float64(0.5805))  Rdp 0.555 [0.527, 0.584] undef-rep 0
+  V1-pilot               dp [-3, 0, 3]  -3 417:34 p=6.2e-85  +0 92:23 p=5.8e-11  +3 9:4 p=0.27  pooled 518:61 p=2.8e-91  POWERED V1 2/3 X 0/3 -> (i)  gap 383  R-3 (np.float64(0.486), np.float64(0.4548), np.float64(0.5203))  Rdp 0.476 [0.446, 0.508] undef-rep 0
+  ALD-pilot              dp [-3, 0, 3]  -3 657:45 p=2.5e-140  +0 181:20 p=1.3e-33  +3 41:3 p=1.6e-09  pooled 879:68 p=1.5e-180  POWERED V1 3/3 X 0/3 -> (i)  gap 612  R-3 (np.float64(0.6018), np.float64(0.5748), np.float64(0.6309))  Rdp 0.617 [0.593, 0.642] undef-rep 0
+  ALDv-pilot             dp [-3, 0, 3]  -3 652:41 p=1.4e-142  +0 171:26 p=2.3e-27  +3 29:2 p=4.6e-07  pooled 852:69 p=1.8e-172  POWERED V1 3/3 X 0/3 -> (i)  gap 611  R-3 (np.float64(0.6014), np.float64(0.5745), np.float64(0.63))  Rdp 0.609 [0.585, 0.635] undef-rep 0
+  SBL-loop               dp [-3, 0, 3]  -3 760:41 p=1.9e-172  +0 398:14 p=7.3e-99  +3 113:4 p=9.2e-29  pooled 1271:59 p=3.5e-297  POWERED V1 3/3 X 0/3 -> (i)  gap 719  R-3 (np.float64(0.6397), np.float64(0.6139), np.float64(0.6667))  Rdp 0.707 [0.686, 0.728] undef-rep 0
+  SBL-pilot              dp [-3, 0, 3]  -3 1089:19 p=2.9e-293  +0 536:12 p=3e-141  +3 122:2 p=7.3e-34  pooled 1747:33 p=0  POWERED V1 3/3 X 0/3 -> (i)  gap 1070  R-3 (np.float64(0.7254), np.float64(0.7056), np.float64(0.7475))  Rdp 0.773 [0.757, 0.790] undef-rep 0
+  OMP-pilot              dp [0, 3, 6]  +0 771:9 p=8.9e-215  +3 273:2 p=1.3e-78  +6 75:2 p=4e-20  pooled 1119:13 p=2.6e-311  POWERED V1 3/3 X 0/3 -> (i)  gap 1220  R-3 (np.float64(0.7508), np.float64(0.7329), np.float64(0.7711))  Rdp 0.917 [0.903, 0.931] undef-rep 0
+  SUMMARY-B (15): (i) 15, (ii) 0, not decided 0; b* -> V1 (i);  16: (i) 16, (ii) 0, not decided 0
+  X* = M-ours-bstar (F = 827); R_X* -3 dB defined? True; R_X* = 0.233 [0.187, 0.279]
+
+## 3. report-only pairs of §6.5 (pair_cross / pair_ald format; anchor = first member)
+  bstar-pilot -> V1-pilot  dp [-3, 0, 3]  -3 208:99 p=4.7e-10  +0 96:53 p=0.00054  +3 24:5 p=0.00055  pooled 328:157 p=6.2e-15  POWERED second 3/3 first 0/3 -> (i)
+  bstar-pilot -> M-ours-bstar  dp [-3, 0, 3]  -3 410:41 p=1.2e-77  +0 107:22 p=1.3e-14  +3 15:14 p=1  pooled 532:77 p=1.3e-84  POWERED second 2/3 first 0/3 -> (i)
+  V1-pilot -> M-ours-bstar  dp [-3, 0, 3]  -3 365:105 p=1.1e-34  +0 88:46 p=0.00036  +3 6:24 p=0.0014  pooled 459:175 p=2.7e-30  POWERED second 2/3 first 1/3 -> (i)
+  ALDv-pilot -> M-ours-dscore-C-V1  dp [-3, 0, 3]  -3 652:41 p=1.4e-142  +0 171:26 p=2.3e-27  +3 29:2 p=4.6e-07  pooled 852:69 p=1.8e-172  POWERED second 3/3 first 0/3 -> (i)
+  ALD-pilot -> M-ours-dscore-C-V1  dp [-3, 0, 3]  -3 657:45 p=2.5e-140  +0 181:20 p=1.3e-33  +3 41:3 p=1.6e-09  pooled 879:68 p=1.5e-180  POWERED second 3/3 first 0/3 -> (i)
+  ALDv-pilot -> V1-pilot  dp [-3, 0, 3]  -3 342:114 p=1.6e-27  +0 123:47 p=4.9e-09  +3 28:6 p=0.0002  pooled 493:167 p=3e-38  POWERED second 3/3 first 0/3 -> (i)
+  ALDv-pilot -> M-ours-bstar  dp [-3, 0, 3]  -3 562:74 p=8.4e-94  +0 161:43 p=3.1e-17  +3 27:23 p=0.67  pooled 750:140 p=1.7e-101  POWERED second 2/3 first 0/3 -> (i)
+  bstar-pilot -> ALDv-pilot  dp [-3, 0, 3]  -3 178:297 p=5.3e-08  +0 86:119 p=0.025  +3 19:22 p=0.76  pooled 283:438 p=8.6e-09  POWERED second 0/3 first 2/3 -> (ii)
+  ALD-pilot -> ALDv-pilot  dp [-3, 0, 3]  -3 44:43 p=1  +0 39:23 p=0.056  +3 13:2 p=0.0074  pooled 96:68 p=0.035  POWERED second 1/3 first 0/3 -> (iii)
+
+## 4. §3 prediction 13 sentences
+  counts: SBL-pilot -3 dB 1774, R0@1 2420
+
+## 5. figure records: paper_f21srb.txt counts (11 x 7) + zero-failure list + 'at or below' line; paper_f33cdf_SRB.txt medians / p90 (10 x 4)
+  zero-failure points from raw: {'M-ours-dscore-C-V1': [12, 15], 'ALD-pilot': [15], 'R5-genie': [9, 12, 15]} (total 6)
+    DIFF  figure record zero-failure list == §6.4 list: recomputed {'Perfect CSI +12 dB', 'fighs_merge.zero_arrows): Proposed (diffusion prior) +12 dB', 'Proposed (diffusion prior) +15 dB', 'Annealed Langevin (plug-in) +15 dB', 'Perfect CSI +9 dB', 'Perfect CSI +15 dB'}  record {'Perfect CSI +12 dB', 'Proposed (diffusion prior) +15 dB', 'Annealed Langevin (plug-in) +15 dB', 'Perfect CSI +9 dB', 'Perfect CSI +15 dB', 'Proposed (diffusion prior) +12 dB'}
+  raw: drawn baseline points with F_X <= F_V1: [('ALD-pilot', 9, 3, 4), ('ALD-pilot', 15, 0, 0)]
+
+## 6. sha256[:16] of the §5 / §6 files; pick and tune JSON vs §5 / §6.5; pick reproduced by sparse_tune.per_snr_pick
+  tune keys: ['cell', 'grid', 'n', 'nmse_db', 'pick', 'prior', 'seed', 'wall_sec']; wall_sec 6345.1762754917145; pick keys: ['edge_rho_omp', 'edge_rho_sbl', 'per_snr', 'rho_omp', 'rho_sbl', 'rhos', 'score_omp_db', 'score_sbl_db']
+
+## SUMMARY: 466 values checked, 1 differ from the record

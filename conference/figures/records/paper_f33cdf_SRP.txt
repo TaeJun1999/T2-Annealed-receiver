@@ -1,0 +1,53 @@
+F33cdf -- Sionna RT room, moving UE (prior SRP: Sionna RT 2.1, built-in scene box with its metal walls as shipped at 28 GHz, LoS + first-order reflections, one fixed BS, one UE on a lawn-mower route, split by time with no guard band; cell C2 = 8x4, N_train = 1.6e5): empirical CDF over the 2560 test trials of the per-trial channel-estimation NMSE at the reporting iteration (@16; Pilot-only LMMSE @1).  REPORT-ONLY: no label, no test, no CI.  Recomputed from raw by conference/figures/paper_f33cdf.py (read-only; analysis.load_raw); no number transcribed.
+
+F33cdf_SRP_wide  7.16 x 2.55 in, four panels: SNR -3 +0 +3 +6 dB = -3 dB and the decision SNRs of the registered b* -> V1 pair (conf/results/tables_D2_SRPB16e4.txt); 10 curves = paper_f16deep.SHOW without Perfect CSI (no estimate), same colours and line styles; x drawn over (-35.0, 5.0) dB (clipped in the drawing only).
+
+Curves (internal arm -> figure name): M-ours-dscore-C-V1 -> Proposed (diffusion prior); ALD-pilot -> Annealed Langevin (plug-in); M-ours-bstar -> GMM prior; R2-ours-G -> Gaussian prior; R1-turbo -> Turbo LMMSE receiver; R3-bigamp -> BiG-AMP; R0-pilot@1 -> Pilot-only LMMSE; SBL-loop -> SBL (in loop); SBL-pilot -> SBL (pilot-only); OMP-pilot -> OMP (pilot-only).
+
+  SNR -3 dB (median / 90th percentile of 10 log10 NMSE [dB]; non-finite or non-positive trials):
+    M-ours-dscore-C-V1     -14.16    -7.76   0
+    ALD-pilot               -8.90    -3.94   0
+    M-ours-bstar            -9.67    -4.55   0
+    R2-ours-G               -8.16    -3.88   0
+    R1-turbo                -7.36    -4.13   0
+    R3-bigamp               -3.86    -2.83   0
+    R0-pilot@1              -6.45    -3.57   0
+    SBL-loop                -7.86    -3.38   0
+    SBL-pilot               -6.27    -2.90   0
+    OMP-pilot               -6.15    -2.53   0
+  SNR +0 dB (median / 90th percentile of 10 log10 NMSE [dB]; non-finite or non-positive trials):
+    M-ours-dscore-C-V1     -17.39   -12.61   0
+    ALD-pilot              -12.52    -8.27   0
+    M-ours-bstar           -13.69    -7.98   0
+    R2-ours-G              -13.19    -7.39   0
+    R1-turbo               -12.39    -6.50   0
+    R3-bigamp               -6.06    -4.29   0
+    R0-pilot@1              -8.77    -5.59   0
+    SBL-loop               -13.71    -6.89   0
+    SBL-pilot               -9.08    -5.47   0
+    OMP-pilot               -8.70    -4.99   0
+  SNR +3 dB (median / 90th percentile of 10 log10 NMSE [dB]; non-finite or non-positive trials):
+    M-ours-dscore-C-V1     -19.87   -15.84   0
+    ALD-pilot              -15.05   -11.18   0
+    M-ours-bstar           -16.69   -12.66   0
+    R2-ours-G              -16.43   -12.49   0
+    R1-turbo               -16.31   -10.95   0
+    R3-bigamp              -10.59    -6.37   0
+    R0-pilot@1             -11.30    -8.20   0
+    SBL-loop               -17.17   -12.79   0
+    SBL-pilot              -11.85    -8.36   0
+    OMP-pilot              -11.33    -7.87   0
+  SNR +6 dB (median / 90th percentile of 10 log10 NMSE [dB]; non-finite or non-positive trials):
+    M-ours-dscore-C-V1     -22.44   -18.16   0
+    ALD-pilot              -17.54   -13.70   0
+    M-ours-bstar           -19.47   -16.07   0
+    R2-ours-G              -19.33   -15.97   0
+    R1-turbo               -19.33   -15.86   0
+    R3-bigamp              -14.44    -8.64   0
+    R0-pilot@1             -13.94   -10.85   0
+    SBL-loop               -19.99   -16.52   0
+    SBL-pilot              -14.65   -11.16   0
+    OMP-pilot              -13.21    -9.92   0
+
+Raised blocks (analysis.load_raw NOTE lines) in the raws read: none.
+Layout: legend band 0.52 in (inside its band: asserted, [in] [0.537, 2.169, 6.623, 2.411]); every artist inside the canvas (tight bbox [in] [0.066, 0.041, 7.1, 2.411]); smallest visible text 7 pt; saved at figsize, PNG 300 dpi.

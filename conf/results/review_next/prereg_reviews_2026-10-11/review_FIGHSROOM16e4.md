@@ -1,0 +1,53 @@
+# Adversarial review — NEXT_EXPERIMENTS_FIGHSROOM16e4.md draft v1 (git 1404d315)
+
+Reviewer: Claude Fable 5.1 subagent, 2026-10-11 CDT. Read-only; nothing run except `bash -n`, sha256sum, git queries, npz header reads and the `fighs_merge` mapping self-check (CPU). Working dir `~/t2/conf`.
+
+## Verdict
+The script will run as written and the acceptance / merge chain is consistent; every registered sha, file and shell construct checks out. One MUST is a factual error in the frozen text (judgement SNRs), not in the script. Fix it, add the DECISIONS line and the finite-pool disclosure, then freeze.
+
+## MUST
+
+### M-1  "판정점은 모두 이 보강이 건드리지 않는 SNR" is false for the baseline table (header bullet 3, §1 "다중성·해석")
+- Evidence: `results/review_next/pairB_SPSRB.txt` (the registered table-B tests, ROOM16e4 §6): decision SNRs are anchor-based per baseline —
+  `R0-pilot@1 ['+3','+6','+9']`, `R1-turbo ['+0','+3','+6']`, `R2-ours-G ['+0','+3','+6']`, `R3-bigamp ['+9','+12','+15']`, `R4-llr ['+9','+12','+15']`, `R4-scvamp ['+3','+6','+9']`, `OMP-pilot ['+0','+3','+6']`. Five of the nine drawn baselines (R0-pilot@1, R1-turbo, R2-ours-G, R3-bigamp, OMP-pilot) were therefore judged at SNRs this supplement re-measures. ROOM16e4 §6 also reports the control `R2-ours-G → b*` at 0/+3/+6.
+- The labels are unaffected (the tests stay on raw_SRBB16e4 / raw_SPSRB / raw_ALDSRB, n = 2560), so the REPORT-ONLY status holds, but the frozen sentence is wrong and the disclosure matters: for those five curves the figure replaces exactly the points their label was decided on.
+- Fix (replace the sentence in the header bullet and in §1 "다중성·해석"): "**b\* → V1 의 판정점 −3 / 0 / +3 dB 는 이 보강이 건드리지 않는 SNR 이다. baseline 16 개의 판정점은 앵커별이라 R0-pilot@1 (+3/+6/+9), R1-turbo (0/+3/+6), R2-ours-G (0/+3/+6), R3-bigamp (+9/+12/+15), R4-llr (+9/+12/+15), R4-scvamp (+3/+6/+9), OMP-pilot (0/+3/+6) 은 +6 dB 이상을 포함한다 (`pairB_SPSRB.txt`); 그 판정·라벨은 원 raw (n = 2560) 로 그대로이고 새 시행으로 다시 판정하지 않는다 — 그림의 +6..+15 dB 점은 그 판정과 다른 시행 집합이며 캡션에 밝힌다.**"
+
+## SHOULD
+
+### S-1  No DECISIONS.md line for the user decision this registration is built on
+- Evidence: `grep -i -E "FIGHSROOM|매끄러운" DECISIONS.md` → nothing. FIGHS16e4 cited "user decision 2026-10-06 CDT" with a ledger line; the script requires DECISIONS tracked+clean, so the line must go in with (or before) the v2 run commit.
+- Fix: add the 2026-10-11 CDT decision (three options offered, user chose the smooth-curve / 8× trials option; report-only; SRP excluded pending the user's GMM-seed decision) to DECISIONS.md in the v2 commit.
+
+### S-2  "새 시행 10000..30479 는 SRB 에서 한 번도 쓰인 적이 없다" — true for trials, but say what a trial is on a pool prior
+- Evidence: no SRB raw has skip ≥ 10000 (`raw_{SRB,SRBB16e4,SRBB16e4last,SPSRB,PILSRB,ALDSRB}` max skip 2520); ALD dev = trials 2560..3071 (`tune_PILSRB.json` dev_skip 2560, n_dev 512); sparse-tune dev stream `[20260930, …, snr+100]` and GB′ (train stream 10) are separate streams (`code/dmimo.py` docstring). So the sentence is correct.
+- But `dmimo._which`: every trial stream → TEST pool, **i.i.d. with replacement** over 52,353 pairs. The n = 20480 draws per SNR cover ≈ 52353·(1 − e^(−20480/52353)) ≈ 1.7e4 distinct pairs, the same pair recurs within a SNR and across the four SNRs, and pairs of trials 0..2559 recur in the new set. Wilson stays valid for the pool-averaged BLER under i.i.d. draws, but "new trials" are new draws + new noise, not new channels, and the ROOM16e4 label caveat "(1) 유한 풀" applies to the supplement too.
+- Fix: append to the 작성 시점 공개 bullet and to the 그림 규칙 caption rule: "새 시행은 같은 테스트 풀 (52,353 쌍) 에서의 복원 추출 (ROOM16e4 §1; `dmimo._which`) — 새 잡음·새 추출이지 새 채널이 아니며, 0..2559 의 쌍이 다시 뽑힐 수 있다. Wilson 구간은 풀 평균 BLER 의 구간이다."
+
+### S-3  State the record command for the figure
+- Evidence: `paper_f21dmc.py` writes its record to stdout (docstring: `> ~/t2/conference/figures/records/paper_f21dmc.txt`); nothing in the code names `paper_f21srbhs.txt`. The registration says "(기록 `records/paper_f21srbhs.txt`)".
+- Fix: in 그림 규칙 write the exact command: `cd ~/t2/conference/figures && CUDA_VISIBLE_DEVICES= ~/miniforge3/envs/torch/bin/python -B paper_f21dmc.py SRB hs > records/paper_f21srbhs.txt` (and that `F21srbhs_col.{pdf,png}` are produced by that same call).
+
+## NIT
+
+- N-1 `code/run_fighsroom16e4.sh` line 146: `log "... rotation $V ..."` prints `rotation ` (empty) for this row. Replace `rotation $V` with `rotation ${V:-none}`.
+- N-2 The ALD `case` checks the test-estimate and test-pilot shas but not the tune record sha the registration names (e0adb06cce792093); tracked+clean at HEAD is equivalent (verified: sha256[:16] of the tracked file = e0adb06cce792093). Optional: `PILSRB) s=a3d249188f9c061a; p=97a2d08640fef383; u=e0adb06cce792093;;` and add `&& [ "$(sha256sum results/ald/tune_$t.json | cut -c1-16)" = "$u" ]` to line 171.
+- N-3 §1 row text writes `--ald-file results/ald/ald_PILSRB_hisnr.npz` (relative) while ROWS, `meta|ald_file` and `acc_extra` use the absolute `/home/HTJ/t2/conf/results/ald/ald_PILSRB_hisnr.npz`. Write the absolute path in §1 (the (f) check compares the literal string).
+- N-4 `paper_f21dmc.py main()` "Counts:" lines keep the suffix `raw_{orig}` for all seven SNRs in hs mode although +6..+15 dB now come from `raw_FH{orig}`; the FIGHSROOM block below says so, but the per-line label is misleading. Optional: `+ (f"   raw_{orig} (-3..+3), raw_{M.hs_tag(orig, a)} (+6..+15)" if HS else f"   raw_{orig}")`.
+- N-5 y range: with n = 20480 and k = 1 the Wilson lower end is 8.6e-6 < `Q.YLO_RULE` 3e-5, so a bar can be clipped by the axis in the (3e-5, 1.2) case; the record's "no point outside the y range" is about points only. Same as FIGHS16e4 §1 (limit fixed at 3e-5); one clause in 그림 규칙 ("막대 끝은 3e-5 아래로 잘릴 수 있다, F16 (a) 와 같음") avoids a later audit question.
+- N-6 Section numbering jumps §1 → §3 → §5 → §6; one line "§2·§4 는 FIGHS16e4 v2 의 것을 그대로 (새 코드 변경 없음)" makes the inheritance explicit.
+- N-7 No pre-freeze bit-reproduction check of `ald.py estimate` on SRB (FIGHS16e4 had §0.5). Evidence it will pass: `ald.py` asserts same-seed determinism inside `cmd_estimate`, and the FIGHS16e4 controls on another GPU gave `max|diff| 0` (FHCXAROT{a,b}B16e4k_aldcontrol.txt). The gate handles a failure (row skipped, FIGHS_N2560). Acceptable as is; mention that §0.5 is replaced by the phase-C gate.
+- N-8 Cost line: FHALDSRB ≈ 10 min — `ald.py regen --set hisnr` iterates 30,480 trials × 4 SNR on CPU (`for tr in range(skip + n)`) before the GPU estimate; say the 10 min includes regen + estimate + the 2-arm runner, or split it.
+
+## Verified OK (no action)
+- `bash -n` clean. Diff vs `run_fighs16e4.sh` contains exactly the header-listed changes (names, ROWS, tag-restricted fresh-run checks, PILSRB case, `${V:+--rotation $V}`, no HISNR precondition, resume glob restricted to the three tags, phase-C summary line).
+- Shell constructs: `for t in $(cut -d'|' -f1 <<< "$ROWS")` yields the three tags; `${t/FH/FHC}` → FHCSRBB16e4 / FHCSPSRB / FHCALDSRB; `ls results/ald/*${c}*` glob fine; `sel` with empty WANT = "  "; `[ "$KK" = - ]` → no `--kron-K`; `${PICK%%:*}` / `${PICK##*:}` split the pick field.
+- Preconditions at HEAD 1404d315: `git -C ~/t2 status --porcelain conf/code Demo` empty; registration and DECISIONS.md tracked+clean; `git log -1 -- REG` = HEAD; no raw_FH{SRBB16e4,SPSRB,ALDSRB} / raw_FHC… / `ald_PILSRB_hisnr.npz` / FHC*SRB* control artefacts; `results/gmm_fits_D2_SRBB16e4` exists (with `fit_SRB_Nr8_fullK32_n160000.npz` for the regen guard); raw_SRBB16e4 / raw_SPSRB / raw_ALDSRB 448 files each, chunk `skip0_n40` at +6/+9/+12/+15 holds every ROWS arm (base: all 7; SP: SBL-loop SBL-pilot OMP-pilot R5-genie; ALD: ALD-pilot ALDv-pilot R5-genie), meta|bstar gmm1024, meta|ntrain 160000, meta|sparse per SNR = pick, meta|ald_file = ald_PILSRB.npz a3d249188f9c061a.
+- Shas: ckpt ed437f21af15c305, pick 4c6da315c701b9d4 (tracked+clean), ald_PILSRB.npz a3d249188f9c061a, pilots_PILSRB_test.npz 97a2d08640fef383, tune_PILSRB.json e0adb06cce792093 (tracked+clean), pilots_PILSRB_dev.npz present. All match §1 and ROOM16e4 §5.
+- ald_ctl: T0 parsed as PILSRB; copies tune / dev / test pilots to FHCALDSRB; `cmd_estimate` reads only `tune_<tag>.json`, `pilots_<tag>_{set,dev}.npz`, `--ckpt`; asserts `a.ckpt == rec["ckpt"]` — tune record has `'ckpt/d2sx_SRB_N160000_a1_best.pt'` = `$CK` exactly; checkpoint prior SRB = pilots' prior; output `ald_FHCALDSRB.npz` compared to `ald_PILSRB.npz`.
+- ctl: `args | sed 's/_hisnr\.npz/.npz/'` → `--ald-file /home/HTJ/t2/conf/results/ald/ald_PILSRB.npz` (the original test estimate, as FIGHS16e4 §1); runner checks the file's rotation/doppler (−1) against the run (none). SP control runs without `--stagec-ckpt`, as `run_srb_base.sh` did (`$COMMON --sparse-file $SP --arm SBL-loop SBL-pilot OMP-pilot R5-genie`).
+- ald_new: E / T parsed; `--set hisnr` exists in `ald.py` (snrs 6/9/12/15, skip HISNR_SKIP0 10000, n 20480); regen without `--rotation` → stored rotation −1.0 = dev pilots → `_guard` equality holds; estimate writes `ald_PILSRB_hisnr.npz` = E. `dmimo._which` maps any 7-entry trial stream to the TEST pool regardless of skip.
+- eval_accept: `--bstar gmm1024` without `--kron-K` is the documented path (kron_K not checked; `meta|ll_val|gmm1024` vs 97.00871495382869 within 1e-9); SP row `-:-` requires `meta|stagec_ckpt_id` absent (the SP run builds no Stage C arm); genie replay vs `raw_FHSRBB16e4` on R5-genie × 4 keys, same chunk plan {(10000+40k, 40)}; `--prior SRB` only names fit files (unused without `--grid`). The full-family path already passed in FIGHS16e4 (FHSVB16e4 gmm256: CONTROL OK, accepted).
+- counts: prints every 2-D `blk_err` arm → includes the alias `R0-pilot@1` (one column) that `analysis.load_raw` injects; `fighs_merge.parse` handles that line (its self-check covers `R0-pilot@1`).
+- Figure: `hs_tag("SRBB16e4"|"SPSRB"|"ALDSRB", arm)` → FHSRBB16e4 / FHSPSRB / FHALDSRB (no HISNR special case; verified by call); `SHOW` = the 11 curves incl. `R0-pilot@1`; `main()` asserts the original counts against pairB before merging, then merges and draws with per-point n (`D.draw` handles n arrays; `zero_arrows` uses the point's own n); `__main__` ROOM branch sets global `HS`, `NAME` → `F21srbhs`, y rule on the drawn (merged) counts with `Q.YLO` 2e-4 / `Q.YLO_RULE` 3e-5 — equal to the non-hs result when HS is false (same min over k > 0 points; the old per-arm min only differed when a zero point forced the else-branch anyway). `merge` stops on a missing raw / count table / arm / n ≠ 20480 and honours `FIGHS_N2560`. Record block appended only when HS.
+- Predictions 1–5 are scorable from the count tables, the record's "rising" lines (Fisher p incl. the +3→+6 cell) and the FIGHS_DONE line.

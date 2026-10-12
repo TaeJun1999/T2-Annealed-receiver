@@ -19,13 +19,14 @@ for fam in ("full", "kron"):
         if f_ != fam or cand: continue
         cap = " **상한 500 정지**" if r["n_iter"] == 500 else ""
         s = f"{K} {r['ll']:.3f} (r{r['restart']}, {r['n_iter']}/{r['it_best']}{cap}, 재시드 {r['rs']:,}, κ={r['kappa']})"
-        if K >= 1024:
+        if K >= 1024 and fam == "kron":                         # kron K >= 1024 = merged restart candidates; a full-family K = 1024 (edge rule) is one fit
             cs = [f"r{c[-1]} {rows[(fam, K, c)]['ll']:.3f} {rows[(fam, K, c)]['n_iter']}/{rows[(fam, K, c)]['it_best']} rs {rows[(fam, K, c)]['rs']:,}" for c in (".k0r0", ".k0r1", ".k0r2")]
             s = f"**{K} {r['ll']!r}** (r{r['restart']}, {r['n_iter']}/{r['it_best']}, rs {r['rs']:,}; 후보 " + ", ".join(cs) + ")"
         out.append(s)
     print(f"[{fam}] ({'일괄' if fam == 'kron' else '정확'} 경로: batched flags {sorted({r['batched'] for (f_, K, c), r in rows.items() if f_ == fam})})\n  " + " / ".join(out))
-print("merged mtimes:", {K: cdt(rows[("kron", K, "")]["mtime"]) for K in (1024, 2048, 4096)})
-print("candidate mtimes 4096:", [cdt(rows[("kron", 4096, c)]["mtime"]) for c in (".k0r0", ".k0r1", ".k0r2")])
+print("full 1024 mtime:", cdt(rows[("full", 1024, "")]["mtime"]) if ("full", 1024, "") in rows else "(none)")
+print("merged mtimes:", {K: (cdt(rows[("kron", K, "")]["mtime"]) if ("kron", K, "") in rows else "(not merged)") for K in (1024, 2048, 4096)})
+print("candidates 4096 (mtime, ll_val, n_iter/it_best, reseeds):", [(cdt(rows[("kron", 4096, c)]["mtime"]), round(rows[("kron", 4096, c)]["ll"], 3), f"{rows[('kron', 4096, c)]['n_iter']}/{rows[('kron', 4096, c)]['it_best']}", rows[("kron", 4096, c)]["rs"]) for c in (".k0r0", ".k0r1", ".k0r2") if ("kron", 4096, c) in rows])
 print("n files:", len(rows), "| max iter over all:", max(r["n_iter"] for r in rows.values()))
 z = np.load(f"results/sigma_grid_D2_{PR}.npz"); print("sigma grid keys:", z.files)
 for k in z.files:

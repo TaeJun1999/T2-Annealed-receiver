@@ -1,0 +1,173 @@
+{
+ "manifest_version": 1,
+ "written": "2026-10-12 05:10:13 KST",
+ "git_commit": "9ad4caa0",
+ "result_tag": "ALDSRP",
+ "testbed": "D2",
+ "raw_dir": "/home/HTJ/t2/conf/raw_ALDSRP",
+ "n_raw_files": 448,
+ "config_hash": "6b12b56f55a3319e",
+ "code_hashes": {
+  "Demo": {
+   "t2_route_a.py": "95a5408901ec125c",
+   "t2_trellis.py": "31cd0ee9c68e972b",
+   "t2_gmm.py": "d064e58c7510c769"
+  },
+  "conf_code": {
+   "runner.py": "f9b7cef1c9ff1ac7",
+   "arms.py": "7ad16d731778f6b6",
+   "score.py": "f5379bdf8a085fc9",
+   "common.py": "fa976185ec5e8b20",
+   "d2.py": "93e475c4118366bc",
+   "analysis.py": "09ba83f75925e0f6",
+   "rt_tap.py": "5d97dc7124150423",
+   "p3_rules.py": "a06e952b1eddf3ad",
+   "dmimo.py": "71c66fb1c1b21efa",
+   "srp_build.py": "1264b1d6614e67ad",
+   "srb_build.py": "12722fe8ed411472"
+  }
+ },
+ "channel_model": {
+  "testbed": "D2",
+  "prior": "SRP",
+  "description": "SRP = D2-pipeline prior SRP, Sionna RT 2.1 ray-traced channels (code/srp_build.py -> pool read by code/dmimo.py, sha 4969fb3ccfba2865/3ea97198c47b43b5): the room of prior SRB (scene `box`, metal walls as shipped, 28 GHz, PathSolver depth 1, 1e8 samples, ONE fixed BS) with ONE UE moving along a lawn-mower route (576 rows x 600 snapshots, 1.5 cm apart, no position twice; UE array aligned with the direction of travel), Sionna PlanarArray ULAs (BS Nr, UE 4), isotropic V pol, half-wavelength, Paths.cfr at the carrier, per-pair path powers normalised, uplink by reciprocity, ensemble-normalised E||H||^2 = Nr Nt; FIXED pool split BY TIME (test = the last 15 % of the route); the receiver treats every block on its own"
+ },
+ "cells": {
+  "C2": {
+   "Nr": 8,
+   "Nt": 4,
+   "T": 16,
+   "Tp": 4,
+   "snrs": [
+    -3,
+    0,
+    3,
+    6,
+    9,
+    12,
+    15
+   ]
+  }
+ },
+ "points": {
+  "D2_C2_SRP_Nr8_T16_Tp4_dft_snr-3": 2560,
+  "D2_C2_SRP_Nr8_T16_Tp4_dft_snr0": 2560,
+  "D2_C2_SRP_Nr8_T16_Tp4_dft_snr12": 2560,
+  "D2_C2_SRP_Nr8_T16_Tp4_dft_snr15": 2560,
+  "D2_C2_SRP_Nr8_T16_Tp4_dft_snr3": 2560,
+  "D2_C2_SRP_Nr8_T16_Tp4_dft_snr6": 2560,
+  "D2_C2_SRP_Nr8_T16_Tp4_dft_snr9": 2560
+ },
+ "trial_stream": {
+  "rule": "default_rng([20260926, TBID[testbed], PID[prior], Nr, T, Tp, int(snr)+100])",
+  "skip_min": 0,
+  "skip_max_end": 2560,
+  "split": "TEST set (trials from 0; paired across arms)"
+ },
+ "run_params": {
+  "beta": "0.7",
+  "dtype": "complex128/float64",
+  "git": "9ad4caa0",
+  "iters": "16",
+  "n": "40",
+  "seed": "20260926",
+  "snr": [
+   "-3.0",
+   "0.0",
+   "12.0",
+   "15.0",
+   "3.0",
+   "6.0",
+   "9.0"
+  ],
+  "t_in": "5",
+  "n_chunks": 448
+ },
+ "receiver": {
+  "outer_iterations": 16,
+  "beta": 0.7,
+  "arm_overrides": "(none)",
+  "t_in_bigamp": 5,
+  "n_inner_routeA": 1,
+  "dtype": "complex128/float64",
+  "device": "CPU, one thread per worker",
+  "code": "conv (133,171)_8 nu=6 terminated, QPSK"
+ },
+ "gmm": {
+  "bstar": "kron",
+  "kron_K": "4096",
+  "ntrain": 160000.0,
+  "selection": "validation log-likelihood over the pre-registered K grid (BLER never consulted)",
+  "fits_dir": "/home/HTJ/t2/conf/results/gmm_fits_D2_ALDSRP",
+  "em_sec": "1538.9219105243683"
+ },
+ "sample_counts": {
+  "train_channels": 160000,
+  "score_train": 144000,
+  "score_val": 16000,
+  "test_trials_per_point": [
+   2560
+  ]
+ },
+ "stagec_checkpoint": {
+  "path": "/home/HTJ/t2/conf/ckpt/d2sx_SRP_N160000_a1_best.pt",
+  "sha256_16": "ac4699c78b3e2d80",
+  "stored_epoch": 694,
+  "best_epoch": 694,
+  "best_val": 0.1495504230260849,
+  "role": "best",
+  "evaluated_weights": "best EMA @694",
+  "best_pt": null,
+  "hp": {
+   "arch": "dit",
+   "param": "vp",
+   "domain": "angle",
+   "lr": 0.002238046051591068,
+   "ema": 0.999,
+   "batch": 256,
+   "emb": 256,
+   "width": 64,
+   "depth": 6,
+   "heads": 8,
+   "patch": 1
+  },
+  "params": 479426,
+  "rung": "D2SXSRP160000",
+  "attempt": 1,
+  "Nr": 8,
+  "Nt": 4,
+  "split_hash": "27af93705c6dc289",
+  "sigma_tag": "SRP",
+  "train_epochs": 694,
+  "stopped_by": null,
+  "train_wall_sec": 3540.061128616333,
+  "train_device": "cuda:0 NVIDIA RTX PRO 6000 Blackwell Server Edition",
+  "val_frac": 0.1,
+  "seeds": {
+   "split": 20260926,
+   "val": 20260927,
+   "train": 20260928,
+   "gate": 20260929
+  }
+ },
+ "stagec_status": "built from explicit ckpt /home/HTJ/t2/conf/ckpt/d2sx_SRP_N160000_a1_best.pt -- caller override, NOT verified against the gate record here (recorded PASS rows: none) | V1 (psd_project=True): built from explicit ckpt /home/HTJ/t2/conf/ckpt/d2sx_SRP_N160000_a1_best.pt -- caller override, NOT verified against the gate record here (recorded PASS rows: none)",
+ "stagec_gate": "NO GATE RECORD mentions d2sx_SRP_N160000_a1_best.pt -- UNVERIFIED here.  (GA-GD are measurable on D1 only, 10_SPEC §5: a D2 re-train is qualified by its D1 sibling's gate row, which this string cannot prove.)",
+ "stagec_ckpt_id": "sha256[:16]=ac4699c78b3e2d80 epoch=694 best_epoch=694 role=best 8x4",
+ "arms": [
+  "ALD-pilot",
+  "ALDv-pilot",
+  "R5-genie"
+ ],
+ "versions": {
+  "python": "3.12.14",
+  "numpy": "2.5.2",
+  "torch": "2.14.0+cu130",
+  "host": "262d04c812cc",
+  "cpu_count": 192
+ },
+ "output_paths": {
+  "tables": "/home/HTJ/t2/conf/results/tables_D2_ALDSRP.txt",
+  "guard": "/home/HTJ/t2/conf/results/guard_D2_ALDSRP.txt",
+  "log": "/home/HTJ/t2/conf/logs/run_D2_ALDSRP.log"
+ }
+}

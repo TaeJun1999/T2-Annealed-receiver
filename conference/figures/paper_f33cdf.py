@@ -38,13 +38,18 @@ CURVES = tuple(a for a in SHOW if a != GE)
 def decision_snrs(tag):
     with open(os.path.join(M.CONF, "results", f"tables_D2_{tag}.txt"), encoding="utf-8") as f:
         m = re.search(r"M-ours-bstar -> M-ours-dscore-C-V1.*?\n\s*decision SNRs \[([^\]]*)\]", f.read(), re.S)
-    return [float(x.strip("' ")) for x in m.group(1).split(",")]
+    return [float(x.strip("' ")) for x in m.group(1).split(",") if x.strip("' ")]
 
 
 def main(prior):
     tag, sp, ald, prior, name, what, _ = (F.TAG, F.SP, F.ALD, F.PRIOR, F.NAME, F.WHAT, F.REG) if prior == "DMC" else F.SETS[prior]
-    snrs = sorted({-3.0, *decision_snrs(tag)})
-    assert len(snrs) == 4, snrs                                # -3 dB + three decision SNRs (a decision point at -3 dB would need another layout)
+    dec = decision_snrs(tag)
+    snrs = sorted({-3.0, *dec})
+    if len(dec) < 3:                                           # fewer than three decision SNRs (label (iv)): the fixed panels -3 / 0 / +3 / +6 dB
+        snrs = [-3.0, 0.0, 3.0, 6.0]
+    elif len(snrs) == 3:                                       # -3 dB is itself a decision SNR (NEXT_EXPERIMENTS_ROOM16e4 §1): the fourth panel
+        snrs.append(next(s for s in F.SNRS if s > max(dec)))   # = the next grid SNR above the decision SNRs
+    assert len(snrs) == 4, snrs
     D.check_styles()
     plt.rcParams.update(D.RC)
     raws = {t: D.raw(t) for t in (tag, sp, ald)}

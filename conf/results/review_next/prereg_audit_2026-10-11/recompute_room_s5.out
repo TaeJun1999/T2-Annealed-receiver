@@ -1,0 +1,89 @@
+# recompute_room_s5.py -- §5 fits table / selection / timeline / stop-rule analysis / DMI absence (prior SRB)
+
+## 1. fits table vs the npz files (final files; candidates for kron K >= 1024; the extra full 1024)
+  full    16: ll_val 30.445115 r0 n_iter 361 it_best 340 reseed 0 kappa 0  mtime 10-12 03:31:26 KST
+  full    32: ll_val 41.698344 r2 n_iter 179 it_best 150 reseed 354 kappa 0  mtime 10-12 03:31:32 KST
+  full    64: ll_val 55.911842 r2 n_iter 190 it_best 180 reseed 188 kappa 0  mtime 10-12 03:31:43 KST
+  full   128: ll_val 68.085292 r1 n_iter 388 it_best 370 reseed 4632 kappa 0  mtime 10-12 03:20:45 KST
+  full   256: ll_val 79.119066 r0 n_iter 244 it_best 240 reseed 8953 kappa 0  mtime 10-12 01:52:25 KST
+  full   512: ll_val 89.213923 r1 n_iter 188 it_best 180 reseed 15243 kappa 0  mtime 10-12 01:38:55 KST
+  full  1024: ll_val 97.008715 r0 n_iter 182 it_best 180 reseed 44081 kappa 0  mtime 10-12 04:49:46 KST
+  full 1024 candidates (kappa, restart) -> ll_val: [(0, 0, 97.009), (0, 1, 96.642), (0, 2, 96.89), (16, 0, 26.452), (16, 1, 26.533), (16, 2, 26.426), (64, 0, 11.203), (64, 1, 11.465), (64, 2, 11.342), (256, 0, -2.933), (256, 1, -3.182), (256, 2, -3.292)]
+  kron    16: ll_val 25.940365 r1 n_iter 121 it_best 80 reseed 0 kappa 0  mtime 10-12 03:32:08 KST
+  kron    32: ll_val 34.173016 r2 n_iter 164 it_best 140 reseed 164 kappa 0  mtime 10-12 03:32:05 KST
+  kron    64: ll_val 41.133466 r2 n_iter 196 it_best 160 reseed 970 kappa 0  mtime 10-12 03:29:54 KST
+  kron   128: ll_val 46.060472 r2 n_iter 161 it_best 120 reseed 3657 kappa 0  mtime 10-12 03:28:56 KST
+  kron   256: ll_val 51.938529 r1 n_iter 123 it_best 90 reseed 6171 kappa 0  mtime 10-12 03:26:35 KST
+  kron   512: ll_val 56.835984 r1 n_iter 147 it_best 140 reseed 15658 kappa 0  mtime 10-12 03:17:55 KST
+  kron  1024: ll_val 61.162240 r0 n_iter 181 it_best 140 reseed 43670 kappa 0  mtime 10-12 04:07:49 KST
+  kron  2048: ll_val 64.848315 r0 n_iter 215 it_best 200 reseed 124714 kappa 0  mtime 10-12 04:07:55 KST
+    DIFF  mtime after freeze: fit_SRB_Nr8_kronK1024_n160000.k0r0.npz: recomputed False  record True
+    DIFF  mtime after freeze: fit_SRB_Nr8_kronK1024_n160000.k0r1.npz: recomputed False  record True
+    DIFF  mtime after freeze: fit_SRB_Nr8_kronK1024_n160000.k0r2.npz: recomputed False  record True
+  files with mtime before the freeze: ['fit_SRB_Nr8_kronK1024_n160000.k0r0.npz', 'fit_SRB_Nr8_kronK1024_n160000.k0r1.npz', 'fit_SRB_Nr8_kronK1024_n160000.k0r2.npz'] (the 3 kron-1024 candidates ENDED before the freeze per tb2.log but their mtimes are: 01:08:53, 01:13:38, 01:17:13 KST)
+
+## 1b. arms.gmm_selection NOW (the runner's selection code) vs the hand-rewritten .sel
+  gmm_selection -> b* = gmm1024, kron_K = 2048, ll_val by arm = {gmm16: 30.4451, gmm32: 41.6983, gmm64: 55.9118, gmm128: 68.0853, gmm256: 79.1191, gmm512: 89.2139, gmm1024: 97.0087, kron: 64.8483}; fits loaded: [('full', 16), ('full', 32), ('full', 64), ('full', 128), ('full', 256), ('full', 512), ('full', 1024), ('kron', 16), ('kron', 32), ('kron', 64), ('kron', 128), ('kron', 256), ('kron', 512), ('kron', 1024), ('kron', 2048)]
+
+## 2. which stopping rule fired (gmm_em_gpu: val every 10 it, patience 40 on it_best; train-ll tol rule from it >= 20)
+  fam  K      last_it it_best  tol_rule  patience_rule   ll[0]      ll[1]      ll[-2]     ll[-1]     max(ll) @it
+  full    16    360   340     True      False         -67.081    -18.222     30.711     30.711     30.711 @360
+  full    32    178   150     True      False         -65.516    -11.888     42.224     42.224     42.224 @178
+  full    64    189   180     True      False         -60.312      9.475     56.593     56.593     56.593 @189
+  full   128    387   370     True      False         -56.868     18.361     68.899     68.899     68.899 @387
+  full   256    243   240     True      False         -54.657     26.769     80.371     80.371     80.371 @243
+  full   512    187   180     True      False         -51.375     34.713     91.542     91.542     91.542 @187
+  full  1024    181   180     True      False         -48.589     42.787    100.431    100.431    100.431 @181
+  kron    16    120    80     False     True          -67.482    -24.156     25.960     25.960     25.960 @120
+  kron    32    163   140     True      False         -65.633    -19.907     34.136     34.136     34.136 @163
+  kron    64    195   160     True      False         -61.048     -0.287     41.209     41.209     41.209 @195
+  kron   128    160   120     False     True          -57.729      6.116     46.296     46.297     46.297 @160
+  kron   256    122    90     True      False         -54.448     14.138     52.212     52.212     52.212 @121
+  kron   512    146   140     True      False         -51.652     18.677     57.295     57.295     57.295 @145
+  kron  1024    180   140     False     True          -48.523     23.137     62.091     62.091     62.091 @180
+  kron  2048    214   200     True      False         -46.273     27.403     66.278     66.278     66.278 @213
+  -> stopped by the train-ll tolerance rule: 12 of 15; by validation patience: 3
+
+## 3. what the selected b* (full K = 1024) is: pi, covs structure, trajectory
+  pi: min 6.24e-06 max 4.17e-03 median 1.06e-03 (uniform would be 9.77e-04); sum 1.000000; #pi < 1e-5: 245
+  64 random components: min/median/max s2/s1 of (cov_k - 0.5 Chat) = 0.000 / 0.249 / 0.844 (rank-1 ~ 1e-16 would mean the seed initialisation); Hermitian True, PSD True
+    DIFF  cov_k - 0.5 Chat is NOT rank-1 in any sampled component (the fit moved away from the seed initialisation): recomputed np.False_  record True
+  component covariance eigenvalues (32 each): median of (max/min) 1.51e+05; median of min eig 1.00e-04; floor 1e-4 hit in 779 components
+  train ll trajectory: it0 -48.589, it1 42.787, it10 98.777, it100 100.365, it180 100.431, it181 100.431; max 100.431 @181; monotone non-decreasing steps: 181 of 181; ll_train stored 100.4307 (= ll[it_best]); ll_val 97.0087; ll_test 73.4880; gauss_val -64.2267
+
+## 4. sigma grid, manifests, commit times, run-log timing lines, training log, tb2 / post / sparse logs, git diffs, banners
+  manifest SRBB16e4: git 9ad4caa0 config_hash 6b12b56f55a3319e n_raw 448 written 2026-10-12 06:15:59 KST Demo {'t2_route_a.py': '95a5408901ec125c', 't2_trellis.py': '31cd0ee9c68e972b', 't2_gmm.py': 'd064e58c7510c769'}
+  manifest SRBB16e4last: git 9ad4caa0 config_hash 6b12b56f55a3319e n_raw 448 written 2026-10-12 06:16:13 KST Demo {'t2_route_a.py': '95a5408901ec125c', 't2_trellis.py': '31cd0ee9c68e972b', 't2_gmm.py': 'd064e58c7510c769'}
+  manifest PILSRB: git 7d524638 config_hash f5a83cbf01b47958 n_raw 448 written 2026-10-12 06:19:29 KST Demo {'t2_route_a.py': '95a5408901ec125c', 't2_trellis.py': '31cd0ee9c68e972b', 't2_gmm.py': 'd064e58c7510c769'}
+  manifest ALDSRB: git 7d524638 config_hash f5a83cbf01b47958 n_raw 448 written 2026-10-12 06:20:53 KST Demo {'t2_route_a.py': '95a5408901ec125c', 't2_trellis.py': '31cd0ee9c68e972b', 't2_gmm.py': 'd064e58c7510c769'}
+  manifest SPSRB: git 7d524638 config_hash f5a83cbf01b47958 n_raw 448 written 2026-10-12 06:31:40 KST Demo {'t2_route_a.py': '95a5408901ec125c', 't2_trellis.py': '31cd0ee9c68e972b', 't2_gmm.py': 'd064e58c7510c769'}
+  commits: b737fd55 2026-10-12 01:23:26 +0900 | 9ad4caa0 2026-10-12 05:06:43 +0900 | 7d524638 2026-10-12 06:18:01 +0900 | f183160d 2026-10-12 06:35:37 +0900 | 99039ef5 2026-10-12 03:29:30 +0900
+  first raw_SRBB16e4 chunk 05:28:19 KST (run commit 9ad4caa0 at 05:06:43 KST); last raw_SRBB16e4last chunk 06:15:30 KST; first raw_PILSRB chunk 06:18:25 KST (commit 7d524638 at 06:18:01 KST); last raw_SPSRB chunk 06:31:36 KST
+  git diff --stat b737fd55..9ad4caa0 -- conf/code Demo:
+ conf/code/analysis.py            |   2 +-
+ conf/code/common.py              |  18 +++-
+ conf/code/dmimo.py               |  24 +++++-
+ conf/code/em_batched_check_nr.py |   2 +-
+ conf/code/path_strata.py         |  84 +++++++++++++++++++
+ conf/code/run_d2_sx.py           |   2 +-
+ conf/code/run_manifest.py        |  10 +++
+ conf/code/run_prior_eval.sh      |   2 +-
+ conf/code/run_srb_eval.sh        |   6 +-
+ conf/code/run_srp_base.sh        | 135 ++++++++++++++++++++++++++++++
+ conf/code/run_srp_eval.sh        |   7 ++
+ conf/code/run_srp_post_gpu.sh    |  24 ++++++
+ conf/code/run_srp_post_select.sh |  42 ++++++++++
+ conf/code/run_srp_sparse_tune.sh |  10 +++
+ conf/code/sigma.py               |   2 +-
+ conf/code/srp_build.py           | 176 +++++++++++++++++++++++++++++++++++++++
+ conf/code/testbed_dm.py          |  14 +++-
+ 17 files changed, 545 insertions(+), 15 deletions(-)
+
+    DIFF  dmimo.py / common.py / analysis.py diffs touch only SRP entries (every changed line mentions SRP / srp): recomputed False  record True
+
+## 5. DMI: no BLER anywhere under conf/ (raw dirs, tables, manifests, accept, pair files, logs)
+  raw_*DMI* npz files: 0; raw_DMI dir exists (empty, mtime 10-12 00:42 KST; from the sigma-grid measurement, like raw_SRB): True; other DMI result files: []
+  GB' (pending in the record): d2_gbprime_SRB.csv exists True, mtime 10-12 06:40 KST (after the §6 commit 06:35 KST: True); content: 160000,1,160000,True,1680,2.476990e-01,gmm1024,1024,4096,0.594906,5.104649,0.647227,4.104649
+    DIFF  record §6 claims no GB' number (every GB' mention says 계산 중 / 보류 / 추가): recomputed False  record True
+
+## SUMMARY: 194 values checked, 6 differ from the record

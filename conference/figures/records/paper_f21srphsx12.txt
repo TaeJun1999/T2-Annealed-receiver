@@ -1,0 +1,40 @@
+F21srphsx12 -- Sionna RT room, moving UE (prior SRP: Sionna RT 2.1, built-in scene box with its metal walls as shipped at 28 GHz, LoS + first-order reflections, one fixed BS, one UE on a lawn-mower route, split by time with no guard band; cell C2 = 8x4, N_train = 1.6e5) with the one legend of F16deep_wide: BLER@16 (Pilot-only LMMSE: after the first iteration), failures / trials per SNR -3 +0 +3 +6 +9 +12 +15 dB.  Recomputed from raw by conference/figures/paper_f21dmc.py (read-only; analysis.load_raw, a raised block = a failure); no number transcribed.
+
+F21srphsx12_col  3.5 x 3.45 in, one panel, legend above; the 11 curves of paper_f16deep.SHOW with its shapes and sizes; 95% Wilson bars on Proposed (diffusion prior), GMM prior, Gaussian prior, Perfect CSI.  n = 2560 (test trials 0..2559) at -3/0/+3 dB and n = 20480 (new trials 10000..30479) at +6/+9 dB and n = 81920 (new trials 10000..91919) at +12/+15 dB for every curve (NEXT_EXPERIMENTS_FIGHSPATH16e4 §1 and NEXT_EXPERIMENTS_FIGHSX16e4 §1; block below).
+
+DRAWN RANGE: -3 .. +12 dB only (paper variant, user decision 2026-10-12 CDT -- conf/DECISIONS.md).  The +15 dB point of every curve was measured (n = 81920; last entry of each row of the Counts block and of the merge block below) and is NOT drawn here; the full-range figure is F21srphsx_col.  The lines 'at or below the proposed curve' and 'Zero-failure points' below refer to the drawn points.
+
+Curves (internal arm -> figure name): M-ours-dscore-C-V1 -> Proposed (diffusion prior); ALD-pilot -> Annealed Langevin (plug-in); M-ours-bstar -> GMM prior; R2-ours-G -> Gaussian prior; R1-turbo -> Turbo LMMSE receiver; R3-bigamp -> BiG-AMP; R0-pilot@1 -> Pilot-only LMMSE; SBL-loop -> SBL (in loop); SBL-pilot -> SBL (pilot-only); OMP-pilot -> OMP (pilot-only); R5-genie -> Perfect CSI.
+
+Counts:
+    M-ours-dscore-C-V1   812/2560 204/2560 24/2560 45/20480 7/20480 4/81920 1/81920   raw_SRPB16e4
+    ALD-pilot            1315/2560 360/2560 64/2560 110/20480 19/20480 11/81920 4/81920   raw_ALDSRP
+    M-ours-bstar         1356/2560 498/2560 133/2560 202/20480 33/20480 14/81920 6/81920   raw_SRPB16e4
+    R2-ours-G            1491/2560 544/2560 139/2560 215/20480 35/20480 16/81920 6/81920   raw_SRPB16e4
+    R1-turbo             1792/2560 930/2560 283/2560 521/20480 78/20480 44/81920 11/81920   raw_SRPB16e4
+    R3-bigamp            2311/2560 1583/2560 763/2560 3386/20480 2585/20480 11333/81920 10874/81920   raw_SRPB16e4
+    R0-pilot@1           2351/2560 1755/2560 882/2560 2433/20480 639/20480 656/81920 196/81920   raw_SRPB16e4
+    SBL-loop             1621/2560 623/2560 154/2560 229/20480 40/20480 14/81920 8/81920   raw_SPSRP
+    SBL-pilot            1857/2560 799/2560 224/2560 298/20480 39/20480 20/81920 8/81920   raw_SPSRP
+    OMP-pilot            2020/2560 940/2560 271/2560 720/20480 138/20480 124/81920 38/81920   raw_SPSRP
+    R5-genie             428/2560 81/2560 7/2560 14/20480 1/20480 1/81920 0/81920   raw_SRPB16e4
+
+Drawn baseline curves (Perfect CSI excluded) at or below the proposed curve (point estimates; failures vs the proposed curve's) -- reported only, nothing is tested here; the registered paired tests are in conf/results/review_next/pairB_SPSRP.txt: none.
+Registered table-B labels against the proposed prior (pairB_SPSRP.txt) of the 9 drawn baselines: all (i).
+Raised blocks (analysis.load_raw NOTE lines; kept and counted as failures) in the raws read: none.
+
+Asserts passed: counts before the merge (n = 2560, the registered judgement) = pairB_SPSRP.txt 'BLER@16 failures' table (11 arms x 7 SNRs); the Counts block above holds the merged values; Perfect CSI error arrays of raw_ALDSRP and raw_SPSRP = raw_SRPB16e4's; drawn = counted; the panel holds exactly the curves of the legend; no point outside the y range.
+Layout: x ticks at the SNR points, x range (-4, 13.0); y log (7.5e-06, 1.2), ticks None; legend band 0.86 in above the axes, 2 columns (inside its band: asserted, [in] [0.435, 2.651, 3.065, 3.389]); every artist inside the canvas (tight bbox [in] [0.086, 0.041, 3.44, 3.389]); smallest visible text 7 pt; saved at figsize, PNG 300 dpi.
+
+FIGHSPATH16e4 + FIGHSX16e4 merge (REPORT-ONLY, NEXT_EXPERIMENTS_FIGHSPATH16e4 §1 and NEXT_EXPERIMENTS_FIGHSX16e4 §1): -3/0/+3 dB = the original test trials 0..2559 (n = 2560, the registered judgement); +6/+9 dB = new trials 10000..30479 (n = 20480 per SNR); +12/+15 dB = new trials 10000..91919 (n = 81920 per SNR, FIGHSX16e4: a separate raw whose first 20480 trials are the same trials as the n = 20480 raw's -- Annealed Langevin: the same trials with a new posterior sample; the unseen trials 30480..91919 alone are the '# split' lines of results/review_next/fighs_FX<tag>.txt; one point = one raw, never pooled).  'rising' = a cell where BLER rises with SNR, with its one-sided Fisher p (reported; no smoothing, no dropped point):
+    M-ours-dscore-C-V1  @16  45/20480 7/20480 4/81920 1/81920   (+6..+15 dB: raw_FHSRPB16e4; then +12/+15 dB: raw_FXSRPB16e4)
+    ALD-pilot           @16  110/20480 19/20480 11/81920 4/81920   (+6..+15 dB: raw_FHALDSRP; then +12/+15 dB: raw_FXALDSRP)
+    M-ours-bstar        @16  202/20480 33/20480 14/81920 6/81920   (+6..+15 dB: raw_FHSRPB16e4; then +12/+15 dB: raw_FXSRPB16e4)
+    R2-ours-G           @16  215/20480 35/20480 16/81920 6/81920   (+6..+15 dB: raw_FHSRPB16e4; then +12/+15 dB: raw_FXSRPB16e4)
+    R1-turbo            @16  521/20480 78/20480 44/81920 11/81920   (+6..+15 dB: raw_FHSRPB16e4; then +12/+15 dB: raw_FXSRPB16e4)
+    R3-bigamp           @16  3386/20480 2585/20480 11333/81920 10874/81920   (+6..+15 dB: raw_FHSRPB16e4; then +12/+15 dB: raw_FXSRPB16e4)   rising: +9->+12 dB p=2.7e-06
+    R0-pilot@1          @16  2433/20480 639/20480 656/81920 196/81920   (+6..+15 dB: raw_FHSRPB16e4; then +12/+15 dB: raw_FXSRPB16e4)
+    SBL-loop            @16  229/20480 40/20480 14/81920 8/81920   (+6..+15 dB: raw_FHSPSRP; then +12/+15 dB: raw_FXSPSRP)
+    SBL-pilot           @16  298/20480 39/20480 20/81920 8/81920   (+6..+15 dB: raw_FHSPSRP; then +12/+15 dB: raw_FXSPSRP)
+    OMP-pilot           @16  720/20480 138/20480 124/81920 38/81920   (+6..+15 dB: raw_FHSPSRP; then +12/+15 dB: raw_FXSPSRP)
+    R5-genie            @16  14/20480 1/20480 1/81920 0/81920   (+6..+15 dB: raw_FHSRPB16e4; then +12/+15 dB: raw_FXSRPB16e4)

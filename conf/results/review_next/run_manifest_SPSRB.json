@@ -1,0 +1,133 @@
+{
+ "manifest_version": 1,
+ "written": "2026-10-12 06:31:40 KST",
+ "git_commit": "7d524638",
+ "result_tag": "SPSRB",
+ "testbed": "D2",
+ "raw_dir": "/home/HTJ/t2/conf/raw_SPSRB",
+ "n_raw_files": 448,
+ "config_hash": "f5a83cbf01b47958",
+ "code_hashes": {
+  "Demo": {
+   "t2_route_a.py": "95a5408901ec125c",
+   "t2_trellis.py": "31cd0ee9c68e972b",
+   "t2_gmm.py": "d064e58c7510c769"
+  },
+  "conf_code": {
+   "runner.py": "f9b7cef1c9ff1ac7",
+   "arms.py": "7ad16d731778f6b6",
+   "score.py": "f5379bdf8a085fc9",
+   "common.py": "fa976185ec5e8b20",
+   "d2.py": "93e475c4118366bc",
+   "analysis.py": "09ba83f75925e0f6",
+   "rt_tap.py": "5d97dc7124150423",
+   "p3_rules.py": "a06e952b1eddf3ad",
+   "dmimo.py": "71c66fb1c1b21efa",
+   "srb_build.py": "12722fe8ed411472"
+  }
+ },
+ "channel_model": {
+  "testbed": "D2",
+  "prior": "SRB",
+  "description": "SRB = D2-pipeline prior SRB, Sionna RT 2.1 ray-traced channels (code/srb_build.py -> pool read by code/dmimo.py, sha ae1c023605d002b4/24c202836d56b34e): built-in room scene `box` (10 x 10 x 5 m, metal walls as shipped) at 28 GHz, PathSolver depth 1 (LoS + first-order specular, 1e8 samples), ONE fixed BS, UE positions uniform over the floor plan at 1.5 m, Sionna PlanarArray ULAs (BS Nr, UE 4 with a frozen yaw ~ U[-pi,pi)), isotropic V pol, half-wavelength, Paths.cfr at the carrier, per-pair path powers normalised, uplink by reciprocity, ensemble-normalised E||H||^2 = Nr Nt; FIXED pool with a 1 m block split (fit / validation / test pools from disjoint tiles)"
+ },
+ "cells": {
+  "C2": {
+   "Nr": 8,
+   "Nt": 4,
+   "T": 16,
+   "Tp": 4,
+   "snrs": [
+    -3,
+    0,
+    3,
+    6,
+    9,
+    12,
+    15
+   ]
+  }
+ },
+ "points": {
+  "D2_C2_SRB_Nr8_T16_Tp4_dft_snr-3": 2560,
+  "D2_C2_SRB_Nr8_T16_Tp4_dft_snr0": 2560,
+  "D2_C2_SRB_Nr8_T16_Tp4_dft_snr12": 2560,
+  "D2_C2_SRB_Nr8_T16_Tp4_dft_snr15": 2560,
+  "D2_C2_SRB_Nr8_T16_Tp4_dft_snr3": 2560,
+  "D2_C2_SRB_Nr8_T16_Tp4_dft_snr6": 2560,
+  "D2_C2_SRB_Nr8_T16_Tp4_dft_snr9": 2560
+ },
+ "trial_stream": {
+  "rule": "default_rng([20260926, TBID[testbed], PID[prior], Nr, T, Tp, int(snr)+100])",
+  "skip_min": 0,
+  "skip_max_end": 2560,
+  "split": "TEST set (trials from 0; paired across arms)"
+ },
+ "run_params": {
+  "beta": "0.7",
+  "dtype": "complex128/float64",
+  "git": "7d524638",
+  "iters": "16",
+  "n": "40",
+  "seed": "20260926",
+  "snr": [
+   "-3.0",
+   "0.0",
+   "12.0",
+   "15.0",
+   "3.0",
+   "6.0",
+   "9.0"
+  ],
+  "t_in": "5",
+  "n_chunks": 448
+ },
+ "receiver": {
+  "outer_iterations": 16,
+  "beta": 0.7,
+  "arm_overrides": "(none)",
+  "t_in_bigamp": 5,
+  "n_inner_routeA": 1,
+  "dtype": "complex128/float64",
+  "device": "CPU, one thread per worker",
+  "code": "conv (133,171)_8 nu=6 terminated, QPSK"
+ },
+ "gmm": {
+  "bstar": "gmm1024",
+  "kron_K": "2048",
+  "ntrain": 160000.0,
+  "selection": "validation log-likelihood over the pre-registered K grid (BLER never consulted)",
+  "fits_dir": "/home/HTJ/t2/conf/results/gmm_fits_D2_SPSRB",
+  "em_sec": "9129.218118906021"
+ },
+ "sample_counts": {
+  "train_channels": 160000,
+  "score_train": 144000,
+  "score_val": 16000,
+  "test_trials_per_point": [
+   2560
+  ]
+ },
+ "stagec_checkpoint": null,
+ "stagec_status": "not requested (--stagec-ckpt not given) -- arm set is the pre-registered one",
+ "stagec_gate": "(none)",
+ "stagec_ckpt_id": "(none)",
+ "arms": [
+  "OMP-pilot",
+  "R5-genie",
+  "SBL-loop",
+  "SBL-pilot"
+ ],
+ "versions": {
+  "python": "3.12.14",
+  "numpy": "2.5.2",
+  "torch": "2.14.0+cu130",
+  "host": "262d04c812cc",
+  "cpu_count": 192
+ },
+ "output_paths": {
+  "tables": "/home/HTJ/t2/conf/results/tables_D2_SPSRB.txt",
+  "guard": "/home/HTJ/t2/conf/results/guard_D2_SPSRB.txt",
+  "log": "/home/HTJ/t2/conf/logs/run_D2_SPSRB.log"
+ }
+}
