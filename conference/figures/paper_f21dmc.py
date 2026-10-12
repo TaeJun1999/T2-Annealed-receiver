@@ -46,7 +46,7 @@ SETS = {"SRT": ("SRTB16e4", "SPSRT", "ALDSRT", "SRT", "F21srt",
                 "Sionna RT room, moving UE (prior SRP: Sionna RT 2.1, built-in scene box with its metal walls as shipped at 28 GHz, LoS + first-order "
                 "reflections, one fixed BS, one UE on a lawn-mower route, split by time with no guard band", "NEXT_EXPERIMENTS_PATH16e4 §1")}
 ROOM = ("SRB", "DMI", "SRP")
-HSREG = {"SRB": "FIGHSROOM16e4", "SRP": "FIGHSPATH16e4"}        # the n = 20480 figure supplements (REPORT-ONLY registrations)
+HSREG = {"SRB": "FIGHSROOM16e4", "SRP": "FIGHSPATH16e4", "DMI": "FIGHSDMI16e4"}   # the n = 20480 figure supplements (REPORT-ONLY registrations)
 X12 = False                                                     # `paper_f21dmc.py <PRIOR> hsx12` (user decision 2026-10-12 CDT, DECISIONS.md): the
 #                                                               paper variant of `hsx` DRAWN up to +12 dB (the +15 dB point stays in the record's
 #                                                               Counts block and in <NAME>hsx_col), figure <NAME>hsx12_col
