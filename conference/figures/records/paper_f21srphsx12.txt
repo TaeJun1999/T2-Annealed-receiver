@@ -2,7 +2,9 @@ F21srphsx12 -- Sionna RT room, moving UE (prior SRP: Sionna RT 2.1, built-in sce
 
 F21srphsx12_col  3.5 x 3.45 in, one panel, legend above; the 11 curves of paper_f16deep.SHOW with its shapes and sizes; 95% Wilson bars on Proposed (diffusion prior), GMM prior, Gaussian prior, Perfect CSI.  n = 2560 (test trials 0..2559) at -3/0/+3 dB and n = 20480 (new trials 10000..30479) at +6/+9 dB and n = 81920 (new trials 10000..91919) at +12/+15 dB for every curve (NEXT_EXPERIMENTS_FIGHSPATH16e4 §1 and NEXT_EXPERIMENTS_FIGHSX16e4 §1; block below).
 
-DRAWN RANGE: -3 .. +12 dB only (paper variant, user decision 2026-10-12 CDT -- conf/DECISIONS.md).  The +15 dB point of every curve was measured (n = 81920; last entry of each row of the Counts block and of the merge block below) and is NOT drawn here; the full-range figure is F21srphsx_col.  The lines 'at or below the proposed curve' and 'Zero-failure points' below refer to the drawn points.
+DRAWN RANGE: -3 .. +12 dB only (paper variant; user decision 2026-10-12 CDT, taken after the SRB +15 dB result was seen -- conf/DECISIONS.md).  The +15 dB point of every curve was measured (n = 81920; last entry of each row of the Counts block and of the merge block below) and is NOT drawn here; the full-range figure is F21srphsx_col.  The lines 'at or below the proposed curve' and 'Zero-failure points' below refer to the drawn points.
+
+Caveat (NEXT_EXPERIMENTS_PATH16e4 §5 / 6.1): the 'GMM prior' curve of this pool is the b* the registered rule selected after EM collapsed -- the seed initialisation, not a well-fitted GMM; the caption must say so.
 
 Curves (internal arm -> figure name): M-ours-dscore-C-V1 -> Proposed (diffusion prior); ALD-pilot -> Annealed Langevin (plug-in); M-ours-bstar -> GMM prior; R2-ours-G -> Gaussian prior; R1-turbo -> Turbo LMMSE receiver; R3-bigamp -> BiG-AMP; R0-pilot@1 -> Pilot-only LMMSE; SBL-loop -> SBL (in loop); SBL-pilot -> SBL (pilot-only); OMP-pilot -> OMP (pilot-only); R5-genie -> Perfect CSI.
 
