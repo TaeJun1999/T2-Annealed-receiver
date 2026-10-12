@@ -1697,8 +1697,8 @@ censored 0% (PARETO §6.2). P-c (Eb/N0, 보고): Δ₆ − 0.918 = −1.32 dB, �
 | 등록 baseline 16 개 (X → V1) | (i) 15, (ii) 0, `V1-pilot` (iii) | (i) 14, (ii) 0; `V1-pilot` (iii) · `R4-llr` (iv) | 등록 baseline 16 개 전부 (i) | 등록 baseline 16 개 전부 (i) |
 | "전부"·"멀어진다" 문장 | 쓰지 않음 (조건 불충족) | 쓰지 않음 (조건 불충족) | 조건 충족 (X\* = M-ours-bstar (F 827)) | 조건 충족 (V1-pilot (F 1113)) |
 | GMM b\* | kron 4096 | kron 4096 (격자 끝·수렴 캐비엇) | full K 1024 — 정상 수렴 (확장 격자의 끝) | "kron 4096" — **EM 이 무너져 선택된 씨앗 초기화** |
-| GB′ median (a1) | — | 0.5425 | 0.6472 | 0.5836 |
-| 기록 감사 (Fable) | 반영 (등록 §6) | MUST 0 · SHOULD 2 · NIT 6 | MUST 0 · SHOULD 2 · NIT 8 | MUST 1 · SHOULD 3 · NIT 6 (정정은 문구) |
+| GB′ median (a1) | 0.715 | 0.5425 | 0.6472 | 0.5836 |
+| 기록 감사 (Fable) | MUST 0 · SHOULD 2 · NIT 8 | MUST 0 · SHOULD 2 · NIT 6 | MUST 0 · SHOULD 2 · NIT 8 | MUST 1 · SHOULD 3 · NIT 6 (정정은 문구) |
 
 - 실패 수 / 2560 (−3 / +3 dB), 원고 범례 11 곡선 — SRB: V1 704 / 17, ALD-pilot 1316 / 55, b\* 827 / 40, R2 1685 / 178, R1 2089 / 406, BiG-AMP 2252 / 634, R0@1 2420 / 860, SBL-loop 1423 / 126, SBL-pilot 1774 / 137, OMP-pilot 1924 / 288, genie 299 / 9. SRP: V1 812 / 24, ALD-pilot 1315 / 64, b\* 1356 / 133, R2 1491 / 139, R1 1792 / 283, BiG-AMP 2311 / 763, R0@1 2351 / 882, SBL-loop 1621 / 154, SBL-pilot 1857 / 224, OMP-pilot 2020 / 271, genie 428 / 7.
 - 도시 풀 둘 (−3 / +15 dB): DeepMIMO V1 2136 / 801, ALD-pilot 2331 / 981, b\* 2232 / 884, genie 1756 / 611; Sionna RT 도시 V1 2320 / 1331, ALD-pilot 2441 / 1514, b\* 2404 / 1430, genie 2091 / 1277.
