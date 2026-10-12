@@ -1676,11 +1676,11 @@ censored 0% (PARETO §6.2). P-c (Eb/N0, 보고): Δ₆ − 0.918 = −1.32 dB, �
 - §3 예측 6/6. 실행 전에 주변 실패 수로 이미 정해져 있던 것 (등록 머리말 공개): a − b = +23 / +8 / −8, SNR@0.1 점추정 +0.14 dB. 이 실행이 새로 정한 것 = 불일치 쌍 수 (p·라벨) 와 bootstrap 구간.
 - 범위 = 이 셀·예산·판정점 하나 (C6·다른 예산·다른 쌍은 계산하지 않음). 이 결과는 헤드라인·기존 등록의 판정·라벨을 바꾸지 않는다.
 
-## 25. 레이 트레이싱 풀: DeepMIMO 도시 · Sionna RT 도시 · Sionna RT 방 두 풀 (DMC16e4 · DMCBASE16e4 · SRT16e4 · ROOM16e4 · PATH16e4; 그림 보강 FIGHSROOM16e4 · FIGHSPATH16e4 · FIGHSX16e4)
+## 25. 레이 트레이싱 풀: DeepMIMO 도시 · Sionna RT 도시 · Sionna RT 방 두 풀 (DMC16e4 · DMCBASE16e4 · SRT16e4 · ROOM16e4 · PATH16e4; 그림 보강 FIGHSROOM16e4 · FIGHSPATH16e4 · FIGHSX16e4; 시드 SEEDSROOM16e4)
 
 **EXPERIMENTS.md 행** (KST 머리): DeepMIMO 주 실행 `2026-10-11 10:04 ~ 11:53 KST` · baseline `2026-10-11 11:55 ~ 12:48 KST`; Sionna RT 도시 주 실행 `2026-10-11 18:30 ~ 20:11 KST` · baseline `2026-10-11 20:13 ~ 20:27 KST`; Sionna RT 방·이동 단말 (SRP) 주 실행 `2026-10-12 03:29 ~ 05:05 KST` · baseline `2026-10-12 05:06 ~ 05:21 KST`; Sionna RT 방·무작위 위치 (SRB) 주 실행 `2026-10-12 05:22 ~ 06:17 KST` · baseline `2026-10-12 06:18 ~ 06:32 KST`; 그림 보강 SRB n = 20480 `2026-10-12 07:01 ~ 08:31 KST`, SRP n = 20480 `2026-10-12 08:34 ~ 10:36 KST`, 두 풀 +12 · +15 dB n = 81920 `2026-10-12 10:40 ~ 18:09 KST`. 등록·결과 전사·기록 감사는 `conf/results/review_next/NEXT_EXPERIMENTS_{DMC16e4,DMCBASE16e4,SRT16e4,ROOM16e4,PATH16e4,FIGHSROOM16e4,FIGHSPATH16e4,FIGHSX16e4}.md` (각 §6); 감사 보고서 `prereg_audit_2026-10-1{0,1}/`. 이 절의 인용 수치는 모두 위 EXPERIMENTS.md 행에 글자 그대로 있는 것을 스크립트로 대조해 옮겼다(작성 2026-10-12 09:47 CDT, Opus 5.5); 별도 검증자 대조는 거치지 않았다. 시드 강건성 (SRB · SRP 의 a2 · a3; `NEXT_EXPERIMENTS_SEEDSROOM16e4.md`) 은 25.5 (2026-10-12 13:18 CDT 추가).
 
-공통: 셀 C2 (8×4), N′ = 1.6×10⁵, 동결 레시피 (V1 479,426 params), 기존 실험과 같은 GMM 격자·선택 규칙, 테스트 시행 0..2559 (n = 2560/SNR; **고정 풀의 테스트 분할에서 복원 추출** — 새 채널이 아니라 풀의 평균), 7 SNR −3…15 dB, BLER@16, 수신기 CPU. 채널은 라이브러리의 자체 생성기로 만든 고정 풀 (345,600 쌍 안팎; 학습 / GMM 검증 / 테스트 분할). 네 풀 모두 **UNGATED 측정** 이고 헤드라인 (§1)·기존 등록의 판정은 바뀌지 않는다.
+공통: 셀 C2 (8×4), N′ = 1.6×10⁵, 동결 레시피 (V1 479,426 params), 기존 실험과 같은 GMM 격자·선택 규칙, 테스트 시행 0..2559 (n = 2560/SNR; **고정 풀의 테스트 분할에서 복원 추출** — 새 채널이 아니라 풀의 평균), 7 SNR −3…15 dB, BLER@16, 수신기 CPU. 채널은 라이브러리의 자체 생성기로 만든 고정 풀 (DeepMIMO 342,597 쌍 · Sionna RT 도시 345,600 쌍; 방 두 풀의 크기는 등록 §5; 학습 / GMM 검증 / 테스트 분할). 네 풀 모두 **UNGATED 측정** 이고 헤드라인 (§1)·기존 등록의 판정은 바뀌지 않는다.
 
 ### 25.1 주 실행 — 표 B `b* → V1` 과 baseline 16 개
 
@@ -1717,20 +1717,20 @@ censored 0% (PARETO §6.2). P-c (Eb/N0, 보고): Δ₆ − 0.918 = −1.32 dB, �
 - 위 표의 나머지 칸의 출처: V1 45 / 7 / 0 / 0 · b\* 202 / 33 / 3 / 1 · genie 14 / 1 / 1 / 0 (SRP n = 20480 행 — +12 · +15 dB 는 n = 20480 에서 V1 0 / 0 건이었다); n = 81920 행의 문자열 b\* 32 / 15 · genie 5 / 4 (SRB), b\* 14 / 6 · genie 1 / 0 (SRP).
 - 보지 않은 61440 시행만: SRB V1 9 / 7 · b\* 21 / 9 · genie 4 / 3; SRP V1 4 / 1 · b\* 11 / 5 · genie 0 / 0.
 - 실행: SRB n = 20480 `FIGHS_DONE ok=3 fail=0`; SRP n = 20480 `FIGHS_DONE ok=3 fail=0`; n = 81920 은 첫 실행 `FIGHS_DONE ok=5 fail=1` (FXALDSRP: 빈 GPU 없음 … 같은 HEAD 에서 재개 → 여섯 행 모두 ACCEPT OK. 처음 20480 시행은 n = 20480 raw 와 비트 동일 (ALD-pilot 제외).
-- 세 등록 모두 Fable 기록 감사에서 §6 의 수치·채점·인용 오류 0 (정정은 문구·동반 기록).
+- 세 등록 모두 Fable 기록 감사에서 §6 의 수치·채점·인용 오류 0 (정정은 문구·동반 기록) (출처: 감사 보고서 `prereg_audit_2026-10-11/audit_FIGHS{ROOM,PATH,X}16e4.md` — EXPERIMENTS 행에는 없다).
 
 ### 25.3 붙는 캐비엇 (등록 문자열의 요지)
 
 - 네 풀 모두: 유한 풀·한 장소(들), 테스트 시행은 테스트 분할의 복원 추출; UNGATED.
 - 도시 풀 둘: BLER 수준이 높다 — Perfect CSI 의 +15 dB BLER 이 DeepMIMO 0.239 · Sionna RT 도시 0.499 (25.1); 테스트 풀의 0.796 이 사실상 rank-1 (Sionna RT 도시).
-- 방 두 풀: 금속 벽·1 차 반사, 고정 기지국 1 곳, **BLER 수준이 낮도록 고른 풀** (Perfect CSI 만으로 선별).
+- 방 두 풀: 금속 벽·1 차 반사, 고정 기지국 1 곳, **BLER 수준이 낮도록 고른 풀** (SRB 행: Perfect CSI 선별).
 - **SRP 의 GMM**: 이 풀의 GMM b\* ("kron 4096", ll_val 244.1933, it_best 0) 는 EM 이 무너져 선택된 씨앗 초기화이고 Kronecker 구조가 아니다 — `b* → V1` 의 수치는 그 b\* 대비다. SRB 의 b\* 는 정상 수렴한 GMM.
 - SRP: 방향 두 가지·규칙 격자 경로 (도플러 없음), 완충 구역 없음; 수신기는 블록마다 따로 처리.
 - 그림의 SNR 범위 (사용자 결정 2026-10-12 CDT, `conf/DECISIONS.md`): 원고판은 +12 dB 까지, 전 구간 판도 함께 둔다. +15 dB 의 수는 25.2 에 있다.
 
 ### 25.4 그림·기록 (`conference/figures/`; 설명은 그 폴더 README 의 "레이 트레이싱 풀 그림" 절)
 
-`F21dmc_col` · `F21srt_col` (전 SNR n = 2560); `F21sr{b,p}_col` (n = 2560, 등록 그림) · `F21sr{b,p}hs_col` (+6…+15 dB n = 20480) · `F21sr{b,p}hsx_col` (+12 · +15 dB n = 81920, 전 구간) · `F21sr{b,p}hsx12_col` (+12 dB 까지) · `F21room_wide` · `F21room12_wide` (두 풀을 한 그림에); `F33cdf_{DMC,SRT,SRB,SRP}_wide` (NMSE CDF, 보고 전용). 수치 기록 `conference/figures/records/paper_f21*.txt` · `paper_f33cdf_*.txt`.
+`F21dmc_col` · `F21srt_col` (전 SNR n = 2560); `F21sr{b,p}_col` (n = 2560, 등록 그림) · `F21sr{b,p}hs_col` (+6…+15 dB n = 20480) · `F21sr{b,p}hsx_col` (+12 · +15 dB n = 81920, 전 구간) · `F21sr{b,p}hsx12_col` (+12 dB 까지) · `F21room_wide` · `F21room12_wide` (두 풀을 한 그림에; 두 패널 판은 DECISIONS 10-12 23:24 KST 줄); `F33cdf_{DMC,SRT,SRB,SRP}_wide` (NMSE CDF, 보고 전용). 수치 기록 `conference/figures/records/paper_f21*.txt` · `paper_f33cdf_*.txt`.
 
 ### 25.5 방 두 풀의 시드 강건성 (SEEDSROOM16e4; a1 · a2 · a3)
 

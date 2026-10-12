@@ -85,7 +85,7 @@
 
 ## 레이 트레이싱 풀 그림 (DeepMIMO · Sionna RT; 기록 2026-10-12 09:23 CDT)
 
-모두 8×4 (N_r = 8, N_t = 4), N_train = 1.6×10⁵, Fig. 2 와 같은 범례 11 곡선 (`paper_f16deep.SHOW`), 고정 풀에서 시험 시행을 복원 추출한다 (새 채널이 아니라 풀의 평균 BLER). 스크립트 `paper_f21dmc.py <PRIOR> [hs|hsx|hsx12]`, `paper_f21room.py [12]`, `paper_f33cdf.py <PRIOR>`; 수치 기록은 `records/paper_f21*.txt` · `records/paper_f33cdf_*.txt`, 등록·결과·감사는 `conf/results/review_next/NEXT_EXPERIMENTS_{DMC16e4,DMCBASE16e4,SRT16e4,ROOM16e4,PATH16e4,FIGHSROOM16e4,FIGHSPATH16e4,FIGHSX16e4}.md`.
+모두 8×4 (N_r = 8, N_t = 4), N_train = 1.6×10⁵, 고정 풀에서 시험 시행을 복원 추출한다 (새 채널이 아니라 풀의 평균 BLER). BLER 그림 `F21*` 는 Fig. 2 와 같은 범례 11 곡선 (`paper_f16deep.SHOW`); `F34seed_wide` 는 5 곡선 (Proposed 시드 1 · 2 · 3, GMM prior, Perfect CSI — 보고 전용, 원고 범례 그림이 아님); `F33cdf_*` 는 NMSE CDF. 스크립트 `paper_f21dmc.py <PRIOR> [hs|hsx|hsx12]`, `paper_f21room.py [12]`, `paper_f33cdf.py <PRIOR>`, `paper_f34seed.py`; 수치 기록은 `records/paper_f21*.txt` · `records/paper_f33cdf_*.txt` · `records/paper_f34seed.txt`, 등록·결과·감사는 `conf/results/review_next/NEXT_EXPERIMENTS_{DMC16e4,DMCBASE16e4,SRT16e4,ROOM16e4,PATH16e4,FIGHSROOM16e4,FIGHSPATH16e4,FIGHSX16e4,SEEDSROOM16e4}.md`.
 
 | 그림 | 내용 | 캡션에 꼭 |
 |---|---|---|
@@ -94,7 +94,7 @@
 | F21srb_col · F21srbhs_col · F21srbhsx_col · **F21srbhsx12_col** | **Sionna RT 방, 무작위 단말 위치** (내장 장면 `box` 10×10×5 m 금속 벽, 28 GHz, LoS + 1 차 반사, 고정 기지국 1 곳, 1 m 타일 block split). 차례로: 전 SNR n = 2560 (등록 그림) / +6..+15 dB 를 n = 20480 으로 / +12 · +15 dB 를 n = 81920 으로 (전 구간) / **같은 것을 +12 dB 까지만 그린 원고판** | 점마다 n 이 다르다: −3/0/+3 dB n = 2560 (등록된 판정의 시행), +6/+9 dB n = 20480, +12(/+15) dB n = 81920. GMM prior 는 정상 수렴한 full K = 1024. 금속 벽·1 차 반사, 한 장소·유한 풀. 아래 수치 표 |
 | F21srp_col · F21srphs_col · F21srphsx_col · **F21srphsx12_col** | **Sionna RT 방, 이동 단말** (같은 방·기지국; 단말 한 대의 잔디깎이 경로 600 × 576 점 · 1.5 cm 간격을 시간 순서로 수집, 시간 분할 — 마지막 87 줄이 테스트; 수신기는 블록마다 따로 처리). 네 판의 뜻은 SRB 와 같다 | 위와 같은 n. **이 풀의 GMM prior 는 EM 이 무너져 선택된 씨앗 초기화이고 잘 맞춘 GMM 이 아니다** (Gaussian prior 와 거의 겹친다) — 캡션에 밝힐 것. 방향 두 가지·규칙 격자 경로 (도플러 없음), 완충 구역 없음 |
 | **F21room_wide · F21room12_wide** | 위 두 풀을 한 그림에: (a) 무작위 위치 (SRB), (b) 이동 단말 (SRP); 7.16 × 3.25 in (`figure*`), 범례 한 번, 두 패널이 x · y 축 공유. `_wide` = 전 구간 (−3…+15 dB), `12_wide` = +12 dB 까지 | 두 단일 패널 그림 (`…hsx_col`) 과 같은 수 (스크립트가 그 기록과 대조). y 축 아래 끝 7.5×10⁻⁶ (n = 81920 의 실패 1 건 = 1.2×10⁻⁵ 가 보이도록). (b) 의 GMM 캐비엇 |
-| F34seed_wide | 방 두 풀의 시드 비교 (`paper_f34seed.py`; 보고 전용): (a) SRB, (b) SRP — Proposed 의 시드 1 · 2 · 3, GMM prior, Perfect CSI; 7.16 × 2.9 in; **전 점 n = 2560** | 시드 = 같은 레시피·예산에서 초기화·배치 순서만 다른 세 번의 학습; 같은 시험 시행. +6 dB 이상은 실패가 한 자리라 곡선이 흔들린다 (보강 없음). (b) 의 GMM 캐비엇 |
+| F34seed_wide | 방 두 풀의 시드 비교 (`paper_f34seed.py`; 보고 전용): (a) SRB, (b) SRP — Proposed 의 시드 1 · 2 · 3, GMM prior, Perfect CSI; 7.16 × 2.9 in; **전 점 n = 2560** | 시드 = 같은 레시피·예산에서 초기화·배치 순서만 다른 세 번의 학습; 같은 시험 시행. +6 dB 이상은 Proposed · Perfect CSI 의 실패가 한 자리라 곡선이 흔들린다 (보강 없음). (b) 의 GMM 캐비엇 |
 | F33cdf_DMC_wide · F33cdf_SRT_wide · F33cdf_SRB_wide · F33cdf_SRP_wide | 블록별 채널 추정 NMSE 의 CDF (보고 전용; 전 SNR n = 2560). 패널: DMC · SRT 는 −3 dB 와 판정 SNR 세 점, SRB · SRP 는 −3 · 0 · +3 · +6 dB | 검정·라벨 없음. −3 dB 중앙값 (10 log₁₀ NMSE): SRB Proposed −14.39 · GMM −12.43 · Annealed Langevin −8.44 · Gaussian −6.17 dB (나머지는 `records/paper_f33cdf_*.txt`) |
 
 ### Sionna RT 방 두 풀의 수치 (캡션·본문용; 출처는 괄호의 등록 §)
