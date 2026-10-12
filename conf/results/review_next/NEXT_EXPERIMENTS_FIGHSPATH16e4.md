@@ -44,7 +44,7 @@ v2 2026-10-11 18:34 CDT (Opus 5.5). 검토(MUST 1 · SHOULD 5 · NIT 5) 반영: 
 
 ### 6.1 실행·운영 기록 (생성기 `prereg_audit_2026-10-11/s6_fighsroom_gen.py`; 수치는 모두 기록 파일에서 읽음)
 
-`bash code/run_fighspath16e4.sh` **한 번**, tmux `fighspath`, 10-11 18:34 CDT 시작(git c48ee796 = 실행 커밋; 시작 줄 하나, 재개 없음). 단계 C (관측된 시험 청크 0 의 대조) 10-11 18:38 CDT: 3 receiver control(s) OK, 1 ALD estimator control(s) OK. `FIGHS_DONE ok=3 fail=0` 10-11 20:36 CDT. ABORT · SKIP · INVALID 줄: 0 개.
+`bash code/run_fighspath16e4.sh` **한 번**, tmux `fighspath` (세션 기록 기준 [감사 N2]), 10-11 18:34 CDT 시작(git c48ee796 = 실행 커밋; 시작 줄 하나, 재개 없음). 단계 C (관측된 시험 청크 0 의 대조) 10-11 18:38 CDT: 3 receiver control(s) OK, 1 ALD estimator control(s) OK. `FIGHS_DONE ok=3 fail=0` 10-11 20:36 CDT. ABORT · SKIP · INVALID 줄: 0 개.
 
 | 행 | 시작 (CDT) | runner | 작업 (done / exists) | 수용 (CDT) | 수용 판정 | manifest git · config_hash | 대조 |
 |---|---|---|---|---|---|---|---|
@@ -80,6 +80,8 @@ v2 2026-10-11 18:34 CDT (Opus 5.5). 검토(MUST 1 · SHOULD 5 · NIT 5) 반영: 
 | OMP-pilot | raw_FHSPSRP | 720 (3.52e-02, [3.27e-02, 3.78e-02]) | 138 (6.74e-03, [5.71e-03, 7.95e-03]) | 30 (1.46e-03, [1.03e-03, 2.09e-03]) | 9 (4.39e-04, [2.31e-04, 8.35e-04]) | 81 / 9 / 3 / 1 |
 | R5-genie | raw_FHSRPB16e4 | 14 (6.84e-04, [4.07e-04, 1.15e-03]) | 1 (4.88e-05, [8.62e-06, 2.77e-04]) | 1 (4.88e-05, [8.62e-06, 2.77e-04]) | 0 (0.00e+00, [0.00e+00, 1.88e-04]) | 1 / 0 / 0 / 0 |
 
+**GMM 캐비엇(머리말) [감사 S2]**: M-ours-bstar (그림의 GMM prior) 행은 PATH16e4 의 b\* 그대로다 — EM 이 무너져 선택된 씨앗 초기화("kron 4096", ll_val 244.1933, it_best 0)이고 잘 맞춘 GMM 이 아니다. 새 시행의 실패 수는 b\* 202 / 33 / 3 / 1, Gaussian prior (R2-ours-G) 215 / 35 / 4 / 1.
+
 Perfect CSI (R5-genie) 의 실패 수는 세 raw 에서 같다: FHSRPB16e4 [14, 1, 1, 0] · FHSPSRP [14, 1, 1, 0] · FHALDSRP [14, 1, 1, 0] → 동일.
 
 0 실패 점 (n = 20480): M-ours-dscore-C-V1 +12 dB, M-ours-dscore-C-V1 +15 dB, R5-genie +15 dB.
@@ -91,17 +93,23 @@ Perfect CSI (R5-genie) 의 실패 수는 세 raw 에서 같다: FHSRPB16e4 [14, 
 
 1. V1 의 실패 수가 +6 ≥ +9 ≥ +12 ≥ +15 dB 로 줄기만 한다 → **적중** (45 / 7 / 0 / 0).
 2. V1 · b\* · Perfect CSI 에 Fisher p < 0.05 인 오르는 칸 없음 → **적중** (오르는 칸의 p: M-ours-dscore-C-V1 없음, M-ours-bstar 없음, R5-genie 없음).
-3. +6 · +9 dB 에서 실패 수 V1 ≤ b\* → **적중** (45 대 202, 7 대 33).
+3. +6 · +9 dB 에서 실패 수 V1 ≤ b\* → **적중** (45 대 202, 7 대 33; b\* 는 씨앗 초기화 GMM — 머리말 캐비엇 [감사 S2]).
 4a. V1 의 +9 dB 실패 수 ≥ 1 / 20480 → **적중** (7).
 4b. V1 의 +15 dB 실패 수 ≤ 5 / 20480 → **적중** (0).
 5. `FIGHS_DONE ok=3 fail=0` → **적중** (ok=3 fail=0).
 
 ### 6.4 그림과 공개 사항
 
-- **그림** `conference/figures/F21srphs_col.{pdf,png}`, 기록 `records/paper_f21srphs.txt` (§1 의 명령 그대로, `FIGHS_DONE` 뒤): 실패 수 = 집계표(assert), y 축 (3e-05, 1.2). 0 실패 점: fighs_merge.zero_arrows): Proposed (diffusion prior) +12 dB; Proposed (diffusion prior) +15 dB; Perfect CSI +15 dB. −3 / 0 / +3 dB 는 원 raw (n = 2560) 그대로다. **GMM prior 곡선은 PATH16e4 의 씨앗 초기화 b\* 의 곡선이다**(머리말의 캐비엇; 캡션에 밝힌다).
+- **그림** `conference/figures/F21srphs_col.{pdf,png}`, 기록 `records/paper_f21srphs.txt` (§1 의 명령 그대로, `FIGHS_DONE` 뒤): 실패 수 = 집계표(assert), y 축 (3e-05, 1.2) **[감사 N1 — 이 항목의 정리된 문장: y 축 (3e-05, 1.2) 은 0 실패 점이 셋이라 규칙의 둘째 범위다(그 밖에 2e-4 이하의 점·막대 끝 12 개; Wilson 하한 8.6e-06 인 막대 넷 — GMM prior · Gaussian prior +15 dB, Perfect CSI +9 · +12 dB — 은 축 아래로 잘린다). 0 실패 점(곡선이 거기서 끊긴다; Perfect CSI 만 `fighs_merge.zero_arrows` 화살표): Proposed (diffusion prior) +12 · +15 dB, Perfect CSI +15 dB — 제안 곡선은 +9 dB 에서 끝나고 +12 · +15 dB 에는 표시가 없다(0 / 20480, Wilson 상한 1.88e-04). 아래는 처음 적은 문장(인용이 깨져 있다)]**. 0 실패 점: fighs_merge.zero_arrows): Proposed (diffusion prior) +12 dB; Proposed (diffusion prior) +15 dB; Perfect CSI +15 dB. −3 / 0 / +3 dB 는 원 raw (n = 2560) 그대로다. **GMM prior 곡선은 PATH16e4 의 씨앗 초기화 b\* 의 곡선이다**(머리말의 캐비엇; 캡션에 밝힌다).
 - 그림 스크립트 `paper_f21dmc.py` · `fighs_merge.py` 는 이 그림을 만들 때 작업 트리에 미커밋 변경이 있었다(이 §6 과 같은 커밋): hs 모드 기록 문구 한 곳("counts before the merge …"; FIGHSROOM16e4 감사 N2), 그리고 FIGHSX16e4 를 위한 `hsx` 모드(이 그림은 쓰지 않는다). `SRB hs` 를 바뀐 스크립트로 다시 돌린 PDF · PNG 가 커밋본과 바이트 동일하고 비-hs 기록(`paper_f21srb.txt` · `paper_f21srp.txt`)도 바이트 동일함을 확인했다.
 - 새 시행의 ALD 추정 파일 `results/ald/ald_PILSRP_hisnr.npz` sha256[:16] 3a13dfb7191bd3ed (git 밖).
 - 실행 중 main 커밋 없음(HEAD c48ee796 그대로; 스크립트의 HEAD 검사 통과). 함께 돈 것(결과 중립 — 수신기는 CPU 결정적; 세션 기록 기준): SRP 시드 a3 학습(GPU 0, 19:20 CDT 까지), SRB 시드 a2 · a3 학습(GPU 0 · 2, 19:26 CDT ~; 등록 밖, 사용자 "GPU 빈거에 뭐라도 하자"), FIGHSROOM16e4 의 기록 감사와 FIGHSX16e4 의 사전 검토(Fable 서브에이전트, CPU 3 스레드 이하, 읽기 전용 — 이 실행의 결과는 읽지 않음), SRB 의 사후 진단 한 번(CPU 2 스레드), 그림 스크립트의 회귀 확인 렌더, 한 배치 ALD 추정의 합성 입력 시험(GPU 1, FIGHSX16e4 검토 보고 뒤 약 1 분 — 이 실행의 ALD 행보다 먼저 끝남).
 - 실행 중 작성자는 이 실행의 진행 줄 수(`grep -c done`)와 운영 로그만 봤고 결과 파일은 `FIGHS_DONE` 뒤에 처음 열었다(세션 기록 기준).
 - §1 의 비용 추정(base ≈ 90 분 · SP ≈ 50 분 · ALD ≈ 10 분, 합 ≈ 2.5 시간) 대비 실측 runner 74.3 · 36.9 · 1.6 분, 전체 10-11 18:34 → 10-11 20:36 CDT.
 - 기록 감사(Fable)는 이 절을 쓴 뒤에 받는다 — 결과는 추가 줄로 적는다.
+
+### 6.5 기록 감사 (Fable 5.1 서브에이전트, 보고서 파일 mtime 2026-10-11 21:00 CDT; `prereg_audit_2026-10-11/audit_FIGHSPATH16e4.md`, 재계산 `recompute_fighspath.py` → `.out`, 등록 도구 재실행 `rerun_fighspath_accept_FH*.txt`)
+
+감사 대상 = 커밋 aefbfc12 (§6 과, 같은 커밋의 `docs/EXPERIMENTS.md` 마지막 행·70 · 72 행의 정정, FIGHSROOM16e4 §6.5 · 6.6, ROOM16e4 의 [정정], `audit_ROOM16e4.md` 의 정정 줄, `DECISIONS.md` 한 줄). **이 문서 §6.1–6.4 의 수치·채점·인용 오류 0**: 자체 판독기로 새 raw 3 × 2048 청크(시행 10000..30479 를 SNR 당 한 번씩; 모든 청크 `run|git` c48ee796, `+dirty` 없음)·원 raw·대조 raw·ALD npz 를 직접 읽음(검사 묶음 63 개 중 62 통과; 나머지 하나는 아래 N3). meta (kron / K 4096 / ll_val 244.1932863626755, 체크포인트 ac4699c78b3e2d80), SP 의 `meta|sparse` == pick, ALD 의 `meta|ald_file`, genie 세 raw 비트 동일(14 / 1 / 1 / 0), 대조 비교 0 다름, 집계표 56 행과 Wilson 문자열, 6.2 의 44 칸과 원 raw 열, 0 실패 점 셋, 오르는 칸 하나(BiG-AMP +9 → +12 dB, p 9e-06), 예측 여섯의 채점, 시각표(시작 줄 하나, 실행 중 커밋 없음) 일치; `eval_accept` 세 행 재실행 → `ACCEPT: OK`; 생성기 `s6_fighsroom_gen.py SRP` 재실행이 6.1–6.3 과 바이트 동일; `paper_f21dmc.py` 를 커밋된 코드로 `SRP hs` · `SRB hs` · `SRP` · `SRB` 다시 그린 기록 4 개·PDF/PNG 8 개가 커밋본과 **바이트 동일**.
+
+**MUST 0 · SHOULD 2 · NIT 8 — 모두 반영(이 문서의 수치·채점 불변; 기록 2026-10-11 21:02 CDT, Opus 5.5)**: **S1** (다른 문서) FIGHSROOM16e4 §6.6 의 "시행" 번호가 새 raw 안의 위치였다 — 스트림 시행 번호(= 10000 + 위치)로 정정(제자리 표시), 진단 스크립트가 스트림 번호를 찍도록 고치고 파일을 다시 만듦. **S2** GMM 캐비엇을 6.2 의 표 뒤와 6.3 의 3 번에 붙임(제자리). N1 6.4 첫 항목의 정리된 문장(y 축 범위의 이유, 제안 곡선이 +9 dB 에서 끝남, 잘리는 막대 넷) — 제자리; N2 "tmux `fighspath`" 는 세션 기록 기준; N3 · N4 · N5 · N8 (다른 문서) FIGHSROOM16e4 §6.4 의 1.46e-04 · 1.95e-04, §6.5 의 `DECISIONS.md` 줄 지칭과 "확인하지 못한 것" 한 항목, §6.6 의 지문 두 개; N6 (다른 문서) `DECISIONS.md` 10:38 KST 줄의 "SRP 시드 a2 · a3 는 19:20 CDT 에 끝남" → a2 는 16:47 CDT, a3 는 19:20 CDT (정정 줄 추가); N7 `docs/EXPERIMENTS.md` 의 이 실험 행에 오르는 칸과 0 실패 점을 이름으로 적음. 감사가 확인하지 못한 것: 세션 기록 기준 진술(tmux 이름, 회귀 렌더, 결과 파일을 처음 연 시점, 병행 작업의 스레드 수, GPU 1 의 합성 ALD 시험), 사용자 인용, 스크래치 `srb_seeds.sh`, 진단 파일의 특이값 비중·지문(실패 위치·반복별 수·함께 실패한 arm 은 raw 에서 확인), 풀 통계의 원 재계산.

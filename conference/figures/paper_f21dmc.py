@@ -47,6 +47,9 @@ SETS = {"SRT": ("SRTB16e4", "SPSRT", "ALDSRT", "SRT", "F21srt",
                 "reflections, one fixed BS, one UE on a lawn-mower route, split by time with no guard band", "NEXT_EXPERIMENTS_PATH16e4 §1")}
 ROOM = ("SRB", "DMI", "SRP")
 HSREG = {"SRB": "FIGHSROOM16e4", "SRP": "FIGHSPATH16e4"}        # the n = 20480 figure supplements (REPORT-ONLY registrations)
+X12 = False                                                     # `paper_f21dmc.py <PRIOR> hsx12` (user decision 2026-10-12 CDT, DECISIONS.md): the
+#                                                               paper variant of `hsx` DRAWN up to +12 dB (the +15 dB point stays in the record's
+#                                                               Counts block and in <NAME>hsx_col), figure <NAME>hsx12_col
 HSX = False                                                     # `paper_f21dmc.py <PRIOR> hsx` (NEXT_EXPERIMENTS_FIGHSX16e4 §1): as `hs`, and the
 #                                                               +12/+15 dB points are the n = 81920 raws raw_FX<tag>, figure <NAME>hsx_col
 HS = False                                                      # `paper_f21dmc.py <PRIOR> hs` (NEXT_EXPERIMENTS_<HSREG[PRIOR]> §1): the +6..+15 dB
@@ -66,6 +69,7 @@ def merged(k, o, a):
 
 
 def main():
+    sl = slice(None, -1) if X12 else slice(None)               # the drawn SNR points
     D.check_styles()
     plt.rcParams.update(D.RC)
     fig = plt.figure(figsize=(W, H))
@@ -89,7 +93,7 @@ def main():
         assert set(n.tolist()) == {N0} and k.tolist() == tab[a], (a, k.tolist(), tab[a])
         if HS:                                                 # +6..+15 dB from the n = 20480 raw (asserted against its count table)
             k, n, line = merged(k, orig, a); fh.append(line)
-        p = D.draw(ax, BY[a], SNRS, k, n, {V1: 5, D.BS: 4, GE: 3}.get(a, 2.9 - 0.05 * SHOW.index(a)))
+        p = D.draw(ax, BY[a], SNRS[sl], k[sl], n[sl], {V1: 5, D.BS: 4, GE: 3}.get(a, 2.9 - 0.05 * SHOW.index(a)))
         assert (p[np.isfinite(p)] >= YLIM[0]).all() and (p[np.isfinite(p)] <= YLIM[1]).all(), (a, p)   # a zero-failure point is NaN (the curve breaks there)
         cur[a] = k
         txt.append(f"    {a:<21}" + " ".join(f"{x}/{m}" for x, m in zip(k, n)) + f"   raw_{orig}")
@@ -97,7 +101,8 @@ def main():
     ax.set_yscale("log"); ax.set_ylim(*YLIM)
     if YTICKS is not None:                                         # the room pools keep the decade ticks of F16deep_wide (a)
         ax.set_yticks(YTICKS); ax.set_yticklabels([f"{y:g}" for y in YTICKS]); ax.minorticks_off()
-    ax.set_xticks(SNRS); ax.set_xlim(*XLIM)
+    xlim = (XLIM[0], SNRS[-2] + 1) if X12 else XLIM
+    ax.set_xticks(SNRS[sl]); ax.set_xlim(*xlim)
     ax.tick_params(axis="x", pad=Q.XTPAD); ax.set_xlabel("SNR [dB]", labelpad=Q.XPAD); ax.set_ylabel("BLER")
     hl = [D.proxy(BY[a]) for a in SHOW]
     leg = fig.legend(hl, [x.get_label() for x in hl], loc="center", ncol=2, frameon=False, fontsize=7,
@@ -109,8 +114,8 @@ def main():
     for ext in ("pdf", "png"):
         fig.savefig(os.path.join(FIG, f"{NAME}_col.{ext}"), dpi=300, **({"metadata": {"CreationDate": None}} if ext == "pdf" else {}))
 
-    below = [f"{BY[a].label} at " + ", ".join(f"{s:+.0f} dB ({x} vs {y})" for s, x, y in zip(SNRS, cur[a], cur[V1]) if x <= y)
-             for a in SHOW if a not in (V1, GE) and (cur[a] <= cur[V1]).any()]
+    below = [f"{BY[a].label} at " + ", ".join(f"{s:+.0f} dB ({x} vs {y})" for s, x, y in zip(SNRS[sl], cur[a][sl], cur[V1][sl]) if x <= y)
+             for a in SHOW if a not in (V1, GE) and (cur[a][sl] <= cur[V1][sl]).any()]
     odd = [f"{BY[a].label} {lab[a]}" for a in SHOW if a not in (V1, GE) and lab[a] != "(i)"]
     print("\n".join(
         [f"{NAME} -- {WHAT}; cell C2 = 8x4, N_train = 1.6e5) with the "
@@ -123,6 +128,9 @@ def main():
          + (f"trials 10000..30479) at +6..+15 dB for every curve (NEXT_EXPERIMENTS_{HSREG[PRIOR]} §1; block below)." if not HSX else
           f"trials 10000..30479) at +6/+9 dB and n = 81920 (new trials 10000..91919) at +12/+15 dB for every curve (NEXT_EXPERIMENTS_{HSREG[PRIOR]} §1 and "
           "NEXT_EXPERIMENTS_FIGHSX16e4 §1; block below).")), "",
+         *([f"DRAWN RANGE: {SNRS[0]:+.0f} .. {SNRS[-2]:+.0f} dB only (paper variant, user decision 2026-10-12 CDT -- conf/DECISIONS.md).  The {SNRS[-1]:+.0f} dB point of every "
+            f"curve was measured (n = 81920; last entry of each row of the Counts block and of the merge block below) and is NOT drawn here; the full-range "
+            f"figure is {NAME[:-2]}_col.  The lines 'at or below the proposed curve' and 'Zero-failure points' below refer to the drawn points.", ""] if X12 else []),
          "Curves (internal arm -> figure name): " + "; ".join(f"{a} -> {BY[a].label}" for a in SHOW) + ".", "", "Counts:"] + txt
         + ["", "Drawn baseline curves (Perfect CSI excluded) at or below the proposed curve (point estimates; failures vs the proposed curve's) -- reported only, nothing is "
            "tested here; the registered paired tests are in conf/results/review_next/pairB_" + SP + ".txt: " + ("; ".join(below) or "none") + ".",
@@ -130,12 +138,12 @@ def main():
            + ("all (i)" if not odd else "; ".join(odd) + "; the others (i)") + ".",
            "Raised blocks (analysis.load_raw NOTE lines; kept and counted as failures) in the raws read: " + ("; ".join(D.NOTES) or "none") + "."]
         + (["Zero-failure points (the curve breaks there; Perfect CSI: fighs_merge.zero_arrows): "
-            + "; ".join(f"{BY[a].label} {s:+.0f} dB" for a in SHOW for s, x in zip(SNRS, cur[a]) if x == 0) + "."] if any((cur[a] == 0).any() for a in SHOW) else [])
+            + "; ".join(f"{BY[a].label} {s:+.0f} dB" for a in SHOW for s, x in zip(SNRS[sl], cur[a][sl]) if x == 0) + "."] if any((cur[a][sl] == 0).any() for a in SHOW) else [])
         + [
            "", "Asserts passed: counts " + ("before the merge (n = 2560, the registered judgement) " if HS else "") + f"= pairB_{SP}.txt 'BLER@16 failures' table (11 arms x 7 SNRs)"
            + ("; the Counts block above holds the merged values" if HS else "") + f"; Perfect CSI error arrays of raw_{ALD} "
            f"and raw_{SP} = raw_{TAG}'s; drawn = counted; the panel holds exactly the curves of the legend; no point outside the y range.",
-           f"Layout: x ticks at the SNR points, x range {XLIM}; y log {YLIM}, ticks {YTICKS}; legend band {BAND} in above the axes, 2 columns "
+           f"Layout: x ticks at the SNR points, x range {xlim}; y log {YLIM}, ticks {YTICKS}; legend band {BAND} in above the axes, 2 columns "
            f"(inside its band: asserted, [in] {np.round(lb, 3).tolist()}); every artist inside the canvas (tight bbox [in] "
            f"{np.round(bb, 3).tolist()}); smallest visible text {small:g} pt; saved at figsize, PNG 300 dpi."]
         + (["", (f"{HSREG[PRIOR]} merge (REPORT-ONLY, NEXT_EXPERIMENTS_{HSREG[PRIOR]} §1)" if not HSX else
@@ -158,16 +166,19 @@ if __name__ == "__main__":
             k = np.array([np.asarray(d[o][(CELL, PRIOR, s)][a]["blk_err"], float)[:, -1].sum() for s in SNRS])
             lows.append((D.wilson(k, np.full(len(k), N0))[0] if a in D.BARS else k / N0).min())
         if sys.argv[1] in ROOM:
-            HSX = len(sys.argv) > 2 and sys.argv[2] == "hsx"
+            X12 = len(sys.argv) > 2 and sys.argv[2] == "hsx12"
+            HSX = X12 or (len(sys.argv) > 2 and sys.argv[2] == "hsx")
             HS = HSX or (len(sys.argv) > 2 and sys.argv[2] == "hs")
             KN = {}
             for a in SHOW:                                         # the drawn counts (merged when HS) decide the y range
                 o = {"SPB16e4k": SP, "ALDB16e4k": ALD}.get(BY[a].orig, TAG)
                 k = np.array([int(np.asarray(d[o][(CELL, PRIOR, s)][a]["blk_err"], float)[:, -1].sum()) for s in SNRS]); n = np.full(len(k), N0)
                 KN[a] = merged(k, o, a)[:2] if HS else (k, n)
+            if X12:                                                # the y range by the same rule, from the DRAWN points only
+                KN = {a: (k[:-1], n[:-1]) for a, (k, n) in KN.items()}
             zero = any((k == 0).any() for k, n in KN.values())
             pos = [float(x) for a, (k, n) in KN.items() for x in ((D.wilson(k, n)[0] if a in D.BARS else k / n)[k > 0])]
-            NAME = NAME + ("hsx" if HSX else "hs" if HS else "")
+            NAME = NAME + ("hsx12" if X12 else "hsx" if HSX else "hs" if HS else "")
             YLIM, YTICKS = ((Q.YLO, 1.2) if not zero and min(pos) > Q.YLO else (Q.YLO_RULE, 1.2)), None
             if HSX and YLIM[0] == Q.YLO_RULE and min(             # FIGHSX16e4 §1: at n = 81920 one failure is 1.22e-5 and the Perfect CSI
                     [float(x) for k, n in KN.values() for x in (k / n)[k > 0]]         # zero-failure arrow ends at 2.76e-5: both below 3e-5

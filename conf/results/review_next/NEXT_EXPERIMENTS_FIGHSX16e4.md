@@ -51,6 +51,131 @@ v2 2026-10-11 20:39 CDT (Opus 5.5). **검토(MUST 3 · SHOULD 8 · NIT 8) 반영
 
 **운영**: GPU 1 을 비워 둔다(스크립트의 ALD 단계용); GPU 0 · 2 는 등록 밖의 SRB 시드 a2 · a3 학습(10-11 19:26 CDT ~, CPU 스레드 2 개씩 고정), GPU 3 · 4 · 5 는 컨테이너 밖 프로세스가 점유. 실행 뒤 그림은 세션 스크래치의 도우미(`fighsx_figs.sh`: SRB 세 행이 수용되면 §1 의 명령으로 `SRB hsx`, `FIGHS_DONE` 뒤 `SRP hsx`; 로그 `logs/fighsx_figs.log`)가 그린다 — 등록의 일부가 아니고 §1 의 그림 명령을 그대로 부를 뿐이다. **실행 커밋 = 이 문서를 담은 커밋**(그 뒤 `FIGHS_DONE` 까지 main 커밋 없음). 실행 시작 전 상태: `raw_FX*` · `raw_FXC*` · `ald_PIL{SRB,SRP}_hisnr4.npz` · FXC 대조 파일 없음; `logs/run_fighspath16e4.log` 에 `FIGHS_DONE`, 살아 있는 `runner.py run` 없음.
 
-## 6. 결과
+## 6. 결과 (기록 2026-10-12 05:02 CDT, Opus 5.5 — 전사만, 해석 없음; 이 절은 추가만 한다)
 
-(실행 뒤 채운다.)
+### 6.1 실행·운영 기록 (생성기 `prereg_audit_2026-10-11/s6_fighsx_gen.py`; 수치는 모두 기록 파일에서 읽음)
+
+`bash code/run_fighsx16e4.sh`, 실행 커밋 037c6610; 시작 줄 3 개(첫 실행 + `--resume` 2 번), `FIGHS_DONE` 줄 3 개. 운영 로그 `logs/run_fighsx16e4.log` 의 시작 · 단계 C · 종료 · 중단 줄 전부(원문, 시간순):
+
+- `[fighs 10-11 20:40 CDT] start (git 037c6610) rows: all resume=0 skip0 10000 n 81920 SNR 12 15`
+- `[fighs 10-11 20:44 CDT] phase C done: 6 receiver control(s) OK, 2 ALD estimator control(s) OK`
+- `[fighs 10-12 04:09 CDT] FXALDSRP ABORT: no free GPU for the ALD estimate (resume later; no automatic retry)`
+- `[fighs 10-12 04:09 CDT] FIGHS_DONE ok=5 fail=1`
+- `[fighs 10-12 04:39 CDT] ABORT (precondition): DECISIONS.md not tracked+clean (commit the registration first)`
+- `[fighs 10-12 04:40 CDT] start (git 037c6610) rows: FXALDSRP resume=1 skip0 10000 n 81920 SNR 12 15`
+- `[fighs 10-12 04:41 CDT] phase C done: 6 receiver control(s) OK, 2 ALD estimator control(s) OK`
+- `[fighs 10-12 04:41 CDT] FXALDSRP SKIP: genie reference FXSRPB16e4 not accepted`
+- `[fighs 10-12 04:41 CDT] FIGHS_DONE ok=0 fail=1`
+- `[fighs 10-12 04:41 CDT] start (git 037c6610) rows: FXSRPB16e4 FXALDSRP resume=1 skip0 10000 n 81920 SNR 12 15`
+- `[fighs 10-12 04:42 CDT] phase C done: 6 receiver control(s) OK, 2 ALD estimator control(s) OK`
+- `[fighs 10-12 04:58 CDT] FIGHS_DONE ok=2 fail=0`
+
+| 행 | 시작 (CDT) | runner | 작업 (done / exists) | 수용 (CDT) | 수용 판정 | manifest git · config_hash | 대조 |
+|---|---|---|---|---|---|---|---|
+| FXSRBB16e4 | 10-11 20:44 | 77.9 분 · 4096 작업 · 192 워커 | 4096 / 0 | 10-11 22:02 | rc=0; ACCEPT: OK -- FXSRBB16e4; ACCEPT (f): OK | 037c6610 · cf706d8f5999293c | CONTROL: OK |
+| FXSPSRB | 10-11 22:02 | 100.7 분 · 4096 작업 · 192 워커 | 4096 / 0 | 10-11 23:45 | rc=0; ACCEPT: OK -- FXSPSRB; ACCEPT (f): OK | 037c6610 · cf706d8f5999293c | CONTROL: OK |
+| FXALDSRB | 10-11 23:54 | 4.3 분 · 4096 작업 · 192 워커 | 4096 / 0 | 10-12 00:00 | rc=0; ACCEPT: OK -- FXALDSRB; ACCEPT (f): OK | 037c6610 · cf706d8f5999293c | CONTROL: OK · CONTROL-ALD: OK |
+| FXSRPB16e4 | 10-12 00:00 · 10-12 04:42 | 154.2 · 0.0 분 · 4096 작업 · 192 워커 | 4096 / 4096 | 10-12 02:35 · 10-12 04:42 | rc=0; ACCEPT: OK -- FXSRPB16e4; ACCEPT (f): OK | 037c6610 · cf706d8f5999293c | CONTROL: OK |
+| FXSPSRP | 10-12 02:35 | 92.0 분 · 4096 작업 · 192 워커 | 4096 / 0 | 10-12 04:09 | rc=0; ACCEPT: OK -- FXSPSRP; ACCEPT (f): OK | 037c6610 · cf706d8f5999293c | CONTROL: OK |
+| FXALDSRP | 10-12 04:52 | 4.5 분 · 4096 작업 · 192 워커 | 4096 / 0 | 10-12 04:58 | rc=0; ACCEPT: OK -- FXALDSRP; ACCEPT (f): OK | 037c6610 · cf706d8f5999293c | CONTROL: OK · CONTROL-ALD: OK |
+
+수용 파일의 (f) 줄:
+
+- `(f) raw_FXSRBB16e4: 4096 chunk files, run|git ['037c6610']; pick -; rotation -; ald -; raised trials per arm (= failures, report only) 0`
+- `(f) raw_FXSPSRB: 4096 chunk files, run|git ['037c6610']; pick results/sparse/pick_SRB_C2.json; rotation -; ald -; raised trials per arm (= failures, report only) 0`
+- `(f) raw_FXALDSRB: 4096 chunk files, run|git ['037c6610']; pick -; rotation -; ald /home/HTJ/t2/conf/results/ald/ald_PILSRB_hisnr4.npz; raised trials per arm (= failures, report only) 0`
+- `(f) raw_FXSRPB16e4: 4096 chunk files, run|git ['037c6610']; pick -; rotation -; ald -; raised trials per arm (= failures, report only) 0`
+- `(f) raw_FXSPSRP: 4096 chunk files, run|git ['037c6610']; pick results/sparse/pick_SRP_C2.json; rotation -; ald -; raised trials per arm (= failures, report only) 0`
+- `(f) raw_FXALDSRP: 4096 chunk files, run|git ['037c6610']; pick -; rotation -; ald /home/HTJ/t2/conf/results/ald/ald_PILSRP_hisnr4.npz; raised trials per arm (= failures, report only) 0`
+
+집계표 머리말: `# run_fighsx16e4 git 037c6610 raw_FXSRBB16e4 C2: failures@16 / n, BLER, 95% Wilson -- REPORT-ONLY (FIGHSX16e4 §1); load_raw warnings 0`
+
+집계표 머리말: `# run_fighsx16e4 git 037c6610 raw_FXSPSRB C2: failures@16 / n, BLER, 95% Wilson -- REPORT-ONLY (FIGHSX16e4 §1); load_raw warnings 0`
+
+집계표 머리말: `# run_fighsx16e4 git 037c6610 raw_FXALDSRB C2: failures@16 / n, BLER, 95% Wilson -- REPORT-ONLY (FIGHSX16e4 §1); load_raw warnings 0`
+
+### 6.2a SRB (방, 무작위 위치) — 범례 11 곡선의 +12 / +15 dB 실패 수: n = 81920 전체, 보지 않은 61440 시행만, 앞선 n = 20480
+
+| 곡선 (arm) | 출처 | +12 dB: k / 81920 (BLER, 95 % Wilson) · 보지 않은 시행 k / 61440 (BLER) · 본 시행 k / 20480 [raw_FH 의 k] | +15 dB: k / 81920 (BLER, 95 % Wilson) · 보지 않은 시행 k / 61440 (BLER) · 본 시행 k / 20480 [raw_FH 의 k] |
+|---|---|---|---|
+| M-ours-dscore-C-V1 | raw_FXSRBB16e4 | 12 (1.46e-04, [8.38e-05, 2.56e-04]) · 9 (1.46e-04) · 3 [3] | 11 (1.34e-04, [7.50e-05, 2.40e-04]) · 7 (1.14e-04) · 4 [4] |
+| ALD-pilot | raw_FXALDSRB | 40 (4.88e-04, [3.59e-04, 6.65e-04]) · 31 (5.05e-04) · 9 [7] | 31 (3.78e-04, [2.67e-04, 5.37e-04]) · 17 (2.77e-04) · 14 [11] |
+| M-ours-bstar | raw_FXSRBB16e4 | 32 (3.91e-04, [2.77e-04, 5.51e-04]) · 21 (3.42e-04) · 11 [11] | 15 (1.83e-04, [1.11e-04, 3.02e-04]) · 9 (1.46e-04) · 6 [6] |
+| R2-ours-G | raw_FXSRBB16e4 | 144 (1.76e-03, [1.49e-03, 2.07e-03]) · 107 (1.74e-03) · 37 [37] | 65 (7.93e-04, [6.23e-04, 1.01e-03]) · 46 (7.49e-04) · 19 [19] |
+| R1-turbo | raw_FXSRBB16e4 | 319 (3.89e-03, [3.49e-03, 4.34e-03]) · 232 (3.78e-03) · 87 [87] | 127 (1.55e-03, [1.30e-03, 1.84e-03]) · 93 (1.51e-03) · 34 [34] |
+| R3-bigamp | raw_FXSRBB16e4 | 11377 (1.39e-01, [1.37e-01, 1.41e-01]) · 8564 (1.39e-01) · 2813 [2813] | 10284 (1.26e-01, [1.23e-01, 1.28e-01]) · 7803 (1.27e-01) · 2481 [2481] |
+| R0-pilot@1 | raw_FXSRBB16e4 | 1558 (1.90e-02, [1.81e-02, 2.00e-02]) · 1182 (1.92e-02) · 376 [376] | 676 (8.25e-03, [7.66e-03, 8.89e-03]) · 503 (8.19e-03) · 173 [173] |
+| SBL-loop | raw_FXSPSRB | 90 (1.10e-03, [8.94e-04, 1.35e-03]) · 73 (1.19e-03) · 17 [17] | 43 (5.25e-04, [3.90e-04, 7.07e-04]) · 30 (4.88e-04) · 13 [13] |
+| SBL-pilot | raw_FXSPSRB | 103 (1.26e-03, [1.04e-03, 1.52e-03]) · 80 (1.30e-03) · 23 [23] | 43 (5.25e-04, [3.90e-04, 7.07e-04]) · 30 (4.88e-04) · 13 [13] |
+| OMP-pilot | raw_FXSPSRB | 304 (3.71e-03, [3.32e-03, 4.15e-03]) · 241 (3.92e-03) · 63 [63] | 178 (2.17e-03, [1.88e-03, 2.52e-03]) · 125 (2.03e-03) · 53 [53] |
+| R5-genie | raw_FXSRBB16e4 | 5 (6.10e-05, [2.61e-05, 1.43e-04]) · 4 (6.51e-05) · 1 [1] | 4 (4.88e-05, [1.90e-05, 1.26e-04]) · 3 (4.88e-05) · 1 [1] |
+
+Perfect CSI (R5-genie) 의 실패 수는 세 raw 에서 같다: FXSRBB16e4 [5, 4] · FXSPSRB [5, 4] · FXALDSRB [5, 4] → 동일. "본 시행" 의 수는 ALD-pilot 을 뺀 모든 arm 에서 n = 20480 raw 의 수와 같다(assert); ALD-pilot 은 새 사후 표본이라 다를 수 있다(등록 머리말 '시행').
+
+0 실패 점 (n = 81920): 없음.
+
+그림 기록 `records/paper_f21srbhsx.txt` 의 '오르는 칸' (한쪽 Fisher p; 보고만): 1 줄. y 축 (3e-05, 1.2).
+- `R3-bigamp           @16  2861/20480 2507/20480 11377/81920 10284/81920   (+6..+15 dB: raw_FHSRBB16e4; then +12/+15 dB: raw_FXSRBB16e4)   rising: +9->+12 dB p=2.7e-10`
+
+집계표 머리말: `# run_fighsx16e4 git 037c6610 raw_FXSRPB16e4 C2: failures@16 / n, BLER, 95% Wilson -- REPORT-ONLY (FIGHSX16e4 §1); load_raw warnings 0`
+
+집계표 머리말: `# run_fighsx16e4 git 037c6610 raw_FXSPSRP C2: failures@16 / n, BLER, 95% Wilson -- REPORT-ONLY (FIGHSX16e4 §1); load_raw warnings 0`
+
+집계표 머리말: `# run_fighsx16e4 git 037c6610 raw_FXALDSRP C2: failures@16 / n, BLER, 95% Wilson -- REPORT-ONLY (FIGHSX16e4 §1); load_raw warnings 0`
+
+### 6.2b SRP (경로, 이동 단말) — 범례 11 곡선의 +12 / +15 dB 실패 수: n = 81920 전체, 보지 않은 61440 시행만, 앞선 n = 20480
+
+| 곡선 (arm) | 출처 | +12 dB: k / 81920 (BLER, 95 % Wilson) · 보지 않은 시행 k / 61440 (BLER) · 본 시행 k / 20480 [raw_FH 의 k] | +15 dB: k / 81920 (BLER, 95 % Wilson) · 보지 않은 시행 k / 61440 (BLER) · 본 시행 k / 20480 [raw_FH 의 k] |
+|---|---|---|---|
+| M-ours-dscore-C-V1 | raw_FXSRPB16e4 | 4 (4.88e-05, [1.90e-05, 1.26e-04]) · 4 (6.51e-05) · 0 [0] | 1 (1.22e-05, [2.15e-06, 6.91e-05]) · 1 (1.63e-05) · 0 [0] |
+| ALD-pilot | raw_FXALDSRP | 11 (1.34e-04, [7.50e-05, 2.40e-04]) · 6 (9.77e-05) · 5 [3] | 4 (4.88e-05, [1.90e-05, 1.26e-04]) · 2 (3.26e-05) · 2 [2] |
+| M-ours-bstar | raw_FXSRPB16e4 | 14 (1.71e-04, [1.02e-04, 2.87e-04]) · 11 (1.79e-04) · 3 [3] | 6 (7.32e-05, [3.36e-05, 1.60e-04]) · 5 (8.14e-05) · 1 [1] |
+| R2-ours-G | raw_FXSRPB16e4 | 16 (1.95e-04, [1.20e-04, 3.17e-04]) · 12 (1.95e-04) · 4 [4] | 6 (7.32e-05, [3.36e-05, 1.60e-04]) · 5 (8.14e-05) · 1 [1] |
+| R1-turbo | raw_FXSRPB16e4 | 44 (5.37e-04, [4.00e-04, 7.21e-04]) · 33 (5.37e-04) · 11 [11] | 11 (1.34e-04, [7.50e-05, 2.40e-04]) · 7 (1.14e-04) · 4 [4] |
+| R3-bigamp | raw_FXSRPB16e4 | 11333 (1.38e-01, [1.36e-01, 1.41e-01]) · 8452 (1.38e-01) · 2881 [2881] | 10874 (1.33e-01, [1.30e-01, 1.35e-01]) · 8192 (1.33e-01) · 2682 [2682] |
+| R0-pilot@1 | raw_FXSRPB16e4 | 656 (8.01e-03, [7.42e-03, 8.64e-03]) · 487 (7.93e-03) · 169 [169] | 196 (2.39e-03, [2.08e-03, 2.75e-03]) · 141 (2.29e-03) · 55 [55] |
+| SBL-loop | raw_FXSPSRP | 14 (1.71e-04, [1.02e-04, 2.87e-04]) · 6 (9.77e-05) · 8 [8] | 8 (9.77e-05, [4.95e-05, 1.93e-04]) · 6 (9.77e-05) · 2 [2] |
+| SBL-pilot | raw_FXSPSRP | 20 (2.44e-04, [1.58e-04, 3.77e-04]) · 9 (1.46e-04) · 11 [11] | 8 (9.77e-05, [4.95e-05, 1.93e-04]) · 6 (9.77e-05) · 2 [2] |
+| OMP-pilot | raw_FXSPSRP | 124 (1.51e-03, [1.27e-03, 1.80e-03]) · 94 (1.53e-03) · 30 [30] | 38 (4.64e-04, [3.38e-04, 6.37e-04]) · 29 (4.72e-04) · 9 [9] |
+| R5-genie | raw_FXSRPB16e4 | 1 (1.22e-05, [2.15e-06, 6.91e-05]) · 0 (0.00e+00) · 1 [1] | 0 (0.00e+00, [0.00e+00, 4.69e-05]) · 0 (0.00e+00) · 0 [0] |
+
+Perfect CSI (R5-genie) 의 실패 수는 세 raw 에서 같다: FXSRPB16e4 [1, 0] · FXSPSRP [1, 0] · FXALDSRP [1, 0] → 동일. "본 시행" 의 수는 ALD-pilot 을 뺀 모든 arm 에서 n = 20480 raw 의 수와 같다(assert); ALD-pilot 은 새 사후 표본이라 다를 수 있다(등록 머리말 '시행').
+
+0 실패 점 (n = 81920): R5-genie +15 dB.
+
+그림 기록 `records/paper_f21srphsx.txt` 의 '오르는 칸' (한쪽 Fisher p; 보고만): 1 줄. y 축 (7.5e-06, 1.2).
+- `R3-bigamp           @16  3386/20480 2585/20480 11333/81920 10874/81920   (+6..+15 dB: raw_FHSRPB16e4; then +12/+15 dB: raw_FXSRPB16e4)   rising: +9->+12 dB p=2.7e-06`
+
+### 6.3 §3 예측 채점 (n = 81920 으로 채점; 괄호 안의 둘째 수는 보지 않은 61440 시행만의 수)
+
+1. SRB: V1 의 실패 수 +15 dB ≤ +12 dB → **적중** (12 → 11; 보지 않은 시행 9 → 7).
+2. SRB: V1 · b\* · Perfect CSI 에 Fisher p < 0.05 인 오르는 칸 없음 → **적중** (오르는 칸의 p: M-ours-dscore-C-V1 없음, M-ours-bstar 없음, R5-genie 없음).
+3a. SRB: +12 dB 에서 실패 수 V1 ≤ b\* → **적중** (12 대 32; 보지 않은 시행 9 대 21).
+3b. SRB: +15 dB 에서 실패 수 V1 ≤ b\* → **적중** (11 대 15; 보지 않은 시행 7 대 9).
+4a. SRB: V1 의 +12 dB 실패 수가 5..35 → **적중** (12).
+4b. SRB: V1 의 +15 dB 실패 수가 7..41 → **적중** (11).
+5. SRP: V1 의 실패 수 +15 dB ≤ +12 dB → **적중** (4 → 1; 보지 않은 시행 4 → 1).
+6a. SRP: +12 dB 에서 실패 수 V1 ≤ b\* → **적중** (4 대 14; 보지 않은 시행 4 대 11).
+6b. SRP: +15 dB 에서 실패 수 V1 ≤ b\* → **적중** (1 대 6; 보지 않은 시행 1 대 5).
+7. 여섯 행 모두 대조·수용 통과(`FIGHS_DONE ok=6 fail=0`) → **빗나감** (첫 실행의 종료 줄 ok=5 fail=1; 시작 줄 3 개; 재개까지 마친 뒤 수용 파일이 `ACCEPT: OK` 인 행 6 / 6 — 엄격 채점: 한 번의 실행으로 ok=6 이 아니면 빗나감).
+8. 처음 20480 시행이 `raw_FH*` 와 비트 동일(ALD-pilot 제외) → **적중** (작성자의 확인 `prereg_audit_2026-10-11/fx_overlap_check.py`; 기록 감사가 따로 확인한다):
+   - `raw_FXSRBB16e4 vs raw_FHSRBB16e4: 1024 chunk files (expected 1024 = 512 x 2 SNR), arms ['M-ours-bstar', 'M-ours-dscore-C-V1', 'R0-pilot', 'R1-turbo', 'R2-ours-G', 'R3-bigamp', 'R5-genie'], 67584 array comparisons, 0 differ`
+   - `raw_FXSPSRB vs raw_FHSPSRB: 1024 chunk files (expected 1024 = 512 x 2 SNR), arms ['OMP-pilot', 'R5-genie', 'SBL-loop', 'SBL-pilot'], 37888 array comparisons, 0 differ`
+   - `raw_FXALDSRB vs raw_FHALDSRB: 1024 chunk files (expected 1024 = 512 x 2 SNR), arms ['R5-genie'], 13312 array comparisons, 0 differ; ALD-pilot (not required): 3214 of 9216 arrays differ`
+   - `raw_FXSRPB16e4 vs raw_FHSRPB16e4: 1024 chunk files (expected 1024 = 512 x 2 SNR), arms ['M-ours-bstar', 'M-ours-dscore-C-V1', 'R0-pilot', 'R1-turbo', 'R2-ours-G', 'R3-bigamp', 'R5-genie'], 67584 array comparisons, 0 differ`
+   - `raw_FXSPSRP vs raw_FHSPSRP: 1024 chunk files (expected 1024 = 512 x 2 SNR), arms ['OMP-pilot', 'R5-genie', 'SBL-loop', 'SBL-pilot'], 37888 array comparisons, 0 differ`
+   - `raw_FXALDSRP vs raw_FHALDSRP: 1024 chunk files (expected 1024 = 512 x 2 SNR), arms ['R5-genie'], 13312 array comparisons, 0 differ; ALD-pilot (not required): 3229 of 9216 arrays differ`
+   - `OVERLAP: OK`
+
+### 6.4 그림과 공개 사항
+
+- **그림 (§1 의 명령 그대로)**: `conference/figures/F21srbhsx_col.{pdf,png}` + 기록 `records/paper_f21srbhsx.txt` (10-12 00:03 CDT — SRB 세 행이 수용된 직후, SRP 행들이 도는 동안 스크래치 도우미 `fighsx_figs.sh` 가 그림; y 축 (3e-05, 1.2), 0 실패 점 없음), `F21srphsx_col.{pdf,png}` + `records/paper_f21srphsx.txt` (10-12 04:59 CDT — 재개가 끝난 뒤; **y 축 (7.5e-06, 1.2) = §1 의 셋째 단계**: V1 의 +15 dB 점이 1 / 81920 = 1.22e-05 이고 Perfect CSI 의 +15 dB 가 0 / 81920 이라 화살표 끝이 3e-5 아래; 0 실패 점은 Perfect CSI +15 dB 하나). 두 그림 모두 −3 / 0 / +3 dB 는 원 raw (n = 2560), +6 / +9 dB 는 `raw_FH*` (n = 20480), +12 / +15 dB 는 `raw_FX*` (n = 81920). SRP 그림의 GMM prior 곡선은 PATH16e4 의 씨앗 초기화 b\* 의 곡선이다(머리말 캐비엇).
+- **원고판 (+12 dB 까지; 등록 밖의 제시 선택 — 사용자 결정, `DECISIONS.md` 10-12 14:34 KST 줄)**: `F21srbhsx12_col` · `F21srphsx12_col` (+ 기록 `records/paper_f21sr{b,p}hsx12.txt`; 그림 모드 `paper_f21dmc.py <PRIOR> hsx12`). 사용자는 SRB 의 n = 81920 결과(Proposed +12 / +15 dB = 12 / 11 건, GMM 32 / 15 건)와 전 구간 그림을 본 뒤 "12dB 까지만 paper에 포함시키는 방안도 고려해봐야겠어" · "우리에게 유리하지 않은 것을 굳이 넣을 필요는 없어." 라고 정했다. +15 dB 의 수는 이 절의 표·집계표·전 구간 그림에 그대로 있다.
+- **첫 실행에서 FXALDSRP 가 돌지 못했다 — GPU 없음**: 10-12 04:09 CDT 에 `no free GPU for the ALD estimate`; `FIGHS_DONE ok=5 fail=1`. 그 시각 GPU 여섯 장이 모두 컨테이너 밖 프로세스에 점유돼 있었다(이 컨테이너의 프로세스 없음 — `nvidia-smi --query-compute-apps` 가 빈 출력; 비워 둔 GPU 1 은 10-12 00:39 CDT 확인 때부터 밖의 프로세스가 635 MiB 를 쓰고 있었고, GPU 0 · 2 는 등록 밖의 SRB 시드 학습이 00:55 · 01:33 CDT 에 끝난 뒤 밖의 프로세스가 가져갔다). 점유된 GPU 에는 접근하지 않았다.
+- **재개 세 번 (같은 HEAD 037c6610; 원인을 하나씩 고침)**: ① 04:39 CDT — GPU 1 이 비자 스크래치 감시 스크립트(`fx_resume_when_free.sh`, 로그 `logs/fx_resume_watch.log`; `nvidia-smi` 만 보고 한 번만 시작)가 `--resume FXALDSRP` 를 시작 → 전제 검사에서 중단: `DECISIONS.md` 에 작성자가 실행 중에 써 둔 미커밋 줄 둘(FIGHSPATH16e4 감사 정정 줄, +12 dB 결정 줄)이 있었다. 작성자가 그 작업본을 스크래치로 옮기고 `git checkout -- DECISIONS.md` 로 커밋 상태로 되돌렸다(재개가 끝난 뒤 다시 넣음). ② 04:40 CDT `--resume FXALDSRP` → `SKIP: genie reference FXSRPB16e4 not accepted`: 행을 하나만 지정하면 기준 행의 수용 표시(`ACC`)가 그 실행에 없어서다(스크립트의 동작; 작성자의 지정 실수). ③ 04:41 CDT `--resume FXSRPB16e4 FXALDSRP` → 기준 행은 4096 청크가 모두 `exists` (새 계산 없음; 수용·집계표를 다시 만들었고 집계표의 수는 같다), FXALDSRP 는 재생성(CPU) + 추정(GPU 1, 04:43 → 04:52 CDT) + runner 4.5 분 → 04:58 CDT `ACCEPT: OK`, `FIGHS_DONE ok=2 fail=0`. 여섯 raw 의 모든 청크가 `run|git` 037c6610 이고 실행 내내 main 커밋은 없었다. §3 예측 7 은 빗나감으로 채점했다(한 번의 실행으로 ok=6 이 아니었다).
+- **실행 중에 본 것**: 작성자는 10-11 22:35 CDT 에(SRB 의 SP 행이 도는 동안) 수용된 `fighs_FXSRBB16e4.txt` 를 읽어 V1 · b\* · genie 의 수를 사용자에게 보고했고, 00:03 CDT 의 SRB 그림을 사용자에게 보냈다 — 그 뒤 사용자가 위의 +12 dB 결정을 했다(SRP 의 n = 81920 결과가 나오기 전). SRP 행들의 집계표는 첫 `FIGHS_DONE` (04:09 CDT) 뒤에 읽었고, FXALDSRP 가 없는 임시 그림 둘(`FIGHS_N2560=FXALDSRP` — ALD 곡선만 +12 · +15 dB 에 n = 20480 유지; 스크래치에만 둠)을 재개 전에 사용자에게 보냈다. 최종 그림은 재개 뒤의 것이다.
+- **실행 중 작업 트리의 변경(커밋은 이 §6 과 함께)**: 그림 스크립트 `paper_f21dmc.py` 에 `hsx12` 모드(10-12 00:32 CDT — SRB 의 hsx 그림 00:03 뒤, SRP 의 hsx 그림 04:59 전; 바뀐 스크립트로 `SRB hsx` 를 다시 돌린 기록·PDF·PNG 가 00:03 의 것과 바이트 동일함을 확인), FIGHSPATH16e4 의 감사 반영(다른 문서들), 진단 스크립트의 시행 번호 표기. `conf/code` · `Demo` 는 실행 커밋 그대로다.
+- 함께 돈 것(결과 중립 — 수신기는 CPU 결정적; 세션 기록 기준): SRB 시드 a2 · a3 학습(GPU 0 · 2, 10-11 19:26 → 10-12 00:55 · 01:33 CDT), FIGHSPATH16e4 의 기록 감사(Fable 서브에이전트, CPU 3 스레드 이하), SRB 의 사후 진단 파일 재생성, 그림 렌더, `fx_overlap_check.py` (SRB 세 raw 는 SRP 행들이 도는 동안, 전체는 재개 뒤 — `FX_overlap_check.txt`).
+- 새 시행의 ALD 추정 파일(git 밖): `ald_PILSRB_hisnr4.npz` sha256[:16] dcdce65b032899b1, `ald_PILSRP_hisnr4.npz` 2608bcf1c02fe80c.
+- §1 의 비용 추정(단계 C ≈ 10 분; 80 · 103 · 13 분; SRP 160 · 90 · 13 분; 합 ≈ 8 시간) 대비 실측 runner 77.9 · 100.7 · 4.3 분, 154.2 · 92.0 · 4.5 분; 첫 실행 10-11 20:40 → 10-12 04:09 CDT (7 시간 29 분), 재개까지 04:58 CDT.
+- 기록 감사(Fable)는 이 절을 쓴 뒤에 받는다 — 결과는 추가 줄로 적는다(예측 8 의 독립 확인 포함).

@@ -1,0 +1,111 @@
+# recompute_fighspath.py  started 2026-10-11 20:55:55 CDT (= 10:55 KST)  HEAD 037c6610
+[PASS] A1 ROWS: 3 rows FHSRPB16e4 / FHSPSRP / FHALDSRP, 15 fields; prior SRP, fits SRPB16e4, kron|4096|244.1932863626755 in all three; ckpt sha ac4699c78b3e2d80 role best (rows 1, 3), '-' (row 2); pick results/sparse/pick_SRP_C2.json:6ae22a15de019833; ORIG SRPB16e4 / SPSRP / ALDSRP; REF - / FHSRPB16e4 / FHSRPB16e4
+[PASS] A2 registration: git diff c48ee796 aefbfc12 = ONE hunk that starts in the 3 context lines above the '## 6.' header (old line 43); old §6 = header + placeholder only -- hunks [('40', '6', '40', '68')]; old tail ['## 6. 결과', '', '(실행 뒤 채운다.)']
+[PASS] A3 lines 1..§6 header-1 of the working-tree registration == committed c48ee796 (frozen 머리말 / §1 / §3 / §5); working tree == aefbfc12 (git diff empty) -- §6 header at line 43
+[PASS] A4 on disk: ckpt sha ac4699c78b3e2d80, pick sha 6ae22a15de019833, ALD test estimate ebb14a8952f0ae17, test pilots 8bfc83a43f790bbf, tune 858087f53952bcbf (§1); script sha e51214bd1b49a16d (§5) and unchanged since the run commit
+   ald_PILSRP_hisnr.npz: sha 3a13dfb7191bd3ed, prov.git c48ee796, skip 10000, hhat (4, 20480, 32), snrs [6.0, 9.0, 12.0, 15.0], tune c 0.01 beta 0.005 (tune_PILSRP.json c 0.01 beta 0.005, dev_skip 2560, n_dev 512)
+[PASS] A5 new-trial ALD estimate ald_PILSRP_hisnr.npz sha256[:16] = 3a13dfb7191bd3ed (§6.4), prov git c48ee796, skip 10000, hhat (4, 20480, 32), snrs 6/9/12/15, tune (c, beta) = tune_PILSRP.json -- 3a13dfb7191bd3ed
+
+# B. scanning the 3 new raws (single process) ...
+[PASS] B0 every new chunk readable; each raw dir holds only D2_*.npz chunk files (2048) -- {'FHSRPB16e4': 2048, 'FHSPSRP': 2048, 'FHALDSRP': 2048}
+[PASS] B1 trial plan: 3 tags x 2048 chunks = 4 SNR x skip 10000..30440 step 40 (each once = trials 10000..30479), n 40; run|snr/skip/n = file name; cell C2 prior SRP, '_dft_' names -- []
+[PASS] B2 run|git == 'c48ee796' (no +dirty), run|iters 16, run|seed 20260926 in every chunk -- []
+[PASS] B3 meta: ntrain 160000 / bstar kron / kron_K 4096 / ll_val|kron 244.1932863626755 / stagec_ckpt_id (sha ac4699c78b3e2d80 epoch 694 role best; absent in SP) / meta|sparse == pick per SNR (SP only) / no rotation / meta|ald_file == path + sha (ALD only), every chunk -- []
+[PASS] B4 arm set of every chunk = the row's; blk_err shape (40, 16) -- []
+[PASS] B5 raised trials 0: no |failed| key, no non-finite blk_err (any iteration) in any chunk of the 3 raws -- []
+[PASS] B6 R5-genie bit-identical across the three FH raws: FHSPSRP / FHALDSRP vs FHSRPB16e4, every chunk x KEYS_RAW 7 + guardH (32768 arrays) -- []
+   genie failures per SNR: FHSRPB16e4 [14, 1, 1, 0] · FHSPSRP [14, 1, 1, 0] · FHALDSRP [14, 1, 1, 0]
+
+# C. scanning the 3 original raws ...
+   raw_SRPB16e4: 448 chunks, run|git ['99039ef5'], max skip 2520
+   raw_SPSRP: 448 chunks, run|git ['9ad4caa0'], max skip 2520
+   raw_ALDSRP: 448 chunks, run|git ['9ad4caa0'], max skip 2520
+[PASS] C1 original raws SRPB16e4 / SPSRP / ALDSRP: 448 chunks = 7 SNR x skip 0..2520 step 40 (max skip 2520, as the 머리말 says), n 2560, no non-finite; run|git one value per raw (SRPB16e4 99039ef5) -- []
+
+# D. controls
+   FHCSRPB16e4: 4 chunks, 196 (chunk, arm, key) comparisons, 0 differ (file says ('4', '4', '196', '0'))
+   FHCSPSRP: 4 chunks, 112 (chunk, arm, key) comparisons, 0 differ (file says ('4', '4', '112', '0'))
+   FHCALDSRP: 4 chunks, 56 (chunk, arm, key) comparisons, 0 differ (file says ('4', '4', '56', '0'))
+[PASS] D1 receiver controls: raw_FHC* (4 chunks, trials 0..39 at +6..+15 dB, run|git c48ee796) vs the original raws, every arm x KEYS_RAW bit-identical (NaN = NaN); counts = *_control.txt (196 / 112 / 56); CONTROL: OK -- []
+[PASS] D2 ALD estimator control: ald_FHCALDSRP.npz hhat (7, 2560, 32) / b / v bit-identical to ald_PILSRP.npz; file says max|diff| 0, CONTROL-ALD: OK
+[PASS] D3 FHC copies of the frozen ALD records = the originals (tune json, dev / test pilots sha)
+
+# E. count tables / §6.2
+[PASS] E1 count tables: every (SNR, arm) failures / n = own recount (56 rows incl. R0-pilot@1 = iteration 1); 32 + 16 + 8 rows -- []
+[PASS] E2 count tables: BLER / Wilson strings (%.2e, z 1.959964) re-formatted from own Wilson (56 rows) -- []
+[PASS] E3 count-table headers = §6.1 '집계표 머리말' lines (3), name run_fighspath16e4 git c48ee796 / FIGHSPATH16e4 §1, and say load_raw warnings 0
+[PASS] E4 §6.2 table: 11 curves (legend order) x 4 SNR k / BLER / Wilson from the new raws (44 cells) + source raw + '원 raw k / 2560' column from the original raws -- []
+[PASS] E5 §6.2 genie line: 'FHSRPB16e4 [14, 1, 1, 0] · FHSPSRP [14, 1, 1, 0] · FHALDSRP [14, 1, 1, 0] → 동일'
+[PASS] E6 §6.2 '0 실패 점 (n = 20480): M-ours-dscore-C-V1 +12 dB, M-ours-dscore-C-V1 +15 dB, R5-genie +15 dB.' = recount -- ['M-ours-dscore-C-V1 +12 dB', 'M-ours-dscore-C-V1 +15 dB', 'R5-genie +15 dB']
+[PASS] G1 figure record paper_f21srphs.txt merge block: 11 lines, k/n at +6..+15 = new raws, source tag, 'rising' cells + one-sided Fisher p (%.2g) over the 7 merged points — byte-identical to own -- diff []
+[PASS] E7 §6.2 'rising' line (1) = the figure record's rising line = own (R3-bigamp +9->+12 dB p=9e-06); '1 줄' -- ['R3-bigamp           @16  3386/20480 2585/20480 2881/20480 2682/20480   (raw_FHSRPB16e4)   rising: +9->+12 dB p=9e-06']
+   all rising cells of the 11 merged curves (incl. +3->+6): {'R3-bigamp': [('+9->+12', '9.05e-06')]}
+   ties (equal BLER in adjacent cells, not 'rising'): {'M-ours-dscore-C-V1': ['+12->+15'], 'R5-genie': ['+9->+12']}
+
+# F. §6.3 predictions (scored by me against the frozen §3 wording)
+[PASS] F1 §6.3: six predictions (1, 2, 3, 4a, 4b, 5) all '적중' and my own scoring agrees (1: 45 >= 7 >= 0 >= 0; 2: no rising cell on V1 / b* / genie incl. +3->+6; 3: 45<=202, 7<=33; 4a: 7 >= 1; 4b: 0 <= 5; 5: ok=3 fail=0) -- V [45, 7, 0, 0], b* [202, 33, 3, 1], p2 {'M-ours-dscore-C-V1': [], 'M-ours-bstar': [], 'R5-genie': []}, got {'1': '적중', '2': '적중', '3': '적중', '4a': '적중', '4b': '적중', '5': '적중'}, own {'1': True, '2': True, '3': True, '4a': True, '4b': True, '5': True}
+[PASS] F2 §6.3 quoted numbers: 1 (45 / 7 / 0 / 0); 2 'M-ours-dscore-C-V1 없음, M-ours-bstar 없음, R5-genie 없음'; 3 (45 대 202, 7 대 33); 4a (7); 4b (0); 5 (ok=3 fail=0)
+[PASS] F3 the §6.3 paraphrases keep the §3 wording's content (1 '+6 ≥ +9 ≥ +12 ≥ +15 dB 로 줄기만'; 2 'Fisher p < 0.05 인 "오르는 칸" 이 없다(+3 → +6 dB 칸 포함)'; 3 '+6 dB 와 +9 dB 에서 실패 수 V1 ≤ b\*'; 4a '≥ 1 / 20480'; 4b '≤ 5 / 20480'; 5 FIGHS_DONE ok=3 fail=0)
+
+# G. figure records
+[PASS] G2 paper_f21srphs.txt 'Counts:' block = merged (−3/0/+3 original n 2560, +6..+15 new n 20480) for the 11 curves; source = original raw
+[PASS] G3 paper_f21srp.txt (original figure record, n 2560 at 7 SNRs) 'Counts:' = own recount of the original raws (11 x 7)
+[PASS] G4 merged record zero-failure line = own: 'Proposed (diffusion prior) +12 dB; Proposed (diffusion prior) +15 dB; Perfect CSI +15 dB.'; §6.4 quotes the same three; record's arm -> figure-name map = LABEL -- Proposed (diffusion prior) +12 dB; Proposed (diffusion prior) +15 dB; Perfect CSI +15 dB
+   original (n = 2560) zero-failure points, own: ['M-ours-dscore-C-V1 +9', 'M-ours-dscore-C-V1 +12', 'M-ours-dscore-C-V1 +15', 'ALD-pilot +12', 'ALD-pilot +15', 'M-ours-bstar +15', 'R2-ours-G +15', 'R1-turbo +15', 'SBL-loop +12', 'SBL-loop +15', 'SBL-pilot +12', 'SBL-pilot +15', 'R5-genie +9', 'R5-genie +12', 'R5-genie +15']
+[PASS] G4b original record paper_f21srp.txt zero-failure line = own recount of the original raws -- sian prior +15 dB; Turbo LMMSE receiver +15 dB; SBL (in loop) +12 dB; SBL (in loop) +15 dB; SBL (pilot-only) +12 dB; SBL (pilot-only) +15 dB; Perfect CSI +9 dB; Perfect CSI +12 dB; Perfect CSI +15 dB.
+[PASS] G5 merged record 'at or below the proposed curve: none' = own (no drawn baseline point <= V1's count at any of the 7 merged points; same n per SNR on both curves) -- []
+[PASS] G6 y-range rule (paper_f21dmc.py ROOM branch) on the drawn (merged) values -> (3e-05, 1.2) [a zero-failure point exists]; record 'y log (3e-05, 1.2)' and §6.4 'y 축 (3e-05, 1.2)'; every drawn point k/n within (3e-05, 1.2) -- zero point True; min drawn point 4.88e-05; drawn values (Wilson lower for bar curves) <= 2e-4: [('ALD-pilot', 12.0, '0.000146'), ('ALD-pilot', 15.0, '9.77e-05'), ('M-ours-bstar', 12.0, '4.98e-05'), ('M-ours-bstar', 15.0, '8.62e-06'), ('M-ours-dscore-C-V1', 9.0, '0.000166'), ('R1-turbo', 15.0, '0.000195'), ('R2-ours-G', 12.0, '7.6e-05'), ('R2-ours-G', 15.0, '8.62e-06'), ('R5-genie', 9.0, '8.62e-06'), ('R5-genie', 12.0, '8.62e-06'), ('SBL-loop', 15.0, '9.77e-05'), ('SBL-pilot', 15.0, '9.77e-05')]
+   point estimates k/n at or below 2e-4 (any arm): ALD-pilot +12 dB 3/20480=0.000146; ALD-pilot +15 dB 2/20480=9.77e-05; M-ours-bstar +12 dB 3/20480=0.000146; M-ours-bstar +15 dB 1/20480=4.88e-05; R2-ours-G +12 dB 4/20480=0.000195; R2-ours-G +15 dB 1/20480=4.88e-05; R1-turbo +15 dB 4/20480=0.000195; SBL-loop +15 dB 2/20480=9.77e-05; SBL-pilot +15 dB 2/20480=9.77e-05; R5-genie +9 dB 1/20480=4.88e-05; R5-genie +12 dB 1/20480=4.88e-05
+   Perfect CSI zero-failure arrow at +15 dB: cap 0.000188, tip 0.00011
+[PASS] G8 figure files F21srphs_col.{pdf,png} + record mtime after FIGHS_DONE (20:36 CDT, log mtime 20:36:54) and not after the registration mtime; F21srp_col + its record untouched since 10-11 16:43 / 15:22 CDT -- F21srphs_col.pdf 20:37:41 F21srphs_col.png 20:37:41 records/paper_f21srphs.txt 20:37:41 F21srp_col.pdf 16:43:27 records/paper_f21srp.txt 15:22:38 F21srbhs_col.pdf 18:31:58 records/paper_f21srbhs.txt 19:06:29 paper_f21dmc.py 19:54:03 fighs_merge.py 19:54:03
+[PASS] G9 figure record wording: REPORT-ONLY, names NEXT_EXPERIMENTS_FIGHSPATH16e4 §1 (twice), 'counts before the merge (n = 2560, the registered judgement)' (the FIGHSROOM N2 fix), no GMM seed-initialisation caveat in the record (INFO -> finding) -- caveat words in record: []
+
+# H. logs / timeline
+[PASS] H1 run log: ONE start line '[fighs 10-11 18:34 CDT] start (git c48ee796) rows: all resume=0 skip0 10000 n 20480 SNR 6 9 12 15'; no resume line
+[PASS] H2 phase C line '[fighs 10-11 18:38 CDT] phase C done: 3 receiver control(s) OK, 1 ALD estimator control(s) OK'; FIGHS_DONE ok=3 fail=0 at 10-11 20:36 CDT = last line; ABORT/SKIP/INVALID/FAILED/rc!=0 lines 0 (§6.1 '0 개') -- []
+[PASS] H3 run / acceptance lines: FHSRPB16e4 18:38 / 19:52, FHSPSRP 19:52 / 20:30, FHALDSRP 20:34 / 20:36, rc 0, 'ACCEPT: OK -- <tag> ACCEPT (f): OK'
+[PASS] H4 ALD lines: estimator control on GPU 1 at 18:34; new-trial regen + estimate on GPU 1 at 20:30 'rotation none'; '[ald regen] PILSRP hisnr: 4 SNR x 20480 trials (skip 10000)'
+[PASS] H4b the three 'run:' lines carry exactly the §1 runner flags (prior SRP, C2, chunk 40, ntrain 160000, ckpt / pick / ald-file, SNR 6 9 12 15, n 20480, skip0 10000, the row's arms)
+[PASS] H5 §6.1 per-row table (3 rows: start, runner minutes 74.3 / 36.9 / 1.6, 2048 tasks, 192 workers, done 2048 / exists 0, acceptance time, verdicts, manifest git c48ee796 · config_hash c28b71e6ef34d918, control verdicts) = logs + files; runner logs: one header each, one 'finished', 2048 'done' lines naming exactly the 2048 chunk files, 0 'exists', no Traceback; manifests 2048 files / arms / trial_stream 10000..30480 / 4 points x 20480, written inside run..acceptance; chunk mtimes inside run..acceptance -- []
+   chunk mtime windows (CDT): FHSRPB16e4 18:44:28–19:52:26 · FHSPSRP 19:55:27–20:29:40 · FHALDSRP 20:34:33–20:35:59
+   manifests written: 2026-10-12 09:52:36 KST · 2026-10-12 10:29:47 KST · 2026-10-12 10:36:09 KST
+[PASS] H6 §6.1 '(f)' lines (3) = the accept files' (f) lines verbatim
+[PASS] H7 git: no commit between c48ee796 (18:34:19 CDT; not after the first file the run wrote, same minute as the start line) and aefbfc12 (20:38:36 CDT, after FIGHS_DONE 20:36); c48ee796 is the last commit touching the registration before aefbfc12 -- 2026-10-11 18:34:19-05:00 .. 2026-10-11 20:38:36-05:00; first run artefact (tune copy for the ALD control) 18:34:19; ['aefbfc12 2026-10-12 10:38:36 +0900', 'c48ee796 2026-10-12 08:34:19 +0900']
+[PASS] H8 §6 header '기록 2026-10-11 20:37 CDT' = registration file mtime minute; §6.1 names the generator s6_fighsroom_gen.py (committed in aefbfc12 with the SRP mode) -- registration mtime 20:37:59; generator mtime 19:06:29
+[PASS] H9 §5 '실행 시작 전 상태: raw_FH*SRP* · ald_PILSRP_hisnr.npz · FHC*SRP 대조 파일 없음': every such path (and every file in the raw dirs) has an mtime at or after the run commit 18:34:19 CDT -- []
+[PASS] H10 paper_f21dmc.py and fighs_merge.py mtime 10-11 19:54 CDT: after the run commit c48ee796 (so uncommitted when the figure was made 20:37:41), before the figure; both committed in aefbfc12 and unchanged since -- 2026-10-11 19:54:03.382471-05:00 2026-10-11 19:54:03.382471-05:00
+[PASS] H11 seed-training logs vs §6.4 / DECISIONS: SRP seeds on GPU 0 from 14:20 CDT, a2 stopped 16:47, a3 stopped 19:20, SEEDS_TRAIN_DONE 19:20; SRB a2 on GPU 0 and a3 on GPU 2 start 19:26 CDT (git c48ee796)
+
+# I. §6.4, EXPERIMENTS, DECISIONS
+[PASS] I1 §6.4 'ald_PILSRP_hisnr.npz sha256[:16] 3a13dfb7191bd3ed (git 밖)' = disk; file untracked
+[PASS] I1b §6.4 cost line: '§1 의 비용 추정(base ≈ 90 분 · SP ≈ 50 분 · ALD ≈ 10 분, 합 ≈ 2.5 시간) 대비 실측 runner 74.3 · 36.9 · 1.6 분, 전체 10-11 18:34 → 10-11 20:36 CDT' = §1 estimates + runner logs + log times
+[PASS] I1c §6.4 concurrent-work times checkable from files: audit_FIGHSROOM16e4.md (18:56 CDT), review_FIGHSX16e4.md (19:52 CDT), FHSRBB16e4_highsnr_fail.txt (18:53 CDT) all inside the run window 18:34..20:36 CDT -- audit_FIGHSROOM16e4.md 18:56:20 review_FIGHSX16e4.md 19:52:25 review_FIGHSX16e4_gpu_smoke.py 19:45:16 FHSRBB16e4_highsnr_fail.txt 18:53:33
+[PASS] I2 EXPERIMENTS.md FIGHSPATH16e4 row (last line, 75): the 11 x 4 failure counts = own recount -- own: V1 45 / 7 / 0 / 0, ALD-pilot 110 / 19 / 3 / 2, b\* 202 / 33 / 3 / 1, R2 215 / 35 / 4 / 1, R1 521 / 78 / 11 / 4, BiG-AMP 3386 / 2585 / 2881 / 2682, R0@1 2433 / 639 / 169 / 55, SBL-loop 229 / 40 / 8 / 2, SBL-pilot 298 / 39 / 11 / 2, OMP-pilot 720 / 138 / 30 / 9, genie 14 / 1 / 1 / 0
+[PASS] I3 EXPERIMENTS.md FIGHSPATH16e4 row: times, run commit, FIGHS_DONE, ACCEPT x3, commit column, rising '1 줄', runner minutes, GPU 1, y range, 6 predictions, flags, seed / trials / pool / PID, GMM caveat, 'not re-judged', review counts -- []
+[PASS] I3b PID of prior SRP in code/common.py = 15; review_FIGHSPATH16e4.md counts MUST 1 · SHOULD 5 · NIT 5 (headings M-/S-/N-) -- PID 15; review items (1, 5, 5)
+[PASS] I4 DECISIONS.md 10:38 KST line (added in aefbfc12): FIGHSPATH16e4 18:34 ~ 20:36 CDT @c48ee796, ok=3 fail=0, V1 45 / 7 / 0 / 0, b* 202 / 33 / 3 / 1, genie 14 / 1 / 1 / 0, 6 predictions; FIGHSROOM audit summary; SRB seeds 19:26 GPU 0 · 2; SRP seeds 19:20 -- []
+
+# J. other record lines added in aefbfc12
+[PASS] J1 EXPERIMENTS.md rows 70 / 72 (lines 70, 72): 'DFT 파일럿 (T2b 규칙: erank(Rt) 3.756 ≥ 3.6)' / '… 3.991 ≥ 3.6' = PATH16e4 §0 (3.756/4 ≥ 3.6 → DFT) + §5 / ROOM16e4 §0 (3.991/4) + §5 = '_dft_' raw names; no 'eig 파일럿' left on rows 70..75 -- raw pilot tokens {'SRPB16e4': ['dft'], 'SRBB16e4': ['dft'], 'FHSRPB16e4': ['dft'], 'FHSRBB16e4': ['dft']}
+   EXPERIMENTS.md word diff c48ee796..aefbfc12 (changed words only, new last row cut): -eig 파일럿; | +DFT 파일럿 (T2b 규칙: erank(Rt) 3.756 ≥ 3.6); | -eig | +DFT | +(T2b 규칙: erank(Rt) 3.991 ≥ 3.6) | +| 2026-10-12 08:34 ~ 10:36 KST (텍사스 10-11 18:34 ~ 20:36 CDT; 한 번 시작, 재개 없음) | `bash conf/
+[PASS] J2 ROOM16e4 '[정정 … 감사 S1 …]': ll_val 30.445 / 41.698 / 55.912 / 68.085 / 79.119 / 89.214 / 97.009 and gains +11.3 · +14.2 · +12.2 · +11.0 · +10.1 · +7.8 nat = the fit files' ll_val (own differences); the wrong sequence is kept in place before the bracket (append-only); the §5 grid text holds the same seven values -- own ll_val 30.445 / 41.698 / 55.912 / 68.085 / 79.119 / 89.214 / 97.009; gains +11.3 · +14.2 · +12.2 · +11.0 · +10.1 · +7.8; last 7.795
+[PASS] J3 audit_ROOM16e4.md erratum (appended; 4 added lines, nothing removed): same ll_val list and gains; 'found by audit_FIGHSROOM16e4.md S1'; '+7.795 nat' -- 4	0	conf/results/review_next/prereg_audit_2026-10-11/audit_ROOM16e4.md
+[PASS] J3b the 18:58 CDT time typed in the ROOM16e4 [정정], the audit erratum and FIGHSROOM16e4 §6.5 / §6.6 = mtime of those three files (18:58:40 CDT)
+[PASS] J4 FIGHSROOM16e4 §6.5 reports audit_FIGHSROOM16e4.md faithfully (14 quoted facts: mtime, audited commit, value / array / check-group counts, MUST/SHOULD/NIT counts, p's, table sizes, re-runs, byte-identity, M1 / S1 / N1 content, SKIP0 note) -- []
+   audit 'Not verified' section has 5 bullets (keywords ['N4', 'GPU 0', '[감사 S2]', '§0']); §6.5 lists: '그 진술들, GPU 0 의 시드 학습, 풀 통계(§0)의 원 재계산'
+   ed265304 added to DECISIONS.md: 1 line(s) (§6.5 says 'DECISIONS.md 두 줄' among the things 'in the same commit')
+   git diff --numstat 193776a1 ed265304 -- paper_f21dmc.py: 4	3	conference/figures/paper_f21dmc.py (§6.4 [감사 N3] says '7 줄')
+   scanning raw_FHSRBB16e4 for §6.4 [감사 S2] and §6.6 ...
+[FAIL] J5 FIGHSROOM16e4 §6.4 [감사 S2] six sub-2e-4 values from raw_FHSRBB16e4 (own): genie +12/+15 1/20480 = 4.9e-05, Wilson lower 8.6e-06; Proposed +12/+15 = 3 · 4 / 20480 = '1.5e-04 · 1.9e-04', lower 5.0e-05 · 7.6e-05; b* +15 and genie +9 lower 1.3e-04 · 1.0e-04 -- own strings (%.1e): ('Perfect CSI +12 · +15 dB (1 / 20480 = 4.9e-05; Wilson 하한 8.6e-06)', '1.5e-04 · 2.0e-04', '5.0e-05 · 7.6e-05', '(1.3e-04 · 1.0e-04)'); 4/20480 = 1.9531e-04
+[PASS] J6 §6.6 vs FHSRBB16e4_highsnr_fail.txt AND vs raw_FHSRBB16e4 (own reader, chunks in skip order): V1 failing blocks +12 dB at raw index 1853 · 15558 · 19518, +15 dB 3420 · 4014 · 9512 · 12742; shares 0.854 · 0.936 · 0.980 / 0.988 · 0.991 · 0.846 · 0.821; medians 0.82; seven distinct channel fingerprints; every one also fails on b* or R2 (one also genie); iteration series 76 → 6 → 3 → 3 → 3 and 41 → 9 → 4 → 4 → 4; alignment OK x 4; distinct channels ≈ 1.7e4 -- own idx [1853, 15558, 19518] [3420, 4014, 9512, 12742]; own it [76, 6, 3, 3, 3] [41, 9, 4, 4, 4]; file medians {'+6': '0.816', '+9': '0.817', '+12': '0.817', '+15': '0.816'}; distinct {'+6': 16937, '+9': 16911, '+12': 16930, '+15': 17031}; raw_FHSRBB16e4 run|git ['193776a1']
+   §6.6 'trial' numbers are 0-based positions in the n = 20480 raw (script prints np.where index); stream trial = 10000 + index: +12 dB [11853, 25558, 29518], +15 dB [13420, 14014, 19512, 22742]
+   own recount of the file's other header numbers: V1 failures by iteration +6 [652, 163, 75, 50, 45] (file [652, 163, 75, 50, 45]), +9 [221, 39, 12, 11, 10] (file [221, 39, 12, 11, 10]); V1 idx count +6 45 (file 45), +9 10 (file 10)
+   channel fingerprints of the seven: ['71ba070d', '70d6d339', '4263cd8b', 'ceb69a6c', 'f168bf2c', 'c1bab4c2', 'f7ba1351']; of these also failing at another SNR in the file: ['f168bf2c', 'f7ba1351']
+[PASS] J7 FHSRBB16e4_highsnr_fail.txt added in aefbfc12 (mtime 18:53 CDT); the committed SRBB16e4_highsnr_fail.txt is unchanged 1404d315..aefbfc12; highsnr_fail_SRB.py diff 1404d315..aefbfc12 = +18 −7 (default-mode equivalence judged by reading the diff, see report) -- 18	7	conf/results/review_next/prereg_audit_2026-10-11/highsnr_fail_SRB.py
+[PASS] J8 paper_f21srbhs.txt changed in aefbfc12 by one line only (the 'Asserts passed: counts before the merge …' wording, FIGHSROOM N2); F21srbhs_col.{pdf,png} not in the commit (unchanged since ed265304)
+
+# wording: vocabulary hits in §6 (line numbers): {'판정': [49]}
+   §6 lines mentioning the GMM caveat (씨앗 초기화): [101]; lines naming M-ours-bstar / b\* / GMM: [73, 93, 94, 101]
+
+# SUMMARY: 62 PASS / 1 FAIL of 63 checks; ≈ 21028 scalar / string values, 33135 array comparisons  (2026-10-11 20:56:42 CDT)
+   FAIL: J5 FIGHSROOM16e4 §6.4 [감사 S2] six sub-2e-4 values from raw_FHSRBB16e4 (own): genie +12/+15 1/20480 = 4.9e-05, Wilson lower 8.6e-06; Proposed +12/+15 = 3 · 4 / 20480 = '1.5e-04 · 1.9e-04', lower 5.0e-05 · 7.6e-05; b* +15 and genie +9 lower 1.3e-04 · 1.0e-04

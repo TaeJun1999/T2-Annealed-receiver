@@ -51,6 +51,6 @@ for snr in (sorted(k[2] for k in data if k[0] == CELL) if SK else (3.0, 6.0, 9.0
     print(f"    V1 failures by iteration (1, 2, 4, 8, 16): {[int(e[V1][:, i - 1].sum()) for i in (1, 2, 4, 8, 16)]};  V1 NMSE@16 [dB] median over all trials {10 * np.log10(np.median(nm[:, -1])):.1f}")
     for t in (f if SK else f[:30]):
         last = int(np.max(np.where(np.diff(e[V1][t]) != 0)[0]) + 2) if np.any(np.diff(e[V1][t]) != 0) else 1
-        print(f"    trial {t:4d}: share {share[t]:.3f}  2nd/1st sv^2 {sv[t, 1] / sv[t, 0]:.3f}  smallest sv^2 {sv[t, -1]:.2e}  power {pw[t]:.2f}  V1 NMSE@16 {10 * np.log10(nm[t, -1]):6.1f} dB (max over iters {10 * np.log10(np.nanmax(nm[t])):6.1f})"
+        print(f"    trial {t + SK:4d}: share {share[t]:.3f}  2nd/1st sv^2 {sv[t, 1] / sv[t, 0]:.3f}  smallest sv^2 {sv[t, -1]:.2e}  power {pw[t]:.2f}  V1 NMSE@16 {10 * np.log10(nm[t, -1]):6.1f} dB (max over iters {10 * np.log10(np.nanmax(nm[t])):6.1f})"
               f"  err last changed at it {last:2d}  also fail: " + (", ".join(a.replace('M-ours-', '').replace('dscore-C-', '') for a in OTH if e[a][t, -1] > 0) or "none")
               + (f"  channel {fp[t]} (drawn {sum(v == fp[t] for v in fp.values())}x at this SNR; V1 fails on {sum(e[V1][i, -1] > 0 for i, v in fp.items() if v == fp[t])} of them)" if SK else ""))
