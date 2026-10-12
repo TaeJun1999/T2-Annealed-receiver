@@ -128,9 +128,11 @@ def main():
          + (f"trials 10000..30479) at +6..+15 dB for every curve (NEXT_EXPERIMENTS_{HSREG[PRIOR]} §1; block below)." if not HSX else
           f"trials 10000..30479) at +6/+9 dB and n = 81920 (new trials 10000..91919) at +12/+15 dB for every curve (NEXT_EXPERIMENTS_{HSREG[PRIOR]} §1 and "
           "NEXT_EXPERIMENTS_FIGHSX16e4 §1; block below).")), "",
-         *([f"DRAWN RANGE: {SNRS[0]:+.0f} .. {SNRS[-2]:+.0f} dB only (paper variant, user decision 2026-10-12 CDT -- conf/DECISIONS.md).  The {SNRS[-1]:+.0f} dB point of every "
+         *([f"DRAWN RANGE: {SNRS[0]:+.0f} .. {SNRS[-2]:+.0f} dB only (paper variant; user decision 2026-10-12 CDT, taken after the SRB +15 dB result was seen -- conf/DECISIONS.md).  The {SNRS[-1]:+.0f} dB point of every "
             f"curve was measured (n = 81920; last entry of each row of the Counts block and of the merge block below) and is NOT drawn here; the full-range "
             f"figure is {NAME[:-2]}_col.  The lines 'at or below the proposed curve' and 'Zero-failure points' below refer to the drawn points.", ""] if X12 else []),
+         *(["Caveat (NEXT_EXPERIMENTS_PATH16e4 §5 / 6.1): the 'GMM prior' curve of this pool is the b* the registered rule selected after EM collapsed -- "
+            "the seed initialisation, not a well-fitted GMM; the caption must say so.", ""] if HS and PRIOR == "SRP" else []),
          "Curves (internal arm -> figure name): " + "; ".join(f"{a} -> {BY[a].label}" for a in SHOW) + ".", "", "Counts:"] + txt
         + ["", "Drawn baseline curves (Perfect CSI excluded) at or below the proposed curve (point estimates; failures vs the proposed curve's) -- reported only, nothing is "
            "tested here; the registered paired tests are in conf/results/review_next/pairB_" + SP + ".txt: " + ("; ".join(below) or "none") + ".",

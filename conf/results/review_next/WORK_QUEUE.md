@@ -1,6 +1,6 @@
 # 작업 큐 (review_next 이후; 갱신할 때마다 맨 위 시각을 바꾼다)
 
-갱신 2026-10-12 05:03 CDT (Opus 5.5). **Sionna 방 그림 둘의 보강 끝: FIGHSROOM16e4 · FIGHSPATH16e4 (n = 20480) · FIGHSX16e4 (+12 · +15 dB n = 81920). 등록 실행 없음 — main 커밋 가능.** 원고판 그림 = `F21sr{b,p}hsx12_col` (+12 dB 까지; 사용자 결정 10-12 CDT). GPU 여섯 장은 지금 컨테이너 밖 프로세스가 점유 (10-12 04:09 CDT 확인). 남은 것: FIGHSX16e4 기록 감사 (Fable) 반영, paper 브랜치 동기화. 사용자 결정 대기: 원고에 쓸 Sionna 결과 (SRB / SRP), SRP 원고판의 SNR 범위 (+12 dB / 전 구간), 시드 BLER 등록.
+갱신 2026-10-12 05:03 CDT (Opus 5.5). **Sionna 방 그림 둘의 보강 끝: FIGHSROOM16e4 · FIGHSPATH16e4 (n = 20480) · FIGHSX16e4 (+12 · +15 dB n = 81920). 등록 실행 없음 — main 커밋 가능.** 원고판 그림 = `F21sr{b,p}hsx12_col` (+12 dB 까지; 사용자 결정 10-12 CDT). GPU 여섯 장은 지금 컨테이너 밖 프로세스가 점유 (10-12 04:09 CDT 확인). FIGHSX16e4 기록 감사 (Fable; 수치 오류 0, MUST 1 · SHOULD 4 · NIT 7) 반영 끝. 사용자 결정 대기: 원고에 쓸 Sionna 결과 (SRB / SRP), SRP 원고판의 SNR 범위 (+12 dB / 전 구간), 시드 BLER 등록.
 
 ## 원고 목표 (사용자 10-05 CDT)
 - **IEEE ICC 2027** (Washington DC). 공식 call 페이지 기준 투고 마감 **2026-10-16**, 통지 2027-01-15, 최종본 2027-02-19. 투고본 **6 쪽 (10 pt) 상한** — 넘으면 심사 없이 거절. 저널판 없음 (DECISIONS 3a64d0ae) → 6 쪽에 못 넣는 것은 arXiv 확장판.
@@ -13,7 +13,6 @@
 ## 진행 중
 | 작업 | 자원 | 상태 |
 |---|---|---|
-| **FIGHSX16e4 기록 감사** (Fable; §6 = 이 갱신과 같은 커밋) | — | 진행 중 (읽기 전용). 반영 뒤 paper 브랜치 동기화 (`TMPDIR=<scratchpad> CLAUDE_SESSION_URL=… bash conference/tools/sync_paper_branch.sh`) |
 | 시드 체크포인트 (등록 밖, 학습만 끝남): SRB a2 · a3, SRP a2 · a3 | — | `ckpt/d2sx_{SRB,SRP}_N160000_a{2,3}{,_best}.pt` (`logs/seeds_{SRB,SRP}_train.log`; SRB a2 1357 · a3 1519 epoch, SRP a2 · a3 patience 정지). 시드 BLER 은 별도 등록 + 사용자 결정 뒤 |
 | 원고 (IEEE ICC 2027, 마감 2026-10-16) — 웹 채팅에서 사용자가 작성, 자료는 paper 브랜치 (`conference/tools/sync_paper_branch.sh`) | — | 진행 중. 실험 큐·GPU 큐 비어 있음 |
 
@@ -23,7 +22,7 @@
 | 4 | RESULTS.md: SEEDS3·HISNR·SPARSE·SCALE 반영, CONTRIBUTIONS.md (09-27 이전에 머묾), 결과 요약 artifact 페이지, 그림 | — | 사용자 요청 시 (규칙: 요청 때 갱신) | |
 
 ## 완료 (최근)
-- **FIGHSX16e4** (2026-10-12 05:03 CDT 기록): 실행 커밋 037c6610 → 10-11 20:40 – 10-12 04:09 CDT `FIGHS_DONE ok=5 fail=1` (FXALDSRP: 빈 GPU 없음) → 같은 HEAD 에서 재개 → 04:58 CDT 여섯 행 모두 ACCEPT OK → §6: 실패 수 / 81920 (+12 / +15 dB) SRB V1 12 / 11 · b\* 32 / 15 · genie 5 / 4, SRP V1 4 / 1 · b\* 14 / 6 · genie 1 / 0; 그림 `F21sr{b,p}hsx_col` (전 구간) · `F21sr{b,p}hsx12_col` (원고판, +12 dB 까지); 예측 12 개 중 11 적중. FIGHSPATH16e4 의 기록 감사 (수치 오류 0; MUST 0 · SHOULD 2 · NIT 8) 반영도 같은 커밋
+- **FIGHSX16e4** (2026-10-12 05:03 CDT 기록): 실행 커밋 037c6610 → 10-11 20:40 – 10-12 04:09 CDT `FIGHS_DONE ok=5 fail=1` (FXALDSRP: 빈 GPU 없음) → 같은 HEAD 에서 재개 → 04:58 CDT 여섯 행 모두 ACCEPT OK → §6: 실패 수 / 81920 (+12 / +15 dB) SRB V1 12 / 11 · b\* 32 / 15 · genie 5 / 4, SRP V1 4 / 1 · b\* 14 / 6 · genie 1 / 0; 그림 `F21sr{b,p}hsx_col` (전 구간) · `F21sr{b,p}hsx12_col` (원고판, +12 dB 까지); 예측 11 개 중 10 적중. FIGHSPATH16e4 의 기록 감사 (수치 오류 0; MUST 0 · SHOULD 2 · NIT 8) 반영도 같은 커밋
 - **FIGHSPATH16e4** (2026-10-11 20:39 CDT 기록): 실행 커밋 c48ee796 → 10-11 18:34–20:36 CDT `FIGHS_DONE ok=3 fail=0` → §6 aefbfc12: V1 실패 수 / 20480 (+6/+9/+12/+15 dB) 45 / 7 / 0 / 0, b\* 202 / 33 / 3 / 1, genie 14 / 1 / 1 / 0; 그림 `F21srphs_col` (V1 은 +9 dB 에서 끝남); 예측 6 개 적중; 기록 감사 전. FIGHSROOM16e4 의 기록 감사 (수치 오류 0; MUST 1 = EXPERIMENTS 의 'eig 파일럿' → DFT) 반영도 같은 커밋
 - **FIGHSROOM16e4** (2026-10-11 18:34 CDT 기록): 실행 커밋 193776a1 → 10-11 17:01–18:31 CDT `FIGHS_DONE ok=3 fail=0` → §6 ed265304: V1 실패 수 / 20480 (+6/+9/+12/+15 dB) 45 / 10 / 3 / 4, b\* 90 / 23 / 11 / 6, genie 17 / 5 / 1 / 1; 0 실패 점 없음; 그림 `F21srbhs_col`; 예측 5 개 적중. ROOM16e4 (SRB) 의 기록 감사 MUST 0 · SHOULD 2 · NIT 8 반영·GB′ 0.6472 도 같은 커밋
 - **ROOM16e4 — SRB** (2026-10-11 17:00 CDT 기록): 동결 b737fd55 → §5 = 실행 커밋 9ad4caa0 → 주 실행 10-11 15:22–16:17 CDT (ACCEPT OK) 표 B `b* → V1` **(i)** 302:129, 판정점 −3/0/+3, SNR@0.1 격차 +0.32 dB; b\* = full 1024 (정상 수렴); baseline @7d524638 16:18–16:32 CDT 16 개 전부 (i) ("전부"·"멀어진다" 충족, X\* = b\*); §6 f183160d; GB′ median 0.6472; 그림 `F21srb_col` · `F33cdf_SRB_wide`. DMI (DeepMIMO 실내) 는 실행 전 철회. 감사·GB′ 줄은 위 "진행 중"
