@@ -1678,7 +1678,7 @@ censored 0% (PARETO §6.2). P-c (Eb/N0, 보고): Δ₆ − 0.918 = −1.32 dB, �
 
 ## 25. 레이 트레이싱 풀: DeepMIMO 도시 · Sionna RT 도시 · Sionna RT 방 두 풀 (DMC16e4 · DMCBASE16e4 · SRT16e4 · ROOM16e4 · PATH16e4; 그림 보강 FIGHSROOM16e4 · FIGHSPATH16e4 · FIGHSX16e4)
 
-**EXPERIMENTS.md 행** (KST 머리): DeepMIMO 주 실행 `2026-10-11 10:04 ~ 11:53 KST` · baseline `2026-10-11 11:55 ~ 12:48 KST`; Sionna RT 도시 주 실행 `2026-10-11 18:30 ~ 20:11 KST` · baseline `2026-10-11 20:13 ~ 20:27 KST`; Sionna RT 방·이동 단말 (SRP) 주 실행 `2026-10-12 03:29 ~ 05:05 KST` · baseline `2026-10-12 05:06 ~ 05:21 KST`; Sionna RT 방·무작위 위치 (SRB) 주 실행 `2026-10-12 05:22 ~ 06:17 KST` · baseline `2026-10-12 06:18 ~ 06:32 KST`; 그림 보강 SRB n = 20480 `2026-10-12 07:01 ~ 08:31 KST`, SRP n = 20480 `2026-10-12 08:34 ~ 10:36 KST`, 두 풀 +12 · +15 dB n = 81920 `2026-10-12 10:40 ~ 18:09 KST`. 등록·결과 전사·기록 감사는 `conf/results/review_next/NEXT_EXPERIMENTS_{DMC16e4,DMCBASE16e4,SRT16e4,ROOM16e4,PATH16e4,FIGHSROOM16e4,FIGHSPATH16e4,FIGHSX16e4}.md` (각 §6); 감사 보고서 `prereg_audit_2026-10-1{0,1}/`. 이 절의 인용 수치는 모두 위 EXPERIMENTS.md 행에 글자 그대로 있는 것을 스크립트로 대조해 옮겼다(작성 2026-10-12 09:47 CDT, Opus 5.5); 별도 검증자 대조는 거치지 않았다. 시드 강건성 (SRB · SRP 의 a2 · a3; `NEXT_EXPERIMENTS_SEEDSROOM16e4.md`) 은 이 절을 쓸 때 실행 중이다.
+**EXPERIMENTS.md 행** (KST 머리): DeepMIMO 주 실행 `2026-10-11 10:04 ~ 11:53 KST` · baseline `2026-10-11 11:55 ~ 12:48 KST`; Sionna RT 도시 주 실행 `2026-10-11 18:30 ~ 20:11 KST` · baseline `2026-10-11 20:13 ~ 20:27 KST`; Sionna RT 방·이동 단말 (SRP) 주 실행 `2026-10-12 03:29 ~ 05:05 KST` · baseline `2026-10-12 05:06 ~ 05:21 KST`; Sionna RT 방·무작위 위치 (SRB) 주 실행 `2026-10-12 05:22 ~ 06:17 KST` · baseline `2026-10-12 06:18 ~ 06:32 KST`; 그림 보강 SRB n = 20480 `2026-10-12 07:01 ~ 08:31 KST`, SRP n = 20480 `2026-10-12 08:34 ~ 10:36 KST`, 두 풀 +12 · +15 dB n = 81920 `2026-10-12 10:40 ~ 18:09 KST`. 등록·결과 전사·기록 감사는 `conf/results/review_next/NEXT_EXPERIMENTS_{DMC16e4,DMCBASE16e4,SRT16e4,ROOM16e4,PATH16e4,FIGHSROOM16e4,FIGHSPATH16e4,FIGHSX16e4}.md` (각 §6); 감사 보고서 `prereg_audit_2026-10-1{0,1}/`. 이 절의 인용 수치는 모두 위 EXPERIMENTS.md 행에 글자 그대로 있는 것을 스크립트로 대조해 옮겼다(작성 2026-10-12 09:47 CDT, Opus 5.5); 별도 검증자 대조는 거치지 않았다. 시드 강건성 (SRB · SRP 의 a2 · a3; `NEXT_EXPERIMENTS_SEEDSROOM16e4.md`) 은 25.5 (2026-10-12 13:18 CDT 추가).
 
 공통: 셀 C2 (8×4), N′ = 1.6×10⁵, 동결 레시피 (V1 479,426 params), 기존 실험과 같은 GMM 격자·선택 규칙, 테스트 시행 0..2559 (n = 2560/SNR; **고정 풀의 테스트 분할에서 복원 추출** — 새 채널이 아니라 풀의 평균), 7 SNR −3…15 dB, BLER@16, 수신기 CPU. 채널은 라이브러리의 자체 생성기로 만든 고정 풀 (345,600 쌍 안팎; 학습 / GMM 검증 / 테스트 분할). 네 풀 모두 **UNGATED 측정** 이고 헤드라인 (§1)·기존 등록의 판정은 바뀌지 않는다.
 
@@ -1731,3 +1731,21 @@ censored 0% (PARETO §6.2). P-c (Eb/N0, 보고): Δ₆ − 0.918 = −1.32 dB, �
 ### 25.4 그림·기록 (`conference/figures/`; 설명은 그 폴더 README 의 "레이 트레이싱 풀 그림" 절)
 
 `F21dmc_col` · `F21srt_col` (전 SNR n = 2560); `F21sr{b,p}_col` (n = 2560, 등록 그림) · `F21sr{b,p}hs_col` (+6…+15 dB n = 20480) · `F21sr{b,p}hsx_col` (+12 · +15 dB n = 81920, 전 구간) · `F21sr{b,p}hsx12_col` (+12 dB 까지) · `F21room_wide` · `F21room12_wide` (두 풀을 한 그림에); `F33cdf_{DMC,SRT,SRB,SRP}_wide` (NMSE CDF, 보고 전용). 수치 기록 `conference/figures/records/paper_f21*.txt` · `paper_f33cdf_*.txt`.
+
+### 25.5 방 두 풀의 시드 강건성 (SEEDSROOM16e4; a1 · a2 · a3)
+
+**EXPERIMENTS.md 행**: `2026-10-12 23:26 ~ 2026-10-13 03:16 KST`. 같은 레시피·예산·GMM b\*·시험 시행에서 확산 체크포인트만 바꿨다 (attempt 2 · 3 의 `_best`); b\* · genie 등 시드와 무관한 arm 은 a1 raw 와 비트 동일 (수용). 수신기 CPU 는 사용자 지시로 96 스레드만 썼다 (결과 불변). 기록 감사는 이 소절을 쓸 때 진행 전이다.
+
+| | SRB (무작위 위치) | SRP (이동 단말) |
+|---|---|---|
+| 집계 라벨 (분모 3) | **"시드 강건 (3/3 (i))"** | **"시드 강건 (3/3 (i); b* = 씨앗 초기화 GMM)"** |
+| 표 B b\*→V1, −3/0/+3 dB · pooled: a1 | 209:86 · 65:38 · 28:5 · 302:129 | 606:62 · 321:27 · 117:8 · 1044:97 |
+| a2 | 211:95 · 62:30 · 26:5 · 299:130 | 591:64 · 307:18 · 112:6 · 1010:88 |
+| a3 | 207:106 · 66:30 · 24:9 · 297:145 | 603:67 · 325:18 · 115:8 · 1043:93 |
+| SNR@0.1 격차 b\*−V1 [90 % paired], a1 / a2 / a3 [dB] | +0.32 [+0.18, +0.45] / +0.35 [+0.22, +0.48] / +0.37 [+0.24, +0.51] | +2.01 [+1.78, +2.24] / +1.95 [+1.73, +2.18] / +2.12 [+1.90, +2.35] |
+| V1 −3 dB BLER, a1 / a2 / a3 | 0.275 / 0.278 / 0.284 | 0.317 / 0.324 / 0.320 |
+| R(−3 dB), a1 / a2 / a3 | 0.233 / 0.220 / 0.191 | 0.586 / 0.568 / 0.578 |
+| 동일예산 GB′ median (보고 전용), a1 / a2 / a3 | 0.6472 / 0.6158 / 0.6174 | 0.5836 / 0.5860 / 0.5840 |
+
+- 네 태그 모두 수용 통과 (`SEEDSROOM_DONE ok=4 fail=0`); §3 예측 7 개 모두 적중. SRP 의 라벨은 씨앗 초기화 GMM 대비 (한정어가 라벨 문자열의 일부).
+- 그림: `conference/figures/F34seed_wide` (보고 전용; 전 점 n = 2560).
