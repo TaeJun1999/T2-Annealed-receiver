@@ -93,9 +93,11 @@
 | F21srt_col | Sionna RT 2.1, 내장 도시 장면 munich · etoile · florence 28 GHz (20 m block split). 전 SNR n = 2560, y 0.3–1.05 | BLER 수준이 높다 (Perfect CSI +15 dB 0.499; 테스트 풀의 0.796 이 rank-1). GMM prior → Proposed 403:93 (+9/+12/+15 dB); 그려진 baseline 9 개 모두 같은 방향 |
 | F21srb_col · F21srbhs_col · F21srbhsx_col · **F21srbhsx12_col** | **Sionna RT 방, 무작위 단말 위치** (내장 장면 `box` 10×10×5 m 금속 벽, 28 GHz, LoS + 1 차 반사, 고정 기지국 1 곳, 1 m 타일 block split). 차례로: 전 SNR n = 2560 (등록 그림) / +6..+15 dB 를 n = 20480 으로 / +12 · +15 dB 를 n = 81920 으로 (전 구간) / **같은 것을 +12 dB 까지만 그린 원고판** | 점마다 n 이 다르다: −3/0/+3 dB n = 2560 (등록된 판정의 시행), +6/+9 dB n = 20480, +12(/+15) dB n = 81920. GMM prior 는 정상 수렴한 full K = 1024. 금속 벽·1 차 반사, 한 장소·유한 풀. 아래 수치 표 |
 | F21srp_col · F21srphs_col · F21srphsx_col · **F21srphsx12_col** | **Sionna RT 방, 이동 단말** (같은 방·기지국; 단말 한 대의 잔디깎이 경로 600 × 576 점 · 1.5 cm 간격을 시간 순서로 수집, 시간 분할 — 마지막 87 줄이 테스트; 수신기는 블록마다 따로 처리). 네 판의 뜻은 SRB 와 같다 | 위와 같은 n. **이 풀의 GMM prior 는 EM 이 무너져 선택된 씨앗 초기화이고 잘 맞춘 GMM 이 아니다** (Gaussian prior 와 거의 겹친다) — 캡션에 밝힐 것. 방향 두 가지·규칙 격자 경로 (도플러 없음), 완충 구역 없음 |
+| F21dmi_col | **DeepMIMO 실내** (DeepMIMO v4 시나리오 `i1_2p4`, 2.4 GHz, 고정 기지국 1 곳, 단말 격자 70,801 위치 × yaw 5 회, 0.5 m 타일 block split). 전 SNR n = 2560 (등록 그림), y 3×10⁻⁵–1.2 | BLER 수준이 낮도록 고른 풀. 표 B GMM prior → Proposed: Proposed 가 유의하게 적게 실패 (−3 / 0 / +3 dB, 263:179; 유의한 점 2/3); 그려진 baseline 9 개 모두 같은 방향. **제안 곡선은 +9 dB 부터 0 실패라 끊긴다** (0 실패 점 18 개) — n = 20480 보강 그림 `F21dmihs_col` 은 `NEXT_EXPERIMENTS_FIGHSDMI16e4.md` (준비 중) |
 | **F21room_wide · F21room12_wide** | 위 두 풀을 한 그림에: (a) 무작위 위치 (SRB), (b) 이동 단말 (SRP); 7.16 × 3.25 in (`figure*`), 범례 한 번, 두 패널이 x · y 축 공유. `_wide` = 전 구간 (−3…+15 dB), `12_wide` = +12 dB 까지 | 두 단일 패널 그림 (`…hsx_col`) 과 같은 수 (스크립트가 그 기록과 대조). y 축 아래 끝 7.5×10⁻⁶ (n = 81920 의 실패 1 건 = 1.2×10⁻⁵ 가 보이도록). (b) 의 GMM 캐비엇 |
 | F34seed_wide | 방 두 풀의 시드 비교 (`paper_f34seed.py`; 보고 전용): (a) SRB, (b) SRP — Proposed 의 시드 1 · 2 · 3, GMM prior, Perfect CSI; 7.16 × 2.9 in; **전 점 n = 2560** | 시드 = 같은 레시피·예산에서 초기화·배치 순서만 다른 세 번의 학습; 같은 시험 시행. +6 dB 이상은 Proposed · Perfect CSI 의 실패가 한 자리라 곡선이 흔들린다 (보강 없음). (b) 의 GMM 캐비엇 |
 | F33cdf_DMC_wide · F33cdf_SRT_wide · F33cdf_SRB_wide · F33cdf_SRP_wide | 블록별 채널 추정 NMSE 의 CDF (보고 전용; 전 SNR n = 2560). 패널: DMC · SRT 는 −3 dB 와 판정 SNR 세 점, SRB · SRP 는 −3 · 0 · +3 · +6 dB | 검정·라벨 없음. −3 dB 중앙값 (10 log₁₀ NMSE): SRB Proposed −14.39 · GMM −12.43 · Annealed Langevin −8.44 · Gaussian −6.17 dB (나머지는 `records/paper_f33cdf_*.txt`) |
+| F33cdf_DMI_wide | DeepMIMO 실내 풀의 NMSE CDF (보고 전용; 전 SNR n = 2560; 패널 −3 · 0 · +3 · +6 dB) | 검정·라벨 없음. −3 dB 중앙값 (10 log₁₀ NMSE): Proposed −14.39 · GMM −13.49 · Annealed Langevin −9.30 · Gaussian −6.33 dB (나머지는 `records/paper_f33cdf_DMI.txt`) |
 
 ### Sionna RT 방 두 풀의 수치 (캡션·본문용; 출처는 괄호의 등록 §)
 
@@ -118,3 +120,15 @@
 - **0 실패 점**: n = 81920 에서는 SRP 의 Perfect CSI +15 dB (0 / 81920) 하나 — 곡선이 거기서 끊기고 화살표 (95 % Wilson 상한 4.7×10⁻⁵) 가 붙는다. +12 dB 판에는 0 실패 점이 없다.
 - BiG-AMP 의 +9 → +12 dB 상승 (두 풀 모두) 은 그 방식의 바닥이다 (한쪽 Fisher p 2.7×10⁻¹⁰ · 2.7×10⁻⁶; 보고만).
 
+### DeepMIMO 실내 풀의 수치 (캡션·본문용; 출처 ROOM16e4 §7; 추가 2026-10-12 18:27 CDT)
+
+| | DeepMIMO 실내 (DMI) |
+|---|---|
+| 표 B GMM prior → Proposed, 판정점 −3 / 0 / +3 dB (n = 2560; a:b = GMM 만 실패 : Proposed 만 실패) | 178:122 · 72:48 · 13:9, 합 263:179 (p 7.5e-05) → Proposed 가 적게 실패 (유의한 점 2/3; §7.1) |
+| BLER −3 / 0 / +3 dB: Proposed · GMM prior · Perfect CSI | 0.324 / 0.058 / 0.007 · 0.346 / 0.068 / 0.009 · 0.125 / 0.016 / 0.002 |
+| BLER 0.1 에서 SNR 격차 GMM − Proposed [90 % paired] | +0.23 dB [+0.08, +0.37] |
+| 회수율 R(−3 dB) [90 %] | 0.099 [0.050, 0.146] |
+| 등록 baseline 16 개 (GMM 포함) 대비 | 16 개 모두 Proposed 가 유의하게 적게 실패 (§7.3) |
+| 실패 수 +6 / +9 / +12 / +15 dB (n = 2560): Proposed · GMM · Perfect CSI | 4 / 0 / 0 / 0 · 7 / 0 / 0 / 0 · 0 / 0 / 0 / 0 (§7.4) |
+| GMM prior 의 상태 | 정상 수렴 (full 공분산 K = 1024; 격자 끝 캐비엇) |
+| 동일예산 GB′ (median; a1) | 0.8038 |

@@ -1,6 +1,6 @@
 # 작업 큐 (review_next 이후; 갱신할 때마다 맨 위 시각을 바꾼다)
 
-갱신 2026-10-12 14:02 CDT (Opus 5.5). **지금: DeepMIMO 실내 풀 (prior DMI; ROOM16e4 의 DMI 부분 — 10-11 의 철회를 사용자 질문 "Deepmimo 지금 못하나?" 에 따라 되돌림) — GMM 적합 21 작업이 GPU 0–5 에서 도는 중 (tmux `tb2dmi`, 10-12 14:01 CDT ~).** Sionna 방 두 풀은 주 실행·baseline·그림 보강·시드까지 끝 (RESULTS §25). **CPU 는 절반만** (runner 를 `taskset -c 24-47,120-143,72-95,168-191` 아래에서).
+갱신 2026-10-12 18:21 CDT (Opus 5.5). **지금: DeepMIMO 실내 풀 (prior DMI; ROOM16e4 의 DMI 부분) — 주 실행·baseline 끝 (10-12 16:15–18:15 CDT; 표 B `b* → V1` (i) 263:179, baseline 16 개 전부 (i)), §7 전사·그림 커밋. 남은 것: 기록 감사 (Fable) → 그림 보강 (n = 20480, 별도 등록 FIGHSDMI16e4) → RESULTS §25 · README 갱신.** Sionna 방 두 풀은 주 실행·baseline·그림 보강·시드까지 끝 (RESULTS §25). **CPU 는 절반 (96 스레드: `taskset -c 24-47,120-143,72-95,168-191`) 만 쓴다 (사용자 10-12 CDT).**
 
 ## 원고 목표 (사용자 10-05 CDT)
 - **IEEE ICC 2027** (Washington DC). 공식 call 페이지 기준 투고 마감 **2026-10-16**, 통지 2027-01-15, 최종본 2027-02-19. 투고본 **6 쪽 (10 pt) 상한** — 넘으면 심사 없이 거절. 저널판 없음 (DECISIONS 3a64d0ae) → 6 쪽에 못 넣는 것은 arXiv 확장판.
@@ -13,7 +13,7 @@
 ## 진행 중
 | 작업 | 자원 | 상태 |
 |---|---|---|
-| **ROOM16e4 — DMI** (DeepMIMO `i1_2p4` 실내 풀; 등록 v2 b737fd55 의 DMI 부분 그대로) | GPU 0–5 (GMM 적합 21 작업; `logs/tb2.log`, 큐 `logs/tb2_queue.txt`) → GPU 1 장 (ALD 조정, GB′) → CPU 96 스레드 (BLER) | 순서: ① 적합 끝 → `touch logs/tb2_queue.txt.stop` ② `bash code/run_dmi_post_select.sh b737fd55` (kron 병합·b\* 선택·끝 규칙: kron 2048 → 4096, full 512 → full 1024 한 번은 손으로 `fit_gpu.py 8 full 1024 160000 DMIB16e4 --prior DMI` + 인라인 `gmm_selection`) ③ `bash code/run_dmi_post_gpu.sh 1 ALD <GPU>` ④ §5 (DMI) = `prereg_audit_2026-10-11/s5_gen.py DMI DMIB16e4 d2sx_DMI_N160000_a1` + `run_dmi_eval.sh` 인자 → 커밋 (= DMI 의 실행 커밋) ⑤ `taskset -c 24-47,120-143,72-95,168-191 bash code/run_dmi_eval.sh` (tmux) ⑥ GB′ `run_dmi_post_gpu.sh 1 GBP <GPU>` ⑦ 수용 뒤 커밋 → `taskset … bash code/run_dmi_base.sh <인자>` ⑧ §6 (DMI) · 그림 `paper_f21dmc.py DMI` · `paper_f33cdf.py DMI` → Fable 기록 감사 → RESULTS §25 · README → 커밋·동기화. **BLER 이 도는 동안 main 커밋·`conf/code`·`DECISIONS.md` 변경 금지** |
+| **ROOM16e4 — DMI** (DeepMIMO `i1_2p4` 실내 풀; 등록 v2 b737fd55 의 DMI 부분 그대로) | CPU 96 스레드 (BLER 끝) | **주 실행·baseline 끝**: 5-DMI = 실행 커밋 4131a3b0 → 주 실행 10-12 16:15–17:54 CDT (ACCEPT OK) 표 B `b* → V1` **(i)** 263:179 (2/3 점), SNR@0.1 격차 +0.23 dB, b\* = full 1024; baseline @29cf411d 17:56–18:15 CDT 16 개 전부 (i) ("전부"·"멀어진다" 충족); GB′ median 0.8038; §7 전사. 남은 것: ① 기록 감사 (Fable 서브에이전트) → §7.8 ② 그림 보강 FIGHSDMI16e4 (+6…+15 dB, n = 20480, 새 시행 10000..; `run_fighsroom16e4.sh` 의 DMI 판 — 등록 → Fable 검토 → 동결 → 실행 ≈ 4–6 h at 96 스레드) ③ RESULTS §25 · figures/README 에 DMI 추가 ④ paper 브랜치 동기화 |
 | 등록 밖의 부분 체크포인트 (참고) | — |  `ckpt/d2sx_{SRB,SRP}_N160000_a{4,5}*.pt` (128 epoch 쯤에서 멈춤) 는 쓰지 않는다 |
 | 원고 (IEEE ICC 2027, 마감 2026-10-16) — 웹 채팅에서 사용자가 작성, 자료는 paper 브랜치 (`conference/tools/sync_paper_branch.sh`) | — | 진행 중. 실험 큐·GPU 큐 비어 있음 |
 

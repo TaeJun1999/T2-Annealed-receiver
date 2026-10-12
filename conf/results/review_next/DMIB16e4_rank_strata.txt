@@ -1,0 +1,28 @@
+# date        : 2026-10-13 07:57:53 KST
+# git commit  : 29cf411d
+# versions    : python 3.12.14  numpy 2.5.2  scipy 1.18.1  torch 2.14.0+cu130 (cuda_available=False)
+# device      : CPU (192 cores) | dtype: complex128 / float64 | deterministic: yes (fixed seeds, no GPU in the receiver)
+# testbed     : D2
+# seed rule   : default_rng([20260926, TBID[testbed], PID[prior], Nr, T, Tp, int(snr)+100])  (trials of a point = ONE stream)
+# code        : rate-1/2 conv (133,171)_8 nu=6 terminated, QPSK, outer iterations = 16 for EVERY arm
+# Demo/ hashes: t2_route_a.py=95a5408901ec125c  t2_trellis.py=31cd0ee9c68e972b  t2_gmm.py=d064e58c7510c769
+# content     : rank_strata.py -- BLER@16 of raw_DMIB16e4 (prior DMI, cell C2) by the energy share of the channel's largest singular value, REPORT-ONLY; SNRs [-3.0, 0.0, 3.0] (-3 dB + the decision SNRs of tables_D2_DMIB16e4.txt)
+
+-3 dB  n=2560  alignment (R5-genie, first 40 replayed trials vs raw, bit-identical): OK;  BLER genie 0.125  V1 0.324  b* 0.346;  share median 0.872
+    share [0.95, 1.00]  n=   59 (0.023)  BLER genie 0.339  V1 0.661  b* 0.678   failures 20 / 39 / 40
+    share [0.80, 0.95)  n= 2040 (0.797)  BLER genie 0.136  V1 0.336  b* 0.360   failures 278 / 686 / 735
+    share [0.60, 0.80)  n=  457 (0.179)  BLER genie 0.050  V1 0.225  b* 0.241   failures 23 / 103 / 110
+    share [0.00, 0.60)  n=    4 (0.002)  BLER genie 0.000  V1 0.250  b* 0.000   failures 0 / 1 / 0
++0 dB  n=2560  alignment (R5-genie, first 40 replayed trials vs raw, bit-identical): OK;  BLER genie 0.016  V1 0.058  b* 0.068;  share median 0.874
+    share [0.95, 1.00]  n=   52 (0.020)  BLER genie 0.115  V1 0.327  b* 0.308   failures 6 / 17 / 16
+    share [0.80, 0.95)  n= 2110 (0.824)  BLER genie 0.016  V1 0.060  b* 0.071   failures 34 / 127 / 149
+    share [0.60, 0.80)  n=  391 (0.153)  BLER genie 0.000  V1 0.013  b* 0.020   failures 0 / 5 / 8
+    share [0.00, 0.60)  n=    7 (0.003)  BLER genie 0.000  V1 0.000  b* 0.000   failures 0 / 0 / 0
++3 dB  n=2560  alignment (R5-genie, first 40 replayed trials vs raw, bit-identical): OK;  BLER genie 0.002  V1 0.007  b* 0.009;  share median 0.873
+    share [0.95, 1.00]  n=   53 (0.021)  BLER genie 0.019  V1 0.075  b* 0.094   failures 1 / 4 / 5
+    share [0.80, 0.95)  n= 2096 (0.819)  BLER genie 0.001  V1 0.006  b* 0.009   failures 3 / 13 / 18
+    share [0.60, 0.80)  n=  408 (0.159)  BLER genie 0.000  V1 0.005  b* 0.000   failures 0 / 2 / 0
+    share [0.00, 0.60)  n=    3 (0.001)  BLER genie 0.000  V1 0.000  b* 0.000   failures 0 / 0 / 0
+
+alignment OK at every SNR
+report-only: no label, no test, no CI; interpretation is the user's.

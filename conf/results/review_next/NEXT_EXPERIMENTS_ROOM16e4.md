@@ -140,7 +140,7 @@ prior 마다 따로 채점한다(문장마다 SRB / DMI).
 
 갱신 2026-10-11 15:06 CDT (Opus 5.5). 값은 파일에서 읽었다(생성기 `prereg_audit_2026-10-11/s5_gen.py SRB SRBB16e4 d2sx_SRB_N160000_a1`; `logs/tb2.log`, `logs/tb2_post_SRB.{log,sel}`, `results/sparse/pick_SRB_C2.json`, `results/ald/tune_PILSRB.json`). **모두 동결(b737fd55, 10-11 11:23:26 CDT) 뒤에 읽었다.**
 
-**DMI — 사용자 결정으로 실행 전 철회** (2026-10-11 CDT, 원문 "Deepmimo 포기하고 sionna에 올인해"; 큐에서 뺀 시각 13:49 CDT; `DECISIONS.md` 같은 날 줄): DMI 의 학습은 끝나 있었고(시행 1, patience 정지, epoch 1162; `ckpt/d2sx_DMI_N160000_a1{,_best}.pt` 는 디스크에 남김), GMM 적합은 하나도 시작하지 않았으며 큐에서 적합 21 작업을 뺐다(10-11 13:49 CDT, `logs/tb2.log` NOTE). SPARSE 조정 파일은 만들어졌으나(12:49 CDT) 읽지 않았고 ALD·GB′ 는 없다. **DMI 의 BLER 은 한 번도 돌지 않았다 — 라벨 없음, §6 없음.** 이 문서의 DMI 에 관한 §1~§3 은 실행되지 않은 등록으로 남는다. 아래는 SRB 만이다.
+**DMI — 사용자 결정으로 실행 전 철회** (2026-10-11 CDT, 원문 "Deepmimo 포기하고 sionna에 올인해"; 큐에서 뺀 시각 13:49 CDT; `DECISIONS.md` 같은 날 줄): DMI 의 학습은 끝나 있었고(시행 1, patience 정지, epoch 1162; `ckpt/d2sx_DMI_N160000_a1{,_best}.pt` 는 디스크에 남김), GMM 적합은 하나도 시작하지 않았으며 큐에서 적합 21 작업을 뺐다(10-11 13:49 CDT, `logs/tb2.log` NOTE). SPARSE 조정 파일은 만들어졌으나(12:49 CDT) 읽지 않았고 ALD·GB′ 는 없다. **DMI 의 BLER 은 한 번도 돌지 않았다 — 라벨 없음, §6 없음.** 이 문서의 DMI 에 관한 §1~§3 은 실행되지 않은 등록으로 남는다. 아래는 SRB 만이다. **[2026-10-12 16:13 CDT 추가: 이 철회를 되돌렸다 — 사용자 "Deepmimo 지금 못하나?" (10-12 CDT); DMI 의 평가 전 고정 기록은 이 절 끝의 '5-DMI' 블록, `DECISIONS.md` 10-13 04:02 KST 줄]**
 
 | 항목 | SRB (SRBB16e4) |
 |---|---|
@@ -157,6 +157,25 @@ prior 마다 따로 채점한다(문장마다 SRB / DMI).
 | §3 예측 가운데 BLER 전에 채점되는 것 (SRB) | **9 (patience 정지 · epoch ∈ [300, 1500]): 빗나감** (patience ✓, epoch 1680 ✗). **10 (b\* = kron 계열, K ≥ 1024): 빗나감** (b\* = full 1024). 나머지는 실행 뒤 |
 | 실행 사실(공개) | (1) 큐 조작: 정지 파일로 작업자를 두 번 멈췄다 다시 띄웠고(11:45 → 11:52, 13:13 → 13:23 CDT; `NEXT_EXPERIMENTS_PATH16e4.md` 의 SRP 풀 생성·ALD 조정에 GPU 를 쓰려고), SRP 의 22 작업을 큐 맨 앞에 넣었으며(12:11 CDT), DMI 적합 21 작업을 뺐다(13:49 CDT) — SRB 의 작업 내용과 순서는 `run_room_gpu.sh` 그대로다(`logs/tb2.log`). (2) SRB 학습(GPU 1)은 11:03 → 13:27 CDT 내내 방해 없이 돌았다. (3) 이 §5 는 `NEXT_EXPERIMENTS_PATH16e4.md` 의 SRP 주 실행이 끝난 뒤에 커밋한다(두 등록 공통 순서: SRP 주 → SRP baseline → SRB 주 → SRB baseline); 작성자는 이 §5 를 쓸 때 SRP 의 결과 표를 열지 않았다 |
 | 스크립트 인자 원문 | 주 실행: `CUDA_VISIBLE_DEVICES= code/run_prior_eval.sh SRB SRBB16e4 d2sx_SRB_N160000_a1 gmm1024 - 97.00871495382869 ed437f21af15c305 b5f74923f2bd2920 "full:16,32,64,128,256,512,1024 kron:16,32,64,128,256,512,1024,2048"` (= `code/run_srb_eval.sh`, 이 커밋에서 채움). baseline: `bash code/run_srb_base.sh d2sx_SRB_N160000_a1 ed437f21af15c305 4c6da315c701b9d4 e0adb06cce792093 gmm1024 - 97.00871495382869`. 실행 커밋 = 이 §5 커밋; fits 링크 `gmm_fits_D2_SRBB16e4last` 는 `run_srb_post_select.sh` 가 10-11 14:07 CDT 에 만듦 |
+
+### 5-DMI. 평가 전 고정 기록 — DMI (철회를 되돌려 실행; 기록 2026-10-12 16:13 CDT, Opus 5.5)
+
+**경위와 공개**: DMI 는 10-11 CDT 에 사용자 결정으로 실행 전 철회됐고(위), 10-12 CDT 사용자 질문 "Deepmimo 지금 못하나?" 에 따라 되돌렸다(이 세션의 해석 — `DECISIONS.md` 같은 날 줄). **규칙은 이 문서 v2 (동결 b737fd55) 의 DMI 에 관한 §1~§3 그대로**이고 새 규칙·새 예측은 없다(§3 의 예측은 동결 때의 것). 동결 뒤·DMI 실행 전에 작성자와 사용자는 **SRB 의 §6 전부와 PATH16e4 (SRP) 의 결과 전부, 두 풀의 그림 보강(n = 20480 / 81920)과 시드 강건성**을 봤다. DMI 에 대해서는 §0 의 풀 통계·Perfect CSI 선별값과 아래 표의 값(검증 우도, ALD 개발 NMSE, 학습 곡선)만 봤다 — **DMI 의 BLER 은 이 커밋 전까지 한 번도 계산되지 않았다**(`raw_DMIB16e4*` 없음; `raw_DMI/` 는 σ 격자 단계의 빈 디렉토리). 동결(b737fd55) 뒤의 `conf/code` 변경은 SRP 용 추가·그림 보강·시드 드라이버·`ald.py` 의 세트 `hisnr4` 추가뿐이고 DMI 의 수신기 경로를 바꾸는 것은 없다(주 실행의 수용과 기록 감사가 본다). **CPU**: 사용자 지시(10-12 CDT "192개 중 절반 정도만" · "한번에 CPU 스레드 다 쓰지 말고")에 따라 runner 를 `taskset -c 24-47,120-143,72-95,168-191` (96 스레드) 아래에서 돈다 — 결과 불변, 시간만 늘어난다.
+
+값은 파일에서 읽었다(생성기 `prereg_audit_2026-10-11/s5_gen.py DMI DMIB16e4 d2sx_DMI_N160000_a1`; `logs/tb2.log`, `logs/tb2_post_DMI.{log,sel}`, `logs/fit_full1024_DMI.log`).
+
+| 항목 | DMI (DMIB16e4) |
+|---|---|
+| 격자: K 별 ll_val (재시작, n_iter/it_best, 재시드, κ) · 구현 경로 | **full** (정확 경로): 16 28.002 (r1, 103/80, 재시드 0, κ=0) / 32 44.495 (r2, 121/80, 0) / 64 67.588 (r2, 307/300, 0) / 128 83.443 (r2, 179/170, 1) / 256 96.447 (r1, 183/150, 542) / 512 105.851 (r2, 191/190, 5,661) / **1024 112.043** (r0, 72/70, 6,847). **kron** (일괄 경로): 16 10.964 / 32 17.682 / 64 22.517 / 128 26.746 / 256 30.850 / 512 34.837 / 1024 38.050615215363074 (후보 r0 38.051 · r1 37.981 · r2 38.007) / 2048 41.18010947841611 (후보 r0 41.180 · r1 41.097 · r2 41.119); 4096 후보 43.957 / 44.071 / 44.067 — **병합하지 않음**(kron 끝 규칙은 b\* 가 kron 2048 일 때만). 파일 24 개, 최대 n_iter 307. 모든 적합이 it_best ≥ 40 에서 선택됐다(EM 이 초기화에서 멈춘 SRP 와 다르다) |
+| 적합 시각 (큐; `logs/tb2.log`) | 21 작업 10-12 14:01 → 14:35 CDT (GPU 0–5; 등록된 목록·순서; 모두 rc=0). 10-11 의 큐에서는 한 작업도 시작하지 않았다(13:49 CDT 에 뺌) |
+| 확장 결정과 시각 (`code/run_dmi_post_select.sh b737fd55`, `logs/tb2_post_DMI.log`; **순서 규칙**: 동결 10-11 11:23:26 CDT 가 먼저) | 병합 파일 mtime: kron 1024 10-12 15:46:21 CDT · 2048 15:46:25 CDT → **b\* = full 512** (105.85089193400368 = full 계열의 기본 격자 끝; kron 계열 최고는 2048 의 41.180) → 등록된 끝 규칙 "b\* 가 full 512 이면 full 1024 한 번": `fit_gpu.py 8 full 1024 160000 DMIB16e4 --prior DMI` (GPU 2, 15:46 → 16:11 CDT, rc=0; 파일 mtime 16:11:10 CDT; κ·재시작 12 회 중 (κ 0, r0) 선택) → 같은 선택 코드로 다시(인라인 `runner._init("DMIB16e4"); arms.gmm_selection("D2", "DMI", 8, 160000)` 의 출력을 `echo` 로 `.sel` 과 로그에 옮김 — SRB 와 같은 절차; `.sel` 을 읽는 코드는 없다): **b\* = full 1024** (112.04253042212595) → **여기서 멈춤**(full 2048 은 돌리지 않는다). 적합이 끝난 뒤(14:35) 선택까지 71 분이 빈 것은 작성자의 대기 명령 오류 때문이다(결과와 무관) |
+| 최종 b\*: 계열·K·ll_val, 캐비엇 | **b\* = full 공분산 K = 1024 (`gmm1024`), ll_val 112.04253042212595**. **격자 끝 캐비엇**: 확장한 격자의 끝이고 ll_val 은 거기서도 오르고 있었다(512 대비 +6.192 nat) — 규칙대로 한 번만 확장. 수렴 캐비엇(재시드 6,847). 수용 검사 `--bstar gmm1024 --ll-val 112.04253042212595`, 격자 `full:16,32,64,128,256,512,1024 kron:16,32,64,128,256,512,1024,2048` |
+| 학습 | 시행 1 (클리핑 없음): `ckpt/d2sx_DMI_N160000_a1.pt` epoch 1162, stopped_by **patience** (best val 0.21521511673927307 @1142; 10-11 11:03 → 12:44 CDT, 6074.0 s, 5.227 s/epoch; GPU 0 큐, `taskset -c 20,116`). 발산 없음 → 사다리 미발동. `logs/tb2_train_state_DMI.txt` = `1 patience` |
+| 체크포인트 | best `ckpt/d2sx_DMI_N160000_a1_best.pt` **dc784649f1e9b890** (epoch 1142, role best); last `…_a1.pt` **20d28bf06e317ca5** (epoch 1162, best_epoch 1142, stopped_by patience, role last); prior DMI, sigma_tag DMI, rung D2SXDMI160000, attempt 1, grad_clip 0, split_hash fecf46b30175b5c8. σ 격자 20 점 ν [2.162e-03, 1.437e+00] → σ_t [3.288e-02, 8.477e-01] (§0 와 같음) |
+| SPARSE 조정 (`run_dmi_sparse_tune.sh`, CPU 2 스레드) | 10-11 11:03 → 12:49 CDT (`SPARSE_TUNE_DONE rc=0`; wall_sec 6342.6) — 철회 전에 만들어졌고 그 뒤 읽지 않았다가 이 기록을 쓰면서 읽었다. `pick_DMI_C2.json` sha256[:16] **8f72c113efb91b0b**, `tune_DMI_C2.json` ec9e1e11da519ae8. 고른 값: **SBL ρ = 16 = 격자 끝**(−14.554 dB), n_em −3…15 dB = 3 / 5 / 5 / 5 / 5 / 10 / 10; **OMP ρ = 16 = 격자 끝**(−13.561 dB), L = 2 / 3 / 4 / 6 / 8 / 8 / 32. 두 ρ 모두 끝값 + 캐비엇, 확장하지 않는다 |
+| ALD 조정 (`run_dmi_post_gpu.sh 1 ALD 0`, GPU 0) | 10-12 15:46 → 15:55 CDT rc=0 (최종 b\* 확정 전에 돌았다 — ALD 조정은 b\* 를 쓰지 않는다). `results/ald/tune_PILDMI.json` sha256[:16] **1e7824c1bae10376** (git 003c8e51 = 그때의 HEAD, ckpt `ckpt/d2sx_DMI_N160000_a1_best.pt`, ckpt_sha dc784649f1e9b890, n_dev 512, dev_skip 2560), `tune_PILDMI_curves.npz` 0dac600e287a5224. 고른 값: **c = 0.01, β = 0.005** (개발 최적 c 0.01 · β 1e-05 −16.900 dB; 저자 기본값 β 0.005 가 −16.868 dB 로 0.1 dB 안 → 유지; β 축 두 번 확장, 확장 뒤 끝값 없음); 멈춤 단계 −3…15 dB = 369 / 484 / 552 / 600 / 600 / 600 / 600; 개발 NMSE −8.05 / −11.86 / −14.50 / −17.50 / −19.79 / −22.15 / −24.23 dB |
+| GB′ | 아직 계산하지 않았다(§1: §5 커밋 뒤, 보고 전용) |
+| 실행 명령 (이 커밋 뒤, 한 번) | `tmux new -d -s dmieval -c /home/HTJ/t2/conf "taskset -c 24-47,120-143,72-95,168-191 bash code/run_dmi_eval.sh"` — `run_dmi_eval.sh` = `CUDA_VISIBLE_DEVICES= bash code/run_prior_eval.sh DMI DMIB16e4 d2sx_DMI_N160000_a1 gmm1024 - 112.04253042212595 dc784649f1e9b890 20d28bf06e317ca5 "full:16,32,64,128,256,512,1024 kron:16,32,64,128,256,512,1024,2048"`. 실행 중 main 커밋·`conf/code`·`DECISIONS.md`·이 문서 변경 없음 |
 
 ## 6. 결과 — SRB (주 실행 2026-10-11 15:22~16:17 CDT, `run_prior_eval.sh` @9ad4caa0 = §5 커밋; baseline 16:18~16:32 CDT, `run_srb_base.sh` @7d524638; DMI 는 철회 — §5; 이 절은 추가만 한다; 기록 2026-10-11 16:35 CDT, Opus 5.5 — 전사만, 해석 없음)
 
@@ -319,3 +338,149 @@ prior 마다 따로 채점한다(문장마다 SRB / DMI).
 
 - **사후 진단** (사용자 질문 "proposed 보면 6dB에서 BLER가 9 dB 보다 낮게 나오는데 좀 이상하지 않아?" 뒤; `prereg_audit_2026-10-11/highsnr_fail_SRB.py` → `SRBB16e4_highsnr_fail.txt`, 커밋 1404d315; 주 실행의 raw 만 읽는다): V1 의 BLER@16 실패는 +6 dB 3 건(시행 818 · 1737 · 2421) · +9 dB 4 건(177 · 1000 · 1528 · 2346) · +12 · +15 dB 0 건 / 2560. 그 7 시행의 최대 특이값 에너지 비중은 0.914 · 0.938 · 0.933 / 0.917 · 0.816 · 0.930 · 0.922 (전체 시행의 중앙값 0.82), 7 시행 모두 같은 시행에서 다른 arm 도 실패했고(b\* · R2-ours-G · V4 · genie 가운데 둘 이상), V1 의 반복별 실패 수는 줄기만 한다(+6 dB 77 → 15 → 4 → 3 → 3, +9 dB 33 → 6 → 5 → 4 → 4; 반복 1 · 2 · 4 · 8 · 16). 이 두 점은 판정점(−3 / 0 / +3 dB)이 아니다.
 - **그림 보강** (사용자 지시 "figure는 매끄러운 곡선이 나타나는게 좋아"): +6 / +9 / +12 / +15 dB 점을 새 시행 n = 20480 으로 다시 재는 보고 전용 실행은 별도 문서 `NEXT_EXPERIMENTS_FIGHSROOM16e4.md` (v2 = 실행 커밋 193776a1, 10-11 17:01 CDT 시작)에 등록했다. 이 문서의 판정·라벨·6.4 의 표와 그림 `F21srb_col` 은 그대로 남고, 보강 그림은 `F21srbhs_col` 이라는 다른 파일이다.
+
+## 7. 결과 — DMI (주 실행 2026-10-12 16:15~17:54 CDT, `run_prior_eval.sh` @4131a3b0 = 5-DMI 커밋; baseline 17:56~18:15 CDT, `run_dmi_base.sh` @29cf411d; 이 절은 추가만 한다; 기록 2026-10-12 18:19 CDT, Opus 5.5 — 전사만, 해석 없음)
+
+수치의 출처: 생성기 `prereg_audit_2026-10-11/s6_gen.py DMIB16e4` 와 `s6_base_gen.py pairB_SPDMI.txt` (표 B 줄은 `results/tables_D2_DMIB16e4{,last}.txt`·`pairB_SPDMI.txt` 원문, 실패 수·BLER 은 raw 를 `analysis.load_raw` 로 읽음, 회수율·ΔR·수용·가드는 각 파일 원문). §6 (SRB) 과 같은 틀이다; §1~§3 은 동결 b737fd55 그대로.
+
+**실행·운영 기록**: `code/run_dmi_eval.sh` (= 5-DMI 의 인자 원문) 한 번, tmux `dmieval`, `taskset -c 24-47,120-143,72-95,168-191` (CPU 96 스레드 — 사용자 지시; runner 는 192 워커를 만들고 96 스레드를 나눠 쓴다), 10-12 16:15 CDT 시작(git 4131a3b0 = 5-DMI 커밋, `conf/code` clean). 측정 태그 `DMIB16e4` (`_best`) 16:15 → 17:02 CDT (runner 46.6 분), 보고 태그 `DMIB16e4last` 17:02 → 17:53 CDT (49.9 분), 각각 448 작업; 수용 검사 17:53 CDT, `PRIOR_EVAL_DONE` 17:54 CDT. manifest `run_manifest_DMIB16e4{,last}.json` 둘 다 git 4131a3b0 · config_hash 76399fb1c7f57517. 실행 중 main 커밋 없음(다음 커밋 29cf411d 는 `PRIOR_EVAL_DONE` 뒤). 함께 돈 것(결과 중립): DMI 의 GB′ (GPU 0, `taskset -c 20,116`, 16:16 → 16:24 CDT; 수신기는 CPU). 주 실행이 도는 동안 작성자는 DMI 의 진행 줄·결과를 보지 않았다(시작 직후의 runner 머리말 세 줄과 종료 표식만).
+
+**수용 검사**: **`ACCEPT: OK -- DMIB16e4, DMIB16e4last`** (`results/review_next/DMIB16e4_accept.txt`; `eval_accept.py` rc 0 — 격자 full 7 (16 … 1024) + kron 8 (16 … 2048), 청크 {(40k, 40)} × 7 SNR, meta ntrain 160000 / bstar gmm1024 / ll_val = 5-DMI, 체크포인트 sha·role, last 의 R5-genie 가 best 와 비트 동일). §1 (c) 의 글자 조건: 두 태그의 `results/tables_D2_<tag>.txt` 에 `SITE-SPECIFIC RAY-TRACED TESTBED (prior DMI)` 가 한 번씩, `FIVE frozen UE yaws per position` 이 한 번씩 있고 `CLAIM TESTBED -- sparse specular` 와 `FIVE fixed` 는 0 번. `eval_accept.py` 가 검사하지 않는 항목은 읽어 확인했다: raw 이름 `D2_C2_DMI_Nr8_T16_Tp4_dft_snr…` (태그당 448 파일; 파일럿 = DFT), 학습 예산 줄 `N_train=160000`, 두 태그의 Demo 해시·manifest config_hash 동일; `dmimo.py selfcheck 8 DMI` → `OK (DMI) | pools fit 273305 val 20000 test 60700 | train sha 3380177f4c38cf57` (= §0; 이 절을 쓰면서 한 번 실행). (e) GB′: 7.2. 판정점(앵커 b\*, 자동): **−3 / 0 / +3 dB**.
+
+### 7.1 측정 판정 — 표 B `b* → V1` (C2, 태그 DMIB16e4 = `_best`, UNGATED)
+
+| 태그 | 판정점 | a:b (부호검정 p) | pooled | 가드 | 라벨 | SNR@0.1 격차 b\*−V1 [90 % paired] |
+|---|---|---|---|---|---|---|
+| **DMIB16e4 (판정)** | −3 / 0 / +3 | 178:122 (0.0015) · 72:48 (0.035) · 13:9 (0.52) | 263:179 (7.5e-05) | POWERED, second arm fewer 2/3 | **(i) "DeepMIMO 실내 (`i1_2p4` 2.4 GHz, 고정 기지국 한 곳, block split) 에서 V1 이 b\* 보다 적게 실패 (prior·기전 축 측정, UNGATED)"** | +0.23 dB [+0.08, +0.37] |
+| DMIB16e4last (보고) | −3 / 0 / +3 | 184:114 (6e-05) · 74:49 (0.03) · 14:9 (0.4) | 272:172 (2.4e-06) | POWERED, 2/3 | (같은 문자열, 보고 전용) | +0.24 dB [+0.11, +0.39] |
+
+라벨 문장에 붙는 것(§2): **(1) 유한 풀·한 장소** — 테스트 시행은 테스트 타일 60,700 쌍에서 복원 추출; **(2) 가까운 이웃** — 0.5 m 타일(2.4 GHz 에서 4 λ), 같은 위치를 yaw 만 바꿔 5 번 쓴다; 테스트 채널의 0.058 이 학습 집합에 정규화 제곱거리 0.1 안의 이웃을 가짐(§0 TDMh; 판정점 시행에서는 0.074 / 0.066 / 0.064 — 7.2); **(4) 선택 편향** — BLER 수준이 낮도록 고른 풀. ((3) 은 SRB 에만.) 범위: 이 방·이 기지국·이 split·이 크기 한정. **b\* 는 full 계열 K = 1024 (격자 끝 규칙으로 한 번 확장한 값; 5-DMI)** — **격자 끝 캐비엇**: 확장한 격자의 끝이고 ll_val 은 거기서도 오르고 있었다(512 대비 +6.192 nat) — 등록 규칙에 따라 여기서 멈췄다(§1 "full 1024 한 번 + 캐비엇"). 유의한 점은 3 점 중 2 점이다(+3 dB 13:9, p 0.52). 헤드라인·D2·38.901·도시 풀·SRB·SRP 기록 불변.
+
+대조군 `b* → b*-scalar` (−3 / 0 / +3): 48:71 (0.043) · 11:36 (0.00035) · 5:6 (1), pooled 64:113 (p 0.00028), POWERED, second arm fewer 0/3 · first arm (b\*) fewer 2/3 → 라벨 규칙으로 **(ii)** (b\* 가 b\*-scalar 보다 적게 실패); SNR@0.1 격차 (b\* − b\*-scalar) −0.21 dB [−0.31, −0.12]. `R2-ours-G → b*` (앵커 R2, 판정점 −3 / 0 / +3): 1074:35 · 680:15 · 173:5, pooled 1927:55, POWERED, b\* (second arm) 가 3/3 에서 적게 실패; SNR@0.1 격차 (R2 − b\*) +3.13 dB [+2.89, +3.38].
+
+**기전 판독**: 회수율 R (best, paired 90 %): **−3 dB 0.099 [0.050, 0.146]** (b\* 885 / V1 829 / genie 321); 판정점 −3 / 0 / +3 0.099 [0.050, 0.146] / 0.180 [0.050, 0.297] / 0.211 [−0.250, 0.533], 합 **0.117 [0.071, 0.164]** (b\* 1081 / V1 997 / genie 365). last: −3 dB 0.124 [0.076, 0.171] (V1 815; `recovery_DMIB16e4last.txt` — `recovery_diff_DMIB16e4.txt` 의 같은 값은 재표집이 달라 [0.076, 0.169]). **1차 ΔR (−3 dB)**: 포화 가드 미발동(b\* BLER@16 −3 dB 0.346 ∈ [0.005, 0.9], b\* 885 > genie 321), undefined 0 → **ΔR = −0.371 [90 % 비짝 −0.439, −0.308] → 등록 라벨 "회수율이 D2 보다 낮다"** (D2 B16e4k −3 dB R 0.470 [0.427, 0.512]; last: −0.346 [−0.413, −0.285]). 2차(보고): 판정점 합 0.117 [`recovery_diff` 의 CI 0.069, 0.162] vs D2 (−3, 0, +3 합) 0.509 → −0.391 [−0.452, −0.334]. 실패 수 격차(−3 dB): V1 − genie 508 [473, 544], b\* − genie 564 [526, 599] (D2: 284 [256, 311], 536 [501, 571]).
+
+### 7.2 보고 전용
+
+**BLER@16 (괄호 = 실패 수 / 2560; best 태그; R0-pilot 은 @1)**
+
+| arm | −3 dB | 0 dB | +3 dB | +6 dB | +9 dB | +12 dB | +15 dB |
+|---|---|---|---|---|---|---|---|
+| **V1** | 0.324 (829) | 0.058 (149) | 0.007 (19) | 0.002 (4) | 0.000 (0) | 0.000 (0) | 0.000 (0) |
+| V1 (last 태그) | 0.318 (815) | 0.058 (148) | 0.007 (18) | 0.001 (3) | 0.000 (0) | 0.000 (0) | 0.000 (0) |
+| V4 | 0.328 (840) | 0.068 (174) | 0.007 (18) | 0.002 (4) | 0.000 (0) | 0.000 (0) | 0.000 (0) |
+| V4b | 0.347 (888) | 0.070 (179) | 0.009 (22) | 0.002 (4) | 0.000 (1) | 0.000 (0) | 0.000 (0) |
+| **b\*** | 0.346 (885) | 0.068 (173) | 0.009 (23) | 0.003 (7) | 0.000 (0) | 0.000 (0) | 0.000 (0) |
+| b\*-scalar | 0.355 (908) | 0.077 (198) | 0.009 (24) | 0.004 (9) | 0.000 (0) | 0.000 (0) | 0.000 (0) |
+| gmm32 | 0.491 (1256) | 0.128 (327) | 0.018 (46) | 0.003 (7) | 0.000 (1) | 0.000 (0) | 0.000 (0) |
+| R2-ours-G | 0.752 (1924) | 0.327 (838) | 0.075 (191) | 0.012 (31) | 0.005 (12) | 0.000 (0) | 0.000 (0) |
+| R1-turbo | 0.877 (2245) | 0.517 (1324) | 0.166 (424) | 0.035 (90) | 0.009 (23) | 0.002 (4) | 0.000 (0) |
+| R0-pilot (@1) | 0.985 (2521) | 0.802 (2052) | 0.360 (922) | 0.118 (302) | 0.032 (81) | 0.009 (23) | 0.001 (3) |
+| pilot_C (@16; 문맥) | 0.871 (2230) | 0.457 (1169) | 0.103 (263) | 0.016 (41) | 0.004 (10) | 0.000 (1) | 0.000 (0) |
+| R4-scvamp | 0.915 (2342) | 0.622 (1593) | 0.266 (680) | 0.098 (250) | 0.029 (73) | 0.012 (30) | 0.003 (7) |
+| R3-bigamp | 0.938 (2402) | 0.684 (1751) | 0.362 (928) | 0.216 (554) | 0.171 (437) | 0.224 (573) | 0.236 (603) |
+| R4-llr | 0.955 (2446) | 0.842 (2155) | 0.820 (2100) | 0.614 (1572) | 0.302 (774) | 0.131 (336) | 0.043 (111) |
+| V0 | 1.000 (2560) | 1.000 (2560) | 1.000 (2560) | 0.997 (2552) | 0.981 (2511) | 0.798 (2043) | 0.252 (644) |
+| **genie** | 0.125 (321) | 0.016 (40) | 0.002 (4) | 0.000 (0) | 0.000 (0) | 0.000 (0) | 0.000 (0) |
+
+- **SNR@0.1** (표 A; dB): genie −2.67 · V1 −0.95 · V4 −0.74 · b\* −0.72 · V4b −0.67 · b\*-scalar −0.51 · gmm32 0.37 · R2-ours-G 2.41 · pilot_C (@16) 3.04 · R1-turbo 3.98 · R4-scvamp 5.93 · R0-pilot (@1) 6.38 · R4-llr 12.74; R3-bigamp · V0 는 "> 15". 표 B 의 격차: `V1 → genie` +1.73 dB [+1.56, +1.90], `b* → genie` +1.95 dB [+1.76, +2.14].
+- **V4 · V4b · V0 (앵커 b\*, −3 / 0 / +3)**: `b* → V4` 177:132 (0.012) · 64:65 (1) · 15:10 (0.42), pooled 256:207 (p 0.026), second arm fewer 1/3 → not significant (격차 +0.02 dB [−0.13, +0.17]); `b* → V4b` 164:167 · 61:67 · 13:12, pooled 238:246 (p 0.75), 0/3 (−0.05 dB [−0.20, +0.10]); `b* → V0` 0:1675 · 0:2387 · 0:2537, pooled 0:6599, first arm (b\*) fewer 3/3. 판정점 3 점 실패 수 합: V1 997 / V4 1032 / V4b 1089; 7 SNR 합: V1 1001 / V4 1036 / V4b 1094 (검정 없음).
+- **`V1 → genie`** (앵커 genie; 범위 안 SNR 이 −3 · 0 dB 둘뿐 → UNDECIDED): 537:29 · 116:7, pooled 653:36. `b* → genie`: 598:34 · 141:8, pooled 739:42 (UNDECIDED).
+- **best 대 last V1 짝 부호검정** (−3 / 0 / +3; a = best 만 실패, b = last 만 실패): 46:32 (p 0.141) · 23:22 (1) · 2:1 (1), pooled 71:55 (p 0.181) — 판정하지 못함(유의 방향 없음).
+- **F3 가드 발동률** (`results/guard_D2_DMIB16e4{,last}.txt`): V0 — best −3 … +15 dB 1.000 / 1.000 / 0.999 / 0.996 / 0.963 / 0.820 / 0.509, last 1.000 / 1.000 / 1.000 / 0.990 / 0.958 / 0.782 / 0.552. V0 밖의 발동 없음. 한 번도 발동하지 않은 arm 12 개: M-ours-bstar, M-ours-bstar-scalar, M-ours-dscore-C-V1, M-ours-dscore-C-V4, M-ours-dscore-C-V4b, M-ours-gmm32, R0-pilot, R1-turbo, R2-ours-G, R3-bigamp, R4-llr, R4-scvamp.
+- **동일예산 GB′** (`run_dmi_post_gpu.sh 1 GBP 0`, GPU 0, 10-12 16:16 → 16:24 CDT, rc 0; `logs/gbprime_DMIB16e4.log`, last 파일 `d2sx_DMI_N160000_a1.pt` — 재개는 학습 없이 끝났고(`trained 1162 ep`, stopped_by patience) 체크포인트의 sha 는 5-DMI 그대로(20d28bf06e317ca5 · dc784649f1e9b890); `results/d2_gbprime_DMI_N160000_a1.npz`): median **0.8038** (min 0.7272 · max 1.0217; SRB 0.6472 · SRP 0.5836 · D3 0.559 · Sionna RT 도시 0.543 · DeepMIMO 도시 0.715 · UMi28 0.920 과 나란히). 잡음 수준 20 개 가운데 19 개에서 비 < 1 이고, 가장 큰 수준 σ 0.848 (격자 끝)에서 1.022 (모델 NMSE 0.2233 대 GMM 0.2186). **수용 (e)**: 로그의 `GMM b* = gmm1024 (full K=1024) @N=160000` = 5-DMI 최종 b\* ✓, `d2_gbprime_DMI_N160000_a1.npz` mtime 10-12 16:24:17 CDT > full 1024 적합 파일 mtime 16:11:10 CDT ✓ → GB′ 수치 유효.
+- **누수 층화** (보고 전용; `code/dmc_leak_strata.py --tag DMIB16e4 --prior DMI`, 10-12 17:57 CDT 실행(CPU 4 스레드; baseline runner 와 겹침, 주 실행의 raw 만 읽음) → `DMIB16e4_leak_strata.txt`; 정렬 OK). d < 0.1 의 비율은 판정점마다 0.074 / 0.066 / 0.064 (d 중앙값 0.1803 / 0.1813 / 0.1810). n: b\* / V1 / genie 실패 수 → 점추정 R: **d < 0.1** −3 dB 189: 74 / 60 / 29 → 0.311, 0 dB 169: 12 / 19 / 4 → −0.875, +3 dB 165: 2 / 2 / 0 → 0.000, 3 점 합 523: 88 / 81 / 33 → 0.127; **d ≥ 0.1** −3 dB 2371: 811 / 769 / 292 → 0.081, 0 dB 2391: 161 / 130 / 36 → 0.248, +3 dB 2395: 21 / 17 / 4 → 0.235, 3 점 합 7157: 993 / 916 / 332 → 0.116.
+- **랭크 층화** (보고 전용; `code/rank_strata.py --tag DMIB16e4 --prior DMI` → `DMIB16e4_rank_strata.txt`; 정렬 OK; 비중 중앙값 0.872 / 0.874 / 0.873). 칸 = n (비율): genie / V1 / b\* 의 BLER@16 (실패 수):
+
+| SNR | ≥ 0.95 | 0.80–0.95 | 0.60–0.80 | < 0.60 |
+|---|---|---|---|---|
+| −3 dB | 59 (0.023): 0.339 / 0.661 / 0.678 (20 / 39 / 40) | 2040 (0.797): 0.136 / 0.336 / 0.360 (278 / 686 / 735) | 457 (0.179): 0.050 / 0.225 / 0.241 (23 / 103 / 110) | 4 (0.002): 0.000 / 0.250 / 0.000 (0 / 1 / 0) |
+| 0 dB | 52 (0.020): 0.115 / 0.327 / 0.308 (6 / 17 / 16) | 2110 (0.824): 0.016 / 0.060 / 0.071 (34 / 127 / 149) | 391 (0.153): 0.000 / 0.013 / 0.020 (0 / 5 / 8) | 7 (0.003): 0.000 / 0.000 / 0.000 (0 / 0 / 0) |
+| +3 dB | 53 (0.021): 0.019 / 0.075 / 0.094 (1 / 4 / 5) | 2096 (0.819): 0.001 / 0.006 / 0.009 (3 / 13 / 18) | 408 (0.159): 0.000 / 0.005 / 0.000 (0 / 2 / 0) | 3 (0.001): 0.000 / 0.000 / 0.000 (0 / 0 / 0) |
+
+### 7.3 baseline — 표 B `X → V1`: 새 라벨 15 개 + 주 라벨 1 개 (C2, prior DMI, UNGATED; 앵커 = X, R0-pilot 은 @1)
+
+**실행·운영 기록**: `bash code/run_dmi_base.sh d2sx_DMI_N160000_a1 dc784649f1e9b890 8f72c113efb91b0b 1e7824c1bae10376 gmm1024 - 112.04253042212595` (인자 = 5-DMI 의 값) **한 번**, tmux `dmibase`, 같은 `taskset` (96 스레드), 10-12 17:56 CDT 시작(git 29cf411d; `DEFER_ALD` 스위치 없이). PIL runner 1.6 분 → 17:58 CDT `ACCEPT: OK -- PILDMI`, `pair_cross` 무결성 OK(raised 0 / 0) → ALD 시험 사이트 재생성(CPU) → ALD 추정 GPU 0 (17:59 CDT; `results/ald/ald_PILDMI.npz` sha256[:16] b0145dac7b7076aa) → ALD runner 0.6 분 → 17:59 CDT `ACCEPT: OK -- ALDDMI`, `pair_ald` 무결성 OK → pick 규칙 재현(`rule-reproduced=True`, 메모리 필요 ≈ 264 GB / 가용 1040 GB) → SP runner 14.9 분 → `meta|sparse` 불일치 0, raised 0 / 0 / 0 → 18:15 CDT `ACCEPT: OK -- SPDMI` → `pair_baselines` rc 0 → 18:15 CDT `DMI_BASE_DONE rc=0`. raw 마다 깨끗한 커밋 하나: `pair_baselines` 머리말 `git base=4131a3b0 extra0=29cf411d pil=29cf411d ald=29cf411d; integrity: OK`. 커밋 29cf411d 는 `PRIOR_EVAL_DONE` 뒤·baseline 시작 전에 주 실행의 결과 파일과 baseline 입력(`results/sparse/{pick,tune}_DMI_C2.json`, `results/ald/tune_PILDMI{.json,_curves.npz}` — 5-DMI 에 sha 로 고정돼 있던 파일을 추적만 함; `run_dmi_base.sh` 가 추적·clean 을 요구한다)을 더한 것이다(`git diff 4131a3b0 29cf411d -- conf/code Demo` 비어 있음).
+
+| X | 판정점 [dB] | a:b (X 만 실패 : V1 만 실패) | pooled (p) | 가드 · 유의 점 수 | 라벨 | F_X − F_V1 (−3 dB) | R_X (−3 dB) [90 %] | R_X (판정점 합) [90 %] |
+|---|---|---|---|---|---|---|---|---|
+| b\* (주 라벨, 7.1) | -3 / +0 / +3 | 178:122 · 72:48 · 13:9 | 263:179 (7.5e-05) | POWERED, V1 2/3 · X 0/3 | **(i)** | 56 | 0.099 [0.050, 0.146] | 0.117 [0.071, 0.164] |
+| b\*-scalar | -3 / +0 / +3 | 201:122 · 87:38 · 14:9 | 302:169 (9.2e-10) | POWERED, V1 2/3 · X 0/3 | **(i)** | 79 | 0.135 [0.085, 0.182] | 0.174 [0.129, 0.218] |
+| gmm32 | -3 / +0 / +3 | 502:75 · 214:36 · 34:7 | 750:118 (3.4e-113) | POWERED, V1 3/3 · X 0/3 | **(i)** | 427 | 0.457 [0.424, 0.488] | 0.500 [0.473, 0.527] |
+| R0-pilot@1 | +3 / +6 / +9 | 903:0 · 298:0 · 81:0 | 1282:0 (0) | POWERED, V1 3/3 · X 0/3 | **(i)** | 1692 | 정의 안 됨 (범위 밖: 0.9848) | 0.985 [0.979, 0.991] |
+| R1-turbo | +0 / +3 / +6 | 1180:5 · 406:1 · 88:2 | 1674:8 (0) | POWERED, V1 3/3 · X 0/3 | **(i)** | 1416 | 0.736 [0.718, 0.753] | 0.929 [0.918, 0.939] |
+| R2-ours-G | -3 / +0 / +3 | 1129:34 · 709:20 · 176:4 | 2014:58 (0) | POWERED, V1 3/3 · X 0/3 | **(i)** | 1095 | 0.683 [0.662, 0.703] | 0.756 [0.741, 0.771] |
+| R3-bigamp | +6 / +9 / +12 | 551:1 · 437:0 · 573:0 | 1561:1 (0) | POWERED, V1 3/3 · X 0/3 | **(i)** | 1573 | 정의 안 됨 (범위 밖: 0.9383) | 0.997 [0.995, 0.999] |
+| R4-llr | +9 / +12 / +15 | 774:0 · 336:0 · 111:0 | 1221:0 (0) | POWERED, V1 3/3 · X 0/3 | **(i)** | 1617 | 정의 안 됨 (범위 밖: 0.9555) | 정의 안 됨 (판정점에서 genie 실패 ≥ V1 실패) |
+| R4-scvamp | +3 / +6 / +9 | 661:0 · 247:1 · 73:0 | 981:1 (4.8e-293) | POWERED, V1 3/3 · X 0/3 | **(i)** | 1513 | 정의 안 됨 (범위 밖: 0.9148) | 0.981 [0.973, 0.989] |
+| bstar-pilot | -3 / +0 / +3 | 449:66 · 154:34 · 18:8 | 621:108 (2.3e-88) | POWERED, V1 2/3 · X 0/3 | **(i)** | 383 | 0.430 [0.396, 0.462] | 0.448 [0.417, 0.478] |
+| V1-pilot | -3 / +0 / +3 | 410:46 · 130:26 · 15:4 | 555:76 (7.9e-91) | POWERED, V1 3/3 · X 0/3 | **(i)** | 364 | 0.417 [0.384, 0.449] | 0.431 [0.402, 0.459] |
+| ALD-pilot | -3 / +0 / +3 | 608:62 · 239:28 · 47:4 | 894:94 (2.6e-164) | POWERED, V1 3/3 · X 0/3 | **(i)** | 546 | 0.518 [0.489, 0.547] | 0.559 [0.534, 0.584] |
+| ALDv-pilot | -3 / +0 / +3 | 587:59 · 209:29 · 34:5 | 830:93 (1.3e-148) | POWERED, V1 3/3 · X 0/3 | **(i)** | 528 | 0.510 [0.479, 0.538] | 0.538 [0.512, 0.563] |
+| SBL-loop | -3 / +0 / +3 | 958:47 · 553:20 · 113:4 | 1624:71 (0) | POWERED, V1 3/3 · X 0/3 | **(i)** | 911 | 0.642 [0.619, 0.665] | 0.711 [0.693, 0.728] |
+| SBL-pilot | -3 / +0 / +3 | 1198:18 · 728:15 · 165:4 | 2091:37 (0) | POWERED, V1 3/3 · X 0/3 | **(i)** | 1180 | 0.699 [0.679, 0.718] | 0.765 [0.750, 0.779] |
+| OMP-pilot | +0 / +3 / +6 | 1080:12 · 298:2 · 77:1 | 1455:15 (0) | POWERED, V1 3/3 · X 0/3 | **(i)** | 1302 | 0.719 [0.701, 0.737] | 0.918 [0.906, 0.930] |
+
+- 표의 pooled p "(0)" 은 도구의 `%.2g` 출력이 언더플로한 것이다(실제 값 < 1e-300).
+- **요약 줄(원문)**: `SUMMARY-B (baselines without b*, 15): (i) 15, (ii) 0, not decided 0; b* -> V1 (i)` · `SUMMARY registered baselines 16 (b* + 𝔅 15): (i) 16, (ii) 0, not decided 0`.
+- **"전부" 문장 (§2 조건 충족: 주 라벨 (i) 이고 15 개 모두 (i))**: **"DeepMIMO 실내 (`i1_2p4` 2.4 GHz, 고정 기지국 한 곳, block split) 에서 V1 이 등록된 baseline 전부(16 개, 희소 baseline 포함)보다 적게 실패 (UNGATED 측정)"**.
+- **"멀어진다" 문장 (조건 충족)**: `'등록된 baseline 전부와 멀어진다' condition (k = 16, (ii) = 0, R_X* CI lower > 0): MET` — `X* (fewest -3 dB failures, ties by name) = M-ours-bstar (F=885); R_X* -3 dB = 0.099 [90% 0.050, 0.146]` → **"… 에서 V1 이 등록된 baseline 전부(16 개, 희소 baseline 포함)와 멀어진다 (UNGATED 측정)"**. 여기서 가장 가까운 baseline X\* 는 GMM prior(b\*) 자신이다.
+- 두 문장 모두 7.1 의 캐비엇과 §1 고유 사항 (6)(baseline 조정용 개발 채널이 테스트 풀에서 나옴)을 붙여서만 쓴다. 범위: 이 방·이 기지국·이 split·이 크기 한정; 동치 문구·일반화 문장은 쓰지 않는다.
+- **드리프트 검사**: `b* → V1` 을 `pair_baselines` 가 다시 낸 값(178:122 · 72:48 · 13:9, pooled 263:179, (i), R(−3 dB) 0.099 [0.050, 0.146], 판정점 합 0.117 [0.071, 0.164]) = 7.1 → 드리프트 없음.
+- R_X(−3 dB) 는 X 의 −3 dB BLER 이 0.9 를 넘는 **4 개**(R0-pilot@1 0.9848 · R3-bigamp 0.9383 · R4-llr 0.9555 · R4-scvamp 0.9148)에서 정의되지 않는다(포화 가드); 나머지 12 개는 정의된다. R4-llr 은 판정점 합의 R_X 도 정의되지 않는다(판정점 +9 / +12 / +15 dB 에서 V1 과 genie 의 실패가 모두 0). (i) 이지만 유의한 점이 2/3 인 행: b\* (+3 dB 13:9) · b\*-scalar (+3 dB 14:9) · bstar-pilot (+3 dB 18:8).
+
+### 7.4 원고 범례 11 곡선 — BLER@16 실패 수 / 2560 (`pairB_SPDMI.txt` 의 표; 전 SNR n = 2560)
+
+| 곡선 | −3 | 0 | +3 | +6 | +9 | +12 | +15 dB |
+|---|---|---|---|---|---|---|---|
+| Proposed (V1) | 829 | 149 | 19 | 4 | 0 | 0 | 0 |
+| Annealed Langevin (plug-in) = ALD-pilot | 1375 | 360 | 62 | 4 | 1 | 1 | 0 |
+| GMM prior = b\* | 885 | 173 | 23 | 7 | 0 | 0 | 0 |
+| Gaussian prior = R2-ours-G | 1924 | 838 | 191 | 31 | 12 | 0 | 0 |
+| Turbo LMMSE = R1-turbo | 2245 | 1324 | 424 | 90 | 23 | 4 | 0 |
+| BiG-AMP = R3-bigamp | 2402 | 1751 | 928 | 554 | 437 | 573 | 603 |
+| Pilot-only LMMSE = R0-pilot@1 | 2521 | 2052 | 922 | 302 | 81 | 23 | 3 |
+| SBL (in loop) | 1740 | 682 | 128 | 16 | 5 | 0 | 0 |
+| SBL (pilot-only) | 2009 | 862 | 180 | 20 | 3 | 1 | 0 |
+| OMP (pilot-only) | 2131 | 1217 | 315 | 80 | 24 | 3 | 0 |
+| Perfect CSI = genie | 321 | 40 | 4 | 0 | 0 | 0 | 0 |
+
+- 11 곡선에 없는 등록 arm (같은 순서): V1-pilot 1193 / 253 / 30 / 3 / 0 / 0 / 0; bstar-pilot 1212 / 269 / 29 / 5 / 0 / 0 / 0; ALDv-pilot 1357 / 329 / 48 / 4 / 1 / 1 / 0; M-ours-bstar-scalar 908 / 198 / 24 / 9 / 0 / 0 / 0; M-ours-gmm32 1256 / 327 / 46 / 7 / 1 / 0 / 0; R4-scvamp 2342 / 1593 / 680 / 250 / 73 / 30 / 7; R4-llr 2446 / 2155 / 2100 / 1572 / 774 / 336 / 111.
+- 그림: `conference/figures/F21dmi_col.{pdf,png}` (`paper_f21dmc.py DMI`, 기록 `records/paper_f21dmi.txt`): 실패 수 = 위 표(assert), 세 raw 의 Perfect CSI 오류 배열 동일(assert), y 축 (3e-05, 1.2) (0 실패 점이 있어서), 0 실패 점 18 개에서 곡선이 끊김(Proposed +9 · +12 · +15, Annealed Langevin +15, GMM prior +9 · +12 · +15, Gaussian prior +12 · +15, Turbo LMMSE +15, SBL (in loop) +12 · +15, SBL (pilot-only) +15, OMP (pilot-only) +15, Perfect CSI +6 · +9 · +12 · +15 dB). 그려진 baseline 9 개의 라벨 모두 (i). **점추정으로 제안 곡선 이하인 baseline 점이 있다**(기록 파일의 해당 줄 원문 그대로: Annealed Langevin (plug-in) at +6 dB (4 vs 4), +15 dB (0 vs 0); GMM prior at +9 dB (0 vs 0), +12 dB (0 vs 0), +15 dB (0 vs 0); Gaussian prior at +12 dB (0 vs 0), +15 dB (0 vs 0); Turbo LMMSE receiver at +15 dB (0 vs 0); SBL (in loop) at +12 dB (0 vs 0), +15 dB (0 vs 0); SBL (pilot-only) at +15 dB (0 vs 0); OMP (pilot-only) at +15 dB (0 vs 0)) — 한 점(+6 dB 4 대 4)을 빼면 모두 양쪽이 0 실패인 점이며, 등록된 판정은 판정점의 짝 검정이다.
+- **NMSE CDF** (보고 전용): `conference/figures/F33cdf_DMI_wide.{pdf,png}` (`paper_f33cdf.py DMI`, 기록 `records/paper_f33cdf_DMI.txt`): 패널 −3 · 0 · +3 · +6 dB, 곡선 10 개, 2560 시행 전부(비유한·비양수 0 건). −3 dB 의 중앙값 10 log10 NMSE [dB]: Proposed −14.39 · GMM prior −13.49 · Annealed Langevin (plug-in) −9.30 · Gaussian prior −6.33 (나머지는 기록 파일).
+
+### 7.5 baseline 보고 전용
+
+- `pair_PILDMI.txt`: P1 `V1-pilot → V1` 410:46 · 130:26 · 15:4, pooled 555:76 → (i) (3/3); P2 `bstar-pilot → V1-pilot` 142:123 (0.27) · 81:65 (0.21) · 11:12 (1), pooled 234:200 (p 0.11) → (iii); `bstar-pilot → b*` 366:39 · 118:22 · 13:7, pooled 497:68 → (i) (2/3); `V1-pilot → b*` 376:68 · 128:48 · 19:12, pooled 523:128 → (i) (b\* 가 2/3 에서 적게 실패).
+- `pair_ALDDMI.txt`: A1 `ALDv-pilot → V1` 587:59 · 209:29 · 34:5 → (i); A2 `ALD-pilot → V1` 608:62 · 239:28 · 47:4 → (i); A3 `ALDv-pilot → V1-pilot` 289:125 · 126:50 · 28:10, pooled 443:185 → (i) (3/3); `ALDv-pilot → b*` 547:75 · 207:51 · 36:11, pooled 790:137 → (i) (3/3); `bstar-pilot → ALDv-pilot` 146:291 · 86:146 · 16:35, pooled 248:472 → (ii) (bstar-pilot 이 3/3 에서 적게 실패); `ALD-pilot → ALDv-pilot` 66:48 (0.11) · 56:25 · 18:4, pooled 140:77 → (i) (2/3). 시험 ALD NMSE(추정 파일 평균) −8.10 / −11.70 / −14.64 / −17.40 / −19.90 / −22.20 / −24.40 dB.
+- 조정 표: 5-DMI (SBL ρ 16 · OMP ρ 16 — 둘 다 격자 끝 + 캐비엇; ALD c 0.01 · β 0.005).
+- raised trials: PIL 0 / 0, ALD 0, SP 0 / 0 / 0.
+
+### 7.6 §3 예측 채점 — DMI (적중 / 빗나감; 범위 밖은 채점 불가; 예측은 동결 b737fd55 때의 것 — DMI 의 실행은 SRB · SRP 의 결과를 본 뒤였다(5-DMI))
+
+1. 표 B (i) → 결과 (i) → **적중**.
+2. 판정점 −3 / 0 / +3 dB 이고 POWERED (DMI 확신 낮음) → **적중**.
+3. Perfect CSI 의 BLER 수준: 관측됨(채점 제외).
+4. 1차 ΔR 의 포화 가드 미발동 → **적중** (b\* BLER(−3 dB) 0.346, b\* 885 > genie 321).
+5. R(−3 dB) 의 90 % CI 하한 > 0 → **적중** (0.050).
+6. `R2-ours-G → b*` b\* 가 ≥ 2/3 점에서 적게 실패 → **적중** (3/3).
+7. V1 과 b\* 의 SNR@0.1 이 둘 다 숫자 → **적중** (−0.95 · −0.72 dB); 격차(b\* − V1) > 0 dB → **적중** (+0.23 dB [+0.08, +0.37]).
+8. GB′ median ≤ 0.90 → **적중** (0.8038).
+9. 학습(patience · epoch ∈ [300, 1500]) → **적중** (5-DMI: patience, epoch 1162).
+10. b\* = kron 계열, K ≥ 1024 → **빗나감** (5-DMI: b\* = full 1024).
+11. V0: −3 dB 가드 발동률 ≥ 0.5 이고 BLER ≥ 0.9 → **적중** (1.000 · 1.000). best 대 last V1 판정하지 못함(pooled p > 0.05) → **적중** (pooled 71:55, p 0.181).
+12. 대조군 `b* → b*-scalar` (iii) → **빗나감** (POWERED, b\* 가 2/3 에서 적게 실패 → (ii)).
+13. baseline — 세 문장: "(ii) 0 이고 (i) ≥ 12" → **적중** ((ii) 0, (i) 15 / 15); `pair_ALDDMI.txt` A3 = (i) → **적중**; −3 dB 실패 수 `SBL-pilot` < `R0-pilot@1` → **적중** (2009 < 2521).
+14. 랭크 층화: 관측됨(채점 제외). 15. 예측 없음.
+16. 빗나갈 경로: (e) b\* 가 full 512 → full 1024 한 번 + 캐비엇 — **발동**(5-DMI). (a)(b)(c)(d)(f) 미발동((i); R > 0; POWERED; 발산 없음; baseline 에 (ii) 없음).
+
+### 7.7 등록 대비 공개 사항 (수치·판정 불변)
+
+- **DMI 는 10-11 CDT 에 실행 전 철회됐다가 10-12 CDT 에 되돌려 실행했다**(5-DMI): 규칙·예측은 동결 v2 그대로이고, 실행은 SRB (§6) 와 SRP (PATH16e4) 의 결과·그림 보강·시드 강건성을 모두 본 뒤였다. §1 의 "SRB 먼저, 이어서 DMI" 순서는 지켜졌으나 그 사이에 다른 등록(PATH · FIGHS* · SEEDSROOM) 의 runner 가 돌았다.
+- **CPU 96 스레드**: 주 실행·baseline 모두 `taskset` 으로 NUMA 노드 1 · 3 에 묶어 돌렸다(사용자 지시; §1 은 "192 워커"). 수신기는 결정적이라 결과는 같고(수용 검사의 R5-genie 비트 동일·청크 계획 통과), 시간만 늘었다(태그당 46.6 · 49.9 분; SRB 는 28.3 · 24.8 분).
+- 동결(b737fd55) 뒤·DMI 의 BLER 전의 `conf/code` 변경(`git diff --stat b737fd55 4131a3b0 -- conf/code Demo`: 23 파일, Demo 0): 새 파일 `srp_build.py` · `path_strata.py` · `run_srp_*.sh` 5 개 · `run_fighsroom16e4.sh` · `run_fighspath16e4.sh` · `run_fighsx16e4.sh` · `run_seedsroom16e4.sh`; 고친 파일 `ald.py` · `analysis.py` · `common.py` · `dmimo.py` · `em_batched_check_nr.py` · `run_d2_sx.py` · `run_manifest.py` · `run_prior_eval.sh` · `sigma.py` · `testbed_dm.py` (prior SRP = PID 15 의 연결과 ALD 의 세트 `hisnr` · `hisnr4`), `run_srb_eval.sh` · `run_dmi_eval.sh` (인자). DMI 의 풀·학습 집합은 그대로다(`dmimo.py selfcheck 8 DMI` 의 train sha = §0 의 3380177f4c38cf57).
+- 주 실행과 baseline 실행은 각각 한 번 돌았고 재실행·중단·재개가 없다(`logs/run_D2_DMIB16e4{,last}.log` 각 448 done, exists 줄 없음; `run_prior_eval_DMIB16e4.log` 와 `run_dmi_base.log` 의 시작 줄 하나씩). 이 로그들은 git 밖이다.
+- 큐·적합의 경위(10-11 큐에서 뺌 → 10-12 다시 21 작업, full 1024 추가 적합, 대기 명령 오류로 71 분 공백)와 ALD 조정이 최종 b\* 확정 전에 돈 것은 5-DMI 에 적은 그대로다.
+- baseline 입력 파일 세 개는 5-DMI 커밋(4131a3b0)에 sha 만 적혀 있었고 git 추적은 29cf411d 에서 시작했다(내용은 5-DMI 의 sha 와 같음 — `run_dmi_base.sh` 가 sha 를 검사).
+- 보고 전용 층화 둘(누수·랭크)은 baseline runner 가 도는 동안 CPU 8 스레드(NUMA 노드 0)로 돌렸다(주 실행의 raw 만 읽는다).
+- **그림 보강**: F21dmi_col 은 +9 dB 부터 제안 곡선이 끊긴다(0 실패). SRB · SRP 와 같은 n = 20480 보강(보고 전용)은 별도 문서로 등록한다 — 이 문서의 판정·라벨·7.4 의 표와 그림 `F21dmi_col` 은 그대로 남는다.
