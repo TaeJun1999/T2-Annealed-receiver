@@ -1,0 +1,20 @@
+F34seed_wide -- seed repeats of the proposed prior on the two Sionna RT room pools (NEXT_EXPERIMENTS_SEEDSROOM16e4): BLER@16, failures / trials per SNR -3 +0 +3 +6 +9 +12 +15 dB, every point n = 2560 (test trials 0..2559; the same trials for every seed).  (a) prior SRB, (b) prior SRP.  Seed 1 = the evaluated checkpoint a1 of ROOM16e4 / PATH16e4; seeds 2, 3 = attempts 2, 3 of the same recipe (only initialisation and batch order differ).  Produced by conference/figures/paper_f34seed.py; no number transcribed.  The registered seed labels are in the registration §6.
+
+Caveat: in (b) the GMM prior is the seed initialisation selected when EM collapsed (NEXT_EXPERIMENTS_PATH16e4 §5 / 6.1), not a well-fitted GMM.
+
+Counts:
+  SRB:
+    Proposed, seed 1 (raw_SRBB16e4): 704/2560 126/2560 17/2560 3/2560 4/2560 0/2560 0/2560
+    Proposed, seed 2 (raw_SRBB16e4s2): 711/2560 121/2560 19/2560 3/2560 4/2560 0/2560 0/2560
+    Proposed, seed 3 (raw_SRBB16e4s3): 726/2560 117/2560 25/2560 4/2560 2/2560 0/2560 0/2560
+    GMM prior:            827/2560 153/2560 40/2560 6/2560 5/2560 1/2560 1/2560
+    Perfect CSI:          299/2560 36/2560 9/2560 1/2560 0/2560 0/2560 0/2560
+  SRP:
+    Proposed, seed 1 (raw_SRPB16e4): 812/2560 204/2560 24/2560 4/2560 0/2560 0/2560 0/2560
+    Proposed, seed 2 (raw_SRPB16e4s2): 829/2560 209/2560 27/2560 6/2560 0/2560 0/2560 0/2560
+    Proposed, seed 3 (raw_SRPB16e4s3): 820/2560 191/2560 26/2560 2/2560 0/2560 0/2560 0/2560
+    GMM prior:            1356/2560 498/2560 133/2560 29/2560 3/2560 2/2560 0/2560
+    Perfect CSI:          428/2560 81/2560 7/2560 1/2560 0/2560 0/2560 0/2560
+
+Asserts passed: GMM prior and Perfect CSI counts identical in the three raws of each pool; -3/0/+3 dB counts = recovery_<TAG>.txt; drawn = counted.
+Layout: 7.16 x 2.9 in, two panels sharing x and y; x range (-4, 16); y log (3e-05, 1.2); 95% Wilson bars on seed 1, GMM prior, Perfect CSI; a zero-failure point breaks its curve (Perfect CSI: arrow from the 95% Wilson upper bound of 0/2560); every artist inside the canvas (tight bbox [in] [0.026, 0.041, 7.11, 2.828]); smallest visible text 7 pt; PNG 300 dpi.
