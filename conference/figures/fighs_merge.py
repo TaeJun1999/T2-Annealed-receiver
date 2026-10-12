@@ -79,24 +79,30 @@ def _load(tag):
     return _raws[tag]
 
 
-def merge(snrs, k, n, orig, cell, prior, arm):
+def merge(snrs, k, n, orig, cell, prior, arm, pre="FH", hs=HS, n_hs=N_HS):
     """One drawn curve, BLER@16: failures k / trials n per SNR of `snrs` from raw_<orig> -> (k, n, record line) with the +6/+9/+12/+15 dB
+    (FIGHSX16e4, pre="FX": the SNRs `hs` only, n = `n_hs`, from raw_FX<orig> and its own count table -- applied on top of the FH merge)
     entries from raw_<hs_tag(orig, arm)> (all four or none); missing data -> SystemExit, or FIGHS_ALLOW_MISSING=1 -> unchanged + WARNING;
     a tag declared in FIGHS_N2560 -> unchanged at every SNR, stated (§1 S-4)."""
     snrs, k = [float(s) for s in snrs], np.array(k, dtype=int)
     n = np.array(np.broadcast_to(n, k.shape), dtype=int)
-    tag = hs_tag(orig, arm)
+    tag = hs_tag(orig, arm) if pre == "FH" else pre + orig
     if tag in N2560:
         if _table(tag):
             raise SystemExit(f"FIGHS16e4: {tag} is in FIGHS_N2560 but was accepted (its count table exists); the list is only for "
                              "tags the run left invalid / unrun (§1)")
-        print(f"NOTE FIGHS16e4: curve {arm} ({cell} {prior}) keeps raw_{orig} (n = 2560) at every SNR: {tag} declared invalid / "
-              "unrun (FIGHS_N2560) -- the caption must say so (§1)", file=sys.stderr)
-        src = f"raw_{orig} at every SNR -- this curve is n = 2560 over the whole range: {tag} invalid / unrun (§1)"
+        if pre != "FH":                                   # FIGHSX16e4 §1: the points handed in (the FH merge's) stay as they are
+            print(f"NOTE FIGHSX16e4: curve {arm} ({cell} {prior}) keeps the points of the previous merge at {'/'.join(f'{s:+.0f}' for s in hs)} dB: "
+                  f"{tag} declared invalid / unrun (FIGHS_N2560) -- the caption must say so (§1)", file=sys.stderr)
+            src = f"unchanged, {tag} invalid / unrun (FIGHSX16e4 §1)"
+        else:
+            print(f"NOTE FIGHS16e4: curve {arm} ({cell} {prior}) keeps raw_{orig} (n = 2560) at every SNR: {tag} declared invalid / "
+                  "unrun (FIGHS_N2560) -- the caption must say so (§1)", file=sys.stderr)
+            src = f"raw_{orig} at every SNR -- this curve is n = 2560 over the whole range: {tag} invalid / unrun (§1)"
     else:
         got, why = _load(tag)
         new = []
-        for s in HS if got else ():
+        for s in hs if got else ():
             d, tab = got
             e = d.get((cell, prior, s), {}).get(arm, {}).get("blk_err")
             if e is None:
@@ -104,13 +110,13 @@ def merge(snrs, k, n, orig, cell, prior, arm):
                 break
             e = np.asarray(e, float)[:, -1]
             kk, nn = int(np.where(np.isfinite(e), e, 1.0).sum()), len(e)
-            if nn != N_HS:
-                why = f"raw_{tag} {arm} {s:+.0f} dB has n = {nn}, not {N_HS} (run incomplete?)"
+            if nn != n_hs:
+                why = f"raw_{tag} {arm} {s:+.0f} dB has n = {nn}, not {n_hs} (run incomplete?)"
                 break
             assert tab.get((s, arm)) == (kk, nn), (tag, arm, s, (kk, nn), tab.get((s, arm)))   # §1: raw == count table
             new.append((snrs.index(s), kk, nn))
         if why:
-            msg = f"FIGHS16e4: curve {arm} ({cell} {prior}, original raw_{orig}) takes +6..+15 dB from raw_{tag}, but {why}"
+            msg = f"FIGHS16e4: curve {arm} ({cell} {prior}, original raw_{orig}) takes {'/'.join(f'{s:+.0f}' for s in hs)} dB from raw_{tag}, but {why}"
             if not ALLOW:
                 raise SystemExit(msg + ".  Regenerate after the FIGHS16e4 run has finished and been accepted (a tag the run left "
                                  "invalid / unrun: FIGHS_N2560=<TAG>, §1; FIGHS_ALLOW_MISSING=1 FIG_OUTDIR=<scratch dir> renders a "
@@ -135,7 +141,7 @@ def block(lines):
 
 def zero_arrows(ax, xs, ns, color, w=0.3):
     """Zero-failure points (0/n blocks) cannot sit on a log axis: a short cap at the 95% Wilson upper bound z^2/(n + z^2) of the
-    point's own n (2560 -> 1.50e-3, 20480 -> 1.87e-4) and a downward arrow (the F17 convention), never a made-up value; the curve
+    point's own n (2560 -> 1.50e-3, 20480 -> 1.87e-4, 81920 -> 4.69e-5) and a downward arrow (the F17 convention), never a made-up value; the curve
     itself breaks there (NaN)."""
     for s, n in zip(xs, np.broadcast_to(ns, np.shape(xs))):
         hi = 1.96 ** 2 / (n + 1.96 ** 2)

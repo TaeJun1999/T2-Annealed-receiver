@@ -47,10 +47,22 @@ SETS = {"SRT": ("SRTB16e4", "SPSRT", "ALDSRT", "SRT", "F21srt",
                 "reflections, one fixed BS, one UE on a lawn-mower route, split by time with no guard band", "NEXT_EXPERIMENTS_PATH16e4 §1")}
 ROOM = ("SRB", "DMI", "SRP")
 HSREG = {"SRB": "FIGHSROOM16e4", "SRP": "FIGHSPATH16e4"}        # the n = 20480 figure supplements (REPORT-ONLY registrations)
+HSX = False                                                     # `paper_f21dmc.py <PRIOR> hsx` (NEXT_EXPERIMENTS_FIGHSX16e4 §1): as `hs`, and the
+#                                                               +12/+15 dB points are the n = 81920 raws raw_FX<tag>, figure <NAME>hsx_col
 HS = False                                                      # `paper_f21dmc.py <PRIOR> hs` (NEXT_EXPERIMENTS_<HSREG[PRIOR]> §1): the +6..+15 dB
 #                                                               points are the n = 20480 raws raw_FH<tag> (fighs_merge.merge), figure <NAME>hs_col                                         # y by the rule of paper_f16deep (a): (Q.YLO, 1.2) while no zero-failure point and
 #                                                               nothing below Q.YLO, else (Q.YLO_RULE, 1.2); zero-failure points as paper_f16deep.draw
 YLADDER = (0.5, 0.3, 0.2, 0.1, 0.05, 0.02, 0.01, 0.005, 0.002, 0.001)
+
+
+def merged(k, o, a):
+    """curve a drawn from raw_<o>: (k, n, record line) with +6..+15 dB from the n = 20480 raw; HSX: +12/+15 dB from the n = 81920 raw."""
+    k, n, line = M.merge(SNRS, k, N0, o, CELL, PRIOR, a)
+    if HSX:
+        s1 = re.search(r"   \((.*?)\)(   rising: .*)?$", line)[1]                      # the source text of the FH pass, whatever it was
+        k, n, line = M.merge(SNRS, k, n, o, CELL, PRIOR, a, pre="FX", hs=M.HS[2:], n_hs=4 * M.N_HS)
+        line = line.replace("   (", f"   (+6..+15 dB: {s1}; then +12/+15 dB: ", 1)
+    return k, n, line
 
 
 def main():
@@ -76,7 +88,7 @@ def main():
         k, n = np.array([int(x.sum()) for x in e]), np.array([len(x) for x in e])
         assert set(n.tolist()) == {N0} and k.tolist() == tab[a], (a, k.tolist(), tab[a])
         if HS:                                                 # +6..+15 dB from the n = 20480 raw (asserted against its count table)
-            k, n, line = M.merge(SNRS, k, N0, orig, CELL, PRIOR, a); fh.append(line)
+            k, n, line = merged(k, orig, a); fh.append(line)
         p = D.draw(ax, BY[a], SNRS, k, n, {V1: 5, D.BS: 4, GE: 3}.get(a, 2.9 - 0.05 * SHOW.index(a)))
         assert (p[np.isfinite(p)] >= YLIM[0]).all() and (p[np.isfinite(p)] <= YLIM[1]).all(), (a, p)   # a zero-failure point is NaN (the curve breaks there)
         cur[a] = k
@@ -108,7 +120,9 @@ def main():
          f"{NAME}_col  {W} x {H} in, one panel, legend above; the {len(SHOW)} curves of paper_f16deep.SHOW with its shapes and sizes; "
          "95% Wilson bars on " + ", ".join(BY[a].label for a in D.BARS) + (f".  n = {N0} (test trials 0..2559) at EVERY SNR for every "
          f"curve (no n = 20480 raw on {PRIOR}; {REG})." if not HS else f".  n = {N0} (test trials 0..2559) at -3/0/+3 dB and n = 20480 (new "
-         f"trials 10000..30479) at +6..+15 dB for every curve (NEXT_EXPERIMENTS_{HSREG[PRIOR]} §1; block below)."), "",
+         + (f"trials 10000..30479) at +6..+15 dB for every curve (NEXT_EXPERIMENTS_{HSREG[PRIOR]} §1; block below)." if not HSX else
+          f"trials 10000..30479) at +6/+9 dB and n = 81920 (new trials 10000..91919) at +12/+15 dB for every curve (NEXT_EXPERIMENTS_{HSREG[PRIOR]} §1 and "
+          "NEXT_EXPERIMENTS_FIGHSX16e4 §1; block below).")), "",
          "Curves (internal arm -> figure name): " + "; ".join(f"{a} -> {BY[a].label}" for a in SHOW) + ".", "", "Counts:"] + txt
         + ["", "Drawn baseline curves (Perfect CSI excluded) at or below the proposed curve (point estimates; failures vs the proposed curve's) -- reported only, nothing is "
            "tested here; the registered paired tests are in conf/results/review_next/pairB_" + SP + ".txt: " + ("; ".join(below) or "none") + ".",
@@ -118,14 +132,20 @@ def main():
         + (["Zero-failure points (the curve breaks there; Perfect CSI: fighs_merge.zero_arrows): "
             + "; ".join(f"{BY[a].label} {s:+.0f} dB" for a in SHOW for s, x in zip(SNRS, cur[a]) if x == 0) + "."] if any((cur[a] == 0).any() for a in SHOW) else [])
         + [
-           "", f"Asserts passed: counts = pairB_{SP}.txt 'BLER@16 failures' table (11 arms x 7 SNRs); Perfect CSI error arrays of raw_{ALD} "
+           "", "Asserts passed: counts " + ("before the merge (n = 2560, the registered judgement) " if HS else "") + f"= pairB_{SP}.txt 'BLER@16 failures' table (11 arms x 7 SNRs)"
+           + ("; the Counts block above holds the merged values" if HS else "") + f"; Perfect CSI error arrays of raw_{ALD} "
            f"and raw_{SP} = raw_{TAG}'s; drawn = counted; the panel holds exactly the curves of the legend; no point outside the y range.",
            f"Layout: x ticks at the SNR points, x range {XLIM}; y log {YLIM}, ticks {YTICKS}; legend band {BAND} in above the axes, 2 columns "
            f"(inside its band: asserted, [in] {np.round(lb, 3).tolist()}); every artist inside the canvas (tight bbox [in] "
            f"{np.round(bb, 3).tolist()}); smallest visible text {small:g} pt; saved at figsize, PNG 300 dpi."]
-        + (["", f"{HSREG[PRIOR]} merge (REPORT-ONLY, NEXT_EXPERIMENTS_{HSREG[PRIOR]} §1): -3/0/+3 dB = the original test trials 0..2559 (n = 2560, the "
-            "registered judgement); +6/+9/+12/+15 dB = new trials 10000..30479 (n = 20480 per SNR; one point = one raw, never pooled).  "
-            "'rising' = a cell where BLER rises with SNR, with its one-sided Fisher p (reported; no smoothing, no dropped point):"] + fh if HS else [])))
+        + (["", (f"{HSREG[PRIOR]} merge (REPORT-ONLY, NEXT_EXPERIMENTS_{HSREG[PRIOR]} §1)" if not HSX else
+                 f"{HSREG[PRIOR]} + FIGHSX16e4 merge (REPORT-ONLY, NEXT_EXPERIMENTS_{HSREG[PRIOR]} §1 and NEXT_EXPERIMENTS_FIGHSX16e4 §1)")
+            + ": -3/0/+3 dB = the original test trials 0..2559 (n = 2560, the "
+            "registered judgement); " + ("+6/+9/+12/+15 dB = new trials 10000..30479 (n = 20480 per SNR; one point = one raw, never pooled).  " if not HSX else
+            "+6/+9 dB = new trials 10000..30479 (n = 20480 per SNR); +12/+15 dB = new trials 10000..91919 (n = 81920 per SNR, FIGHSX16e4: a separate raw whose first "
+            "20480 trials are the same trials as the n = 20480 raw's -- Annealed Langevin: the same trials with a new posterior sample; the unseen trials "
+            "30480..91919 alone are the '# split' lines of results/review_next/fighs_FX<tag>.txt; one point = one raw, never pooled).  ")
+            + "'rising' = a cell where BLER rises with SNR, with its one-sided Fisher p (reported; no smoothing, no dropped point):"] + fh if HS else [])))
 
 
 if __name__ == "__main__":
@@ -138,16 +158,21 @@ if __name__ == "__main__":
             k = np.array([np.asarray(d[o][(CELL, PRIOR, s)][a]["blk_err"], float)[:, -1].sum() for s in SNRS])
             lows.append((D.wilson(k, np.full(len(k), N0))[0] if a in D.BARS else k / N0).min())
         if sys.argv[1] in ROOM:
-            HS = len(sys.argv) > 2 and sys.argv[2] == "hs"
+            HSX = len(sys.argv) > 2 and sys.argv[2] == "hsx"
+            HS = HSX or (len(sys.argv) > 2 and sys.argv[2] == "hs")
             KN = {}
             for a in SHOW:                                         # the drawn counts (merged when HS) decide the y range
                 o = {"SPB16e4k": SP, "ALDB16e4k": ALD}.get(BY[a].orig, TAG)
                 k = np.array([int(np.asarray(d[o][(CELL, PRIOR, s)][a]["blk_err"], float)[:, -1].sum()) for s in SNRS]); n = np.full(len(k), N0)
-                KN[a] = M.merge(SNRS, k, N0, o, CELL, PRIOR, a)[:2] if HS else (k, n)
+                KN[a] = merged(k, o, a)[:2] if HS else (k, n)
             zero = any((k == 0).any() for k, n in KN.values())
             pos = [float(x) for a, (k, n) in KN.items() for x in ((D.wilson(k, n)[0] if a in D.BARS else k / n)[k > 0])]
-            NAME = NAME + ("hs" if HS else "")
+            NAME = NAME + ("hsx" if HSX else "hs" if HS else "")
             YLIM, YTICKS = ((Q.YLO, 1.2) if not zero and min(pos) > Q.YLO else (Q.YLO_RULE, 1.2)), None
+            if HSX and YLIM[0] == Q.YLO_RULE and min(             # FIGHSX16e4 §1: at n = 81920 one failure is 1.22e-5 and the Perfect CSI
+                    [float(x) for k, n in KN.values() for x in (k / n)[k > 0]]         # zero-failure arrow ends at 2.76e-5: both below 3e-5
+                    + [1.96 ** 2 / (x + 1.96 ** 2) / 1.7 for x in KN[GE][1][KN[GE][0] == 0]]) < Q.YLO_RULE:
+                YLIM = (Q.YLO_RULE / 4, 1.2)                       # the FIGHS16e4 §1 limit scaled from n = 20480 to n = 81920: 7.5e-6
             main()
             sys.exit(0)
         YLIM = (next(y for y in YLADDER if y < min(lows)), 1.05)

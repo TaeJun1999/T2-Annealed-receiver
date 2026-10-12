@@ -9,17 +9,20 @@ Every number is read from a record, never typed:
   results/review_next/FHC*_control.txt, *_aldcontrol.txt
   conference/figures/records/paper_f21srb{,hs}.txt   original (n = 2560) and merged counts, rising cells, zero-failure points
 It does NOT read the new raws (raw_FH*): their counts come from the count tables (the figure script asserts raw == table).
-Usage (cwd = ~/t2/conf):  python -B results/review_next/prereg_audit_2026-10-11/s6_fighsroom_gen.py > <draft>.md
+Usage (cwd = ~/t2/conf):  python -B results/review_next/prereg_audit_2026-10-11/s6_fighsroom_gen.py [SRB|SRP] > <draft>.md
+SRP = NEXT_EXPERIMENTS_FIGHSPATH16e4 (logs/run_fighspath16e4.log, tags FH*SRP*, records paper_f21srp{,hs}.txt, its own §3 predictions).
 """
-import glob, json, re
+import glob, json, re, sys
 
 RV, REC = "results/review_next", "../conference/figures/records"
-TAGS = {"FHSRBB16e4": "SRBB16e4", "FHSPSRB": "SPSRB", "FHALDSRB": "ALDSRB"}
+PR = sys.argv[1] if len(sys.argv) > 1 else "SRB"
+RUN = {"SRB": "fighsroom", "SRP": "fighspath"}[PR]
+TAGS = {f"FH{PR}B16e4": f"{PR}B16e4", f"FHSP{PR}": f"SP{PR}", f"FHALD{PR}": f"ALD{PR}"}
 HS = (6, 9, 12, 15)
 ORDER = ["M-ours-dscore-C-V1", "ALD-pilot", "M-ours-bstar", "R2-ours-G", "R1-turbo", "R3-bigamp", "R0-pilot@1", "SBL-loop", "SBL-pilot",
          "OMP-pilot", "R5-genie"]
-SRC = {a: "FHSRBB16e4" for a in ORDER}
-SRC.update({"ALD-pilot": "FHALDSRB", "SBL-loop": "FHSPSRB", "SBL-pilot": "FHSPSRB", "OMP-pilot": "FHSPSRB"})
+SRC = {a: f"FH{PR}B16e4" for a in ORDER}
+SRC.update({"ALD-pilot": f"FHALD{PR}", "SBL-loop": f"FHSP{PR}", "SBL-pilot": f"FHSP{PR}", "OMP-pilot": f"FHSP{PR}"})
 out = []
 def P(*a): out.append(" ".join(str(x) for x in a))
 
@@ -47,7 +50,7 @@ def counts(path):
     return c, s
 
 
-LOG = [l for l in open("logs/run_fighsroom16e4.log", encoding="utf-8", errors="replace").read().split("\n") if l.startswith("[fighs ")]
+LOG = [l for l in open(f"logs/run_{RUN}16e4.log", encoding="utf-8", errors="replace").read().split("\n") if l.startswith("[fighs ")]
 def when(pat):
     h = [re.match(r"\[fighs (\d\d-\d\d \d\d:\d\d) CDT\]", l)[1] for l in LOG if re.search(pat, l)]
     assert len(h) == 1, (pat, h)
@@ -63,15 +66,15 @@ bad = [l for l in LOG if re.search(r"ABORT|SKIP|INVALID|failed", l)]
 T, HEAD = {}, {}
 for t in TAGS:
     T[t], HEAD[t] = table(t)
-O, _ = counts(f"{REC}/paper_f21srb.txt")
-Mg, HSREC = counts(f"{REC}/paper_f21srbhs.txt")
+O, _ = counts(f"{REC}/paper_f21{PR.lower()}.txt")
+Mg, HSREC = counts(f"{REC}/paper_f21{PR.lower()}hs.txt")
 for a in ORDER:                                    # merged record == count table at +6..+15, == original record at -3/0/+3
     assert Mg[a][:3] == O[a][:3], a
     for i, s in enumerate(HS):
         assert Mg[a][3 + i] == T[SRC[a]][s, a][:2], (a, s, Mg[a][3 + i], T[SRC[a]][s, a])
 
 P(f"### 6.1 실행·운영 기록 (생성기 `prereg_audit_2026-10-11/s6_fighsroom_gen.py`; 수치는 모두 기록 파일에서 읽음)\n")
-P(f"`bash code/run_fighsroom16e4.sh` **한 번**, tmux `fighsroom`, {when('start .git')} CDT 시작(git {GIT} = 실행 커밋; 시작 줄 하나, 재개 없음). "
+P(f"`bash code/run_{RUN}16e4.sh` **한 번**, tmux `{RUN}`, {when('start .git')} CDT 시작(git {GIT} = 실행 커밋; 시작 줄 하나, 재개 없음). "
   f"단계 C (관측된 시험 청크 0 의 대조) {when('phase C done')} CDT: {[l for l in LOG if 'phase C done' in l][0].split('phase C done: ')[1]}. "
   f"`{done[0].split('] ')[1]}` {when('FIGHS_DONE')} CDT. ABORT · SKIP · INVALID 줄: {len(bad)} 개.\n")
 P("| 행 | 시작 (CDT) | runner | 작업 (done / exists) | 수용 (CDT) | 수용 판정 | manifest git · config_hash | 대조 |")
@@ -118,7 +121,7 @@ P(f"\nPerfect CSI (R5-genie) 의 실패 수는 세 raw 에서 같다: " + " · "
 zero = [f"{a} {s:+d} dB" for a in ORDER for s in HS if T[SRC[a]][s, a][0] == 0]
 P(f"\n0 실패 점 (n = 20480): {', '.join(zero) if zero else '없음'}.")
 rising = [l.strip() for l in HSREC.split("\n") if "rising:" in l]
-P(f"\n그림 기록 `records/paper_f21srbhs.txt` 의 '오르는 칸' (SNR 이 오를 때 BLER 이 오르는 칸, 한쪽 Fisher p; 보고만): {len(rising)} 줄.")
+P(f"\n그림 기록 `records/paper_f21{PR.lower()}hs.txt` 의 '오르는 칸' (SNR 이 오를 때 BLER 이 오르는 칸, 한쪽 Fisher p; 보고만): {len(rising)} 줄.")
 for l in rising:
     P(f"- `{l}`")
 
@@ -129,10 +132,18 @@ def rise_p(a):
     return [float(p) for l in rising if l.split("@16")[0].strip() == a for p in re.findall(r"p=([\d.e+-]+)", l.split("rising:")[1])]
 NONE = "없음"
 r2 = {a: rise_p(a) for a in ("M-ours-dscore-C-V1", "M-ours-bstar", "R5-genie")}
-P(f"1. V1 의 실패 수 +6 dB > +9 dB → **{'적중' if V[0] > V[1] else '빗나감'}** ({V[0]} 대 {V[1]}).")
-P(f"2. V1 · b\\* · Perfect CSI 에 Fisher p < 0.05 인 오르는 칸 없음 → **{'적중' if all(p >= 0.05 for v in r2.values() for p in v) else '빗나감'}** "
-  f"(오르는 칸의 p: {', '.join(f'{a} {v if v else NONE}' for a, v in r2.items())}).")
-P(f"3. +6 · +9 dB 에서 실패 수 V1 ≤ b\\* → **{'적중' if V[0] <= B[0] and V[1] <= B[1] else '빗나감'}** ({V[0]} 대 {B[0]}, {V[1]} 대 {B[1]}).")
-P(f"4. +15 dB 에서 V1 실패 수 ≤ 5 / 20480 → **{'적중' if V[3] <= 5 else '빗나감'}** ({V[3]}).")
-P(f"5. `FIGHS_DONE ok=3 fail=0` → **{'적중' if (OKN, FAILN) == (3, 0) else '빗나감'}** (ok={OKN} fail={FAILN}).")
+hit = lambda c: "적중" if c else "빗나감"
+p2 = f"(오르는 칸의 p: {', '.join(f'{a} {v if v else NONE}' for a, v in r2.items())})"
+if PR == "SRB":
+    P(f"1. V1 의 실패 수 +6 dB > +9 dB → **{hit(V[0] > V[1])}** ({V[0]} 대 {V[1]}).")
+    P(f"2. V1 · b\\* · Perfect CSI 에 Fisher p < 0.05 인 오르는 칸 없음 → **{hit(all(p >= 0.05 for v in r2.values() for p in v))}** {p2}.")
+    P(f"3. +6 · +9 dB 에서 실패 수 V1 ≤ b\\* → **{hit(V[0] <= B[0] and V[1] <= B[1])}** ({V[0]} 대 {B[0]}, {V[1]} 대 {B[1]}).")
+    P(f"4. +15 dB 에서 V1 실패 수 ≤ 5 / 20480 → **{hit(V[3] <= 5)}** ({V[3]}).")
+else:
+    P(f"1. V1 의 실패 수가 +6 ≥ +9 ≥ +12 ≥ +15 dB 로 줄기만 한다 → **{hit(V[0] >= V[1] >= V[2] >= V[3])}** ({' / '.join(map(str, V))}).")
+    P(f"2. V1 · b\\* · Perfect CSI 에 Fisher p < 0.05 인 오르는 칸 없음 → **{hit(all(p >= 0.05 for v in r2.values() for p in v))}** {p2}.")
+    P(f"3. +6 · +9 dB 에서 실패 수 V1 ≤ b\\* → **{hit(V[0] <= B[0] and V[1] <= B[1])}** ({V[0]} 대 {B[0]}, {V[1]} 대 {B[1]}).")
+    P(f"4a. V1 의 +9 dB 실패 수 ≥ 1 / 20480 → **{hit(V[1] >= 1)}** ({V[1]}).")
+    P(f"4b. V1 의 +15 dB 실패 수 ≤ 5 / 20480 → **{hit(V[3] <= 5)}** ({V[3]}).")
+P(f"5. `FIGHS_DONE ok=3 fail=0` → **{hit((OKN, FAILN) == (3, 0))}** (ok={OKN} fail={FAILN}).")
 print("\n".join(out))

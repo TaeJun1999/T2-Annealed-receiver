@@ -55,3 +55,7 @@ None.
 - §0 statistics (pool shas, TDMh 0.004, screening values) — frozen before the run, outside this audit (the §6.1 appendix "0.004" was checked against §0's own text only).
 - The "작성자는 … 읽지 않았다 / 보지 않았다" statements and the tmux session names (not checkable from files).
 - Whether the 14:50 CDT re-selection was produced by the `sel` snippet of `run_srb_post_select.sh` (S2) — only its outcome was verified.
+
+## Erratum (added 2026-10-11 18:58 CDT by the main session, Opus 5.5; found by `audit_FIGHSROOM16e4.md` S1)
+
+S1 above quotes the full-family gains per doubling as "+10.1, +11.0, +10.1, +7.8 nat". From the §5 grid (ll_val 30.445 / 41.698 / 55.912 / 68.085 / 79.119 / 89.214 / 97.009) they are +11.3, +14.2, +12.2, +11.0, +10.1, +7.8 nat (16 → 32 → … → 1024). The finding itself (grid edge, ll_val still rising by +7.795 nat) is unaffected.
