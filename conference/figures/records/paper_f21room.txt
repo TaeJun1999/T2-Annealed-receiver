@@ -1,0 +1,66 @@
+F21room_wide -- the two Sionna RT room pools (Sionna RT 2.1, built-in scene box with its metal walls as shipped at 28 GHz, LoS + first-order reflections, ONE fixed BS; cell C2 = 8x4, N_train = 1.6e5) with the one legend of F16deep_wide: BLER@16 (Pilot-only LMMSE: after the first iteration), failures / trials per SNR -3 +0 +3 +6 +9 +12 +15 dB.  (a) prior SRB: random UE positions, 1 m block split; (b) prior SRP: one UE on a lawn-mower route, split by time with no guard band.  Produced by conference/figures/paper_f21room.py from the same raws and the same merge as paper_f21dmc.py <PRIOR> hsx; no number transcribed.  REPORT-ONLY.
+
+F21room_wide  7.16 x 3.25 in, two panels sharing x and y, legend above; the 11 curves of paper_f16deep.SHOW; 95% Wilson bars on Proposed (diffusion prior), GMM prior, Gaussian prior, Perfect CSI.  n = 2560 (test trials 0..2559) at -3/0/+3 dB, n = 20480 (new trials 10000..30479) at +6/+9 dB, n = 81920 (new trials 10000..91919) at +12/+15 dB for every curve (NEXT_EXPERIMENTS_FIGHSROOM16e4 / _FIGHSPATH16e4 / _FIGHSX16e4; the n = 81920 point contains the 20480 trials of the earlier n = 20480 point -- not independent of it).
+
+Caveat (NEXT_EXPERIMENTS_PATH16e4 §5 / 6.1): in panel (b) the 'GMM prior' curve is the b* the registered rule selected after EM collapsed -- the seed initialisation, not a well-fitted GMM; the caption must say so.  Panel (a)'s GMM prior is the converged full-covariance K = 1024 fit.
+
+Curves (internal arm -> figure name): M-ours-dscore-C-V1 -> Proposed (diffusion prior); ALD-pilot -> Annealed Langevin (plug-in); M-ours-bstar -> GMM prior; R2-ours-G -> Gaussian prior; R1-turbo -> Turbo LMMSE receiver; R3-bigamp -> BiG-AMP; R0-pilot@1 -> Pilot-only LMMSE; SBL-loop -> SBL (in loop); SBL-pilot -> SBL (pilot-only); OMP-pilot -> OMP (pilot-only); R5-genie -> Perfect CSI.
+
+Counts:
+  (a) Sionna RT room, random UE positions (prior SRB):
+    M-ours-dscore-C-V1   704/2560 126/2560 17/2560 45/20480 10/20480 12/81920 11/81920
+    ALD-pilot            1316/2560 287/2560 55/2560 81/20480 25/20480 40/81920 31/81920
+    M-ours-bstar         827/2560 153/2560 40/2560 90/20480 23/20480 32/81920 15/81920
+    R2-ours-G            1685/2560 670/2560 178/2560 438/20480 135/20480 144/81920 65/81920
+    R1-turbo             2089/2560 1198/2560 406/2560 917/20480 287/20480 319/81920 127/81920
+    R3-bigamp            2252/2560 1369/2560 634/2560 2861/20480 2507/20480 11377/81920 10284/81920
+    R0-pilot@1           2420/2560 1807/2560 860/2560 2630/20480 978/20480 1558/81920 676/81920
+    SBL-loop             1423/2560 510/2560 126/2560 261/20480 73/20480 90/81920 43/81920
+    SBL-pilot            1774/2560 650/2560 137/2560 306/20480 85/20480 103/81920 43/81920
+    OMP-pilot            1924/2560 888/2560 288/2560 607/20480 217/20480 304/81920 178/81920
+    R5-genie             299/2560 36/2560 9/2560 17/20480 5/20480 5/81920 4/81920
+  (b) Sionna RT room, moving UE (prior SRP):
+    M-ours-dscore-C-V1   812/2560 204/2560 24/2560 45/20480 7/20480 4/81920 1/81920
+    ALD-pilot            1315/2560 360/2560 64/2560 110/20480 19/20480 11/81920 4/81920
+    M-ours-bstar         1356/2560 498/2560 133/2560 202/20480 33/20480 14/81920 6/81920
+    R2-ours-G            1491/2560 544/2560 139/2560 215/20480 35/20480 16/81920 6/81920
+    R1-turbo             1792/2560 930/2560 283/2560 521/20480 78/20480 44/81920 11/81920
+    R3-bigamp            2311/2560 1583/2560 763/2560 3386/20480 2585/20480 11333/81920 10874/81920
+    R0-pilot@1           2351/2560 1755/2560 882/2560 2433/20480 639/20480 656/81920 196/81920
+    SBL-loop             1621/2560 623/2560 154/2560 229/20480 40/20480 14/81920 8/81920
+    SBL-pilot            1857/2560 799/2560 224/2560 298/20480 39/20480 20/81920 8/81920
+    OMP-pilot            2020/2560 940/2560 271/2560 720/20480 138/20480 124/81920 38/81920
+    R5-genie             428/2560 81/2560 7/2560 14/20480 1/20480 1/81920 0/81920
+
+Merge sources and 'rising' cells (one-sided Fisher p; reported, no smoothing, no dropped point):
+  SRB M-ours-dscore-C-V1  @16  45/20480 10/20480 12/81920 11/81920   (+6..+15 dB: raw_FHSRBB16e4; then +12/+15 dB: raw_FXSRBB16e4)
+  SRB ALD-pilot           @16  81/20480 25/20480 40/81920 31/81920   (+6..+15 dB: raw_FHALDSRB; then +12/+15 dB: raw_FXALDSRB)
+  SRB M-ours-bstar        @16  90/20480 23/20480 32/81920 15/81920   (+6..+15 dB: raw_FHSRBB16e4; then +12/+15 dB: raw_FXSRBB16e4)
+  SRB R2-ours-G           @16  438/20480 135/20480 144/81920 65/81920   (+6..+15 dB: raw_FHSRBB16e4; then +12/+15 dB: raw_FXSRBB16e4)
+  SRB R1-turbo            @16  917/20480 287/20480 319/81920 127/81920   (+6..+15 dB: raw_FHSRBB16e4; then +12/+15 dB: raw_FXSRBB16e4)
+  SRB R3-bigamp           @16  2861/20480 2507/20480 11377/81920 10284/81920   (+6..+15 dB: raw_FHSRBB16e4; then +12/+15 dB: raw_FXSRBB16e4)   rising: +9->+12 dB p=2.7e-10
+  SRB R0-pilot@1          @16  2630/20480 978/20480 1558/81920 676/81920   (+6..+15 dB: raw_FHSRBB16e4; then +12/+15 dB: raw_FXSRBB16e4)
+  SRB SBL-loop            @16  261/20480 73/20480 90/81920 43/81920   (+6..+15 dB: raw_FHSPSRB; then +12/+15 dB: raw_FXSPSRB)
+  SRB SBL-pilot           @16  306/20480 85/20480 103/81920 43/81920   (+6..+15 dB: raw_FHSPSRB; then +12/+15 dB: raw_FXSPSRB)
+  SRB OMP-pilot           @16  607/20480 217/20480 304/81920 178/81920   (+6..+15 dB: raw_FHSPSRB; then +12/+15 dB: raw_FXSPSRB)
+  SRB R5-genie            @16  17/20480 5/20480 5/81920 4/81920   (+6..+15 dB: raw_FHSRBB16e4; then +12/+15 dB: raw_FXSRBB16e4)
+  SRP M-ours-dscore-C-V1  @16  45/20480 7/20480 4/81920 1/81920   (+6..+15 dB: raw_FHSRPB16e4; then +12/+15 dB: raw_FXSRPB16e4)
+  SRP ALD-pilot           @16  110/20480 19/20480 11/81920 4/81920   (+6..+15 dB: raw_FHALDSRP; then +12/+15 dB: raw_FXALDSRP)
+  SRP M-ours-bstar        @16  202/20480 33/20480 14/81920 6/81920   (+6..+15 dB: raw_FHSRPB16e4; then +12/+15 dB: raw_FXSRPB16e4)
+  SRP R2-ours-G           @16  215/20480 35/20480 16/81920 6/81920   (+6..+15 dB: raw_FHSRPB16e4; then +12/+15 dB: raw_FXSRPB16e4)
+  SRP R1-turbo            @16  521/20480 78/20480 44/81920 11/81920   (+6..+15 dB: raw_FHSRPB16e4; then +12/+15 dB: raw_FXSRPB16e4)
+  SRP R3-bigamp           @16  3386/20480 2585/20480 11333/81920 10874/81920   (+6..+15 dB: raw_FHSRPB16e4; then +12/+15 dB: raw_FXSRPB16e4)   rising: +9->+12 dB p=2.7e-06
+  SRP R0-pilot@1          @16  2433/20480 639/20480 656/81920 196/81920   (+6..+15 dB: raw_FHSRPB16e4; then +12/+15 dB: raw_FXSRPB16e4)
+  SRP SBL-loop            @16  229/20480 40/20480 14/81920 8/81920   (+6..+15 dB: raw_FHSPSRP; then +12/+15 dB: raw_FXSPSRP)
+  SRP SBL-pilot           @16  298/20480 39/20480 20/81920 8/81920   (+6..+15 dB: raw_FHSPSRP; then +12/+15 dB: raw_FXSPSRP)
+  SRP OMP-pilot           @16  720/20480 138/20480 124/81920 38/81920   (+6..+15 dB: raw_FHSPSRP; then +12/+15 dB: raw_FXSPSRP)
+  SRP R5-genie            @16  14/20480 1/20480 1/81920 0/81920   (+6..+15 dB: raw_FHSRPB16e4; then +12/+15 dB: raw_FXSRPB16e4)
+
+Drawn baseline curves (Perfect CSI excluded) at or below the proposed curve (point estimates; nothing is tested here -- the registered paired tests are in conf/results/review_next/pairB_SP{SRB,SRP}.txt, judged on the n = 2560 raws):
+  (a) none
+  (b) none
+
+Zero-failure points (the curve breaks there; Perfect CSI: fighs_merge.zero_arrows): (b) Perfect CSI +15 dB (0/81920).
+
+Asserts passed: merged counts = the 'Counts:' block of records/paper_f21{srb,srp}hsx.txt (11 arms x 7 SNRs per pool; those are asserted against the count tables and pairB tables by paper_f21dmc.py); n per point = 2560 / 20480 / 81920; drawn = counted (points and bar ends read back); each panel holds exactly the curves of the legend; the two axes share x and y; no point outside the y range.
+Layout: x ticks at the SNR points, x range (-4, 16); y log (7.5e-06, 1.2) (FIGHSX16e4 §1 rule on the drawn values of both panels); legend band 0.58 in above the axes, 3 columns (inside its band: asserted, [in] [1.542, 2.715, 5.618, 3.205]); every artist inside the canvas (tight bbox [in] [0.026, 0.041, 7.11, 3.205]); smallest visible text 7 pt; saved at figsize, PNG 300 dpi.

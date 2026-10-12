@@ -82,3 +82,38 @@
     - `paper_f24.txt`: R3-bigamp @16 1362/20480 1299/20480 1418/20480 1397/20480 (raw_FHROTbB16e4k) rising: +9->+12 dB p=0.0096
   BiG-AMP (R3-bigamp) 외에는 Clustered SV 의 Perfect CSI +3 → +6 dB 한 칸 (0/2560 → 1/20480; 두 시행 집합이 만나는 칸) 뿐이다. 캡션 문구 예: "BiG-AMP (i.i.d. prior) reaches an error floor; its BLER is not monotone in SNR on the floor."
 - **실패 0 점 (n = 20480)** (집계표 `fighs_<TAG>.txt`·`hisnr_<TAG>.txt` 에서; 태그 arm SNR): FHPILSV R5-genie +9/+12/+15 dB; FHPILSV V1-pilot +12/+15 dB; FHPILSV bstar-pilot +12/+15 dB; FHSPSV R5-genie +9/+12/+15 dB; FHSPSV SBL-loop +12/+15 dB; FHSPSV SBL-pilot +12/+15 dB; FHSVB16e4 M-ours-bstar +12/+15 dB; FHSVB16e4 M-ours-dscore-C-V1 +15 dB; FHSVB16e4 R0-pilot +15 dB; FHSVB16e4 R1-turbo +15 dB; FHSVB16e4 R2-ours-G +12/+15 dB; FHSVB16e4 R5-genie +9/+12/+15 dB. Perfect CSI 의 실패 0 점은 화살표 (0/20480 → 1.9×10⁻⁴, 0/2560 → 1.5×10⁻³), 다른 곡선은 그 점에서 끊긴다.
+
+## 레이 트레이싱 풀 그림 (DeepMIMO · Sionna RT; 기록 2026-10-12 09:23 CDT)
+
+모두 8×4 (N_r = 8, N_t = 4), N_train = 1.6×10⁵, Fig. 2 와 같은 범례 11 곡선 (`paper_f16deep.SHOW`), 고정 풀에서 시험 시행을 복원 추출한다 (새 채널이 아니라 풀의 평균 BLER). 스크립트 `paper_f21dmc.py <PRIOR> [hs|hsx|hsx12]`, `paper_f21room.py [12]`, `paper_f33cdf.py <PRIOR>`; 수치 기록은 `records/paper_f21*.txt` · `records/paper_f33cdf_*.txt`, 등록·결과·감사는 `conf/results/review_next/NEXT_EXPERIMENTS_{DMC16e4,DMCBASE16e4,SRT16e4,ROOM16e4,PATH16e4,FIGHSROOM16e4,FIGHSPATH16e4,FIGHSX16e4}.md`.
+
+| 그림 | 내용 | 캡션에 꼭 |
+|---|---|---|
+| F21dmc_col | DeepMIMO v4, 도시 시나리오 6 개 28 GHz (20 m block split). 전 SNR n = 2560, y 0.2–1.05 | BLER 수준이 높다 (Perfect CSI +15 dB 0.239). 표 B GMM prior → Proposed: Proposed 가 유의하게 적게 실패 (+9/+12/+15 dB, 357:124); 그려진 baseline 9 개 모두 같은 방향 |
+| F21srt_col | Sionna RT 2.1, 내장 도시 장면 munich · etoile · florence 28 GHz (20 m block split). 전 SNR n = 2560, y 0.3–1.05 | BLER 수준이 높다 (Perfect CSI +15 dB 0.499; 테스트 풀의 0.796 이 rank-1). GMM prior → Proposed 403:93 (+9/+12/+15 dB); 그려진 baseline 9 개 모두 같은 방향 |
+| F21srb_col · F21srbhs_col · F21srbhsx_col · **F21srbhsx12_col** | **Sionna RT 방, 무작위 단말 위치** (내장 장면 `box` 10×10×5 m 금속 벽, 28 GHz, LoS + 1 차 반사, 고정 기지국 1 곳, 1 m 타일 block split). 차례로: 전 SNR n = 2560 (등록 그림) / +6..+15 dB 를 n = 20480 으로 / +12 · +15 dB 를 n = 81920 으로 (전 구간) / **같은 것을 +12 dB 까지만 그린 원고판** | 점마다 n 이 다르다: −3/0/+3 dB n = 2560 (등록된 판정의 시행), +6/+9 dB n = 20480, +12(/+15) dB n = 81920. GMM prior 는 정상 수렴한 full K = 1024. 금속 벽·1 차 반사, 한 장소·유한 풀. 아래 수치 표 |
+| F21srp_col · F21srphs_col · F21srphsx_col · **F21srphsx12_col** | **Sionna RT 방, 이동 단말** (같은 방·기지국; 단말 한 대의 잔디깎이 경로 600 × 576 점 · 1.5 cm 간격을 시간 순서로 수집, 시간 분할 — 마지막 87 줄이 테스트; 수신기는 블록마다 따로 처리). 네 판의 뜻은 SRB 와 같다 | 위와 같은 n. **이 풀의 GMM prior 는 EM 이 무너져 선택된 씨앗 초기화이고 잘 맞춘 GMM 이 아니다** (Gaussian prior 와 거의 겹친다) — 캡션에 밝힐 것. 방향 두 가지·규칙 격자 경로 (도플러 없음), 완충 구역 없음 |
+| **F21room_wide · F21room12_wide** | 위 두 풀을 한 그림에: (a) 무작위 위치 (SRB), (b) 이동 단말 (SRP); 7.16 × 3.25 in (`figure*`), 범례 한 번, 두 패널이 x · y 축 공유. `_wide` = 전 구간 (−3…+15 dB), `12_wide` = +12 dB 까지 | 두 단일 패널 그림 (`…hsx_col`) 과 같은 수 (스크립트가 그 기록과 대조). y 축 아래 끝 7.5×10⁻⁶ (n = 81920 의 실패 1 건 = 1.2×10⁻⁵ 가 보이도록). (b) 의 GMM 캐비엇 |
+| F33cdf_DMC_wide · F33cdf_SRT_wide · F33cdf_SRB_wide · F33cdf_SRP_wide | 블록별 채널 추정 NMSE 의 CDF (보고 전용; 전 SNR n = 2560). 패널: DMC · SRT 는 −3 dB 와 판정 SNR 세 점, SRB · SRP 는 −3 · 0 · +3 · +6 dB | 검정·라벨 없음. −3 dB 중앙값 (10 log₁₀ NMSE): SRB Proposed −14.39 · GMM −12.43 · Annealed Langevin −8.44 · Gaussian −6.17 dB (나머지는 `records/paper_f33cdf_*.txt`) |
+
+### Sionna RT 방 두 풀의 수치 (캡션·본문용; 출처는 괄호의 등록 §)
+
+| | 무작위 위치 (SRB) | 이동 단말 (SRP) |
+|---|---|---|
+| 표 B GMM prior → Proposed, 판정점 −3 / 0 / +3 dB (n = 2560; a:b = GMM 만 실패 : Proposed 만 실패) | 209:86 · 65:38 · 28:5, 합 302:129 → Proposed 가 적게 실패 (ROOM16e4 §6.1) | 606:62 · 321:27 · 117:8, 합 1044:97 → Proposed 가 적게 실패 (PATH16e4 §6.1) |
+| BLER −3 / 0 / +3 dB: Proposed · GMM prior · Perfect CSI | 0.275 / 0.049 / 0.007 · 0.323 / 0.060 / 0.016 · 0.117 / 0.014 / 0.004 | 0.317 / 0.080 / 0.009 · 0.530 / 0.195 / 0.052 · 0.167 / 0.032 / 0.003 |
+| BLER 0.1 에서 SNR 격차 GMM − Proposed [90 % paired] | +0.32 dB [+0.18, +0.45] | +2.01 dB [+1.78, +2.24] |
+| 회수율 R(−3 dB) = (GMM − Proposed) / (GMM − Perfect CSI) [90 %] | 0.233 [0.187, 0.279] | 0.586 [0.554, 0.618] |
+| 등록 baseline 16 개 (GMM 포함) 대비 | 16 개 모두 Proposed 가 유의하게 적게 실패 | 16 개 모두 Proposed 가 유의하게 적게 실패 |
+| 실패 수 +6 / +9 dB (n = 20480): Proposed · GMM · Perfect CSI | 45 / 10 · 90 / 23 · 17 / 5 (FIGHSROOM16e4 §6.2) | 45 / 7 · 202 / 33 · 14 / 1 (FIGHSPATH16e4 §6.2) |
+| 실패 수 +12 / +15 dB (n = 81920): Proposed · GMM · Perfect CSI | 12 / 11 · 32 / 15 · 5 / 4 (FIGHSX16e4 §6.2a) | 4 / 1 · 14 / 6 · 1 / 0 (§6.2b) |
+| 같은 점의 BLER: Proposed · GMM | 1.5×10⁻⁴ / 1.3×10⁻⁴ · 3.9×10⁻⁴ / 1.8×10⁻⁴ | 4.9×10⁻⁵ / 1.2×10⁻⁵ · 1.7×10⁻⁴ / 7.3×10⁻⁵ |
+| GMM prior 의 상태 | 정상 수렴 (full 공분산 K = 1024; 살아 있는 성분 779; 격자 끝 캐비엇) | **씨앗 초기화** (EM 붕괴; "kron 4096" 은 적합 작업의 이름일 뿐) |
+| 동일예산 GB′ (median; a1) | 0.6472 | 0.5836 |
+| 시드 강건성 (a2 · a3) | 진행 중 — `NEXT_EXPERIMENTS_SEEDSROOM16e4.md` | 진행 중 — 같은 문서 |
+
+- **판정과 그림의 시행이 다르다**: 라벨 (표 B, baseline 16 개) 은 모두 n = 2560 의 원 시행으로 판정했고 다시 판정하지 않는다. 그림의 +6 dB 이상 점은 새 시행 (보고 전용) 이다. n = 81920 점은 n = 20480 점의 시행을 포함한다 (독립이 아님; 보지 않은 61440 시행만의 수는 `conf/results/review_next/fighs_FX*.txt` 의 `# split` 줄).
+- **SNR 범위 (사용자 결정 2026-10-12 CDT, `conf/DECISIONS.md`)**: 원고판은 +12 dB 까지 (`…hsx12_col`, `F21room12_wide`); 전 구간 판도 함께 둔다 ("12, 15 둘다 그려보고"). SRB 는 +12 → +15 dB 에서 Proposed 가 거의 평평하고 (12 → 11 건) GMM 과의 차이가 줄어든다 (11 대 15); SRP 는 +15 dB 까지 내려간다 (4 → 1 건, GMM 14 → 6). +15 dB 의 수는 위 표와 기록에 있다.
+- **0 실패 점**: n = 81920 에서는 SRP 의 Perfect CSI +15 dB (0 / 81920) 하나 — 곡선이 거기서 끊기고 화살표 (95 % Wilson 상한 4.7×10⁻⁵) 가 붙는다. +12 dB 판에는 0 실패 점이 없다.
+- BiG-AMP 의 +9 → +12 dB 상승 (두 풀 모두) 은 그 방식의 바닥이다 (한쪽 Fisher p 2.7×10⁻¹⁰ · 2.7×10⁻⁶; 보고만).
+
