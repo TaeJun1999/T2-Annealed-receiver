@@ -1,0 +1,25 @@
+# date        : 2026-10-13 07:57:53 KST
+# git commit  : 29cf411d
+# versions    : python 3.12.14  numpy 2.5.2  scipy 1.18.1  torch 2.14.0+cu130 (cuda_available=False)
+# device      : CPU (192 cores) | dtype: complex128 / float64 | deterministic: yes (fixed seeds, no GPU in the receiver)
+# testbed     : D2
+# seed rule   : default_rng([20260926, TBID[testbed], PID[prior], Nr, T, Tp, int(snr)+100])  (trials of a point = ONE stream)
+# code        : rate-1/2 conv (133,171)_8 nu=6 terminated, QPSK, outer iterations = 16 for EVERY arm
+# Demo/ hashes: t2_route_a.py=95a5408901ec125c  t2_trellis.py=31cd0ee9c68e972b  t2_gmm.py=d064e58c7510c769
+# content     : dmc_leak_strata.py -- leakage strata of raw_DMIB16e4 (prior DMI, cell C2), REPORT-ONLY (the NEXT_EXPERIMENTS_DMC16e4 §1 definition, registered for DMI): d = min_train ||h - h_train||^2 / ||h||^2, N' = 160000 (stream 7), strata d < 0.1 / d >= 0.1; decision SNRs [-3.0, 0.0, 3.0] from tables_D2_DMIB16e4.txt
+
+-3 dB  n=2560  alignment (R5-genie, first 40 replayed trials vs raw, bit-identical): OK;  d median 0.1803, share d < 0.1 = 0.074
+    d < 0.1    n=  189  failures b*   74  V1   60  genie   29  R = 0.311
+    d >= 0.1   n= 2371  failures b*  811  V1  769  genie  292  R = 0.081
++0 dB  n=2560  alignment (R5-genie, first 40 replayed trials vs raw, bit-identical): OK;  d median 0.1813, share d < 0.1 = 0.066
+    d < 0.1    n=  169  failures b*   12  V1   19  genie    4  R = -0.875
+    d >= 0.1   n= 2391  failures b*  161  V1  130  genie   36  R = 0.248
++3 dB  n=2560  alignment (R5-genie, first 40 replayed trials vs raw, bit-identical): OK;  d median 0.1810, share d < 0.1 = 0.064
+    d < 0.1    n=  165  failures b*    2  V1    2  genie    0  R = 0.000
+    d >= 0.1   n= 2395  failures b*   21  V1   17  genie    4  R = 0.235
+pooled over the 3 decision SNRs
+    d < 0.1    n=  523  failures b*   88  V1   81  genie   33  R = 0.127
+    d >= 0.1   n= 7157  failures b*  993  V1  916  genie  332  R = 0.116
+
+alignment OK at every SNR
+report-only: no label, no test, no CI; interpretation is the user's.

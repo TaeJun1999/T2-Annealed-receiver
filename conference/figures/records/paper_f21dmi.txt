@@ -1,0 +1,26 @@
+F21dmi -- DeepMIMO indoor (prior DMI: DeepMIMO v4 scenario i1_2p4 at 2.4 GHz, one fixed BS, 0.5 m block split; cell C2 = 8x4, N_train = 1.6e5) with the one legend of F16deep_wide: BLER@16 (Pilot-only LMMSE: after the first iteration), failures / trials per SNR -3 +0 +3 +6 +9 +12 +15 dB.  Recomputed from raw by conference/figures/paper_f21dmc.py (read-only; analysis.load_raw, a raised block = a failure); no number transcribed.
+
+F21dmi_col  3.5 x 3.45 in, one panel, legend above; the 11 curves of paper_f16deep.SHOW with its shapes and sizes; 95% Wilson bars on Proposed (diffusion prior), GMM prior, Gaussian prior, Perfect CSI.  n = 2560 (test trials 0..2559) at EVERY SNR for every curve (no n = 20480 raw on DMI; NEXT_EXPERIMENTS_ROOM16e4 §1).
+
+Curves (internal arm -> figure name): M-ours-dscore-C-V1 -> Proposed (diffusion prior); ALD-pilot -> Annealed Langevin (plug-in); M-ours-bstar -> GMM prior; R2-ours-G -> Gaussian prior; R1-turbo -> Turbo LMMSE receiver; R3-bigamp -> BiG-AMP; R0-pilot@1 -> Pilot-only LMMSE; SBL-loop -> SBL (in loop); SBL-pilot -> SBL (pilot-only); OMP-pilot -> OMP (pilot-only); R5-genie -> Perfect CSI.
+
+Counts:
+    M-ours-dscore-C-V1   829/2560 149/2560 19/2560 4/2560 0/2560 0/2560 0/2560   raw_DMIB16e4
+    ALD-pilot            1375/2560 360/2560 62/2560 4/2560 1/2560 1/2560 0/2560   raw_ALDDMI
+    M-ours-bstar         885/2560 173/2560 23/2560 7/2560 0/2560 0/2560 0/2560   raw_DMIB16e4
+    R2-ours-G            1924/2560 838/2560 191/2560 31/2560 12/2560 0/2560 0/2560   raw_DMIB16e4
+    R1-turbo             2245/2560 1324/2560 424/2560 90/2560 23/2560 4/2560 0/2560   raw_DMIB16e4
+    R3-bigamp            2402/2560 1751/2560 928/2560 554/2560 437/2560 573/2560 603/2560   raw_DMIB16e4
+    R0-pilot@1           2521/2560 2052/2560 922/2560 302/2560 81/2560 23/2560 3/2560   raw_DMIB16e4
+    SBL-loop             1740/2560 682/2560 128/2560 16/2560 5/2560 0/2560 0/2560   raw_SPDMI
+    SBL-pilot            2009/2560 862/2560 180/2560 20/2560 3/2560 1/2560 0/2560   raw_SPDMI
+    OMP-pilot            2131/2560 1217/2560 315/2560 80/2560 24/2560 3/2560 0/2560   raw_SPDMI
+    R5-genie             321/2560 40/2560 4/2560 0/2560 0/2560 0/2560 0/2560   raw_DMIB16e4
+
+Drawn baseline curves (Perfect CSI excluded) at or below the proposed curve (point estimates; failures vs the proposed curve's) -- reported only, nothing is tested here; the registered paired tests are in conf/results/review_next/pairB_SPDMI.txt: Annealed Langevin (plug-in) at +6 dB (4 vs 4), +15 dB (0 vs 0); GMM prior at +9 dB (0 vs 0), +12 dB (0 vs 0), +15 dB (0 vs 0); Gaussian prior at +12 dB (0 vs 0), +15 dB (0 vs 0); Turbo LMMSE receiver at +15 dB (0 vs 0); SBL (in loop) at +12 dB (0 vs 0), +15 dB (0 vs 0); SBL (pilot-only) at +15 dB (0 vs 0); OMP (pilot-only) at +15 dB (0 vs 0).
+Registered table-B labels against the proposed prior (pairB_SPDMI.txt) of the 9 drawn baselines: all (i).
+Raised blocks (analysis.load_raw NOTE lines; kept and counted as failures) in the raws read: none.
+Zero-failure points (the curve breaks there; Perfect CSI: fighs_merge.zero_arrows): Proposed (diffusion prior) +9 dB; Proposed (diffusion prior) +12 dB; Proposed (diffusion prior) +15 dB; Annealed Langevin (plug-in) +15 dB; GMM prior +9 dB; GMM prior +12 dB; GMM prior +15 dB; Gaussian prior +12 dB; Gaussian prior +15 dB; Turbo LMMSE receiver +15 dB; SBL (in loop) +12 dB; SBL (in loop) +15 dB; SBL (pilot-only) +15 dB; OMP (pilot-only) +15 dB; Perfect CSI +6 dB; Perfect CSI +9 dB; Perfect CSI +12 dB; Perfect CSI +15 dB.
+
+Asserts passed: counts = pairB_SPDMI.txt 'BLER@16 failures' table (11 arms x 7 SNRs); Perfect CSI error arrays of raw_ALDDMI and raw_SPDMI = raw_DMIB16e4's; drawn = counted; the panel holds exactly the curves of the legend; no point outside the y range.
+Layout: x ticks at the SNR points, x range (-4, 16); y log (3e-05, 1.2), ticks None; legend band 0.86 in above the axes, 2 columns (inside its band: asserted, [in] [0.435, 2.651, 3.065, 3.389]); every artist inside the canvas (tight bbox [in] [0.086, 0.041, 3.44, 3.389]); smallest visible text 7 pt; saved at figsize, PNG 300 dpi.
