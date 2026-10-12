@@ -14,6 +14,7 @@
 | 작업 | 자원 | 상태 |
 |---|---|---|
 | **ROOM16e4 — DMI** (DeepMIMO `i1_2p4` 실내 풀; 등록 v2 b737fd55 의 DMI 부분 그대로) | CPU 96 스레드 (BLER 끝) | **주 실행·baseline 끝**: 5-DMI = 실행 커밋 4131a3b0 → 주 실행 10-12 16:15–17:54 CDT (ACCEPT OK) 표 B `b* → V1` **(i)** 263:179 (2/3 점), SNR@0.1 격차 +0.23 dB, b\* = full 1024; baseline @29cf411d 17:56–18:15 CDT 16 개 전부 (i) ("전부"·"멀어진다" 충족); GB′ median 0.8038; §7 전사. 남은 것: ① 기록 감사 (Fable 서브에이전트) → §7.8 ② 그림 보강 FIGHSDMI16e4 (+6…+15 dB, n = 20480, 새 시행 10000..; `run_fighsroom16e4.sh` 의 DMI 판 — 등록 → Fable 검토 → 동결 → 실행 ≈ 4–6 h at 96 스레드) ③ RESULTS §25 · figures/README 에 DMI 추가 ④ paper 브랜치 동기화 |
+| **FIGHSDMI16e4** (DMI 그림 보강: +6…+15 dB, n = 20480, 새 시행 10000..; 보고 전용; 사용자의 별도 지시 없음 — 세션의 해석) | CPU 96 스레드 (tmux `fighsdmi`) + GPU 1 장 잠깐 (ALD 대조·추정, 시작 직후) | v2 = 실행 커밋 → `taskset … bash code/run_fighsdmi16e4.sh` 한 번 (≈ 2.5 h). 끝 표식 `FIGHS_DONE ok=3 fail=0` (`logs/run_fighsdmi16e4.log`). **그때까지 main 커밋·`conf/code`·`DECISIONS.md`·등록 문서 변경 금지** (재개가 필요하면 `--resume` 을 태그 없이). 끝난 뒤: §6 전사 (`prereg_audit_2026-10-11/s6_fighsroom_gen.py` 의 DMI 판) → `paper_f21dmc.py DMI hs` → `F21dmihs_col` → 사용자에게 → 기록 감사 (Fable) → RESULTS 25.6 · README 갱신 → ROOM16e4 §7 감사 반영 커밋 → paper 동기화 |
 | 등록 밖의 부분 체크포인트 (참고) | — |  `ckpt/d2sx_{SRB,SRP}_N160000_a{4,5}*.pt` (128 epoch 쯤에서 멈춤) 는 쓰지 않는다 |
 | 원고 (IEEE ICC 2027, 마감 2026-10-16) — 웹 채팅에서 사용자가 작성, 자료는 paper 브랜치 (`conference/tools/sync_paper_branch.sh`) | — | 진행 중. 실험 큐·GPU 큐 비어 있음 |
 

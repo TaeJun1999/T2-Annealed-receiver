@@ -1,0 +1,45 @@
+[OK] ll_val repr 112.04253042212595
+[OK] gmm_selection b*=gmm1024 ll=112.04253042212595 kron_K=2048 kron ll=41.18010947841611; loaded [('full', 16), ('full', 32), ('full', 64), ('full', 128), ('full', 256), ('full', 512), ('full', 1024), ('kron', 16), ('kron', 32), ('kron', 64), ('kron', 128), ('kron', 256), ('kron', 512), ('kron', 1024), ('kron', 2048)]
+   llv: {'gmm1024': 112.043, 'gmm512': 105.851, 'gmm256': 96.447, 'gmm128': 83.443, 'gmm64': 67.588, 'gmm32': 44.495, 'kron': 41.18, 'gmm16': 28.002}
+[OK] HISNR_SKIP0 / DEV_SKIP0 / PID 10000 2560 14
+[OK] C2 snrs {'Nr': 8, 'Nt': 4, 'T': 16, 'Tp': 4, 'snrs': (-3, 0, 3, 6, 9, 12, 15)}
+   tune: {'tag': 'PILDMI', 'ckpt': 'ckpt/d2sx_DMI_N160000_a1_best.pt', 'ckpt_sha': 'dc784649f1e9b890', 'git': '003c8e51', 'c': 0.01, 'beta': 0.005, 'n_dev': 512, 'dev_skip': 2560, 'rotation': -1.0, 'train_prior': 'DMI', 'doppler': -1.0, 'stop': {'-3.0': 369, '0.0': 484, '3.0': 552, '6.0': 600, '9.0': 600, '12.0': 600, '15.0': 600}, 'seed': 20260927}
+[OK] tune ckpt == $CK and sha 
+[OK] tune stop/v keys for 6..15 
+[OK] tune dev 
+   pilots dev : {'rotation': -1.0, 'doppler': -1.0, 'train_prior': 'DMI', 'prior': 'DMI', 'fits_tag': 'DMIB16e4', 'skip': 2560.0, 'n': 512.0} b (7, 512, 32)
+   pilots test: {'rotation': -1.0, 'doppler': -1.0, 'train_prior': 'DMI', 'prior': 'DMI', 'fits_tag': 'DMIB16e4', 'skip': 0.0, 'n': 2560.0} b (7, 2560, 32)
+   ald test   : {'rotation': -1.0, 'doppler': -1.0, 'train_prior': 'DMI', 'skip': 0.0} hhat (7, 2560, 32) ckpt_sha dc784649f1e9b890 prov {'ckpt_sha': 'dc784649f1e9b890', 'ald_py_sha': 'f81f3c0f65bed35e', 'git': '29cf411d', 'device': 'NVIDIA RTX PRO 6000 Blackwell Server Edition', 'precision': 'float32/complex64, deterministic, TF32 off', 'rotation': -1.0, 'train_prior': 'DMI', 'doppler': -1.0}
+[OK] dev pilots guard == what regen --set hisnr will write (rotation -1, doppler -1, train_prior DMI) 
+[OK] ald test ckpt_sha 
+[OK] pick per_snr has 6 9 12 15 + rho rho_sbl 16 rho_omp 16 per_snr {'-3': {'n_em': 3, 'nmse_sbl_db': -6.549845526564347, 'edge_sbl': False, 'L': 2, 'nmse_omp_db': -6.852773560153706, 'edge_omp': False}, '0': {'n_em': 5, 'nmse_sbl_db': -9.063939190471885, 'edge_sbl': False, 'L': 3, 'nmse_omp_db': -8.560953762631382, 'edge_omp': False}, '3': {'n_em': 5, 'nmse_sbl_db': -11.705320728052515, 'edge_sbl': False, 'L': 4, 'nmse_omp_db': -11.053328698201108, 'edge_omp': False}, '6': {'n_em': 5, 'nmse_sbl_db': -14.2842783439769, 'edge_sbl': False, 'L': 6, 'nmse_omp_db': -13.322873544032314, 'edge_omp': False}, '9': {'n_em': 5, 'nmse_sbl_db': -17.160249105606788, 'edge_sbl': False, 'L': 8, 'nmse_omp_db': -15.707241557593271, 'edge_omp': False}, '12': {'n_em': 10, 'nmse_sbl_db': -20.10776739319006, 'edge_sbl': False, 'L': 8, 'nmse_omp_db': -18.268455865260165, 'edge_omp': False}, '15': {'n_em': 10, 'nmse_sbl_db': -23.006205054571595, 'edge_sbl': False, 'L': 32, 'nmse_omp_db': -21.157912116173165, 'edge_omp': False}}
+[OK] raw_DMIB16e4 +6 dB chunk0 (D2_C2_DMI_Nr8_T16_Tp4_dft_snr6_skip0_n40.npz) missing [] meta {'bstar': 'gmm1024', 'kron_K': '2048', 'll': '112.04253042212595', 'ntrain': '160000.0', 'ck': 'sha256[:16]=dc784649f1e9b890 epoch=1142 best_epoch=1142 role=best 8x4', 'git': '4131a3b0', 'iters': '16', 'em': '8022.3476731'}
+     arms in file: ['M-ours-bstar', 'M-ours-bstar-scalar', 'M-ours-dscore-C-V0', 'M-ours-dscore-C-V1', 'M-ours-dscore-C-V4', 'M-ours-dscore-C-V4b', 'M-ours-gmm32', 'R0-pilot', 'R1-turbo', 'R2-ours-G', 'R3-bigamp', 'R4-llr', 'R4-scvamp', 'R5-genie']
+[OK] raw_DMIB16e4 +9 dB chunk0 (D2_C2_DMI_Nr8_T16_Tp4_dft_snr9_skip0_n40.npz) 
+[OK] raw_DMIB16e4 +12 dB chunk0 (D2_C2_DMI_Nr8_T16_Tp4_dft_snr12_skip0_n40.npz) 
+[OK] raw_DMIB16e4 +15 dB chunk0 (D2_C2_DMI_Nr8_T16_Tp4_dft_snr15_skip0_n40.npz) 
+[OK] raw_SPDMI +6 dB chunk0 (D2_C2_DMI_Nr8_T16_Tp4_dft_snr6_skip0_n40.npz) missing [] meta {'bstar': 'gmm1024', 'kron_K': '2048', 'll': '112.04253042212595', 'ntrain': '160000.0', 'ck': '(absent)', 'git': '29cf411d', 'iters': '16', 'em': '8022.3476731'}
+     arms in file: ['OMP-pilot', 'R5-genie', 'SBL-loop', 'SBL-pilot']
+[OK] raw_SPDMI +9 dB chunk0 (D2_C2_DMI_Nr8_T16_Tp4_dft_snr9_skip0_n40.npz) 
+[OK] raw_SPDMI +12 dB chunk0 (D2_C2_DMI_Nr8_T16_Tp4_dft_snr12_skip0_n40.npz) 
+[OK] raw_SPDMI +15 dB chunk0 (D2_C2_DMI_Nr8_T16_Tp4_dft_snr15_skip0_n40.npz) 
+[OK] raw_ALDDMI +6 dB chunk0 (D2_C2_DMI_Nr8_T16_Tp4_dft_snr6_skip0_n40.npz) missing [] meta {'bstar': 'gmm1024', 'kron_K': '2048', 'll': '112.04253042212595', 'ntrain': '160000.0', 'ck': 'sha256[:16]=dc784649f1e9b890 epoch=1142 best_epoch=1142 role=best 8x4', 'git': '29cf411d', 'iters': '16', 'em': '8022.3476731', 'ald_file': '/home/HTJ/t2/conf/results/ald/ald_PILDMI.npz sha256[:16]=b0145dac7b7076aa'}
+     arms in file: ['ALD-pilot', 'ALDv-pilot', 'R5-genie']
+[OK] raw_ALDDMI +9 dB chunk0 (D2_C2_DMI_Nr8_T16_Tp4_dft_snr9_skip0_n40.npz) 
+[OK] raw_ALDDMI +12 dB chunk0 (D2_C2_DMI_Nr8_T16_Tp4_dft_snr12_skip0_n40.npz) 
+[OK] raw_ALDDMI +15 dB chunk0 (D2_C2_DMI_Nr8_T16_Tp4_dft_snr15_skip0_n40.npz) 
+[OK] raw_DMIB16e4 max skip 448 files, max skip 2520, snrs [-3, 0, 3, 6, 9, 12, 15]
+[OK] raw_DMIB16e4last max skip 448 files, max skip 2520, snrs [-3, 0, 3, 6, 9, 12, 15]
+[OK] raw_PILDMI max skip 448 files, max skip 2520, snrs [-3, 0, 3, 6, 9, 12, 15]
+[OK] raw_ALDDMI max skip 448 files, max skip 2520, snrs [-3, 0, 3, 6, 9, 12, 15]
+[OK] raw_SPDMI max skip 448 files, max skip 2520, snrs [-3, 0, 3, 6, 9, 12, 15]
+[OK] raw_DMI empty 
+   every raw_*DMI* dir: ['raw_ALDDMI', 'raw_DMI', 'raw_DMIB16e4', 'raw_DMIB16e4last', 'raw_PILDMI', 'raw_SPDMI']
+[OK] trial stream -> test pool; pool size which=test test=60700 fit=273305 val=20000
+   expected distinct pairs among 20480 draws from 60700: 17383; expected draws that repeat a pair of trials 0..2559 of the same SNR: 846
+   results/ald/ald_FHCALDSRP.npz vs results/ald/ald_PILSRP.npz: arrays hhat/b/v identical True; file sha 00eadc14a0e0079a vs ebb14a8952f0ae17; zip member time (1980, 1, 1, 0, 0, 0) vs (1980, 1, 1, 0, 0, 0); prov git c48ee796 vs 9ad4caa0
+   results/ald/ald_FHCALDSRB.npz vs results/ald/ald_PILSRB.npz: arrays hhat/b/v identical True; file sha 8d2ba8f0a75ba397 vs a3d249188f9c061a; zip member time (1980, 1, 1, 0, 0, 0) vs (1980, 1, 1, 0, 0, 0); prov git 193776a1 vs 7d524638
+   reuse-branch one-liner on results/ald/ald_PILSRP_hisnr.npz: prov git = 'c48ee796'; skip 10000; hhat (4, 20480, 32); snrs [ 6.  9. 12. 15.]
+   reuse-branch one-liner on results/ald/ald_PILSRB_hisnr.npz: prov git = '193776a1'; skip 10000; hhat (4, 20480, 32); snrs [ 6.  9. 12. 15.]
+
+29 / 29 checks OK
