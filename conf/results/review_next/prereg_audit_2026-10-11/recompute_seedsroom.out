@@ -1,0 +1,155 @@
+# recompute_seedsroom.py -- SEEDSROOM16e4 record audit (own numpy reader; raw / ckpt / GB' npz only)
+
+## raw_SRBB16e4: 448 files
+  chunk plan {(40k, 40)} k = 0..63 at each of 7 SNRs: True [ok]; arms 14 [ok]; KEYS_RAW array shapes {(2560, 16)} [ok]; '|failed' keys: none
+  meta (distinct values over all files): run|git=['9ad4caa0']; run|iters=['16']; run|seed=['20260926']; run|dtype=['complex128/float64']; run|beta=['0.7']; run|t_in=['5']; meta|ntrain=['160000.0']; meta|bstar=['gmm1024']; meta|kron_K=['2048']; meta|ll_val|<bstar>=['97.00871495382869']; meta|stagec_ckpt=['/home/HTJ/t2/conf/ckpt/d2sx_SRB_N160000_a1_best.pt']; meta|stagec_ckpt_id=['sha256[:16]=ed437f21af15c305 epoch=1660 best_epoch=1660 role=best 8x4']
+    ntrain 160000 [ok] bstar [ok] ll_val [ok] kron_K [ok] iters 16 [ok]
+  b* BLER@16 per SNR: -3:0.3230 +0:0.0598 +3:0.0156 +6:0.0023 +9:0.0020 +12:0.0004 +15:0.0004
+  decision SNRs [-3, 0, 3] [ok]
+  table B b*->V1: 209:86 (5.6e-13) · 65:38 (0.01) · 28:5 (6.6e-05) · 302:129 (4.5e-17) [ok]
+  power guard: 3/3 points with >= 6 discordant -> POWERED; V1 fewer at 3/3, b* fewer at 0/3 -> label (i) [ok]
+  SNR@0.1 gap b*-V1: +0.32 [+0.18, +0.45] [ok]  (4 dp +0.3209 [+0.1788, +0.4542]; SNR@0.1 b* -0.915 V1 -1.236; censored 0%)
+  -3 dB failures: V1 704 b* 827 V0 2560 genie 299; V1 0.275 (0.258, 0.293), 704/2560 [ok] (z = 1.96: (0.258, 0.293)); b* · genie 827 · 299 [ok]; V0 BLER 1.000
+    §0 b* / genie -3 dB BLER: 0.323 / 0.117 [ok]
+  failures -3..+15: V1 704 126 17 3 4 0 0 | b* 827 153 40 6 5 1 1 | genie 299 36 9 1 0 0 0 | V0 2560 2560 2559 2557 2519 2304 1674
+  R(-3 dB) 0.233 [0.187, 0.279] [ok] (b*/V1/genie 827/704/299, undefined 0); R(decision [-3, 0, 3]) 0.256 [0.212, 0.299] [ok] (b*/V1/genie 1020/847/344, undefined 0)
+    R(+0 dB) 0.231 [0.100, 0.347] b*/V1/genie 153/126/36
+    R(+3 dB) 0.742 [0.536, 0.930] b*/V1/genie 40/17/9
+  V0 guard -3 dB: fired 2553 of 2560 rate 0.997 worst 6.081e+08; V1 guard fired at -3 dB: 0
+
+## raw_SRBB16e4s2: 448 files
+  chunk plan {(40k, 40)} k = 0..63 at each of 7 SNRs: True [ok]; arms 14 [ok]; KEYS_RAW array shapes {(2560, 16)} [ok]; '|failed' keys: none
+  meta (distinct values over all files): run|git=['62c24e7e']; run|iters=['16']; run|seed=['20260926']; run|dtype=['complex128/float64']; run|beta=['0.7']; run|t_in=['5']; meta|ntrain=['160000.0']; meta|bstar=['gmm1024']; meta|kron_K=['2048']; meta|ll_val|<bstar>=['97.00871495382869']; meta|stagec_ckpt=['/home/HTJ/t2/conf/ckpt/d2sx_SRB_N160000_a2_best.pt']; meta|stagec_ckpt_id=['sha256[:16]=2d3e7eae6bb20008 epoch=1337 best_epoch=1337 role=best 8x4']
+    ntrain 160000 [ok] bstar [ok] ll_val [ok] kron_K [ok] iters 16 [ok]
+    run|git == 62c24e7e on every chunk, no +dirty [ok]; stagec_ckpt_id [ok]; stagec_ckpt [ok]
+  vs raw_SRBB16e4: keys missing on one side none; arms differing in any KEYS_RAW array: ['M-ours-dscore-C-V0', 'M-ours-dscore-C-V1', 'M-ours-dscore-C-V4', 'M-ours-dscore-C-V4b'] [ok]; same set at every point: True; non-Stage-C arrays bit-identical 490/490 [ok]; extra keys (guardH / clip / diverged / ...) differing arms: ['M-ours-dscore-C-V0', 'M-ours-dscore-C-V1'] [ok]
+    V1 @16 block outcomes differing from a1 per SNR (trials): [165, 55, 8, 4, 2, 0, 0] (V1 actually different [ok])
+  b* BLER@16 per SNR: -3:0.3230 +0:0.0598 +3:0.0156 +6:0.0023 +9:0.0020 +12:0.0004 +15:0.0004
+  decision SNRs [-3, 0, 3] [ok]
+  table B b*->V1: 211:95 (2.9e-11) · 62:30 (0.0011) · 26:5 (0.00019) · 299:130 (2e-16) [ok]
+  power guard: 3/3 points with >= 6 discordant -> POWERED; V1 fewer at 3/3, b* fewer at 0/3 -> label (i) [ok]
+  SNR@0.1 gap b*-V1: +0.35 [+0.22, +0.48] [ok]  (4 dp +0.3544 [+0.2239, +0.4837]; SNR@0.1 b* -0.915 V1 -1.270; censored 0%)
+  -3 dB failures: V1 711 b* 827 V0 2560 genie 299; V1 0.278 (0.261, 0.295), 711/2560 [ok] (z = 1.96: (0.261, 0.295)); b* · genie 827 · 299 [ok]; V0 BLER 1.000
+  failures -3..+15: V1 711 121 19 3 4 0 0 | b* 827 153 40 6 5 1 1 | genie 299 36 9 1 0 0 0 | V0 2560 2560 2560 2550 2490 2175 1375
+  R(-3 dB) 0.220 [0.174, 0.268] [ok] (b*/V1/genie 827/711/299, undefined 0); R(decision [-3, 0, 3]) 0.250 [0.208, 0.293] [ok] (b*/V1/genie 1020/851/344, undefined 0)
+    R(+0 dB) 0.274 [0.160, 0.378] b*/V1/genie 153/121/36
+    R(+3 dB) 0.677 [0.467, 0.848] b*/V1/genie 40/19/9
+  V0 guard -3 dB: fired 2560 of 2560 rate 1.000 worst 8.632e+08 [ok]; V1 guard fired at -3 dB: 0
+
+## raw_SRBB16e4s3: 448 files
+  chunk plan {(40k, 40)} k = 0..63 at each of 7 SNRs: True [ok]; arms 14 [ok]; KEYS_RAW array shapes {(2560, 16)} [ok]; '|failed' keys: none
+  meta (distinct values over all files): run|git=['62c24e7e']; run|iters=['16']; run|seed=['20260926']; run|dtype=['complex128/float64']; run|beta=['0.7']; run|t_in=['5']; meta|ntrain=['160000.0']; meta|bstar=['gmm1024']; meta|kron_K=['2048']; meta|ll_val|<bstar>=['97.00871495382869']; meta|stagec_ckpt=['/home/HTJ/t2/conf/ckpt/d2sx_SRB_N160000_a3_best.pt']; meta|stagec_ckpt_id=['sha256[:16]=9f6a9d5042587ae5 epoch=1499 best_epoch=1499 role=best 8x4']
+    ntrain 160000 [ok] bstar [ok] ll_val [ok] kron_K [ok] iters 16 [ok]
+    run|git == 62c24e7e on every chunk, no +dirty [ok]; stagec_ckpt_id [ok]; stagec_ckpt [ok]
+  vs raw_SRBB16e4: keys missing on one side none; arms differing in any KEYS_RAW array: ['M-ours-dscore-C-V0', 'M-ours-dscore-C-V1', 'M-ours-dscore-C-V4', 'M-ours-dscore-C-V4b'] [ok]; same set at every point: True; non-Stage-C arrays bit-identical 490/490 [ok]; extra keys (guardH / clip / diverged / ...) differing arms: ['M-ours-dscore-C-V0', 'M-ours-dscore-C-V1'] [ok]
+    V1 @16 block outcomes differing from a1 per SNR (trials): [172, 55, 14, 1, 4, 0, 0] (V1 actually different [ok])
+  b* BLER@16 per SNR: -3:0.3230 +0:0.0598 +3:0.0156 +6:0.0023 +9:0.0020 +12:0.0004 +15:0.0004
+  decision SNRs [-3, 0, 3] [ok]
+  table B b*->V1: 207:106 (1.2e-08) · 66:30 (0.00031) · 24:9 (0.014) · 297:145 (4e-13) [ok]
+  power guard: 3/3 points with >= 6 discordant -> POWERED; V1 fewer at 3/3, b* fewer at 0/3 -> label (i) [ok]
+  SNR@0.1 gap b*-V1: +0.37 [+0.24, +0.51] [ok]  (4 dp +0.3717 [+0.2356, +0.5084]; SNR@0.1 b* -0.915 V1 -1.287; censored 0%)
+  -3 dB failures: V1 726 b* 827 V0 2560 genie 299; V1 0.284 (0.266, 0.301), 726/2560 [ok] (z = 1.96: (0.266, 0.301)); b* · genie 827 · 299 [ok]; V0 BLER 1.000
+  failures -3..+15: V1 726 117 25 4 2 0 0 | b* 827 153 40 6 5 1 1 | genie 299 36 9 1 0 0 0 | V0 2560 2560 2560 2558 2528 2303 1509
+  R(-3 dB) 0.191 [0.141, 0.241] [ok] (b*/V1/genie 827/726/299, undefined 0); R(decision [-3, 0, 3]) 0.225 [0.178, 0.270] [ok] (b*/V1/genie 1020/868/344, undefined 0)
+    R(+0 dB) 0.308 [0.184, 0.417] b*/V1/genie 153/117/36
+    R(+3 dB) 0.484 [0.217, 0.697] b*/V1/genie 40/25/9
+  V0 guard -3 dB: fired 2559 of 2560 rate 1.000 worst 3.461e+10 [ok]; V1 guard fired at -3 dB: 0
+
+## raw_SRPB16e4: 448 files
+  chunk plan {(40k, 40)} k = 0..63 at each of 7 SNRs: True [ok]; arms 14 [ok]; KEYS_RAW array shapes {(2560, 16)} [ok]; '|failed' keys: none
+  meta (distinct values over all files): run|git=['99039ef5']; run|iters=['16']; run|seed=['20260926']; run|dtype=['complex128/float64']; run|beta=['0.7']; run|t_in=['5']; meta|ntrain=['160000.0']; meta|bstar=['kron']; meta|kron_K=['4096']; meta|ll_val|<bstar>=['244.1932863626755']; meta|stagec_ckpt=['/home/HTJ/t2/conf/ckpt/d2sx_SRP_N160000_a1_best.pt']; meta|stagec_ckpt_id=['sha256[:16]=ac4699c78b3e2d80 epoch=694 best_epoch=694 role=best 8x4']
+    ntrain 160000 [ok] bstar [ok] ll_val [ok] kron_K [ok] iters 16 [ok]
+  b* BLER@16 per SNR: -3:0.5297 +0:0.1945 +3:0.0520 +6:0.0113 +9:0.0012 +12:0.0008 +15:0.0000
+  decision SNRs [-3, 0, 3] [ok]
+  table B b*->V1: 606:62 (4.3e-113) · 321:27 (5.2e-65) · 117:8 (5.9e-26) · 1044:97 (4.1e-201) [ok]
+  power guard: 3/3 points with >= 6 discordant -> POWERED; V1 fewer at 3/3, b* fewer at 0/3 -> label (i) [ok]
+  SNR@0.1 gap b*-V1: +2.01 [+1.78, +2.24] [ok]  (4 dp +2.0051 [+1.7842, +2.2398]; SNR@0.1 b* 1.512 V1 -0.493; censored 0%)
+  -3 dB failures: V1 812 b* 1356 V0 2560 genie 428; V1 0.317 (0.299, 0.335), 812/2560 [ok] (z = 1.96: (0.299, 0.335)); b* · genie 1356 · 428 [ok]; V0 BLER 1.000
+    §0 b* / genie -3 dB BLER: 0.530 / 0.167 [ok]
+  failures -3..+15: V1 812 204 24 4 0 0 0 | b* 1356 498 133 29 3 2 0 | genie 428 81 7 1 0 0 0 | V0 2560 2560 2560 2559 2553 2484 1345
+  R(-3 dB) 0.586 [0.554, 0.618] [ok] (b*/V1/genie 1356/812/428, undefined 0); R(decision [-3, 0, 3]) 0.644 [0.620, 0.667] [ok] (b*/V1/genie 1987/1040/516, undefined 0)
+    R(+0 dB) 0.705 [0.661, 0.749] b*/V1/genie 498/204/81
+    R(+3 dB) 0.865 [0.801, 0.928] b*/V1/genie 133/24/7
+  V0 guard -3 dB: fired 2560 of 2560 rate 1.000 worst 4.713e+10; V1 guard fired at -3 dB: 0
+
+## raw_SRPB16e4s2: 448 files
+  chunk plan {(40k, 40)} k = 0..63 at each of 7 SNRs: True [ok]; arms 14 [ok]; KEYS_RAW array shapes {(2560, 16)} [ok]; '|failed' keys: none
+  meta (distinct values over all files): run|git=['62c24e7e']; run|iters=['16']; run|seed=['20260926']; run|dtype=['complex128/float64']; run|beta=['0.7']; run|t_in=['5']; meta|ntrain=['160000.0']; meta|bstar=['kron']; meta|kron_K=['4096']; meta|ll_val|<bstar>=['244.1932863626755']; meta|stagec_ckpt=['/home/HTJ/t2/conf/ckpt/d2sx_SRP_N160000_a2_best.pt']; meta|stagec_ckpt_id=['sha256[:16]=bdc0f5e854d2abbd epoch=744 best_epoch=744 role=best 8x4']
+    ntrain 160000 [ok] bstar [ok] ll_val [ok] kron_K [ok] iters 16 [ok]
+    run|git == 62c24e7e on every chunk, no +dirty [ok]; stagec_ckpt_id [ok]; stagec_ckpt [ok]
+  vs raw_SRPB16e4: keys missing on one side none; arms differing in any KEYS_RAW array: ['M-ours-dscore-C-V0', 'M-ours-dscore-C-V1', 'M-ours-dscore-C-V4', 'M-ours-dscore-C-V4b'] [ok]; same set at every point: True; non-Stage-C arrays bit-identical 490/490 [ok]; extra keys (guardH / clip / diverged / ...) differing arms: ['M-ours-dscore-C-V0', 'M-ours-dscore-C-V1'] [ok]
+    V1 @16 block outcomes differing from a1 per SNR (trials): [123, 61, 15, 4, 0, 0, 0] (V1 actually different [ok])
+  b* BLER@16 per SNR: -3:0.5297 +0:0.1945 +3:0.0520 +6:0.0113 +9:0.0012 +12:0.0008 +15:0.0000
+  decision SNRs [-3, 0, 3] [ok]
+  table B b*->V1: 591:64 (8.5e-108) · 307:18 (4.9e-69) · 112:6 (2.1e-26) · 1010:88 (3.6e-199) [ok]
+  power guard: 3/3 points with >= 6 discordant -> POWERED; V1 fewer at 3/3, b* fewer at 0/3 -> label (i) [ok]
+  SNR@0.1 gap b*-V1: +1.95 [+1.73, +2.18] [ok]  (4 dp +1.9537 [+1.7286, +2.1820]; SNR@0.1 b* 1.512 V1 -0.442; censored 0%)
+  -3 dB failures: V1 829 b* 1356 V0 2560 genie 428; V1 0.324 (0.306, 0.342), 829/2560 [ok] (z = 1.96: (0.306, 0.342)); b* · genie 1356 · 428 [ok]; V0 BLER 1.000
+  failures -3..+15: V1 829 209 27 6 0 0 0 | b* 1356 498 133 29 3 2 0 | genie 428 81 7 1 0 0 0 | V0 2560 2560 2560 2560 2559 2543 2024
+  R(-3 dB) 0.568 [0.536, 0.597] [ok] (b*/V1/genie 1356/829/428, undefined 0); R(decision [-3, 0, 3]) 0.627 [0.603, 0.649] [ok] (b*/V1/genie 1987/1065/516, undefined 0)
+    R(+0 dB) 0.693 [0.649, 0.734] b*/V1/genie 498/209/81
+    R(+3 dB) 0.841 [0.774, 0.902] b*/V1/genie 133/27/7
+  V0 guard -3 dB: fired 2560 of 2560 rate 1.000 worst 7.113e+10 [ok]; V1 guard fired at -3 dB: 0
+
+## raw_SRPB16e4s3: 448 files
+  chunk plan {(40k, 40)} k = 0..63 at each of 7 SNRs: True [ok]; arms 14 [ok]; KEYS_RAW array shapes {(2560, 16)} [ok]; '|failed' keys: none
+  meta (distinct values over all files): run|git=['62c24e7e']; run|iters=['16']; run|seed=['20260926']; run|dtype=['complex128/float64']; run|beta=['0.7']; run|t_in=['5']; meta|ntrain=['160000.0']; meta|bstar=['kron']; meta|kron_K=['4096']; meta|ll_val|<bstar>=['244.1932863626755']; meta|stagec_ckpt=['/home/HTJ/t2/conf/ckpt/d2sx_SRP_N160000_a3_best.pt']; meta|stagec_ckpt_id=['sha256[:16]=5db51008da6cc8df epoch=763 best_epoch=763 role=best 8x4']
+    ntrain 160000 [ok] bstar [ok] ll_val [ok] kron_K [ok] iters 16 [ok]
+    run|git == 62c24e7e on every chunk, no +dirty [ok]; stagec_ckpt_id [ok]; stagec_ckpt [ok]
+  vs raw_SRPB16e4: keys missing on one side none; arms differing in any KEYS_RAW array: ['M-ours-dscore-C-V0', 'M-ours-dscore-C-V1', 'M-ours-dscore-C-V4', 'M-ours-dscore-C-V4b'] [ok]; same set at every point: True; non-Stage-C arrays bit-identical 490/490 [ok]; extra keys (guardH / clip / diverged / ...) differing arms: ['M-ours-dscore-C-V0', 'M-ours-dscore-C-V1'] [ok]
+    V1 @16 block outcomes differing from a1 per SNR (trials): [132, 55, 20, 4, 0, 0, 0] (V1 actually different [ok])
+  b* BLER@16 per SNR: -3:0.5297 +0:0.1945 +3:0.0520 +6:0.0113 +9:0.0012 +12:0.0008 +15:0.0000
+  decision SNRs [-3, 0, 3] [ok]
+  table B b*->V1: 603:67 (9.2e-109) · 325:18 (5.1e-74) · 115:8 (2.1e-25) · 1043:93 (6e-204) [ok]
+  power guard: 3/3 points with >= 6 discordant -> POWERED; V1 fewer at 3/3, b* fewer at 0/3 -> label (i) [ok]
+  SNR@0.1 gap b*-V1: +2.12 [+1.90, +2.35] [ok]  (4 dp +2.1151 [+1.9008, +2.3472]; SNR@0.1 b* 1.512 V1 -0.603; censored 0%)
+  -3 dB failures: V1 820 b* 1356 V0 2560 genie 428; V1 0.320 (0.303, 0.339), 820/2560 [ok] (z = 1.96: (0.303, 0.339)); b* · genie 1356 · 428 [ok]; V0 BLER 1.000
+  failures -3..+15: V1 820 191 26 2 0 0 0 | b* 1356 498 133 29 3 2 0 | genie 428 81 7 1 0 0 0 | V0 2560 2560 2560 2560 2557 2534 2106
+  R(-3 dB) 0.578 [0.544, 0.607] [ok] (b*/V1/genie 1356/820/428, undefined 0); R(decision [-3, 0, 3]) 0.646 [0.622, 0.668] [ok] (b*/V1/genie 1987/1037/516, undefined 0)
+    R(+0 dB) 0.736 [0.695, 0.778] b*/V1/genie 498/191/81
+    R(+3 dB) 0.849 [0.783, 0.908] b*/V1/genie 133/26/7
+  V0 guard -3 dB: fired 2560 of 2560 rate 1.000 worst 1.273e+11 [ok]; V1 guard fired at -3 dB: 0
+
+## aggregate labels and spreads (§6.1)
+  SRB: seed labels ['(i)', '(i)', '(i)'] -> 시드 강건 (3/3 (i)) [ok]
+    spread: SNR@0.1 격차 +0.32 / +0.35 / +0.37 dB (0.05); V1 −3 dB 실패 수 704 / 711 / 726 (22); R(−3 dB) 0.233 / 0.220 / 0.191 (0.042) [ok]; unrounded gap spread 0.0508 dB, unrounded R spread 0.0417; V0 -3 dB failures [2560, 2560, 2560]
+  SRP: seed labels ['(i)', '(i)', '(i)'] -> 시드 강건 (3/3 (i)) [ok]
+    spread: SNR@0.1 격차 +2.01 / +1.95 / +2.12 dB (0.17); V1 −3 dB 실패 수 812 / 829 / 820 (17); R(−3 dB) 0.586 / 0.568 / 0.578 (0.018) [ok]; unrounded gap spread 0.1614 dB, unrounded R spread 0.0183; V0 -3 dB failures [2560, 2560, 2560]
+  §3 scoring (strict, from recomputed values):
+    1. both (i): True; 2. V1 -3 dB BLER (3 dp) in [0.258, 0.293]: [(0.278, True, 'unrounded 0.27773'), (0.284, True, 'unrounded 0.28359')]; 3. gap CI overlaps [+0.18, +0.45]: [('[+0.2239, +0.4837]', np.True_), ('[+0.2356, +0.5084]', np.True_)]
+    4. both (i): True; 5. V1 -3 dB BLER (3 dp) in [0.299, 0.335]: [(0.324, True, 'unrounded 0.32383'), (0.32, True, 'unrounded 0.32031')]; 6. gap CI overlaps [+1.78, +2.24]: [('[+1.7286, +2.1820]', np.True_), ('[+1.9008, +2.3472]', np.True_)]
+
+## §5 checkpoints (torch.load map_location=cpu weights_only=False; sha256[:16] of the files)
+  d2sx_SRB_N160000_a2_best.pt sha 2d3e7eae6bb20008 {'epoch': 1337, 'best_epoch': 1337, 'best_val': 0.24751384556293488, 'stopped_by': None, 'role': 'best', 'rung': 'D2SXSRB160000', 'attempt': 2, 'split_hash': 'c009329584978bd9', 'prior': 'SRB', 'sigma_tag': 'SRB', 'aborted': None}
+  d2sx_SRB_N160000_a2.pt      sha acb7a0852e306929 {'epoch': 1357, 'best_epoch': 1337, 'best_val': 0.24751384556293488, 'stopped_by': 'patience', 'role': 'last', 'rung': 'D2SXSRB160000', 'attempt': 2, 'split_hash': 'c009329584978bd9', 'prior': 'SRB', 'sigma_tag': 'SRB', 'aborted': None}
+    §5 [ok]; best.best_val == last.best_val: True; mtime best 1791784252 last 1791784537
+  d2sx_SRB_N160000_a3_best.pt sha 9f6a9d5042587ae5 {'epoch': 1499, 'best_epoch': 1499, 'best_val': 0.24783873558044434, 'stopped_by': None, 'role': 'best', 'rung': 'D2SXSRB160000', 'attempt': 3, 'split_hash': 'c009329584978bd9', 'prior': 'SRB', 'sigma_tag': 'SRB', 'aborted': None}
+  d2sx_SRB_N160000_a3.pt      sha e4d44ff042e936df {'epoch': 1519, 'best_epoch': 1499, 'best_val': 0.24783873558044434, 'stopped_by': 'patience', 'role': 'last', 'rung': 'D2SXSRB160000', 'attempt': 3, 'split_hash': 'c009329584978bd9', 'prior': 'SRB', 'sigma_tag': 'SRB', 'aborted': None}
+    §5 [ok]; best.best_val == last.best_val: True; mtime best 1791786538 last 1791786818
+  d2sx_SRP_N160000_a2_best.pt sha bdc0f5e854d2abbd {'epoch': 744, 'best_epoch': 744, 'best_val': 0.14912495017051697, 'stopped_by': None, 'role': 'best', 'rung': 'D2SXSRP160000', 'attempt': 2, 'split_hash': '27af93705c6dc289', 'prior': 'SRP', 'sigma_tag': 'SRP', 'aborted': None}
+  d2sx_SRP_N160000_a2.pt      sha 19b7aa5915c7d196 {'epoch': 764, 'best_epoch': 744, 'best_val': 0.14912495017051697, 'stopped_by': 'patience', 'role': 'last', 'rung': 'D2SXSRP160000', 'attempt': 2, 'split_hash': '27af93705c6dc289', 'prior': 'SRP', 'sigma_tag': 'SRP', 'aborted': None}
+    §5 [ok]; best.best_val == last.best_val: True; mtime best 1791755140 last 1791755249
+  d2sx_SRP_N160000_a3_best.pt sha 5db51008da6cc8df {'epoch': 763, 'best_epoch': 763, 'best_val': 0.14876320958137512, 'stopped_by': None, 'role': 'best', 'rung': 'D2SXSRP160000', 'attempt': 3, 'split_hash': '27af93705c6dc289', 'prior': 'SRP', 'sigma_tag': 'SRP', 'aborted': None}
+  d2sx_SRP_N160000_a3.pt      sha 0698a00b93de9ca5 {'epoch': 783, 'best_epoch': 763, 'best_val': 0.14876320958137512, 'stopped_by': 'patience', 'role': 'last', 'rung': 'D2SXSRP160000', 'attempt': 3, 'split_hash': '27af93705c6dc289', 'prior': 'SRP', 'sigma_tag': 'SRP', 'aborted': None}
+    §5 [ok]; best.best_val == last.best_val: True; mtime best 1791764134 last 1791764418
+  d2sx_SRB_N160000_a1_best.pt sha ed437f21af15c305 {'epoch': 1660, 'best_epoch': 1660, 'best_val': 0.24769899249076843, 'stopped_by': None, 'role': 'best', 'rung': 'D2SXSRB160000', 'attempt': 1, 'split_hash': 'c009329584978bd9', 'prior': 'SRB', 'sigma_tag': 'SRB', 'aborted': None}  [ok]; a1 raw ckpt id ['sha256[:16]=ed437f21af15c305 epoch=1660 best_epoch=1660 role=best 8x4'] run|git ['9ad4caa0']
+  d2sx_SRP_N160000_a1_best.pt sha ac4699c78b3e2d80 {'epoch': 694, 'best_epoch': 694, 'best_val': 0.1495504230260849, 'stopped_by': None, 'role': 'best', 'rung': 'D2SXSRP160000', 'attempt': 1, 'split_hash': '27af93705c6dc289', 'prior': 'SRP', 'sigma_tag': 'SRP', 'aborted': None}  [ok]; a1 raw ckpt id ['sha256[:16]=ac4699c78b3e2d80 epoch=694 best_epoch=694 role=best 8x4'] run|git ['99039ef5']
+  partial checkpoints (registered as NOT evaluated): d2sx_SRB_N160000_a4.pt, d2sx_SRB_N160000_a4_best.pt, d2sx_SRB_N160000_a5.pt, d2sx_SRB_N160000_a5_best.pt, d2sx_SRP_N160000_a4.pt, d2sx_SRP_N160000_a4_best.pt, d2sx_SRP_N160000_a5.pt, d2sx_SRP_N160000_a5_best.pt
+
+## GB' npz (results/d2_gbprime_{SRB,SRP}_N160000_a{1,2,3}.npz): ratio nmse_model / nmse_gmm
+  SRB a1: median 0.6472 min 0.5949 max 5.1046 over 20 points [ok]  other keys {'nu': (20,), 'sigma': (20,)}
+  SRB a2: median 0.6158 min 0.5673 max 1.0104 over 20 points [ok]  other keys {'nu': (20,), 'sigma': (20,)}
+  SRB a3: median 0.6174 min 0.5698 max 0.9967 over 20 points [ok]  other keys {'nu': (20,), 'sigma': (20,)}
+  SRP a1: median 0.5836 min 0.4954 max 0.9130 over 20 points [ok]  other keys {'nu': (20,), 'sigma': (20,)}
+  SRP a2: median 0.5860 min 0.5008 max 0.9740 over 20 points [ok]  other keys {'nu': (20,), 'sigma': (20,)}
+  SRP a3: median 0.5840 min 0.4943 max 0.9938 over 20 points [ok]  other keys {'nu': (20,), 'sigma': (20,)}
+
+## cross-check of the own reader against analysis.load_raw (all arms x KEYS_RAW x 7 SNRs)
+  SRBB16e4: 686 arrays compared, 0 differ, load_raw warnings 0, arms only in load_raw (derived, skipped) ['R0-pilot@1'] [ok]
+  SRBB16e4s2: 686 arrays compared, 0 differ, load_raw warnings 0, arms only in load_raw (derived, skipped) ['R0-pilot@1'] [ok]
+  SRBB16e4s3: 686 arrays compared, 0 differ, load_raw warnings 0, arms only in load_raw (derived, skipped) ['R0-pilot@1'] [ok]
+  SRPB16e4: 686 arrays compared, 0 differ, load_raw warnings 0, arms only in load_raw (derived, skipped) ['R0-pilot@1'] [ok]
+  SRPB16e4s2: 686 arrays compared, 0 differ, load_raw warnings 0, arms only in load_raw (derived, skipped) ['R0-pilot@1'] [ok]
+  SRPB16e4s3: 686 arrays compared, 0 differ, load_raw warnings 0, arms only in load_raw (derived, skipped) ['R0-pilot@1'] [ok]
+
+## summary: 152 programmatic comparisons (each may cover several record values), mismatches: 0

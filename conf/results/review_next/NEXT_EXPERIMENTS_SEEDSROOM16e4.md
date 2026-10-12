@@ -111,6 +111,8 @@
 | SRP a2 (SRPB16e4s2) | 591:64 (8.5e-108) · 307:18 (4.9e-69) · 112:6 (2.1e-26) · 1010:88 (3.6e-199) | POWERED (3/3), V1 3/3 · b\* 0/3 | **(i)** | +1.95 [+1.73, +2.18] | 0.324 (0.306, 0.342), 829/2560 | 1356 · 428 | 0.568 [0.536, 0.597] | 0.627 [0.603, 0.649] |
 | SRP a3 (SRPB16e4s3) | 603:67 (9.2e-109) · 325:18 (5.1e-74) · 115:8 (2.1e-25) · 1043:93 (6e-204) | POWERED (3/3), V1 3/3 · b\* 0/3 | **(i)** | +2.12 [+1.90, +2.35] | 0.320 (0.303, 0.339), 820/2560 | 1356 · 428 | 0.578 [0.544, 0.607] | 0.646 [0.622, 0.668] |
 
+[감사 N3] 위 표의 a1 행은 §0 인용이 아니라 a1 기록 파일 (`tables_D2_SR{B,P}B16e4.txt` · `recovery_SR{B,P}B16e4.txt`) 을 같은 생성기로 읽은 것이다 — §0 에 있는 값은 §0 과 같다.
+
 **시드 강건성 라벨 (§1; 분모 3 = a1·a2·a3)**:
 - **SRB: "시드 강건 (3/3 (i))"** (시드별 라벨 a1 (i) · a2 (i) · a3 (i)).
 - **SRP: "시드 강건 (3/3 (i); b* = 씨앗 초기화 GMM)"** (시드별 라벨 a1 (i) · a2 (i) · a3 (i)).
@@ -127,6 +129,8 @@
   - V0 가드 (SRPB16e4s2; `results/guard_D2_SRPB16e4s2.txt`): `C2       -3 M-ours-dscore-C-V0          2560   2560   1.000  7.113e+10`
   - V0 가드 (SRPB16e4s3; `results/guard_D2_SRPB16e4s3.txt`): `C2       -3 M-ours-dscore-C-V0          2560   2560   1.000  1.273e+11`
 
+- **[감사 S2]** §1 의 시드별 V0 −3 dB BLER (a1 / a2 / a3; 실패 수 / 2560): SRB 2560 / 2560 / 2560, SRP 2560 / 2560 / 2560 — 모두 1.000. b\* · genie 의 −3 dB BLER 은 세 시드에서 같다: SRB 0.323 · 0.117, SRP 0.530 · 0.167.
+
 **§3 예측 채점**:
 1. SRB a2·a3 표 B 모두 (i) → **적중** ((i) · (i); 집계 "시드 강건 (3/3 (i))").
 2. SRB V1 −3 dB BLER 이 a1 의 95 % Wilson CI [0.258, 0.293] 안 → **적중** (0.278 · 0.284).
@@ -139,10 +143,16 @@
 
 ### 6.2 그림과 공개 사항
 
-- **그림 (보고 전용)**: `conference/figures/F34seed_wide.{pdf,png}` + 기록 `records/paper_f34seed.txt` (`paper_f34seed.py`): (a) SRB, (b) SRP — Proposed 의 시드 1 · 2 · 3, GMM prior, Perfect CSI; 전 SNR n = 2560 (이 등록의 raw 와 a1 raw 그대로; +6 dB 이상은 실패 수가 한 자리라 곡선이 끊기거나 흔들린다 — 판정점은 −3 / 0 / +3 dB). 스크립트가 세 raw 의 GMM · Perfect CSI 실패 수가 같음과 −3 / 0 / +3 dB 의 수 = `recovery_<TAG>.txt` 를 assert 한다.
+- **그림 (보고 전용)**: `conference/figures/F34seed_wide.{pdf,png}` + 기록 `records/paper_f34seed.txt` (`paper_f34seed.py`): (a) SRB, (b) SRP — Proposed 의 시드 1 · 2 · 3, GMM prior, Perfect CSI; 전 SNR n = 2560 (이 등록의 raw 와 a1 raw 그대로; +6 dB 이상은 실패 수가 한 자리라 곡선이 끊기거나 흔들린다 — 판정점은 −3 / 0 / +3 dB). 스크립트가 세 raw 의 GMM · Perfect CSI 실패 수가 같음과 −3 / 0 / +3 dB 의 수 = `recovery_<TAG>.txt` 를 assert 한다. **[감사 M1] 등록과 다른 점**: §1 '보고 전용' 행은 "그림 없음" 으로 동결했다 — `F34seed_wide` 는 등록에 없던 추가 산출물이다(사용자 지시 10-12 CDT '그래프, 피규어 다 그리고 정보도 함께 커밋, 푸시도 하자' — `DECISIONS.md` 10-12 23:24 KST 줄; 동결 전의 지시였는데 §1 에 반영하지 않았다). 등록된 raw 의 실패 수를 그대로 그린 것이고 새 검정·라벨·점 선택은 없다; 스크립트는 실행 중에 썼다. [감사 N1] "+6 dB 이상은 실패 수가 한 자리" 는 Proposed · Perfect CSI 곡선의 것이다 (GMM prior 는 SRP +6 dB 에서 29 건).
 - **CPU 절반**: runner 는 네 태그 모두 `taskset` 마스크(노드 1 · 3, 96 스레드) 아래에서 돌았다(시작 직후 `taskset -cp` 로 확인: 24-47,72-95,120-143,168-191). runner 시간 44.0 · 45.6 · 58.9 · 64.0 분(§1 추정 SRB 50–57 · SRP 82–106 분); 전체 10-12 09:26 → 13:16 CDT (3 시간 50 분; 추정 4.7–5.8 시간).
-- **실행 중 main 커밋 없음**(HEAD 62c24e7e 그대로). 그 사이에 한 것(HEAD·`conf/code`·`Demo`·이 문서·`DECISIONS.md` 는 건드리지 않음): `git push origin main` 과 paper 브랜치 동기화 세 번(원격만 갱신), 작업 트리의 `docs/RESULTS.md` §25 (레이 트레이싱 풀 요약; 미커밋으로 paper 브랜치에 실림), 이 절의 생성기와 그림 스크립트 작성.
+- **실행 중 main 커밋 없음**(HEAD 62c24e7e 그대로). 그 사이에 한 것(HEAD·`conf/code`·`Demo`·이 문서·`DECISIONS.md` 는 건드리지 않음): `git push origin main` 과 paper 브랜치 동기화 세 번(원격만 갱신 [감사 N2: HEAD · 인덱스 · 작업 트리는 그대로, 로컬 `paper` 참조와 원격만 갱신]), 작업 트리의 `docs/RESULTS.md` §25 (레이 트레이싱 풀 요약; 미커밋으로 paper 브랜치에 실림), 이 절의 생성기와 그림 스크립트 작성.
 - **실행 중에 본 것**: 작성자는 SRB 두 태그가 수용된 뒤·SRP 태그가 도는 동안(10-12 11:17 CDT ~) SRB 의 `tables_D2_SRBB16e4s{2,3}.txt` · `recovery_*.txt` 를 읽어 생성기를 시험했고 SRB 의 결과(3/3 (i))를 사용자에게 보고했다. SRP 의 결과 파일은 `SEEDSROOM_DONE` 뒤에 읽었다. GB′ 값은 §5 추가 줄 둘(동결 전 SRB, 실행 중 SRP).
 - 함께 돈 것(결과 중립 — 수신기는 CPU 결정적; 세션 기록 기준): SRP a2 · a3 의 GB′ (GPU 5, CPU 쌍 69,165 — 마스크 밖; 11:39 CDT 까지).
 - 등록 밖 체크포인트 a4 · a5 (09:15 CDT 에 멈춘 부분 학습)는 평가하지 않았다.
 - 기록 감사(Fable)는 이 절을 쓴 뒤에 받는다 — 결과는 추가 줄로 적는다.
+
+### 6.3 기록 감사 (Fable 5.1 서브에이전트, 보고서 파일 mtime 2026-10-12 13:49 CDT; `prereg_audit_2026-10-11/audit_SEEDSROOM16e4.md`, 재계산 `recompute_seedsroom{,_docs}.py` → `.out`, 등록 도구 재실행 `rerun_seedsroom_*`)
+
+감사 대상 = 커밋 36022add. **§5 · §6 의 수치·라벨·예측 채점·수용 오류 0** — 자체 판독기로 raw 넷(448 청크씩)과 a1 raw 둘을 직접 읽어 표 B 의 모든 양(판정점 −3 / 0 / +3, 점별 a:b 와 정확 부호검정 p, pooled, power guard, 방향 수, 라벨), −3 dB 실패 수와 Wilson 구간, SNR@0.1 격차와 CI, 회수율과 CI 를 다시 계산(등록 §0 · §5 · §6: 프로그램 비교 152 건·약 400 값, 다른 것 0). 두 집계 라벨이 동결된 규칙으로 성립: SRB "시드 강건 (3/3 (i))", SRP "시드 강건 (3/3 (i); b* = 씨앗 초기화 GMM)". 수용의 독립 확인: 모든 청크 `run|git` 62c24e7e (`+dirty` 없음), meta·체크포인트 id 일치, **Stage C 가 아닌 arm 의 배열 490 개(태그마다)가 a1 raw 와 비트 동일**, 다른 것은 정확히 {V0, V1, V4, V4b}; `eval_accept` 재실행 `ACCEPT: OK` × 4, `--ref-arms all` 보고서 넷이 기록과 바이트 동일; 생성기 재실행이 6.1 과 같음; `F34seed_wide` 의 PDF · PNG · 기록이 바이트 동일하게 다시 그려지고 70 개 실패 수가 raw 와 같음; §1–§3 은 62c24e7e 뒤로 바뀌지 않음(diff = §5 추가 줄 2 와 §6 뿐). 동반 기록(EXPERIMENTS 행 · RESULTS §25 · README · DECISIONS): 수·문구 약 870 개 중 다른 것 1 (아래 S1).
+
+**MUST 1 · SHOULD 4 · NIT 6 — 모두 반영(수치·라벨·채점 불변; 기록 2026-10-12 13:50 CDT, Opus 5.5)**: **M1** 등록 §1 은 "그림 없음" 이었는데 `F34seed_wide` 를 만들고 그 차이를 밝히지 않았다 → 6.2 의 그림 항목에 "등록과 다른 점" 을 적음(제자리). S1 `DECISIONS.md` 03:18 KST 줄의 "runner 44–63 분/태그" → 44–64 분 (44.0 · 45.6 · 58.9 · 64.0) — 정정 줄. S2 §1 이 보고 전용으로 등록한 시드별 V0 −3 dB BLER 을 6.1 에 추가. S3 GB′ 의 출처 파일(`results/d2_gbprime_{SRB,SRP}.csv`, 시드 npz)을 커밋에 넣음. S4 `conference/figures/README.md` 의 레이 트레이싱 절 머리 문단("모두 범례 11 곡선" 은 `F34seed_wide` 에 맞지 않음 — 그 그림은 5 곡선·보고 전용이고 원고 범례 그림이 아님)을 고치고 스크립트·기록·등록 목록에 시드 것을 넣음. N1 "+6 dB 이상 한 자리" 는 Proposed · Perfect CSI 의 것; N2 "원격만 갱신" 의 뜻; N3 a1 행의 출처; N4 머리말의 'v2 의 §1 변경' 목록에 검토 N6 (§1 '태그·실행' 의 `tmux -c` 와 start 줄 확인)이 빠져 있다; N5 `docs/RESULTS.md` §25 에서 인용한 EXPERIMENTS 행에 없는 다섯 곳(풀 크기, 25.2 의 감사 결과, "Perfect CSI 만으로 선별", 두 패널 그림, 절 제목)을 고치거나 출처를 붙임; N6 `WORK_QUEUE.md` 머리 줄의 SRP 라벨에 한정어. 감사가 확인하지 못한 것: v1 과 v2 의 §3 이 같다는 것(v1 은 커밋된 적이 없다 — 검토 머리말의 해시 증언과 검토가 적은 §3 내용만 있음), 6.2 의 세션 기록 기준 진술(`taskset -cp` 값, 실행 중 열람 시각, GPU 번호), DMC · SRT 수의 raw 재계산(행·등록 문구와만 대조).

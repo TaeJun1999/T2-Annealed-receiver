@@ -1,6 +1,6 @@
 # 작업 큐 (review_next 이후; 갱신할 때마다 맨 위 시각을 바꾼다)
 
-갱신 2026-10-12 13:18 CDT (Opus 5.5). **Sionna 방 두 풀: 주 실행·baseline·그림 보강 (n = 20480 / 81920)·시드 강건성 (SEEDSROOM16e4: 두 풀 모두 3/3 (i)) 끝. 등록 실행 없음 — main 커밋 가능.** 결과 요약 = `docs/RESULTS.md` §25, 그림 설명 = `conference/figures/README.md` 의 레이 트레이싱 절; main · paper 브랜치 원격과 동기화. **CPU 는 절반만** (사용자 10-12 CDT: runner 를 `taskset -c 24-47,120-143,72-95,168-191` 아래에서). 남은 것: SEEDSROOM16e4 기록 감사 (Fable) 반영. 사용자 결정 대기: 원고에 무엇을 실을지 (사용자가 GitHub 의 결과를 보고 정함).
+갱신 2026-10-12 13:18 CDT (Opus 5.5). **Sionna 방 두 풀: 주 실행·baseline·그림 보강 (n = 20480 / 81920)·시드 강건성 (SEEDSROOM16e4: SRB 3/3 (i) · SRP 3/3 (i) — SRP 는 b* = 씨앗 초기화 GMM 대비) 끝. 등록 실행 없음 — main 커밋 가능.** 결과 요약 = `docs/RESULTS.md` §25, 그림 설명 = `conference/figures/README.md` 의 레이 트레이싱 절; main · paper 브랜치 원격과 동기화. **CPU 는 절반만** (사용자 10-12 CDT: runner 를 `taskset -c 24-47,120-143,72-95,168-191` 아래에서). SEEDSROOM16e4 기록 감사 (Fable; 수치·라벨 오류 0, MUST 1 · SHOULD 4 · NIT 6) 반영 끝. 사용자 결정 대기: 원고에 무엇을 실을지 (사용자가 GitHub 의 결과를 보고 정함).
 
 ## 원고 목표 (사용자 10-05 CDT)
 - **IEEE ICC 2027** (Washington DC). 공식 call 페이지 기준 투고 마감 **2026-10-16**, 통지 2027-01-15, 최종본 2027-02-19. 투고본 **6 쪽 (10 pt) 상한** — 넘으면 심사 없이 거절. 저널판 없음 (DECISIONS 3a64d0ae) → 6 쪽에 못 넣는 것은 arXiv 확장판.
@@ -13,7 +13,7 @@
 ## 진행 중
 | 작업 | 자원 | 상태 |
 |---|---|---|
-| **SEEDSROOM16e4 기록 감사** (Fable; §6 = 이 갱신과 같은 커밋) | — | 진행 중 (읽기 전용). 반영 뒤 커밋·동기화. 등록 밖의 부분 체크포인트 `ckpt/d2sx_{SRB,SRP}_N160000_a{4,5}*.pt` (128 epoch 쯤에서 멈춤) 는 쓰지 않는다 |
+| 등록 밖의 부분 체크포인트 (참고) | — |  `ckpt/d2sx_{SRB,SRP}_N160000_a{4,5}*.pt` (128 epoch 쯤에서 멈춤) 는 쓰지 않는다 |
 | 원고 (IEEE ICC 2027, 마감 2026-10-16) — 웹 채팅에서 사용자가 작성, 자료는 paper 브랜치 (`conference/tools/sync_paper_branch.sh`) | — | 진행 중. 실험 큐·GPU 큐 비어 있음 |
 
 ## 대기열 (순서대로)
