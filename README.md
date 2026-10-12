@@ -1,7 +1,7 @@
 # paper — IEEE ICC 2027 원고 자료 (웹 작성용)
 
 main 의 원고 자료와 **모든 실험의 결과 기록**을 모은 브랜치다 (raw 시행 데이터·배열 데이터 .npz·실험 코드·로그는 없음 — 그것들은 main 과 서버에 있다). main 62c24e7e 에서
-2026-10-12 09:26 CDT 에 만들었다 (`conference/tools/sync_paper_branch.sh`). 원본은 main 이다.
+2026-10-12 09:47 CDT 에 만들었다 (`conference/tools/sync_paper_branch.sh`). 원본은 main 이다. 단 main 에 아직 커밋하지 않은 작업 트리 파일 1 개가 들어 있다 (등록 실행 중에는 main 커밋 금지 — 끝난 뒤 커밋).
 
 먼저 읽을 것: `conference/PAPER_PLAN.md` → `conference/README.md` → `conference/figures/README.md` (논문 그림·캡션 메모)
 → `conference/figures/TERMS.md` (그림·본문 용어) → `docs/RESULTS.md` → `docs/paper/CONTRIBUTIONS.md`.
