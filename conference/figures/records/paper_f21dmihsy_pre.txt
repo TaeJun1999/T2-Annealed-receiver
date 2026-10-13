@@ -1,0 +1,16 @@
+paper_f21dmihsy_pre -- order-of-events evidence for NEXT_EXPERIMENTS_FIGHSYDMI16e4 §1 (figure rule; review N-9): the hsy / hsy12 modes of paper_f21dmc.py were written and frozen BEFORE any count table of the FY / FZ rows existed.
+written 2026-10-12 23:31:39 CDT (= 2026-10-13 13:31:39 KST); main HEAD ba17b1a4 (the run commit of registration v3; the figure script is an uncommitted working-tree change until FIGHS_DONE)
+sha256 paper_f21dmc.py  e6b9e55a8a93be957a68c2bbaba5e971b110135d9655e340c443abf78a5a2d52
+sha256 fighs_merge.py   7af8501fcee02731beb51491a3df7a48b8efb5d0ebf2bf8da8ab6ccda0f00c1d (unchanged)
+count tables results/review_next/fighs_F[YZ]*.txt present: 0; accept files F[YZ]*_accept.txt present: 0
+run log at this moment:
+    [fighs 10-12 23:21 CDT] start (git ba17b1a4) rows: all resume=0 skip0 10000; SNR:n per row FYDMIB16e4=12:327680/chunk40 FYALDDMI=12:327680/chunk40 FZDMIB16e4=15
+    [fighs 10-12 23:21 CDT] phase C: ALD estimator controls (sequential, one free GPU each), then receiver controls (trials 0..39 at each row's SNR, rows in paralle
+    [fighs 10-12 23:21 CDT] FYALDDMI ALD estimator control: ald.py estimate --tag FYCALDDMI --set test on GPU 3 (copies of the frozen records of PILDMI)
+    [fighs 10-12 23:22 CDT] FZALDDMI ALD estimator control: ald.py estimate --tag FZCALDDMI --set test on GPU 3 (copies of the frozen records of PILDMI)
+    [fighs 10-12 23:24 CDT] phase C done: 4 receiver control(s) OK, 2 ALD estimator control(s) OK
+    [fighs 10-12 23:24 CDT] FYDMIB16e4 run: --testbed D2 --prior DMI --cell C2 --chunk 40 --ntrain 160000 --stagec-ckpt /home/HTJ/t2/conf/ckpt/d2sx_DMI_N160000_a1_b
+    [fighs 10-12 23:24 CDT] FYALDDMI ALD PILDMI: regen (CPU) + estimate (GPU 3) on trials 10000.., rotation none (tune record results/ald/tune_PILDMI.json)
+FYDMIB16e4 chunks done: 139 of 8192 (no chunk of it was opened; the test renders below read no FY / FZ raw: fighs_merge._load stops at the missing count table)
+regression (FIG_OUTDIR = scratch, taskset -c 0-15): the 12 existing modes (DMC, SRT, DMI, DMI hs, SRB, SRB hs, SRB hsx, SRB hsx12, SRP, SRP hs, SRP hsx, SRP hsx12) reproduce the committed records (12 of 12 byte-identical) and figures (24 of 24 PDF/PNG byte-identical).
+test renders (FIGHS_ALLOW_MISSING=1, scratch): DMI hsy rc 0 (32 fallback warnings = every FY / FZ merge call), DMI hsy12 rc 0 (16).
