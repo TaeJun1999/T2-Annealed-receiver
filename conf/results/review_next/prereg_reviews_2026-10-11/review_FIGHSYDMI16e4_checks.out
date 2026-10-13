@@ -1,0 +1,140 @@
+==================== pre_sim.out
+DIE #1 (line 16): conf/code or Demo dirty
+DIE #2 (line 17): results/review_next/NEXT_EXPERIMENTS_FIGHSYDMI16e4.md not tracked+clean (commit the registration first)
+DIE #3 (line 18): HEAD is not the run commit (the last commit touching results/review_next/NEXT_EXPERIMENTS_FIGHSYDMI16e4.md); no other commit until FIGHS_DONE
+preconditions that would die now: 3
+
+==================== flow_sim.out
+################ scenario fresh_run1
+[fighs] start (git abc1234) rows: all resume=0 skip0 10000; SNR:n per row FYDMIB16e4=12:327680/chunk40 FYALDDMI=12:327680/chunk40 FZDMIB16e4=15:3072000/chunk400 FZALDDMI=15:327680/chunk40 
+[fighs] phase C: ALD estimator controls (sequential, one free GPU each), then receiver controls (trials 0..39 at each row's SNR, rows in parallel)
+[fighs] phase C done: 4 receiver control(s) OK, 2 ALD estimator control(s) OK
+[fighs] FYDMIB16e4 run: --testbed D2 --prior DMI --cell C2 --chunk 40 --ntrain 160000 --stagec-ckpt /home/HTJ/t2/conf/ckpt/d2sx_DMI_N160000_a1_best.pt  --snr 12 --n 327680 --skip0 10000 --arm R0-pilot R1-turbo R2-ours-G R3-bigamp M-ours-bstar M-ours-dscore-C-V1 R5-genie
+[fighs] FYALDDMI ALD PILDMI: regen (CPU) + estimate (GPU 0) on trials 10000.., rotation none (tune record results/ald/tune_PILDMI.json)
+[fighs] FYDMIB16e4 acceptance rc=0 (ACCEPT: OK -- stub ACCEPT (f): OK )
+[fighs] FZALDDMI ALD PILDMI: reusing fresh_run1/results/ald/ald_PILDMI_hisnr5.npz (prov git abc1234)
+[fighs] FYALDDMI ALD PILDMI: reusing fresh_run1/results/ald/ald_PILDMI_hisnr5.npz (prov git abc1234)
+[fighs] FYALDDMI run: --testbed D2 --prior DMI --cell C2 --chunk 40 --ntrain 160000 --stagec-ckpt /home/HTJ/t2/conf/ckpt/d2sx_DMI_N160000_a1_best.pt --ald-file fresh_run1/results/ald/ald_PILDMI_hisnr5.npz --snr 12 --n 327680 --skip0 10000 --arm ALD-pilot R5-genie
+[fighs] FYALDDMI acceptance rc=0 (ACCEPT: OK -- stub ACCEPT (f): OK )
+[fighs] FZDMIB16e4 run: --testbed D2 --prior DMI --cell C2 --chunk 400 --ntrain 160000 --stagec-ckpt /home/HTJ/t2/conf/ckpt/d2sx_DMI_N160000_a1_best.pt  --snr 15 --n 3072000 --skip0 10000 --arm R0-pilot R1-turbo R2-ours-G R3-bigamp M-ours-bstar M-ours-dscore-C-V1 R5-genie
+[fighs] FZDMIB16e4 acceptance rc=0 (ACCEPT: OK -- stub ACCEPT (f): OK )
+[fighs] FZALDDMI ALD PILDMI: reusing fresh_run1/results/ald/ald_PILDMI_hisnr5.npz (prov git abc1234)
+[fighs] FZALDDMI run: --testbed D2 --prior DMI --cell C2 --chunk 40 --ntrain 160000 --stagec-ckpt /home/HTJ/t2/conf/ckpt/d2sx_DMI_N160000_a1_best.pt --ald-file fresh_run1/results/ald/ald_PILDMI_hisnr5.npz --snr 15 --n 327680 --skip0 10000 --arm ALD-pilot R5-genie
+[fighs] FZALDDMI acceptance rc=0 (ACCEPT: OK -- stub ACCEPT (f): OK )
+[fighs] FIGHS_DONE ok=4 fail=0
+exit code would be 0
+--- python calls:
+17
+PY code/ald.py regen --tag PILDMI --prior DMI --cell C2 --fits-tag DMIB16e4 --set hisnr5
+PY code/ald.py estimate --tag PILDMI --ckpt ckpt/d2sx_DMI_N160000_a1_best.pt --set hisnr5
+################ scenario nogpu_early_run1
+[fighs] start (git abc1234) rows: all resume=0 skip0 10000; SNR:n per row FYDMIB16e4=12:327680/chunk40 FYALDDMI=12:327680/chunk40 FZDMIB16e4=15:3072000/chunk400 FZALDDMI=15:327680/chunk40 
+[fighs] phase C: ALD estimator controls (sequential, one free GPU each), then receiver controls (trials 0..39 at each row's SNR, rows in parallel)
+[fighs] phase C done: 4 receiver control(s) OK, 2 ALD estimator control(s) OK
+[fighs] FYALDDMI ABORT: no free GPU for the ALD estimate (resume later; no automatic retry)
+[fighs] FYALDDMI early ALD estimate not made (phase R tries once more)
+[fighs] FZALDDMI ABORT: no free GPU for the ALD estimate (resume later; no automatic retry)
+[fighs] FZALDDMI early ALD estimate not made (phase R tries once more)
+[fighs] FYDMIB16e4 run: --testbed D2 --prior DMI --cell C2 --chunk 40 --ntrain 160000 --stagec-ckpt /home/HTJ/t2/conf/ckpt/d2sx_DMI_N160000_a1_best.pt  --snr 12 --n 327680 --skip0 10000 --arm R0-pilot R1-turbo R2-ours-G R3-bigamp M-ours-bstar M-ours-dscore-C-V1 R5-genie
+[fighs] FYDMIB16e4 acceptance rc=0 (ACCEPT: OK -- stub ACCEPT (f): OK )
+[fighs] FYALDDMI ABORT: no free GPU for the ALD estimate (resume later; no automatic retry)
+[fighs] FZDMIB16e4 run: --testbed D2 --prior DMI --cell C2 --chunk 400 --ntrain 160000 --stagec-ckpt /home/HTJ/t2/conf/ckpt/d2sx_DMI_N160000_a1_best.pt  --snr 15 --n 3072000 --skip0 10000 --arm R0-pilot R1-turbo R2-ours-G R3-bigamp M-ours-bstar M-ours-dscore-C-V1 R5-genie
+[fighs] FZDMIB16e4 acceptance rc=0 (ACCEPT: OK -- stub ACCEPT (f): OK )
+[fighs] FZALDDMI ABORT: no free GPU for the ALD estimate (resume later; no automatic retry)
+[fighs] FIGHS_DONE ok=2 fail=2
+exit code would be 2
+--- python calls:
+6
+################ scenario resume of fresh_run1 with FZALDDMI alone (same sandbox = same files)
+[fighs] start (git abc1234) rows: FZALDDMI resume=1 skip0 10000; SNR:n per row FYDMIB16e4=12:327680/chunk40 FYALDDMI=12:327680/chunk40 FZDMIB16e4=15:3072000/chunk400 FZALDDMI=15:327680/chunk40 
+[fighs] phase C: ALD estimator controls (sequential, one free GPU each), then receiver controls (trials 0..39 at each row's SNR, rows in parallel)
+[fighs] phase C done: 4 receiver control(s) OK, 2 ALD estimator control(s) OK
+[fighs] FZALDDMI SKIP: genie reference FZDMIB16e4 not accepted
+[fighs] FIGHS_DONE ok=0 fail=1
+exit code would be 1
+[fighs] FZALDDMI ALD PILDMI: reusing fresh_run1/results/ald/ald_PILDMI_hisnr5.npz (prov git abc1234)
+################ scenario resume of fresh_run1, all rows
+[fighs] start (git abc1234) rows: all resume=1 skip0 10000; SNR:n per row FYDMIB16e4=12:327680/chunk40 FYALDDMI=12:327680/chunk40 FZDMIB16e4=15:3072000/chunk400 FZALDDMI=15:327680/chunk40 
+[fighs] phase C: ALD estimator controls (sequential, one free GPU each), then receiver controls (trials 0..39 at each row's SNR, rows in parallel)
+[fighs] phase C done: 4 receiver control(s) OK, 2 ALD estimator control(s) OK
+[fighs] FYALDDMI ALD PILDMI: reusing fresh_run1/results/ald/ald_PILDMI_hisnr5.npz (prov git abc1234)
+[fighs] FZALDDMI ALD PILDMI: reusing fresh_run1/results/ald/ald_PILDMI_hisnr5.npz (prov git abc1234)
+[fighs] FYDMIB16e4 acceptance rc=0 (ACCEPT: OK -- stub ACCEPT (f): OK )
+[fighs] FYALDDMI ALD PILDMI: reusing fresh_run1/results/ald/ald_PILDMI_hisnr5.npz (prov git abc1234)
+[fighs] FYALDDMI acceptance rc=0 (ACCEPT: OK -- stub ACCEPT (f): OK )
+[fighs] FZDMIB16e4 acceptance rc=0 (ACCEPT: OK -- stub ACCEPT (f): OK )
+[fighs] FZALDDMI ALD PILDMI: reusing fresh_run1/results/ald/ald_PILDMI_hisnr5.npz (prov git abc1234)
+[fighs] FZALDDMI acceptance rc=0 (ACCEPT: OK -- stub ACCEPT (f): OK )
+[fighs] FIGHS_DONE ok=4 fail=0
+exit code would be 0
+
+==================== flow_sim2.out
+################ proposed script, scenario A: fresh run where FYDMIB16e4 fails acceptance (f)
+[fighs] start (git abc1234) rows: all resume=0 skip0 10000; SNR:n per row FYDMIB16e4=12:327680/chunk40 FYALDDMI=12:327680/chunk40 FZDMIB16e4=15:3072000/chunk400 FZALDDMI=15:327680/chunk40 
+[fighs] phase C: ALD estimator controls (sequential, one free GPU each), then receiver controls (trials 0..39 at each row's SNR, rows in parallel)
+[fighs] phase C done: 4 receiver control(s) OK, 2 ALD estimator control(s) OK
+[fighs] FYALDDMI ALD PILDMI: regen (CPU) + estimate (GPU 0) on trials 10000.., rotation none (tune record results/ald/tune_PILDMI.json)
+[fighs] FYDMIB16e4 acceptance rc=1 (ACCEPT: OK -- stub ACCEPT (f): FAILED )
+[fighs] FYDMIB16e4 INVALID: acceptance failed -- no count table (cause -> §6; a re-run needs user approval)
+[fighs] FYALDDMI SKIP: genie reference FYDMIB16e4 not accepted
+[fighs] FZDMIB16e4 SKIP: FYDMIB16e4 (the same receivers and tools, 5.5 h) was not accepted in this call -- the 51 h row is not started before the cause is known (--resume)
+[fighs] FZALDDMI SKIP: genie reference FZDMIB16e4 not accepted
+[fighs] FZALDDMI ALD PILDMI: reusing propA_run2/results/ald/ald_PILDMI_hisnr5.npz (prov git abc1234)
+[fighs] FIGHS_DONE ok=0 fail=4
+exit code would be 4
+################ proposed script, scenario B: fresh run, then --resume FZALDDMI alone (EARLY must not outlive FIGHS_DONE)
+[fighs] phase C done: 4 receiver control(s) OK, 2 ALD estimator control(s) OK
+[fighs] FZALDDMI SKIP: genie reference FZDMIB16e4 not accepted
+[fighs] FZALDDMI ALD PILDMI: reusing propB_run2/results/ald/ald_PILDMI_hisnr5.npz (prov git abc1234)
+[fighs] FIGHS_DONE ok=0 fail=1
+exit code would be 1
+################ proposed script, scenario C: fresh run, all OK
+[fighs] FYDMIB16e4 acceptance rc=0 (ACCEPT: OK -- stub ACCEPT (f): OK )
+[fighs] FZALDDMI ALD PILDMI: reusing propC_run2/results/ald/ald_PILDMI_hisnr5.npz (prov git abc1234)
+[fighs] FYALDDMI ALD PILDMI: reusing propC_run2/results/ald/ald_PILDMI_hisnr5.npz (prov git abc1234)
+[fighs] FYALDDMI acceptance rc=0 (ACCEPT: OK -- stub ACCEPT (f): OK )
+[fighs] FZDMIB16e4 acceptance rc=0 (ACCEPT: OK -- stub ACCEPT (f): OK )
+[fighs] FZALDDMI ALD PILDMI: reusing propC_run2/results/ald/ald_PILDMI_hisnr5.npz (prov git abc1234)
+[fighs] FZALDDMI acceptance rc=0 (ACCEPT: OK -- stub ACCEPT (f): OK )
+[fighs] FIGHS_DONE ok=4 fail=0
+exit code would be 0
+
+==================== raw_shape.out
+chunk file D2_C2_DMI_Nr8_T16_Tp4_dft_snr15_skip10000_n40.npz: 108 keys; per-trial arrays 61 {((16,), 'int64'): 7, ((16,), 'float64'): 45, ((), 'float64'): 7, ((2,), 'float64'): 2}; meta/run/0-d keys 47
+uncompressed per-trial bytes (all per-trial keys): 6744 B -> n = 3,072,000: 19.3 GiB; n = 327,680: 2.06 GiB (load_raw holds parts + concatenated per key: peak ~ total + one key)
+file size: chunk-40 mean 70.8 KiB; synthetic chunk-400 456.4 KiB (1168 B/trial vs 1812 B/trial)
+disk: FYDMIB16e4 8192 x chunk-40 = 0.55 GiB; FZDMIB16e4 7680 x chunk-400 = 3.34 GiB
+disk: ALD rows 8192 x 30.3 KiB = 0.24 GiB each; ALD pilots + estimate hisnr5 = 2 x 0.62 GiB
+read every key once, chunk-40: 4.7 ms per file
+read every key once, chunk-400 (synthetic): 8.5 ms per file
+
+==================== post_timing.out
+(b) run_manifest loop: 3.4 ms per chunk-40 file -> 8192 files 28 s; 7680 files 26 s (per-file cost is meta-dominated, the same for chunk 400)
+(c) acc_extra (f) loop: 0.29 ms per file -> 8192 files 2 s
+(d) os.path.exists walk: 3.4 us per file (2048 files)
+(e) run_manifest loop on the synthetic chunk-400 file: 3.4 ms per file
+(a) load_raw raw_FHDMIB16e4: 2048 files, 7.3 s (3.6 ms per file), arrays held 0.51 GiB for 81920 trials (6744 B per trial), maxRSS 0.06 -> 0.64 GiB, warnings 0
+    -> FYDMIB16e4 (8192 chunk-40 files, 327,680 trials): ~29 s, ~2.1 GiB held
+    -> FZDMIB16e4 (7680 chunk-400 files, 3,072,000 trials): held ~19.3 GiB (+ one key's parts while concatenating); read time ~ 7680 x (8.5 ms + open) from raw_shape.out
+
+==================== ald_overhead.out
+file 160 MiB (hhat (2, 81920, 32) complex128): load hhat+b 0.17 s, sha256 + tune 0.24 s, 4 small reads 0.000 s; held 160 MiB
+scaled to the hisnr5 file (x4.00): ~1.7 s single-thread per chunk, 0.66 GiB held + 0.66 GiB transient per worker -> x192 workers: 126 GiB held, up to 252 GiB at the first round
+ALD row CPU per chunk [estimate]: FHALDDMI measured 13.8 s wall x 36.7 / 192 = 2.6 s single-thread equivalent (84 MB file, mean skip 20240); hisnr5 rows: + skip (173840 - 20240) x 47.5 us = 7.3 s + file overhead ~1.5 s
+  => ~11.4 s per chunk x 8192 / 36.7 = 0.71 h per ALD row (registration: 0.7 h)
+
+==================== ald_regen_check.out
+ald.py parses; 'hisnr5' occurrences: 4
+_regen_one +12 dB trials 10000..10063 vs pilots_PILDMI_hisnr.npz: {'b': True, 'H': True, 'G': True, 'sigma2': True}  (0.8 s)
+_regen_one +15 dB trials 10000..10063 vs pilots_PILDMI_hisnr.npz: {'b': True, 'H': True, 'G': True, 'sigma2': True}  (0.6 s)
+REGEN-PREFIX: OK
+FYDMIB16e4: chunk_plan 8192 chunks, first (10000, 40), last (337640, 40), last trial 337679; == eval_accept plan: True
+FZDMIB16e4: chunk_plan 7680 chunks, first (10000, 400), last (3081600, 400), last trial 3081999; == eval_accept plan: True
+F?ALDDMI: chunk_plan 8192 chunks, first (10000, 40), last (337640, 40), last trial 337679; == eval_accept plan: True
+control (FZ row, --chunk 400 --n 40): [(0, 40)]
+
+==================== proposed script diff (code/run_fighsydmi16e4.sh -> scratch copy; bash -n OK)
+213a214
+>   [ $TAG = FZDMIB16e4 ] && sel FYDMIB16e4 && [ "${ACC[FYDMIB16e4]}" != 0 ] && { log "$TAG SKIP: FYDMIB16e4 (the same receivers and tools, 5.5 h) was not accepted in this call -- the 51 h row is not started before the cause is known (--resume)"; FAIL=$((FAIL+1)); continue; }
+228a230
+> wait $EP 2>/dev/null   # the background EARLY job never outlives the script (FIGHS_DONE is the last line of the log)

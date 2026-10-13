@@ -1,0 +1,14 @@
+# original vs patched eval_accept.py on existing raws (read-only): rc, wall, max RSS | first output bytes
+orig_ok: rc=0 40.8 s maxRSS 0.49 GiB | ACCEPT: OK -- FHALDDMI 
+patch_ok: rc=0 5.5 s maxRSS 0.09 GiB | ACCEPT: OK -- FHALDDMI 
+orig_neg: rc=1 40.9 s maxRSS 0.49 GiB | ACCEPT: FAILED   FHALDDMI ('C2', 6): replay vs raw_FHALDSRB (R5-genie): shared 20480/20480, arms differing ['R5-genie'] (max |diff| 626)   FHALDDMI ('C2', 9): replay vs raw_FHALDSRB (R5-genie): shared 20480/20480, arms differing ['R5-genie'] (max |diff| 3.49) 
+patch_neg: rc=1 5.2 s maxRSS 0.09 GiB | ACCEPT: FAILED   FHALDDMI ('C2', 6): replay vs raw_FHALDSRB (R5-genie): shared 20480/20480, arms differing ['R5-genie'] (max |diff| 626)   FHALDDMI ('C2', 9): replay vs raw_FHALDSRB (R5-genie): shared 20480/20480, arms differing ['R5-genie'] (max |diff| 3.49) 
+OK-case outputs byte-identical
+NEG-case outputs byte-identical
+orig_dry_ZQDRYA_best_dc784649f1e9b890_C2: rc=0 0.8 s maxRSS 0.21 GiB | ACCEPT: OK -- ZQDRYA 
+patch_dry_ZQDRYA_best_dc784649f1e9b890_C2: rc=0 0.3 s maxRSS 0.06 GiB | ACCEPT: OK -- ZQDRYA 
+orig_dry_ZQDRYA_____C2: rc=1 0.8 s maxRSS 0.21 GiB | ACCEPT: FAILED   D2_C2_DMI_Nr8_T16_Tp4_dft_snr15_skip10000_n40.npz: ckpt id sha256[:16]=dc784649f1e9b890 epoch=1142 best_epoch=1142 role=best 8x4 present, tag spec '-:-' expects none   D2_C2_DMI_Nr8_T16_Tp4_dft_snr15_skip10040_n40.npz: ckpt id sha256[:16]=dc78
+patch_dry_ZQDRYA_____C2: rc=1 0.3 s maxRSS 0.06 GiB | ACCEPT: FAILED   D2_C2_DMI_Nr8_T16_Tp4_dft_snr15_skip10000_n40.npz: ckpt id sha256[:16]=dc784649f1e9b890 epoch=1142 best_epoch=1142 role=best 8x4 present, tag spec '-:-' expects none   D2_C2_DMI_Nr8_T16_Tp4_dft_snr15_skip10040_n40.npz: ckpt id sha256[:16]=dc78
+
+# patched replay loop at the FZ scale (synthetic repeats; time / RSS only)
+patched loop at FZ scale: reference rows 3072000 built in 11 s, RSS +3.74 GiB; tag loop 327680 trials in 16 s; total 28 s, RSS +3.74 GiB   (unpatched, extrapolated from replay_mem.out: ~32 min for the rows alone, ~590 GiB)

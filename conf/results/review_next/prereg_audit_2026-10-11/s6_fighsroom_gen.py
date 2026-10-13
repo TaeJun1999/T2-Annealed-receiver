@@ -74,7 +74,7 @@ for a in ORDER:                                    # merged record == count tabl
         assert Mg[a][3 + i] == T[SRC[a]][s, a][:2], (a, s, Mg[a][3 + i], T[SRC[a]][s, a])
 
 P(f"### 6.1 실행·운영 기록 (생성기 `prereg_audit_2026-10-11/s6_fighsroom_gen.py`; 수치는 모두 기록 파일에서 읽음)\n")
-P(f"`bash code/run_{RUN}16e4.sh` **한 번**, tmux `{RUN}`, {when('start .git')} CDT 시작(git {GIT} = 실행 커밋; 시작 줄 하나, 재개 없음). "
+P(f"`bash code/run_{RUN}16e4.sh` **한 번**, tmux `{RUN}` (세션 기록 기준 [감사 N1]), {when('start .git')} CDT 시작(git {GIT} = 실행 커밋; 시작 줄 하나, 재개 없음). "
   f"단계 C (관측된 시험 청크 0 의 대조) {when('phase C done')} CDT: {[l for l in LOG if 'phase C done' in l][0].split('phase C done: ')[1]}. "
   f"`{done[0].split('] ')[1]}` {when('FIGHS_DONE')} CDT. ABORT · SKIP · INVALID 줄: {len(bad)} 개.\n")
 P("| 행 | 시작 (CDT) | runner | 작업 (done / exists) | 수용 (CDT) | 수용 판정 | manifest git · config_hash | 대조 |")

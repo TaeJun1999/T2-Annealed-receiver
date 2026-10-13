@@ -50,7 +50,7 @@ v2 2026-10-12 18:43 CDT (Opus 5.5). 검토(MUST 1 · SHOULD 5 · NIT 8) 반영: 
 
 ### 6.1 실행·운영 기록 (생성기 `prereg_audit_2026-10-11/s6_fighsroom_gen.py`; 수치는 모두 기록 파일에서 읽음)
 
-`bash code/run_fighsdmi16e4.sh` **한 번**, tmux `fighsdmi`, 10-12 18:43 CDT 시작(git e5caaccb = 실행 커밋; 시작 줄 하나, 재개 없음). 단계 C (관측된 시험 청크 0 의 대조) 10-12 18:45 CDT: 3 receiver control(s) OK, 1 ALD estimator control(s) OK. `FIGHS_DONE ok=3 fail=0` 10-12 21:32 CDT. ABORT · SKIP · INVALID 줄: 0 개.
+`bash code/run_fighsdmi16e4.sh` **한 번**, tmux `fighsdmi` (세션 기록 기준 [감사 N1]), 10-12 18:43 CDT 시작(git e5caaccb = 실행 커밋; 시작 줄 하나, 재개 없음). 단계 C (관측된 시험 청크 0 의 대조) 10-12 18:45 CDT: 3 receiver control(s) OK, 1 ALD estimator control(s) OK. `FIGHS_DONE ok=3 fail=0` 10-12 21:32 CDT. ABORT · SKIP · INVALID 줄: 0 개.
 
 | 행 | 시작 (CDT) | runner | 작업 (done / exists) | 수용 (CDT) | 수용 판정 | manifest git · config_hash | 대조 |
 |---|---|---|---|---|---|---|---|
@@ -86,6 +86,8 @@ v2 2026-10-12 18:43 CDT (Opus 5.5). 검토(MUST 1 · SHOULD 5 · NIT 8) 반영: 
 | OMP-pilot | raw_FHSPDMI | 601 (2.93e-02, [2.71e-02, 3.17e-02]) | 114 (5.57e-03, [4.64e-03, 6.68e-03]) | 26 (1.27e-03, [8.67e-04, 1.86e-03]) | 12 (5.86e-04, [3.35e-04, 1.02e-03]) | 80 / 24 / 3 / 0 |
 | R5-genie | raw_FHDMIB16e4 | 7 (3.42e-04, [1.66e-04, 7.05e-04]) | 1 (4.88e-05, [8.62e-06, 2.77e-04]) | 0 (0.00e+00, [0.00e+00, 1.88e-04]) | 0 (0.00e+00, [0.00e+00, 1.88e-04]) | 0 / 0 / 0 / 0 |
 
+**GMM 캐비엇(머리말 · 6.4) [감사 N3]**: M-ours-bstar 는 ROOM16e4 5-DMI 의 b\* = full K 1024 그대로다 — 확장 격자의 끝(512 대비 ll_val +6.192 nat, 거기서도 오르는 중)이고 EM 은 72 반복에서 학습 우도의 음수 스텝으로 멈췄다(ROOM16e4 §7.8 S1; 30 반복 연장 시 ll_val +0.016 nat).
+
 Perfect CSI (R5-genie) 의 실패 수는 세 raw 에서 같다: FHDMIB16e4 [7, 1, 0, 0] · FHSPDMI [7, 1, 0, 0] · FHALDDMI [7, 1, 0, 0] → 동일.
 
 0 실패 점 (n = 20480): M-ours-dscore-C-V1 +12 dB, M-ours-dscore-C-V1 +15 dB, ALD-pilot +15 dB, M-ours-bstar +15 dB, R5-genie +12 dB, R5-genie +15 dB.
@@ -114,3 +116,10 @@ Perfect CSI (R5-genie) 의 실패 수는 세 raw 에서 같다: FHDMIB16e4 [7, 1
 - **머리말의 인용과 ROOM16e4 §7 의 기록 감사**: 감사(MUST 0 · SHOULD 3 · NIT 9; ROOM16e4 §7.8)는 §7 의 수치·라벨을 고치지 않았다 — 머리말이 인용한 n = 2560 실패 수는 그대로다. 감사 S1: b\* 의 EM 은 허용오차 수렴이 아니라 학습 우도가 줄어든 스텝에서 멈췄다(72 반복; 30 반복을 이어 돌리면 ll_val +0.016 nat) — 머리말 GMM 항목의 캐비엇에 더해 읽는다. 이 그림의 GMM prior 곡선은 그 b\* 의 곡선이다.
 - +12 · +15 dB 의 n = 81920 측정은 등록하지 않았다 — §3 의 메모대로 사용자가 그림을 보고 정한다.
 - 기록 감사(Fable)는 이 절을 쓴 뒤에 받는다 — 결과는 추가 줄로 적는다.
+- **[추가 — 감사 N2] 그림을 받은 뒤의 사용자 반응**(10-12 CDT, `FIGHS_DONE` 뒤; 원문): "좀 더 시행을 늘려서 15dB까지 다 그리면 좋긴 하겠는데" — `DECISIONS.md` 2026-10-13 11:39 KST 줄 · WORK_QUEUE 사용자 결정 대기 8. 추가 시행은 따로 등록해야 하는 실행이다(§3 메모) → `NEXT_EXPERIMENTS_FIGHSYDMI16e4.md`.
+
+### 6.5 기록 감사 (Fable 서브에이전트, 보고서 파일 mtime 2026-10-12 22:04 CDT; `prereg_audit_2026-10-11/audit_FIGHSDMI16e4.md`, 재계산 `recompute_fighsdmi_r2.py` → `.out` (첫 실행 `recompute_fighsdmi.py` → `.out` 도 남김), 청크 재생 `recompute_fighsdmi_replay*.{py,out}`, 등록 도구 재실행 `rerun_fighsdmi_accept_FH*.txt`, GMM 정지 조건 재집계 `recompute_fighsdmi_gmmstop.{py,out}`)
+
+감사 대상 = 커밋 42fd4e03 (§6 과, 같은 커밋의 `docs/EXPERIMENTS.md` 마지막 행, `docs/RESULTS.md` §25.6 의 "그림 보강" 줄, `conference/figures/README.md` 두 행, `DECISIONS.md` 마지막 두 줄, `WORK_QUEUE.md`, 그림 기록·그림). **§6.1–6.4 의 수치·채점·인용 오류 0; 다른 문서의 이 실행에 관한 수치도 raw 재계산과 같다.** 감사자의 보고: 자체 판독기로 새 raw 3 × 2048 청크(SNR 마다 시행 10000..30479 를 한 번씩; 모든 청크 `run|git` e5caaccb, `+dirty` 없음)·원 raw·대조 raw·ALD npz 를 직접 읽음 — 최종 실행 71 묶음 71 통과(첫 실행의 실패 1 건은 감사자 검사의 오류). meta, 집계표 56 행과 Wilson 문자열, 6.2 의 44 칸과 원 raw 열, 0 실패 점 여섯, 오르는 칸, genie 세 raw 비트 동일(7 / 1 / 0 / 0), 대조 비교 0 다름, 예측 여섯의 채점, 6.1 의 시각표(시작 줄 하나, 실행 구간에 HEAD 이동 없음), 6.4 의 y 축·원문 인용 두 줄·잘리는 막대 넷·"12 점"·ALD sha 일치; `eval_accept` 세 행 재실행 → `ACCEPT: OK`; 생성기 `s6_fighsroom_gen.py DMI` 재실행이 6.1–6.3 과 바이트 동일; `paper_f21dmc.py DMI hs` · `DMI` 를 다시 그린 기록 둘·PDF/PNG 넷이 커밋본과 sha256 동일; 메모리 안 청크 재생 2 건(FHALDDMI +12 dB skip 27640, FHDMIB16e4 +9 dB skip 29080)이 `run|git` 만 빼고 비트 동일.
+
+**MUST 0 · SHOULD 0 · NIT 5 — 모두 반영(이 문서의 수치·채점 불변; 기록 2026-10-12 22:07 CDT, Opus 5.5)**: N1 "tmux `fighsdmi`" 는 세션 기록 기준(제자리 표시; 생성기의 문자열에도 같은 표시); N2 그림을 받은 뒤의 사용자 반응을 6.4 끝에 추가; N3 GMM 캐비엇을 6.2 의 표 뒤에(제자리); N4 (다른 문서) WORK_QUEUE 대기 7 · `DECISIONS.md` 의 "fits 폴더 57 개 가운데 34 개" 는 폴더 기준 — 서로 다른 적합으로 세면 30 개 가운데 14 개(RMX\* · S2d 의 14 폴더는 한 적합이고, 14 개에는 EM 이 붕괴한 SRP 가 들어 있다) → WORK_QUEUE 에 덧붙이고 `DECISIONS.md` 에 정정 줄; N5 (다른 문서) `conference/figures/README.md` 의 DMI 수치 표 머리에 출처 FIGHSDMI16e4 §6 과 갱신 시각. 감사가 확인하지 못한 것: 세션 기록 기준 진술(tmux 이름, `taskset` 마스크와 "CPU 96 스레드", 그림 명령 앞의 `taskset -c 24-39`, `git status` 로 본 목록, 작성자가 실행 중 본 것, "사용자의 메시지는 없었다"), 사용자 인용, 새 시행의 ALD 추정의 재생성(GPU 금지 — 파일 출처·대조·재생한 ALD 청크의 비트 동일까지만), 재생은 6,144 청크 가운데 2 청크(FHSPDMI 는 재생하지 않음). 감사가 추론으로 적은 것: 실행 중 동결 경로를 건드리지 않았다는 것(mtime · git 기록), EARLY 호출이 추정 파일을 만들었다는 것(로그 순서와 파일 mtime).

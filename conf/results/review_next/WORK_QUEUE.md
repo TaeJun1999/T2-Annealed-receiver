@@ -1,6 +1,6 @@
 # 작업 큐 (review_next 이후; 갱신할 때마다 맨 위 시각을 바꾼다)
 
-갱신 2026-10-12 21:39 CDT (Opus 5.5). **지금: DeepMIMO 실내 풀 (prior DMI) — 주 실행·baseline·기록 감사 (MUST 0)·그림 보강 (FIGHSDMI16e4, n = 20480; 10-12 18:43–21:32 CDT `FIGHS_DONE ok=3 fail=0`) 까지 끝, §6 전사·그림 `F21dmihs_col` 커밋. 남은 것: FIGHSDMI16e4 §6 의 기록 감사 (Fable) · 사용자 결정 대기 7 (GMM EM 정지 조건) · 8 (DMI 그림을 +15 dB 까지 잇는 추가 시행).** Sionna 방 두 풀은 주 실행·baseline·그림 보강·시드까지 끝 (RESULTS §25). **CPU 는 절반 (96 스레드: `taskset -c 24-47,120-143,72-95,168-191`) 만 쓴다 (사용자 10-12 CDT).**
+갱신 2026-10-12 23:01 CDT (Opus 5.5). **지금: FIGHSYDMI16e4 실행 중 — DeepMIMO 실내 그림 (DMI) 의 +12 dB (n = 327,680) · +15 dB (n = 3,072,000) 추가 시행 (사용자 10-12 CDT "+15 dB까지 시도"); tmux `fighsydmi`, CPU 96 스레드, 약 59 시간 (끝 10-15 오전 CDT 쯤). `FIGHS_DONE` 까지 main 커밋·`conf/code`·`DECISIONS.md`·등록 문서 변경 금지 (기록은 작업 트리 + paper 브랜치 동기화).** DMI 의 주 실행·baseline·감사·n = 20480 보강은 끝 (RESULTS §25.6). 남은 사용자 결정: 대기 7 (GMM EM 정지 조건). **CPU 는 절반 (96 스레드: `taskset -c 24-47,120-143,72-95,168-191`) 만 쓴다 (사용자 10-12 CDT).**
 
 ## 원고 목표 (사용자 10-05 CDT)
 - **IEEE ICC 2027** (Washington DC). 공식 call 페이지 기준 투고 마감 **2026-10-16**, 통지 2027-01-15, 최종본 2027-02-19. 투고본 **6 쪽 (10 pt) 상한** — 넘으면 심사 없이 거절. 저널판 없음 (DECISIONS 3a64d0ae) → 6 쪽에 못 넣는 것은 arXiv 확장판.
@@ -13,6 +13,7 @@
 ## 진행 중
 | 작업 | 자원 | 상태 |
 |---|---|---|
+| **FIGHSYDMI16e4** (DMI 그림의 +12 dB n = 327,680 · +15 dB n = 3,072,000 (chunk 400), 새 시행 10000..; ALD 는 두 SNR 모두 327,680, 희소 셋은 n = 20480 유지; 보고 전용; 사용자 "+15 dB까지 시도") | CPU 96 스레드 (tmux `fighsydmi`) + GPU 1 장 약 40 분 (시작 직후: ALD 대조·추정) | v2 = 실행 커밋 → `taskset … bash code/run_fighsydmi16e4.sh` 한 번 (≈ 59 h: FYDMIB16e4 5.5 h → FYALDDMI 0.7 h → FZDMIB16e4 51 h → FZALDDMI 0.7 h). 끝 표식 `FIGHS_DONE ok=4 fail=0` (`logs/run_fighsydmi16e4.log`). **그때까지 main 커밋·`conf/code`·`DECISIONS.md`·등록 문서 변경 금지** (재개: 같은 HEAD 에서 `--resume` 을 태그 없이; 멈춘 뒤 main 에 커밋하면 재개 불가). 할 일: ① 그림 스크립트 `hsy` · `hsy12` 모드 (FY 집계표를 열기 전에; sha + date → `records/paper_f21dmihsy_pre.txt` → paper 동기화) ② FY 두 행 수용 뒤 `hsy12` 그림을 사용자에게 ③ FZ 시작 약 1.3 h 뒤 `run|git` 에 `+dirty` 없는지 확인 ④ 2.5 h 넘게 진행 줄이 안 늘면 멈춤으로 보고 `--resume` ⑤ 끝난 뒤: `# split` 본 부분 = `fighs_FHDMIB16e4.txt` 확인, §6 전사 (실패 시행의 풀 쌍 수 포함), `hsy` 그림, EXPERIMENTS 행, 기록 감사 (Fable), RESULTS · README, 커밋·푸시 |
 | 등록 밖의 부분 체크포인트 (참고) | — |  `ckpt/d2sx_{SRB,SRP}_N160000_a{4,5}*.pt` (128 epoch 쯤에서 멈춤) 는 쓰지 않는다 |
 | 원고 (IEEE ICC 2027, 마감 2026-10-16) — 웹 채팅에서 사용자가 작성, 자료는 paper 브랜치 (`conference/tools/sync_paper_branch.sh`) | — | 진행 중. 실험 큐·GPU 큐 비어 있음 |
 
@@ -22,7 +23,7 @@
 | 4 | RESULTS.md: SEEDS3·HISNR·SPARSE·SCALE 반영, CONTRIBUTIONS.md (09-27 이전에 머묾), 결과 요약 artifact 페이지, 그림 | — | 사용자 요청 시 (규칙: 요청 때 갱신) | |
 
 ## 완료 (최근)
-- **FIGHSDMI16e4** (2026-10-12 21:39 CDT 기록): 실행 커밋 e5caaccb → 10-12 18:43–21:32 CDT `FIGHS_DONE ok=3 fail=0` (CPU 96 스레드, 재개 없음) → §6: 실패 수 / 20480 (+6/+9/+12/+15 dB) V1 21 / 2 / 0 / 0, b\* 27 / 8 / 2 / 0, genie 7 / 1 / 0 / 0; 그림 `F21dmihs_col` (V1 은 +9 dB 에서 끝남); 예측 6 개 적중; 사용자의 별도 지시 없이 시작 (세션의 해석 — §5 · §6.4). 기록 감사 (Fable) 는 §6.5 에.
+- **FIGHSDMI16e4** (2026-10-12 21:39 CDT 기록): 실행 커밋 e5caaccb → 10-12 18:43–21:32 CDT `FIGHS_DONE ok=3 fail=0` (CPU 96 스레드, 재개 없음) → §6: 실패 수 / 20480 (+6/+9/+12/+15 dB) V1 21 / 2 / 0 / 0, b\* 27 / 8 / 2 / 0, genie 7 / 1 / 0 / 0; 그림 `F21dmihs_col` (V1 은 +9 dB 에서 끝남); 예측 6 개 적중; 사용자의 별도 지시 없이 시작 (세션의 해석 — §5 · §6.4). 기록 감사 (Fable) MUST 0 · SHOULD 0 · NIT 5 반영 (§6.5).
 - **ROOM16e4 — DMI** (2026-10-12 21:39 CDT 기록): 5-DMI = 실행 커밋 4131a3b0 → 주 실행 10-12 16:15–17:54 CDT (ACCEPT OK) 표 B `b* → V1` **(i)** 263:179 (2/3 점), SNR@0.1 격차 +0.23 dB, b\* = full 1024 (붕괴 없음; EM 은 음수 스텝에서 멈춤 — §7.8); baseline @29cf411d 17:56–18:15 CDT 16 개 전부 (i) ("전부"·"멀어진다" 충족); §7 전사 cde35a4e; Fable 기록 감사 MUST 0 · SHOULD 3 · NIT 9 (1,219 값 불일치 0, 여섯 청크 재생 비트 동일) 반영 §7.8; RESULTS §25.6 · figures/README.
 - **SEEDSROOM16e4** (2026-10-12 13:18 CDT 기록): 동결 = 실행 커밋 62c24e7e → 10-12 09:26–13:16 CDT `SEEDSROOM_DONE ok=4 fail=0` (CPU 96 스레드) → §6: SRB "시드 강건 (3/3 (i))" (pooled 302:129 · 299:130 · 297:145; 격차 +0.32 / +0.35 / +0.37 dB), SRP "시드 강건 (3/3 (i); b* = 씨앗 초기화 GMM)" (1044:97 · 1010:88 · 1043:93; +2.01 / +1.95 / +2.12 dB); 예측 7 개 적중; 그림 `F34seed_wide`. `docs/RESULTS.md` §25 (레이 트레이싱 풀 요약) 도 같은 커밋
 - **FIGHSX16e4** (2026-10-12 05:03 CDT 기록): 실행 커밋 037c6610 → 10-11 20:40 – 10-12 04:09 CDT `FIGHS_DONE ok=5 fail=1` (FXALDSRP: 빈 GPU 없음) → 같은 HEAD 에서 재개 → 04:58 CDT 여섯 행 모두 ACCEPT OK → §6: 실패 수 / 81920 (+12 / +15 dB) SRB V1 12 / 11 · b\* 32 / 15 · genie 5 / 4, SRP V1 4 / 1 · b\* 14 / 6 · genie 1 / 0; 그림 `F21sr{b,p}hsx_col` (전 구간) · `F21sr{b,p}hsx12_col` (원고판, +12 dB 까지); 예측 11 개 중 10 적중. FIGHSPATH16e4 의 기록 감사 (수치 오류 0; MUST 0 · SHOULD 2 · NIT 8) 반영도 같은 커밋
@@ -49,8 +50,8 @@
 4. (10-11 CDT) ray-traced 두 풀 (DeepMIMO · Sionna RT): NMSE CDF 그림 (`F33cdf_{DMC,SRT}_wide`) 을 원고에 넣을지·어느 SNR 을 보일지
 5. (10-11 CDT) DMC·SRT 시드 강건성 BLER (시드 a2·a3 학습은 GPU 2 에서 진행 중) 을 등록·실행할지
 6. (10-11 CDT) BLER 이 낮은 구성 (스트림 수를 줄이는 등) 을 ray-traced 풀에 새로 등록할지; DMC16e4 수용 (c) 문구 판단 (감사 N4)
-7. (10-12 CDT) **GMM EM 정지 조건**: 동결된 GMM 절차 (`code/gmm_em_gpu.py`) 는 20 반복 뒤 학습 우도가 처음 줄어든 스텝에서도 멈춘다 (허용오차 수렴이 아닐 수 있음; 돌려주는 모델은 검증 최고 상태). fits 폴더 57 개 가운데 34 개의 선택 적합이 그렇게 끝났다 (DMI · DeepMIMO 도시 · D3 · UMi28 · MIX3 · NR16 등; 헤드라인 D2 B16e4k · SRB · SRT · SV 는 아님 — `prereg_audit_2026-10-11/gmm_stop_survey.out`). 잰 크기는 DMI 하나: 30 반복 연장 시 ll_val +0.016 nat (격자 한 칸 +6.192 nat 의 0.3 %); BLER 영향은 재지 않음. 선택지: ① 캐비엇만 (지금 상태; 보고 때 "답이 없으면 ①" 이라고 알림) ② 이어 돌린 GMM 으로 BLER 을 다시 재는 강건성 실행을 따로 등록.
-8. (10-12 CDT) **DMI 그림을 +15 dB 까지 잇기**: 사용자 "좀 더 시행을 늘려서 15dB까지 다 그리면 좋긴 하겠는데". n = 20480 에서 V1 · Perfect CSI 는 +12 dB 부터, b\* · ALD 는 +15 dB 에서 0 실패. 추가 시행은 따로 등록해야 하는 실행 (FIGHSX16e4 의 틀; FIGHSDMI16e4 §3 메모) — 필요한 시행 수·시간의 추정과 선택지를 보고함, 결정 대기.
+7. (10-12 CDT) **GMM EM 정지 조건**: 동결된 GMM 절차 (`code/gmm_em_gpu.py`) 는 20 반복 뒤 학습 우도가 처음 줄어든 스텝에서도 멈춘다 (허용오차 수렴이 아닐 수 있음; 돌려주는 모델은 검증 최고 상태). fits 폴더 57 개 가운데 34 개의 선택 적합이 그렇게 끝났다 (DMI · DeepMIMO 도시 · D3 · UMi28 · MIX3 · NR16 등; 헤드라인 D2 B16e4k · SRB · SRT · SV 는 아님 — `prereg_audit_2026-10-11/gmm_stop_survey.out`). 잰 크기는 DMI 하나: 30 반복 연장 시 ll_val +0.016 nat (격자 한 칸 +6.192 nat 의 0.3 %); BLER 영향은 재지 않음. 선택지: ① 캐비엇만 (지금 상태; 보고 때 "답이 없으면 ①" 이라고 알림) ② 이어 돌린 GMM 으로 BLER 을 다시 재는 강건성 실행을 따로 등록. (57 · 34 는 폴더 기준. 서로 다른 적합으로 세면 30 개 가운데 14 개 — RMX\* · S2d 의 14 폴더는 한 적합이고, 14 개에는 EM 이 붕괴한 SRP 가 들어 있다; '선택 적합' = 폴더 안 ll_val 최고 파일; `prereg_audit_2026-10-11/recompute_fighsdmi_gmmstop.out` — FIGHSDMI16e4 감사 N4)
+8. (해결 10-12 CDT, 사용자 "+15 dB까지 시도") DMI 그림을 +15 dB 까지 잇기 → `NEXT_EXPERIMENTS_FIGHSYDMI16e4.md` (실행 중; 위 '진행 중').
 
 ## 원고 결정 기록 (2026-10-06 15:50 CDT)
 - GitHub 기본 브랜치 = `paper` (사용자가 바꿈).

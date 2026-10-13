@@ -109,22 +109,24 @@ def main():
                 rows = {}
                 for s, n, f in ref[key]:
                     with np.load(f) as z:
-                        for i in range(n):
-                            rows[s + i] = {k: cut(z[k], i) for k in rk}
+                        zz = {k: z[k] for k in rk}              # one read per key and file (a per-trial z[k] kept one whole chunk array alive per trial and key)
+                    for i in range(n):
+                        rows[s + i] = {k: cut(zz[k], i) for k in rk}
                 worst, shared, missing = {}, 0, set()
                 for s, n, f in ch:
                     with np.load(f) as z:
-                        for i in range(n):
-                            if s + i not in rows:
-                                bad.append(f"{tag} {key}: trial {s + i} absent from {a.ref_raw}"); continue
-                            shared += 1
-                            for k in rk:
-                                if k not in z.files:
-                                    missing.add(k); continue
-                                x, y = cut(z[k], i), rows[s + i][k]
-                                d = float(np.max(np.abs(np.nan_to_num(x, nan=1e300) - np.nan_to_num(y, nan=1e300))))
-                                if d != 0.0:
-                                    worst[k.split("|")[0]] = max(worst.get(k.split("|")[0], 0.0), d)
+                        zz = {k: z[k] for k in rk if k in z.files}
+                    for i in range(n):
+                        if s + i not in rows:
+                            bad.append(f"{tag} {key}: trial {s + i} absent from {a.ref_raw}"); continue
+                        shared += 1
+                        for k in rk:
+                            if k not in zz:
+                                missing.add(k); continue
+                            x, y = cut(zz[k], i), rows[s + i][k]
+                            d = float(np.max(np.abs(np.nan_to_num(x, nan=1e300) - np.nan_to_num(y, nan=1e300))))
+                            if d != 0.0:
+                                worst[k.split("|")[0]] = max(worst.get(k.split("|")[0], 0.0), d)
                 if worst or missing or shared != a.n:
                     bad.append(f"{tag} {key}: replay vs {a.ref_raw} ({a.ref_arms}): shared {shared}/{a.n}"
                                + (f", arms differing {sorted(worst)} (max |diff| {max(worst.values()):.3g})" if worst else "")
