@@ -1,0 +1,162 @@
+{
+ "manifest_version": 1,
+ "written": "2026-10-13 23:32:59 KST",
+ "git_commit": "ba17b1a4",
+ "result_tag": "FYDMIB16e4",
+ "testbed": "D2",
+ "raw_dir": "/home/HTJ/t2/conf/raw_FYDMIB16e4",
+ "n_raw_files": 8192,
+ "config_hash": "6aaa57efae8f1689",
+ "code_hashes": {
+  "Demo": {
+   "t2_route_a.py": "95a5408901ec125c",
+   "t2_trellis.py": "31cd0ee9c68e972b",
+   "t2_gmm.py": "d064e58c7510c769"
+  },
+  "conf_code": {
+   "runner.py": "ff55588cc0749a1b",
+   "arms.py": "7ad16d731778f6b6",
+   "score.py": "f5379bdf8a085fc9",
+   "common.py": "fa976185ec5e8b20",
+   "d2.py": "93e475c4118366bc",
+   "analysis.py": "09ba83f75925e0f6",
+   "rt_tap.py": "5d97dc7124150423",
+   "p3_rules.py": "a06e952b1eddf3ad",
+   "dmimo.py": "71c66fb1c1b21efa",
+   "dmi_build.py": "9fbea06b9d598065"
+  }
+ },
+ "channel_model": {
+  "testbed": "D2",
+  "prior": "DMI",
+  "description": "DMI = D2-pipeline prior DMI, DeepMIMO v4.0.5 ray-traced channels (Wireless InSite; code/dmimo.py, pool built by code/dmi_build.py, sha dec5e7a1ea1e4605/f0f716718f1c15d1): indoor scenario i1_2p4 at 2.4 GHz, ONE fixed BS (dataset 120) x its 7 m x 1 m user grid (1 cm spacing), five frozen UE yaws ~ U[-180,180) deg per position, DeepMIMO compute_channels, BS ULA Nr facing its users, UE ULA 4, isotropic, half-wavelength, 25 paths, narrowband at the carrier, per-pair path powers normalised, ensemble-normalised E||H||^2 = Nr Nt; FIXED pool with a 0.5 m block split on the user position"
+ },
+ "cells": {
+  "C2": {
+   "Nr": 8,
+   "Nt": 4,
+   "T": 16,
+   "Tp": 4,
+   "snrs": [
+    -3,
+    0,
+    3,
+    6,
+    9,
+    12,
+    15
+   ]
+  }
+ },
+ "points": {
+  "D2_C2_DMI_Nr8_T16_Tp4_dft_snr12": 327680
+ },
+ "trial_stream": {
+  "rule": "default_rng([20260926, TBID[testbed], PID[prior], Nr, T, Tp, int(snr)+100])",
+  "skip_min": 10000,
+  "skip_max_end": 337680,
+  "split": "HISNR16e4 high-SNR supplement set (trials >= 10000)"
+ },
+ "run_params": {
+  "beta": "0.7",
+  "dtype": "complex128/float64",
+  "git": "ba17b1a4",
+  "iters": "16",
+  "n": "40",
+  "seed": "20260926",
+  "snr": "12.0",
+  "t_in": "5",
+  "n_chunks": 8192
+ },
+ "receiver": {
+  "outer_iterations": 16,
+  "beta": 0.7,
+  "arm_overrides": "(none)",
+  "t_in_bigamp": 5,
+  "n_inner_routeA": 1,
+  "dtype": "complex128/float64",
+  "device": "CPU, one thread per worker",
+  "code": "conv (133,171)_8 nu=6 terminated, QPSK"
+ },
+ "gmm": {
+  "bstar": "gmm1024",
+  "kron_K": "2048",
+  "ntrain": 160000.0,
+  "selection": "validation log-likelihood over the pre-registered K grid (BLER never consulted)",
+  "fits_dir": "/home/HTJ/t2/conf/results/gmm_fits_D2_FYDMIB16e4",
+  "em_sec": "8022.347673177719"
+ },
+ "sample_counts": {
+  "train_channels": 160000,
+  "score_train": 144000,
+  "score_val": 16000,
+  "test_trials_per_point": [
+   327680
+  ]
+ },
+ "stagec_checkpoint": {
+  "path": "/home/HTJ/t2/conf/ckpt/d2sx_DMI_N160000_a1_best.pt",
+  "sha256_16": "dc784649f1e9b890",
+  "stored_epoch": 1142,
+  "best_epoch": 1142,
+  "best_val": 0.21521511673927307,
+  "role": "best",
+  "evaluated_weights": "best EMA @1142",
+  "best_pt": null,
+  "hp": {
+   "arch": "dit",
+   "param": "vp",
+   "domain": "angle",
+   "lr": 0.002238046051591068,
+   "ema": 0.999,
+   "batch": 256,
+   "emb": 256,
+   "width": 64,
+   "depth": 6,
+   "heads": 8,
+   "patch": 1
+  },
+  "params": 479426,
+  "rung": "D2SXDMI160000",
+  "attempt": 1,
+  "Nr": 8,
+  "Nt": 4,
+  "split_hash": "fecf46b30175b5c8",
+  "sigma_tag": "DMI",
+  "train_epochs": 1142,
+  "stopped_by": null,
+  "train_wall_sec": 5969.9627685546875,
+  "train_device": "cuda:0 NVIDIA RTX PRO 6000 Blackwell Server Edition",
+  "val_frac": 0.1,
+  "seeds": {
+   "split": 20260926,
+   "val": 20260927,
+   "train": 20260928,
+   "gate": 20260929
+  }
+ },
+ "stagec_status": "built from explicit ckpt /home/HTJ/t2/conf/ckpt/d2sx_DMI_N160000_a1_best.pt -- caller override, NOT verified against the gate record here (recorded PASS rows: none) | V1 (psd_project=True): built from explicit ckpt /home/HTJ/t2/conf/ckpt/d2sx_DMI_N160000_a1_best.pt -- caller override, NOT verified against the gate record here (recorded PASS rows: none)",
+ "stagec_gate": "NO GATE RECORD mentions d2sx_DMI_N160000_a1_best.pt -- UNVERIFIED here.  (GA-GD are measurable on D1 only, 10_SPEC §5: a D2 re-train is qualified by its D1 sibling's gate row, which this string cannot prove.)",
+ "stagec_ckpt_id": "sha256[:16]=dc784649f1e9b890 epoch=1142 best_epoch=1142 role=best 8x4",
+ "arms": [
+  "M-ours-bstar",
+  "M-ours-dscore-C-V1",
+  "R0-pilot",
+  "R1-turbo",
+  "R2-ours-G",
+  "R3-bigamp",
+  "R5-genie"
+ ],
+ "versions": {
+  "python": "3.12.14",
+  "numpy": "2.5.2",
+  "torch": "2.14.0+cu130",
+  "host": "262d04c812cc",
+  "cpu_count": 192
+ },
+ "output_paths": {
+  "tables": "/home/HTJ/t2/conf/results/tables_D2_FYDMIB16e4.txt",
+  "guard": "/home/HTJ/t2/conf/results/guard_D2_FYDMIB16e4.txt",
+  "log": "/home/HTJ/t2/conf/logs/run_D2_FYDMIB16e4.log"
+ }
+}

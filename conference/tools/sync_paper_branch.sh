@@ -13,6 +13,7 @@ PATHS=(conference docs/RESULTS.md docs/EXPERIMENTS.md docs/paper conf/conference
 mapfile -t REGS < <(ls conf/results/review_next/NEXT_EXPERIMENTS_*.md)
 DATA='\.(npz|npy|pt|ckpt|db)$|__pycache__'        # never shipped
 mapfile -t RES < <(git ls-files -- conf/results conf/figs | grep -v -E "$DATA" | while IFS= read -r f; do [ -e "$f" ] && echo "$f"; done)   # result records main tracks
+RES+=(${EXTRA:-})                                # EXTRA="<paths/globs>": untracked result records to ship now (accepted rows of a registered run that main cannot commit before its end)
 DIRTY=$(git status --porcelain -- "${PATHS[@]}" "${REGS[@]}" "${RES[@]}" | wc -l)   # uncommitted files shipped from the working tree
 export GIT_INDEX_FILE="$SP/paper_branch.index"
 git read-tree --empty
