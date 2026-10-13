@@ -658,7 +658,8 @@ def cmd_run(a):
              for pt in pts for s, m in chunk_plan(a.skip0, a.n, a.chunk)]
     tasks = [(testbed,) + t for t in tasks]
     tasks.sort(key=lambda t: (t[4], -C.CELLS[t[1]]["Nr"]))   # first chunks of every point early; 8x4 first
-    jobs = min(os.cpu_count(), len(tasks))
+    ncpu = len(os.sched_getaffinity(0))                 # the CPUs this process may use (taskset): one worker per allowed thread,
+    jobs = min(ncpu, len(tasks))                        # not os.cpu_count() -- user 2026-10-12 CDT: half of the machine = half the workers
     if a.worker_gb is not None:                         # SCALE16e4 memory guard: an exception to 01_RULES §4 (DECISIONS)
         mj = mem_jobs(a.worker_gb) if a.worker_gb > 0 else 0
         if mj < 1:
@@ -666,7 +667,7 @@ def cmd_run(a):
         jobs = min(jobs, mj)
         _init(TAG, {"jobs": jobs, "worker_gb": float(a.worker_gb)})
         print(f"[run] --worker-gb {a.worker_gb:g}: memory guard allows {mj} workers -> jobs = {jobs} "
-              f"(min of cpu_count {os.cpu_count()}, tasks {len(tasks)}, floor(0.8 MemAvailable / G))", flush=True)
+              f"(min of allowed CPUs {ncpu}, tasks {len(tasks)}, floor(0.8 MemAvailable / G))", flush=True)
     print(f"[run] {testbed} {len(pts)} points x n={a.n} -> {len(tasks)} tasks on {jobs} workers "
           f"(prior {prior}, cells {cells}, chunk {a.chunk}) -> {d_raw()}", flush=True)
     t0 = time.time()
