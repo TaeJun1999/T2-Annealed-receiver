@@ -1,0 +1,40 @@
+F21dmihsy12 -- DeepMIMO indoor (prior DMI: DeepMIMO v4 scenario i1_2p4 at 2.4 GHz, one fixed BS, 0.5 m block split; cell C2 = 8x4, N_train = 1.6e5) with the one legend of F16deep_wide: BLER@16 (Pilot-only LMMSE: after the first iteration), failures / trials per SNR -3 +0 +3 +6 +9 +12 +15 dB.  Recomputed from raw by conference/figures/paper_f21dmc.py (read-only; analysis.load_raw, a raised block = a failure); no number transcribed.
+
+F21dmihsy12_col  3.5 x 3.45 in, one panel, legend above; the 11 curves of paper_f16deep.SHOW with its shapes and sizes; 95% Wilson bars on Proposed (diffusion prior), GMM prior, Gaussian prior, Perfect CSI.  n = 2560 (test trials 0..2559) at -3/0/+3 dB and n = 20480 (new trials 10000..30479) at +6/+9 dB; +12 dB: n = 327680 (new trials 10000..337679) for the seven main-raw curves and Annealed Langevin, n = 20480 for the three sparse curves; +15 dB (NOT drawn): n = 20480 for every curve (NEXT_EXPERIMENTS_FIGHSDMI16e4 §1 and NEXT_EXPERIMENTS_FIGHSYDMI16e4 §1; block below).  Every trial is a draw with replacement from the fixed test pool of 60,700 pairs: the points are averages over that pool.
+
+DRAWN RANGE: -3 .. +12 dB only (the +12 dB variant of NEXT_EXPERIMENTS_FIGHSYDMI16e4 §1: the two +12 dB rows merged, drawn without waiting for the +15 dB rows and not regenerated after them).  The +15 dB entries of the Counts block and of the merge block are the n = 20480 values of raw_FH* and are NOT drawn; the full-range figure is F21dmihsy_col.  The lines 'at or below the proposed curve' and 'Zero-failure points' below refer to the drawn points.
+
+Curves (internal arm -> figure name): M-ours-dscore-C-V1 -> Proposed (diffusion prior); ALD-pilot -> Annealed Langevin (plug-in); M-ours-bstar -> GMM prior; R2-ours-G -> Gaussian prior; R1-turbo -> Turbo LMMSE receiver; R3-bigamp -> BiG-AMP; R0-pilot@1 -> Pilot-only LMMSE; SBL-loop -> SBL (in loop); SBL-pilot -> SBL (pilot-only); OMP-pilot -> OMP (pilot-only); R5-genie -> Perfect CSI.
+
+Counts:
+    M-ours-dscore-C-V1   829/2560 149/2560 19/2560 21/20480 2/20480 8/327680 0/20480   raw_DMIB16e4
+    ALD-pilot            1375/2560 360/2560 62/2560 58/20480 8/20480 27/327680 0/20480   raw_ALDDMI
+    M-ours-bstar         885/2560 173/2560 23/2560 27/20480 8/20480 9/327680 0/20480   raw_DMIB16e4
+    R2-ours-G            1924/2560 838/2560 191/2560 308/20480 54/20480 133/327680 2/20480   raw_DMIB16e4
+    R1-turbo             2245/2560 1324/2560 424/2560 767/20480 153/20480 354/327680 6/20480   raw_DMIB16e4
+    R3-bigamp            2402/2560 1751/2560 928/2560 4194/20480 3448/20480 73013/327680 4940/20480   raw_DMIB16e4
+    R0-pilot@1           2521/2560 2052/2560 922/2560 2390/20480 634/20480 2300/327680 39/20480   raw_DMIB16e4
+    SBL-loop             1740/2560 682/2560 128/2560 192/20480 20/20480 4/20480 1/20480   raw_SPDMI
+    SBL-pilot            2009/2560 862/2560 180/2560 244/20480 41/20480 7/20480 1/20480   raw_SPDMI
+    OMP-pilot            2131/2560 1217/2560 315/2560 601/20480 114/20480 26/20480 12/20480   raw_SPDMI
+    R5-genie             321/2560 40/2560 4/2560 7/20480 1/20480 3/327680 0/20480   raw_DMIB16e4
+
+Drawn baseline curves (Perfect CSI excluded) at or below the proposed curve (point estimates; BLER = failures / n compared, each side's k/n given; 'resolution limit' = a zero-failure point whose 1/n is above the proposed curve's BLER) -- reported only, nothing is tested here; the registered paired tests are in conf/results/review_next/pairB_SPDMI.txt: none.
+Registered table-B labels against the proposed prior (pairB_SPDMI.txt) of the 9 drawn baselines: all (i).
+Raised blocks (analysis.load_raw NOTE lines; kept and counted as failures) in the raws read: none.
+
+Asserts passed: counts before the merge (n = 2560, the registered judgement) = pairB_SPDMI.txt 'BLER@16 failures' table (11 arms x 7 SNRs); the Counts block above holds the merged values; Perfect CSI error arrays of raw_ALDDMI and raw_SPDMI = raw_DMIB16e4's; drawn = counted; the panel holds exactly the curves of the legend; no point outside the y range.
+Layout: x ticks at the SNR points, x range (-4, 13.0); y log (1.8750000000000003e-06, 1.2), ticks None; legend band 0.86 in above the axes, 2 columns (inside its band: asserted, [in] [0.435, 2.651, 3.065, 3.389]); every artist inside the canvas (tight bbox [in] [0.086, 0.041, 3.44, 3.389]); smallest visible text 7 pt; saved at figsize, PNG 300 dpi.
+
+FIGHSDMI16e4 + FIGHSYDMI16e4 merge (REPORT-ONLY, NEXT_EXPERIMENTS_FIGHSDMI16e4 §1 and NEXT_EXPERIMENTS_FIGHSYDMI16e4 §1): -3/0/+3 dB = the original test trials 0..2559 (n = 2560, the registered judgement); +6/+9 dB = new trials 10000..30479 (n = 20480 per SNR); +12 dB = raw_FY<tag> (n = 327680, new trials 10000..337679) -- separate raws whose first 20480 trials are the same trials as the n = 20480 raw's (Annealed Langevin: the same trials with a new posterior sample).  The sample sizes were fixed after the n = 20480 results had been seen, so the Wilson intervals are nominal; the unseen trials alone are the '# split' lines of results/review_next/fighs_F[YZ]<tag>.txt.  The three sparse curves were not re-measured (n = 20480 at +12/+15 dB).  One point = one raw, never pooled.  'rising' = a cell where BLER rises with SNR, with its one-sided Fisher p (reported; no smoothing, no dropped point):
+    M-ours-dscore-C-V1  @16  21/20480 2/20480 8/327680 0/20480   (+6..+15 dB: raw_FHDMIB16e4; then +12 dB: raw_FYDMIB16e4)
+    ALD-pilot           @16  58/20480 8/20480 27/327680 0/20480   (+6..+15 dB: raw_FHALDDMI; then +12 dB: raw_FYALDDMI)
+    M-ours-bstar        @16  27/20480 8/20480 9/327680 0/20480   (+6..+15 dB: raw_FHDMIB16e4; then +12 dB: raw_FYDMIB16e4)
+    R2-ours-G           @16  308/20480 54/20480 133/327680 2/20480   (+6..+15 dB: raw_FHDMIB16e4; then +12 dB: raw_FYDMIB16e4)
+    R1-turbo            @16  767/20480 153/20480 354/327680 6/20480   (+6..+15 dB: raw_FHDMIB16e4; then +12 dB: raw_FYDMIB16e4)
+    R3-bigamp           @16  4194/20480 3448/20480 73013/327680 4940/20480   (+6..+15 dB: raw_FHDMIB16e4; then +12 dB: raw_FYDMIB16e4)   rising: +9->+12 dB p=4.1e-79; +12->+15 dB p=6.5e-10
+    R0-pilot@1          @16  2390/20480 634/20480 2300/327680 39/20480   (+6..+15 dB: raw_FHDMIB16e4; then +12 dB: raw_FYDMIB16e4)
+    SBL-loop            @16  192/20480 20/20480 4/20480 1/20480   (not re-measured (FIGHSYDMI16e4 §1), n = 20480 at +12/+15 dB: raw_FHSPDMI)
+    SBL-pilot           @16  244/20480 41/20480 7/20480 1/20480   (not re-measured (FIGHSYDMI16e4 §1), n = 20480 at +12/+15 dB: raw_FHSPDMI)
+    OMP-pilot           @16  601/20480 114/20480 26/20480 12/20480   (not re-measured (FIGHSYDMI16e4 §1), n = 20480 at +12/+15 dB: raw_FHSPDMI)
+    R5-genie            @16  7/20480 1/20480 3/327680 0/20480   (+6..+15 dB: raw_FHDMIB16e4; then +12 dB: raw_FYDMIB16e4)
