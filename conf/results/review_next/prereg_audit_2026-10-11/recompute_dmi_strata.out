@@ -1,0 +1,35 @@
+# recompute_dmi_strata.py -- training set (160000, 32) complex128; replay of the DMI trial stream at -3 / 0 / +3 dB
+
+-3 dB: alignment (R5-genie on replayed trials 0..39 and 2520..2559; blk_err True, ber trajectories True)
+  leak: d median 0.1803, share d < 0.1 = 0.074   [row-major vec instead: median 0.7694 -> column-major is the training set's order]
+    d < 0.1  n=  189  b* 74  V1 60  genie 29  R = 0.311
+    d >= 0.1  n= 2371  b* 811  V1 769  genie 292  R = 0.081
+  rank: share median 0.872
+    share [0.95, 1.00)  n=   59 (0.023)  BLER genie 0.339 V1 0.661 b* 0.678  failures 20 / 39 / 40
+    share [0.80, 0.95)  n= 2040 (0.797)  BLER genie 0.136 V1 0.336 b* 0.360  failures 278 / 686 / 735
+    share [0.60, 0.80)  n=  457 (0.179)  BLER genie 0.050 V1 0.225 b* 0.241  failures 23 / 103 / 110
+    share [0.00, 0.60)  n=    4 (0.002)  BLER genie 0.000 V1 0.250 b* 0.000  failures 0 / 1 / 0
+
++0 dB: alignment (R5-genie on replayed trials 0..39 and 2520..2559; blk_err True, ber trajectories True)
+  leak: d median 0.1813, share d < 0.1 = 0.066
+    d < 0.1  n=  169  b* 12  V1 19  genie 4  R = -0.875
+    d >= 0.1  n= 2391  b* 161  V1 130  genie 36  R = 0.248
+  rank: share median 0.874
+    share [0.95, 1.00)  n=   52 (0.020)  BLER genie 0.115 V1 0.327 b* 0.308  failures 6 / 17 / 16
+    share [0.80, 0.95)  n= 2110 (0.824)  BLER genie 0.016 V1 0.060 b* 0.071  failures 34 / 127 / 149
+    share [0.60, 0.80)  n=  391 (0.153)  BLER genie 0.000 V1 0.013 b* 0.020  failures 0 / 5 / 8
+    share [0.00, 0.60)  n=    7 (0.003)  BLER genie 0.000 V1 0.000 b* 0.000  failures 0 / 0 / 0
+
++3 dB: alignment (R5-genie on replayed trials 0..39 and 2520..2559; blk_err True, ber trajectories True)
+  leak: d median 0.1810, share d < 0.1 = 0.064
+    d < 0.1  n=  165  b* 2  V1 2  genie 0  R = 0.0
+    d >= 0.1  n= 2395  b* 21  V1 17  genie 4  R = 0.235
+  rank: share median 0.873
+    share [0.95, 1.00)  n=   53 (0.021)  BLER genie 0.019 V1 0.075 b* 0.094  failures 1 / 4 / 5
+    share [0.80, 0.95)  n= 2096 (0.819)  BLER genie 0.001 V1 0.006 b* 0.009  failures 3 / 13 / 18
+    share [0.60, 0.80)  n=  408 (0.159)  BLER genie 0.000 V1 0.005 b* 0.000  failures 0 / 2 / 0
+    share [0.00, 0.60)  n=    3 (0.001)  BLER genie 0.000 V1 0.000 b* 0.000  failures 0 / 0 / 0
+pooled d < 0.1: n=523 b* 88 V1 81 genie 33 R = 0.127
+pooled d >= 0.1: n=7157 b* 993 V1 916 genie 332 R = 0.116
+
+## SUMMARY: 44 values checked, 0 differ from the record

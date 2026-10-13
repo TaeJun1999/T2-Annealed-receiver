@@ -1,0 +1,21 @@
+## eval_accept.py --prior DMI --ntrain 160000 --bstar gmm1024 --ll-val 112.04253042212595 --n 2560 --skip0 0 --points C2:6,9,12,15 --tag DMIB16e4:best:dc784649f1e9b890:C2    (dry form on the ORIGINAL raw: expected to FAIL only on 'points ... missing/extra' for -3/0/+3, everything else must pass)
+ACCEPT: FAILED
+  DMIB16e4: points [('C2', -3), ('C2', 0), ('C2', 3)] missing/extra
+rc=1
+## same without --points (full original plan)
+ACCEPT: OK -- DMIB16e4
+rc=0
+## eval_accept.py --prior DMI --ntrain 160000 --bstar gmm1024 --ll-val 112.04253042212595 --n 2560 --skip0 0 --points C2:6,9,12,15 --tag SPDMI:-:-:C2 --ref-raw raw_DMIB16e4   (dry form on the ORIGINAL raw: expected to FAIL only on 'points ... missing/extra' for -3/0/+3, everything else must pass)
+ACCEPT: FAILED
+  SPDMI: points [('C2', -3), ('C2', 0), ('C2', 3)] missing/extra
+rc=1
+## same without --points (full original plan)
+ACCEPT: OK -- SPDMI
+rc=0
+## eval_accept.py --prior DMI --ntrain 160000 --bstar gmm1024 --ll-val 112.04253042212595 --n 2560 --skip0 0 --points C2:6,9,12,15 --tag ALDDMI:best:dc784649f1e9b890:C2 --ref-raw raw_DMIB16e4   (dry form on the ORIGINAL raw: expected to FAIL only on 'points ... missing/extra' for -3/0/+3, everything else must pass)
+ACCEPT: FAILED
+  ALDDMI: points [('C2', -3), ('C2', 0), ('C2', 3)] missing/extra
+rc=1
+## same without --points (full original plan)
+ACCEPT: OK -- ALDDMI
+rc=0

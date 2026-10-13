@@ -1,0 +1,139 @@
+# recompute_dmi_s5.py -- 5-DMI fits table / selection / stop-rule analysis / timeline / disclosures (prior DMI)
+
+## 1. fits table vs the npz files
+  min it_best over the 24 files = 40; max n_iter = 307
+  full-family ll_val gains per doubling (16 -> ... -> 1024): +16.493, +23.093, +15.855, +13.004, +9.404, +6.192
+  full 1024 candidates (kappa, restart) -> ll_val: [(0, 0, 112.043), (0, 1, 111.957), (0, 2, 111.903), (16, 0, 36.152), (16, 1, 36.092), (16, 2, 36.216), (64, 0, 19.33), (64, 1, 19.209), (64, 2, 18.978), (256, 0, 1.622), (256, 1, 1.493), (256, 2, 2.05)]
+
+## 1b. arms.gmm_selection NOW vs the hand-written .sel
+  gmm_selection -> b* = gmm1024, kron_K = 2048, ll_val by arm = {gmm16: 28.0024, gmm32: 44.4953, gmm64: 67.5879, gmm128: 83.4427, gmm256: 96.4469, gmm512: 105.8509, gmm1024: 112.0425, kron: 41.1801}
+
+## 2. which stop rule ended each final fit (gmm_em_gpu.py:133-143: validation every 10 it, patience 40 on it_best; from it >= 20: break if ll[-1] - ll[-2] < 1e-6 |ll[-1]|,
+      which ALSO fires on a NEGATIVE train-ll step, e.g. after a reseed)
+  fam  K     n_iter it_best  rule        last step      tol*|ll|     mean of the 5 steps before   ll[0] -> ll[-1]
+  full    16   103     80   tol(NEG step)  -2.081e-05   2.784e-05   +1.313e-04               -61.686 ->    27.844   neg steps total 1
+  full    32   121     80   patience       +3.533e-04   4.475e-05   +7.298e-04               -56.685 ->    44.755   neg steps total 0
+  full    64   307    300   tol            +6.222e-05   6.788e-05   +1.337e-04               -53.801 ->    67.881   neg steps total 0
+  full   128   179    170   tol            +5.736e-05   8.402e-05   +1.224e-04               -49.882 ->    84.022   neg steps total 0
+  full   256   183    150   tol            +4.804e-05   9.771e-05   +2.154e-04               -46.139 ->    97.709   neg steps total 0
+  full   512   191    190   tol            +7.106e-05   1.077e-04   +2.184e-04               -43.030 ->   107.681   neg steps total 0
+  full  1024    72     70   tol(NEG step)  -1.545e-03   1.155e-04   +1.716e-03               -39.853 ->   115.499   neg steps total 1
+  kron    16    59     50   tol(NEG step)  -7.659e-05   1.069e-05   +1.684e-03               -60.710 ->    10.694   neg steps total 1
+  kron    32    43     40   tol            +1.516e-05   1.746e-05   +8.472e-05               -57.395 ->    17.462   neg steps total 0
+  kron    64   176    140   tol            +2.051e-05   2.213e-05   +3.680e-05               -53.850 ->    22.133   neg steps total 0
+  kron   128   158    130   tol            +2.506e-05   2.655e-05   +6.598e-05               -49.757 ->    26.550   neg steps total 0
+  kron   256   161    120   patience       +1.962e-04   3.078e-05   +2.520e-04               -46.308 ->    30.778   neg steps total 0
+  kron   512   141    130   tol            +3.129e-05   3.481e-05   +9.146e-05               -43.059 ->    34.812   neg steps total 0
+  kron  1024   271    230   patience       +2.891e-04   3.843e-05   +4.061e-04               -39.938 ->    38.425   neg steps total 0
+  kron  2048   181    140   patience       +1.052e-04   4.213e-05   +1.590e-04               -37.144 ->    42.130   neg steps total 0
+  -> final fits ended by a NEGATIVE train-ll step: [('full', 16), ('full', 1024), ('kron', 16)]
+  b* train ll: it0 -39.853, it1 71.984, it10 114.353, it30 115.278, it50 115.458, it70 115.5007, it71 115.4992; per-iteration gain over it 61..70: 0.0017 nat
+  b* ll_train 115.5007, ll_val 112.0425 (train-val gap 3.458), ll_test 92.6851, gauss_val -57.2968; the three kappa-0 restarts: ll_val [112.043, 111.957, 111.903] (spread 0.139 nat)
+
+## 3. structure of b* (pi, covs): live components, placeholders, PSD
+  pi: min 6.246e-06, max 2.541e-03, median 1.018e-03 (uniform 1/1024 = 9.766e-04; 1/n = 6.250e-06); sum 1.000000000
+  components with cov_k - 0.5 Chat of rank 1 (reseeded placeholders at the end of EM): 99; with pi_k <= 1.5/n: 99; both: 99; pi mass of the placeholders 0.00062
+  LIVE components (EM-updated covariance): 925 of 1024, carrying 0.99938 of the mass; effective number exp(H(pi)) = 855.8
+  (for comparison) full 512: placeholders 30 of 512, pi mass 0.00019
+
+## 4. logs: queue (tb2.log), post-select, full-1024 fit, training, sigma grid
+  sigma_grid_D2_DMI.npz keys ['nu', 'sigma', 'lo', 'hi', 'samples']
+
+## 5. commits, raw mtimes, manifests, runner / driver logs (§7 header, 7.3 header, 7.7)
+  commits (CDT): b737fd55 10-11 11:23:26 | 003c8e51 10-12 14:03:00 | 4131a3b0 10-12 16:13:38 | 29cf411d 10-12 17:56:07 | cde35a4e 10-12 18:21:13
+  raw_DMIB16e4: 448 chunks, first 10-12 16:28:50, last 10-12 17:02:26 CDT
+  raw_DMIB16e4last: 448 chunks, first 10-12 17:18:07, last 10-12 17:52:43 CDT
+  raw_PILDMI: 448 chunks, first 10-12 17:56:51, last 10-12 17:58:08 CDT
+  raw_ALDDMI: 448 chunks, first 10-12 17:59:14, last 10-12 17:59:42 CDT
+  raw_SPDMI: 448 chunks, first 10-12 18:02:26, last 10-12 18:15:00 CDT
+  manifest DMIB16e4: git 4131a3b0 config_hash 76399fb1c7f57517 n_raw 448
+  manifest DMIB16e4last: git 4131a3b0 config_hash 76399fb1c7f57517 n_raw 448
+  manifest PILDMI: git 29cf411d config_hash 08f6774848ad0818 n_raw 448
+  manifest ALDDMI: git 29cf411d config_hash 08f6774848ad0818 n_raw 448
+  manifest SPDMI: git 29cf411d config_hash 08f6774848ad0818 n_raw 448
+
+## 6. git diffs (7.3 header, 7.7) and banners / acceptance files
+  changed lines in the 9 shared modules: 76; lines NOT mentioning SRP/srp: 45
+      -PAT = re.compile(r"^(D1|D2)_(C\d)_([A-Z]\d?c?|S2v|SV8e|MIX3|UMi28|DMC|SRT|SRB|DMI)_Nr(\d+)_T(\d+)_Tp(\d+)_(dft|eig)_snr(-?\d+)_skip(\d+)_n(\d+)\.npz$
+      -       "DMI": 14}                                     # DeepMIMO v4 indoor scenario i1_2p4, ONE fixed BS x 5 UE yaws, 0.5 m block split (dmi_build.py
+      +       "DMI": 14,                                     # DeepMIMO v4 indoor scenario i1_2p4, ONE fixed BS x 5 UE yaws, 0.5 m block split (dmi_build.py
+      -DM_PRIORS = ("DMC", "SRT", "SRB", "DMI")                           # priors served by dmimo.DMGen / dmimo.ensemble_sides_dm (== dmimo.PRIORS): ray-tr
+      -DM_WARNINGS = {"DMC": DM_WARNING, "SRT": SRT_WARNING, "SRB": SRB_WARNING, "DMI": DMI_WARNING}
+      +    "# " + "=" * 100 + "\n"
+      +    "# as shipped) at 28 GHz (LoS + first-order specular reflection, depth 1), ONE fixed BS, ONE UE MOVING along a lawn-mower route over the\n"
+      +    "# floor (345600 snapshots in time order, 1.5 cm apart, no position twice; UE array aligned with the direction of travel), channels by\n"
+      +    "# Sionna's own arrays and Paths.cfr (per-pair path powers normalised, narrowband at the carrier, ensemble-normalised;\n"
+      +    "# test channels are the LAST 15 % of the route, an area the UE has not entered before. Not the D2 synthetic testbed.\n"
+      +    "# Reference = known-channel receiver (R5-genie: same EP detector + BCJR, true H); not a bound.\n"
+      +    "# " + "=" * 100
+      +)
+      -PRIORS = ("DMC", "SRT", "SRB", "DMI")     # == common.DM_PRIORS; SRT = Sionna RT 2.1 city pool (srt_build.py), added 2026-10-10 CDT;
+      -#                                           (dmi_build.py), both added 2026-10-11 CDT (user: fixed BS, the configuration whose BLER is low)
+      +#                                           (dmi_build.py), both added 2026-10-11 CDT (user: fixed BS, the configuration whose BLER is low);
+      -POOLS = {"DMC": ("deepmimo", "dmc"), "SRT": ("sionna_rt", "srt"), "SRB": ("sionna_rt", "srb"), "DMI": ("deepmimo", "dmi")}   # prior -> (folder under
+      +POOLS = {"DMC": ("deepmimo", "dmc"), "SRT": ("sionna_rt", "srt"), "SRB": ("sionna_rt", "srb"), "DMI": ("deepmimo", "dmi"),
+      +    [(0.2082516748617985-0.00042153205443472156j), (1.0003602488142247+0j), (0.20774179533676834+0.0001598794498263174j), (0.0006225943763000072+0.00
+      +    [(0.0002608936140591457-0.0017205035488756487j), (0.20774179533676834-0.0001598794498263174j), (0.9998152788149859+0j), (0.20742131552257198+0.00
+      +    [(-0.016393629503275463+8.038250150309879e-05j), (0.0006225943763000072-0.0019075004178549702j), (0.20742131552257198-0.0003852580112960537j), (0
+      +    [(0.20779012904306302+0.23187755525635304j), (1.0002498551738752+0j), (0.20810259510830303-0.23175343275622606j), (0.00013852200601918263-0.01073
+      +    [(4.6548433298030765e-05+0.01118921900228474j), (0.20810259510830303+0.23175343275622606j), (1.0007501419032379+0j), (0.20791050201179334-0.23175
+      +    [(-0.016646394269927332-0.09279092393255342j), (0.00013852200601918263+0.010739300010218191j), (0.20791050201179334+0.23175070912001772j), (1.000
+      +    [(0.0010498580334118834-0.004402974914081554j), (-0.01646407251824759-0.09235664111461381j), (0.0004422102933657915+0.010984646147071522j), (0.20
+      +    [(-0.009966748943011021+0.006353398671263661j), (0.001021937567161693-0.004859697062535335j), (-0.016429099259795583-0.09267735268454198j), (0.00
+      +    [(-0.019218232954193712+0.006018698416184067j), (-0.010246564897101743+0.006280140523517544j), (0.001283779523140248-0.005070330445014358j), (-0.
+      +    [(0.026411175771897503+0.007532023270078544j), (-0.019479381172410933+0.005848529952581541j), (-0.01062297841950143+0.006050000494430573j), (0.00
+      -    ap.add_argument("--prior", choices=("S2", "UMi28", "DMC", "SRT", "SRB", "DMI"), default="S2")
+      -ap.add_argument("--prior", default="S2", choices=("S2", "S2c", "SV8e", "MIX3", "UMi28", "S2d", "DMC", "SRT", "SRB", "DMI"),
+      +                                         "SRB (scene `box`, metal walls as shipped, 28 GHz, PathSolver depth 1, 1e8 samples, ONE fixed BS) with ONE U
+      +                                         "moving along a lawn-mower route (576 rows x 600 snapshots, 1.5 cm apart, no position twice; UE array aligne
+      +                                         "with the direction of travel), Sionna PlanarArray ULAs (BS Nr, UE 4), isotropic V pol, half-wavelength, "
+      +                                         "Paths.cfr at the carrier, per-pair path powers normalised, uplink by reciprocity, ensemble-normalised "
+      +                                         "E||H||^2 = Nr Nt; FIXED pool split BY TIME (test = the last 15 % of the route); the receiver treats every b
+      +                                         "on its own")
+      -#   prior  S2c | SV8e | UMi28 | MIX3 | DMC | SRT | SRB | DMI   bstar  kron | gmm<K>        kron_K  '-' when bstar is a full family
+      -CHAT_FROM_TRAIN = ("S2c", "SV8e", "MIX3", "UMi28", "S2v", "S2d", "DMC", "SRT", "SRB", "DMI")
+      -         f"# content     : testbed_dm.py -- {'DeepMIMO v4' if PRIOR in ('DMC', 'DMI') else 'Sionna RT 2.1'} {PRIOR} (code/dmimo.py, pool by code/{dic
+      -    if pr is None and PRIOR == "SRB":                            # room pool: identity from srb_build's constants
+      +        tt = m["t"][g.idx["test"]]
+      +        ok &= c
+      +                 f"{los.mean():.6f}, mean paths {m['npath'].mean():.2f} -> {'PASS' if c else 'FAIL'}")
+      +        pr = nanp
+      +    elif pr is None and PRIOR == "SRB":                          # room pool: identity from srb_build's constants
+  removed lines (13) -- each is re-added with an SRP entry appended:
+      -PAT = re.compile(r"^(D1|D2)_(C\d)_([A-Z]\d?c?|S2v|SV8e|MIX3|UMi28|DMC|SRT|SRB|DMI)_Nr(\d+)_T(\d+)_Tp(\d+)_(dft|eig)_snr(-?\d+)_skip(\d+)_n(\d+)\.npz$")
+      -       "DMI": 14}                                     # DeepMIMO v4 indoor scenario i1_2p4, ONE fixed BS x 5 UE yaws, 0.5 m block split (dmi_build.py): NEW str
+      -DM_PRIORS = ("DMC", "SRT", "SRB", "DMI")                           # priors served by dmimo.DMGen / dmimo.ensemble_sides_dm (== dmimo.PRIORS): ray-traced pools
+      -DM_WARNINGS = {"DMC": DM_WARNING, "SRT": SRT_WARNING, "SRB": SRB_WARNING, "DMI": DMI_WARNING}
+      -PRIORS = ("DMC", "SRT", "SRB", "DMI")     # == common.DM_PRIORS; SRT = Sionna RT 2.1 city pool (srt_build.py), added 2026-10-10 CDT;
+      -#                                           (dmi_build.py), both added 2026-10-11 CDT (user: fixed BS, the configuration whose BLER is low)
+      -POOLS = {"DMC": ("deepmimo", "dmc"), "SRT": ("sionna_rt", "srt"), "SRB": ("sionna_rt", "srb"), "DMI": ("deepmimo", "dmi")}   # prior -> (folder under ~/data, p
+      -    ap.add_argument("--prior", choices=("S2", "UMi28", "DMC", "SRT", "SRB", "DMI"), default="S2")
+      -ap.add_argument("--prior", default="S2", choices=("S2", "S2c", "SV8e", "MIX3", "UMi28", "S2d", "DMC", "SRT", "SRB", "DMI"),
+      -#   prior  S2c | SV8e | UMi28 | MIX3 | DMC | SRT | SRB | DMI   bstar  kron | gmm<K>        kron_K  '-' when bstar is a full family
+      -CHAT_FROM_TRAIN = ("S2c", "SV8e", "MIX3", "UMi28", "S2v", "S2d", "DMC", "SRT", "SRB", "DMI")
+      -         f"# content     : testbed_dm.py -- {'DeepMIMO v4' if PRIOR in ('DMC', 'DMI') else 'Sionna RT 2.1'} {PRIOR} (code/dmimo.py, pool by code/{dict(DMC='dmi
+      -    if pr is None and PRIOR == "SRB":                            # room pool: identity from srb_build's constants
+
+## 7. GB' (7.2) and acceptance (e)
+  d2_gbprime_DMI_N160000_a1.npz keys: ['nu', 'sigma', 'nmse_gmm', 'nmse_model']
+    nu: [0.0021624  0.00304435 0.004286   0.00603408 0.00849511 0.0119599
+ 0.01683782 0.02370523 0.03337356 0.04698517 0.06614837 0.09312739
+ 0.13110998 0.18458401 0.25986775 0.36585644 0.51507328 0.72514914
+ 1.02090576 1.43728858]
+    sigma: [0.0328816  0.03901505 0.04629257 0.05492758 0.06517328 0.07733013
+ 0.09175462 0.10886971 0.12917731 0.15327291 0.18186309 0.21578623
+ 0.25603709 0.30379599 0.36046342 0.42770109 0.50748068 0.60214165
+ 0.71445985 0.8477289 ]
+    nmse_gmm: [0.00115169 0.00154805 0.00207364 0.00277096 0.00369876 0.00493051
+ 0.00656985 0.00874565 0.01162963 0.01544872 0.02045004 0.0269561
+ 0.03534837 0.04616312 0.06013837 0.0782871  0.10171414 0.13149835
+ 0.16902384 0.21860759]
+    nmse_model: [0.00101996 0.00131981 0.00170417 0.00220661 0.00286237 0.00372725
+ 0.00487094 0.00640056 0.00845728 0.01125052 0.01507036 0.02031951
+ 0.02754967 0.03744697 0.05111786 0.06953511 0.09340572 0.12405706
+ 0.16321507 0.22334314]
+
+## 8. no DMI BLER before 4131a3b0; DECISIONS.md lines
+  out of scope (follow-up FIGHSDMI16e4, appeared DURING this audit): [('raw_FHCALDDMI', '10-12 18:44:35'), ('raw_FHCDMIB16e4', '10-12 18:45:53'), ('raw_FHCSPDMI', '10-12 18:45:14'), ('raw_FHDMIB16e4', '10-12 18:54:14')]
+
+## SUMMARY: 147 values checked, 0 differ from the record

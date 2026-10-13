@@ -16,7 +16,7 @@ import glob, json, re, sys
 
 RV, REC = "results/review_next", "../conference/figures/records"
 PR = sys.argv[1] if len(sys.argv) > 1 else "SRB"
-RUN = {"SRB": "fighsroom", "SRP": "fighspath"}[PR]
+RUN = {"SRB": "fighsroom", "SRP": "fighspath", "DMI": "fighsdmi"}[PR]   # DMI = NEXT_EXPERIMENTS_FIGHSDMI16e4 (its §3 = the SRP form)
 TAGS = {f"FH{PR}B16e4": f"{PR}B16e4", f"FHSP{PR}": f"SP{PR}", f"FHALD{PR}": f"ALD{PR}"}
 HS = (6, 9, 12, 15)
 ORDER = ["M-ours-dscore-C-V1", "ALD-pilot", "M-ours-bstar", "R2-ours-G", "R1-turbo", "R3-bigamp", "R0-pilot@1", "SBL-loop", "SBL-pilot",
@@ -145,5 +145,6 @@ else:
     P(f"3. +6 · +9 dB 에서 실패 수 V1 ≤ b\\* → **{hit(V[0] <= B[0] and V[1] <= B[1])}** ({V[0]} 대 {B[0]}, {V[1]} 대 {B[1]}).")
     P(f"4a. V1 의 +9 dB 실패 수 ≥ 1 / 20480 → **{hit(V[1] >= 1)}** ({V[1]}).")
     P(f"4b. V1 의 +15 dB 실패 수 ≤ 5 / 20480 → **{hit(V[3] <= 5)}** ({V[3]}).")
-P(f"5. `FIGHS_DONE ok=3 fail=0` → **{hit((OKN, FAILN) == (3, 0))}** (ok={OKN} fail={FAILN}).")
+NST = len(re.findall(r"\] start \(git", open(f"logs/run_{RUN}16e4.log", encoding="utf-8").read()))
+P(f"5. `FIGHS_DONE ok=3 fail=0`" + (", 재개 없이 한 번에(시작 줄 1 개)" if PR == "DMI" else "") + f" → **{hit((OKN, FAILN) == (3, 0) and (PR != "DMI" or NST == 1))}** (ok={OKN} fail={FAILN}" + (f"; 시작 줄 {NST} 개" if PR == "DMI" else "") + ").")
 print("\n".join(out))

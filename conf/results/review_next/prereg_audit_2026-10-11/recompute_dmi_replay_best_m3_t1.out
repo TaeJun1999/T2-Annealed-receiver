@@ -1,0 +1,8 @@
+# replay DMIB16e4 snr -3 skip 0 n 40; affinity [0, 1, 2]..7 (8 cpus); OMP_NUM_THREADS=1 MKL=1 OPENBLAS=1
+  run_task: done    __replay_never_written__.npz  (207 s)  BLER16: R2-ours-G=0.80 R3-bigamp=0.90 R4-scvamp=0.93 M-ours-gmm32=0.57 R5-genie=0.25  [207 s]
+  torch threads 1
+  stored raw_DMIB16e4/D2_C2_DMI_Nr8_T16_Tp4_dft_snr-3_skip0_n40.npz: 173 keys; replay: 173 keys; only stored []; only replay []
+  identical numeric keys 149, identical string keys 23, differing keys 1
+    DIFF ('run|git', '4131a3b0', 'ecaaf967+dirty')
+  arms with blk_err: 14; failures @16 in this chunk (stored == replay): M-ours-bstar 15, M-ours-bstar-scalar 16, M-ours-dscore-C-V0 40, M-ours-dscore-C-V1 15, M-ours-dscore-C-V4 15, M-ours-dscore-C-V4b 18, M-ours-gmm32 23, R0-pilot 33, R1-turbo 36, R2-ours-G 32, R3-bigamp 36, R4-llr 39, R4-scvamp 37, R5-genie 10
+  VERDICT: BIT-IDENTICAL except run|git
