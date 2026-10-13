@@ -1,0 +1,407 @@
+==================== replay_mem40.py (scratch copy; kept as text -- raw_shape.py writes a synthetic npz next to itself, so it is not stored here as a runnable file)
+"""as replay_mem.py, the chunk-40 reference alone in a fresh process (the first script's second number reused freed heap)."""
+import glob, sys, time
+import numpy as np
+rk = [f"R5-genie|{q}" for q in ("blk_err", "ber", "tauL_gmean", "alphaD")]
+cut = lambda v, i: v[i, :16] if v.ndim == 2 else v[i]
+rss = lambda: int(open("/proc/self/statm").read().split()[1]) * 4096
+f40 = sorted(glob.glob("/home/HTJ/t2/conf/raw_FHDMIB16e4/D2_*_snr15_*_n40.npz"))
+rows = {}; r0 = rss(); t0 = time.time(); nt = 0
+for j, f in enumerate(f40):
+    with np.load(f) as z:
+        for i in range(40):
+            rows[(j, i)] = {k: cut(z[k], i) for k in rk}; nt += 1
+dt = time.time() - t0; dr = rss() - r0
+print(f"chunk-40 reference: {len(f40)} files, {nt} trials, {dt:.1f} s ({dt / nt * 1e6:.0f} us/trial), RSS +{dr / 2**20:.0f} MiB ({dr / nt / 1024:.1f} KiB/trial)")
+print(f"  => n = 327,680 reference trials (FYALDDMI vs raw_FYDMIB16e4): {dt / nt * 327680 / 60:.1f} min, {dr / nt * 327680 / 2**30:.1f} GiB")
+
+==================== replay_patched_scale.py (scratch copy; kept as text -- raw_shape.py writes a synthetic npz next to itself, so it is not stored here as a runnable file)
+"""review_FIGHSYDMI16e4: the PATCHED eval_accept replay loop (one read per key and file) at the FZ scale -- 7680 reference chunk files x 400
+trials (the synthetic chunk-400 file of raw_shape.py read 7680 times) + 8192 tag chunk files x 40 trials (a stored chunk-40 file read 8192
+times).  Measures time and RSS only; the comparison values are meaningless here."""
+import glob, os, sys, time
+import numpy as np
+S = os.path.dirname(os.path.abspath(__file__))
+rk = [f"R5-genie|{q}" for q in ("blk_err", "ber", "tauL_gmean", "alphaD")]
+cut = lambda v, i: v[i, :16] if v.ndim == 2 else v[i]
+rss = lambda: int(open("/proc/self/statm").read().split()[1]) * 4096
+syn = os.path.join(S, "synth_D2_C2_DMI_Nr8_T16_Tp4_dft_snr15_skip10000_n400.npz")
+f40 = sorted(glob.glob("/home/HTJ/t2/conf/raw_FHALDDMI/D2_*_snr15_*_n40.npz"))[0]
+r0, t0, rows = rss(), time.time(), {}
+for j in range(7680):
+    s = 10000 + 400 * j
+    with np.load(syn) as z:
+        zz = {k: z[k] for k in rk}
+    for i in range(400):
+        rows[s + i] = {k: cut(zz[k], i) for k in rk}
+t1 = time.time(); r1 = rss()
+shared = 0
+for j in range(8192):
+    s = 10000 + 40 * j
+    with np.load(f40) as z:
+        zz = {k: z[k] for k in rk if k in z.files}
+    for i in range(40):
+        shared += 1
+        for k in rk:
+            x, y = cut(zz[k], i), rows[s + i][k]
+            d = float(np.max(np.abs(np.nan_to_num(x, nan=1e300) - np.nan_to_num(y, nan=1e300))))
+t2 = time.time()
+print(f"patched loop at FZ scale: reference rows {len(rows)} built in {t1 - t0:.0f} s, RSS +{(r1 - r0) / 2**30:.2f} GiB; tag loop {shared} trials in {t2 - t1:.0f} s; "
+      f"total {t2 - t0:.0f} s, RSS +{(rss() - r0) / 2**30:.2f} GiB   (unpatched, extrapolated from replay_mem.out: ~32 min for the rows alone, ~590 GiB)")
+
+==================== raw_shape.py (scratch copy; kept as text -- raw_shape.py writes a synthetic npz next to itself, so it is not stored here as a runnable file)
+"""review_FIGHSYDMI16e4: key inventory of a main-raw chunk; a synthetic chunk-400 file (10 stored chunk-40 files concatenated, written to the
+scratch dir only) for size / load-time estimates; load_raw memory model for n = 3,072,000."""
+import glob, os, sys, time, collections
+sys.path.insert(0, "/home/HTJ/t2/conf/code")
+import numpy as np
+S = os.path.dirname(os.path.abspath(__file__))
+fs = sorted(glob.glob("/home/HTJ/t2/conf/raw_FHDMIB16e4/D2_*_snr15_skip*_n40.npz"), key=lambda f: int(f.split("_skip")[1].split("_")[0]))[:10]
+zs = [np.load(f) for f in fs]
+z = zs[0]
+per_trial = {k: z[k] for k in z.files if z[k].ndim >= 1 and z[k].shape[0] == 40}
+other = [k for k in z.files if k not in per_trial]
+by = collections.Counter(); 
+for k, v in per_trial.items(): by[(v.shape[1:], str(v.dtype))] += 1
+print(f"chunk file {os.path.basename(fs[0])}: {len(z.files)} keys; per-trial arrays {len(per_trial)} {dict(by)}; meta/run/0-d keys {len(other)}")
+bpt = sum(v.nbytes for v in per_trial.values()) / 40
+print(f"uncompressed per-trial bytes (all per-trial keys): {bpt:.0f} B -> n = 3,072,000: {bpt * 3072000 / 2**30:.1f} GiB; n = 327,680: {bpt * 327680 / 2**30:.2f} GiB (load_raw holds parts + concatenated per key: peak ~ total + one key)")
+flat = {}
+for k in z.files:
+    if k in per_trial:
+        flat[k] = np.concatenate([y[k] for y in zs if k in y.files])
+    else:
+        flat[k] = z[k]
+flat["run|n"] = np.array(400)
+out = os.path.join(S, "synth_D2_C2_DMI_Nr8_T16_Tp4_dft_snr15_skip10000_n400.npz")
+np.savez_compressed(out, **flat)
+sz40 = np.mean([os.path.getsize(f) for f in fs]); sz400 = os.path.getsize(out)
+print(f"file size: chunk-40 mean {sz40 / 1024:.1f} KiB; synthetic chunk-400 {sz400 / 1024:.1f} KiB ({sz400 / 400:.0f} B/trial vs {sz40 / 40:.0f} B/trial)")
+print(f"disk: FYDMIB16e4 8192 x chunk-40 = {8192 * sz40 / 2**30:.2f} GiB; FZDMIB16e4 7680 x chunk-400 = {7680 * sz400 / 2**30:.2f} GiB")
+fa = sorted(glob.glob("/home/HTJ/t2/conf/raw_FHALDDMI/D2_*_snr15_*_n40.npz"))
+print(f"disk: ALD rows 8192 x {np.mean([os.path.getsize(f) for f in fa]) / 1024:.1f} KiB = {8192 * np.mean([os.path.getsize(f) for f in fa]) / 2**30:.2f} GiB each; ALD pilots + estimate hisnr5 = 2 x {(2 * 327680 * 32 * 16 * 2) / 2**30:.2f} GiB")
+# per-file read time of everything load_raw reads (every key once)
+for name, f in (("chunk-40", fs[0]), ("chunk-400 (synthetic)", out)):
+    t0 = time.time()
+    for _ in range(20):
+        with np.load(f) as y:
+            for k in y.files: y[k]
+    print(f"read every key once, {name}: {(time.time() - t0) / 20 * 1e3:.1f} ms per file")
+
+==================== post_timing.py (scratch copy; kept as text -- raw_shape.py writes a synthetic npz next to itself, so it is not stored here as a runnable file)
+"""review_FIGHSYDMI16e4: time / memory of the post-run steps on an existing raw (read-only), for extrapolation to the FY / FZ raws.
+(a) analysis.load_raw on raw_FHDMIB16e4 (2048 chunk-40 files, 4 points x 20480 trials); (b) run_manifest.py's per-file loop (copied; nothing
+written); (c) the acc_extra (f) per-file loop; (d) the runner's 'exists' walk; (e) the synthetic chunk-400 file through the manifest loop."""
+import glob, os, sys, time, resource
+sys.path.insert(0, "/home/HTJ/t2/conf/code")
+import numpy as np
+rss = lambda: resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 2**20
+root = "/home/HTJ/t2/conf/raw_FHDMIB16e4"
+files = sorted(glob.glob(root + "/D2_*.npz"))
+def manifest_loop(files):
+    meta, run, arms, pts = {}, {}, set(), {}
+    for f in files:
+        z = np.load(f, allow_pickle=False)
+        for k in z.files:
+            if k.startswith("meta|"):
+                meta.setdefault(k[5:], set()).add(str(z[k].item() if z[k].shape == () else z[k]))
+            elif k.startswith("run|"):
+                run.setdefault(k[4:], set()).add(str(z[k].item() if z[k].shape == () else z[k]))
+            elif "|" in k and k.split("|")[1] == "blk_err":
+                arms.add(k.split("|")[0])
+        be = next(k for k in z.files if k.endswith("|blk_err")); pts[f] = int(z[be].shape[0])
+    return len(meta), len(run)
+t0 = time.time(); manifest_loop(files[:512]); tm = (time.time() - t0) / 512
+print(f"(b) run_manifest loop: {tm * 1e3:.1f} ms per chunk-40 file -> 8192 files {tm * 8192:.0f} s; 7680 files {tm * 7680:.0f} s (per-file cost is meta-dominated, the same for chunk 400)")
+def f_loop(files):
+    gits, ex = set(), {}
+    for f in files:
+        with np.load(f) as z:
+            gits.add(str(z["run|git"]) if "run|git" in z.files else None)
+            for k in z.files:
+                if k.endswith("|failed"):
+                    ex[k[:-7]] = ex.get(k[:-7], 0) + int(z[k].sum())
+t0 = time.time(); f_loop(files[:512]); tf = (time.time() - t0) / 512
+print(f"(c) acc_extra (f) loop: {tf * 1e3:.2f} ms per file -> 8192 files {tf * 8192:.0f} s")
+t0 = time.time(); n = sum(os.path.exists(f) for f in files); te = (time.time() - t0) / len(files)
+print(f"(d) os.path.exists walk: {te * 1e6:.1f} us per file ({n} files)")
+syn = os.path.join(os.path.dirname(os.path.abspath(__file__)), "synth_D2_C2_DMI_Nr8_T16_Tp4_dft_snr15_skip10000_n400.npz")
+t0 = time.time(); [manifest_loop([syn]) for _ in range(50)]; print(f"(e) run_manifest loop on the synthetic chunk-400 file: {(time.time() - t0) / 50 * 1e3:.1f} ms per file")
+from analysis import load_raw
+r0 = rss(); t0 = time.time(); d, _, w = load_raw("D2", root=root); dt = time.time() - t0
+nb = sum(v.nbytes for k in d for a in d[k] for v in d[k][a].values() if hasattr(v, "nbytes") and getattr(v, "base", None) is None)
+print(f"(a) load_raw raw_FHDMIB16e4: {len(files)} files, {dt:.1f} s ({dt / len(files) * 1e3:.1f} ms per file), arrays held {nb / 2**30:.2f} GiB for {4 * 20480} trials "
+      f"({nb / (4 * 20480):.0f} B per trial), maxRSS {r0:.2f} -> {rss():.2f} GiB, warnings {len(w)}")
+print(f"    -> FYDMIB16e4 (8192 chunk-40 files, 327,680 trials): ~{dt / len(files) * 8192:.0f} s, ~{nb / (4 * 20480) * 327680 / 2**30:.1f} GiB held")
+print(f"    -> FZDMIB16e4 (7680 chunk-400 files, 3,072,000 trials): held ~{nb / (4 * 20480) * 3072000 / 2**30:.1f} GiB (+ one key's parts while concatenating); read time ~ 7680 x (8.5 ms + open) from raw_shape.out")
+
+==================== ald_overhead.py (scratch copy; kept as text -- raw_shape.py writes a synthetic npz next to itself, so it is not stored here as a runnable file)
+"""review_FIGHSYDMI16e4: per-chunk cost of the ALD file in runner.build_point (_ald_table loads hhat + b of ALL SNRs; meta|ald_file sha256 of the
+whole file; run_task re-opens it 4 times), measured on the existing 168 MB hisnr4 file and scaled x4 to the 671 MB hisnr5 file (2 x 327680 x 32
+complex128 x {hhat, b}).  Read-only."""
+import hashlib, sys, time, resource
+import numpy as np
+f = "/home/HTJ/t2/conf/results/ald/ald_PILSRB_hisnr4.npz"
+import os; sz = os.path.getsize(f)
+ts = []
+for _ in range(3):
+    t0 = time.time()
+    z = np.load(f); tab = {"hhat": z["hhat"], "b": z["b"], "v": z["v"], "skip": int(z["skip"])}; str(z["ckpt_sha"])
+    t1 = time.time()
+    h = hashlib.sha256(open(f, "rb").read()).hexdigest()[:16]; str(np.load(f)["tune"])
+    t2 = time.time()
+    for _ in range(2): float(np.load(f)["rotation"]); float(np.load(f)["doppler"])
+    t3 = time.time(); ts.append((t1 - t0, t2 - t1, t3 - t2))
+a = np.min(ts, 0)
+print(f"file {sz / 2**20:.0f} MiB (hhat {tab['hhat'].shape} {tab['hhat'].dtype}): load hhat+b {a[0]:.2f} s, sha256 + tune {a[1]:.2f} s, 4 small reads {a[2]:.3f} s; held {(tab['hhat'].nbytes + tab['b'].nbytes) / 2**20:.0f} MiB")
+k = 671e6 / sz
+print(f"scaled to the hisnr5 file (x{k:.2f}): ~{(a[0] + a[1]) * k:.1f} s single-thread per chunk, {671 / 1024:.2f} GiB held + {671 / 1024:.2f} GiB transient per worker "
+      f"-> x192 workers: {192 * 0.671 / 1.024:.0f} GiB held, up to {2 * 192 * 0.671 / 1.024:.0f} GiB at the first round")
+print(f"ALD row CPU per chunk [estimate]: FHALDDMI measured 13.8 s wall x 36.7 / 192 = {13.8 * 36.7 / 192:.1f} s single-thread equivalent (84 MB file, mean skip 20240); "
+      f"hisnr5 rows: + skip (173840 - 20240) x 47.5 us = {(173840 - 20240) * 47.5e-6:.1f} s + file overhead ~{(a[0] + a[1]) * (k - 0.5):.1f} s")
+tot = 13.8 * 36.7 / 192 + (173840 - 20240) * 47.5e-6 + (a[0] + a[1]) * (k - 0.5)
+print(f"  => ~{tot:.1f} s per chunk x 8192 / 36.7 = {tot * 8192 / 36.7 / 3600:.2f} h per ALD row (registration: 0.7 h)")
+
+==================== ald_regen_check.py (scratch copy; kept as text -- raw_shape.py writes a synthetic npz next to itself, so it is not stored here as a runnable file)
+"""review_FIGHSYDMI16e4: the working-tree code/ald.py (set hisnr5) -- parse check, the set tables, and an IN-MEMORY call of _regen_one (nothing
+written) for trials 10000..10063 at +12 / +15 dB compared with the stored pilots_PILDMI_hisnr.npz (the same trials of set hisnr): b, H, G, sigma2.
+Also runner.chunk_plan / eval_accept plan for the four rows."""
+import ast, os, sys, time
+sys.path.insert(0, "/home/HTJ/t2/conf/code")
+src = open("/home/HTJ/t2/conf/code/ald.py").read(); ast.parse(src)
+print("ald.py parses; 'hisnr5' occurrences:", src.count("hisnr5"))
+import numpy as np
+import ald, common as C
+z = np.load("/home/HTJ/t2/conf/results/ald/pilots_PILDMI_hisnr.npz")
+ok = True
+for snr in (12.0, 15.0):
+    t0 = time.time()
+    s, b, H, G, s2 = ald._regen_one(("D2", "DMI", "C2", snr, C.HISNR_SKIP0, 64, "DMIB16e4", None, None, None))
+    k = int(np.flatnonzero(np.isclose(z["snrs"], snr))[0])
+    same = dict(b=np.array_equal(b, z["b"][k][:64]), H=np.array_equal(H, z["H"][k][:64]), G=np.array_equal(G, z["G"][k]), sigma2=float(s2) == float(z["sigma2"][k]))
+    ok &= all(same.values())
+    print(f"_regen_one +{snr:.0f} dB trials 10000..10063 vs pilots_PILDMI_hisnr.npz: {same}  ({time.time() - t0:.1f} s)")
+print("REGEN-PREFIX:", "OK" if ok else "FAILED")
+import runner
+for tag, n, ch in (("FYDMIB16e4", 327680, 40), ("FZDMIB16e4", 3072000, 400), ("F?ALDDMI", 327680, 40)):
+    p = runner.chunk_plan(10000, n, ch); q = [(10000 + ch * k, ch) for k in range(n // ch)]
+    print(f"{tag}: chunk_plan {len(p)} chunks, first {p[0]}, last {p[-1]}, last trial {p[-1][0] + p[-1][1] - 1}; == eval_accept plan: {p == q}")
+print("control (FZ row, --chunk 400 --n 40):", runner.chunk_plan(0, 40, 400))
+
+==================== timed.py (scratch copy; kept as text -- raw_shape.py writes a synthetic npz next to itself, so it is not stored here as a runnable file)
+"""timed.py OUT CMD...: run CMD (stdout+stderr -> OUT), print wall seconds and the child's max RSS."""
+import resource, subprocess, sys, time
+t0 = time.time()
+with open(sys.argv[1], "w") as fh:
+    rc = subprocess.run(sys.argv[2:], stdout=fh, stderr=subprocess.STDOUT, stdin=subprocess.DEVNULL).returncode
+print(f"rc={rc} {time.time() - t0:.1f} s maxRSS {resource.getrusage(resource.RUSAGE_CHILDREN).ru_maxrss / 2**20:.2f} GiB")
+
+==================== pre_sim.sh (scratch copy; kept as text -- raw_shape.py writes a synthetic npz next to itself, so it is not stored here as a runnable file)
+#!/bin/bash
+# review_FIGHSYDMI16e4: the '# PRE' lines + the row precondition loop of code/run_fighsydmi16e4.sh, copied verbatim (sed line ranges), with
+# die() reporting instead of exiting and the log redirected to the scratch dir.  Read-only (git status / ls / sha256sum / grep / pgrep).
+cd /home/HTJ/t2/conf; P=~/miniforge3/envs/torch/bin/python; export CUDA_VISIBLE_DEVICES=
+L=/tmp/claude-1005/-home-HTJ-t2/b187bcb3-67a6-4fa2-86ce-8a8ed017508c/scratchpad/review_fighsy/pre_sim.log; OUT=results/review_next; LOGD=logs; REG=results/review_next/NEXT_EXPERIMENTS_FIGHSYDMI16e4.md
+SK=10000
+NDIE=0
+log () { echo "[sim] $*"; }
+die () { NDIE=$((NDIE+1)); echo "DIE #$NDIE (line ${BASH_LINENO[0]}): $*"; }
+RESUME=0; WANT="  "
+ROWS='FYDMIB16e4|C2|DMI|DMIB16e4|ckpt/d2sx_DMI_N160000_a1_best.pt|dc784649f1e9b890|best|gmm1024|-|112.04253042212595|-|DMIB16e4|-||12|327680|40|R0-pilot R1-turbo R2-ours-G R3-bigamp M-ours-bstar M-ours-dscore-C-V1 R5-genie
+FYALDDMI|C2|DMI|DMIB16e4|ckpt/d2sx_DMI_N160000_a1_best.pt|dc784649f1e9b890|best|gmm1024|-|112.04253042212595|FYDMIB16e4|ALDDMI|-|--ald-file /home/HTJ/t2/conf/results/ald/ald_PILDMI_hisnr5.npz|12|327680|40|ALD-pilot R5-genie
+FZDMIB16e4|C2|DMI|DMIB16e4|ckpt/d2sx_DMI_N160000_a1_best.pt|dc784649f1e9b890|best|gmm1024|-|112.04253042212595|-|DMIB16e4|-||15|3072000|400|R0-pilot R1-turbo R2-ours-G R3-bigamp M-ours-bstar M-ours-dscore-C-V1 R5-genie
+FZALDDMI|C2|DMI|DMIB16e4|ckpt/d2sx_DMI_N160000_a1_best.pt|dc784649f1e9b890|best|gmm1024|-|112.04253042212595|FZDMIB16e4|ALDDMI|-|--ald-file /home/HTJ/t2/conf/results/ald/ald_PILDMI_hisnr5.npz|15|327680|40|ALD-pilot R5-genie'
+sel () { [ "$WANT" = "  " ] || [[ "$WANT" == *" $1 "* ]]; }
+[ -z "$(git -C /home/HTJ/t2 status --porcelain conf/code Demo)" ] || die "conf/code or Demo dirty"  # PRE
+for f in $REG DECISIONS.md; do [ -n "$(git ls-files $f)" ] && [ -z "$(git status --porcelain $f)" ] || die "$f not tracked+clean (commit the registration first)"; done  # PRE
+[ "$(git log -1 --format=%H -- $REG)" = "$(git rev-parse HEAD)" ] || die "HEAD is not the run commit (the last commit touching $REG); no other commit until FIGHS_DONE"  # PRE
+X=$(for t in $(cut -d'|' -f1 <<< "$ROWS"); do ls -d raw_$t raw_${t:0:2}C${t:2} 2>/dev/null; done | tr '\n' ' '); [ $RESUME = 1 ] || [ -z "$X" ] || die "FIGHS raw(s) exist: $X(an interrupted run: --resume; re-running a finished tag needs user approval)"  # PRE
+[ $RESUME = 1 ] || [ -z "$(ls results/ald/ald_PILDMI_hisnr5.npz 2>/dev/null)" ] || die "results/ald/ald_PILDMI_hisnr5.npz exists before a fresh run (stale ALD estimate)"  # PRE
+[ $RESUME = 1 ] || [ -z "$(for t in $(cut -d'|' -f1 <<< "$ROWS"); do c=${t:0:2}C${t:2}; ls $OUT/${c}_control.txt $OUT/${c}_aldcontrol.txt results/ald/*${c}* 2>/dev/null; done)" ] || die "stale control artefacts of this script's rows before a fresh run"  # PRE
+grep -q 'FIGHS_DONE' logs/run_fighsdmi16e4.log 2>/dev/null && ! pgrep -f 'code/runner[.]py run' > /dev/null || die "FIGHSDMI16e4 has not printed FIGHS_DONE (or a runner.py run is still alive) -- §1 순서·자원"  # PRE
+H=$(git rev-parse --short HEAD)
+for w in $WANT; do grep -q "^$w|" <<< "$ROWS" || die "unknown row '$w'"; done
+while IFS='|' read -r TAG CELL PR BF CK SHA ROLE BS KK LL REF ORIG PICK FL SNRS N CH ARMS; do
+  sel $TAG || continue
+  [ -d results/gmm_fits_D2_$BF ] || die "$TAG: fits dir results/gmm_fits_D2_$BF missing"
+  [ "$CK" = - ] || [ "$(sha256sum $CK | cut -c1-16)" = "$SHA" ] || die "$TAG: $CK sha256[:16] != $SHA"
+  [ "$PICK" = - ] || { f=${PICK%%:*}; [ "$(sha256sum $f | cut -c1-16)" = "${PICK##*:}" ] && [ -n "$(git ls-files $f)" ] && [ -z "$(git status --porcelain $f)" ]; } || die "$TAG: pick $PICK not (sha, tracked, clean)"
+  for o in ${ORIG//,/ }; do [ -d raw_$o ] || die "$TAG: original raw raw_$o missing"; done
+  [[ $REF == F[YZ]* ]] || [ "$REF" = - ] || [ -d raw_$REF ] || die "$TAG: genie reference raw_$REF missing"
+  [[ $FL != *--ald-file* ]] || { t=$(grep -o 'ald_[A-Za-z0-9]*_hisnr5' <<< "$FL"); t=${t#ald_}; t=${t%_hisnr5}
+    case $t in PILDMI) s=b0145dac7b7076aa; p=1e8cc99169b3f18c;; *) s=unregistered; p=unregistered;; esac
+    [ "$(sha256sum results/ald/ald_$t.npz 2>/dev/null | cut -c1-16)" = "$s" ] && [ -f results/ald/pilots_${t}_dev.npz ] && [ "$(sha256sum results/ald/pilots_${t}_test.npz 2>/dev/null | cut -c1-16)" = "$p" ] \
+      && [ -n "$(git ls-files results/ald/tune_$t.json)" ] && [ -z "$(git status --porcelain results/ald/tune_$t.json)" ]; } \
+    || die "$TAG: ALD records of $t not as registered (test estimate sha256[:16] $s, dev/test pilots present, tune record tracked+clean)"
+done <<< "$ROWS"
+echo "preconditions that would die now: $NDIE"
+
+==================== flow_sim.sh (scratch copy; kept as text -- raw_shape.py writes a synthetic npz next to itself, so it is not stored here as a runnable file)
+#!/bin/bash
+# review_FIGHSYDMI16e4: control flow of code/run_fighsydmi16e4.sh from its start line to the end (lines 197-230 copied verbatim by sed, ald_new =
+# lines 146-159 verbatim, sel = line 28, args = lines 29-33), in a sandbox dir with stubs for python / nvidia-smi / git / the heavy functions.
+# The ROWS table is the script's with the ALD path redirected into the sandbox.  Usage: flow_sim.sh <scenario> [--resume] [TAG ...]
+export SB=/tmp/claude-1005/-home-HTJ-t2/b187bcb3-67a6-4fa2-86ce-8a8ed017508c/scratchpad/review_fighsy/flow_sandbox/$1; SCEN=${1%%_run*}; shift; mkdir -p $SB
+cd $SB; mkdir -p logs results/ald results/review_next; P=/tmp/claude-1005/-home-HTJ-t2/b187bcb3-67a6-4fa2-86ce-8a8ed017508c/scratchpad/review_fighsy/flow_stub_python.sh; export FAKE_H=abc1234 EST_FAIL=0
+L=logs/run.log; OUT=results/review_next; LOGD=logs; SK=10000; H=abc1234
+log () { echo "[fighs] $*" | tee -a $L; }
+git () { echo abc1234; }
+GPU_FREE=1; [ "$SCEN" = nogpu_early ] && GPU_FREE=0
+nvidia-smi () { [ -f $SB/gpu_free ] && echo "0, 5"; }
+[ $GPU_FREE = 1 ] && touch $SB/gpu_free
+RESUME=0; [ "$1" = --resume ] && { RESUME=1; shift; }; WANT=" $* "
+ROWS='FYDMIB16e4|C2|DMI|DMIB16e4|ckpt/d2sx_DMI_N160000_a1_best.pt|dc784649f1e9b890|best|gmm1024|-|112.04253042212595|-|DMIB16e4|-||12|327680|40|R0-pilot R1-turbo R2-ours-G R3-bigamp M-ours-bstar M-ours-dscore-C-V1 R5-genie
+FYALDDMI|C2|DMI|DMIB16e4|ckpt/d2sx_DMI_N160000_a1_best.pt|dc784649f1e9b890|best|gmm1024|-|112.04253042212595|FYDMIB16e4|ALDDMI|-|--ald-file $SB/results/ald/ald_PILDMI_hisnr5.npz|12|327680|40|ALD-pilot R5-genie
+FZDMIB16e4|C2|DMI|DMIB16e4|ckpt/d2sx_DMI_N160000_a1_best.pt|dc784649f1e9b890|best|gmm1024|-|112.04253042212595|-|DMIB16e4|-||15|3072000|400|R0-pilot R1-turbo R2-ours-G R3-bigamp M-ours-bstar M-ours-dscore-C-V1 R5-genie
+FZALDDMI|C2|DMI|DMIB16e4|ckpt/d2sx_DMI_N160000_a1_best.pt|dc784649f1e9b890|best|gmm1024|-|112.04253042212595|FZDMIB16e4|ALDDMI|-|--ald-file $SB/results/ald/ald_PILDMI_hisnr5.npz|15|327680|40|ALD-pilot R5-genie'
+ROWS="${ROWS//'$SB'/$SB}"   # sim only: expand the sandbox path inside the single-quoted table
+sel () { [ "$WANT" = "  " ] || [[ "$WANT" == *" $1 "* ]]; }
+args () {  # the row's runner flags (globals of the current row): --stagec-ckpt / --sparse-file from the table, then FLAGS
+  local a="--testbed D2 --prior $PR --cell $CELL --chunk $CH --ntrain 160000"
+  [ "$CK" = - ] || a="$a --stagec-ckpt /home/HTJ/t2/conf/$CK"
+  [ "$PICK" = - ] || a="$a --sparse-file ${PICK%%:*}"
+  echo "$a $FL"; }
+acc_extra () { echo "ACCEPT (f): OK"; }
+counts () { echo "count table stub $1"; }
+ctl () { echo "CONTROL: OK" > $OUT/${TAG:0:2}C${TAG:2}_control.txt; }
+ald_ctl () { echo "CONTROL-ALD: OK" > $OUT/${TAG:0:2}C${TAG:2}_aldcontrol.txt; }
+ald_new () {  # --ald-file rows: the ALD estimate of the new trials (ald.py --set hisnr5 = the FIGHSYDMI16e4 §1 code change), with the frozen tune record
+  local E T V G; E=$(grep -o '/[^ ]*_hisnr5\.npz' <<< "$FL"); V=$(grep -o -e '--rotation [0-9.]*' <<< "$FL" | cut -d' ' -f2)
+  T=$(basename $E .npz); T=${T#ald_}; T=${T%_hisnr5}
+  if [ -f $E ]; then   # a --resume, or phase R after the EARLY call (a fresh run ABORTs on ald_PILDMI_hisnr5.npz): reuse it only if made on this HEAD
+    [ "$($P -c "import json, numpy as np; print(json.loads(str(np.load('$E')['prov']))['git'])" 2>/dev/null)" = "$H" ] \
+      && { log "$TAG ALD $T: reusing $E (prov git $H)"; return 0; } \
+      || { log "$TAG ABORT: $E exists but its prov git is not $H (stale estimate)"; return 1; }
+  fi
+  G=$(nvidia-smi --query-gpu=index,memory.used --format=csv,noheader,nounits | awk -F', ' '$2 < 100 {print $1; exit}')
+  [ -n "$G" ] || { log "$TAG ABORT: no free GPU for the ALD estimate (resume later; no automatic retry)"; return 1; }
+  log "$TAG ALD $T: regen (CPU) + estimate (GPU $G) on trials $SK.., rotation ${V:-none} (tune record results/ald/tune_$T.json)"
+  CUDA_VISIBLE_DEVICES= $P code/ald.py regen --tag $T --prior $PR --cell $CELL --fits-tag $BF ${V:+--rotation $V} --set hisnr5 >> $L 2>&1 < /dev/null \
+    && CUDA_VISIBLE_DEVICES=$G $P code/ald.py estimate --tag $T --ckpt $CK --set hisnr5 >> $L 2>&1 < /dev/null && [ -f $E ] \
+    || { log "$TAG ABORT: ALD regen/estimate failed (see $L)"; return 1; }; }
+RW=$(echo $WANT); log "start (git $H) rows: ${RW:-all} resume=$RESUME skip0 $SK; SNR:n per row $(awk -F'|' '{printf "%s=%s:%s/chunk%s ", $1, $15, $16, $17}' <<< "$ROWS")"; OK=0; FAIL=0; declare -A ACC
+
+# ---------------------------------------------------------------- phase C: controls on the observed test chunk 0 (parallel)
+log "phase C: ALD estimator controls (sequential, one free GPU each), then receiver controls (trials 0..39 at each row's SNR, rows in parallel)"  # CTL
+while IFS='|' read -r TAG CELL PR BF CK SHA ROLE BS KK LL REF ORIG PICK FL SNRS N CH ARMS; do sel $TAG || continue; [[ $FL == *--ald-file* ]] && ald_ctl; done <<< "$ROWS"  # CTL
+while IFS='|' read -r TAG CELL PR BF CK SHA ROLE BS KK LL REF ORIG PICK FL SNRS N CH ARMS; do sel $TAG || continue; ctl & done <<< "$ROWS"  # CTL
+wait; log "phase C done: $(for t in $(cut -d'|' -f1 <<< "$ROWS"); do grep -lx 'CONTROL: OK' $OUT/${t:0:2}C${t:2}_control.txt 2>/dev/null; done | wc -l) receiver control(s) OK, $(grep -lx 'CONTROL-ALD: OK' $OUT/FYCALDDMI_aldcontrol.txt $OUT/FZCALDDMI_aldcontrol.txt 2>/dev/null | wc -l) ALD estimator control(s) OK"  # CTL
+while IFS='|' read -r TAG CELL PR BF CK SHA ROLE BS KK LL REF ORIG PICK FL SNRS N CH ARMS; do sel $TAG || continue; [[ $FL == *--ald-file* ]] && grep -qx 'CONTROL: OK' $OUT/${TAG:0:2}C${TAG:2}_control.txt 2>/dev/null && grep -qx 'CONTROL-ALD: OK' $OUT/${TAG:0:2}C${TAG:2}_aldcontrol.txt 2>/dev/null && { ald_new || log "$TAG early ALD estimate not made (phase R tries once more)"; }; done <<< "$ROWS" &  # EARLY (background)
+EP=$!
+[ "$SCEN" = nogpu_early ] && { sleep 0.5; ( sleep 4; touch $SB/gpu_free ) & }     # the GPU frees up after the EARLY attempts started
+while IFS='|' read -r TAG CELL PR BF CK SHA ROLE BS KK LL REF ORIG PICK FL SNRS N CH ARMS; do
+  sel $TAG || continue
+  [ "$(git rev-parse --short HEAD)" = "$H" ] || { log "ABORT: HEAD moved from $H during the run"; exit 1; }
+  grep -qx 'CONTROL: OK' $OUT/${TAG:0:2}C${TAG:2}_control.txt 2>/dev/null || { log "$TAG SKIP: control ${TAG:0:2}C${TAG:2} not OK ($OUT/${TAG:0:2}C${TAG:2}_control.txt)"; FAIL=$((FAIL+1)); continue; }  # CTL
+  [[ $FL != *--ald-file* ]] || grep -qx 'CONTROL-ALD: OK' $OUT/${TAG:0:2}C${TAG:2}_aldcontrol.txt 2>/dev/null || { log "$TAG SKIP: ALD estimator control not OK ($OUT/${TAG:0:2}C${TAG:2}_aldcontrol.txt)"; FAIL=$((FAIL+1)); continue; }  # CTL
+  [[ $REF == F[YZ]* ]] && [ "${ACC[$REF]}" != 0 ] && { log "$TAG SKIP: genie reference $REF not accepted"; FAIL=$((FAIL+1)); continue; }
+  [[ $FL == *--ald-file* ]] && { wait $EP 2>/dev/null; ald_new || { FAIL=$((FAIL+1)); continue; }; }
+  ln -sfn gmm_fits_D2_$BF results/gmm_fits_D2_$TAG
+  log "$TAG run: $(args) --snr $SNRS --n $N --skip0 $SK --arm $ARMS"
+  echo "# run_fighsydmi16e4 git $H $(TZ=America/Chicago date '+%Y-%m-%d %H:%M %Z') resume=$RESUME" >> $LOGD/run_D2_$TAG.log   # appended: a resume keeps the earlier chunk lines
+  $P code/runner.py run $(args) --snr $SNRS --n $N --skip0 $SK --arm $ARMS --tag $TAG >> $LOGD/run_D2_$TAG.log 2>&1 < /dev/null \
+    || { log "$TAG ABORT: run failed ($LOGD/run_D2_$TAG.log)"; FAIL=$((FAIL+1)); continue; }
+  $P code/run_manifest.py --tag $TAG >> $L 2>&1 < /dev/null || log "$TAG run_manifest rc=$?"
+  KARG=; [ "$KK" = - ] || KARG="--kron-K $KK"; RARG=; [ "$REF" = - ] || RARG="--ref-raw raw_$REF"; A=$OUT/${TAG}_accept.txt
+  $P code/eval_accept.py --prior $PR --ntrain 160000 --bstar $BS $KARG --ll-val $LL --n $N --chunk $CH --skip0 $SK --points $CELL:${SNRS// /,} \
+    --tag $TAG:$ROLE:$SHA:$CELL $RARG > $A 2>&1 < /dev/null; RC=$?
+  acc_extra raw_$TAG >> $A 2>&1 || RC=1
+  ACC[$TAG]=$RC; log "$TAG acceptance rc=$RC ($(grep -h '^ACCEPT' $A | tr '\n' ' ' | cut -c1-120))"
+  [ $RC -eq 0 ] || { log "$TAG INVALID: acceptance failed -- no count table (cause -> §6; a re-run needs user approval)"; FAIL=$((FAIL+1)); continue; }
+  counts raw_$TAG $CELL > $OUT/fighs_$TAG.txt 2>&1 && OK=$((OK+1)) || { log "$TAG count table failed rc=$?"; FAIL=$((FAIL+1)); }
+done <<< "$ROWS"
+log "FIGHS_DONE ok=$OK fail=$FAIL"
+echo "exit code would be $FAIL"
+
+==================== flow_sim2.sh (scratch copy; kept as text -- raw_shape.py writes a synthetic npz next to itself, so it is not stored here as a runnable file)
+#!/bin/bash
+# review_FIGHSYDMI16e4: control flow of code/run_fighsydmi16e4.sh from its start line to the end (lines 197-230 copied verbatim by sed, ald_new =
+# lines 146-159 verbatim, sel = line 28, args = lines 29-33), in a sandbox dir with stubs for python / nvidia-smi / git / the heavy functions.
+# The ROWS table is the script's with the ALD path redirected into the sandbox.  Usage: flow_sim.sh <scenario> [--resume] [TAG ...]
+export SB=/tmp/claude-1005/-home-HTJ-t2/b187bcb3-67a6-4fa2-86ce-8a8ed017508c/scratchpad/review_fighsy/flow_sandbox/$1; SCEN=${1%%_run*}; shift; mkdir -p $SB; FAILTAG=${FAILTAG:-none}
+cd $SB; mkdir -p logs results/ald results/review_next; P=/tmp/claude-1005/-home-HTJ-t2/b187bcb3-67a6-4fa2-86ce-8a8ed017508c/scratchpad/review_fighsy/flow_stub_python.sh; export FAKE_H=abc1234 EST_FAIL=0
+L=logs/run.log; OUT=results/review_next; LOGD=logs; SK=10000; H=abc1234
+log () { echo "[fighs] $*" | tee -a $L; }
+git () { echo abc1234; }
+GPU_FREE=1; [ "$SCEN" = nogpu_early ] && GPU_FREE=0
+nvidia-smi () { [ -f $SB/gpu_free ] && echo "0, 5"; }
+[ $GPU_FREE = 1 ] && touch $SB/gpu_free
+RESUME=0; [ "$1" = --resume ] && { RESUME=1; shift; }; WANT=" $* "
+ROWS='FYDMIB16e4|C2|DMI|DMIB16e4|ckpt/d2sx_DMI_N160000_a1_best.pt|dc784649f1e9b890|best|gmm1024|-|112.04253042212595|-|DMIB16e4|-||12|327680|40|R0-pilot R1-turbo R2-ours-G R3-bigamp M-ours-bstar M-ours-dscore-C-V1 R5-genie
+FYALDDMI|C2|DMI|DMIB16e4|ckpt/d2sx_DMI_N160000_a1_best.pt|dc784649f1e9b890|best|gmm1024|-|112.04253042212595|FYDMIB16e4|ALDDMI|-|--ald-file $SB/results/ald/ald_PILDMI_hisnr5.npz|12|327680|40|ALD-pilot R5-genie
+FZDMIB16e4|C2|DMI|DMIB16e4|ckpt/d2sx_DMI_N160000_a1_best.pt|dc784649f1e9b890|best|gmm1024|-|112.04253042212595|-|DMIB16e4|-||15|3072000|400|R0-pilot R1-turbo R2-ours-G R3-bigamp M-ours-bstar M-ours-dscore-C-V1 R5-genie
+FZALDDMI|C2|DMI|DMIB16e4|ckpt/d2sx_DMI_N160000_a1_best.pt|dc784649f1e9b890|best|gmm1024|-|112.04253042212595|FZDMIB16e4|ALDDMI|-|--ald-file $SB/results/ald/ald_PILDMI_hisnr5.npz|15|327680|40|ALD-pilot R5-genie'
+ROWS="${ROWS//'$SB'/$SB}"
+sel () { [ "$WANT" = "  " ] || [[ "$WANT" == *" $1 "* ]]; }
+args () {  # the row's runner flags (globals of the current row): --stagec-ckpt / --sparse-file from the table, then FLAGS
+  local a="--testbed D2 --prior $PR --cell $CELL --chunk $CH --ntrain 160000"
+  [ "$CK" = - ] || a="$a --stagec-ckpt /home/HTJ/t2/conf/$CK"
+  [ "$PICK" = - ] || a="$a --sparse-file ${PICK%%:*}"
+  echo "$a $FL"; }
+acc_extra () { echo "ACCEPT (f): $([ "$TAG" = "$FAILTAG" ] && echo FAILED || echo OK)"; [ "$TAG" != "$FAILTAG" ]; }
+counts () { echo "count table stub $1"; }
+ctl () { echo "CONTROL: OK" > $OUT/${TAG:0:2}C${TAG:2}_control.txt; }
+ald_ctl () { echo "CONTROL-ALD: OK" > $OUT/${TAG:0:2}C${TAG:2}_aldcontrol.txt; }
+ald_new () {  # --ald-file rows: the ALD estimate of the new trials (ald.py --set hisnr5 = the FIGHSYDMI16e4 §1 code change), with the frozen tune record
+  local E T V G; E=$(grep -o '/[^ ]*_hisnr5\.npz' <<< "$FL"); V=$(grep -o -e '--rotation [0-9.]*' <<< "$FL" | cut -d' ' -f2)
+  T=$(basename $E .npz); T=${T#ald_}; T=${T%_hisnr5}
+  if [ -f $E ]; then   # a --resume, or phase R after the EARLY call (a fresh run ABORTs on ald_PILDMI_hisnr5.npz): reuse it only if made on this HEAD
+    [ "$($P -c "import json, numpy as np; print(json.loads(str(np.load('$E')['prov']))['git'])" 2>/dev/null)" = "$H" ] \
+      && { log "$TAG ALD $T: reusing $E (prov git $H)"; return 0; } \
+      || { log "$TAG ABORT: $E exists but its prov git is not $H (stale estimate)"; return 1; }
+  fi
+  G=$(nvidia-smi --query-gpu=index,memory.used --format=csv,noheader,nounits | awk -F', ' '$2 < 100 {print $1; exit}')
+  [ -n "$G" ] || { log "$TAG ABORT: no free GPU for the ALD estimate (resume later; no automatic retry)"; return 1; }
+  log "$TAG ALD $T: regen (CPU) + estimate (GPU $G) on trials $SK.., rotation ${V:-none} (tune record results/ald/tune_$T.json)"
+  CUDA_VISIBLE_DEVICES= $P code/ald.py regen --tag $T --prior $PR --cell $CELL --fits-tag $BF ${V:+--rotation $V} --set hisnr5 >> $L 2>&1 < /dev/null \
+    && CUDA_VISIBLE_DEVICES=$G $P code/ald.py estimate --tag $T --ckpt $CK --set hisnr5 >> $L 2>&1 < /dev/null && [ -f $E ] \
+    || { log "$TAG ABORT: ALD regen/estimate failed (see $L)"; return 1; }; }
+RW=$(echo $WANT); log "start (git $H) rows: ${RW:-all} resume=$RESUME skip0 $SK; SNR:n per row $(awk -F'|' '{printf "%s=%s:%s/chunk%s ", $1, $15, $16, $17}' <<< "$ROWS")"; OK=0; FAIL=0; declare -A ACC
+
+# ---------------------------------------------------------------- phase C: controls on the observed test chunk 0 (parallel)
+log "phase C: ALD estimator controls (sequential, one free GPU each), then receiver controls (trials 0..39 at each row's SNR, rows in parallel)"  # CTL
+while IFS='|' read -r TAG CELL PR BF CK SHA ROLE BS KK LL REF ORIG PICK FL SNRS N CH ARMS; do sel $TAG || continue; [[ $FL == *--ald-file* ]] && ald_ctl; done <<< "$ROWS"  # CTL
+while IFS='|' read -r TAG CELL PR BF CK SHA ROLE BS KK LL REF ORIG PICK FL SNRS N CH ARMS; do sel $TAG || continue; ctl & done <<< "$ROWS"  # CTL
+wait; log "phase C done: $(for t in $(cut -d'|' -f1 <<< "$ROWS"); do grep -lx 'CONTROL: OK' $OUT/${t:0:2}C${t:2}_control.txt 2>/dev/null; done | wc -l) receiver control(s) OK, $(grep -lx 'CONTROL-ALD: OK' $OUT/FYCALDDMI_aldcontrol.txt $OUT/FZCALDDMI_aldcontrol.txt 2>/dev/null | wc -l) ALD estimator control(s) OK"  # CTL
+while IFS='|' read -r TAG CELL PR BF CK SHA ROLE BS KK LL REF ORIG PICK FL SNRS N CH ARMS; do sel $TAG || continue; [[ $FL == *--ald-file* ]] && grep -qx 'CONTROL: OK' $OUT/${TAG:0:2}C${TAG:2}_control.txt 2>/dev/null && grep -qx 'CONTROL-ALD: OK' $OUT/${TAG:0:2}C${TAG:2}_aldcontrol.txt 2>/dev/null && { ald_new || log "$TAG early ALD estimate not made (phase R tries once more)"; }; done <<< "$ROWS" &  # EARLY (background)
+EP=$!
+while IFS='|' read -r TAG CELL PR BF CK SHA ROLE BS KK LL REF ORIG PICK FL SNRS N CH ARMS; do
+  sel $TAG || continue
+  [ "$(git rev-parse --short HEAD)" = "$H" ] || { log "ABORT: HEAD moved from $H during the run"; exit 1; }
+  grep -qx 'CONTROL: OK' $OUT/${TAG:0:2}C${TAG:2}_control.txt 2>/dev/null || { log "$TAG SKIP: control ${TAG:0:2}C${TAG:2} not OK ($OUT/${TAG:0:2}C${TAG:2}_control.txt)"; FAIL=$((FAIL+1)); continue; }  # CTL
+  [[ $FL != *--ald-file* ]] || grep -qx 'CONTROL-ALD: OK' $OUT/${TAG:0:2}C${TAG:2}_aldcontrol.txt 2>/dev/null || { log "$TAG SKIP: ALD estimator control not OK ($OUT/${TAG:0:2}C${TAG:2}_aldcontrol.txt)"; FAIL=$((FAIL+1)); continue; }  # CTL
+  [[ $REF == F[YZ]* ]] && [ "${ACC[$REF]}" != 0 ] && { log "$TAG SKIP: genie reference $REF not accepted"; FAIL=$((FAIL+1)); continue; }
+  [ $TAG = FZDMIB16e4 ] && sel FYDMIB16e4 && [ "${ACC[FYDMIB16e4]}" != 0 ] && { log "$TAG SKIP: FYDMIB16e4 (the same receivers and tools, 5.5 h) was not accepted in this call -- the 51 h row is not started before the cause is known (--resume)"; FAIL=$((FAIL+1)); continue; }
+  [[ $FL == *--ald-file* ]] && { wait $EP 2>/dev/null; ald_new || { FAIL=$((FAIL+1)); continue; }; }
+  ln -sfn gmm_fits_D2_$BF results/gmm_fits_D2_$TAG
+  log "$TAG run: $(args) --snr $SNRS --n $N --skip0 $SK --arm $ARMS"
+  echo "# run_fighsydmi16e4 git $H $(TZ=America/Chicago date '+%Y-%m-%d %H:%M %Z') resume=$RESUME" >> $LOGD/run_D2_$TAG.log   # appended: a resume keeps the earlier chunk lines
+  $P code/runner.py run $(args) --snr $SNRS --n $N --skip0 $SK --arm $ARMS --tag $TAG >> $LOGD/run_D2_$TAG.log 2>&1 < /dev/null \
+    || { log "$TAG ABORT: run failed ($LOGD/run_D2_$TAG.log)"; FAIL=$((FAIL+1)); continue; }
+  $P code/run_manifest.py --tag $TAG >> $L 2>&1 < /dev/null || log "$TAG run_manifest rc=$?"
+  KARG=; [ "$KK" = - ] || KARG="--kron-K $KK"; RARG=; [ "$REF" = - ] || RARG="--ref-raw raw_$REF"; A=$OUT/${TAG}_accept.txt
+  $P code/eval_accept.py --prior $PR --ntrain 160000 --bstar $BS $KARG --ll-val $LL --n $N --chunk $CH --skip0 $SK --points $CELL:${SNRS// /,} \
+    --tag $TAG:$ROLE:$SHA:$CELL $RARG > $A 2>&1 < /dev/null; RC=$?
+  acc_extra raw_$TAG >> $A 2>&1 || RC=1
+  ACC[$TAG]=$RC; log "$TAG acceptance rc=$RC ($(grep -h '^ACCEPT' $A | tr '\n' ' ' | cut -c1-120))"
+  [ $RC -eq 0 ] || { log "$TAG INVALID: acceptance failed -- no count table (cause -> §6; a re-run needs user approval)"; FAIL=$((FAIL+1)); continue; }
+  counts raw_$TAG $CELL > $OUT/fighs_$TAG.txt 2>&1 && OK=$((OK+1)) || { log "$TAG count table failed rc=$?"; FAIL=$((FAIL+1)); }
+done <<< "$ROWS"
+wait $EP 2>/dev/null   # the background EARLY job never outlives the script (FIGHS_DONE is the last line of the log)
+log "FIGHS_DONE ok=$OK fail=$FAIL"
+echo "exit code would be $FAIL"
+
+==================== flow_stub_python.sh (scratch copy; kept as text -- raw_shape.py writes a synthetic npz next to itself, so it is not stored here as a runnable file)
+#!/bin/bash
+# stub for $P in flow_sim.sh: records the call; emulates only the file effects / outputs the script's control flow depends on
+echo "PY $*" >> $SB/trace.txt
+case "$1 $2" in
+  "-c "*) f=$(sed -n "s/.*np.load('\([^']*\)').*/\1/p" <<< "$2"); [ -f "$f" ] && cat "$f";;            # prov git of the fake estimate
+  "code/ald.py regen") sleep 1; echo "[ald regen stub]";;
+  "code/ald.py estimate") sleep 2; [ "$EST_FAIL" = 1 ] && exit 1
+       if [[ "$*" == *"--set hisnr5"* ]]; then echo -n "$FAKE_H" > $SB/results/ald/ald_PILDMI_hisnr5.npz; fi; echo "[ald estimate stub]";;
+  "code/runner.py run") sleep 1;;
+  "code/eval_accept.py "*) echo "ACCEPT: OK -- stub";;
+esac
+exit 0
+

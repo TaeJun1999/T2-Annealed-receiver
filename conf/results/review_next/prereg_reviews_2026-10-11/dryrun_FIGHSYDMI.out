@@ -1,0 +1,19 @@
+# plumbing dry run for NEXT_EXPERIMENTS_FIGHSYDMI16e4 (Perfect CSI only, trials 10000.. at +15 dB = trials already seen in raw_FHDMIB16e4; tags ZQDRY / ZQDRYA are scratch) 2026-10-12 22:05 CDT
+1/2 done    D2_C2_DMI_Nr8_T16_Tp4_dft_snr15_skip10400_n400.npz  (10 s)  BLER16: R5-genie=0.00
+2/2 done    D2_C2_DMI_Nr8_T16_Tp4_dft_snr15_skip10000_n400.npz  (10 s)  BLER16: R5-genie=0.00
+[run] finished in 0.2 min -> python runner.py analysis --testbed D2 --tag ZQDRY
+2/2 done    D2_C2_DMI_Nr8_T16_Tp4_dft_snr15_skip10040_n40.npz  (2 s)  BLER16: R5-genie=0.00
+[run] finished in 0.0 min -> python runner.py analysis --testbed D2 --tag ZQDRYA
+raw_ZQDRY:
+D2_C2_DMI_Nr8_T16_Tp4_dft_snr15_skip10000_n400.npz
+D2_C2_DMI_Nr8_T16_Tp4_dft_snr15_skip10400_n400.npz
+
+raw_ZQDRYA:
+D2_C2_DMI_Nr8_T16_Tp4_dft_snr15_skip10000_n40.npz
+D2_C2_DMI_Nr8_T16_Tp4_dft_snr15_skip10040_n40.npz
+## eval_accept chunk 400 row
+ACCEPT: OK -- ZQDRY
+## eval_accept chunk 40 row against the chunk 400 reference (trial-level genie replay)
+ACCEPT: OK -- ZQDRYA
+## load_raw + genie failures vs the stored chunk-40 raw (first 800 trials)
+point ('C2', 'DMI', 15.0) n 800 warnings 0 genie blk_err identical to raw_FHDMIB16e4 trials 10000..10799: True
