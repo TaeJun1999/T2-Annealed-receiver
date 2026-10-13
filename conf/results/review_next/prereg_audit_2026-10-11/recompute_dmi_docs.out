@@ -1,0 +1,22 @@
+# recompute_dmi_docs.py -- text-level checks of §7 (prior DMI)
+
+## A. markdown tables parsed from the record vs the raw-verified expected blocks
+
+## B. tables_D2_DMIB16e4{,last}.txt: table A SNR@0.1 and table-B gaps (text) vs 7.1 / 7.2
+
+## C. guard files vs 7.2
+
+## D. pair_PILDMI.txt / pair_ALDDMI.txt vs 7.5
+
+## E. GB' npz vs 7.2
+  ratio per level: [0.8856 0.8526 0.8218 0.7963 0.7739 0.756  0.7414 0.7319 0.7272 0.7282
+ 0.7369 0.7538 0.7794 0.8112 0.85   0.8882 0.9183 0.9434 0.9656 1.0217]
+
+## F. docs/EXPERIMENTS.md: the two DMI rows
+  EXPERIMENTS row 1 wording on b*: **b\* = full 공분산 K 1024 — 정상 수렴한 GMM** (등록된 격자 끝 규칙으로 512 → 1024 한 번 확장; 확장 격자의 끝이고 ll_val 은 아직 오르는 중 +6.192 nat — 캐비엇)
+
+## G. internal consistency / wording of §7
+  7.2 leak-strata threads wording: CPU 4 스레드   |   7.7: 보고 전용 층화 둘(누수·랭크)은 baseline runner 가 도는 동안 CPU 8 스레드(NUMA 노드 0)로 돌렸다(주 실행의 raw 만 읽는다).
+  7.3 baseline-input files tracked in 29cf411d (as listed): `results/sparse/{pick,tune}_DMI_C2.json`, `results/ald/tune_PILDMI{.json,_curves.npz}` — 5-DMI 에 sha 로 고정돼 있던 파일을 추적만 함; `run_dmi_base.sh` 가 추적·clean 을 요구한다   |   7.7: baseline 입력 파일 세 개는 5-DMI 커밋(4131a3b0)에 sha 만 적혀 있었고 git 추적은
+
+## SUMMARY: 210 values checked, 0 differ

@@ -43,3 +43,74 @@ v2 2026-10-12 18:43 CDT (Opus 5.5). 검토(MUST 1 · SHOULD 5 · NIT 8) 반영: 
 **그림 스크립트**: `HSREG` 에 DMI 항목을 넣은 변경은 커밋 ecaaf967 (이 실행 커밋 앞)에 들어갔다.
 
 **실행 명령(이 커밋 뒤, 한 번)**: `tmux new -d -s fighsdmi -c /home/HTJ/t2/conf "taskset -c 24-47,120-143,72-95,168-191 bash code/run_fighsdmi16e4.sh"`. **실행 커밋 = 이 문서를 담은 커밋**(그 뒤 `FIGHS_DONE` 까지 main 커밋 없음). 실행 시작 전 상태: `raw_FHDMIB16e4` · `raw_FHSPDMI` · `raw_FHALDDMI` · `ald_PILDMI_hisnr.npz` · FHC\*DMI 대조 파일 없음. DMI 의 새 시행 결과는 아무도 보지 않았다. ROOM16e4 §7 의 기록 감사는 이 커밋 시점에 아직 돌고 있다(결과를 보지 않은 채 시작한다; 감사가 §7 의 수치를 고치면 이 문서의 인용(머리말의 n = 2560 실패 수 등)도 §6 에서 밝힌다).
+
+---
+
+## 6. 결과 (기록 2026-10-12 21:37 CDT, Opus 5.5 — 전사만, 해석 없음; 이 절은 추가만 한다)
+
+### 6.1 실행·운영 기록 (생성기 `prereg_audit_2026-10-11/s6_fighsroom_gen.py`; 수치는 모두 기록 파일에서 읽음)
+
+`bash code/run_fighsdmi16e4.sh` **한 번**, tmux `fighsdmi`, 10-12 18:43 CDT 시작(git e5caaccb = 실행 커밋; 시작 줄 하나, 재개 없음). 단계 C (관측된 시험 청크 0 의 대조) 10-12 18:45 CDT: 3 receiver control(s) OK, 1 ALD estimator control(s) OK. `FIGHS_DONE ok=3 fail=0` 10-12 21:32 CDT. ABORT · SKIP · INVALID 줄: 0 개.
+
+| 행 | 시작 (CDT) | runner | 작업 (done / exists) | 수용 (CDT) | 수용 판정 | manifest git · config_hash | 대조 |
+|---|---|---|---|---|---|---|---|
+| FHDMIB16e4 | 10-12 18:49 | 75.3 분 · 2048 작업 · 192 워커 | 2048 / 0 | 10-12 20:05 | rc=0; ACCEPT: OK -- FHDMIB16e4; ACCEPT (f): OK | e5caaccb · 66bd25e9fa596040 | CONTROL: OK |
+| FHSPDMI | 10-12 20:05 | 82.3 분 · 2048 작업 · 192 워커 | 2048 / 0 | 10-12 21:28 | rc=0; ACCEPT: OK -- FHSPDMI; ACCEPT (f): OK | e5caaccb · 66bd25e9fa596040 | CONTROL: OK |
+| FHALDDMI | 10-12 21:29 | 2.6 분 · 2048 작업 · 192 워커 | 2048 / 0 | 10-12 21:32 | rc=0; ACCEPT: OK -- FHALDDMI; ACCEPT (f): OK | e5caaccb · 66bd25e9fa596040 | CONTROL: OK · CONTROL-ALD: OK |
+
+수용 파일의 (f) 줄(raw 당 청크 수 · `run|git` · pick · ald · raised):
+
+- `(f) raw_FHDMIB16e4: 2048 chunk files, run|git ['e5caaccb']; pick -; rotation -; ald -; raised trials per arm (= failures, report only) 0`
+- `(f) raw_FHSPDMI: 2048 chunk files, run|git ['e5caaccb']; pick results/sparse/pick_DMI_C2.json; rotation -; ald -; raised trials per arm (= failures, report only) 0`
+- `(f) raw_FHALDDMI: 2048 chunk files, run|git ['e5caaccb']; pick -; rotation -; ald /home/HTJ/t2/conf/results/ald/ald_PILDMI_hisnr.npz; raised trials per arm (= failures, report only) 0`
+
+집계표 머리말:
+
+- `# run_fighsdmi16e4 git e5caaccb raw_FHDMIB16e4 C2: failures@16 / n, BLER, 95% Wilson -- REPORT-ONLY (FIGHSDMI16e4 §1); load_raw warnings 0`
+- `# run_fighsdmi16e4 git e5caaccb raw_FHSPDMI C2: failures@16 / n, BLER, 95% Wilson -- REPORT-ONLY (FIGHSDMI16e4 §1); load_raw warnings 0`
+- `# run_fighsdmi16e4 git e5caaccb raw_FHALDDMI C2: failures@16 / n, BLER, 95% Wilson -- REPORT-ONLY (FIGHSDMI16e4 §1); load_raw warnings 0`
+
+### 6.2 원고 범례 11 곡선 — BLER@16 실패 수 (+6 / +9 / +12 / +15 dB; 새 시행 n = 20480 과 원 raw n = 2560)
+
+| 곡선 (arm) | 출처 | +6 dB: k / 20480 (BLER, 95 % Wilson) | +9 dB: k / 20480 (BLER, 95 % Wilson) | +12 dB: k / 20480 (BLER, 95 % Wilson) | +15 dB: k / 20480 (BLER, 95 % Wilson) | 원 raw k / 2560 (+6 / +9 / +12 / +15) |
+|---|---|---|---|---|---|---|
+| M-ours-dscore-C-V1 | raw_FHDMIB16e4 | 21 (1.03e-03, [6.71e-04, 1.57e-03]) | 2 (9.77e-05, [2.68e-05, 3.56e-04]) | 0 (0.00e+00, [0.00e+00, 1.88e-04]) | 0 (0.00e+00, [0.00e+00, 1.88e-04]) | 4 / 0 / 0 / 0 |
+| ALD-pilot | raw_FHALDDMI | 58 (2.83e-03, [2.19e-03, 3.66e-03]) | 8 (3.91e-04, [1.98e-04, 7.71e-04]) | 1 (4.88e-05, [8.62e-06, 2.77e-04]) | 0 (0.00e+00, [0.00e+00, 1.88e-04]) | 4 / 1 / 1 / 0 |
+| M-ours-bstar | raw_FHDMIB16e4 | 27 (1.32e-03, [9.06e-04, 1.92e-03]) | 8 (3.91e-04, [1.98e-04, 7.71e-04]) | 2 (9.77e-05, [2.68e-05, 3.56e-04]) | 0 (0.00e+00, [0.00e+00, 1.88e-04]) | 7 / 0 / 0 / 0 |
+| R2-ours-G | raw_FHDMIB16e4 | 308 (1.50e-02, [1.35e-02, 1.68e-02]) | 54 (2.64e-03, [2.02e-03, 3.44e-03]) | 6 (2.93e-04, [1.34e-04, 6.39e-04]) | 2 (9.77e-05, [2.68e-05, 3.56e-04]) | 31 / 12 / 0 / 0 |
+| R1-turbo | raw_FHDMIB16e4 | 767 (3.75e-02, [3.49e-02, 4.01e-02]) | 153 (7.47e-03, [6.38e-03, 8.75e-03]) | 20 (9.77e-04, [6.32e-04, 1.51e-03]) | 6 (2.93e-04, [1.34e-04, 6.39e-04]) | 90 / 23 / 4 / 0 |
+| R3-bigamp | raw_FHDMIB16e4 | 4194 (2.05e-01, [1.99e-01, 2.10e-01]) | 3448 (1.68e-01, [1.63e-01, 1.74e-01]) | 4530 (2.21e-01, [2.16e-01, 2.27e-01]) | 4940 (2.41e-01, [2.35e-01, 2.47e-01]) | 554 / 437 / 573 / 603 |
+| R0-pilot@1 | raw_FHDMIB16e4 | 2390 (1.17e-01, [1.12e-01, 1.21e-01]) | 634 (3.10e-02, [2.87e-02, 3.34e-02]) | 145 (7.08e-03, [6.02e-03, 8.32e-03]) | 39 (1.90e-03, [1.39e-03, 2.60e-03]) | 302 / 81 / 23 / 3 |
+| SBL-loop | raw_FHSPDMI | 192 (9.37e-03, [8.14e-03, 1.08e-02]) | 20 (9.77e-04, [6.32e-04, 1.51e-03]) | 4 (1.95e-04, [7.60e-05, 5.02e-04]) | 1 (4.88e-05, [8.62e-06, 2.77e-04]) | 16 / 5 / 0 / 0 |
+| SBL-pilot | raw_FHSPDMI | 244 (1.19e-02, [1.05e-02, 1.35e-02]) | 41 (2.00e-03, [1.48e-03, 2.71e-03]) | 7 (3.42e-04, [1.66e-04, 7.05e-04]) | 1 (4.88e-05, [8.62e-06, 2.77e-04]) | 20 / 3 / 1 / 0 |
+| OMP-pilot | raw_FHSPDMI | 601 (2.93e-02, [2.71e-02, 3.17e-02]) | 114 (5.57e-03, [4.64e-03, 6.68e-03]) | 26 (1.27e-03, [8.67e-04, 1.86e-03]) | 12 (5.86e-04, [3.35e-04, 1.02e-03]) | 80 / 24 / 3 / 0 |
+| R5-genie | raw_FHDMIB16e4 | 7 (3.42e-04, [1.66e-04, 7.05e-04]) | 1 (4.88e-05, [8.62e-06, 2.77e-04]) | 0 (0.00e+00, [0.00e+00, 1.88e-04]) | 0 (0.00e+00, [0.00e+00, 1.88e-04]) | 0 / 0 / 0 / 0 |
+
+Perfect CSI (R5-genie) 의 실패 수는 세 raw 에서 같다: FHDMIB16e4 [7, 1, 0, 0] · FHSPDMI [7, 1, 0, 0] · FHALDDMI [7, 1, 0, 0] → 동일.
+
+0 실패 점 (n = 20480): M-ours-dscore-C-V1 +12 dB, M-ours-dscore-C-V1 +15 dB, ALD-pilot +15 dB, M-ours-bstar +15 dB, R5-genie +12 dB, R5-genie +15 dB.
+
+그림 기록 `records/paper_f21dmihs.txt` 의 '오르는 칸' (SNR 이 오를 때 BLER 이 오르는 칸, 한쪽 Fisher p; 보고만): 1 줄.
+- `R3-bigamp           @16  4194/20480 3448/20480 4530/20480 4940/20480   (raw_FHDMIB16e4)   rising: +9->+12 dB p=7.4e-42; +12->+15 dB p=8.2e-07`
+
+### 6.3 §3 예측 채점
+
+1. V1 의 실패 수가 +6 ≥ +9 ≥ +12 ≥ +15 dB 로 줄기만 한다 → **적중** (21 / 2 / 0 / 0).
+2. V1 · b\* · Perfect CSI 에 Fisher p < 0.05 인 오르는 칸 없음 → **적중** (오르는 칸의 p: M-ours-dscore-C-V1 없음, M-ours-bstar 없음, R5-genie 없음).
+3. +6 · +9 dB 에서 실패 수 V1 ≤ b\* → **적중** (21 대 27, 2 대 8).
+4a. V1 의 +9 dB 실패 수 ≥ 1 / 20480 → **적중** (2).
+4b. V1 의 +15 dB 실패 수 ≤ 5 / 20480 → **적중** (0).
+5. `FIGHS_DONE ok=3 fail=0`, 재개 없이 한 번에(시작 줄 1 개) → **적중** (ok=3 fail=0; 시작 줄 1 개).
+
+### 6.4 그림과 공개 사항
+
+- **그림** `conference/figures/F21dmihs_col.{pdf,png}`, 기록 `records/paper_f21dmihs.txt` (§1 의 명령 그대로, `FIGHS_DONE` 뒤; 앞에 `taskset -c 24-39` 만 붙임): 실패 수 = 집계표(스크립트 assert), y 축 (3e-05, 1.2) (기록의 Layout 줄). 0 실패 점 — 기록 원문: `Zero-failure points (the curve breaks there; Perfect CSI: fighs_merge.zero_arrows): Proposed (diffusion prior) +12 dB; Proposed (diffusion prior) +15 dB; Annealed Langevin (plug-in) +15 dB; GMM prior +15 dB; Perfect CSI +12 dB; Perfect CSI +15 dB.` 제안 곡선은 +9 dB 에서 끝나고 +12 · +15 dB 에는 표시가 없다(0 / 20480, Wilson 상한 1.88e-04); Perfect CSI 의 +12 · +15 dB 는 화살표다. Wilson 하한이 y 축 아래(3e-05 미만)라 축에서 잘리는 막대(6.2 의 구간에서 읽음; 막대는 네 곡선에만 있다): Proposed +9 dB (2.68e-05), GMM prior +12 dB (2.68e-05), Gaussian prior +15 dB (2.68e-05), Perfect CSI +9 dB (8.62e-06). −3 / 0 / +3 dB 는 원 raw (n = 2560) 그대로다.
+- **'at or below the proposed curve' 줄**(머리말이 옮기기로 한 것; 보강 그림 기록 원문): `Drawn baseline curves (Perfect CSI excluded) at or below the proposed curve (point estimates; failures vs the proposed curve's) -- reported only, nothing is tested here; the registered paired tests are in conf/results/review_next/pairB_SPDMI.txt: Annealed Langevin (plug-in) at +15 dB (0 vs 0); GMM prior at +15 dB (0 vs 0).` n = 2560 그림 기록(`records/paper_f21dmi.txt`)의 같은 줄은 12 점이었다(ROOM16e4 §7.4).
+- 새 시행의 ALD 추정 파일 `results/ald/ald_PILDMI_hisnr.npz` sha256[:16] 01d221fb66ceada3 (git 밖). 단계 C 직후 `# EARLY` 줄이 만들었고(운영 로그 10-12 18:45 CDT 줄, GPU 0), 단계 R 이 그대로 썼다(10-12 21:29 CDT 줄 "reusing … (prov git e5caaccb)").
+- 실행 중 main 커밋 없음(HEAD e5caaccb 그대로). 작업 트리에서 `conf/code` · `Demo` · `DECISIONS.md` · 이 문서를 건드리지 않았다(`FIGHS_DONE` 뒤 `git status` 로 확인: 바뀐 추적 파일은 `NEXT_EXPERIMENTS_ROOM16e4.md` · `prereg_audit_2026-10-11/s6_fighsroom_gen.py` · `conference/figures/README.md` · `docs/EXPERIMENTS.md` · `docs/RESULTS.md` 와 로그뿐). 함께 돈 것(결과 중립 — 수신기는 CPU 결정적; 세션 기록 기준): ROOM16e4 §7 의 기록 감사(Fable 서브에이전트; CPU, 읽기 전용 — 여섯 청크 재생과 b\* 의 EM 30 반복 연장 포함), 그 감사의 반영 편집(위 다섯 파일 가운데 넷), 작성자의 읽기 전용 조사 `prereg_audit_2026-10-11/gmm_stop_survey.py`, 생성기 `s6_fighsroom_gen.py` 의 DMI 확장(`RUN` 표와 예측 5 의 시작 줄 수)과 `SRP` 회귀 실행.
+- **실행 중 작성자가 본 것**: 진행 줄 수와 운영 로그, 그리고 **첫 행의 집계표 `fighs_FHDMIB16e4.txt`** — 그 행의 수용(10-12 20:05 CDT) 뒤 · `FIGHS_DONE` 전에 열어 사용자에게 V1 · b\* · Perfect CSI 의 실패 수를 보고했다(FIGHSPATH16e4 §6.4 의 "`FIGHS_DONE` 뒤에 처음 열었다" 와 다르다). 나머지 두 행의 집계표와 그림은 `FIGHS_DONE` 뒤에 처음 열었다. 그 사이 실행에 손댄 것은 없다(한 번 시작해 스스로 끝남; 세션 기록 기준).
+- **사용자 확인**: §5 대로 확인을 받지 않고 시작했고, 시작부터 `FIGHS_DONE` 까지 사용자의 메시지는 없었다(세션 기록 기준).
+- §1 의 비용 추정(base ≈ 65 분 · SP ≈ 60 분 · ALD ≈ 5 분, 합 ≈ 2.5 시간) 대비 실측 runner 75.3 · 82.3 · 2.6 분, 전체 10-12 18:43 → 10-12 21:32 CDT (CPU 96 스레드, runner 는 192 워커).
+- **머리말의 인용과 ROOM16e4 §7 의 기록 감사**: 감사(MUST 0 · SHOULD 3 · NIT 9; ROOM16e4 §7.8)는 §7 의 수치·라벨을 고치지 않았다 — 머리말이 인용한 n = 2560 실패 수는 그대로다. 감사 S1: b\* 의 EM 은 허용오차 수렴이 아니라 학습 우도가 줄어든 스텝에서 멈췄다(72 반복; 30 반복을 이어 돌리면 ll_val +0.016 nat) — 머리말 GMM 항목의 캐비엇에 더해 읽는다. 이 그림의 GMM prior 곡선은 그 b\* 의 곡선이다.
+- +12 · +15 dB 의 n = 81920 측정은 등록하지 않았다 — §3 의 메모대로 사용자가 그림을 보고 정한다.
+- 기록 감사(Fable)는 이 절을 쓴 뒤에 받는다 — 결과는 추가 줄로 적는다.

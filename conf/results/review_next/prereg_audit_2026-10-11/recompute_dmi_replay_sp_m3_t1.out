@@ -1,0 +1,8 @@
+# replay SPDMI snr -3 skip 0 n 40; affinity [0, 1, 2]..15 (16 cpus); OMP_NUM_THREADS=1 MKL=1 OPENBLAS=1
+  run_task: done    __replay_never_written__.npz  (35 s)  BLER16: R5-genie=0.25  [35 s]
+  torch threads 1
+  stored raw_SPDMI/D2_C2_DMI_Nr8_T16_Tp4_dft_snr-3_skip0_n40.npz: 72 keys; replay: 72 keys; only stored []; only replay []
+  identical numeric keys 52, identical string keys 19, differing keys 1
+    DIFF ('run|git', '29cf411d', 'e5caaccb')
+  arms with blk_err: 4; failures @16 in this chunk (stored == replay): OMP-pilot 36, R5-genie 10, SBL-loop 29, SBL-pilot 32
+  VERDICT: BIT-IDENTICAL except run|git

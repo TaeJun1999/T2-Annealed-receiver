@@ -1,0 +1,112 @@
+# recompute_dmi_main.py -- independent recomputation (direct numpy read of the chunk files), prior DMI
+
+## 0. chunk plan / raw meta (both tags; every chunk) + the D2 reference raw
+  raw_DMIB16e4: problems = none (plan {(40k,40): k=0..63} x 7 SNR, no raised/non-finite blk_err, keys complete)
+  raw_DMIB16e4last: problems = none (plan {(40k,40): k=0..63} x 7 SNR, no raised/non-finite blk_err, keys complete)
+  raw_B16e4k: problems = none (plan {(40k,40): k=0..63} x 7 SNR, no raised/non-finite blk_err, keys complete)
+  best meta|ll_val|*: {'gmm1024': 112.04253042212595, 'gmm128': 83.44267114560067, 'gmm16': 28.00238399732464, 'gmm256': 96.44685399322994, 'gmm32': 44.49531027384512, 'gmm512': 105.85089193400368, 'gmm64': 67.58792185720861, 'kron': 41.18010947841611}
+  best run|n = ['40']
+  best run|iters = ['16']
+  best run|seed = ['20260926']
+  best run|beta = ['0.7']
+  best run|t_in = ['5']
+  best run|dtype = ['complex128/float64']
+  best prior/sigma-related meta keys: {}
+  best N_train per arm: {'M-ours-bstar': '160000', 'M-ours-bstar-scalar': '160000', 'M-ours-dscore-C-V0': '160000', 'M-ours-dscore-C-V1': '160000', 'M-ours-dscore-C-V4': '160000', 'M-ours-dscore-C-V4b': '160000', 'M-ours-gmm32': '160000', 'R0-pilot': '160000', 'R1-turbo': '160000', 'R2-ours-G': '160000', 'R3-bigamp': '0', 'R4-llr': '160000', 'R4-scvamp': '160000', 'R5-genie': 'n/a'}
+  last meta|ll_val|*: {'gmm1024': 112.04253042212595, 'gmm128': 83.44267114560067, 'gmm16': 28.00238399732464, 'gmm256': 96.44685399322994, 'gmm32': 44.49531027384512, 'gmm512': 105.85089193400368, 'gmm64': 67.58792185720861, 'kron': 41.18010947841611}
+  last run|n = ['40']
+  last run|iters = ['16']
+  last run|seed = ['20260926']
+  last run|beta = ['0.7']
+  last run|t_in = ['5']
+  last run|dtype = ['complex128/float64']
+  last prior/sigma-related meta keys: {}
+  last N_train per arm: {'M-ours-bstar': '160000', 'M-ours-bstar-scalar': '160000', 'M-ours-dscore-C-V0': '160000', 'M-ours-dscore-C-V1': '160000', 'M-ours-dscore-C-V4': '160000', 'M-ours-dscore-C-V4b': '160000', 'M-ours-gmm32': '160000', 'R0-pilot': '160000', 'R1-turbo': '160000', 'R2-ours-G': '160000', 'R3-bigamp': '0', 'R4-llr': '160000', 'R4-scvamp': '160000', 'R5-genie': 'n/a'}
+  D2 reference raw_B16e4k: run|git [], bstar ['kron'] kron_K ['1024'] ntrain ['160000.0']
+
+## 1. failure counts and BLER@16 (best tag; R0-pilot also @1; V1 of the last tag) -- the §7.2 table
+  arm                     -3 dB   +0 dB   +3 dB   +6 dB   +9 dB  +12 dB  +15 dB
+  M-ours-dscore-C-V1      829 0.324   149 0.058    19 0.007     4 0.002     0 0.000     0 0.000     0 0.000
+  V1last                  815 0.318   148 0.058    18 0.007     3 0.001     0 0.000     0 0.000     0 0.000
+  M-ours-dscore-C-V4      840 0.328   174 0.068    18 0.007     4 0.002     0 0.000     0 0.000     0 0.000
+  M-ours-dscore-C-V4b     888 0.347   179 0.070    22 0.009     4 0.002     1 0.000     0 0.000     0 0.000
+  M-ours-bstar            885 0.346   173 0.068    23 0.009     7 0.003     0 0.000     0 0.000     0 0.000
+  M-ours-bstar-scalar     908 0.355   198 0.077    24 0.009     9 0.004     0 0.000     0 0.000     0 0.000
+  M-ours-gmm32           1256 0.491   327 0.128    46 0.018     7 0.003     1 0.000     0 0.000     0 0.000
+  R2-ours-G              1924 0.752   838 0.327   191 0.075    31 0.012    12 0.005     0 0.000     0 0.000
+  R1-turbo               2245 0.877  1324 0.517   424 0.166    90 0.035    23 0.009     4 0.002     0 0.000
+  R0-pilot@1             2521 0.985  2052 0.802   922 0.360   302 0.118    81 0.032    23 0.009     3 0.001
+  R0-pilot               2230 0.871  1169 0.457   263 0.103    41 0.016    10 0.004     1 0.000     0 0.000
+  R4-scvamp              2342 0.915  1593 0.622   680 0.266   250 0.098    73 0.029    30 0.012     7 0.003
+  R3-bigamp              2402 0.938  1751 0.684   928 0.362   554 0.216   437 0.171   573 0.224   603 0.236
+  R4-llr                 2446 0.955  2155 0.842  2100 0.820  1572 0.614   774 0.302   336 0.131   111 0.043
+  M-ours-dscore-C-V0     2560 1.000  2560 1.000  2560 1.000  2552 0.997  2511 0.981  2043 0.798   644 0.252
+  R5-genie                321 0.125    40 0.016     4 0.002     0 0.000     0 0.000     0 0.000     0 0.000
+  decision-point sums V1/V4/V4b = (997, 1032, 1089); 7-SNR sums = (1001, 1036, 1094)
+
+## 2. decision SNRs by the §1 rule (anchor BLER@16 in [0.005, 0.9], 3 smallest |log10(BLER/0.1)|)
+  best anchor M-ours-bstar  : [-3, 0, 3]   BLER@16 {-3: 0.3457, +0: 0.0676, +3: 0.0090, +6: 0.0027, +9: 0.0002, +12: 0.0002, +15: 0.0002}  |log10(./0.1)| at chosen: [0.539, 0.17, 1.047]  in-range SNRs: [-3, 0, 3]
+  best anchor R2-ours-G     : [-3, 0, 3]   BLER@16 {-3: 0.7516, +0: 0.3273, +3: 0.0746, +6: 0.0121, +9: 0.0047, +12: 0.0002, +15: 0.0002}  |log10(./0.1)| at chosen: [0.876, 0.515, 0.127]  in-range SNRs: [-3, 0, 3, 6]
+  best anchor R5-genie      : [-3, 0]   BLER@16 {-3: 0.1254, +0: 0.0156, +3: 0.0016, +6: 0.0002, +9: 0.0002, +12: 0.0002, +15: 0.0002}  |log10(./0.1)| at chosen: [0.098, 0.806]  in-range SNRs: [-3, 0]
+  last anchor M-ours-bstar  : [-3, 0, 3]   BLER@16 {-3: 0.3457, +0: 0.0676, +3: 0.0090, +6: 0.0027, +9: 0.0002, +12: 0.0002, +15: 0.0002}  |log10(./0.1)| at chosen: [0.539, 0.17, 1.047]  in-range SNRs: [-3, 0, 3]
+  last anchor R2-ours-G     : [-3, 0, 3]   BLER@16 {-3: 0.7516, +0: 0.3273, +3: 0.0746, +6: 0.0121, +9: 0.0047, +12: 0.0002, +15: 0.0002}  |log10(./0.1)| at chosen: [0.876, 0.515, 0.127]  in-range SNRs: [-3, 0, 3, 6]
+  last anchor R5-genie      : [-3, 0]   BLER@16 {-3: 0.1254, +0: 0.0156, +3: 0.0016, +6: 0.0002, +9: 0.0002, +12: 0.0002, +15: 0.0002}  |log10(./0.1)| at chosen: [0.098, 0.806]  in-range SNRs: [-3, 0]
+
+## 3. paired exact two-sided sign tests at the decision SNRs (a:b = only-first-fails : only-second-fails)
+  [best] M-ours-bstar -> M-ours-dscore-C-V1  anchor M-ours-bstar  dp [-3, 0, 3]: -3 dB 178:122 p=0.0015  +0 dB 72:48 p=0.035  +3 dB 13:9 p=0.52   pooled 263:179 p=7.5e-05   POWERED  second fewer 2/3  first fewer 0/3
+    -> §2 label for tag best: (i)   (POWERED=True, second arm fewer at 2/3, first arm fewer at 0/3)
+  [last] M-ours-bstar -> M-ours-dscore-C-V1  anchor M-ours-bstar  dp [-3, 0, 3]: -3 dB 184:114 p=6e-05  +0 dB 74:49 p=0.03  +3 dB 14:9 p=0.4   pooled 272:172 p=2.4e-06   POWERED  second fewer 2/3  first fewer 0/3
+    -> §2 label for tag last: (i)   (POWERED=True, second arm fewer at 2/3, first arm fewer at 0/3)
+  [best] M-ours-bstar -> M-ours-bstar-scalar  anchor M-ours-bstar  dp [-3, 0, 3]: -3 dB 48:71 p=0.043  +0 dB 11:36 p=0.00035  +3 dB 5:6 p=1   pooled 64:113 p=0.00028   POWERED  second fewer 0/3  first fewer 2/3
+    -> control label by the registered rule: (ii)  (record (ii): first arm b* fewer at 2/3, second arm fewer at 0/3)
+  [best] R2-ours-G -> M-ours-bstar  anchor R2-ours-G  dp [-3, 0, 3]: -3 dB 1074:35 p=6.3e-268  +0 dB 680:15 p=3.5e-179  +3 dB 173:5 p=7.6e-45   pooled 1927:55 p=0   POWERED  second fewer 3/3  first fewer 0/3
+  [best] M-ours-bstar -> M-ours-dscore-C-V4  anchor M-ours-bstar  dp [-3, 0, 3]: -3 dB 177:132 p=0.012  +0 dB 64:65 p=1  +3 dB 15:10 p=0.42   pooled 256:207 p=0.026   POWERED  second fewer 1/3  first fewer 0/3
+  [best] M-ours-bstar -> M-ours-dscore-C-V4b  anchor M-ours-bstar  dp [-3, 0, 3]: -3 dB 164:167 p=0.91  +0 dB 61:67 p=0.66  +3 dB 13:12 p=1   pooled 238:246 p=0.75   POWERED  second fewer 0/3  first fewer 0/3
+  [best] M-ours-bstar -> M-ours-dscore-C-V0  anchor M-ours-bstar  dp [-3, 0, 3]: -3 dB 0:1675 p=0  +0 dB 0:2387 p=0  +3 dB 0:2537 p=0   pooled 0:6599 p=0   POWERED  second fewer 0/3  first fewer 3/3
+  [best] M-ours-dscore-C-V1 -> R5-genie  anchor R5-genie  dp [-3, 0]: -3 dB 537:29 p=3.2e-122  +0 dB 116:7 p=1.4e-26   pooled 653:36 p=1.3e-147   UNDECIDED  second fewer 2/2  first fewer 0/2
+  [best] M-ours-bstar -> R5-genie  anchor R5-genie  dp [-3, 0]: -3 dB 598:34 p=2.7e-134  +0 dB 141:8 p=1.5e-32   pooled 739:42 p=1.2e-165   UNDECIDED  second fewer 2/2  first fewer 0/2
+
+## 4. best vs last V1, paired exact two-sided sign test (a = only best fails, b = only last fails)
+  -3 dB 46:32 p=0.141  +0 dB 23:22 p=1  +3 dB 2:1 p=1   pooled 71:55 p=0.181
+
+## 5. recovery R = (b* - V1)/(b* - genie): point estimates + re-implemented paired bootstrap 90% CI; saturation guard; Delta R
+  best -3     b* 885 V1 829 genie 321  R = 0.099  [90% 0.050, 0.146]  undefined 0
+  best 0      b* 173 V1 149 genie 40  R = 0.180  [90% 0.050, 0.297]  undefined 0
+  best 3      b* 23 V1 19 genie 4  R = 0.211  [90% -0.250, 0.533]  undefined 0
+  best pooled b* 1081 V1 997 genie 365  R = 0.117  [90% 0.071, 0.164]  undefined 0
+  last -3     b* 885 V1 815 genie 321  R = 0.124  [90% 0.076, 0.171]  undefined 0
+  last 0      b* 173 V1 148 genie 40  R = 0.188  [90% 0.053, 0.302]  undefined 0
+  last 3      b* 23 V1 18 genie 4  R = 0.263  [90% -0.176, 0.579]  undefined 0
+  last pooled b* 1081 V1 981 genie 365  R = 0.140  [90% 0.094, 0.183]  undefined 0
+  D2 B16e4k -3 dB  b* 623 V1 371 genie 87  R = 0.470  [90% 0.427, 0.512]
+  D2 B16e4k -3,0,3  b* 864 V1 488 genie 125  R = 0.509
+  Delta R primary (-3 dB) = -0.371 (last -0.346);  secondary (decision sum vs D2 -3,0,3) = -0.391
+  Delta R best -3 dB unpaired CI (my resampler, same seed for both sets): [-0.434, -0.304]  (record [-0.439, -0.308] from frontier_ci)
+  Delta R last -3 dB unpaired CI (my resampler, same seed for both sets): [-0.409, -0.282]  (record [-0.413, -0.285] from frontier_ci)
+  Delta R secondary unpaired CI (my resampler): [-0.449, -0.330]  (record [-0.452, -0.334])
+  failure-count gaps -3 dB: V1-genie 508, b*-genie 564;  D2 -3: 284, 536
+  gap CIs (my paired bootstrap of counts, same seed): V1-genie [472, 544]  b*-genie [528, 600]  (record {'V1-genie': (473, 544), 'b*-genie': (526, 599)})
+  saturation guard (-3 dB): b* BLER@16 = 0.3457 in [0.005, 0.9]? True; b* fails 885 <= genie 321? False -> guard does not fire
+
+## 6. SNR@0.1 by the tool's log-linear rule (exp_0921_analysis.snr_at re-implemented; 2 dp as table A prints)
+  [best] R0-pilot: 3.04, R1-turbo: 3.98, R2-ours-G: 2.41, R3-bigamp: >15, R4-scvamp: 5.93, R4-llr: 12.74, R5-genie: -2.67, M-ours-gmm32: 0.37, M-ours-bstar: -0.72, M-ours-dscore-C-V1: -0.95, M-ours-dscore-C-V0: >15, M-ours-dscore-C-V4: -0.74, M-ours-dscore-C-V4b: -0.67, M-ours-bstar-scalar: -0.51, R0-pilot@1: 6.38
+  best gaps: b*-V1 +0.23 (record +0.23), V1-genie +1.73 (record +1.73), b*-genie +1.95 (record +1.95), b*-scalar -0.21 (record -0.21), R2-b* +3.13 (record +3.13), b*-V4 +0.02 (record +0.02), b*-V4b -0.05 (record -0.05)
+  [last] R0-pilot: 3.04, R1-turbo: 3.98, R2-ours-G: 2.41, R3-bigamp: >15, R4-scvamp: 5.93, R4-llr: 12.74, R5-genie: -2.67, M-ours-gmm32: 0.37, M-ours-bstar: -0.72, M-ours-dscore-C-V1: -0.96, M-ours-dscore-C-V0: >15, M-ours-dscore-C-V4: -0.64, M-ours-dscore-C-V4b: -0.67, M-ours-bstar-scalar: -0.51, R0-pilot@1: 6.38
+
+## 7. F3 guard firing (NMSE > 10 or non-finite at any of the 16 iterations), per arm / SNR / tag
+  [best] fired: -3 dB M-ours-dscore-C-V0 2560, +0 dB M-ours-dscore-C-V0 2560, +3 dB M-ours-dscore-C-V0 2557, +6 dB M-ours-dscore-C-V0 2551, +9 dB M-ours-dscore-C-V0 2465, +12 dB M-ours-dscore-C-V0 2100, +15 dB M-ours-dscore-C-V0 1304
+  [best] V0 fired counts [2560, 2560, 2557, 2551, 2465, 2100, 1304]
+  [last] fired: -3 dB M-ours-dscore-C-V0 2560, +0 dB M-ours-dscore-C-V0 2559, +3 dB M-ours-dscore-C-V0 2559, +6 dB M-ours-dscore-C-V0 2534, +9 dB M-ours-dscore-C-V0 2452, +12 dB M-ours-dscore-C-V0 2002, +15 dB M-ours-dscore-C-V0 1413
+  [last] V0 fired counts [2560, 2559, 2559, 2534, 2452, 2002, 1413]
+
+## 8. R5-genie of the last tag bit-identical to the best tag (every key, every SNR, every trial); non-ckpt arms identical
+  identical = True  (keys: ['alphaD', 'alphaD_clip', 'ber', 'blk_err', 'guardH', 'nmse', 'tauL_clip_frac', 'tauL_gmean'])
+
+## 9. loader cross-check: analysis.load_raw vs this direct read
+  load_raw warnings: none
+
+## 10. checkpoint records (torch.load, CPU)
+  best ckpt/d2sx_DMI_N160000_a1_best.pt: sha256[:16]=dc784649f1e9b890 {'epoch': 1142, 'best_epoch': 1142, 'best_val': 0.21521511673927307, 'stopped_by': None, 'role': 'best', 'prior': 'DMI', 'sigma_tag': 'DMI', 'rung': 'D2SXDMI160000', 'attempt': 1, 'grad_clip': 0.0, 'wall_sec': 5969.9627685546875, 'split_hash': 'fecf46b30175b5c8'}
+  last ckpt/d2sx_DMI_N160000_a1.pt: sha256[:16]=20d28bf06e317ca5 {'epoch': 1162, 'best_epoch': 1142, 'best_val': 0.21521511673927307, 'stopped_by': 'patience', 'role': 'last', 'prior': 'DMI', 'sigma_tag': 'DMI', 'rung': 'D2SXDMI160000', 'attempt': 1, 'grad_clip': 0.0, 'wall_sec': 6073.974973678589, 'split_hash': 'fecf46b30175b5c8'}
+
+## SUMMARY: 334 values checked, 0 differ from the record

@@ -1752,7 +1752,7 @@ censored 0% (PARETO §6.2). P-c (Eb/N0, 보고): Δ₆ − 0.918 = −1.32 dB, �
 
 ### 25.6 DeepMIMO 실내 풀 (prior DMI; ROOM16e4 5-DMI · §7) — 주 실행과 baseline (추가 2026-10-12 18:27 CDT, Opus 5.5)
 
-**EXPERIMENTS.md 행** (KST 머리): 주 실행 `2026-10-13 06:15 ~ 07:54 KST` · baseline `2026-10-13 07:56 ~ 08:15 KST`. 결과 절 `conf/results/review_next/NEXT_EXPERIMENTS_ROOM16e4.md` §7. 인용 수치는 그 두 행에 글자 그대로 있는 것을 스크립트로 대조해 옮겼다. 10-11 CDT 에 실행 전 철회됐던 풀을 10-12 CDT 에 되돌려 실행했다(규칙·예측은 동결 v2 그대로; 실행은 SRB · SRP 의 결과를 본 뒤). 크기·SNR 범위·레시피·GMM 격자는 25 의 공통 줄과 같다; CPU 96 스레드(결과 불변). 기록 감사(Fable)는 이 줄을 쓸 때 진행 중이다.
+**EXPERIMENTS.md 행** (KST 머리): 주 실행 `2026-10-13 06:15 ~ 07:54 KST` · baseline `2026-10-13 07:56 ~ 08:15 KST`. 결과 절 `conf/results/review_next/NEXT_EXPERIMENTS_ROOM16e4.md` §7. 인용 수치는 그 두 행에 글자 그대로 있는 것을 스크립트로 대조해 옮겼다. 10-11 CDT 에 실행 전 철회됐던 풀을 10-12 CDT 에 되돌려 실행했다(규칙·예측은 동결 v2 그대로; 실행은 SRB · SRP 의 결과를 본 뒤). 크기·SNR 범위·레시피·GMM 격자는 25 의 공통 줄과 같다; CPU 96 스레드(결과 불변). 기록 감사(Fable): MUST 0 · SHOULD 3 · NIT 9 — 수치·라벨 오류 0, 1,219 값 재계산(§7.8; 2026-10-12 19:13 CDT 반영).
 
 | | DeepMIMO 실내 (prior DMI) |
 |---|---|
@@ -1766,12 +1766,13 @@ censored 0% (PARETO §6.2). P-c (Eb/N0, 보고): Δ₆ − 0.918 = −1.32 dB, �
 | 1차 ΔR(−3 dB) (D2 대비) | −0.371 [−0.439, −0.308] → "회수율이 D2 보다 낮다" |
 | 등록 baseline 16 개 (X → V1) | 등록 baseline 16 개 전부 (i) (유의한 점이 2/3 인 행: b\* · b\*-scalar · bstar-pilot) |
 | "전부"·"멀어진다" 문장 | 조건 충족 (X\* = M-ours-bstar (F 885)) |
-| GMM b\* | full K 1024 — 정상 수렴 (확장 격자의 끝; +6.192 nat) |
+| GMM b\* | full K 1024 — 붕괴 없는 EM 적합 (72 반복, 살아 있는 성분 925 / 1024; 확장 격자의 끝; +6.192 nat). EM 은 학습 우도의 음수 스텝에서 끊겼다 — 허용오차 수렴이 아니다; 이어 돌린 감사 진단에서 ll_val 30 반복에 +0.016 nat (ROOM16e4 5-DMI · §7.8) |
 | GB′ median (a1) | 0.8038 |
 | §3 예측 | 빗나감: 10 (b\* 계열) · 12 (대조군) |
 
 - 실패 수 / 2560 (−3 / +3 dB), 원고 범례 11 곡선: V1 829 / 19, ALD-pilot 1375 / 62, b\* 885 / 23, R2 1924 / 191, R1 2245 / 424, BiG-AMP 2402 / 928, R0@1 2521 / 922, SBL-loop 1740 / 128, SBL-pilot 2009 / 180, OMP-pilot 2131 / 315, genie 321 / 4.
-- 고SNR (n 2560): V1 +6 / +9 / +12 / +15 dB = 4 / 0 / 0 / 0 건 — 그림 `F21dmi_col` 의 제안 곡선은 +9 dB 부터 0 실패로 끊긴다. 새 시행 n = 20480 보강은 `NEXT_EXPERIMENTS_FIGHSDMI16e4.md` (보고 전용; 이 줄을 쓸 때 등록 검토 중).
+- 고SNR (n 2560): V1 +6 / +9 / +12 / +15 dB = 4 / 0 / 0 / 0 건 — 그림 `F21dmi_col` 의 제안 곡선은 +9 dB 부터 0 실패로 끊긴다. 새 시행 n = 20480 보강은 바로 아래 줄.
+- **그림 보강 (보고 전용; 새 검정·라벨 없음; 추가 2026-10-12 21:39 CDT, Opus 5.5)** — EXPERIMENTS.md 행 `2026-10-13 08:43 ~ 11:32 KST`, 결과 절 `NEXT_EXPERIMENTS_FIGHSDMI16e4.md` §6: 새 시행 10000..30479, n 20480 / SNR, `FIGHS_DONE ok=3 fail=0`. 실패 수 / 20480 (+6 / +9 / +12 / +15 dB): V1 21 / 2 / 0 / 0, ALD-pilot 58 / 8 / 1 / 0, b\* 27 / 8 / 2 / 0, R2 308 / 54 / 6 / 2, R1 767 / 153 / 20 / 6, BiG-AMP 4194 / 3448 / 4530 / 4940, R0@1 2390 / 634 / 145 / 39, SBL-loop 192 / 20 / 4 / 1, SBL-pilot 244 / 41 / 7 / 1, OMP-pilot 601 / 114 / 26 / 12, genie 7 / 1 / 0 / 0. 0 실패 점 (n 20480): V1 +12 · +15 dB, ALD-pilot +15 dB, b\* +15 dB, genie +12 · +15 dB (제안 곡선은 +9 dB 에서 끝남). 그림 `F21dmihs_col`, 기록 `records/paper_f21dmihs.txt`. 사용자의 별도 지시 없이 시작한 보강이다 (세션의 해석).
 - 대조군·체크포인트: 대조군 b\*→b\*-scalar (ii) (b\* 가 2/3 점에서 적게 실패); best 대 last V1 pooled 71:55 (p 0.181).
 - 캐비엇: 유한 풀 (테스트 60,700 쌍 복원 추출) · 이웃 0.058 (0.5 m 타일, 한 위치에 yaw 5 개) · BLER 이 낮도록 고른 풀 (Perfect CSI 선별); UNGATED, 헤드라인 불변.
 - 그림·기록: `conference/figures/F21dmi_col` (11 곡선, 전 SNR n = 2560) · `F33cdf_DMI_wide` (NMSE CDF, 보고 전용); `records/paper_f21dmi.txt` · `paper_f33cdf_DMI.txt`.
