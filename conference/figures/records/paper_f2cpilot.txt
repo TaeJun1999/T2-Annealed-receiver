@@ -1,13 +1,20 @@
-F2c_pilot -- Fig. 2 (c) candidate: SNR needed for BLER 0.1 vs the pilot length T_p (D2 8x4, T = 16, QPSK; headline checkpoint d2sx_N160000_a1.pt, headline fits b* kron K = 1024; cells C2 / C7 / C8).  No new trials: values read from the records below and asserted (task prompt conf/results/review_next/prompts/PROMPT_FIG_PILOT.md).
+F2c_pilot -- Fig. 2 (c) candidate: SNR needed for BLER 0.1 vs the pilot length T_p (D2 8x4, T = 16, QPSK; headline checkpoint d2sx_N160000_a1.pt, headline fits b* kron K = 1024; cells C2 / C7 / C8).  No new trials: barred curves and caption numbers read from the records below, thin curves computed from the raws; all asserted against the records (task prompt conf/results/review_next/prompts/PROMPT_FIG_PILOT.md).
 
-File: F2c_pilot 2.0 x 2.0 in, axes [0.48, 0.36] .. [1.96, 1.95] in (= F2c_room_sel); PNG 300 dpi; PDF TrueType; sha256[:16] pdf 43cc33768f2b88f7  png c3841314515deb06.
+Files (PNG 300 dpi; PDF TrueType; same curves, only the x tick labelling and the axes bottom differ):
+  F2c_pilot    2.0 x 2.0 in, axes [0.48, 0.36] .. [1.96, 1.95] in; x tick labels 'T_p (K_b)', x label 'Pilots T_p (payload K_b)'; sha256[:16] pdf 58af39b8bafabe54  png a18db44918c95dd3
+  F2c_pilot2r  2.0 x 2.0 in, axes [0.48, 0.42] .. [1.96, 1.95] in; x tick labels 'T_p' over 'K_b' (two rows, named at their left), no x label; sha256[:16] pdf fbef42985d3199dc  png d63080285138d507
+  (F2c_room_sel: axes [0.48, 0.36] .. [1.96, 1.95] in)
 
-SNR@0.1 [dB] and 90% bootstrap interval (B = 2000, seed 20260926; censored 0% everywhere):
+SNR@0.1 [dB]; barred curves with the 90% bootstrap interval of their record (B = 2000, seed 20260926; censored 0% everywhere), the others point values from the raws:
   arm                    T_p 4 (K_b 42)          T_p 6 (K_b 34)          T_p 8 (K_b 26)          source
   Proposed (V1)          -2.23 [-2.38, -2.07]    -2.92 [-3.11, -2.74]    -3.57 [-3.75, -3.39]    frontier_PARB16e4.txt
   GMM prior (b*)         -0.81 [-1.02, -0.58]    -1.83 [-2.00, -1.65]    -2.60 [-2.81, -2.42]    frontier_PARB16e4.txt
-  Gaussian prior (R2)    +0.06 [-0.20, +0.31]    -0.89 [-1.11, -0.66]    -1.59 [-1.79, -1.37]    conf/figs/F19_pilot_pareto.txt (b)
   Perfect CSI (genie)    -4.81 [-4.95, -4.68]    -4.84 [-4.97, -4.69]    -5.26 [-5.42, -5.10]    frontier_PARB16e4.txt
+  Gaussian prior (R2)    +0.06 [-0.20, +0.31]    -0.89 [-1.11, -0.66]    -1.59 [-1.79, -1.37]    conf/figs/F19_pilot_pareto.txt (b)
+  Turbo LMMSE (R1) @16   +2.30                  +1.36                  +0.34                  raws (frontier_ci.snr_at) = tables_D2_{B16e4k,PARB16e4}.txt
+  BiG-AMP (R3) @16       +2.31                  +1.05                  -0.03                  raws (frontier_ci.snr_at) = tables_D2_{B16e4k,PARB16e4}.txt
+  Pilot-only (R0) @1     +6.03                  +4.32                  +2.98                  raws (frontier_ci.snr_at) = tables_D2_{B16e4k,PARB16e4}.txt
+  left out (no C7 / C8 raw: never run there): ALD-pilot, SBL-loop, SBL-pilot, OMP-pilot
 
 Caption / text numbers (from the records; asserted against the prompt):
   P-a (registered): V1 (T_p 4) - b* (T_p 6) = -0.40 dB [90% -0.64, -0.17] (frontier_PARB16e4.txt; the registered Holm-first 95% CI is [-0.67, -0.13])
@@ -19,7 +26,9 @@ Notes for the caption:
   - cross-cell intervals are UNPAIRED bootstraps (different cells = different trial streams); the same-T_p gaps are paired.
   - fixed frame T = 16, variable payload K_b = Nt (T - T_p) - 6: not 'the same message with fewer pilots'; the best-T_p envelope on the test set is not a policy.
   - Gaussian prior from F19's single-spec bootstrap; for V1 / b* / genie the frontier file and the F19 record differ by <= 0.02 dB at some interval ends (draw order of the bootstrap), never in the point values.
-  - geometry: no legend / panel label / title inside (the Fig. 2 legend band F2legend_* carries the four curves); x tick labels 'T_p (K_b)', x label 'Pilots T_p (payload K_b)' (two stacked tick rows do not fit the 0.36 in bottom); y not inverted (lower = better).
-  - marker centres closer than 1.5 pt: none
+  - the panel draws 7 of the 11 curves of the Fig. 2 legend band: ALD, SBL (in loop), SBL (pilot-only) and OMP (pilot-only) were never run in the T_p = 6 / 8 cells (caption: say so).
+  - bars only on Proposed / GMM / Gaussian / Perfect CSI (as in Fig. 2); pilot-only LMMSE is its 1-pass BLER (as in Fig. 2).
+  - geometry: no legend / panel label / title inside; y not inverted (lower = better); F2c_pilot keeps the axes bottom 0.36 in of the other panels, F2c_pilot2r raises it (two 8 pt tick rows do not fit under 0.36 in).
+  - marker centres closer than 1.5 pt: R3-bigamp / R1-turbo at T_p 4: 0.09 pt
 
 Records read: frontier_PARB16e4.txt sha256[:16] b9153155d17dfc0a, F19_pilot_pareto.txt d528ba433a584b66, tables_D2_PARB16e4.txt 149feb996971153c, tables_D2_B16e4k.txt 0c3cab5fc84a945b.
