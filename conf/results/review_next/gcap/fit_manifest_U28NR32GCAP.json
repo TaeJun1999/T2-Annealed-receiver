@@ -1,0 +1,52 @@
+{
+  "manifest": "U28NR32GCAP fit manifest (E2' UMi28 32x4 GMM capacity check) -- written BEFORE any continuation / K8192 EM iteration; development only (train stream 7 / validation stream 8); no BLER, no test trials, no ll_test used for selection",
+  "written": "2026-10-17 13:2x KST (2026-10-16 23:2x CDT) -- exact time = the commit that adds this file",
+  "cell": {"prior": "UMi28", "testbed": "D2", "cell": "C9", "Nr": 32, "Nt": 4, "T": 16, "Tp": 4, "ntrain": 160000, "n_val": 5000,
+           "train_set": "runner._sets: C.train_rng('D2','UMi28',32,7), 160000", "val_set": "C.train_rng('D2','UMi28',32,8), 5000",
+           "heldout_set_ll_test": "C.train_rng('D2','UMi28',32,10), 5000 -- recorded by the existing code (field ll_test); NOT used for selection"},
+  "source_fit": {
+    "path": "/home/HTJ/t2_wtS/conf/results/gmm_fits_D2_U28NR32B16e4/fit_UMi28_Nr32_kronK4096_n160000.npz",
+    "sha256": "2d72a4349e2700e79aec72b48bebed29e59b0f336091b9a6706dbd70d29ef569",
+    "selected_restart": 0, "kappa": 0, "it_best": 30, "n_iter": 31, "n_reseed": 29980, "kron_batched": 1,
+    "ll_train_at_best": 188.2857805090495, "ll_val": 152.23176788511105,
+    "stop_reason_recorded_by_this_manifest": "legacy tol stop at it 30: ll[30] - ll[29] < 0 (a training-ll DECREASE; dll printed -0.0 at 3 decimals) -- the best-validation state is the LAST validation point (it 30), i.e. validation ll was still rising when the fit stopped",
+    "candidate_files_sha256": {"k0r0": "849d4a64e06fc0b58bce7a0b973f5bcdcdf584691604f39bef13ead37c483918",
+                               "k0r1": "ee1b33655a766062d7e2a4a1f8c68e843d0bc88c95298cddf0f1f35f3d1683cc",
+                               "k0r2": "7fb39b24ef19ce3604de6bf5944dd97e66cf9f49655027382224efb79b3d78ee"},
+    "cand_ll_val": [152.23176788511105, 152.12418375640400, 151.79374075040246]
+  },
+  "candidates": {
+    "A_original_K4096": "source_fit as is",
+    "B_continued_K4096": {
+      "code": "conf/code/fit_gcap_cont.py <source path> <source sha256> 50 U28NR32GCAP 32 --prior UMi28",
+      "start": "the source fit's saved best-validation state (pi, covs); kron flip-flop start Tk = gmm_em_gpu.kron_tk(covs) (exact for kron components, I for reseeded ones -- as the EM holds them)",
+      "steps": "EXACTLY 50 EM M-steps (states 0..50 evaluated; state 0 = the source state); tol stop OFF, patience stop OFF",
+      "validation": "every 10 steps: states 0, 10, 20, 30, 40, 50; the saved fit = the best-validation state over those six INCLUDING state 0",
+      "M_step": "batched exact kron (= the source fit's kron_batched = 1), floor 1e-4, kappa 0, reseed when nk < 4",
+      "reseed_rng": "default_rng([20260926, TBID['D2'], 9, PID['UMi28'], 32, 1, 4096, 0, 0, 1]) (the source restart's tuple + [1]; a stream no earlier fit used)",
+      "numerical_stop": "failed Cholesky or non-finite training ll -> stop, record completed steps, reason and the best state so far; such a run is NOT '50 completed' and NOT 'converged'",
+      "output": "conf/results/gmm_fits_D2_U28NR32GCAP/fit_UMi28_Nr32_kronK4096_n160000.cont50.npz",
+      "state0_check": "the continuation's state-0 training ll and validation ll must reproduce 188.2857805090495 / 152.23176788511105 to round-off (the probe re-evaluates them first)"
+    },
+    "C_K8192": {
+      "code": "FIT_KRON_BATCHED=1 FIT_STOP_RULE=gcap conf/code/fit_gpu.py 32 kron 8192 160000 U28NR32GCAP --restart r --prior UMi28 (r = 0, 1, 2), then --merge (selection by validation ll only)",
+      "seeds": "the existing protocol tuple default_rng([20260926, TBID['D2'], 9, PID['UMi28'], 32, 1, 8192, 0, r])",
+      "init": "the existing random seed_cov start (rng.choice), unchanged",
+      "budget": "n_iter = 500 evaluated states (FIT_ITERS), restarts 3, kappa 0 (kron), floor 1e-4, batched exact kron M-step",
+      "validation": "every 10 iterations, best-validation state returned (existing rule)",
+      "stop_rules_in_order_checked": [
+        "numerical: failed Cholesky in the training E-step, or non-finite training ll -> stop 'numerical (...)' (best state so far returned)",
+        "patience (existing validation early stop): at a validation point with no improvement for >= 40 iterations since the best -> stop 'patience' (validation plateau / decline; NOT 'converged')",
+        "tol (convergence): it >= 20 AND 0 <= ll[it] - ll[it-1] < 1e-6 |ll[it]| -> stop 'tol'.  A training-ll DECREASE (ll[it] < ll[it-1]) does NOT stop the run (gcap rule; the legacy rule stopped on it)",
+        "budget: state 499 evaluated -> stop 'budget' (budget exhausted)"
+      ],
+      "stop_reason_classes": {"tol": "수렴 (convergence)", "patience": "검증 정체 (validation patience; existing rule, not convergence)", "budget": "예산 소진", "numerical (...)": "수치 이상"},
+      "output": "conf/results/gmm_fits_D2_U28NR32GCAP/fit_UMi28_Nr32_kronK8192_n160000.k0r{0,1,2}.npz (candidates, with stop / stop_rule / ll_val_traj) and fit_UMi28_Nr32_kronK8192_n160000.npz (merge)"
+    }
+  },
+  "selection_rule": "final b* = argmax validation ll over {A, B, C} (strict >). B is a distinct candidate only if its best-validation state index > 0 (state 0 IS A; a round-off difference in its recomputed ll_val is not a candidate). Test BLER, the held-out ll_test and any other test-set quantity are not consulted. Frozen after selection (path + sha256 recorded).",
+  "after_selection": {"final == A": "end without test evaluation; record sentence: '검사한 범위 (continuation 50회, K 8192) 에서 validation LL 이 기존 K4096 을 넘지 못했다.'",
+                      "final != A": "register the test evaluation (NEXT_EXPERIMENTS_U28NR32GCAP.md) before any test trial is run"},
+  "not_done": "no other GMM family (angle-diagonal, circulant, Toeplitz, ...): the evaluated families are full and Kronecker only; no other cell; no fit re-selection or K extension after any test BLER is seen",
+  "resources": "one GPU per EM process (CUDA_VISIBLE_DEVICES, empty GPU only), CPU pinned to that GPU's NUMA hyperthread pair (taskset -c c,c+96); data generation is CPU (Sionna, ~12 min per process)"
+}

@@ -1,0 +1,10 @@
+# 2026-10-16 23:54:05 CDT git 09d2ea69 GPU 4: python conf/results/review_next/gcap/test_gcap_em.py <git show 5bcffc3e:conf/code/gmm_em_gpu.py>
+T1 full: n_iter 21 reseeds 135 stop tol-decrease bit-identical True
+T1 kron: n_iter 41 reseeds 0 stop patience bit-identical True
+T1 kron batched: n_iter 41 reseeds 0 stop patience bit-identical True
+T2 batched=False: straight 21 states, reseeds 89 = 42 + 47; max |d ll| 0.00e+00, max rel |d cov| 0.00e+00; ok True; val traj straight [-25.185798, -26.387615, -26.058057] cont [-26.387615, -26.058057]
+T3 batched=False: max |kron_tk - Tk| 3.33e-16 (Tk = I in 6 components); continuation from kron_tk: max |d ll| 7.11e-15
+T2 batched=True: straight 21 states, reseeds 89 = 42 + 47; max |d ll| 0.00e+00, max rel |d cov| 0.00e+00; ok True; val traj straight [-25.185798, -26.387615, -26.058057] cont [-26.387615, -26.058057]
+T3 batched=True: max |kron_tk - Tk| 4.44e-16 (Tk = I in 6 components); continuation from kron_tk: max |d ll| 0.00e+00
+T4 init consumes no rng draw on a 1-state run: True
+test_gcap_em OK
