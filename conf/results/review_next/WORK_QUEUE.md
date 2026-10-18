@@ -1,6 +1,6 @@
 # 작업 큐 (review_next 이후; 갱신할 때마다 맨 위 시각을 바꾼다)
 
-갱신 2026-10-17 07:40 CDT (Opus 5.5). **지금: 등록 실행 U28NR32GCAP (E2′ UMi28 32×4 GMM 용량 확인) 의 test 평가가 돈다** (`bash code/run_gcap.sh`, tmux `gcap`; 실행 커밋 = §5; 추정 ≈ 21 h → 10-18 05 시 CDT 쯤). 끝날 때까지 main 커밋 · `conf/code` · `Demo` · `DECISIONS.md` · 그 등록 문서 수정 금지. 남은 사용자 결정: 대기 7 (GMM EM 정지 조건). **CPU: 사용자 상한 120 스레드 (10-16 CDT; 이 실행 119 + chk 1)**. FIGHSYDMI16e4 는 접음 (사용자 10-16 CDT; DECISIONS 2026-10-17 09:48 KST).
+갱신 2026-10-18 13:58 CDT (Opus 5.5). **U28NR32GCAP 끝 (10-18 12:49 CDT, GCAP_DONE ok=7 fail=1 — 실패 = 기록용 runner analysis; 표 B (i), §6 · DECISIONS · EXPERIMENTS 기록).** 다음: E3′ SBL32 · E5 QAM16 test (둘 다 §5 커밋, Codex 교차 검토 → main 병합 · 실행 커밋 → 순서대로, 한 번에 하나). 남은 사용자 결정: 대기 7 (GMM EM 정지 조건), 9 (GCAP 재개의 할당기 환경변수 = 등록 이탈). **CPU: 사용자 상한 168 스레드 (10-17 CDT; GCAP 120 + NUMA 0 48), 개발 실행은 `nice -n 10`**. FIGHSYDMI16e4 는 접음 (사용자 10-16 CDT; DECISIONS 2026-10-17 09:48 KST).
 
 ## 원고 목표 (사용자 10-05 CDT)
 - **IEEE ICC 2027** (Washington DC). 공식 call 페이지 기준 투고 마감 **2026-10-16**, 통지 2027-01-15, 최종본 2027-02-19. 투고본 **6 쪽 (10 pt) 상한** — 넘으면 심사 없이 거절. 저널판 없음 (DECISIONS 3a64d0ae) → 6 쪽에 못 넣는 것은 arXiv 확장판.
@@ -13,7 +13,9 @@
 ## 진행 중
 | 작업 | 자원 | 상태 |
 |---|---|---|
-| **U28NR32GCAP** (E2′; `NEXT_EXPERIMENTS_U28NR32GCAP.md` v2.1, 동결 778bda1d) | CPU 119 + 1 스레드 | 적합·선택 끝 (b\* = C kron K8192 재시작 2, ll_val 154.13990347772582, sha d883afaf…f71b). 개발 스모크 G 13.5 → 워커 58, 추정 ≈ 21 h. 10-17 07:4x CDT `run_gcap.sh` 시작 (로그 `logs/run_gcap.log`, 끝 `GCAP_DONE`). 이전 세션 7f296764 가 05:44 CDT 에 끊겨 새 세션이 이어 받음 (컨테이너 재생성 아님). 끝나면 §6 결과 · DECISIONS 줄 · EXPERIMENTS 행 |
+| **GPU 0·1·2 점유 (더미)** | GPU 0·1·2, CPU 0·96 / 22·118 / 23·119 (nice 10) | 사용자 지시 (2026-10-17 18:1x CDT, "이번만 규칙 어기자. 1, 2번 잡아둬"; 19:0x CDT "0번도 추가로 일단 점유") — AGENTS.md '자원이 놀아도 일을 억지로 만들지 않는다' 의 일회 예외. tmux `gpuhold0` · `gpuhold1` · `gpuhold2` 가 `gpuhold/gpu_hold.py` (256×256 matmul 5 s 마다, 596 MiB) 를 끊기면 다시 띄운다. 실제 GPU 작업 (E4 등) 을 그 GPU 에서 시작하기 전에 tmux Ctrl-C 로 내린다. 로그 `logs/gpuhold/` |
+| **E3′ U28NR32SBL** (`~/t2_wtE3`, 브랜치 `e3-sbl32`; 등록 v2.2 + §5 fbd96825) | test: CPU 96 (NUMA 1·3), 추정 ≈ 9 min | 개발 선택 ρ 4 · n_em 3 · cold (지표 142/960, 범위 끝 ρ · n_em); 스모크 G 7.0, 청크 108 s; ALD 두 파일을 main `results/ald/` 에 복사 (sha §5); `code/run_sbl32.sh` (Codex 검토 전). 다음: Codex 교차 검토 → main 병합 + `sbl32/sbl32_s5.txt` 실행 커밋 → `bash code/run_sbl32.sh` (tmux) |
+| **E5 QAM16** (`~/t2_wtE5`, 브랜치 `e5-qam16`; 등록 v2 + §5 087b1c06) | test: CPU 96, UMi ≈ 20 min → D2 ≈ 11 min | 격자 두 셀 G0 {3…21} dB; 스모크 G UMi 1.5 · D2 1.0 (청크 245 · 128 s); D2 시작 규칙 충족. 다음: Codex 교차 검토 (등록 동결 전) → main 병합 + `qam16/e5_s5.txt` 실행 커밋 → `E5_CPUS=24-47,120-143,72-95,168-191 bash code/run_e5.sh U28` → `… D2` |
 | **FIGHSYDMI16e4** (DMI 그림의 +12 dB n = 327,680 · +15 dB n = 3,072,000; 보고 전용) | — (CPU·GPU 반납) | **접음 (사용자 10-16 CDT)**. FYDMIB16e4 · FYALDDMI ACCEPT OK (10-13 17:54 / 17:56 CDT). FZDMIB16e4 는 10-13 21:37 CDT 사용자 지시로 멈춘 3519 / 7680 청크에서 끝 (`logs/fighsydmi_watch.md`), 재개 안 함; FZALDDMI 미시작. raw (`raw_FY*` · `raw_FZ*`) 와 로그는 지우지 않는다. 그림·§6·EXPERIMENTS 정리는 사용자 지시가 있을 때. |
 | 등록 밖의 부분 체크포인트 (참고) | — |  `ckpt/d2sx_{SRB,SRP}_N160000_a{4,5}*.pt` (128 epoch 쯤에서 멈춤) 는 쓰지 않는다 |
 | 원고 (IEEE ICC 2027, 마감 2026-10-16) — 웹 채팅에서 사용자가 작성, 자료는 paper 브랜치 (`conference/tools/sync_paper_branch.sh`) | — | 진행 중. 실험 큐·GPU 큐 비어 있음 |
@@ -24,6 +26,7 @@
 | 4 | RESULTS.md: SEEDS3·HISNR·SPARSE·SCALE 반영, CONTRIBUTIONS.md (09-27 이전에 머묾), 결과 요약 artifact 페이지, 그림 | — | 사용자 요청 시 (규칙: 요청 때 갱신) | |
 
 ## 완료 (최근)
+- **U28NR32GCAP** (E2′, 2026-10-18 13:58 CDT 기록): 실행 커밋 64b2912f → 10-17 07:40 CDT 시작, 22:33 CDT 메모리 압박으로 §1.5 멈춤 → 22:34 CDT `--resume` (glibc 할당기 환경변수 — 등록 이탈, 개발 시행으로 결과 불변 확인) → 10-18 12:49 CDT `GCAP_DONE ok=7 fail=1` (실패 = 기록용 `runner.py analysis` 의 KeyError 'R2-ours-G', 표 B 와 무관) → §6: 표 B `b*(GCAP) → V1` **(i)** 378:35, SNR@0.1 격차 +2.17 dB [+1.83, +2.50] (기존 b\* +2.29), R 0.4209 [0.390, 0.451]; 예측 8/8; verifier 2 회 (결함 4 + 1 반영). Codex 교차 검토 제안 대기.
 - **FIGHSDMI16e4** (2026-10-12 21:39 CDT 기록): 실행 커밋 e5caaccb → 10-12 18:43–21:32 CDT `FIGHS_DONE ok=3 fail=0` (CPU 96 스레드, 재개 없음) → §6: 실패 수 / 20480 (+6/+9/+12/+15 dB) V1 21 / 2 / 0 / 0, b\* 27 / 8 / 2 / 0, genie 7 / 1 / 0 / 0; 그림 `F21dmihs_col` (V1 은 +9 dB 에서 끝남); 예측 6 개 적중; 사용자의 별도 지시 없이 시작 (세션의 해석 — §5 · §6.4). 기록 감사 (Fable) MUST 0 · SHOULD 0 · NIT 5 반영 (§6.5).
 - **ROOM16e4 — DMI** (2026-10-12 21:39 CDT 기록): 5-DMI = 실행 커밋 4131a3b0 → 주 실행 10-12 16:15–17:54 CDT (ACCEPT OK) 표 B `b* → V1` **(i)** 263:179 (2/3 점), SNR@0.1 격차 +0.23 dB, b\* = full 1024 (붕괴 없음; EM 은 음수 스텝에서 멈춤 — §7.8); baseline @29cf411d 17:56–18:15 CDT 16 개 전부 (i) ("전부"·"멀어진다" 충족); §7 전사 cde35a4e; Fable 기록 감사 MUST 0 · SHOULD 3 · NIT 9 (1,219 값 불일치 0, 여섯 청크 재생 비트 동일) 반영 §7.8; RESULTS §25.6 · figures/README.
 - **SEEDSROOM16e4** (2026-10-12 13:18 CDT 기록): 동결 = 실행 커밋 62c24e7e → 10-12 09:26–13:16 CDT `SEEDSROOM_DONE ok=4 fail=0` (CPU 96 스레드) → §6: SRB "시드 강건 (3/3 (i))" (pooled 302:129 · 299:130 · 297:145; 격차 +0.32 / +0.35 / +0.37 dB), SRP "시드 강건 (3/3 (i); b* = 씨앗 초기화 GMM)" (1044:97 · 1010:88 · 1043:93; +2.01 / +1.95 / +2.12 dB); 예측 7 개 적중; 그림 `F34seed_wide`. `docs/RESULTS.md` §25 (레이 트레이싱 풀 요약) 도 같은 커밋
@@ -53,6 +56,8 @@
 6. (10-11 CDT) BLER 이 낮은 구성 (스트림 수를 줄이는 등) 을 ray-traced 풀에 새로 등록할지; DMC16e4 수용 (c) 문구 판단 (감사 N4)
 7. (10-12 CDT) **GMM EM 정지 조건**: 동결된 GMM 절차 (`code/gmm_em_gpu.py`) 는 20 반복 뒤 학습 우도가 처음 줄어든 스텝에서도 멈춘다 (허용오차 수렴이 아닐 수 있음; 돌려주는 모델은 검증 최고 상태). fits 폴더 57 개 가운데 34 개의 선택 적합이 그렇게 끝났다 (DMI · DeepMIMO 도시 · D3 · UMi28 · MIX3 · NR16 등; 헤드라인 D2 B16e4k · SRB · SRT · SV 는 아님 — `prereg_audit_2026-10-11/gmm_stop_survey.out`). 잰 크기는 DMI 하나: 30 반복 연장 시 ll_val +0.016 nat (격자 한 칸 +6.192 nat 의 0.3 %); BLER 영향은 재지 않음. 선택지: ① 캐비엇만 (지금 상태; 보고 때 "답이 없으면 ①" 이라고 알림) ② 이어 돌린 GMM 으로 BLER 을 다시 재는 강건성 실행을 따로 등록. (57 · 34 는 폴더 기준. 서로 다른 적합으로 세면 30 개 가운데 14 개 — RMX\* · S2d 의 14 폴더는 한 적합이고, 14 개에는 EM 이 붕괴한 SRP 가 들어 있다; '선택 적합' = 폴더 안 ll_val 최고 파일; `prereg_audit_2026-10-11/recompute_fighsdmi_gmmstop.out` — FIGHSDMI16e4 감사 N4)
 8. (해결 10-12 CDT, 사용자 "+15 dB까지 시도") DMI 그림을 +15 dB 까지 잇기 → `NEXT_EXPERIMENTS_FIGHSYDMI16e4.md` (실행했으나 사용자 결정 (10-16 CDT) 으로 접음 — +12 dB 두 행 수용, +15 dB 행은 3519 / 7680 청크에서 끝; 위 '진행 중').
+
+9. (10-18 CDT) **GCAP 재개의 할당기 환경변수**: 22:34 CDT `--resume` 에 등록 §1.3 · §1.5 의 재개 명령에 없는 glibc 할당기 환경변수 3 개를 붙였다 (사용자 "뭐든 빨리 할 수 있는 방향으로 하자" 뒤 Claude 판단). 개발 시행 2 회로 결과 불변 (17 배열 바이트 동일), test 에서는 genie 448 청크 비트 동일 — b\* 는 개발 시행으로만 확인. 이 이탈을 수용할지 (등록 §6.1 · §6.4, DECISIONS 2026-10-19 KST 줄).
 
 ## 원고 결정 기록 (2026-10-06 15:50 CDT)
 - GitHub 기본 브랜치 = `paper` (사용자가 바꿈).

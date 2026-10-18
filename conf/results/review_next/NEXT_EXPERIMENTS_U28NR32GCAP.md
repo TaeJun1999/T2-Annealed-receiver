@@ -148,3 +148,51 @@
 - `gcap/gcap_s5.txt`: `FREEZE 778bda1d` / `FIT C 8192 154.13990347772582 d883afaf2e3e6133685594c5e7eaa892ac371b90c41505b7acd4a2b3fd49f71b` / `WGB 13.5`. 동결 = 이 절과 `gcap_s5.txt` 를 더하는 실행 커밋 (code/·Demo/ 는 778bda1d 와 같다).
 
 ## 6. 결과 (이 절은 추가만 한다)
+
+### 6.1 실행 기록 (기록 2026-10-18 13:44 CDT = 10-19 03:44 KST, Opus 5.5 — 원자료 전사; 판정은 6.2)
+
+표기: `G:n` = `logs/run_gcap.log` n 행, `E:n` = `logs/run_D2_U28NR32GCAPe.log` n 행.
+
+- **실행 커밋** 64b2912f (§5 커밋; FREEZE 778bda1d, `git diff 778bda1d 64b2912f -- conf/code Demo` 0 바이트). 실행 내내 main HEAD = 64b2912f (다른 커밋 없음), `git status --porcelain conf/code Demo` 0 줄.
+- **실행 1** (tmux `gcap`, `bash code/run_gcap.sh`): `G:1` 10-17 07:40 CDT start (resume=0, WGB 13.5); runner 워커 58 (`E:7`). 서버 메모리 압박 (6.4) 으로 22:33 CDT 에 §1.5 절차 (tmux Ctrl-C) 로 멈춤: `G:2` INTERRUPTED, `G:3` runner exit e 130 chk 0, accept_e FAILED · accept_chk OK · run_git FAILED (미완성 raw 116/448), run_manifest 2 OK, guard_e OK, compare NOT RUN, analysis FAILED → `G:16` GCAP_DONE ok=4 fail=5. 완료 청크 116, 읽을 수 없는 청크 0.
+- **실행 2** (같은 HEAD, 태그 없이 `--resume`; 등록 §1.3 (실행 행 `bash code/run_gcap.sh [--resume]`, 메모리 가드 행 `GCAP_WGB=<G′ ≥ G> bash code/run_gcap.sh --resume`) · §1.5 ("같은 HEAD 에서 `--resume`") 의 재개 명령에 없는 glibc 할당기 환경변수 3 개를 붙였다 — **등록 이탈**, 6.4): `G:18` 10-17 22:34 CDT start (resume=1, WGB 13.5); runner 워커 55 (`E:150`), `E:600` finished in 854.4 min → `G:19` 10-18 12:49 CDT runner exit e 0 chk 0; `G:20–29` accept_e OK, accept_chk OK, run_git OK, run_manifest_U28NR32GCAPe OK (448 파일, arm M-ours-bstar · R5-genie), run_manifest_U28NR32GCAPchk OK, guard_e OK; `G:108` compare OK; `G:109` **analysis FAILED** → `G:110` **GCAP_DONE ok=7 fail=1**.
+- **analysis FAILED 원인** (`E:601–619`): `runner.py analysis --testbed D2 --tag U28NR32GCAPe` → `analysis.table_A` 가 arm 마다 SNR@0.1 격차를 `REF = "R2-ours-G"` (`code/analysis.py:100`) 에 대해 계산 (`:321`) → 이 raw 에는 M-ours-bstar · R5-genie 두 arm 만 있어 `KeyError: 'R2-ours-G'`. 실행 1 의 analysis FAILED 도 같은 예외 (`E:125–143`). 즉 §1.3 사후 산출물 행의 "`runner.py analysis` (2 arm 표, 기록용)" 는 동결 코드로 만들 수 없다 — 등록 작성·검토 때 놓친 결함. 표 B · R · 라벨은 §1.3 분석 행 · §2.1 대로 `gcap_compare` 출력에서만 읽으므로 이 단계와 무관하다. conf/code 를 고쳐야 하므로 다시 돌리지 않았다.
+- **수용·raw** (단일 프로세스, `meta|*` · `run|*` 키만 읽음): `raw_U28NR32GCAPe/` 448 npz (= 7 점 × 64 청크); 값 집합 `run|git` {64b2912f}, `meta|bstar` {kron}, `meta|kron_K` {8192}, `meta|ll_val|kron` {154.13990347772582} (= §5), `meta|ntrain` {160000.0}, `meta|worker_gb` {13.5}, `meta|jobs` {58: 116 청크, 55: 332 청크}, `run|seed` {20260926}, `run|iters` {16}, `run|dtype` {complex128/float64}. `raw_U28NR32GCAPchk/` 1 npz (kron_K 4096, ll_val 152.23176788511105, run|git 64b2912f). `gcap/U28NR32GCAPe_accept.txt` · `U28NR32GCAPchk_accept.txt` = "ACCEPT: OK". `results/guard_D2_U28NR32GCAPe.txt`: NO GUARD FIRINGS. `gcap_compare` 검사 줄: 같은 7 점, n = 2560, R5-genie 가 기존 raw 와 모든 점·필드에서 비트 동일.
+- **시간** (`E:` 의 `done` 줄 청크 초): 실행 1 116 청크 평균 19995 s · 중앙 19611 s (8061–37745; 둘째 회전부터 메모리 압박), 실행 2 332 청크 평균 7954 s · 중앙 7260 s (6524–13125). 벽시계 14 h 53 min + 14 h 15 min = 29 h 08 min (§5 추정 21.1 h). 실행 1 이 멈출 때 진행 중이던 청크 약 58 개의 계산은 버려졌다.
+- **적합 비용 (§1.4 의 두 수)**: 등록 계산 167226 s (§5: 기존 격자 128781 s + K8192 세 재시작 38445 s). raw `meta|em_sec` = 40544.76968383789 s (448 파일 같음) = GCAPe fits 폴더 두 파일의 `sec` 합 (kronK8192 병합 38444.77 + fullK32 2100.003348827362 = `meta|em_sec|M-ours-gmm32`) — 정의가 달라 두 수가 다르다.
+
+### 6.2 결과 · 라벨 (`gcap/compare_U28NR32GCAP.txt`)
+
+| 쌍 (앵커) | 판정점 | 부호검정 @16 a:b (점별) · 합 | power guard · 판정 | SNR@0.1 격차 (90 % paired bootstrap) |
+|---|---|---|---|---|
+| b\*(GCAP) → V1 (b\*) | −3 · 0 · +3 | 172:16 (p 3.4e-34) · 127:13 (1.1e-24) · 79:6 (2.4e-17) — 378:35, p = 8.3e-74 | POWERED; V1 적게 실패 3/3 → significant | **+2.17 dB [+1.83, +2.50]**, censored 0 % |
+| b\*(기존 A) → V1 (재계산) | −3 · 0 · +3 | 173:13 (p 7.3e-37) · 136:12 (9e-28) · 82:7 (2.4e-17) — 391:32, p = 1.3e-79 | POWERED, 3/3 → significant | +2.29 dB [+1.98, +2.61] |
+| b\*(GCAP) → genie | −9 · −6 · −3 | 774:1 · 520:1 · 419:2 — 1713:4 | POWERED, 3/3 | +7.16 dB [+6.56, +7.64] (기존 +7.28 [+6.70, +7.77]) |
+| V1 → genie (기존 raw, 두 표 같음) | −9 · −6 · −3 | 646:1 · 372:4 · 263:2 — 1281:7 | POWERED, 3/3 | +4.98 dB [+4.44, +5.47] |
+
+- **R** (판정점 −3 · 0 · +3 합, B = 2000, seed 20260926): ΣF b\*(GCAP) 942 · V1 599 · genie 127 → **R = 0.420859 [0.390, 0.451]**; 기존 b\* 958 · 599 · 127 → 0.432010 [0.402, 0.462].
+- **기존 b\* 재계산 = 기록값** (§4.2: 391:32, +2.29 [+1.98, +2.61], ΣF 958 · 599 · 127, R 0.432010 [0.402, 0.462]) — 일치.
+- **SNR 별 실패 수 / 2560** (b\*(GCAP) · V1 · genie; V1 · genie = 기존 raw): −12: 2277 · 2219 · 846, −9: 1196 · 1068 · 423, −6: 746 · 595 · 227, −3: 505 · 349 · 88, 0: 294 · 180 · 30, +3: 143 · 70 · 9, +6: 61 · 27 · 3.
+- **보고 전용 b\*(기존) → b\*(GCAP)** (점별 부호검정, 7 점; a = 기존만 실패 : b = 새만 실패): −12 dB 2280/2277 38:35 p 0.82, −9 1207/1196 56:45 p 0.32, −6 761/746 57:42 p 0.16, −3 509/505 57:53 p 0.78, 0 304/294 56:46 p 0.37, +3 145/143 30:28 p 0.9, +6 62/61 13:12 p 1 (실패 수 기존 / 새); 새 b\* 가 7 점 모두 1–15 블록 적게 실패, 유의한 점 없음. 라벨 없음.
+- **라벨 (§2.1, 최종 = C)**: **(i)** "UMi28 C9 (Nr 32) 에서 V1 이 b\*(GCAP) 보다 적게 실패 (GMM 용량 확인 재평가, UNGATED)" + G_GCAP "(b\*(GCAP) = 검사한 family (full · Kronecker) 와 K 범위 (kron ≤ 8192), 등록 절차 (continuation 50 회 포함) 안에서 검증 LL 로 고른 GMM 이며 최적 GMM 이 아니다)" + "[K 상한 민감: 외삽 불가]".
+
+### 6.3 예측 채점 (§3; 8 개 모두 적중)
+
+1. 적중 — B best 상태 10 > 0, Δ = 152.34773499788244 − 152.23176788511105 = +0.1160 nat (0 < Δ ≤ 1.0).
+2. 적중 — B `stop budget`, steps 50/50, `status completed` (§5).
+3. 적중 — C 병합 154.1399 > A 152.2318 (+1.908 nat).
+4. 적중 — C 세 재시작 모두 `patience` (§5).
+5. 적중 — 최종 = C ≠ A.
+6. 적중 — 판정점 −3 · 0 · +3, 라벨 (i).
+7. 적중 — ΣF_b\*(새) 942 ∈ [910, 1006].
+8. 적중 — 격차 점추정 +2.17 dB ≥ +1.5 dB.
+
+### 6.4 실행 중 기록 (`gcap/PENDING_DECISIONS_gcap_resume.md` 를 옮김; 수치 두 곳은 verifier 지적으로 원자료에 맞게 고쳐 옮겼다 — 원본 파일은 그대로 둔다)
+
+- 2026-10-17 22:35 CDT — 주 실행을 §1.5 절차로 멈추고 (tmux Ctrl-C, 22:33 CDT) 같은 HEAD 64b2912f 에서 `--resume` (22:34 CDT; WGB 13.5 그대로, 메모리 가드가 워커 55 — `E:150`; runner 는 읽은 MemAvailable 을 로그에 남기지 않는다. 원본의 "MemAvailable 989 GB" 는 runner 공식 `int(0.8·kB/2**20 // G)` 로 55 가 나오지 않는다 (989 GiB → 58) — 다른 시각의 측정값으로 보이며 출처가 없어 뺀다).
+  - 사유: 서버 메모리 압박 (다른 사용자의 페이지 캐시 ≈ 430 GB, MemFree 수 GB, 스왑 가득) 으로 워커가 커널 직접 회수에 갇힘 (워커 표본 user 0 % · sys 100 %, cgroup memory.pressure 65–90 %); 둘째 회전 청크 (실행 1 의 `done` 줄 59–116 번째, `E:67–124`) 24753–37745 s, 중앙 30816 s — 첫 회전 (1–58 번째) 중앙값 9746 s 의 2.54–3.87 배 (원본의 "31–35 ks, 3.2–3.6 배" 는 틀린 값).
+  - 재개 때 바꾼 것: glibc 할당기 환경변수만 (`GLIBC_TUNABLES=glibc.malloc.mmap_max=0:glibc.malloc.trim_threshold=68719476736`, `MALLOC_MMAP_MAX_=0`, `MALLOC_TRIM_THRESHOLD_=68719476736`) — 해제한 메모리를 커널에 돌려주지 않고 다시 써서 반복 할당의 회수를 없앰. conf/code · Demo · 인자 · G 그대로. (raw 에는 환경변수가 기록되지 않는다 — 이 절이 기록.)
+  - 결과 불변 확인 (개발 시행만): GCAP 설정 (b\* K8192 + genie, 0 dB) 시행 4300..4302 를 기본 / 할당기 설정으로 동시에 (raw `raw_U28NR32MTa` / `raw_U28NR32MTb`) → 17 배열 바이트 동일; 시간 3003 s / 934 s (user 556 / 579 s, sys 2431 / 350 s), 최대 RSS 12.57 / 12.91 GB (가드 1.25·G = 16.9 GB 아래). 할당기 설정으로 시행 2560..2562 를 다시 돌린 결과 (`raw_U28NR32MTc`) 가 GCAP 개발 스모크 청크 (기본 할당기, 10-17 07:37 CDT, 압박 전) 의 첫 3 행과 17 배열 모두 바이트 동일 (22:31 CDT). 출처: 실행 스크립트·로그를 scratchpad 에서 `gcap/malloctest/` 로 옮김 (`run_both.sh` · `run_variant.py` · `run_c.sh`, `a.log` · `b.log` · `c.log`; `*_failed_ckpt.log` 는 8×4 체크포인트를 잘못 넘겨 runner 가 시작 전에 거부한 첫 시도 — rc 1, 5 s, 청크 없음); 두 대조는 `gcap/malloctest/cmp_mt.py` 로 raw 에서 다시 계산 → `cmp_mt.out` ("MTa vs MTb: 17 arrays compared; differing: []", "MTc vs GCAPdev rows 0..2: 17 arrays compared; differing: []", 10-18 CDT).
+  - test 쪽 증거 (사후): 실행 2 의 332 청크를 포함한 448 청크 전부에서 R5-genie 가 기존 raw 와 비트 동일 (6.1 `gcap_compare` 검사 줄; verifier 독립 재확인). b\* 의 불변은 개발 시행으로만 확인됐다.
+  - 사용자: "뭐든 빨리 할 수 있는 방향으로 하자", "내가 지금 터미널을 건드리지 못해서 너가 할 수 있을까?" (2026-10-17 22:2x–22:3x CDT). 첫 멈춤 시도는 자동 권한 분류기가 거부, 사용자 요청 뒤 다시 실행.
+  - 재개 뒤 관찰 (원본): 힙이 최고치 (≈ 12.6 GB) 에 닿은 워커부터 user 55 % 안팎으로 계산 (재개 10 분 뒤 13/55 워커), 나머지는 메모리를 받는 동안 대기; RSS 합계 473 GB (2 분) → 531 GB (20 분). 추가 (세션 점검의 관찰, 파일 기록 없음): 23:42 CDT 워커 55 개 모두 힙 최고치, RSS 합계 686 GB, memory.pressure 0 %. 실행 2 청크 시간은 6.1 대로 첫 회전 (압박 전) 보다 짧다.

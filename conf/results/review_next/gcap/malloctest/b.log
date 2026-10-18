@@ -1,0 +1,9 @@
+[run] M-ours-dscore: ABSENT -- no GATE-PASSING checkpoint (04_SPEC §5 gates GA-GD): no gate-passing checkpoint for D2; recorded PASS rows: none (searched conf/results/gate_D2.txt and LADDER.md)
+[run] M-ours-dscore is NOT in this run.  The reason is written to every raw file as 'meta|dscore_status', so analysis.py reports its slot as BLOCKED / FAILED-VERIFICATION instead of quietly printing a table without it (01_RULES §6).
+[run] Stage C arms (10_SPEC §3b/§3c): M-ours-dscore-C-{V0,V1,V4} + the mandatory GMM control M-ours-bstar-scalar, from /home/HTJ/t2/conf/ckpt/d2sx_UMi28NR32_N160000_a1_best.pt (32x4) -- ON for ['C9'], ABSENT for []
+[run] Stage C checkpoint: sha256[:16]=463da87aa8dbfb61 epoch=232 best_epoch=232 role=best 32x4
+[run] Stage C gate record: NO GATE RECORD mentions d2sx_UMi28NR32_N160000_a1_best.pt -- UNVERIFIED here.  (GA-GD are measurable on D1 only, 10_SPEC §5: a D2 re-train is qualified by its D1 sibling's gate row, which this string cannot prove.)
+[run] D2 1 points x n=3 -> 1 tasks on 1 workers (prior UMi28, cells ['C9'], chunk 3) -> /home/HTJ/t2/conf/raw_U28NR32MTb
+1/1 done    D2_C9_UMi28_Nr32_T16_Tp4_eig_snr0_skip4300_n3.npz  (931 s)  BLER16: R5-genie=0.00
+[run] finished in 15.5 min -> python runner.py analysis --testbed D2 --tag U28NR32MTb
+U28NR32MTb: rc 0 wall 934 s  maxRSS 12.91 GB  utime 579 s  stime 350 s  minflt 657954  majflt 1106  env GLIBC_TUNABLES=glibc.malloc.mmap_max=0:glibc.malloc.trim_threshold=68719476736
