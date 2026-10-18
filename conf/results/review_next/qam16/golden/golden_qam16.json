@@ -1,0 +1,199 @@
+{
+  "meta": {
+    "target": "T2 receiver simulator: QPSK/16-QAM mapper + block size of rate-1/2 terminated CC (133,171)_8, nu=6",
+    "written_from": "spec in the delegation message + textbook QAM facts; implementation code NOT read",
+    "spec": {
+      "code": "rate 1/2, terminated, generators (133,171)_8, memory nu=6 -> 2(K+6) coded bits",
+      "Ns": "N_t (T - T_p) = 4 * (16 - 4) = 48 data symbols per block",
+      "K": "K = Ns*m/2 - nu",
+      "qam16": "Re, Im in {-3,-1,+1,+3}/sqrt(10), per-axis 2-bit Gray, bit-label convention free",
+      "qpsk": "{+-1 +- j}/sqrt(2)"
+    },
+    "tolerance": {
+      "integers": "exact",
+      "float64_abs": 1e-12,
+      "float32_abs": 1e-6,
+      "note": "float64_abs for complex128 implementations (01_RULES 9.3 says receiver runs complex128). float32_abs only if the mapper is complex64; it must then be reported as float32."
+    },
+    "reference_impl": "golden_qam16.py (check_K, check_constellation, check_roundtrip, _selftest)"
+  },
+  "cases": [
+    {
+      "id": "C1_K",
+      "what": "information bits per block",
+      "calc": [
+        "Ns = 4*(16-4) = 48",
+        "QPSK m=2: coded = 48*2 = 96; K = 96/2 - 6 = 42; check 2*(42+6) = 96",
+        "16-QAM m=4: coded = 48*4 = 192; K = 192/2 - 6 = 90; check 2*(90+6) = 192",
+        "info bits per data symbol K/Ns: 42/48 = 0.875, 90/48 = 1.875",
+        "effective code rate K/(Ns*m): 42/96 = 0.4375, 90/192 = 0.46875"
+      ],
+      "rows": [
+        {"m": 2, "Ns": 48, "K_given": 42, "coded_bits": 96, "K_expected": 42, "ok": true, "K_over_Ns": 0.875, "rate": 0.4375},
+        {"m": 4, "Ns": 48, "K_given": 90, "coded_bits": 192, "K_expected": 90, "ok": true, "K_over_Ns": 1.875, "rate": 0.46875}
+      ],
+      "tol": "exact (integers); K_over_Ns and rate are exact binary fractions"
+    },
+    {
+      "id": "C2_qam16_geometry",
+      "what": "16-QAM point set, energy, distances",
+      "calc": [
+        "points = scale*(a + j b), a,b in {-3,-1,1,3}, scale = 1/sqrt(10) = sqrt(3/(2(M-1))) with M=16",
+        "mean energy: per axis mean of a^2 over {-3,-1,1,3} = (9+1+1+9)/4 = 5; Re+Im = 10; times scale^2 = 1/10 -> 1 exactly",
+        "energy shells: |a|=|b|=1 -> 2/10 = 0.2 (4 inner); one of |a|,|b|=3 -> 10/10 = 1.0 (8 edge); |a|=|b|=3 -> 18/10 = 1.8 (4 corner); check (4*0.2+8*1.0+4*1.8)/16 = 16/16 = 1",
+        "d_min = level step 2 * scale = 2/sqrt(10) = 0.6324555320336759; d_min^2 = 0.4",
+        "Es per coded bit = Es/m = 1/4 = 0.25",
+        "peak energy 1.8, PAPR = 1.8 = 2.5527 dB",
+        "per-axis hard-decision thresholds: 0 and +-2/sqrt(10) = +-0.6324555320336759"
+      ],
+      "expected": {
+        "M": 16, "m": 4,
+        "points_times_inv_scale": [[-3,-3],[-3,-1],[-3,1],[-3,3],[-1,-3],[-1,-1],[-1,1],[-1,3],[1,-3],[1,-1],[1,1],[1,3],[3,-3],[3,-1],[3,1],[3,3]],
+        "scale": 0.31622776601683794,
+        "mean_energy": 1.0,
+        "energy_shells": {"0.2": 4, "1.0": 8, "1.8": 4},
+        "d_min": 0.6324555320336759,
+        "Es_per_bit": 0.25,
+        "peak_energy": 1.8,
+        "n_min_pairs": 24,
+        "neighbor_count_hist": {"2": 4, "3": 8, "4": 4},
+        "axis_thresholds": [-0.6324555320336759, 0.0, 0.6324555320336759]
+      },
+      "tol": "float64_abs on energies/distances; point set: every point within float64_abs of a distinct grid point"
+    },
+    {
+      "id": "C3_gray",
+      "what": "Gray property and axis separation, labelling-convention free",
+      "calc": [
+        "nearest pairs on a 4x4 grid: 4 rows*3 + 4 cols*3 = 24; equivalently (4*2+8*3+4*4)/2 = 24",
+        "Gray: all 24 nearest pairs have label Hamming distance exactly 1 (violations = 0)",
+        "axis separation: 2 bit positions are functions of the Re level only, the other 2 of the Im level only",
+        "1-D: four distinct 2-bit labels with adjacent levels 1 bit apart walk the 4-cycle 00-01-11-10, so levels 3 apart are also 1 bit apart and levels 2 apart are 2 bits apart: g(|d|) = [0,1,2,1] for |d| = 0,1,2,3",
+        "full Hamming matrix: H(p,q) = g(|dr|) + g(|di|) for all 256 ordered pairs, where dr, di are level-index differences",
+        "Hamming histogram over 120 unordered pairs: H=1: 32 (24 at d_min + 8 at 3*d_min, the row/column end pairs), H=2: 48, H=3: 32, H=4: 8",
+        "brute force (golden_qam16.enumerate_gray_4x4): the 4x4 grid has exactly 384 Gray labellings = 6 (choice of Re bit pair) * 8 * 8 (1-D Gray per axis) = |Aut(Q4)| = 2^4*4!; all 384 are axis separated and satisfy the H formula, so for 16-QAM axis separation and H follow from nearest-neighbour Gray + bijection"
+      ],
+      "expected": {
+        "n_min_pairs": 24,
+        "gray_violations": 0,
+        "n_re_bits": 2, "n_im_bits": 2,
+        "g_1d": [0, 1, 2, 1],
+        "hamming_matrix_mismatches": 0,
+        "hamming_hist_unordered": {"1": 32, "2": 48, "3": 32, "4": 8},
+        "n_gray_labellings_4x4": 384
+      },
+      "tol": "exact (integers)"
+    },
+    {
+      "id": "C4_roundtrip",
+      "what": "noiseless and near-noiseless hard decision through the implementation's own modulate/hard_demod",
+      "input": "bits = labels 0..M-1 written MSB first and concatenated (64 bits for 16-QAM, 8 for QPSK); the bit order is whatever the implementation consumes, the checks do not care",
+      "calc": [
+        "(a) noiseless: hard_demod(modulate(bits)) == bits, and the M output symbols form the grid of C2/C5 and pass C3 (check_constellation on the implementation's own table)",
+        "(b) y = s + 0.99*(d_min/2)*u, u in {1, j, -1, -j, 1+j, 1-j, -1+j, -1-j}: decision region of every point contains the open square of half-width d_min/2, so the label is unchanged",
+        "(c) y = s_a + 0.51*(s_b - s_a) for every ordered nearest pair (a,b): decided label = label of b, which is exactly 1 bit away from label of a",
+        "(d) outer points pushed 5*d_min outward perpendicular to their edge (corners diagonally), and corners scaled by 10: outer regions are unbounded, label unchanged",
+        "exact ties at d_min/2 are NOT tested (tie-break is implementation-defined)"
+      ],
+      "expected_trial_counts": {
+        "4": {"noiseless": 16, "inside_0.99": 128, "cross_0.51": 48, "cross_not_1bit": 48, "outward": 16},
+        "2": {"noiseless": 4, "inside_0.99": 32, "cross_0.51": 8, "cross_not_1bit": 8, "outward": 8}
+      },
+      "expected_errors": 0,
+      "count_derivation": [
+        "16-QAM: inside = 16*8 = 128; cross = 2*24 ordered pairs = 48; outward = 12 non-inner points + 4 corners*10 = 16",
+        "QPSK: inside = 4*8 = 32; cross = 2*4 = 8; outward = 4 + 4 = 8"
+      ],
+      "tol": "exact bit equality"
+    },
+    {
+      "id": "C5_qpsk",
+      "what": "QPSK geometry and Gray",
+      "calc": [
+        "points (+-1 +- j)/sqrt(2); |s|^2 = 2/2 = 1 for every point -> mean 1",
+        "d_min = 2/sqrt(2) = sqrt(2) = 1.4142135623730951; scale = sqrt(3/(2*3)) = 1/sqrt(2)",
+        "Es per coded bit = 1/2",
+        "each point has 2 nearest neighbours (all are corners), 4 nearest pairs, all 1 bit apart; diagonal pair 2 bits apart; 1 bit on Re, 1 bit on Im; g_1d = [0,1]"
+      ],
+      "expected": {
+        "M": 4, "m": 2,
+        "points_times_inv_scale": [[-1,-1],[-1,1],[1,-1],[1,1]],
+        "mean_energy": 1.0,
+        "energy_shells": {"1.0": 4},
+        "d_min": 1.4142135623730951,
+        "Es_per_bit": 0.5,
+        "n_min_pairs": 4,
+        "neighbor_count_hist": {"2": 4}
+      },
+      "tol": "float64_abs"
+    },
+    {
+      "id": "B1_neighbor_counts",
+      "what": "boundary: corner / edge / inner points",
+      "expected": {
+        "corner (|a|=|b|=3)": 2,
+        "edge (one of |a|,|b| = 3)": 3,
+        "inner (|a|=|b|=1)": 4,
+        "histogram": {"2": 4, "3": 8, "4": 4}
+      },
+      "calc": "corner has one neighbour per axis inward; edge has 2 along the edge + 1 inward; inner has 4. Count of each class: 4 corners, 4*(4-2)=8 edges, (4-2)^2=4 inner",
+      "tol": "exact"
+    },
+    {
+      "id": "B2_equal_energy",
+      "what": "boundary: QPSK and 16-QAM have the same mean symbol energy",
+      "expected": {"mean_energy_qpsk": 1.0, "mean_energy_qam16": 1.0, "difference": 0.0},
+      "calc": "QPSK: 2/2 = 1; 16-QAM: 10/10 = 1 (C2). Same Es, so the same SNR means the same Es/N0 for both; Es per coded bit differs (1/2 vs 1/4)",
+      "tol": "float64_abs on each; |difference| <= 2*float64_abs"
+    },
+    {
+      "id": "B3_K_boundary",
+      "what": "boundary and wrong-K detection for check_K",
+      "rows": [
+        {"m": 2, "Ns": 7, "K_given": 1, "coded_bits": 14, "K_expected": 1, "ok": true, "why": "smallest QPSK block: 14/2 - 6 = 1"},
+        {"m": 2, "Ns": 6, "K_given": 0, "coded_bits": 12, "K_expected": 0, "ok": false, "why": "12/2 - 6 = 0: only tail bits"},
+        {"m": 4, "Ns": 4, "K_given": 2, "coded_bits": 16, "K_expected": 2, "ok": true, "why": "smallest 16-QAM block: 16/2 - 6 = 2"},
+        {"m": 4, "Ns": 3, "K_given": 0, "coded_bits": 12, "K_expected": 0, "ok": false, "why": "12/2 - 6 = 0"},
+        {"m": 1, "Ns": 47, "K_given": 17, "coded_bits": 47, "K_expected": null, "ok": false, "why": "odd coded length cannot equal 2(K+6)"},
+        {"m": 2, "Ns": 48, "K_given": 48, "coded_bits": 96, "K_expected": 42, "ok": false, "why": "tail forgotten: 96/2"},
+        {"m": 2, "Ns": 48, "K_given": 45, "coded_bits": 96, "K_expected": 42, "ok": false, "why": "(96-6)/2: tail counted as 6 coded bits instead of 12"},
+        {"m": 4, "Ns": 48, "K_given": 96, "coded_bits": 192, "K_expected": 90, "ok": false, "why": "tail forgotten: 192/2"},
+        {"m": 4, "Ns": 48, "K_given": 93, "coded_bits": 192, "K_expected": 90, "ok": false, "why": "(192-6)/2"}
+      ],
+      "tol": "exact"
+    },
+    {
+      "id": "B4_decision_edges",
+      "what": "boundary: decision near region edges and outside the grid (run through check_roundtrip, case C4 b-d)",
+      "expected": {"inside_0.99": "same label", "cross_0.51": "neighbour label, 1 bit flipped", "outward_far": "same label", "exact_tie_0.5": "not tested"},
+      "tol": "exact bit equality"
+    },
+    {
+      "id": "B5_negative",
+      "what": "inputs the checks must reject (shows the checks have teeth)",
+      "rows": {
+        "natural_binary": {
+          "input": "16-QAM grid, label = 4*r + i with r,i = level index 0..3 (natural binary per axis, not Gray)",
+          "gray_violations": 8,
+          "hamming_matrix_mismatches": 160,
+          "axis_separated": true,
+          "calc": [
+            "per axis labels 00,01,10,11: pair (1,2) is 2 bits apart -> 1 violation per row and per column -> 4 + 4 = 8",
+            "1-D error e = H_nat - g: +1 for {1,2},{0,3}; -1 for {0,2},{1,3}; 0 for the 4 diagonal and {0,1},{2,3}. Ordered 1-D pairs: e=0: 8, e=+1: 4, e=-1: 4",
+            "2-D entry matches iff e_r + e_i = 0: 8*8 + 4*4 + 4*4 = 96 of 256 -> mismatches = 160"
+          ]
+        },
+        "duplicate_label": {"input": "reference table with labels[1] = labels[0]", "labels_bijective": false},
+        "unnormalized": {"input": "reference points * sqrt(10) (levels +-1, +-3)", "mean_energy": 10.0, "point_set_ok": false, "calc": "(9+1+1+9)/4 * 2 = 10"},
+        "complex64_at_float64_tol": {"input": "reference points cast to complex64", "ok_at_1e-12": false, "ok_at_1e-6": true},
+        "wrong_M": {"input": "first 15 points", "ok": false},
+        "bad_demod_thresholds": {
+          "input": "hard demod using thresholds 0, +-2 (unnormalised grid) on normalised symbols",
+          "noiseless_symbol_errors": 12,
+          "calc": "|Re|,|Im| <= 3/sqrt(10) < 2, so outer levels are decided as inner: every point with an outer coordinate (16 - 4 inner = 12) is wrong"
+        }
+      },
+      "tol": "exact"
+    }
+  ]
+}

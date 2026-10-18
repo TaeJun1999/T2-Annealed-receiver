@@ -1,0 +1,77 @@
+diff --git a/conf/code/runner.py b/conf/code/runner.py
+index 0d0462f4..94a800fb 100644
+--- a/conf/code/runner.py
++++ b/conf/code/runner.py
+@@ -506,14 +506,20 @@ def run_task(task):
+     pil = C.make_pilots(testbed, prior, c["Nt"], c["Tp"], c["Nr"])[0]   # cheap; the build is not
+     out = raw_file(testbed, cell, prior, pil, snr, skip, n)
+     if os.path.exists(out):
+-        if mod != "qpsk":
+-            with np.load(out) as saved:
+-                expected_k = c["Nt"] * (c["T"] - c["Tp"]) * C.MOD_BITS[mod] // 2 - C.NU
+-                if (str(saved.get("meta|modulation", "qpsk")) != mod
+-                        or int(saved.get("meta|payload_bits", -1)) != expected_k
+-                        or str(saved.get("meta|protocol", "")) != "E5-qam16-v1"):
+-                    raise ValueError(f"--mod {mod}: existing raw {out} has a different modulation/payload/protocol; "
+-                                     "use a new --tag (existing raw is preserved)")
++        ns = c["Nt"] * (c["T"] - c["Tp"])
++        expected = (mod, ns * C.MOD_BITS[mod] // 2 - C.NU, "" if mod == "qpsk" else "E5-qam16-v1")
++        with np.load(out) as saved:
++            # Legacy QPSK chunks omit all three fields. Check them for EVERY requested modulation,
++            # so omitting --mod on resume cannot accept 16-QAM chunks into a QPSK run.
++            actual = (str(saved.get("meta|modulation", "qpsk")),
++                      int(saved.get("meta|payload_bits", ns * C.MOD_BITS["qpsk"] // 2 - C.NU)),
++                      str(saved.get("meta|protocol", "")))
++        if actual != expected:
++            mismatch = "; ".join(f"{k}: saved={v!r}, requested={e!r}"
++                                 for k, v, e in zip(("modulation", "payload_bits", "protocol"), actual, expected)
++                                 if v != e)
++            raise ValueError(f"--mod {mod}: existing raw {out} has a different modulation/payload/protocol "
++                             f"({mismatch}); use a new --tag (existing raw is preserved)")
+         return f"exists  {os.path.basename(out)}"                      # FINISHED CHUNKS ARE SKIPPED
+     t0 = time.time()
+     P = build_point(testbed, cell, prior, snr, ntrain, beta, t_in, ckpt, stagec_ckpt, mean_arms, p3_arms, pilot_arms, ald_file, mod)
+@@ -704,12 +710,20 @@ def cmd_smoke(a):
+     """n = 2, every arm, numbers discarded: exceptions and the key/shape signature only (test C1's rule)."""
+     testbed = a.testbed
+     prior = a.prior or C.PRIOR_OF[testbed]
+-    bad, ref = [], None
++    bad, ref, nrun = [], None, 0
+     for cell in (a.cell or ["C1"]):
+         snr = float((a.snr or [C.CELLS[cell]["snrs"][-1]])[0])
+         t0 = time.time()
+         P = build_point(testbed, cell, prior, snr, a.ntrain, a.beta, a.tin, a.ckpt, a.stagec_ckpt, a.mean_arms,
+                         a.p3_arms, a.pilot_arms, a.ald_file, a.mod)
++        arms = {k: v for k, v in P["arms"].items() if (not a.arm or k in a.arm)}
++        miss = sorted(set(a.arm or ()) - set(arms))
++        if miss:
++            bad.append(f"--arm {miss} not built at {cell} {snr:g} dB: {P['stagec']}")
++            continue
++        if not arms:
++            bad.append(f"{cell} {snr:g} dB: no arms available for smoke")
++            continue
+         print(f"[smoke] {cell}: Stage C: {P['stagec']}", flush=True)
+         print(f"[smoke] {testbed} {cell} prior={prior} snr={snr:g} pilots={P['pil']} "
+               f"({P['Nr']}x{P['Nt']}, T={P['T']}, Tp={P['Tp']}): {len(P['arms'])} arms "
+@@ -727,10 +741,9 @@ def cmd_smoke(a):
+             X, Y = P["arms"]["R5-genie"].transmit(u, perm, H, rng)
+             if tr < skip:
+                 continue
+-            for k, rx in P["arms"].items():
+-                if a.arm and k not in a.arm:
+-                    continue
++            for k, rx in arms.items():
+                 t1 = time.time()
++                nrun += 1
+                 try:
+                     o = rx.run(Y, H, u, perm, a.iters)
+                 except Exception as ex:
+@@ -744,6 +757,8 @@ def cmd_smoke(a):
+                 if tr == skip:
+                     print(f"  {cell} {k:<14} {time.time() - t1:6.2f} s/run  "
+                           f"finite={bool(np.all(np.isfinite(o['nmse'])))}", flush=True)
++    if not nrun:
++        bad.append("no arms executed")
+     print(f"[smoke] {'OK: no exceptions, identical key/shape signature across arms' if not bad else 'PROBLEMS:'}",
+           flush=True)
+     for b in bad:

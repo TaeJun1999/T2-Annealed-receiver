@@ -1,0 +1,84 @@
+Traceback (most recent call last):
+  File "/home/HTJ/t2_wtE5/conf/results/review_next/qam16/checks.py", line 226, in <module>
+    globals()[ap.parse_args().check]()
+  File "/home/HTJ/t2_wtE5/conf/results/review_next/qam16/checks.py", line 121, in regression
+    R.main(argv)
+  File "/home/HTJ/t2_wtE5/conf/code/runner.py", line 1407, in main
+    _init(a.tag)
+           ^^^^^^
+  File "/home/HTJ/t2_wtE5/conf/code/runner.py", line 685, in cmd_run
+    _init(TAG, {"jobs": jobs, "worker_gb": float(a.worker_gb)})
+                                      ^^^^^^^^^^^
+  File "/home/HTJ/t2_wtE5/conf/code/runner.py", line 569, in run_task
+    Y = doppler_rx(H, Pp, X, Y, doppler, C.PID[prior], snr, tr)
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/HTJ/t2_wtE5/Demo/t2_route_a.py", line 365, in run
+    hH, alphaH = self.prior.denoise(q, nu_q)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/HTJ/t2_wtE5/conf/code/score.py", line 1134, in denoise
+    m, J = self._eval(q, nu)
+           ^^^^^^^^^^^^^^^^^
+  File "/home/HTJ/t2_wtE5/conf/code/score.py", line 1120, in _eval
+    Jr = torch.func.jacrev(f)(x)
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/HTJ/miniforge3/envs/torch/lib/python3.12/site-packages/torch/_functorch/eager_transforms.py", line 646, in wrapper_fn
+    vjp_out = _vjp_with_argnums(func, *args, argnums=argnums, has_aux=has_aux)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/HTJ/miniforge3/envs/torch/lib/python3.12/site-packages/torch/_functorch/vmap.py", line 56, in fn
+    return f(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^
+  File "/home/HTJ/miniforge3/envs/torch/lib/python3.12/site-packages/torch/_functorch/eager_transforms.py", line 415, in _vjp_with_argnums
+    primals_out = func(*primals)
+                  ^^^^^^^^^^^^^^
+  File "/home/HTJ/t2_wtE5/conf/code/score.py", line 1119, in <lambda>
+    f = lambda v: tweedie_real(self.model, v, sg)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/HTJ/t2_wtE5/conf/code/score.py", line 592, in tweedie_real
+    return x + (sigma ** 2).unsqueeze(-1) * model.score_real(x, sigma)
+                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/HTJ/t2_wtE5/conf/code/score.py", line 412, in score_real
+    abar, sa, sb, eps = self._vp(x, sigma)
+                        ^^^^^^^^^^^^^^^^^^
+  File "/home/HTJ/t2_wtE5/conf/code/score.py", line 393, in _vp
+    return abar, sa, torch.sqrt(1.0 - abar), self.raw(sa.unsqueeze(-1) * x, torch.log(sigma))
+                                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/HTJ/t2_wtE5/conf/code/score.py", line 385, in raw
+    return self.net(x @ self.M.T, logsig) @ self.M
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/HTJ/miniforge3/envs/torch/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1783, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/HTJ/miniforge3/envs/torch/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1794, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/HTJ/t2_wtE5/conf/code/arch_dit.py", line 157, in forward
+    h = b(h, c)
+        ^^^^^^^
+  File "/home/HTJ/miniforge3/envs/torch/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1783, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/HTJ/miniforge3/envs/torch/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1794, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/HTJ/t2_wtE5/conf/code/arch_dit.py", line 107, in forward
+    x = x + g1.unsqueeze(-2) * self.attn(_modulate(self.n1(x), sh1, sc1))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/HTJ/miniforge3/envs/torch/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1783, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/HTJ/miniforge3/envs/torch/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1794, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/HTJ/t2_wtE5/conf/code/arch_dit.py", line 86, in forward
+    return self.proj(o.transpose(1, 2).reshape(B, T, W))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/HTJ/miniforge3/envs/torch/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1783, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/HTJ/miniforge3/envs/torch/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1794, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/HTJ/miniforge3/envs/torch/lib/python3.12/site-packages/torch/nn/modules/linear.py", line 134, in forward
+    return F.linear(input, self.weight, self.bias)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+KeyboardInterrupt

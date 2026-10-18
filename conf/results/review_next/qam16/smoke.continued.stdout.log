@@ -1,0 +1,22 @@
+SMOKE command: /home/HTJ/miniforge3/envs/torch/bin/python -B conf/code/runner.py run --testbed D2 --prior UMi28 --cell C2 --snr 9 --ntrain 160000 --stagec-ckpt /home/HTJ/t2_wtE5/conf/ckpt/d2sx_UMi28_N160000_a1_best.pt --pilot-arms --mod 16qam --skip0 2560 --n 4 --chunk 4 --tag U28B16e4 --arm M-ours-dscore-C-V1 M-ours-bstar R2-ours-G R5-genie V1-pilot
+[run] M-ours-dscore: ABSENT -- no GATE-PASSING checkpoint (04_SPEC §5 gates GA-GD): no gate-passing checkpoint for D2; recorded PASS rows: none (searched conf/results/gate_D2.txt and LADDER.md)
+[run] M-ours-dscore is NOT in this run.  The reason is written to every raw file as 'meta|dscore_status', so analysis.py reports its slot as BLOCKED / FAILED-VERIFICATION instead of quietly printing a table without it (01_RULES §6).
+[run] Stage C arms (10_SPEC §3b/§3c): M-ours-dscore-C-{V0,V1,V4} + the mandatory GMM control M-ours-bstar-scalar, from /home/HTJ/t2_wtE5/conf/ckpt/d2sx_UMi28_N160000_a1_best.pt (8x4) -- ON for ['C2'], ABSENT for []
+[run] Stage C checkpoint: sha256[:16]=6f3a1b9490864af1 epoch=379 best_epoch=379 role=best 8x4
+[run] Stage C gate record: NO GATE RECORD mentions d2sx_UMi28_N160000_a1_best.pt -- UNVERIFIED here.  (GA-GD are measurable on D1 only, 10_SPEC §5: a D2 re-train is qualified by its D1 sibling's gate row, which this string cannot prove.)
+[run] D2 1 points x n=4 -> 1 tasks on 1 workers (prior UMi28, cells ['C2'], chunk 4) -> /home/HTJ/t2_wtE5/conf/results/review_next/qam16/raw_U28B16e4_16qam_dev
+1/1 done    D2_C2_UMi28_Nr8_T16_Tp4_eig_snr9_skip2560_n4.npz  (204 s)  modulation=16qam K=90 arm-trial exceptions=0
+[run] finished in 3.4 min -> python runner.py analysis --testbed D2 --tag U28B16e4
+[diag E5] saved V1 query coverage: mod=16qam K=90 trials=2560..2560 -> /home/HTJ/t2_wtE5/conf/results/review_next/qam16/coverage_U28B16e4.npz
+PASS 16qam dev smoke U28B16e4 4 blocks x 5 arms x 16 iterations; coverage matches V1
+SMOKE command: /home/HTJ/miniforge3/envs/torch/bin/python -B conf/code/runner.py run --testbed D2 --prior S2 --cell C2 --snr 9 --ntrain 160000 --stagec-ckpt /home/HTJ/t2_wtE5/conf/ckpt/d2sx_N160000_a1.pt --pilot-arms --mod 16qam --skip0 2560 --n 4 --chunk 4 --tag B16e4k --arm M-ours-dscore-C-V1 M-ours-bstar R2-ours-G R5-genie V1-pilot
+[run] M-ours-dscore: ABSENT -- no GATE-PASSING checkpoint (04_SPEC §5 gates GA-GD): no gate-passing checkpoint for D2; recorded PASS rows: none (searched conf/results/gate_D2.txt and LADDER.md)
+[run] M-ours-dscore is NOT in this run.  The reason is written to every raw file as 'meta|dscore_status', so analysis.py reports its slot as BLOCKED / FAILED-VERIFICATION instead of quietly printing a table without it (01_RULES §6).
+[run] Stage C arms (10_SPEC §3b/§3c): M-ours-dscore-C-{V0,V1,V4} + the mandatory GMM control M-ours-bstar-scalar, from /home/HTJ/t2_wtE5/conf/ckpt/d2sx_N160000_a1.pt (8x4) -- ON for ['C2'], ABSENT for []
+[run] Stage C checkpoint: sha256[:16]=4443921ce8d5c4a1 epoch=1784 best_epoch=1764 role=legacy-last 8x4 | BEST_WEIGHTS_UNAVAILABLE: evaluated = last-epoch EMA, reported best_val belongs to best_epoch
+[run] Stage C gate record: NO GATE RECORD mentions d2sx_N160000_a1.pt -- UNVERIFIED here.  (GA-GD are measurable on D1 only, 10_SPEC §5: a D2 re-train is qualified by its D1 sibling's gate row, which this string cannot prove.)
+[run] D2 1 points x n=4 -> 1 tasks on 1 workers (prior S2, cells ['C2'], chunk 4) -> /home/HTJ/t2_wtE5/conf/results/review_next/qam16/raw_B16e4k_16qam_dev
+1/1 done    D2_C2_S2_Nr8_T16_Tp4_dft_snr9_skip2560_n4.npz  (15 s)  modulation=16qam K=90 arm-trial exceptions=0
+[run] finished in 0.3 min -> python runner.py analysis --testbed D2 --tag B16e4k
+[diag E5] saved V1 query coverage: mod=16qam K=90 trials=2560..2560 -> /home/HTJ/t2_wtE5/conf/results/review_next/qam16/coverage_B16e4k.npz
+PASS 16qam dev smoke B16e4k 4 blocks x 5 arms x 16 iterations; coverage matches V1

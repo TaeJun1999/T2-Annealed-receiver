@@ -1,0 +1,37 @@
+START 2026-10-17 11:21:00 CDT
+HEAD=64b2912f + uncommitted implementation; CUDA empty; affinity=[0, 1]; BLAS=1
+BLAS [{"filepath": "/home/HTJ/miniforge3/envs/torch/lib/python3.12/site-packages/numpy.libs/libscipy_openblas64_-61654e39.so", "symbol": "scipy_openblas_get_num_threads64_", "num_threads": 1}, {"filepath": "/home/HTJ/miniforge3/envs/torch/lib/python3.12/site-packages/scipy.libs/libscipy_openblas-5f890258.so", "symbol": "scipy_openblas_get_num_threads", "num_threads": 1}]
+PASS warm gamma_path / trial reset / cold HEAD byte comparison / unset trial: 72 cases
+PASS runner build + meta|sparse + separate prior objects: 8,3,16,3
+PASS runner build + meta|sparse + separate prior objects: 8,3,16,3,0
+PASS runner build + meta|sparse + separate prior objects: 8,3,16,3,1
+PASS unchanged --sparse-file resolver / cold metadata
+PASS invalid WARM/arity rejection
+COMMAND /home/HTJ/miniforge3/envs/torch/bin/python /home/HTJ/t2_wtE3/conf/code/runner.py run --testbed D2 --cell C2 --prior UMi28 --snr -3.0 --skip0 0 --n 40 --chunk 40 --ntrain 160000 --beta 0.7 --tin 5 --iters 16 --sparse-arms 8,3,16,3 --arm SBL-loop --tag SBL32REG4
+PASS 8,3,16,3 SBL-loop|blk_err: shape=(40, 16), dtype=int64, byte-identical
+PASS 8,3,16,3 SBL-loop|ber: shape=(40, 16), dtype=float64, byte-identical
+PASS 8,3,16,3 SBL-loop|nmse: shape=(40, 16), dtype=float64, byte-identical
+PASS 8,3,16,3 SBL-loop|tauL_gmean: shape=(40, 16), dtype=float64, byte-identical
+PASS 8,3,16,3 SBL-loop|alphaD: shape=(40, 16), dtype=float64, byte-identical
+PASS 8,3,16,3 SBL-loop|tauL_clip_frac: shape=(40, 16), dtype=float64, byte-identical
+PASS 8,3,16,3 SBL-loop|alphaD_clip: shape=(40, 16), dtype=float64, byte-identical
+PASS 8,3,16,3 meta|sparse byte-identical; SBL-loop exceptions absent
+COMMAND /home/HTJ/miniforge3/envs/torch/bin/python /home/HTJ/t2_wtE3/conf/code/runner.py run --testbed D2 --cell C2 --prior UMi28 --snr -3.0 --skip0 0 --n 40 --chunk 40 --ntrain 160000 --beta 0.7 --tin 5 --iters 16 --sparse-arms 8,3,16,3,0 --arm SBL-loop --tag SBL32REG5OFF
+PASS 8,3,16,3,0 SBL-loop|blk_err: shape=(40, 16), dtype=int64, byte-identical
+PASS 8,3,16,3,0 SBL-loop|ber: shape=(40, 16), dtype=float64, byte-identical
+PASS 8,3,16,3,0 SBL-loop|nmse: shape=(40, 16), dtype=float64, byte-identical
+PASS 8,3,16,3,0 SBL-loop|tauL_gmean: shape=(40, 16), dtype=float64, byte-identical
+PASS 8,3,16,3,0 SBL-loop|alphaD: shape=(40, 16), dtype=float64, byte-identical
+PASS 8,3,16,3,0 SBL-loop|tauL_clip_frac: shape=(40, 16), dtype=float64, byte-identical
+PASS 8,3,16,3,0 SBL-loop|alphaD_clip: shape=(40, 16), dtype=float64, byte-identical
+PASS 8,3,16,3,0 meta|sparse byte-identical; SBL-loop exceptions absent
+EXISTING ('C2', 'PASS', 0.0, 'exactly 0', 'two runs of every arm are bitwise identical')
+EXISTING ('C3', 'PASS', 0, '0 changed files', 'Demo/ locked files unchanged: t2_route_a.py=95a5408901ec125c, t2_trellis.py=31cd0ee9c68e972b, t2_gmm.py=d064e58c7510c769')
+EXISTING ('C4', 'PASS', 0, '1 distinct (H,Y) hash per trial', 'every arm sees the same channel/noise realisation inside a cell')
+EXISTING ('C5', 'PASS', 0, '0 missing/empty fields', 'explicit config dump complete for 8 arms')
+EXISTING ('M1', 'PASS', 0.0, 'exactly 0', "assembler M-ours-gmm32 == Demo/exp_0925 'Hgmm-K32' (b* = kron, legacy b* = Hgmm-kron)")
+EXISTING ('M1b', 'PASS', 0.0, 'exactly 0', "assembler M-ours-score == Demo/exp_0925 'Hscore-exact'")
+EXISTING ('M2', 'PASS', 0.0, 'exactly 0', "M-ours-G (Module H -> Gaussian) == R2-ours-G: the headline gap is Module H's alone")
+EXISTING ('M2b', 'PASS', 1.2832790385886028e-13, '<= 1e-10', 'K=1 mixture-EP site reduces to the Gaussian arm (ep_site path)')
+EXISTING ('M4', 'PASS', 0, '0 mismatching arms', 'config dump of 4 M-ours arms matches 03_SPEC §1.1')
+REGRESSION PASS

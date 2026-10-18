@@ -1,0 +1,307 @@
+diff --git a/conf/code/arms.py b/conf/code/arms.py
+index 6259cdd1..73a72de3 100644
+--- a/conf/code/arms.py
++++ b/conf/code/arms.py
+@@ -54,6 +54,21 @@ def route_a(Nr, Nt, T, Tp, sigma2, prior, code, Xp, moduleH, clip=None, **over):
+ # ----------------------------------------------------------------------------- GMM fits
+ D1_FITS = os.path.join(DEMO, "exp_0925_fits")            # reused verbatim (see DECISIONS)
+ D2_FITS = os.path.join(C.CONF, "results", "gmm_fits_D2")
++QPSK_ONLY_ARMS = {
++    "R3-bigamp": "BiG-AMP uses QPSK bit_llrs_from_pmf and two-bit symbol messages",
++    "R4-scvamp": "SC-VAMP uses CONST_QPSK and QPSK bit_llrs_from_pmf",
++    "R4-llr": "SC-VAMP LLR mode uses CONST_QPSK and two-bit messages",
++}
++
++
++def check_modulation_arms(mod, arm_sel):
++    """Fail before loading inputs or starting trials, including direct run_task callers."""
++    if C.MOD_BITS[mod] != 2:
++        bad = sorted(set(arm_sel or ()) & QPSK_ONLY_ARMS.keys())
++        if bad:
++            raise ValueError(f"--mod {mod}: unsupported --arm: " + "; ".join(
++                f"{k}: {QPSK_ONLY_ARMS[k]}" for k in bad))
++
+ D1_KS, D2_KS = (16, 32, 64), (16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192)   # 256/512: b* kept hitting the grid edge
+ # 4096/8192 added 2026-09-23 (NEXT_EXPERIMENTS_B32e4 §1, before any K=4096 fit exists): the §6l extension rule at
+ # N'=3.2e5.  load_fits() only loads files that exist, so every existing fits directory selects exactly as before.
+@@ -113,9 +128,10 @@ def build_baseline_arms(testbed, prior, Nr, Nt, T, Tp, sigma2, code, Xp, ntrain=
+     arms["R0-pilot"] = route_a(*a, Cs, code, Xp, "gaussian", mode="pilot_only")
+     arms["R1-turbo"] = route_a(*a, Cs, code, Xp, "gaussian", loo=False)
+     arms["R2-ours-G"] = route_a(*a, Cs, code, Xp, "gaussian")
+-    arms["R3-bigamp"] = R3BiGAMP(*a, code, Xp, beta=BETA, t_in=C.T_IN)
+-    arms["R4-scvamp"] = R4SCVAMP(*a, Cs, code, Xp, mode="onsager")
+-    arms["R4-llr"] = R4SCVAMP(*a, Cs, code, Xp, mode="llr")
++    if code.m == 2:
++        arms["R3-bigamp"] = R3BiGAMP(*a, code, Xp, beta=BETA, t_in=C.T_IN)
++        arms["R4-scvamp"] = R4SCVAMP(*a, Cs, code, Xp, mode="onsager")
++        arms["R4-llr"] = R4SCVAMP(*a, Cs, code, Xp, mode="llr")
+     arms["R5-genie"] = route_a(*a, Cs, code, Xp, "gaussian", mode="genie")
+     if testbed == "D1" and true_prior is not None:
+         arms["R6-exactEP"] = route_a(*a, true_prior.view("eta"), code, Xp, "gmm_site")
+diff --git a/conf/code/common.py b/conf/code/common.py
+index 6f638330..db30c684 100644
+--- a/conf/code/common.py
++++ b/conf/code/common.py
+@@ -44,6 +44,7 @@ from t2_gmm import angle_grid_prior, ensemble_sides, GMMPriorB, RouteAClip   # n
+ # ----------------------------------------------------------------------------- fixed configuration (06_SPEC_runner.md §2)
+ GENS, NU = ("133", "171"), 6                  # rate-1/2 convolutional, terminated, BCJR
+ M_QAM = 2                                     # QPSK
++MOD_BITS = {"qpsk": 2, "16qam": 4}            # explicit receiver configuration; leave legacy helpers QPSK
+ NT = 4                                        # transmit antennas (all cells)
+ N_ITER = 16                                   # outer iterations, ALL arms
+ RHO_C, KG = 0.7, 32                           # D1 grid prior: per-component correlation, grid size
+diff --git a/conf/code/diag_sigma_coverage.py b/conf/code/diag_sigma_coverage.py
+index cc8f7969..9dfbae22 100644
+--- a/conf/code/diag_sigma_coverage.py
++++ b/conf/code/diag_sigma_coverage.py
+@@ -178,7 +178,20 @@ def main():
+     ap.add_argument("--cell", default="C2")
+     ap.add_argument("--snr", type=float, nargs="+", default=[0, 3, 6, 15])
+     ap.add_argument("--n", type=int, default=8)
++    ap.add_argument("--mod", choices=list(C.MOD_BITS), default="qpsk")
++    ap.add_argument("--stagec-ckpt", help="explicit V1 checkpoint: opt in to development-only E5 coverage")
++    ap.add_argument("--prior", choices=list(C.PID), default="S2")
++    ap.add_argument("--tag", default="", help="existing frozen GMM fit routing tag")
++    ap.add_argument("--ntrain", type=int, default=160000)
++    ap.add_argument("--skip0", type=int, default=C.DEV_SKIP0)
++    ap.add_argument("--out", help="new output .npz for E5 coverage; never overwrites an existing file")
+     a = ap.parse_args()
++    if a.mod != "qpsk" or a.stagec_ckpt:
++        if not a.stagec_ckpt or not a.tag or not a.out:
++            ap.error("E5 coverage needs --stagec-ckpt, --tag (frozen fits), and --out")
++        if a.skip0 < C.DEV_SKIP0 or a.n < 1:
++            ap.error("E5 coverage requires development trials (--skip0 >= 2560, --n >= 1)")
++        return v1_coverage(a)
+     nu_g, sg_g = SG.load("D2")
+     s_lo, s_hi = float(sg_g.min()), float(sg_g.max())
+     res, pil, bstar, sp = run(a.cell, a.snr, a.n)
+@@ -193,5 +206,65 @@ def main():
+     return 0
+ 
+ 
++def v1_coverage(a):
++    """Frozen V1 queries only, with the runner's modulation, pilots, routing and RNG.
++
++    Legacy invocation above stays unchanged. No BLER is reported by this path.
++    Ratios use finite queries in each iteration as denominator; raw counts are saved.
++    """
++    import json
++    import torch
++    import runner as R
++    st = torch.load(a.stagec_ckpt, map_location="cpu", weights_only=False)
++    if st.get("testbed") != "D2" or st.get("prior") != a.prior:
++        raise ValueError("E5 coverage requires a D2 checkpoint trained on --prior")
++    _, grid = SG.load(st["testbed"], st.get("sigma_tag", ""))  # require the actual frozen grid
++    lo, hi = float(grid.min()), float(grid.max())
++    out = os.path.abspath(a.out)
++    if not out.endswith(".npz"):
++        raise ValueError("--out must end in .npz")
++    # Reserve both outputs before doing any receiver work; preserve all old artifacts.
++    with open(out, "xb") as raw, open(out[:-4] + ".json", "x") as summary:
++        R._init(a.tag)
++        values = {}
++        for snr in a.snr:
++            p = R.build_point("D2", a.cell, a.prior, snr, ntrain=a.ntrain,
++                              stagec_ckpt=a.stagec_ckpt, mod=a.mod)
++            rx = p["arms"]["M-ours-dscore-C-V1"]
++            if (rx.prior.s_lo, rx.prior.s_hi) != (lo, hi):
++                raise ValueError("V1 query range differs from the checkpoint's frozen training grid")
++            rng = C.trial_rng("D2", a.prior, p["Nr"], p["T"], p["Tp"], snr)
++            nu = []
++            for tr in range(a.skip0 + a.n):
++                H = p["gen"].sample(rng)
++                u = rng.integers(0, 2, p["code"].K)
++                perm = rng.permutation(p["code"].Ns)
++                _, Y = rx.transmit(u, perm, H, rng)
++                if tr >= a.skip0:
++                    nu.append(rx.run(Y, H, u, perm, C.N_ITER)["nu_q"])
++            values[f"{snr:g}|nu_q"] = nu = np.asarray(nu)
++            sg = np.sqrt(nu / 2)
++            fin = np.isfinite(sg)
++            below, above = (sg < lo) & fin, (sg > hi) & fin
++            counts = fin.sum(0)
++            frac = np.divide((below | above).sum(0), counts,
++                             out=np.full(C.N_ITER, np.nan), where=counts > 0)
++            for k, v in dict(sigma=sg, finite=counts, below=below.sum(0), above=above.sum(0),
++                             out_fraction=frac).items():
++                values[f"{snr:g}|{k}"] = v
++        meta = dict(modulation=a.mod, payload_bits=p["code"].K, protocol="E5-qam16-v1",
++                    checkpoint=a.stagec_ckpt, checkpoint_id=R.stagec_id_str(a.stagec_ckpt),
++                    fit_tag=a.tag, prior=a.prior, cell=a.cell, skip=a.skip0, n=a.n,
++                    sigma_tag=st.get("sigma_tag", ""), s_lo=lo, s_hi=hi,
++                    convention="sigma=sqrt(nu_q/2); per-iteration fraction among finite queries")
++        np.savez_compressed(raw, **values, **{f"meta|{k}": v for k, v in meta.items()})
++        detail = {k: np.asarray(v).tolist() for k, v in values.items()
++                  if k.endswith(("finite", "below", "above", "out_fraction"))}
++        json.dump(dict(meta=meta, iterations=detail), summary, indent=2)
++    print(f"[diag E5] saved V1 query coverage: mod={a.mod} K={p['code'].K} "
++          f"trials={a.skip0}..{a.skip0 + a.n - 1} -> {out}", flush=True)
++    return 0
++
++
+ if __name__ == "__main__":
+     sys.exit(main())
+diff --git a/conf/code/runner.py b/conf/code/runner.py
+index fe48be9c..0d0462f4 100644
+--- a/conf/code/runner.py
++++ b/conf/code/runner.py
+@@ -328,7 +328,7 @@ def _sparse_at(snr):
+ 
+ 
+ def build_point(testbed, cell, prior, snr, ntrain=C.N_TRAIN, beta=C.BETA, t_in=C.T_IN, ckpt=None,
+-                stagec_ckpt=None, mean_arms=False, p3_arms=False, pilot_arms=False, ald_file=None):
++                stagec_ckpt=None, mean_arms=False, p3_arms=False, pilot_arms=False, ald_file=None, mod="qpsk"):
+     """Every arm of `testbed` at one (cell, prior, SNR) point, all sharing one pilot matrix (06_SPEC §2).
+ 
+     D1: R0 R1 R2 R3 R4-scvamp R4-llr R5-genie R6-exactEP + M-ours-{gmm32,bstar,score,dscore}
+@@ -341,14 +341,14 @@ def build_point(testbed, cell, prior, snr, ntrain=C.N_TRAIN, beta=C.BETA, t_in=C
+     c = C.CELLS[cell]
+     Nr, Nt, T, Tp = c["Nr"], c["Nt"], c["T"], c["Tp"]
+     sigma2 = 10 ** (-snr / 10)
+-    code = C.QAMCode(C.GENS, C.NU, C.M_QAM, Nt * (T - Tp))
++    code = C.QAMCode(C.GENS, C.NU, C.MOD_BITS[mod], Nt * (T - Tp))
+     pil, Xp = C.make_pilots(testbed, prior, Nt, Tp, Nr)
+     gen = C.make_gen(testbed, prior, Nr, Nt)
+     true = getattr(gen, "prior", None) if testbed == "D1" else None     # exact prior: D1 only
+     a = (testbed, prior, Nr, Nt, T, Tp, sigma2, code, Xp)
+ 
+     arms, cfgs, Cs, fits = A.build_baseline_arms(*a, ntrain=ntrain, true_prior=true)
+-    if beta != C.BETA or t_in != C.T_IN:            # 01_RULES §4: beta 0.7 -> 0.5 -> 0.3 is BiG-AMP's knob
++    if code.m == 2 and (beta != C.BETA or t_in != C.T_IN):  # BiG-AMP's QPSK-only knobs
+         arms["R3-bigamp"] = A.R3BiGAMP(Nr, Nt, T, Tp, sigma2, code, Xp, beta=beta, t_in=t_in)
+         cfgs["R3-bigamp"] = dict(arms["R3-bigamp"].cfg_dump, arm="R3-bigamp")
+ 
+@@ -390,6 +390,9 @@ def build_point(testbed, cell, prior, snr, ntrain=C.N_TRAIN, beta=C.BETA, t_in=C
+     meta["dscore_status"] = why
+     meta["stagec_status"] = sc_why
+     meta["ntrain"] = float(ntrain)
++    if mod != "qpsk":
++        meta.update(modulation=mod, payload_bits=code.K, protocol="E5-qam16-v1")
++        meta["unsupported_arms"] = __import__("json").dumps(A.QPSK_ONLY_ARMS, sort_keys=True)
+     meta.update(fit_cost_meta(testbed, fits))
+     if stagec_ckpt:
+         meta["stagec_ckpt"] = str(stagec_ckpt)
+@@ -494,15 +497,26 @@ def run_task(task):
+     """One (point, skip, chunk).  The trials that a previous chunk consumed are REGENERATED from the same
+     common.trial_rng stream and then dropped, so chunks concatenate and every arm at a point sees the same
+     (H, u, perm, Y) -- paired inside a cell (01_RULES §5, test C4)."""
++    # Existing diagnostic callers pass the original 21-field QPSK tuple.
++    mod = task[21] if len(task) == 22 else "qpsk"
++    A.check_modulation_arms(mod, task[10])
+     (testbed, cell, prior, snr, skip, n, ntrain, beta, t_in, iters, arm_sel, ckpt, stagec_ckpt, mean_arms,
+-     p3_arms, extra_log, pilot_arms, ald_file, doppler, rotation, train_prior) = task
++     p3_arms, extra_log, pilot_arms, ald_file, doppler, rotation, train_prior) = task[:21]
+     c = C.CELLS[cell]
+     pil = C.make_pilots(testbed, prior, c["Nt"], c["Tp"], c["Nr"])[0]   # cheap; the build is not
+     out = raw_file(testbed, cell, prior, pil, snr, skip, n)
+     if os.path.exists(out):
++        if mod != "qpsk":
++            with np.load(out) as saved:
++                expected_k = c["Nt"] * (c["T"] - c["Tp"]) * C.MOD_BITS[mod] // 2 - C.NU
++                if (str(saved.get("meta|modulation", "qpsk")) != mod
++                        or int(saved.get("meta|payload_bits", -1)) != expected_k
++                        or str(saved.get("meta|protocol", "")) != "E5-qam16-v1"):
++                    raise ValueError(f"--mod {mod}: existing raw {out} has a different modulation/payload/protocol; "
++                                     "use a new --tag (existing raw is preserved)")
+         return f"exists  {os.path.basename(out)}"                      # FINISHED CHUNKS ARE SKIPPED
+     t0 = time.time()
+-    P = build_point(testbed, cell, prior, snr, ntrain, beta, t_in, ckpt, stagec_ckpt, mean_arms, p3_arms, pilot_arms, ald_file)
++    P = build_point(testbed, cell, prior, snr, ntrain, beta, t_in, ckpt, stagec_ckpt, mean_arms, p3_arms, pilot_arms, ald_file, mod)
+     P["meta"].update(RUN_META)                          # empty unless --worker-gb
+     if rotation is not None:                            # NEXT_EXPERIMENTS_ROT16e4: receive-array rotation (distribution drift)
+         P["gen"].rot = float(np.deg2rad(rotation))
+@@ -609,6 +623,9 @@ def run_task(task):
+             if k in logs]
+     bl = " ".join(f"{k}={np.nanmean([l['blk_err'][-1] for l in logs[k]]):.2f}" for k in show)
+     nf = sum(int(sum(v)) for v in failed.values())
++    if mod != "qpsk":
++        return (f"done    {os.path.basename(out)}  ({time.time() - t0:.0f} s)  modulation={mod} K={code.K}"
++                f" arm-trial exceptions={nf}")
+     return (f"done    {os.path.basename(out)}  ({time.time() - t0:.0f} s)  BLER{iters}: {bl}"
+             + (f"  [{nf} arm-trial exceptions recorded]" if nf else ""))
+ 
+@@ -654,7 +671,7 @@ def cmd_run(a):
+     if a.extra_log:
+         print(f"[run] --extra-log {' '.join(a.extra_log)}: extra per-iteration raw fields (NEXT_EXPERIMENTS_P3 §5)", flush=True)
+     tasks = [pt + (s, m, a.ntrain, a.beta, a.tin, a.iters, a.arm, a.ckpt, a.stagec_ckpt, a.mean_arms, a.p3_arms,
+-                   a.extra_log, a.pilot_arms, a.ald_file, a.doppler, a.rotation, a.train_prior)
++                   a.extra_log, a.pilot_arms, a.ald_file, a.doppler, a.rotation, a.train_prior, a.mod)
+              for pt in pts for s, m in chunk_plan(a.skip0, a.n, a.chunk)]
+     tasks = [(testbed,) + t for t in tasks]
+     tasks.sort(key=lambda t: (t[4], -C.CELLS[t[1]]["Nr"]))   # first chunks of every point early; 8x4 first
+@@ -692,7 +709,7 @@ def cmd_smoke(a):
+         snr = float((a.snr or [C.CELLS[cell]["snrs"][-1]])[0])
+         t0 = time.time()
+         P = build_point(testbed, cell, prior, snr, a.ntrain, a.beta, a.tin, a.ckpt, a.stagec_ckpt, a.mean_arms,
+-                        a.p3_arms, a.pilot_arms, a.ald_file)
++                        a.p3_arms, a.pilot_arms, a.ald_file, a.mod)
+         print(f"[smoke] {cell}: Stage C: {P['stagec']}", flush=True)
+         print(f"[smoke] {testbed} {cell} prior={prior} snr={snr:g} pilots={P['pil']} "
+               f"({P['Nr']}x{P['Nt']}, T={P['T']}, Tp={P['Tp']}): {len(P['arms'])} arms "
+@@ -702,12 +719,17 @@ def cmd_smoke(a):
+         else:
+             print(f"[smoke] {cell}: M-ours-dscore: {P['dscore']}", flush=True)
+         rng = C.trial_rng(testbed, prior, P["Nr"], P["T"], P["Tp"], snr)
+-        for tr in range(2):
++        skip = max(a.skip0, C.DEV_SKIP0) if a.mod != "qpsk" else 0
++        for tr in range(skip + 2):
+             H = P["gen"].sample(rng)
+             u = rng.integers(0, 2, P["code"].K)
+             perm = rng.permutation(P["code"].Ns)
+             X, Y = P["arms"]["R5-genie"].transmit(u, perm, H, rng)
++            if tr < skip:
++                continue
+             for k, rx in P["arms"].items():
++                if a.arm and k not in a.arm:
++                    continue
+                 t1 = time.time()
+                 try:
+                     o = rx.run(Y, H, u, perm, a.iters)
+@@ -719,7 +741,7 @@ def cmd_smoke(a):
+                     ref = sig
+                 elif sig != ref:
+                     bad.append(f"{cell}/{k}: shape signature {sig} != {ref}")
+-                if tr == 0:
++                if tr == skip:
+                     print(f"  {cell} {k:<14} {time.time() - t1:6.2f} s/run  "
+                           f"finite={bool(np.all(np.isfinite(o['nmse'])))}", flush=True)
+     print(f"[smoke] {'OK: no exceptions, identical key/shape signature across arms' if not bad else 'PROBLEMS:'}",
+@@ -1180,6 +1202,13 @@ def write_fit_table(prior, Nrs, ntrain):
+ def cmd_analysis(a):
+     """analysis.main(testbed, tag) reads conf/raw[_tag]/ and writes conf/results/tables_<testbed>[_tag].txt."""
+     import warnings
++    # The legacy table/goodput code assumes QPSK K. E5 only supplies simulator raw;
++    # refuse a tagged 16-QAM raw even when the caller omits --mod.
++    for path in glob.glob(os.path.join(d_raw(), f"{a.testbed}_*.npz")):
++        with np.load(path) as saved:
++            if str(saved.get("meta|modulation", "qpsk")) != "qpsk":
++                raise ValueError(f"legacy analysis assumes QPSK payload; {path} records "
++                                 "a different modulation. 16-QAM table generation is outside E5 simulator scope.")
+     analysis = _need("analysis", "it builds the 08_SPEC tables")
+     with warnings.catch_warnings():
+         # NARROW: only numpy's all-NaN aggregation warning, which the genie arm triggers by construction
+@@ -1212,6 +1241,8 @@ def main(argv=None):
+                     help="first trial index (review_next: the DEVELOPMENT set is skip 2560.. of the same stream; "
+                          "0 = the pre-registered test set). Non-zero requires --tag.")
+     ap.add_argument("--arm", nargs="+", default=None, help="subset of arms to run (requires --tag)")
++    ap.add_argument("--mod", choices=list(C.MOD_BITS), default="qpsk",
++                    help="receiver modulation (run/smoke); 16qam requires --tag; QPSK default unchanged")
+     ap.add_argument("--iters", type=int, default=C.N_ITER, help="outer iterations, 16 for every arm")
+     ap.add_argument("--beta", type=float, default=C.BETA, help="BiG-AMP damping (01_RULES §4: 0.7 -> 0.5 -> 0.3)")
+     ap.add_argument("--tin", type=int, default=C.T_IN, help="BiG-AMP inner iterations")
+@@ -1274,6 +1305,15 @@ def main(argv=None):
+     ap.add_argument("--force-regrid", action="store_true",
+                     help="sigma: deliberately replace the FROZEN conf/results/sigma_grid_<testbed>.npz")
+     a = ap.parse_args(argv)
++    try:
++        A.check_modulation_arms(a.mod, a.arm)
++    except ValueError as ex:
++        ap.error(str(ex))
++    if a.mod != "qpsk" and a.cmd not in ("run", "smoke"):
++        ap.error("--mod 16qam is supported by run/smoke only; legacy analysis assumes QPSK payload, "
++                 "and training/sigma-grid measurement stay frozen")
++    if a.mod != "qpsk" and not a.tag:
++        ap.error("--mod 16qam requires --tag to protect QPSK outputs")
+ 
+     a.device = a.device or ("cuda" if a.cmd in ("train", "gate") else "cpu")
+     if a.cmd in ("run", "tests", "smoke", "sigma", "fit", "analysis") and a.device != "cpu":

@@ -1,0 +1,25 @@
+ENV {"pid": 2332088, "affinity": [64, 65], "torch_threads": 1, "torch_interop_threads": 1, "CUDA_VISIBLE_DEVICES": "", "seed": 20260926, "mode": "B16e4k"}
+COMMAND: /home/HTJ/miniforge3/envs/torch/bin/python -B conf/code/runner.py smoke --testbed D2 --prior S2 --cell C2 --snr 9 --ntrain 160000 --stagec-ckpt /home/HTJ/t2_wtE5/conf/ckpt/d2sx_N160000_a1.pt --pilot-arms --mod 16qam --skip0 2560 --iters 16 --tag B16e4k --arm M-ours-dscore-C-V1 M-ours-bstar R2-ours-G R5-genie V1-pilot
+[smoke] C2: Stage C: built from explicit ckpt /home/HTJ/t2_wtE5/conf/ckpt/d2sx_N160000_a1.pt -- caller override, NOT verified against the gate record here (recorded PASS rows: none) | V1 (psd_project=True): built from explicit ckpt /home/HTJ/t2_wtE5/conf/ckpt/d2sx_N160000_a1.pt -- caller override, NOT verified against the gate record here (recorded PASS rows: none)
+[smoke] D2 C2 prior=S2 snr=9 pilots=dft (8x4, T=16, Tp=4): 13 arms ['M-ours-bstar', 'M-ours-bstar-scalar', 'M-ours-dscore-C-V0', 'M-ours-dscore-C-V1', 'M-ours-dscore-C-V4', 'M-ours-dscore-C-V4b', 'M-ours-gmm32', 'R0-pilot', 'R1-turbo', 'R2-ours-G', 'R5-genie', 'V1-pilot', 'bstar-pilot']  build 1.0 s
+[smoke] C2: M-ours-dscore: ABSENT -- no GATE-PASSING checkpoint (04_SPEC §5 gates GA-GD): no gate-passing checkpoint for D2; recorded PASS rows: none (searched conf/results/gate_D2.txt and LADDER.md)
+  C2 R2-ours-G        0.07 s/run  finite=True
+  C2 R5-genie         0.04 s/run  finite=False
+  C2 M-ours-bstar     1.25 s/run  finite=True
+  C2 M-ours-dscore-C-V1   4.13 s/run  finite=True
+  C2 V1-pilot         0.12 s/run  finite=True
+[smoke] OK: no exceptions, identical key/shape signature across arms
+COMMAND: /home/HTJ/miniforge3/envs/torch/bin/python -B conf/code/runner.py smoke --testbed D2 --prior S2 --cell C2 --snr 9 --ntrain 160000 --stagec-ckpt /home/HTJ/t2_wtE5/conf/ckpt/d2sx_N160000_a1.pt --pilot-arms --mod 16qam --skip0 2562 --iters 16 --tag B16e4k --arm M-ours-dscore-C-V1 M-ours-bstar R2-ours-G R5-genie V1-pilot
+[smoke] C2: Stage C: built from explicit ckpt /home/HTJ/t2_wtE5/conf/ckpt/d2sx_N160000_a1.pt -- caller override, NOT verified against the gate record here (recorded PASS rows: none) | V1 (psd_project=True): built from explicit ckpt /home/HTJ/t2_wtE5/conf/ckpt/d2sx_N160000_a1.pt -- caller override, NOT verified against the gate record here (recorded PASS rows: none)
+[smoke] D2 C2 prior=S2 snr=9 pilots=dft (8x4, T=16, Tp=4): 13 arms ['M-ours-bstar', 'M-ours-bstar-scalar', 'M-ours-dscore-C-V0', 'M-ours-dscore-C-V1', 'M-ours-dscore-C-V4', 'M-ours-dscore-C-V4b', 'M-ours-gmm32', 'R0-pilot', 'R1-turbo', 'R2-ours-G', 'R5-genie', 'V1-pilot', 'bstar-pilot']  build 3.2 s
+[smoke] C2: M-ours-dscore: ABSENT -- no GATE-PASSING checkpoint (04_SPEC §5 gates GA-GD): no gate-passing checkpoint for D2; recorded PASS rows: none (searched conf/results/gate_D2.txt and LADDER.md)
+  C2 R2-ours-G        0.07 s/run  finite=True
+  C2 R5-genie         0.04 s/run  finite=False
+  C2 M-ours-bstar     1.19 s/run  finite=True
+  C2 M-ours-dscore-C-V1   1.38 s/run  finite=True
+  C2 V1-pilot         0.13 s/run  finite=True
+[smoke] OK: no exceptions, identical key/shape signature across arms
+[smoke] PROBLEMS:
+  --arm ['V1-pilot'] not built at C2 9 dB: built from explicit ckpt /home/HTJ/t2_wtE5/conf/ckpt/d2sx_N160000_a1.pt -- caller override, NOT verified against the gate record here (recorded PASS rows: none) | V1 (psd_project=True): built from explicit ckpt /home/HTJ/t2_wtE5/conf/ckpt/d2sx_N160000_a1.pt -- caller override, NOT verified against the gate record here (recorded PASS rows: none)
+  no arms executed
+PASS 16qam B16e4k dev=2560..2563 arms=5 iterations=16 arrays=35 bit-identical; missing --pilot-arms exit=1

@@ -1,0 +1,42 @@
+REGRESSION command: /home/HTJ/miniforge3/envs/torch/bin/python -B conf/code/runner.py run --testbed D2 --prior S2 --cell C2 --snr -3.0 --ntrain 160000 --stagec-ckpt /home/HTJ/t2_wtE5/conf/ckpt/d2sx_N160000_a1.pt --tag B16e4k --n 40 --chunk 40 --skip0 0 --beta 0.7 --tin 5 --iters 16 --seed 20260926
+[run] M-ours-dscore: ABSENT -- no GATE-PASSING checkpoint (04_SPEC §5 gates GA-GD): no gate-passing checkpoint for D2; recorded PASS rows: none (searched conf/results/gate_D2.txt and LADDER.md)
+[run] M-ours-dscore is NOT in this run.  The reason is written to every raw file as 'meta|dscore_status', so analysis.py reports its slot as BLOCKED / FAILED-VERIFICATION instead of quietly printing a table without it (01_RULES §6).
+[run] Stage C arms (10_SPEC §3b/§3c): M-ours-dscore-C-{V0,V1,V4} + the mandatory GMM control M-ours-bstar-scalar, from /home/HTJ/t2_wtE5/conf/ckpt/d2sx_N160000_a1.pt (8x4) -- ON for ['C2'], ABSENT for []
+[run] Stage C checkpoint: sha256[:16]=4443921ce8d5c4a1 epoch=1784 best_epoch=1764 role=legacy-last 8x4 | BEST_WEIGHTS_UNAVAILABLE: evaluated = last-epoch EMA, reported best_val belongs to best_epoch
+[run] Stage C gate record: NO GATE RECORD mentions d2sx_N160000_a1.pt -- UNVERIFIED here.  (GA-GD are measurable on D1 only, 10_SPEC §5: a D2 re-train is qualified by its D1 sibling's gate row, which this string cannot prove.)
+[run] D2 1 points x n=40 -> 1 tasks on 1 workers (prior S2, cells ['C2'], chunk 40) -> /home/HTJ/t2_wtE5/conf/results/review_next/qam16/raw_B16e4k_omitted
+1/1 exists  D2_C2_S2_Nr8_T16_Tp4_dft_snr-3_skip0_n40.npz
+[run] finished in 0.0 min -> python runner.py analysis --testbed D2 --tag B16e4k
+PASS REGRESSION B16e4k omitted arrays= 98 mismatches= 0 current schema unchanged= True historical added= ['meta|stagec_ckpt_id']
+REGRESSION command: /home/HTJ/miniforge3/envs/torch/bin/python -B conf/code/runner.py run --testbed D2 --prior S2 --cell C2 --snr -3.0 --ntrain 160000 --stagec-ckpt /home/HTJ/t2_wtE5/conf/ckpt/d2sx_N160000_a1.pt --tag B16e4k --n 40 --chunk 40 --skip0 0 --beta 0.7 --tin 5 --iters 16 --seed 20260926 --mod qpsk
+[run] M-ours-dscore: ABSENT -- no GATE-PASSING checkpoint (04_SPEC §5 gates GA-GD): no gate-passing checkpoint for D2; recorded PASS rows: none (searched conf/results/gate_D2.txt and LADDER.md)
+[run] M-ours-dscore is NOT in this run.  The reason is written to every raw file as 'meta|dscore_status', so analysis.py reports its slot as BLOCKED / FAILED-VERIFICATION instead of quietly printing a table without it (01_RULES §6).
+[run] Stage C arms (10_SPEC §3b/§3c): M-ours-dscore-C-{V0,V1,V4} + the mandatory GMM control M-ours-bstar-scalar, from /home/HTJ/t2_wtE5/conf/ckpt/d2sx_N160000_a1.pt (8x4) -- ON for ['C2'], ABSENT for []
+[run] Stage C checkpoint: sha256[:16]=4443921ce8d5c4a1 epoch=1784 best_epoch=1764 role=legacy-last 8x4 | BEST_WEIGHTS_UNAVAILABLE: evaluated = last-epoch EMA, reported best_val belongs to best_epoch
+[run] Stage C gate record: NO GATE RECORD mentions d2sx_N160000_a1.pt -- UNVERIFIED here.  (GA-GD are measurable on D1 only, 10_SPEC §5: a D2 re-train is qualified by its D1 sibling's gate row, which this string cannot prove.)
+[run] D2 1 points x n=40 -> 1 tasks on 1 workers (prior S2, cells ['C2'], chunk 40) -> /home/HTJ/t2_wtE5/conf/results/review_next/qam16/raw_B16e4k_explicit
+1/1 done    D2_C2_S2_Nr8_T16_Tp4_dft_snr-3_skip0_n40.npz  (330 s)  BLER16: R2-ours-G=0.42 R3-bigamp=0.75 R4-scvamp=0.72 M-ours-gmm32=0.33 R5-genie=0.07
+[run] finished in 5.5 min -> python runner.py analysis --testbed D2 --tag B16e4k
+PASS REGRESSION B16e4k explicit arrays= 98 mismatches= 0 current schema unchanged= True historical added= ['meta|stagec_ckpt_id']
+PASS omitted vs explicit: every saved field bit-identical B16e4k
+REGRESSION command: /home/HTJ/miniforge3/envs/torch/bin/python -B conf/code/runner.py run --testbed D2 --prior UMi28 --cell C2 --snr 12.0 --ntrain 160000 --stagec-ckpt /home/HTJ/t2_wtE5/conf/ckpt/d2sx_UMi28_N160000_a1_best.pt --tag U28B16e4 --n 40 --chunk 40 --skip0 0 --beta 0.7 --tin 5 --iters 16 --seed 20260926
+[run] M-ours-dscore: ABSENT -- no GATE-PASSING checkpoint (04_SPEC §5 gates GA-GD): no gate-passing checkpoint for D2; recorded PASS rows: none (searched conf/results/gate_D2.txt and LADDER.md)
+[run] M-ours-dscore is NOT in this run.  The reason is written to every raw file as 'meta|dscore_status', so analysis.py reports its slot as BLOCKED / FAILED-VERIFICATION instead of quietly printing a table without it (01_RULES §6).
+[run] Stage C arms (10_SPEC §3b/§3c): M-ours-dscore-C-{V0,V1,V4} + the mandatory GMM control M-ours-bstar-scalar, from /home/HTJ/t2_wtE5/conf/ckpt/d2sx_UMi28_N160000_a1_best.pt (8x4) -- ON for ['C2'], ABSENT for []
+[run] Stage C checkpoint: sha256[:16]=6f3a1b9490864af1 epoch=379 best_epoch=379 role=best 8x4
+[run] Stage C gate record: NO GATE RECORD mentions d2sx_UMi28_N160000_a1_best.pt -- UNVERIFIED here.  (GA-GD are measurable on D1 only, 10_SPEC §5: a D2 re-train is qualified by its D1 sibling's gate row, which this string cannot prove.)
+[run] D2 1 points x n=40 -> 1 tasks on 1 workers (prior UMi28, cells ['C2'], chunk 40) -> /home/HTJ/t2_wtE5/conf/results/review_next/qam16/raw_U28B16e4_omitted
+1/1 done    D2_C2_UMi28_Nr8_T16_Tp4_eig_snr12_skip0_n40.npz  (1670 s)  BLER16: R2-ours-G=0.00 R3-bigamp=0.25 R4-scvamp=0.00 M-ours-gmm32=0.00 R5-genie=0.00
+[run] finished in 27.8 min -> python runner.py analysis --testbed D2 --tag U28B16e4
+PASS REGRESSION U28B16e4 omitted arrays= 98 mismatches= 0 current schema unchanged= True historical added= []
+REGRESSION command: /home/HTJ/miniforge3/envs/torch/bin/python -B conf/code/runner.py run --testbed D2 --prior UMi28 --cell C2 --snr 12.0 --ntrain 160000 --stagec-ckpt /home/HTJ/t2_wtE5/conf/ckpt/d2sx_UMi28_N160000_a1_best.pt --tag U28B16e4 --n 40 --chunk 40 --skip0 0 --beta 0.7 --tin 5 --iters 16 --seed 20260926 --mod qpsk
+[run] M-ours-dscore: ABSENT -- no GATE-PASSING checkpoint (04_SPEC §5 gates GA-GD): no gate-passing checkpoint for D2; recorded PASS rows: none (searched conf/results/gate_D2.txt and LADDER.md)
+[run] M-ours-dscore is NOT in this run.  The reason is written to every raw file as 'meta|dscore_status', so analysis.py reports its slot as BLOCKED / FAILED-VERIFICATION instead of quietly printing a table without it (01_RULES §6).
+[run] Stage C arms (10_SPEC §3b/§3c): M-ours-dscore-C-{V0,V1,V4} + the mandatory GMM control M-ours-bstar-scalar, from /home/HTJ/t2_wtE5/conf/ckpt/d2sx_UMi28_N160000_a1_best.pt (8x4) -- ON for ['C2'], ABSENT for []
+[run] Stage C checkpoint: sha256[:16]=6f3a1b9490864af1 epoch=379 best_epoch=379 role=best 8x4
+[run] Stage C gate record: NO GATE RECORD mentions d2sx_UMi28_N160000_a1_best.pt -- UNVERIFIED here.  (GA-GD are measurable on D1 only, 10_SPEC §5: a D2 re-train is qualified by its D1 sibling's gate row, which this string cannot prove.)
+[run] D2 1 points x n=40 -> 1 tasks on 1 workers (prior UMi28, cells ['C2'], chunk 40) -> /home/HTJ/t2_wtE5/conf/results/review_next/qam16/raw_U28B16e4_explicit
+1/1 done    D2_C2_UMi28_Nr8_T16_Tp4_eig_snr12_skip0_n40.npz  (2184 s)  BLER16: R2-ours-G=0.00 R3-bigamp=0.25 R4-scvamp=0.00 M-ours-gmm32=0.00 R5-genie=0.00
+[run] finished in 36.4 min -> python runner.py analysis --testbed D2 --tag U28B16e4
+PASS REGRESSION U28B16e4 explicit arrays= 98 mismatches= 0 current schema unchanged= True historical added= []
+PASS omitted vs explicit: every saved field bit-identical U28B16e4

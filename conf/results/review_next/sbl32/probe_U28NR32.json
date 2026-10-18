@@ -1,0 +1,479 @@
+{
+  "started": "2026-10-17 11:21:45 CDT",
+  "finished": "2026-10-17 11:52:20 CDT",
+  "command": [
+    "conf/code/sbl_probe.py"
+  ],
+  "git": "64b2912f",
+  "dirty": " M conf/code/arms.py\n M conf/code/runner.py\n?? conf/code/sbl_probe.py\n?? conf/logs/sbl32_checks.err\n?? conf/logs/sbl32_checks.out\n?? conf/logs/sbl32_checks2.err\n?? conf/logs/sbl32_checks2.out\n?? conf/logs/sbl32_final.err\n?? conf/logs/sbl32_final.out\n?? conf/raw_SBL32REG4/\n?? conf/raw_SBL32REG5OFF/\n?? conf/raw_SPU28/\n?? conf/results/gmm_fits_D2_SBL32REG4/\n?? conf/results/gmm_fits_D2_SBL32REG5OFF/\n?? conf/results/gmm_fits_D2_SPU28/\n?? conf/results/gmm_fits_D2_U28NR32GCAPchk/\n?? conf/results/review_next/sbl32/\n",
+  "input_sha256": {
+    "/home/HTJ/t2_wtE3/conf/code/sbl_probe.py": "e3c090a23d07550b4633caba565cc708c98061e0f54816084d1d5ff53c61ff67",
+    "/home/HTJ/t2_wtE3/conf/code/arms.py": "09ab0dfbef884ac78569d5e165e8ee8e89158872cdf488661489cbf30bf03138",
+    "/home/HTJ/t2_wtE3/conf/code/common.py": "fa976185ec5e8b20179c0e7ae7c633a425f8584f21f8237f5b9c616eb7c32020",
+    "/home/HTJ/t2_wtE3/conf/results/gmm_fits_D2_U28NR32GCAPchk/fit_UMi28_Nr32_fullK32_n160000.npz": "d572e0ac63013a96042a148aa1fceaa6662710ddfdbcfb4a4dd051271704e215",
+    "/home/HTJ/t2_wtE3/Demo/t2_route_a.py": "95a5408901ec125c29403582b5bc4bb3f637d2a8bbe2b493c58669982ae9ca71",
+    "/home/HTJ/t2_wtE3/Demo/t2_trellis.py": "31cd0ee9c68e972b437a59576e979eb88e430df16c2328b9668e0a9112a0032f",
+    "/home/HTJ/t2_wtE3/Demo/t2_gmm.py": "d064e58c7510c7697e132349beda6df722482f3c6ea5eabdb9169b79633e9a13"
+  },
+  "seed": [
+    20260926,
+    2,
+    8,
+    32,
+    16,
+    4,
+    100
+  ],
+  "testbed": "D2",
+  "prior": "UMi28",
+  "cell": "C9",
+  "snr": 0,
+  "trial": 2560,
+  "n": 1,
+  "iterations": 16,
+  "rows": [
+    {
+      "rho": 4,
+      "n_em": 3,
+      "atoms": 2048,
+      "warm": false,
+      "gamma_step_sec": 0.022855154937133193,
+      "gamma_step_samples_sec": [
+        2.062941293930635,
+        0.021869864081963897,
+        0.022855154937133193,
+        0.01926433597691357,
+        0.023720182944089174
+      ],
+      "gamma_step_scope": "gamma(n_em=1), includes flat initialization; first receiver G,b",
+      "block_sec": 4.764808387961239,
+      "ep_site_calls": 16,
+      "max_rss_kib": 902996,
+      "projected_hours": {
+        "96": 0.2470641386350272,
+        "119": 0.19931224629380342
+      },
+      "pilot": "eig",
+      "G_shape": [
+        128,
+        128
+      ],
+      "b_shape": [
+        128
+      ],
+      "runtime": {
+        "affinity": [
+          0,
+          1
+        ],
+        "threadpools": [
+          {
+            "filepath": "/home/HTJ/miniforge3/envs/torch/lib/python3.12/site-packages/numpy.libs/libscipy_openblas64_-61654e39.so",
+            "symbol": "scipy_openblas_get_num_threads64_",
+            "num_threads": 1
+          },
+          {
+            "filepath": "/home/HTJ/miniforge3/envs/torch/lib/python3.12/site-packages/scipy.libs/libscipy_openblas-5f890258.so",
+            "symbol": "scipy_openblas_get_num_threads",
+            "num_threads": 1
+          }
+        ],
+        "cuda_visible_devices": ""
+      }
+    },
+    {
+      "rho": 4,
+      "n_em": 10,
+      "atoms": 2048,
+      "warm": false,
+      "gamma_step_sec": 0.016459872014820576,
+      "gamma_step_samples_sec": [
+        0.0201630350202322,
+        0.01897363318130374,
+        0.016459872014820576,
+        0.014170703012496233,
+        0.01451432192698121
+      ],
+      "gamma_step_scope": "gamma(n_em=1), includes flat initialization; first receiver G,b",
+      "block_sec": 12.3981311051175,
+      "ep_site_calls": 16,
+      "max_rss_kib": 899504,
+      "projected_hours": {
+        "96": 0.6428660573023889,
+        "119": 0.5186146344624314
+      },
+      "pilot": "eig",
+      "G_shape": [
+        128,
+        128
+      ],
+      "b_shape": [
+        128
+      ],
+      "runtime": {
+        "affinity": [
+          0,
+          1
+        ],
+        "threadpools": [
+          {
+            "filepath": "/home/HTJ/miniforge3/envs/torch/lib/python3.12/site-packages/numpy.libs/libscipy_openblas64_-61654e39.so",
+            "symbol": "scipy_openblas_get_num_threads64_",
+            "num_threads": 1
+          },
+          {
+            "filepath": "/home/HTJ/miniforge3/envs/torch/lib/python3.12/site-packages/scipy.libs/libscipy_openblas-5f890258.so",
+            "symbol": "scipy_openblas_get_num_threads",
+            "num_threads": 1
+          }
+        ],
+        "cuda_visible_devices": ""
+      }
+    },
+    {
+      "rho": 4,
+      "n_em": 25,
+      "atoms": 2048,
+      "warm": false,
+      "gamma_step_sec": 0.026555996853858232,
+      "gamma_step_samples_sec": [
+        0.022872166009619832,
+        0.026555996853858232,
+        0.027107517002150416,
+        0.02354105096310377,
+        0.6293868599459529
+      ],
+      "gamma_step_scope": "gamma(n_em=1), includes flat initialization; first receiver G,b",
+      "block_sec": 39.05061771394685,
+      "ep_site_calls": 16,
+      "max_rss_kib": 899080,
+      "projected_hours": {
+        "96": 2.0248468444268735,
+        "119": 1.633489891302352
+      },
+      "pilot": "eig",
+      "G_shape": [
+        128,
+        128
+      ],
+      "b_shape": [
+        128
+      ],
+      "runtime": {
+        "affinity": [
+          0,
+          1
+        ],
+        "threadpools": [
+          {
+            "filepath": "/home/HTJ/miniforge3/envs/torch/lib/python3.12/site-packages/numpy.libs/libscipy_openblas64_-61654e39.so",
+            "symbol": "scipy_openblas_get_num_threads64_",
+            "num_threads": 1
+          },
+          {
+            "filepath": "/home/HTJ/miniforge3/envs/torch/lib/python3.12/site-packages/scipy.libs/libscipy_openblas-5f890258.so",
+            "symbol": "scipy_openblas_get_num_threads",
+            "num_threads": 1
+          }
+        ],
+        "cuda_visible_devices": ""
+      }
+    },
+    {
+      "rho": 8,
+      "n_em": 3,
+      "atoms": 8192,
+      "warm": false,
+      "gamma_step_sec": 0.06990240910090506,
+      "gamma_step_samples_sec": [
+        0.08210093504749238,
+        0.06738020898774266,
+        0.06432579201646149,
+        0.06990240910090506,
+        0.07187713286839426
+      ],
+      "gamma_step_scope": "gamma(n_em=1), includes flat initialization; first receiver G,b",
+      "block_sec": 33.897046794882044,
+      "ep_site_calls": 16,
+      "max_rss_kib": 970612,
+      "projected_hours": {
+        "96": 1.7576246486235134,
+        "119": 1.4179156829231705
+      },
+      "pilot": "eig",
+      "G_shape": [
+        128,
+        128
+      ],
+      "b_shape": [
+        128
+      ],
+      "runtime": {
+        "affinity": [
+          0,
+          1
+        ],
+        "threadpools": [
+          {
+            "filepath": "/home/HTJ/miniforge3/envs/torch/lib/python3.12/site-packages/numpy.libs/libscipy_openblas64_-61654e39.so",
+            "symbol": "scipy_openblas_get_num_threads64_",
+            "num_threads": 1
+          },
+          {
+            "filepath": "/home/HTJ/miniforge3/envs/torch/lib/python3.12/site-packages/scipy.libs/libscipy_openblas-5f890258.so",
+            "symbol": "scipy_openblas_get_num_threads",
+            "num_threads": 1
+          }
+        ],
+        "cuda_visible_devices": ""
+      }
+    },
+    {
+      "rho": 8,
+      "n_em": 10,
+      "atoms": 8192,
+      "warm": false,
+      "gamma_step_sec": 0.08612758107483387,
+      "gamma_step_samples_sec": [
+        0.8195806790608913,
+        0.974271991988644,
+        0.08612758107483387,
+        0.07834383402951062,
+        0.0669079408980906
+      ],
+      "gamma_step_scope": "gamma(n_em=1), includes flat initialization; first receiver G,b",
+      "block_sec": 43.33816917287186,
+      "ep_site_calls": 16,
+      "max_rss_kib": 971232,
+      "projected_hours": {
+        "96": 2.2471643274822446,
+        "119": 1.8128384490613065
+      },
+      "pilot": "eig",
+      "G_shape": [
+        128,
+        128
+      ],
+      "b_shape": [
+        128
+      ],
+      "runtime": {
+        "affinity": [
+          0,
+          1
+        ],
+        "threadpools": [
+          {
+            "filepath": "/home/HTJ/miniforge3/envs/torch/lib/python3.12/site-packages/numpy.libs/libscipy_openblas64_-61654e39.so",
+            "symbol": "scipy_openblas_get_num_threads64_",
+            "num_threads": 1
+          },
+          {
+            "filepath": "/home/HTJ/miniforge3/envs/torch/lib/python3.12/site-packages/scipy.libs/libscipy_openblas-5f890258.so",
+            "symbol": "scipy_openblas_get_num_threads",
+            "num_threads": 1
+          }
+        ],
+        "cuda_visible_devices": ""
+      }
+    },
+    {
+      "rho": 8,
+      "n_em": 25,
+      "atoms": 8192,
+      "warm": false,
+      "gamma_step_sec": 0.07709475001320243,
+      "gamma_step_samples_sec": [
+        0.06065160781145096,
+        0.07709475001320243,
+        0.08533825003542006,
+        0.060329349944368005,
+        0.07831474300473928
+      ],
+      "gamma_step_scope": "gamma(n_em=1), includes flat initialization; first receiver G,b",
+      "block_sec": 122.00332386605442,
+      "ep_site_calls": 16,
+      "max_rss_kib": 969780,
+      "projected_hours": {
+        "96": 6.326098274536155,
+        "119": 5.1034070113905114
+      },
+      "pilot": "eig",
+      "G_shape": [
+        128,
+        128
+      ],
+      "b_shape": [
+        128
+      ],
+      "runtime": {
+        "affinity": [
+          0,
+          1
+        ],
+        "threadpools": [
+          {
+            "filepath": "/home/HTJ/miniforge3/envs/torch/lib/python3.12/site-packages/numpy.libs/libscipy_openblas64_-61654e39.so",
+            "symbol": "scipy_openblas_get_num_threads64_",
+            "num_threads": 1
+          },
+          {
+            "filepath": "/home/HTJ/miniforge3/envs/torch/lib/python3.12/site-packages/scipy.libs/libscipy_openblas-5f890258.so",
+            "symbol": "scipy_openblas_get_num_threads",
+            "num_threads": 1
+          }
+        ],
+        "cuda_visible_devices": ""
+      }
+    },
+    {
+      "rho": 16,
+      "n_em": 3,
+      "atoms": 32768,
+      "warm": false,
+      "gamma_step_sec": 1.4303036560304463,
+      "gamma_step_samples_sec": [
+        3.3202460820320994,
+        0.320717949885875,
+        2.084339624037966,
+        1.4303036560304463,
+        0.29703857097774744
+      ],
+      "gamma_step_scope": "gamma(n_em=1), includes flat initialization; first receiver G,b",
+      "block_sec": 124.0651880169753,
+      "ep_site_calls": 16,
+      "max_rss_kib": 1204176,
+      "projected_hours": {
+        "96": 6.433009749028349,
+        "119": 5.189654923585895
+      },
+      "pilot": "eig",
+      "G_shape": [
+        128,
+        128
+      ],
+      "b_shape": [
+        128
+      ],
+      "runtime": {
+        "affinity": [
+          0,
+          1
+        ],
+        "threadpools": [
+          {
+            "filepath": "/home/HTJ/miniforge3/envs/torch/lib/python3.12/site-packages/numpy.libs/libscipy_openblas64_-61654e39.so",
+            "symbol": "scipy_openblas_get_num_threads64_",
+            "num_threads": 1
+          },
+          {
+            "filepath": "/home/HTJ/miniforge3/envs/torch/lib/python3.12/site-packages/scipy.libs/libscipy_openblas-5f890258.so",
+            "symbol": "scipy_openblas_get_num_threads",
+            "num_threads": 1
+          }
+        ],
+        "cuda_visible_devices": ""
+      }
+    },
+    {
+      "rho": 16,
+      "n_em": 10,
+      "atoms": 32768,
+      "warm": false,
+      "gamma_step_sec": 0.32423343579284847,
+      "gamma_step_samples_sec": [
+        0.31883076694794,
+        3.698306326987222,
+        0.32423343579284847,
+        0.3133449030574411,
+        5.5958943699952215
+      ],
+      "gamma_step_scope": "gamma(n_em=1), includes flat initialization; first receiver G,b",
+      "block_sec": 295.33864390617236,
+      "ep_site_calls": 16,
+      "max_rss_kib": 1202184,
+      "projected_hours": {
+        "96": 15.313855609949679,
+        "119": 12.354034777774531
+      },
+      "pilot": "eig",
+      "G_shape": [
+        128,
+        128
+      ],
+      "b_shape": [
+        128
+      ],
+      "runtime": {
+        "affinity": [
+          0,
+          1
+        ],
+        "threadpools": [
+          {
+            "filepath": "/home/HTJ/miniforge3/envs/torch/lib/python3.12/site-packages/numpy.libs/libscipy_openblas64_-61654e39.so",
+            "symbol": "scipy_openblas_get_num_threads64_",
+            "num_threads": 1
+          },
+          {
+            "filepath": "/home/HTJ/miniforge3/envs/torch/lib/python3.12/site-packages/scipy.libs/libscipy_openblas-5f890258.so",
+            "symbol": "scipy_openblas_get_num_threads",
+            "num_threads": 1
+          }
+        ],
+        "cuda_visible_devices": ""
+      }
+    },
+    {
+      "rho": 16,
+      "n_em": 25,
+      "atoms": 32768,
+      "warm": false,
+      "gamma_step_sec": 2.973147001117468,
+      "gamma_step_samples_sec": [
+        7.059961225138977,
+        0.3476794420275837,
+        2.973147001117468,
+        4.396097800927237,
+        0.34856080589815974
+      ],
+      "gamma_step_scope": "gamma(n_em=1), includes flat initialization; first receiver G,b",
+      "block_sec": 774.1837877279613,
+      "ep_site_calls": 16,
+      "max_rss_kib": 1205252,
+      "projected_hours": {
+        "96": 40.14286306737577,
+        "119": 32.38415844090819
+      },
+      "pilot": "eig",
+      "G_shape": [
+        128,
+        128
+      ],
+      "b_shape": [
+        128
+      ],
+      "runtime": {
+        "affinity": [
+          0,
+          1
+        ],
+        "threadpools": [
+          {
+            "filepath": "/home/HTJ/miniforge3/envs/torch/lib/python3.12/site-packages/numpy.libs/libscipy_openblas64_-61654e39.so",
+            "symbol": "scipy_openblas_get_num_threads64_",
+            "num_threads": 1
+          },
+          {
+            "filepath": "/home/HTJ/miniforge3/envs/torch/lib/python3.12/site-packages/scipy.libs/libscipy_openblas-5f890258.so",
+            "symbol": "scipy_openblas_get_num_threads",
+            "num_threads": 1
+          }
+        ],
+        "cuda_visible_devices": ""
+      }
+    }
+  ],
+  "lock_id_Demo": "3b5c0a375509",
+  "limitations": "One development packet per row, no decoding outcomes retained. Timing under concurrent server load. Projection = block_sec * 17920 / W, ideal linear scaling, excludes setup/stream regeneration/IO; no parallel scaling or 7-SNR timing measurement. Gamma timing includes flat initialization. RSS is fresh-process high-water including block, five gamma probes and imports."
+}

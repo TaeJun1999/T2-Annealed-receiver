@@ -1,0 +1,240 @@
+{
+  "reference": "/home/HTJ/t2_wtE3/conf/raw_SPU28/D2_C2_UMi28_Nr8_T16_Tp4_eig_snr-3_skip0_n40.npz",
+  "meta": {
+    "meta|bstar": "kron",
+    "meta|kron_K": "4096",
+    "meta|ll_val|gmm16": "-18.61260160444689",
+    "meta|ll_val|gmm32": "-12.02920117745571",
+    "meta|ll_val|gmm64": "-7.2052623913360065",
+    "meta|ll_val|gmm128": "-3.5057879255739306",
+    "meta|ll_val|gmm256": "-1.6999635217327989",
+    "meta|ll_val|gmm512": "-1.3312937608457942",
+    "meta|ll_val|kron": "5.797910431000217",
+    "meta|dscore_status": "ABSENT -- no GATE-PASSING checkpoint (04_SPEC \u00a75 gates GA-GD): no gate-passing checkpoint for D2; recorded PASS rows: none (searched conf/results/gate_D2.txt and LADDER.md)",
+    "meta|stagec_status": "not requested (--stagec-ckpt not given) -- arm set is the pre-registered one",
+    "meta|ntrain": "160000.0",
+    "meta|em_sec": "9133.61854147911",
+    "meta|em_sec|M-ours-bstar": "9133.61854147911",
+    "meta|em_sec_note": "sum of 'sec' over 15 fit files in /home/HTJ/t2/conf/results/gmm_fits_D2_SPU28 (every EM run: 15 (family, K) combinations x kappa grid x restarts)",
+    "meta|em_sec|M-ours-gmm32": "181.48422360420227",
+    "meta|sparse": "{\"L\": 3, \"n_em\": 3, \"rho_omp\": 16, \"rho_sbl\": 8}",
+    "meta|budget_note": "training budget (N_train, channel samples) of EVERY arm -- 10_SPEC A3.  The GMM arms and the learned arms are only equal-budget when their N_train below are EQUAL; read the numbers, not the arm names.  The GMM re-fit at N'=1.6e5 may not have finished when this table was written.",
+    "meta|budget|R0-pilot": "N_train=160000 -- the ONE channel set (GMM EM fit / its sample covariance Chat)",
+    "meta|budget|R1-turbo": "N_train=160000 -- the ONE channel set (GMM EM fit / its sample covariance Chat)",
+    "meta|budget|R2-ours-G": "N_train=160000 -- the ONE channel set (GMM EM fit / its sample covariance Chat)",
+    "meta|budget|R3-bigamp": "N_train=0 -- i.i.d. CN(0,1/Nr) prior, fits nothing",
+    "meta|budget|R4-scvamp": "N_train=160000 -- the ONE channel set (GMM EM fit / its sample covariance Chat)",
+    "meta|budget|R4-llr": "N_train=160000 -- the ONE channel set (GMM EM fit / its sample covariance Chat)",
+    "meta|budget|R5-genie": "N_train=n/a -- genie: the true H is given",
+    "meta|budget|M-ours-gmm32": "N_train=160000 -- the ONE channel set (GMM EM fit / its sample covariance Chat)",
+    "meta|budget|M-ours-bstar": "N_train=160000 -- the ONE channel set (GMM EM fit / its sample covariance Chat)",
+    "meta|budget|SBL-loop": "N_train=160000 -- unclassified arm, quoting the point's channel-set size",
+    "meta|budget|SBL-pilot": "N_train=160000 -- unclassified arm, quoting the point's channel-set size",
+    "meta|budget|OMP-pilot": "N_train=160000 -- unclassified arm, quoting the point's channel-set size",
+    "run|beta": "0.7",
+    "run|t_in": "5",
+    "run|seed": "20260926",
+    "run|iters": "16",
+    "run|n": "40",
+    "run|skip": "0",
+    "run|snr": "-3.0",
+    "run|dtype": "complex128/float64",
+    "run|git": "02dafa1c"
+  },
+  "commands": [
+    [
+      "/home/HTJ/miniforge3/envs/torch/bin/python",
+      "/home/HTJ/t2_wtE3/conf/code/runner.py",
+      "run",
+      "--testbed",
+      "D2",
+      "--cell",
+      "C2",
+      "--prior",
+      "UMi28",
+      "--snr",
+      "-3.0",
+      "--skip0",
+      "0",
+      "--n",
+      "40",
+      "--chunk",
+      "40",
+      "--ntrain",
+      "160000",
+      "--beta",
+      "0.7",
+      "--tin",
+      "5",
+      "--iters",
+      "16",
+      "--sparse-arms",
+      "8,3,16,3",
+      "--arm",
+      "SBL-loop",
+      "--tag",
+      "SBL32REG4"
+    ],
+    [
+      "/home/HTJ/miniforge3/envs/torch/bin/python",
+      "/home/HTJ/t2_wtE3/conf/code/runner.py",
+      "run",
+      "--testbed",
+      "D2",
+      "--cell",
+      "C2",
+      "--prior",
+      "UMi28",
+      "--snr",
+      "-3.0",
+      "--skip0",
+      "0",
+      "--n",
+      "40",
+      "--chunk",
+      "40",
+      "--ntrain",
+      "160000",
+      "--beta",
+      "0.7",
+      "--tin",
+      "5",
+      "--iters",
+      "16",
+      "--sparse-arms",
+      "8,3,16,3,0",
+      "--arm",
+      "SBL-loop",
+      "--tag",
+      "SBL32REG5OFF"
+    ]
+  ],
+  "comparisons": [
+    {
+      "spec": "8,3,16,3",
+      "key": "SBL-loop|blk_err",
+      "shape": [
+        40,
+        16
+      ],
+      "byte_identical": true
+    },
+    {
+      "spec": "8,3,16,3",
+      "key": "SBL-loop|ber",
+      "shape": [
+        40,
+        16
+      ],
+      "byte_identical": true
+    },
+    {
+      "spec": "8,3,16,3",
+      "key": "SBL-loop|nmse",
+      "shape": [
+        40,
+        16
+      ],
+      "byte_identical": true
+    },
+    {
+      "spec": "8,3,16,3",
+      "key": "SBL-loop|tauL_gmean",
+      "shape": [
+        40,
+        16
+      ],
+      "byte_identical": true
+    },
+    {
+      "spec": "8,3,16,3",
+      "key": "SBL-loop|alphaD",
+      "shape": [
+        40,
+        16
+      ],
+      "byte_identical": true
+    },
+    {
+      "spec": "8,3,16,3",
+      "key": "SBL-loop|tauL_clip_frac",
+      "shape": [
+        40,
+        16
+      ],
+      "byte_identical": true
+    },
+    {
+      "spec": "8,3,16,3",
+      "key": "SBL-loop|alphaD_clip",
+      "shape": [
+        40,
+        16
+      ],
+      "byte_identical": true
+    },
+    {
+      "spec": "8,3,16,3,0",
+      "key": "SBL-loop|blk_err",
+      "shape": [
+        40,
+        16
+      ],
+      "byte_identical": true
+    },
+    {
+      "spec": "8,3,16,3,0",
+      "key": "SBL-loop|ber",
+      "shape": [
+        40,
+        16
+      ],
+      "byte_identical": true
+    },
+    {
+      "spec": "8,3,16,3,0",
+      "key": "SBL-loop|nmse",
+      "shape": [
+        40,
+        16
+      ],
+      "byte_identical": true
+    },
+    {
+      "spec": "8,3,16,3,0",
+      "key": "SBL-loop|tauL_gmean",
+      "shape": [
+        40,
+        16
+      ],
+      "byte_identical": true
+    },
+    {
+      "spec": "8,3,16,3,0",
+      "key": "SBL-loop|alphaD",
+      "shape": [
+        40,
+        16
+      ],
+      "byte_identical": true
+    },
+    {
+      "spec": "8,3,16,3,0",
+      "key": "SBL-loop|tauL_clip_frac",
+      "shape": [
+        40,
+        16
+      ],
+      "byte_identical": true
+    },
+    {
+      "spec": "8,3,16,3,0",
+      "key": "SBL-loop|alphaD_clip",
+      "shape": [
+        40,
+        16
+      ],
+      "byte_identical": true
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+ENV {"pid": 2331407, "affinity": [64, 65], "torch_threads": 1, "torch_interop_threads": 1, "CUDA_VISIBLE_DEVICES": "", "seed": 20260926, "mode": "defects"}
+PASS defect1 omitted_21_fields --mod qpsk: existing raw /home/HTJ/t2_wtE5/conf/results/review_next/qam16/raw_B16e4k_16qam_dev/D2_C2_S2_Nr8_T16_Tp4_dft_snr9_skip2560_n4.npz has a different modulation/payload/protocol (modulation: saved='16qam', requested='qpsk'; payload_bits: saved=90, requested=42; protocol: saved='E5-qam16-v1', requested=''); use a new --tag (existing raw is preserved)
+PASS defect1 explicit_qpsk_22_fields --mod qpsk: existing raw /home/HTJ/t2_wtE5/conf/results/review_next/qam16/raw_B16e4k_16qam_dev/D2_C2_S2_Nr8_T16_Tp4_dft_snr9_skip2560_n4.npz has a different modulation/payload/protocol (modulation: saved='16qam', requested='qpsk'; payload_bits: saved=90, requested=42; protocol: saved='E5-qam16-v1', requested=''); use a new --tag (existing raw is preserved)
+PASS resume metadata matrix: 12 cases; all files preserved
+[smoke] C2: Stage C: built from explicit ckpt /home/HTJ/t2_wtE5/conf/ckpt/d2sx_N160000_a1.pt -- caller override, NOT verified against the gate record here (recorded PASS rows: none) | V1 (psd_project=True): built from explicit ckpt /home/HTJ/t2_wtE5/conf/ckpt/d2sx_N160000_a1.pt -- caller override, NOT verified against the gate record here (recorded PASS rows: none)
+[smoke] D2 C2 prior=S2 snr=9 pilots=dft (8x4, T=16, Tp=4): 11 arms ['M-ours-bstar', 'M-ours-bstar-scalar', 'M-ours-dscore-C-V0', 'M-ours-dscore-C-V1', 'M-ours-dscore-C-V4', 'M-ours-dscore-C-V4b', 'M-ours-gmm32', 'R0-pilot', 'R1-turbo', 'R2-ours-G', 'R5-genie']  build 0.0 s
+[smoke] C2: M-ours-dscore: ABSENT -- no GATE-PASSING checkpoint (04_SPEC §5 gates GA-GD): no gate-passing checkpoint for D2; recorded PASS rows: none (searched conf/results/gate_D2.txt and LADDER.md)
+[smoke] OK: no exceptions, identical key/shape signature across arms
+[smoke] PROBLEMS:
+  --arm ['V1-pilot'] not built at C2 9 dB: built from explicit ckpt /home/HTJ/t2_wtE5/conf/ckpt/d2sx_N160000_a1.pt -- caller override, NOT verified against the gate record here (recorded PASS rows: none) | V1 (psd_project=True): built from explicit ckpt /home/HTJ/t2_wtE5/conf/ckpt/d2sx_N160000_a1.pt -- caller override, NOT verified against the gate record here (recorded PASS rows: none)
+  no arms executed
+[smoke] PROBLEMS:
+  --arm ['V1-pilot'] not built at C2 9 dB: built from explicit ckpt /home/HTJ/t2_wtE5/conf/ckpt/d2sx_N160000_a1.pt -- caller override, NOT verified against the gate record here (recorded PASS rows: none) | V1 (psd_project=True): built from explicit ckpt /home/HTJ/t2_wtE5/conf/ckpt/d2sx_N160000_a1.pt -- caller override, NOT verified against the gate record here (recorded PASS rows: none)
+  no arms executed
+[smoke] PROBLEMS:
+  C2 9 dB: no arms available for smoke
+  no arms executed
+PASS defect2: missing/partly missing/empty arms fail; receiver_run_calls=0

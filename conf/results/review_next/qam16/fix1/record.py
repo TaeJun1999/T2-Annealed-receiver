@@ -1,0 +1,132 @@
+"""Write a fact-based completion record from the saved checks, without receiver evaluation."""
+from pathlib import Path
+import json
+import os
+import subprocess
+
+ROOT = Path('/home/HTJ/t2_wtE5')
+OUT = Path(__file__).resolve().parent
+stamp = subprocess.check_output(['date', '+%Y-%m-%d %H:%M:%S %Z'],
+                                env={**os.environ, 'TZ': 'America/Chicago'}, text=True).strip()
+load = lambda name: json.loads((OUT / f'{name}.json').read_text())
+reg = load('regression')
+smokes = [load('smoke_' + tag) for tag in ('B16e4k', 'U28B16e4')]
+preserve, static, defects = load('protected_after'), load('static_checks'), load('defects')
+assert all((OUT / f'{name}.json').exists() for name in ('defects', 'regression', 'smoke_B16e4k', 'smoke_U28B16e4'))
+assert reg['test_receiver_evaluations'] == 0 and all(not row['mismatches'] for row in reg['comparisons'])
+assert all(not row['mismatches'] and row['missing_pilot_returncode'] == 1 for row in smokes)
+assert preserve['git_unchanged'] and static['new_chunk_path_ast_identical']
+head = preserve['roots']['E5']['head']
+array_count = sum(row['arrays'] for row in reg['comparisons'])
+dev_array_count = sum(row['arrays'] for row in smokes)
+protected_count = preserve['unchanged_original_files']
+report = f"""E5 16-QAM fix1 완료 기록
+기록 시각: {stamp} (date 출력)
+HEAD: {head}, e5-qam16, 미커밋 변경 있음. 커밋·삭제·push 없음.
+
+변경
+- conf/code/runner.py run_task: 기존 파일은 요청 변조와 무관하게 modulation/payload_bits/protocol을 대조한다.
+  메타가 없으면 qpsk / 해당 셀의 QPSK K / 빈 protocol로 해석한다. 불일치 시 저장값·요청값을 명시해 ValueError.
+  QPSK 요청의 protocol은 빈 문자열, 16qam은 기존 E5-qam16-v1이다. 기존 raw를 다시 쓰지 않는다.
+- cmd_smoke: run_task와 같은 arm 선택·누락 집합 규칙을 적용한다. 누락 arm이 있는 셀은 시행 생성 전에 실패로 기록한다.
+  빈 arm 집합도 실패이며, 전체 run 호출이 0이면 no arms executed를 기록해 반환값 1로 끝낸다.
+- 이 작업은 등록 문서, select_grid.py, run_grid.sh, Demo에 쓰기를 수행하지 않았다.
+  단, 종료 검사에서 앞의 세 파일에 동시 변경이 관측되어 전체 보존 검사는 실패했다. 아래에 별도로 기록한다.
+- 스크립트·출력은 이 fix1/에 있으며, docs/EXPERIMENTS.md에는 로컬 검사 실행 기록만 덧붙였다.
+
+검사 명령
+  tmux new-session -d -s e5_qam16_fix1_checks -c /home/HTJ/t2_wtE5 \\
+    'exec taskset -c 64-65 bash conf/results/review_next/qam16/fix1/run_checks.sh > conf/results/review_next/qam16/fix1/suite.stdout.log 2> conf/results/review_next/qam16/fix1/suite.stderr.log'
+  내부 순서: taskset -c 64-65 /home/HTJ/miniforge3/envs/torch/bin/python -B .../fix1/checks.py
+    defects -> regression -> B16e4k -> U28B16e4
+  preservation.py after는 보호 파일 3개의 예상 밖 변경으로 실패했다 (기존 실패 로그 보존).
+  이어 finalize.sh에서 preservation_audit.py로 사실을 기록하고 static_checks.py로 AST·구문·소유 diff를 검사했다.
+  runner.main(argv)를 호출한 정확한 argv는 regression.json 및 smoke_*.json과 *.stdout.log에 있다.
+  검사 스크립트는 수신기 수학을 바꾸지 않고 출력 경로와 호출 계수·관측만 감싼다.
+
+실행으로 확인한 결과
+1) 교차 검토 결함 1: 기존 16qam 개발 raw에 QPSK 21필드 tuple / 명시 qpsk 22필드 tuple로 재개.
+   수정 전 둘 다 exists, 수정 후 둘 다 ValueError. stored=16qam/K90/E5-qam16-v1,
+   requested=qpsk/K42/빈 protocol을 오류에 표시한다. build_point 0회, raw SHA 불변.
+   추가 메타 조합 {len(defects['resume_matrix'])}건: 동일 변조 재개, 양방향 혼합, payload/protocol 불일치·누락,
+   legacy C2/C7 QPSK 기본 K를 확인했다. 근거: defects.json / defects.stdout.log / resume_fixtures/.
+2) 교차 검토 결함 2: --pilot-arms 없이 --arm V1-pilot.
+   수정 전 반환 0·run 호출 0, 수정 후 반환 1·run 호출 0·trial_rng 호출 0.
+   일부 arm만 누락된 요청과 생성 arm이 빈 경우도 반환 1. 근거: defects.json.
+3) QPSK 저장 배열 재비교: B16e4k C2 -3 dB, U28B16e4 C2 +12 dB, 각 skip0 n40,
+   --mod 생략/명시, 각 14 arm × KEYS_RAW 7 = 98개, 합계 {array_count}개 배열 불일치 0.
+   dtype·shape·전체 바이트를 비교했으며, 생략/명시 사이에는 모든 저장 필드가 동일하다.
+   수정 전 b885a69f 및 기존 control_runner.py의 build_point와 현재 코드의 메타 키·arm 집합이 같다
+   (메타 키 37개/셀). 이전 B16e4k 원본 raw의 stagec_ckpt_id 키 차이는 이미 기존 회귀에 기록된 차이이다.
+   변경 코드의 runner.main 재개 4회 모두 1/1 exists. 원본 QPSK raw 직접 재개 4회도 exists.
+   재개 중 build_point/trial_rng를 금지하는 가드를 통과했으며 기존 원본·검사 raw SHA는 불변이다.
+   이는 저장 배열 재비교·메타 구성·재개 검사이며 QPSK 체크포인트 재평가나 학습 재실행이 아니다.
+   근거: regression.json / regression.stdout.log; 테스트 수신기 평가 {reg['test_receiver_evaluations']}회.
+4) 16qam 개발 스모크: 두 셀 C2/S2, C2/UMi28, +9 dB, seed 20260926, 2560..2563.
+   cmd_smoke는 n=2이므로 셀마다 --skip0 2560 및 2562로 각각 실행했다 (--pilot-arms 포함).
+   V1/b*/R2/R5-genie/V1-pilot 각각 4번, 총 5 arm × 4시행 × 2셀의 수신기 호출만 수행했다.
+   네 호출 모두 OK. 각 반환값의 KEYS_RAW를 저장해 기존 개발 raw의 {dev_array_count}개 배열과 비트 동일함을 확인했다.
+   shape (4,16), 메타 키 집합 동일, 예외 없음, 유한성 통과 (genie NMSE의 기존 NaN 규약 제외).
+   같은 두 셀에서 --pilot-arms를 빼고 V1-pilot만 요청하면 runner.main 반환 1, trial_rng 0회.
+   smoke_*.npz는 cmd_smoke 반환값을 계수용 wrapper에서 저장한 검사 자료이며 run_task의 새 raw가 아니다.
+   근거: smoke_B16e4k.json/.npz, smoke_U28B16e4.json/.npz 및 해당 stdout/stderr 로그.
+5) 보존/범위: 전체 보존 검사는 실패했다. E5 runner.py 외에 다음 세 파일 SHA가 실행 전후 달랐다:
+   conf/results/review_next/NEXT_EXPERIMENTS_E5QAM16.md
+   conf/results/review_next/qam16/run_grid.sh
+   conf/results/review_next/qam16/select_grid.py
+   이 작업은 그 경로에 쓰기를 수행하지 않았으며, 변경 주체·프로세스는 확인하지 않았다. 되돌리지 않았다.
+   같은 시점 git status에는 e5_compare.py, run_e5.sh 등의 새 파일도 보였다 (concurrent_status.txt).
+   기존 {protected_count}개 보호 파일 SHA 및 main/E5 HEAD·index는 불변이다. 기존 raw·Demo·main 코드는 보존됐다.
+   runner.py는 기능 검사 때 기록한 SHA와 동일하다. 세 동시 변경 파일은 기능 검사 입력으로 사용하지 않았다.
+   근거: preservation.after.stderr.log, protected_before/after.json, concurrent_changes.diff, concurrent_status.txt.
+   /proc에서 검사 Python의 affinity=64-65, CUDA_VISIBLE_DEVICES=빈 문자열을 확인했다.
+   torch intra/inter-op=1, BLAS 환경=1. 회귀 검사 때 Threads=1, UMi 평가 중 Threads=3으로 관측됐다.
+   UMi의 스레드별 조회에서 작업 스레드 1개가 R, 나머지 2개는 S·누적 user/system CPU ticks 모두 0이었다.
+   nvidia-smi --query-compute-apps에서 이 검사 PID에 해당하는 GPU 프로세스는 0개였다.
+   실행·리소스 근거: execution_context.txt / resources.json / resources_umi.json / umi_threads.json.
+   사용 잠금 ID: main Demo 3b5c0a375509. E5 Demo 대응 파일은 읽기만 하고 SHA 보존을 확인했다.
+
+코드 판독·정적 검사로 확인한 범위
+- AST 비교에서 변경 함수는 run_task/cmd_smoke뿐이며, run_task의 기존 파일 분기 뒤
+  신규 청크 수신기 계산·저장 코드는 수정 전과 동일하다. 이것은 수치 재실행의 대체 주장으로 쓰지 않는다.
+- Python 구문, bash -n, git diff --check 통과. 근거: static_checks.json/stdout.log, diff_check.log, implementation.diff.
+
+기존 실행의 상태와 남은 불확실성
+- 위 두 QPSK 청크의 기존 회귀와 두 16qam 개발 raw: 확인한 배열·메타·스모크 범위에서 유효, 원자료 보존.
+- 교차 검토의 누락 arm 요청에 대한 기존 OK 판정: 무효 (수신기 실행 0회를 성공으로 판정한 결함).
+  이번 재검사에서 반환 1로 정정됨. 이전 로그는 보존했다.
+- 다른 태그에 과거 변조가 혼합되었는지는 감사하지 않았다. 코드상 가능성이 실제 발생했다는 뜻은 아니다.
+- 테스트 시행 0..2559의 새 수신기 평가, 재학습, 격자 선택, BLER 성능 비교는 수행하지 않았다.
+- 개발 4시행/셀은 요청된 스모크 범위이며, 다른 설정의 정확성이나 장기 수치 안정성은 미검증이다.
+- 이번 수정의 Claude 교차 검토·사용자 잠금은 남아 있다. 이 기록은 구현자 검증이다.
+"""
+with (OUT / 'REPORT.txt').open('x') as stream:
+    stream.write(report)
+
+entry = f"""
+
+## {stamp} — E5 16-QAM fix1 (Codex, e5-qam16; 로컬 검사)
+
+HEAD `{head}` + 미커밋 `conf/code/runner.py`. 커밋·삭제·push 없음. main 읽기만.
+명령: `taskset -c 64-65 bash conf/results/review_next/qam16/fix1/run_checks.sh` (tmux `e5_qam16_fix1_checks`);
+검사 순서 `checks.py defects`, `regression`, `B16e4k`, `U28B16e4`, `preservation.py after`; 이어 `static_checks.py`.
+Python `/home/HTJ/miniforge3/envs/torch/bin/python -B`, CPU 64-65/1스레드, GPU 비활성화,
+seed 20260926; 잠금 ID main Demo `3b5c0a375509` (E5 Demo SHA 보존).
+
+| 검사 | 실행 범위·결과 | 근거 (conf/results/review_next/qam16/fix1/) |
+|---|---|---|
+| 재개 결함 | 기존16qam+QPSK 요청 21/22필드 모두 거부; 메타 조합 {len(defects['resume_matrix'])}건 통과; raw 보존 | defects.json, defects.stdout.log |
+| smoke 결함 | V1-pilot 누락·일부 arm 누락·빈 집합 모두 반환1; 수신기 호출0 | defects.json |
+| QPSK 회귀 | B16e4k C2 −3 dB 및 U28B16e4 C2 +12 dB skip0 n40의 저장 배열 {array_count}개 불일치0; 메타37개 동일; 생략/명시 모두 exists. 테스트 수신기 평가0 | regression.json, regression.stdout.log |
+| 16qam 개발 smoke | 두 셀 +9 dB, 2560..2563, 5 arm×16반복; cmd_smoke 각2회 OK; 기존 개발 raw와 {dev_array_count}배열 비트 동일; pilot flag 누락 시 반환1 | smoke_B16e4k.json/.npz, smoke_U28B16e4.json/.npz, B16e4k.stdout.log, U28B16e4.stdout.log |
+| 범위·정적 검사 | 전체 보존 검사 실패: 등록·격자 3파일에 동시 변경 관측(이 작업에서는 미작성·미수정). 나머지 기존 {protected_count}파일 및 main/E5 HEAD/index 불변; runner SHA 동일; 구문·소유 diff 통과; 신규 청크 계산·저장 AST 동일 | preservation.after.stderr.log, protected_after.json, concurrent_changes.diff, static_checks.json |
+
+QPSK는 저장 배열 재비교와 재개 검사이며 체크포인트 재평가가 아니다. 개발 smoke만 기존 체크포인트로 재평가했다.
+기존 QPSK 회귀·개발 raw는 위 검사 범위에서 유효; 교차 검토의 누락 arm OK 판정은 무효(실행0).
+전체 명령·stdout/stderr·불확실성은 `conf/results/review_next/qam16/fix1/REPORT.txt` 및 `suite.stdout.log`에 있다.
+이 작업은 등록 문서·격자 스크립트·기존 raw에 쓰기를 수행하지 않았다. 관측된 동시 변경은 되돌리지 않았으며 작성 주체는 미확인이다.
+이번 수정의 교차 검토와 잠금은 남아 있다. 전체 보존 검사를 PASS로 보고하지 않는다.
+"""
+with (ROOT / 'docs/EXPERIMENTS.md').open('a') as stream:
+    stream.write(entry)
+print(f'{stamp}: wrote fix1/REPORT.txt and appended the local docs/EXPERIMENTS.md execution record')
