@@ -11,7 +11,7 @@ cd /home/HTJ/t2
 SP=$(mktemp -d)                                   # temporary index + README text (tiny; left in the temp dir)
 PATHS=(conference docs/RESULTS.md docs/EXPERIMENTS.md docs/paper conf/conference_plot conf/DECISIONS.md)
 mapfile -t REGS < <(ls conf/results/review_next/NEXT_EXPERIMENTS_*.md)
-DATA='\.(npz|npy|pt|ckpt|db)$|__pycache__'        # never shipped
+DATA='\.(npz|npy|pt|ckpt|db)$|__pycache__|review_next/cost/.*cost_[^/]*\.txt$'   # never shipped (cost_*.txt: E4 bench outputs carry main's 16 MB git status; their numbers are in EXPERIMENTS / DECISIONS)
 mapfile -t RES < <(git ls-files -- conf/results conf/figs | grep -v -E "$DATA" | while IFS= read -r f; do [ -e "$f" ] && echo "$f"; done)   # result records main tracks
 RES+=(${EXTRA:-})                                # EXTRA="<paths/globs>": untracked result records to ship now (accepted rows of a registered run that main cannot commit before its end)
 DIRTY=$(git status --porcelain -- "${PATHS[@]}" "${REGS[@]}" "${RES[@]}" | wc -l)   # uncommitted files shipped from the working tree
