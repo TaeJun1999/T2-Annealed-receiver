@@ -1,0 +1,38 @@
+% =====================================================================
+% Receive-cost table (E4 COST1022; task PROMPT_SERVER_COST.md: "작은 비용 표 하나").
+% Single column.  Every number is in table_cost_sources.md with its source line.
+% Values at the lower SNR of each cell (D2 -3 dB, UMi -3 dB); the other SNR
+% (D2 +6 dB, UMi +3 dB) differs by at most 1.9 % in rx time (max 1.85 %).
+% No cost claim and no timing-only Pareto point (task rule).  Caption wording is
+% a placeholder for the author.  Plain LaTeX only.
+% =====================================================================
+\begin{table}[!t]
+\centering
+\caption{Measured receive time per coded block (one CPU thread)}
+\label{tab:cost}
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}lrrr@{}}
+\hline
+Prior in module H & Time/block$^{\rm a}$ & H share & fwd/VJP$^{\rm b}$\\
+\hline
+\multicolumn{4}{@{}l}{\emph{Sparse specular $8\times4$}}\\
+Proposed (diffusion)     & 1.02\,s  & 95.9\%  & 32/1024\\
+Matched-scalar variant   & 1.01\,s  & 95.9\%  & 32/1024\\
+GMM ($K=1024$)           & 0.76\,s  & 94.6\%  & --\\
+\hline
+\multicolumn{4}{@{}l}{\emph{3GPP UMi 28\,GHz $32\times4$}}\\
+Proposed (diffusion)     & 84.9\,s  & 99.7\%  & 32/4096\\
+GMM ($K=4096$)           & 90.0\,s  & 99.7\%  & --\\
+GMM ($K=8192$)           & 183.9\,s & 99.85\% & --\\
+SBL (in loop)            & 0.99\,s  & 74.7\%  & 48 EM\\
+\hline
+\end{tabular}
+
+\vspace{2pt}
+\begin{minipage}{\columnwidth}
+\scriptsize
+$^{\rm a}$Median over 24 development blocks at $-3$\,dB; batch 1, 16 outer iterations, one thread on an Intel Xeon 6740P, same checkpoints and GMM fits as the BLER results; the full receive call (detection, decoding, prior module), excluding training, fitting and model loading. On the same shared server, UMi $32\times4$ times varied between runs (proposed 70--91\,s, GMM $K=4096$ 77--114\,s per block); in the two diagnostic runs that logged memory placement, the run with more memory on remote NUMA nodes was 10--11\% (proposed) and 22--30\% (GMM) slower; the cause was not isolated. Sparse specular $8\times4$ times varied by at most 5\%.
+$^{\rm b}$Per block (16 calls of module H): backbone forward passes / vector--Jacobian product directions; one forward inside the Jacobian and one for the posterior mean per call. SBL: EM steps.
+\end{minipage}
+\end{table}

@@ -9,6 +9,7 @@
 - 추가: 2026-10-05 18:37 CDT — §22 SEEDSNR16e4 추가 (Opus 5.5). 수치·라벨·캐비엇은 등록 §6.1 (기록 감사 §6.2 정정 반영; scale c689a935, 결과·문서 파일은 main 에 사본) 에서 옮김; 별도 검증자 대조는 아래 §22 머리에 적는다.
 - 추가: 2026-10-08 23:23 CDT — §24 SITE16e4 추가 (Opus 5.5). 수치·라벨은 등록 §6.1 (기록 감사 §6.2: raw 에서 독립 재계산, 수치 정정 없음)·원본 출력에서 스크립트로 옮김.
 - 추가: 2026-10-12 09:47 CDT — §25 레이 트레이싱 풀 (DeepMIMO · Sionna RT 도시 · Sionna RT 방 두 풀; 그림 보강 포함) 추가 (Opus 5.5; 사용자 요청 "지금까지 결과를 보고 어떤 걸 실을지 결정할거니까 github에 동기화해줘"). 인용 수치는 EXPERIMENTS.md 의 해당 행에 글자 그대로 있는 것을 스크립트로 대조해 옮김; 별도 검증자 대조는 거치지 않았다.
+- 추가: 2026-10-19 17:49 CDT — §26 U28NR32GCAP · §27 U28NR32SBL · §28 E5QAM16 · §29 V1LS · §30 E1+ D2SITEMS · §31 E4 COST1022 (10/16 보강 캠페인; Opus 5.5; 사용자 일괄 수용 "다 제안을 받아드릴테니까 그 대로 진행해", DECISIONS 의 P9). 수치는 각 등록 §6 · 출력에서 옮겼고 원고 수치 표 `conf/results/review_next/CAMPAIGN_2026-10-16_NUMBERS.md` (verifier 대조 끝) 와 같은 값이다. 다섯 BLER 등록은 verifier · Fable 기록 감사 (MUST 0) 를 거쳤다; 이 여섯 절의 별도 검증자 대조는 §31 끝에 적는다.
 - 판정 문구는 사전 등록 라벨(지지 / 판정 불가 / UNDECIDED / 기각 / PASS 등) 그대로다. 수치를 인용하기 전에 **§6 인용 주의**를 먼저 읽는다.
 - 목차: §1 헤드라인(Stage C, 동일예산) · §2 review_next 진단·ablation · §3 A1 위상 augmentation · §4 P3 반복 루프 규칙 · §5 C6 (Nr=16) · §6 인용 주의 · §7 C6 동일예산 1.6e5 · §8 K1·K2 · §9 파일럿 오버헤드(Tp≥Nt) · §10 채널 모델 확장 · §11 그림 목록 · §12 ALD · §13 비정상 A·B (DOP·ROT) · §14 비정상 B′·C (ROTMIX·S2v) · §15 DOP·ROT 보충 (SUPP) · §16 정적 13 baseline (STATIC) · §17 genie 고SNR 바닥 진단 · §18 시드 강건성 2 (SEEDS3) · §19 고SNR 보강 (HISNR) · §20 희소 baseline (SPARSE) · §21 배열 규모 확장 (SCALE) · §22 시드 강건성 3: Nr 16/32 (SEEDSNR) · §25 레이 트레이싱 풀 (DeepMIMO · Sionna RT)
 
@@ -1776,3 +1777,119 @@ censored 0% (PARETO §6.2). P-c (Eb/N0, 보고): Δ₆ − 0.918 = −1.32 dB, �
 - 대조군·체크포인트: 대조군 b\*→b\*-scalar (ii) (b\* 가 2/3 점에서 적게 실패); best 대 last V1 pooled 71:55 (p 0.181).
 - 캐비엇: 유한 풀 (테스트 60,700 쌍 복원 추출) · 이웃 0.058 (0.5 m 타일, 한 위치에 yaw 5 개) · BLER 이 낮도록 고른 풀 (Perfect CSI 선별); UNGATED, 헤드라인 불변.
 - 그림·기록: `conference/figures/F21dmi_col` (11 곡선, 전 SNR n = 2560) · `F33cdf_DMI_wide` (NMSE CDF, 보고 전용); `records/paper_f21dmi.txt` · `paper_f33cdf_DMI.txt`.
+
+
+## 26. UMi 32×4 GMM 용량 확인 (E2′ U28NR32GCAP; b\*(GCAP) = kron K 8192)
+
+**EXPERIMENTS.md 행**: `2026-10-17 21:40 ~ 10-19 02:49 KST`. 결과 절 `conf/results/review_next/NEXT_EXPERIMENTS_U28NR32GCAP.md` §6 (6.1–6.6), 출력 `gcap/compare_U28NR32GCAP.txt`. 검토: verifier 2 회 (원문 `gcap/verifier_s6_2026-10-18.md`), Codex 교차 검토 (추가 결함 0), Fable 기록 감사 (`prereg_audit_2026-10-19/audit_U28NR32GCAP.md`; MUST 0, SHOULD 1 · NIT 2 반영).
+
+| | UMi 28 GHz C9 (Nr 32) 32×4, QPSK |
+|---|---|
+| 비교 (앵커 → 대상) | b\*(GCAP) → V1 — b\*(GCAP) = full · Kronecker 격자 (kron ≤ 8192, continuation 50 회 포함) 에서 검증 LL 로 고른 kron K 8192 |
+| 판정점 | −3 · 0 · +3 dB |
+| a:b (점별) · pooled | 172:16 · 127:13 · 79:6 · 378:35 (p 8.3e-74) |
+| 라벨 (표 B) | **(i)** "UMi28 C9 (Nr 32) 에서 V1 이 b\*(GCAP) 보다 적게 실패 (GMM 용량 확인 재평가, UNGATED)" (POWERED, V1 적게 3/3) + G_GCAP "(b\*(GCAP) = 검사한 family (full · Kronecker) 와 K 범위 (kron ≤ 8192), 등록 절차 (continuation 50 회 포함) 안에서 검증 LL 로 고른 GMM 이며 최적 GMM 이 아니다)" + "[K 상한 민감: 외삽 불가]", UNGATED |
+| SNR@0.1 격차 b\*(GCAP) − V1 [90 % paired] | **+2.17 dB [+1.83, +2.50]**, censored 0 % |
+| 회수율 R (판정점 합) | 0.421 [0.390, 0.451] (ΣF b\* 942 · V1 599 · genie 127) |
+| 기존 b\* (kron K 4096) 재계산 | 391:32, +2.29 dB [+1.98, +2.61], R 0.432 [0.402, 0.462] (기록값과 같음) |
+| 보고 전용 b\*(기존) → b\*(GCAP) | 7 점 모두 새 쪽이 1–15 블록 적게 실패, 유의한 점 없음 |
+| §3 예측 | 8/8 적중 |
+
+- 실패 수 / 2560 (b\*(GCAP) · V1 · genie; V1 · genie = 기존 raw `U28NR32B16e4`): −12 dB 2277 · 2219 · 846, −9 1196 · 1068 · 423, −6 746 · 595 · 227, −3 505 · 349 · 88, 0 294 · 180 · 30, +3 143 · 70 · 9, +6 61 · 27 · 3.
+- 실행 이탈 (사용자 수용, 등록 §6.5): 첫 실행이 서버 메모리 압박으로 멈춰 재개 때 glibc 할당기 환경변수를 붙였다 — 증거 범위: b\* 의 test 동등성은 개발 시행으로만 확인, genie 448 청크 비트 동일.
+- 캐비엇 (대기 7, 결정 ①): 기존 b\* (kron K 4096, `U28NR32B16e4`) 는 동결 EM 절차가 학습 우도가 처음 줄어든 스텝에서 멈춘 적합이다 (legacy tol 규칙, ll[30] − ll[29] = −1.50e-4; GCAP 등록 §0 · §5 A; 허용오차 수렴이 아닐 수 있음; 돌려주는 모델은 검증 최고 상태) — 위 '기존 b\* 재계산' · '보고 전용 b\*(기존) → b\*(GCAP)' 행에 붙는다. b\*(GCAP) (K 8192) 는 gcap 정지 규칙의 patience 로 멈춰 이 캐비엇 대상이 아니다 (허용오차 수렴도 아님).
+
+## 27. UMi 32×4 SBL-loop 하나 (E3′ U28NR32SBL)
+
+**EXPERIMENTS.md 행**: `2026-10-19 04:29 ~ 04:45 KST`. 결과 절 `NEXT_EXPERIMENTS_U28NR32SBL.md` §6 (6.1–6.4), 출력 `pairB_U28NR32SBL.txt` · `pairB_U28NR32SBL_bstar.txt`. 검토: verifier (원문 `qam16/verifier_s6_E5_SBL32_2026-10-18.md`), Fable 기록 감사 (`audit_U28NR32SBL.md`; MUST 0 · SHOULD 0, NIT 2 정정).
+
+| | UMi 28 GHz C9 32×4, QPSK |
+|---|---|
+| 비교 | SBL-loop (ρ 4, n_em 3, cold — 개발 시행 loop BLER 로 조정) → V1 |
+| 판정점 | −3 · 0 · +3 dB |
+| a:b · pooled | 325:3 · 216:10 · 110:6 · 651:19 (p 1.3e-165) |
+| 라벨 | **(i)** "UMi 32×4 에서 loop BLER 로 조정한 SBL-loop (ρ = 4, n_em = 3, cold) 대비 V1 이 적게 실패 [조사 범위 끝: ρ · n_em, 둘 다 조사 하한 (ρ 4, n_em 3)]" |
+| SNR@0.1 격차 SBL-loop − V1 | **+3.14 dB [+2.78, +3.54]**, censored 0 % |
+| R | −3 dB R_X 0.552 [0.519, 0.587] (primary); 판정점 합 0.572 [0.548, 0.597] (ΣF SBL 1231 · V1 599 · genie 127 — 판정점 실패 수에서 계산) |
+| 보고 전용 b\* → SBL-loop | b\* 가 3/3 점에서 적게 실패 (104:377); 격차 b\* − SBL −0.85 dB [−1.16, −0.62] |
+| 같은 출력의 등록 baseline 14 개 | 모두 (i) (기존 raw 재계산; 이 등록의 라벨은 SBL-loop → V1 하나) |
+| §3 예측 | 3/4 (예측 1 빗나감) |
+
+- SBL-loop 실패 수 / 2560 (−12 … +6 dB): 2522 · 1772 · 979 · 671 · 386 · 174 · 83.
+- 캐비엇 (대기 7, 결정 ①): 보고 전용 b\* → SBL-loop 와 baseline 14 개 가운데 b\* 행의 b\* 는 §26 의 기존 b\* (kron K 4096) — 같은 EM 정지 캐비엇.
+
+## 28. 동결 prior 의 16-QAM 재사용 (E5 E5QAM16)
+
+**EXPERIMENTS.md 행**: `2026-10-19 04:45 ~ 05:18 KST` (UMi) · `2026-10-19 05:18 ~ 05:36 KST` (D2). 결과 절 `NEXT_EXPERIMENTS_E5QAM16.md` §6 (6.1–6.6), 출력 `qam16/compare_{U28,D2}QAM16.txt`. 검토: verifier 2 회 (원문 `qam16/verifier_s6_E5_SBL32_2026-10-18.md` 의 2 차 · 3 차; 1 차는 SBL32 만), Fable 기록 감사 (`audit_E5QAM16.md`; MUST 0 · SHOULD 0, NIT 3 정정), Codex 독립 분석 (`reviews/20261019-054103-prompt_e5_blind.md` — 프롬프트에 점검 예시 한 구절이 있었다, 정정 기록).
+
+| | UMi28 C2 8×4, 16-QAM (주검증) | D2 C2 8×4, 16-QAM (보조) |
+|---|---|---|
+| 체크포인트 · GMM | QPSK 평가와 같은 것 (`U28B16e4` best, kron 4096) | 같은 것 (`d2sx_N160000_a1.pt` legacy-last, kron 1024) |
+| 판정점 | +12 · +15 · +18 dB | +9 · +12 · +15 dB |
+| a:b (b\* → V1) · pooled | 72:17 · 49:20 · **4:1666** · 125:1703 | 157:23 · 121:17 · 93:16 · 371:56 |
+| 라벨 | **(i)** (기계적, 2/3) + 사용자 결정 제한 문장 (아래) | 라벨 없음 (§2.2) — V1 적게 3/3 |
+| ΣF b\* / V1 / genie | 1004 / 2582 / 438 | 922 / 607 / 465 |
+| R | **−2.79** [−3.03, −2.57] | 0.689 [0.642, 0.736] |
+| SNR@0.1 격차 b\* − V1 | n/a (V1 이 격자 +3…+21 dB 에서 0.1 아래로 내려가지 않음; +15 dB 277/2560) | **+3.44 dB [+2.62, +4.33]** |
+| V1 실패 +18 · +21 dB / 2560 | 1844 · 2543 (b\* 182 · 107) | 2485 · 2557 (b\* 147 · 123) |
+| §3 예측 | 4/4 (2 는 기계적) | |
+
+- 사용자 결정 문장 (등록 §6.5 원문): "(i) [K 상한 민감: 외삽 불가]: 이 채널 · 변조 설정 (UMi 28 GHz 8×4, 16-QAM, K_b 90) 에서 동결 prior 의 재사용과 성능 이득을 함께 확인했다. 단, 이득은 판정점 +12 · +15 dB 에서이며, 셋째 판정점 +18 dB 에서는 V1 이 b\* 보다 크게 더 실패했다 (b\* 만 실패 4 : V1 만 실패 1666; 판정점 합 R = −2.79 [90 % −3.03, −2.57]); V1 은 평가 격자 (+3 … +21 dB) 어디에서도 BLER 0.1 아래로 내려가지 않았다 (+18 · +21 dB 실패 1844 · 2543 / 2560)."
+- 고 SNR 붕괴의 후속: 개발 진단 `qam16/diag_v1/SUMMARY.md` → 대책 등록 V1LS (§29).
+- 캐비엇 (대기 7, 결정 ①): UMi b\* (`gmm_fits_D2_U28B16e4` kronK4096 k0r0) 는 동결 EM 절차가 학습 우도가 처음 줄어든 스텝에서 멈춘 적합이다 (허용오차 수렴이 아닐 수 있음; 돌려주는 모델은 검증 최고 상태).
+
+## 29. V1 고 SNR 붕괴의 대책 — 학습 σ 하한을 낮춘 V1-wide (V1LS)
+
+**EXPERIMENTS.md 행**: `2026-10-19 12:13 ~ 17:13 KST` (네 run 체인). 결과 절 `NEXT_EXPERIMENTS_V1LS.md` §6 (6.1–6.8), 출력 `v1ls/compare_{U28LSQ,U28LS16,D2LSQ,D2LS16}.txt`. 검토: verifier (결함 0), Codex 교차 검토 (결함 0; `reviews/20261019-224612-prompt_s6_v1ls.md`), Fable 기록 감사 (`audit_V1LS.md`; MUST 0 · SHOULD 0 · NIT 0). PRIMARY = V1-wide (개발 선택 A · B · C 가운데 C).
+
+| run | L1 V1 → V1-wide (+18 · +21 dB) | L2 판정점 | L2 b\* → V1-wide a:b · pooled | L2 | SNR@0.1 격차 b\* − V1-wide [90 %] | ΣF b\* / V1-wide / genie | R [90 %] |
+|---|---|---|---|---|---|---|---|
+| UMi28 C2 QPSK | 929:0 · 2555:0 → **(a)**, MONOTONE yes | +3 · +6 · +9 | 81:37 · 53:27 · 35:10 · 169:74 | **(i)** | **+0.58 dB [+0.30, +0.86]** | 800 / 705 / 215 | 0.162 [0.121, 0.202] |
+| UMi28 C2 16-QAM | 1693:3 · 2463:0 → **(a)**, yes | +12 · +15 · +18 | 69:18 · 52:19 · 44:16 · 165:53 | **(i)** | **+0.69 dB [+0.43, +1.02]** | 1004 / 892 / 438 | 0.198 [0.159, 0.236] |
+| D2 C2 QPSK | 2256:0 · 2557:0 → **(a)**, yes | −3 · 0 · +3 | 299:47 · 112:18 · 31:6 · 442:71 | **(i)** | **+1.40 dB [+1.21, +1.63]** | 864 / 493 / 125 | 0.502 [0.464, 0.538] |
+| D2 C2 16-QAM | 2396:1 · 2491:0 → **(a)**, yes | +9 · +12 · +15 | 160:26 · 116:22 · 93:11 · 369:59 | **(i)** | **+3.33 dB [+2.51, +4.28]** | 922 / 612 / 465 | 0.678 [0.631, 0.729] |
+
+- 문장은 run 마다 단독 (네 run 을 합친 문장은 쓰지 않는다): L1 (a) "<셀> <변조> 에서 V1-wide 가 +18 · +21 dB 에서 V1 보다 적게 실패 (V1 의 고 SNR 붕괴가 이 격자에서는 나타나지 않음)", L2 (i) "V1-wide 가 b\* 보다 적게 실패" (UMi 두 run 은 "[K 상한 민감: 외삽 불가]"), 그리고 모든 문장 끝에 V1-wide 설명 (등록 §2.1 원문): "V1-wide = V1 과 같은 rung · attempt (학습 추첨 시드) · 데이터 (같은 분할) · 레시피로 학습 σ 범위의 하한을 낮춰 다시 학습한 체크포인트 (가중치 초기화는 통제 · 확인하지 않음; 학습 길이 · 정지 epoch 다름); 학습 σ 범위의 하한은 개발 시행 2560..2623 에서 측정, 상한은 등록 V1 과 같은 동결 격자 (test 번호 시행 0..63 의 라벨 없는 질의 통계) (개발 선택: A · B · C 가운데 C)". SUFFIX none ×4. 쓰지 않는 문구 (등록 §2.2): "동등", "비열등", "완전히 해결", "모든 SNR 에서", "원인을 증명", "σ 범위만의 효과".
+- 기존 V1 의 QPSK +18 · +21 dB 붕괴 (보고 전용, 원 QPSK 등록 라벨은 바꾸지 않음): V1 실패 / 2560 — UMi28 934 · 2556, D2 2258 · 2559 (같은 시행 b\* 7 · 6, 4 · 6). 기존 QPSK test 격자는 +15 dB 까지였다.
+- 예측 7/7 (3 은 기계적 — 적중을 증거로 세지 않음, 등록 N4). 원고 헤드라인은 등록된 기존 V1 그대로 두고 V1LS 는 후속 결과로 쓴다 (DECISIONS P2).
+- 캐비엇 (대기 7, 결정 ①): UMi28 두 run 의 b\* 는 §28 과 같은 적합 (EM 정지 캐비엇).
+
+## 30. 행렬 site 대 matched-scalar site (E1+ D2SITEMS)
+
+**EXPERIMENTS.md 행**: test `2026-10-19 22:42 ~ 22:47 KST`; 병합 확인 `2026-10-19 22:40 ~ 22:41 KST`; 개발 확인 `2026-10-19 11:28 ~ 12:24 KST`. 결과 절 `NEXT_EXPERIMENTS_D2SITEMS.md` §6 (6.1–6.7), 출력 `e1ms/compare_D2SITEMS.txt`. 검토: verifier (결함 0), Fable 기록 감사 (`audit_D2SITEMS.md`; NIT 2 정정), Codex 교차 검토 (수치 결함 0; `reviews/20261020-000614-prompt_s6_e1ms.md`).
+
+| | D2 C2 8×4, QPSK (헤드라인 셀; V1 · V4 · genie 는 기록 `raw_B16e4k`) |
+|---|---|
+| 주 비교 V1-ms → V1 (판정점 −3 · 0 · +3 고정) | 53:35 (p .069) · 22:12 (.12) · 8:10 (.81); pooled 83:57 (p .034, 보고 전용) |
+| 라벨 | **(iii)** 판정하지 못함 (유의 방향 없음) — POWERED, 어느 쪽도 2/3 미달; 개별 유의점 없음 |
+| SNR 손실 L = SNR_ms(0.1) − SNR_V1(0.1) | **+0.14 dB [90 % +0.05, +0.22]** (양수 = scalar 쪽 손실; 3 점 격자; censored 0 %) |
+| 보조 (보고 전용) V4 → V1-ms | 6:1 · 4:6 · 0:6 (+3 dB p .031, V4 가 적게 실패) → (iii); 격차 V4 − V1-ms +0.01 dB [−0.04, +0.04] |
+| 실패 수 / 2560 (V1 · V4 · V1-ms · genie) | −3 dB 371 · 394 · 389 · 87; 0 dB 88 · 96 · 98 · 26; +3 dB 29 · 21 · 27 · 12 |
+| §3 예측 | 8/10 (빗나감: 2 — −3 dB 가 p .069; 6 — 보조가 (iv) 가 아니라 (iii)) |
+
+- 고정 설명 (모든 문장 끝에, 등록 §2.1 원문): "V1-ms = V1 과 같은 가중치 · 배선 · 안정화 (Jacobian PSD 수리, precision floor λ_min, decoder damping, scalar feedback) 에서 EP site 의 공분산만 C₊ = νJ₊ → (tr C₊/N) I 로 바꾼 arm (설계 차이는 이것 하나); 첫 질의 뒤 두 arm 의 질의 궤적은 갈린다; full Jacobian 을 계산하므로 저비용 구현이 아니다". 결과 문장에 붙는 해석은 이 고정 설명 · §2.1 허용 꼴 · §2.2 고정 문장 셋뿐.
+- 원고용 영어 틀 (§2.4; DECISIONS P3 — 이득의 출처를 다루는 곳에 한 문장): "In paired sign tests, the comparison between the matrix-site receiver and its matched-scalar variant is not decided: neither receiver has p < 0.05 in its favor at two or more of the three tested SNRs." · "Relative to the matrix-site receiver, the matched-scalar variant reaches BLER 0.1 at an SNR offset of +0.14\,dB [$+0.05$, $+0.22$] (positive: more SNR needed)."
+- test 시행 사용: V1-ms 는 본 실행에서만 test 시행을 돌았다; 확인 3 · 병합 확인 (a) 는 test 0..39 에서 V1 · V4 만 (비트 대조, 새 정보 없음).
+
+## 31. 실제 수신 비용 (E4 COST1022; 판정 없음)
+
+**EXPERIMENTS.md 행**: 측정 `2026-10-20 00:16 ~ 05:22 KST`; NUMA 대조 `2026-10-20 05:54 ~ 06:24 KST`. 출력 `conf/results/review_next/cost/cost_COST1022_{D2,U32}.{txt,npz}` (표는 txt 끝), `cost/numa_check/`. 도구 `conf/code/bench_cost.py` (Codex 작성, 정답 사례 G1–G8, 사용자 잠금 8498afe226c7). 결과 검토: verifier (표 14 행을 npz 에서 다시 계산해 일치; 기록 결함 3 정정). 절차: 등록 · 기록 감사는 생략 (사용자 결정 — test 를 쓰지 않는 timing 측정).
+
+조건: 개발 시행 2561..2584 (SNR 마다 24 블록, 워밍업 2560), batch 1, 반복 16, torch · BLAS 1 스레드, CPU 24 한 코어, BLER 에 쓴 것과 같은 체크포인트 · fit (sha256 대조). 시간은 `rx.run` 만.
+
+| 셀 | arm | rx.run 중앙값 (낮은 SNR) [IQR] | rx.run (높은 SNR) | H 비중 | 블록당 계수 |
+|---|---|---|---|---|---|
+| D2 8×4 (−3 · +6 dB) | V1 | 1015 ms [1014, 1017] | 1009 ms | 95.7–95.9 % | H 16, backbone forward 32 (denoise 16), VJP 1024 |
+| | b\* (kron K 1024) | 759 ms [756, 761] | 773 ms | 94.5–94.6 % | H 16, K 1024 |
+| | V1-ms | 1013 ms | 1006 ms | 95.7–95.9 % | V1 과 같음 |
+| UMi32 32×4 (−3 · +3 dB) | V1 | 84.9 s [84.4, 85.2] | 85.3 s | 99.6–99.7 % | forward 32, VJP 4096 |
+| | GMM kron K 4096 | 90.0 s [88.9, 91.1] | 90.4 s | 99.7 % | K 4096 |
+| | GMM kron K 8192 (GCAP) | 183.9 s [181.5, 185.4] | 182.9 s | 99.85 % | K 8192 |
+| | SBL-loop | 0.993 s | 0.995 s | 74.7–74.8 % | EM 48 |
+
+- 계수: 과제의 기대 "forward 16" 은 denoise 호출 수와 같고, backbone forward 는 jacrev 안 1 회 + 평균 1 회라 32 (`score.py:1120–1121`); VJP 방향 1024 · 4096 은 기대와 같다.
+- 한정어 (사용자 결정, DECISIONS P4): 같은 서버에서도 실행 · 배치에 따라 UMi32 블록당 시간이 V1 70–91 s, GMM K 4096 77–114 s 로 달랐다 (10-18 확인 실행 · COST1022 · NUMA 대조 두 배치). 메모리 배치를 기록한 대조 실행 두 개에서는 원격 메모리가 많은 배치가 V1 +10–11 %, K 4096 +22–30 % 느렸다 (−3 · +3 dB) — 원인을 메모리 노드 배치로 단정하지 않는다 (메모리 고정은 컨테이너가 막아 미검증). D2 는 10-18 확인 실행 대비 −4.9 … +4.3 %.
+- 과제 규칙: 비용 주장 문장 · timing 만의 Pareto 를 쓰지 않는다; 성능–시간 관측점은 등록 test BLER 이 있는 arm 만 (§26–§30, 기존 헤드라인 표).
+- 원고 표 초안: `conference/tables/table_cost.tex` (DECISIONS P4; 자리는 사용자).
+
+**검증 (§26–§31, 머리 12 행이 말한 자리)**: verifier (2026-10-19 18:07 CDT 보고; `scratchpad/verify_results26/`) — 행 머리 시각 9 개, 따옴표 문구 16 개 (글자 그대로), 숫자 토큰 전부, R 8 개 (ΣF 에서 재계산), E4 14 행 · 범위 · sha 가 출처와 일치. 결함 5 고침: P1 캐비엇 범위 (C9 K 4096 도 해당 — §26 · §27 에 붙임; K 8192 는 해당 아님), §28 verifier 횟수 (3 → 2), 비용 표 주석의 NUMA 문장 (두 대조 실행으로 한정, 원인 미분리), V1 +11 → +10–11 %, WORK_QUEUE 머리 줄. 선택 개선 반영: §26 등록 (i) 문장, 예측 단서, §27 baseline 14 단서, §29 금지 문구 여섯.
