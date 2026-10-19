@@ -121,3 +121,9 @@ SBL-pilot · OMP-pilot 을 32×4 에 추가 ("baseline 16 개 전부" 채우기)
 2. **적중** — 고른 설정 cold (warm 146 · 147 이 cold 142 를 이기지 못함).
 3. **적중** — 표 B `SBL-loop → V1` (i).
 4. **적중** — 보고 전용 `b* → SBL-loop`: b\* 가 적게 실패 (3/3 점).
+
+### 6.4 기록 감사 (Fable 서브에이전트, 2026-10-19 08:47–09:04 CDT 보고; `prereg_audit_2026-10-19/audit_U28NR32SBL.md`, 재계산 `recompute_sbl32.py` → `recompute_sbl32.out` · `.json`, 도구 재실행 `rerun_pairB_U28NR32SBL{,_bstar}_SBL.txt` · `rerun_accept_SBL.txt`)
+
+감사 대상 = HEAD 9a2c9fd4 (실행 커밋 13f05fb1, FREEZE d6a76fbf). 자동 비교 **442 일치 / 0 불일치** — 실패 수 16 arm × 7 SNR, 표 B 14 쌍 × 7 줄 (판정점 · a:b · p 문자열 · POWERED · 라벨 · SNR@0.1 격차 + 90 % CI · 절대 격차 · R_X), 요약 4 줄, 보고 전용 b\* → SBL-loop 5 줄, NMSE 15 × 7, 개발 선택 10 후보 (F · 지표 · 동률 규칙 · TOP2 · PICK · 범위 끝) 가 `select_dev_*.out` 과 줄 단위 일치, meta 값 집합 11, genie 비트 대조 6,074,880 값 차이 0, 예측 4/4 채점 재현, §5 산술 3. `pair_baselines.py` 재실행 2 파일 바이트 동일, `eval_accept.py` ACCEPT OK. 수동 ≈ 90 값 가운데 시각 2 건 (N1) 외 일치. FREEZE 뒤 §0–§3 불변, FREEZE → 실행 커밋 코드 0, 실행 창 안 main 커밋 없음, s5 = §5 = 실제 sha256. test / 개발 분리: 시행 < 2560 의 SBL arm 은 이 test 실행 하나뿐 (개발 3840..4159, 스모크 · 병합 확인 4160..4199).
+
+**MUST 0 · SHOULD 0 · NIT 2 — 반영 (판정 · 수치 불변; 머리말 · §0 · §5 는 고치지 않고 여기에 정정; 기록 2026-10-19 09:06 CDT, Opus 5.5)**: N1 실행 커밋 13f05fb1 의 시각은 2026-10-18 **14:29:07 CDT** (`logs/run_sbl32.log:1` 시작 14:29 CDT) — §5 (97 행) 와 DECISIONS 실행 시작 줄의 "14:28 CDT" 는 s5 파일 작성 시각 (mtime 14:28:22) 이다; 머리말 v2.2 의 "20:0x CDT" 는 그 줄이 든 커밋 fe7e911b 의 19:59:01 CDT. N2 §0 (16 행) 의 "최대 RSS 0.88–1.18 GB" 는 `probe.out` 의 878–1177 MiB 를 1000 으로 나눈 값 — 바르게는 878–1177 MiB (0.86–1.15 GiB); §0 은 판정에 쓰지 않고 G 는 §5 스모크로 따로 정했다. 감사가 확인하지 못한 것: MemAvailable · tmux 이름 · 사용자 승인 시점 (파일 없음); "BLER 미열람" 은 파일 순서로만 (모순 없음); verifier 검토 내용 → 보고 원문을 세션 기록에서 `qam16/verifier_s6_E5_SBL32_2026-10-18.md` 로 옮김 (1 차 · 2 차); 부트스트랩은 같은 시드 재구현 + 도구 재실행 + 다른 시드 [+2.79, +3.53].

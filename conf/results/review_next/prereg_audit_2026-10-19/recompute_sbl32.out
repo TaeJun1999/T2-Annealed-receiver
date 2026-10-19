@@ -1,0 +1,123 @@
+====================================================================================================
+A. TEST RAW raw_U28NR32SBL (448 chunks) -- plan, meta, genie replay
+  SNR points [-12, -9, -6, -3, 0, 3, 6] (grid [-12, -9, -6, -3, 0, 3, 6]): OK
+  chunk plan per SNR = {(40k, 40): k = 0..63}: OK for all 7 SNRs (checked at load)
+  '|failed' keys: 0; non-finite blk_err@16 (raised trials): 0
+  run|git                value set = ['13f05fb1']
+  meta|sparse            value set = ['{"L": 1, "n_em": 3, "rho_omp": 1, "rho_sbl": 4}']
+  meta|bstar             value set = ['kron']
+  meta|kron_K            value set = ['4096']
+  meta|ll_val|kron       value set = ['152.23176788511105']
+  meta|worker_gb         value set = ['7.0']
+  meta|jobs              value set = ['96']
+  run|iters              value set = ['16']
+  run|seed               value set = ['20260926']
+  meta|ntrain            value set = ['160000.0']
+  meta|stagec_ckpt_id    value set = ['(absent)']
+  run|dtype              value set = ['complex128/float64']
+  run|beta               value set = ['0.7']
+  run|t_in               value set = ['5']
+  meta|em_sec            value set = ['12520.085450410843']
+  arms in the SBL raw: ['R5-genie', 'SBL-loop']
+  reference raws: base run|git ['b4433d3c'] ckpt ['sha256[:16]=463da87aa8dbfb61 epoch=232 best_epoch=232 role=best 32x4'] ll_val|kron ['152.23176788511105']; PIL ['b4433d3c']; ALD ['b4433d3c']; failed keys 0; raised 0 0 0
+  R5-genie replay (7 KEYS_RAW + guardH, 7 SNR x 2560 trials, SBL / PIL / ALD vs base): 6074880 values, differing arrays 0
+  V1-pilot@1 nmse == M-ours-dscore-C-V1@1 nmse at all 7 SNR: True
+  bstar-pilot@1 nmse == M-ours-bstar@1 nmse at all 7 SNR: True
+====================================================================================================
+B. FAILURE COUNTS @16 per SNR (-12 .. +6 dB) vs pairB_U28NR32SBL.txt lines 107-122
+  R5-genie                 846   423   227    88    30     9     3   OK
+  M-ours-dscore-C-V1      2219  1068   595   349   180    70    27   OK
+  M-ours-bstar            2280  1207   761   509   304   145    62   OK
+  M-ours-bstar-scalar     2339  1255   797   526   326   150    73   OK
+  M-ours-gmm32            2317  1273   819   590   369   192    92   OK
+  R0-pilot                2560  2073  1096   747   468   254   123   OK
+  R1-turbo                2537  1973  1218   840   544   318   154   OK
+  R2-ours-G               2460  1468   919   676   436   238   102   OK
+  R3-bigamp               2560  2559  1762  1385  1130   920   839   OK
+  R4-llr                  2548  2388  2245  1319   904   593   362   OK
+  R4-scvamp               2539  2025  1265   887   574   333   179   OK
+  bstar-pilot             2535  1665   874   572   347   169    81   OK
+  V1-pilot                2517  1546   740   440   234    96    33   OK
+  ALD-pilot               2545  1822   863   537   282   124    40   OK
+  ALDv-pilot              2547  1836   851   524   267   125    38   OK
+  SBL-loop                2522  1772   979   671   386   174    83   OK
+  decision-point (-3/0/+3) sums: b* 958 V1 599 genie 127 SBL-loop 1231  (§0: 958 / 599 / 127)
+====================================================================================================
+C. TABLE B X -> V1 for b* + 13 baselines (anchor rule, exact sign test, power guard, label, SNR@0.1 gap, R_X)
+  M-ours-bstar         dp ['-3', '+0', '+3'] 173:13(p=7.3e-37) 136:12(p=9e-28) 82:7(p=2.4e-17) pooled 391:32 POWERED=True wy 3 wx 0 -> (i) | gap +2.29 dB  [90% paired bootstrap +1.98, +2.61; censored repli | R-3 0.380 [90% 0.339, 0.421]
+  M-ours-bstar-scalar  dp ['-3', '+0', '+3'] 185:8(p=6.9e-45) 152:6(p=1.1e-37) 87:7(p=1.1e-18) pooled 424:21 POWERED=True wy 3 wx 0 -> (i) | gap +2.53 dB  [90% paired bootstrap +2.23, +2.87; censored repli | R-3 0.404 [90% 0.364, 0.444]
+  M-ours-gmm32         dp ['-3', '+0', '+3'] 253:12(p=6.9e-60) 198:9(p=1.6e-47) 123:1(p=1.2e-35) pooled 574:22 POWERED=True wy 3 wx 0 -> (i) | gap +3.27 dB  [90% paired bootstrap +2.90, +3.72; censored repli | R-3 0.480 [90% 0.443, 0.518]
+  R0-pilot             dp ['+0', '+3', '+6'] 291:3(p=2.7e-82) 187:3(p=1.5e-51) 97:1(p=6.2e-28) pooled 575:7 POWERED=True wy 3 wx 0 -> (i) | gap +4.56 dB  [90% paired bootstrap +4.04, +5.05; censored repli | R-3 0.604 [90% 0.574, 0.635]
+  R1-turbo             dp ['+0', '+3', '+6'] 367:3(p=7e-105) 249:1(p=2.8e-73) 127:0(p=1.2e-38) pooled 743:4 POWERED=True wy 3 wx 0 -> (i) | gap +5.49 dB  [90% paired bootstrap +5.05, +5.92; censored repli | R-3 0.653 [90% 0.626, 0.681]
+  R2-ours-G            dp ['+0', '+3', '+6'] 261:5(p=1.8e-70) 170:2(p=5e-48) 76:1(p=1e-21) pooled 507:8 POWERED=True wy 3 wx 0 -> (i) | gap +4.23 dB  [90% paired bootstrap +3.74, +4.79; censored repli | R-3 0.556 [90% 0.522, 0.590]
+  R3-bigamp            dp ['+0', '+3', '+6'] 950:0(p=2.1e-286) 850:0(p=2.7e-256) 812:0(p=7.3e-245) pooled 2612:0 POWERED=True wy 3 wx 0 -> (i) | gap >= +7.60 dB (R3-bigamp never reaches 0.1 on the grid) | R-3 0.799 [90% 0.781, 0.817]
+  R4-llr               dp ['+0', '+3', '+6'] 726:2(p=3.8e-214) 523:0(p=7.3e-158) 335:0(p=2.9e-101) pooled 1584:2 POWERED=True wy 3 wx 0 -> (i) | gap >= +7.60 dB (R4-llr never reaches 0.1 on the grid) | R-3 0.788 [90% 0.770, 0.807]
+  R4-scvamp            dp ['+0', '+3', '+6'] 396:2(p=2.5e-115) 264:1(p=9e-78) 152:0(p=3.5e-46) pooled 812:3 POWERED=True wy 3 wx 0 -> (i) | gap +5.87 dB  [90% paired bootstrap +5.40, +6.34; censored repli | R-3 0.673 [90% 0.648, 0.700]
+  bstar-pilot          dp ['-3', '+0', '+3'] 229:6(p=8.2e-60) 176:9(p=2.5e-41) 104:5(p=3.8e-25) pooled 509:20 POWERED=True wy 3 wx 0 -> (i) | gap +2.86 dB  [90% paired bootstrap +2.52, +3.24; censored repli | R-3 0.461 [90% 0.424, 0.499]
+  V1-pilot             dp ['-3', '+0', '+3'] 104:13(p=8.5e-19) 64:10(p=9e-11) 31:5(p=1.3e-05) pooled 199:28 POWERED=True wy 3 wx 0 -> (i) | gap +1.17 dB  [90% paired bootstrap +0.90, +1.50; censored repli | R-3 0.259 [90% 0.216, 0.301]
+  ALD-pilot            dp ['-3', '+0', '+3'] 197:9(p=3.1e-47) 113:11(p=1.8e-22) 59:5(p=9e-13) pooled 369:25 POWERED=True wy 3 wx 0 -> (i) | gap +1.95 dB  [90% paired bootstrap +1.64, +2.25; censored repli | R-3 0.419 [90% 0.381, 0.458]
+  ALDv-pilot           dp ['-3', '+0', '+3'] 186:11(p=3.5e-42) 102:15(p=4.4e-17) 60:5(p=4.9e-13) pooled 348:31 POWERED=True wy 3 wx 0 -> (i) | gap +1.76 dB  [90% paired bootstrap +1.44, +2.07; censored repli | R-3 0.401 [90% 0.362, 0.440]
+  SBL-loop             dp ['-3', '+0', '+3'] 325:3(p=2.2e-92) 216:10(p=1.5e-51) 110:6(p=7.5e-26) pooled 651:19 POWERED=True wy 3 wx 0 -> (i) | gap +3.14 dB  [90% paired bootstrap +2.78, +3.54; censored repli | R-3 0.552 [90% 0.519, 0.587]
+    robustness (different seed/scheme, report only): SNR@0.1 gap 90% CI [+2.79, +3.53]
+    anchor |log10(BLER/0.1)| per SNR: -12:0.994 -9:0.840 -6:0.583 -3:0.418 +0:0.178 +3:0.168 +6:0.489  (BLER -12 dB 0.9852 > 0.9 -> excluded)
+  SUMMARY-B (baselines without b*, 13): (i) 13, (ii) 0, not decided 0; b* -> V1 (i)
+  SUMMARY registered baselines 14 (b* + 𝔅 13): (i) 14, (ii) 0, not decided 0
+  X* (fewest -3 dB failures, ties by name) = V1-pilot (F=440); R_X* -3 dB = 0.259 [90% 0.216, 0.301]
+  '등록된 baseline 전부와 멀어진다' condition (k = 14, (ii) = 0, R_X* CI lower > 0): MET
+====================================================================================================
+D. REPORT-ONLY b* -> SBL-loop (pairB_U28NR32SBL_bstar.txt)
+  dp [-3, 0, 3] 34:196(p=7.2e-29) 47:129(p=5e-10) 23:52(p=0.0011) pooled 104:377; b* fewer at 3/3 points (mechanical label (ii), NOT attached per §1.3); gap -0.85 dB  [90% paired bootstrap -1.16, -0.62; censored replicates 0%]
+  failures@16 at the decision SNRs: M-ours-bstar 509/304/145  SBL-loop 671/386/174
+====================================================================================================
+E. REPORT-ONLY median NMSE@16 (pairB lines 124-138)
+  M-ours-dscore-C-V1   3.51e-01 1.80e-01 1.01e-01 5.74e-02 3.17e-02 1.70e-02 9.00e-03  OK
+  M-ours-bstar         4.23e-01 2.20e-01 1.28e-01 7.68e-02 4.31e-02 2.28e-02 1.19e-02  OK
+  M-ours-bstar-scalar  4.16e-01 2.21e-01 1.30e-01 7.55e-02 4.22e-02 2.20e-02 1.15e-02  OK
+  M-ours-gmm32         5.22e-01 2.75e-01 1.65e-01 9.28e-02 4.92e-02 2.49e-02 1.30e-02  OK
+  R0-pilot             7.86e-01 6.54e-01 4.86e-01 3.26e-01 1.97e-01 1.11e-01 5.90e-02  OK
+  R1-turbo             7.22e-01 4.97e-01 2.70e-01 1.40e-01 7.10e-02 3.63e-02 1.81e-02  OK
+  R2-ours-G            6.91e-01 4.20e-01 2.45e-01 1.35e-01 6.98e-02 3.61e-02 1.80e-02  OK
+  R3-bigamp            9.83e-01 9.50e-01 7.99e-01 6.61e-01 4.83e-01 3.00e-01 1.51e-01  OK
+  R4-llr               7.84e-01 6.46e-01 1.42e+00 2.20e-01 7.58e-02 3.79e-02 1.87e-02  OK
+  R4-scvamp            7.24e-01 5.03e-01 2.78e-01 1.42e-01 7.13e-02 3.64e-02 1.82e-02  OK
+  bstar-pilot          5.64e-01 3.96e-01 2.64e-01 1.72e-01 1.04e-01 6.15e-02 3.50e-02  OK
+  V1-pilot             5.32e-01 3.65e-01 2.33e-01 1.47e-01 8.71e-02 4.84e-02 2.71e-02  OK
+  ALD-pilot            6.26e-01 4.38e-01 2.78e-01 1.70e-01 9.83e-02 5.39e-02 2.98e-02  OK
+  ALDv-pilot           6.26e-01 4.38e-01 2.78e-01 1.70e-01 9.83e-02 5.39e-02 2.98e-02  OK
+  SBL-loop             8.64e-01 4.09e-01 1.97e-01 1.01e-01 4.87e-02 2.37e-02 1.19e-02  OK
+====================================================================================================
+F. DEVELOPMENT SELECTION (worktree t2_wtE3 raw_U28NR32SBLd_*; §1.2 rules re-applied; vs select_dev_*.out and §5)
+  probe.out: 9 rows; 30 h screen = block > 578.6 s -> excluded [(16, 25)] (40.1 h); max RSS range 878.0-1177.0 MiB
+  U28NR32SBLd_r4e3       F(-3,0,+3) [86, 35, 21] sum 142 metric 0.14791666666666667 raised [0, 0, 0] probe_sec 4.765 git d3993c8d
+  U28NR32SBLd_r4e3w      F(-3,0,+3) [86, 38, 22] sum 146 metric 0.15208333333333332 raised [0, 0, 0] probe_sec 4.765 git fe7e911b
+  U28NR32SBLd_r8e3w      F(-3,0,+3) [88, 37, 22] sum 147 metric 0.153125 raised [0, 0, 0] probe_sec 33.897 git fe7e911b
+  U28NR32SBLd_r8e3       F(-3,0,+3) [90, 35, 23] sum 148 metric 0.15416666666666667 raised [0, 0, 0] probe_sec 33.897 git d3993c8d
+  U28NR32SBLd_r16e3      F(-3,0,+3) [90, 35, 23] sum 148 metric 0.15416666666666667 raised [0, 0, 0] probe_sec 124.065 git d3993c8d
+  U28NR32SBLd_r8e10      F(-3,0,+3) [90, 40, 23] sum 153 metric 0.159375 raised [0, 0, 0] probe_sec 43.338 git d3993c8d
+  U28NR32SBLd_r4e10      F(-3,0,+3) [93, 39, 22] sum 154 metric 0.16041666666666668 raised [0, 0, 0] probe_sec 12.398 git d3993c8d
+  U28NR32SBLd_r16e10     F(-3,0,+3) [91, 41, 23] sum 155 metric 0.16145833333333334 raised [0, 0, 0] probe_sec 295.339 git 79ea962c
+  U28NR32SBLd_r4e25      F(-3,0,+3) [94, 38, 27] sum 159 metric 0.165625 raised [0, 0, 0] probe_sec 39.051 git d3993c8d
+  U28NR32SBLd_r8e25      F(-3,0,+3) [97, 40, 24] sum 161 metric 0.16770833333333332 raised [0, 0, 0] probe_sec 122.003 git d3993c8d
+  TOP2 [(4, 3), (8, 3)]; PICK U28NR32SBLd_r4e3 rho 4 n_em 3 warm False metric 0.14791666666666667 range_edge ['rho', 'n_em']
+  prediction 1 (rho larger -> fewer dev failures, strict): n_em3 142,148,148  n_em10 154,153,155  n_em25 159,161 -> 빗나감
+  prediction 2 (pick is cold): pick warm=False (best warm sum 146 vs cold best 142) -> 적중
+  dev / smoke / merge raws (min skip, max skip, chunks): raw_U28NR32SBLd_r16e10 (3840, 4150, 96), raw_U28NR32SBLd_r16e3 (3840, 4150, 96), raw_U28NR32SBLd_r4e10 (3840, 4150, 96), raw_U28NR32SBLd_r4e25 (3840, 4150, 96), raw_U28NR32SBLd_r4e3 (3840, 4150, 96), raw_U28NR32SBLd_r4e3w (3840, 4150, 96), raw_U28NR32SBLd_r8e10 (3840, 4150, 96), raw_U28NR32SBLd_r8e25 (3840, 4150, 96), raw_U28NR32SBLd_r8e3 (3840, 4150, 96), raw_U28NR32SBLd_r8e3w (3840, 4150, 96), raw_U28NR32SBLdev (4160, 4160, 1), raw_U28NR32SBLmrg (4160, 4160, 1)
+  C9 raws holding an SBL/OMP arm (root, min skip, max skip, chunks):
+    ('t2/conf/raw_U28NR32SBL', 0, 2520, 448)
+    ('t2/conf/raw_U28NR32SBLmrg', 4160, 4160, 1)
+    ('t2_wtE3/conf/raw_U28NR32SBLd_r16e10', 3840, 4150, 96)
+    ('t2_wtE3/conf/raw_U28NR32SBLd_r16e3', 3840, 4150, 96)
+    ('t2_wtE3/conf/raw_U28NR32SBLd_r4e10', 3840, 4150, 96)
+    ('t2_wtE3/conf/raw_U28NR32SBLd_r4e25', 3840, 4150, 96)
+    ('t2_wtE3/conf/raw_U28NR32SBLd_r4e3', 3840, 4150, 96)
+    ('t2_wtE3/conf/raw_U28NR32SBLd_r4e3w', 3840, 4150, 96)
+    ('t2_wtE3/conf/raw_U28NR32SBLd_r8e10', 3840, 4150, 96)
+    ('t2_wtE3/conf/raw_U28NR32SBLd_r8e25', 3840, 4150, 96)
+    ('t2_wtE3/conf/raw_U28NR32SBLd_r8e3', 3840, 4150, 96)
+    ('t2_wtE3/conf/raw_U28NR32SBLd_r8e3w', 3840, 4150, 96)
+    ('t2_wtE3/conf/raw_U28NR32SBLdev', 4160, 4160, 1)
+====================================================================================================
+G. ARITHMETIC OF §5 / §1.2 (worker count, time screen, G)
+  6.580 x 1.05 = 6.909 -> G 7.0; floor(0.8 x 956.8 GiB / 7) = 109; ceil(448/96) x 108 = 540 s
+====================================================================================================
+COMPARISONS: 442 match, 0 mismatch

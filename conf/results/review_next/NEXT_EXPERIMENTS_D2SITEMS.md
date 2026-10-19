@@ -214,3 +214,54 @@ UMi32 확장, k-probe (Hutchinson) 같은 새 scalar 알고리즘, 결과에 따
 - 실행 전 산출물 없음 (10-18 22:24 CDT, main): `results/review_next/e1ms/`, `logs/run_e1ms.log`, `raw_D2SITEMS`, `results/gmm_fits_D2_D2SITEMS` 모두 없음 (worktree 의 `raw_E1MS*` · `results/gmm_fits_D2_E1MS*` 는 개발 · 시험 산출물이며 추적하지 않는다).
 
 ## 6. 결과 (이 절은 추가만 한다)
+
+기록 2026-10-19 08:49 CDT (= 10-19 22:49 KST, Opus 5.5). 출처: `results/review_next/e1ms/compare_D2SITEMS.txt` (`code/e1ms_compare.py` 출력, 수치는 옮긴 것), `logs/run_e1ms.log`, `logs/run_D2_D2SITEMS.log`, `e1ms/D2SITEMS_accept.txt`, `e1ms/console_D2SITEMS.txt` (tmux 화면 저장).
+
+### 6.1 실행 · 수용
+- 실행 커밋 9a2c9fd4 (s5: FREEZE e6ac9e65 · WGB 1.5). 사용자 승인 "다 진행하자" (DECISIONS 실행 시작 줄). 병합 확인 E1MS_MERGECHK OK (10-19 08:40–08:41 CDT; (a) test 0..39 의 V1 · V4 14 배열 on · off 비트 동일, V1-ms 미실행; (b) 개발 청크의 V1-ms + genie = `raw_E1MSdev` · `raw_E1MSsm`; 그 DECISIONS 줄).
+- tmux `e1ms`, `E1MS_CPUS=24-47,120-143,72-95,168-191 bash code/run_e1ms.sh`, 워커 96 (메모리 가드 허용 529), 재개 없음. 10-19 08:42 CDT 시작 → runner 4.6 분 → 08:47 CDT `E1MS_DONE ok=3 fail=0`.
+- 수용 ① `ACCEPT: OK -- D2SITEMS` (R5-genie 를 `raw_B16e4k` 와 대조); ② `192 chunks (want 192), 0 problems` (run|git 9a2c9fd4 · meta|ms_arm · arm 집합 · 모양 (40, 16)). compare 머리말: base `manifest-head:cd241b7e/chunks-sha:78cbb59fc01ce520` (§5 와 같음), `integrity: OK` (점, n = 2560, arm, raw 마다 깨끗한 커밋 하나, R5-genie KEYS4 동일). raise 된 블록 0 (compare 의 NOTE · WARNING 줄 0).
+- 같은 시각의 다른 작업 (결과 무관): 08:46 CDT 부터 Codex 두 건 (V1LS §6 교차 검토 — CPU 66-67; E4 마무리 보고 — worktree `~/t2_wtCost`, CPU 1,97) 과 Fable 기록 감사 넷 (CPU 2–17, nice 10). 계산 명령은 이 실행의 CPU 밖 (Codex 66-67 · 1,97, Fable 2–17) 으로 묶도록 지시했다 — 에이전트 프로세스 자체는 묶지 않았다 (codex exec 의 affinity 0-191, verifier 확인). runner 를 띄우지 않았고, 시작 가드 (08:42 CDT) 뒤에 떴다. 08:46–08:47 CDT 에는 선언상 이 계정의 CPU 합이 96 + 20 스레드였다 (사용자 상한 168 안, 공통 규칙의 96 집합 밖).
+
+### 6.2 판정 (§1.4 규칙 그대로, `compare_D2SITEMS.txt`)
+
+| 비교 | 판정점 | 점별 a:b · p (−3 / 0 / +3 dB) | pooled (보고 전용) | POWERED (D) | 라벨 | SNR@0.1 격차 [90 %] |
+|---|---|---|---|---|---|---|
+| **주** `V1-ms → V1` (a = V1-ms 만 실패) | −3 · 0 · +3 (고정; 앵커 규칙 확인 줄도 같음) | 53:35 p .069 · 22:12 p .12 · 8:10 p .81 | 83:57 p .034 | True (88 · 34 · 18) | **(iii)** (second arm fewer 0/3, first arm fewer 0/3) | L = **+0.14 dB [+0.05, +0.22]**, censored 0 % |
+| 보조 (보고 전용) `V4 → V1-ms` (a = V4 만 실패) | 같음 | 6:1 p .12 · 4:6 p .75 · 0:6 p .031 | 10:13 p .68 | True (7 · 10 · 6) | (iii) (second arm fewer 0/3, first arm fewer 1/3 — +3 dB) | +0.01 dB [−0.04, +0.04], censored 0 % |
+
+실패 수 / 2560 (BLER@16; raise 된 블록 = 실패):
+
+| SNR (dB) | V1 | V4 | V1-ms | genie |
+|---|---|---|---|---|
+| −3 | 371 | 394 | 389 | 87 |
+| 0 | 88 | 96 | 98 | 26 |
+| +3 | 29 | 21 | 27 | 12 |
+
+V1 · V4 는 기록된 `raw_B16e4k` (§0.1 과 같은 수), V1-ms 는 `raw_D2SITEMS`; genie 는 두 raw 에서 비트 동일 (수용 ①).
+
+### 6.3 등록 문장 (§2.1 · §2.2 의 틀 그대로)
+- **주 비교 (iii)**: "판정하지 못함 (유의 방향 없음)". 개별 유의점 없음 (점별 p .069 · .12 · .81). "SNR 손실 L = SNR_ms(0.1) − SNR_V1(0.1) = +0.14 dB [90 % paired bootstrap +0.05, +0.22] (양수 = scalar 쪽 손실; 3 점 격자 −3 / 0 / +3 dB; censored replicates 0 %)". "V1-ms = V1 과 같은 가중치 · 배선 · 안정화 (Jacobian PSD 수리, precision floor λ_min, decoder damping, scalar feedback) 에서 EP site 의 공분산만 C₊ = νJ₊ → (tr C₊/N) I 로 바꾼 arm (설계 차이는 이것 하나); 첫 질의 뒤 두 arm 의 질의 궤적은 갈린다; full Jacobian 을 계산하므로 저비용 구현이 아니다". 범위: 이 셀 · 예산 · prior (Sparse specular 8×4, N′ = 1.6e5), 판정점 −3 / 0 / +3 dB, test 시행 0..2559.
+- **보조 (§2.2)**: "보조 (보고 전용) `V4 → V1-ms`: (iii) '판정하지 못함 (유의 방향 없음)'; 점별 a:b · p −3 dB 6:1 p=0.12 · +0 dB 4:6 p=0.75 · +3 dB 0:6 p=0.031; SNR@0.1 격차 (V4 − V1-ms) +0.01 dB [90% paired bootstrap −0.04, +0.04; censored replicates 0%]. V4 와 V1-ms 는 Jacobian 수리 (V4 없음 · V1-ms 있음) 와 scalar site 를 만드는 경로가 함께 다르다 (§0.2)". (iii) 안의 개별 유의점: +3 dB 0:6 p .031 — V4 가 적게 실패.
+- 원고용 영어 틀 (§2.4; 넣을지 · 어디에 넣을지는 사용자): (iii) `In paired sign tests, the comparison between the matrix-site receiver and its matched-scalar variant is not decided: neither receiver has p < 0.05 in its favor at two or more of the three tested SNRs.` · 공통 (kind ok) `Relative to the matrix-site receiver, the matched-scalar variant reaches BLER 0.1 at an SNR offset of +0.14\,dB [$+0.05$, $+0.22$] (positive: more SNR needed).`
+- §2.3 의 쓰지 않는 문구는 쓰지 않는다. pooled 83:57 (p .034) 은 보고 전용이며 라벨 · 문장에 쓰지 않는다 (§1.4).
+
+### 6.4 예측 채점 (§3)
+1. 주 라벨 (iii) — **적중**.
+2. −3 dB 에서 V1 쪽 유의 — 빗나감 (53:35, a > b 이지만 p .069 ≥ .05); 0 · +3 dB 유의 아님 — 맞음 (p .12 · .81); 혼합 결과 아님 (V1-ms 쪽 유의 점 0) — 맞음. → **빗나감** (부분 ✓ 병기).
+3. POWERED True, 세 점 모두 D ≥ 6 (88 · 34 · 18) — **적중**.
+4. L: kind ok, censored 0 %, 점추정 +0.14 ∈ [+0.04, +0.25] — **적중**.
+5. L 구간 하한 +0.05 ≥ +0.01 — **적중**.
+6. 보조 라벨 (iv) — 빗나감 ((iii): 점별 D 7 · 10 · 6 으로 세 점 모두 D ≥ 6 → POWERED; 등록이 적은 대안 (iii) 쪽); 점별 D ≤ 20 / 10 / 10 — 맞음 (7 · 10 · 6). → **빗나감** (부분 ✓ 병기).
+7. |F_ms − F_V4| = 5 · 2 · 6 ≤ 20 / 10 / 10; F_ms(−3 dB) 389 > 371; F_ms(+3 dB) 27 < 29 — **적중**.
+8. 앵커 규칙 확인 줄 두 블록 모두 `['-3', '+0', '+3']` — **적중**.
+9. 수용 ① · ② OK, NOTE 줄 0 — **적중**.
+10. runner 벽시계 4.6 분 ≤ 15 분 — **적중**.
+11. (빗나갈 경로 — 해당 없음.)
+→ 1–10 가운데 8 적중, 2 빗나감 (2 · 6, 둘 다 부분 ✓).
+
+### 6.5 남은 일
+기록 감사 (Fable, 1 회 — 사용자 승인 "다 진행하자"), Codex 교차 검토 (제안), 원고 · `docs/RESULTS.md` 반영은 사용자 요청 때. `e4-cost` 병합은 이제 가능하다 (E1+ 실행 끝, §5 병합 순서).
+
+### 6.6 검토 (verifier, 보고 받음 2026-10-19 09:02 CDT; `scratchpad/verify_e1ms_s6/` 의 recompute · textcheck)
+결함 0. 독립 재계산 (numpy, conf/code 미사용): 실패 수 표 · 점별 a:b · p · pooled · D · 라벨 (iii) · (iii) 일치; SNR@0.1 V1 −2.226 · V1-ms −2.090 · V4 −2.084 dB → L +0.137, 보조 +0.006; bootstrap (B 2000, seed 20260925) L [+0.050, +0.225] · 보조 [−0.037, +0.042], censored 0/2000; `e1ms_compare.py` 재실행 출력이 기록과 diff 없음. §6.3 문장은 §2.1 · §2.2 · §2.4 의 틀과 글자 단위로 같고 §2.3 금지 문구 0; 예측 채점 8/10 (2 · 6 빗나감, 대안을 적중으로 치지 않음). raw_D2SITEMS 192 청크 · 시행 0..2559 · run|git 9a2c9fd4 · meta 일치, genie 비트 동일, FREEZE 뒤 등록 문서는 §6 추가 (hunk 하나) 뿐. 선택 개선 1 반영: §6.1 의 CPU 문구 (위). 추가 확인 필요 1 (결과 무관): 같은 시각 에이전트들의 실제 CPU 사용은 지나간 일이라 확인 수단 없음.

@@ -1,0 +1,296 @@
+# recompute_v1ls.py -- numpy 2.5.2; raw read from /home/HTJ/t2/conf/raw_<T>; compare files from /home/HTJ/t2/conf/results/review_next/v1ls
+
+==== U28LSQ (UMi28 qpsk, grid [-3, 0, 3, 6, 9, 12, 15, 18, 21], reference raw_U28B16e4) ====
+  files in raw_U28LSQ: 576 (npz matching the run pattern: 576)
+  chunk plan: 576 chunks = 9 SNR x 64; issues: none
+  '|failed' keys: 0; non-finite blk_err entries: 0; blk_err values: [0, 1]; bad shapes: 0
+  acceptance ② (every chunk, distinct values):
+    OK  run|git: 1d706648
+    OK  meta|modulation: ABSENT
+    OK  meta|lowsig_arms present: 576
+    OK  meta|lowsig_s_lo: 0.032681101782796075
+    OK  meta|wide_sigma_tag: UMi28HSUd
+    OK  meta|wide_ckpt_id (prefix): sha256[:16]=03cc9005164fe31d epoch=493 best_epoch=493 role=best 8x4
+    OK  meta|wide_ckpt_id (full, distinct): sha256[:16]=03cc9005164fe31d epoch=493 best_epoch=493 role=best 8x4
+    OK  meta|stagec_ckpt_id (prefix): sha256[:16]=6f3a1b9490864af1 epoch=379 best_epoch=379 role=best 8x4
+    OK  meta|kron_K: 4096
+    OK  meta|bstar: kron
+    OK  meta|ntrain: 160000.0
+    OK  meta|jobs: 96
+    OK  meta|worker_gb: 1.5
+    OK  run|n: 40
+    OK  run|iters: 16
+    OK  run|seed: 20260926
+    OK  run|dtype: complex128/float64
+    OK  meta|ll_val|kron (|d|<=1e-9): 5.797910431000217
+  acceptance ③ vs raw_U28B16e4: 448 chunks (want 448), 11648 arrays of V1/b*/genie compared over keys ['alphaD', 'alphaD_clip', 'ber', 'blk_err', 'clip', 'guardH', 'nmse', 'tauL_clip_frac', 'tauL_gmean'], differing 0, keys present in only one file: none
+  failures @16 / 2560 per SNR (recomputed):
+    SNR              V1  M-ours-bstar      R5-genie      V1-clamp      V1-gmmfb       V1-wide
+     -3            1228          1270           594          1228          1228          1240
+     +0             656           714           302           656           656           660
+     +3             393           431           131           393           393           387
+     +6             215           243            58           215           215           217
+     +9             104           126            26           104           104           101
+    +12              44            69             8            44            44            40
+    +15              24            27             3            24            24            24
+    +18             934             7             0             4             4             5
+    +21            2556             6             0             1             5             1
+  [PRIMARY] M-ours-dscore-C-V1-wide
+    L1 +18 dB 929:0 p=4.4e-280  +21 dB 2555:0 p=0   -> (a) X fewer at both points
+    MONOTONE (failures of M-ours-dscore-C-V1-wide at +15 / +18 / +21 dB = 24 / 5 / 1 of 2560): yes
+    L2 decision SNRs ['+3', '+6', '+9'] | sign test @16: +3 dB 81:37 p=6.3e-05  +6 dB 53:27 p=0.0049  +9 dB 35:10 p=0.00025   pooled 169:74 p=1e-09
+    power guard: POWERED; second arm fewer failures at 3/3 points, first arm fewer failures at 0/3 points -> significant
+    SNR@0.1 gap (M-ours-bstar minus M-ours-dscore-C-V1-wide): +0.58 dB  [90% paired bootstrap +0.30, +0.86; censored replicates 0%]   -> label (i)   (flags ('ok', 'ok'))
+    decision points: sum F  b* 800  X 705  genie 215   R = 0.162393  [90% paired bootstrap B=2000 seed 20260926: 0.121, 0.202]
+    SUFFIX (§2.1 M3): none
+    PRIMARY LABELS: L1 (a) X fewer at both points (monotone yes)   L2 (i) (suffixes 0)
+  [report-only] M-ours-dscore-C-V1-clamp
+    L1 +18 dB 930:0 p=2.2e-280  +21 dB 2555:0 p=0   -> (a) X fewer at both points
+    MONOTONE (failures of M-ours-dscore-C-V1-clamp at +15 / +18 / +21 dB = 24 / 4 / 1 of 2560): yes
+    L2 decision SNRs ['+3', '+6', '+9'] | sign test @16: +3 dB 76:38 p=0.00048  +6 dB 50:22 p=0.0013  +9 dB 35:13 p=0.0021   pooled 161:73 p=8.7e-09
+    power guard: POWERED; second arm fewer failures at 3/3 points, first arm fewer failures at 0/3 points -> significant
+    SNR@0.1 gap (M-ours-bstar minus M-ours-dscore-C-V1-clamp): +0.60 dB  [90% paired bootstrap +0.33, +0.85; censored replicates 0%]   -> label (i)   (flags ('ok', 'ok'))
+    decision points: sum F  b* 800  X 712  genie 215   R = 0.150427  [90% paired bootstrap B=2000 seed 20260926: 0.110, 0.189]
+    SUFFIX (§2.1 M3): none
+  [report-only] M-ours-dscore-C-V1-gmmfb
+    L1 +18 dB 930:0 p=2.2e-280  +21 dB 2551:0 p=0   -> (a) X fewer at both points
+    MONOTONE (failures of M-ours-dscore-C-V1-gmmfb at +15 / +18 / +21 dB = 24 / 4 / 5 of 2560): no
+    L2 decision SNRs ['+3', '+6', '+9'] | sign test @16: +3 dB 76:38 p=0.00048  +6 dB 50:22 p=0.0013  +9 dB 35:13 p=0.0021   pooled 161:73 p=8.7e-09
+    power guard: POWERED; second arm fewer failures at 3/3 points, first arm fewer failures at 0/3 points -> significant
+    SNR@0.1 gap (M-ours-bstar minus M-ours-dscore-C-V1-gmmfb): +0.60 dB  [90% paired bootstrap +0.33, +0.85; censored replicates 0%]   -> label (i)   (flags ('ok', 'ok'))
+    decision points: sum F  b* 800  X 712  genie 215   R = 0.150427  [90% paired bootstrap B=2000 seed 20260926: 0.110, 0.189]
+    SUFFIX (§2.1 M3): none
+  V1 -> C other points: -3 27:39 p=0.18  +0 27:31 p=0.69  +3 32:26 p=0.51  +6 14:16 p=0.86  +9 10:7 p=0.63  +12 10:6 p=0.45  +15 3:3 p=1; pooled <= +15 dB 123:128 p=0.8
+  b* -> C at +18 / +21: +18 4:2 p=0.69  +21 6:1 p=0.12
+  prediction 5: C <= +15 dB sum 2669 vs V1 2664 (limit 2767.2) -> ok
+  prediction 4: V1 vs b* at +18 / +21: 934 vs 7, 2556 vs 6 -> ok
+  largest decision-point p (PRIMARY): 0.004868; sign_p(53,27) = 0.004868
+
+==== U28LS16 (UMi28 16qam, grid [3, 6, 9, 12, 15, 18, 21], reference raw_U28QAM16) ====
+  files in raw_U28LS16: 448 (npz matching the run pattern: 448)
+  chunk plan: 448 chunks = 7 SNR x 64; issues: none
+  '|failed' keys: 0; non-finite blk_err entries: 0; blk_err values: [0, 1]; bad shapes: 0
+  acceptance ② (every chunk, distinct values):
+    OK  run|git: 1d706648
+    OK  meta|modulation: 16qam
+    OK  meta|lowsig_arms present: 448
+    OK  meta|lowsig_s_lo: 0.032681101782796075
+    OK  meta|wide_sigma_tag: UMi28HSUd
+    OK  meta|wide_ckpt_id (prefix): sha256[:16]=03cc9005164fe31d epoch=493 best_epoch=493 role=best 8x4
+    OK  meta|wide_ckpt_id (full, distinct): sha256[:16]=03cc9005164fe31d epoch=493 best_epoch=493 role=best 8x4
+    OK  meta|stagec_ckpt_id (prefix): sha256[:16]=6f3a1b9490864af1 epoch=379 best_epoch=379 role=best 8x4
+    OK  meta|kron_K: 4096
+    OK  meta|bstar: kron
+    OK  meta|ntrain: 160000.0
+    OK  meta|jobs: 96
+    OK  meta|worker_gb: 1.5
+    OK  run|n: 40
+    OK  run|iters: 16
+    OK  run|seed: 20260926
+    OK  run|dtype: complex128/float64
+    OK  meta|ll_val|kron (|d|<=1e-9): 5.797910431000217
+    OK  meta|payload_bits: 90
+    OK  meta|protocol: E5-qam16-v1
+  acceptance ③ vs raw_U28QAM16: 448 chunks (want 448), 11648 arrays of V1/b*/genie compared over keys ['alphaD', 'alphaD_clip', 'ber', 'blk_err', 'clip', 'guardH', 'nmse', 'tauL_clip_frac', 'tauL_gmean'], differing 0, keys present in only one file: none
+  failures @16 / 2560 per SNR (recomputed):
+    SNR              V1  M-ours-bstar      R5-genie      V1-clamp      V1-gmmfb       V1-wide
+     +3            1549          1560          1054          1549          1549          1540
+     +6            1022          1060           704          1022          1022          1011
+     +9             718           753           428           718           718           717
+    +12             461           516           246           461           461           465
+    +15             277           306           136           277           277           273
+    +18            1844           182            56           160           160           154
+    +21            2543           107            29            83           107            80
+  [PRIMARY] M-ours-dscore-C-V1-wide
+    L1 +18 dB 1693:3 p=0  +21 dB 2463:0 p=0   -> (a) X fewer at both points
+    MONOTONE (failures of M-ours-dscore-C-V1-wide at +15 / +18 / +21 dB = 273 / 154 / 80 of 2560): yes
+    L2 decision SNRs ['+12', '+15', '+18'] | sign test @16: +12 dB 69:18 p=3.3e-08  +15 dB 52:19 p=0.00011  +18 dB 44:16 p=0.00039   pooled 165:53 p=1.4e-14
+    power guard: POWERED; second arm fewer failures at 3/3 points, first arm fewer failures at 0/3 points -> significant
+    SNR@0.1 gap (M-ours-bstar minus M-ours-dscore-C-V1-wide): +0.69 dB  [90% paired bootstrap +0.43, +1.02; censored replicates 0%]   -> label (i)   (flags ('ok', 'ok'))
+    decision points: sum F  b* 1004  X 892  genie 438   R = 0.197880  [90% paired bootstrap B=2000 seed 20260926: 0.159, 0.236]
+    SUFFIX (§2.1 M3): none
+    PRIMARY LABELS: L1 (a) X fewer at both points (monotone yes)   L2 (i) (suffixes 0)
+  [report-only] M-ours-dscore-C-V1-clamp
+    L1 +18 dB 1685:1 p=0  +21 dB 2460:0 p=0   -> (a) X fewer at both points
+    MONOTONE (failures of M-ours-dscore-C-V1-clamp at +15 / +18 / +21 dB = 277 / 160 / 83 of 2560): yes
+    L2 decision SNRs ['+12', '+15', '+18'] | sign test @16: +12 dB 72:17 p=3.2e-09  +15 dB 49:20 p=0.00064  +18 dB 41:19 p=0.0062   pooled 162:56 p=3.9e-13
+    power guard: POWERED; second arm fewer failures at 3/3 points, first arm fewer failures at 0/3 points -> significant
+    SNR@0.1 gap (M-ours-bstar minus M-ours-dscore-C-V1-clamp): +0.60 dB  [90% paired bootstrap +0.36, +0.93; censored replicates 0%]   -> label (i)   (flags ('ok', 'ok'))
+    decision points: sum F  b* 1004  X 898  genie 438   R = 0.187279  [90% paired bootstrap B=2000 seed 20260926: 0.148, 0.226]
+    SUFFIX (§2.1 M3): none
+  [report-only] M-ours-dscore-C-V1-gmmfb
+    L1 +18 dB 1685:1 p=0  +21 dB 2436:0 p=0   -> (a) X fewer at both points
+    MONOTONE (failures of M-ours-dscore-C-V1-gmmfb at +15 / +18 / +21 dB = 277 / 160 / 107 of 2560): yes
+    L2 decision SNRs ['+12', '+15', '+18'] | sign test @16: +12 dB 72:17 p=3.2e-09  +15 dB 49:20 p=0.00064  +18 dB 41:19 p=0.0062   pooled 162:56 p=3.9e-13
+    power guard: POWERED; second arm fewer failures at 3/3 points, first arm fewer failures at 0/3 points -> significant
+    SNR@0.1 gap (M-ours-bstar minus M-ours-dscore-C-V1-gmmfb): +0.60 dB  [90% paired bootstrap +0.36, +0.93; censored replicates 0%]   -> label (i)   (flags ('ok', 'ok'))
+    decision points: sum F  b* 1004  X 898  genie 438   R = 0.187279  [90% paired bootstrap B=2000 seed 20260926: 0.148, 0.226]
+    SUFFIX (§2.1 M3): none
+  V1 -> C other points: +3 23:14 p=0.19  +6 25:14 p=0.11  +9 20:19 p=1  +12 11:15 p=0.56  +15 16:12 p=0.57; pooled <= +15 dB 95:74 p=0.12
+  b* -> C at +18 / +21: +18 44:16 p=0.00039  +21 35:8 p=4.2e-05
+  prediction 5: C <= +15 dB sum 4006 vs V1 4027 (limit 4153.9) -> ok
+  largest decision-point p (PRIMARY): 0.000394; sign_p(53,27) = 0.004868
+
+==== D2LSQ (S2 qpsk, grid [-3, 0, 3, 6, 9, 12, 15, 18, 21], reference raw_B16e4k) ====
+  files in raw_D2LSQ: 576 (npz matching the run pattern: 576)
+  chunk plan: 576 chunks = 9 SNR x 64; issues: none
+  '|failed' keys: 0; non-finite blk_err entries: 0; blk_err values: [0, 1]; bad shapes: 0
+  acceptance ② (every chunk, distinct values):
+    OK  run|git: 1d706648
+    OK  meta|modulation: ABSENT
+    OK  meta|lowsig_arms present: 576
+    OK  meta|lowsig_s_lo: 0.033062204571989696
+    OK  meta|wide_sigma_tag: HSUd
+    OK  meta|wide_ckpt_id (prefix): sha256[:16]=bd48a8860ca2543e epoch=1028 best_epoch=1008 role=last 8x4
+    OK  meta|wide_ckpt_id (full, distinct): sha256[:16]=bd48a8860ca2543e epoch=1028 best_epoch=1008 role=last 8x4 | evaluated = LAST epoch; the best-epoch weights are in the _best.pt sibling
+    OK  meta|stagec_ckpt_id (prefix): sha256[:16]=4443921ce8d5c4a1 epoch=1784 best_epoch=1764 role=legacy-last 8x4
+    OK  meta|kron_K: 1024
+    OK  meta|bstar: kron
+    OK  meta|ntrain: 160000.0
+    OK  meta|jobs: 96
+    OK  meta|worker_gb: 1.5
+    OK  run|n: 40
+    OK  run|iters: 16
+    OK  run|seed: 20260926
+    OK  run|dtype: complex128/float64
+    OK  meta|ll_val|kron (|d|<=1e-9): -11.459169831224418
+  acceptance ③ vs raw_B16e4k: 448 chunks (want 448), 11648 arrays of V1/b*/genie compared over keys ['alphaD', 'alphaD_clip', 'ber', 'blk_err', 'clip', 'guardH', 'nmse', 'tauL_clip_frac', 'tauL_gmean'], differing 0, keys present in only one file: none
+  failures @16 / 2560 per SNR (recomputed):
+    SNR              V1  M-ours-bstar      R5-genie      V1-clamp      V1-gmmfb       V1-wide
+     -3             371           623            87           371           371           371
+     +0              88           184            26            88            88            90
+     +3              29            57            12            29            29            32
+     +6              16            28             9            16            16            15
+     +9               7            17             2             7             7             8
+    +12               5            16             2             5             5             5
+    +15               3             8             2             3             3             3
+    +18            2258             4             1             0             0             2
+    +21            2559             6             0             2             7             2
+  [PRIMARY] M-ours-dscore-C-V1-wide
+    L1 +18 dB 2256:0 p=0  +21 dB 2557:0 p=0   -> (a) X fewer at both points
+    MONOTONE (failures of M-ours-dscore-C-V1-wide at +15 / +18 / +21 dB = 3 / 2 / 2 of 2560): yes
+    L2 decision SNRs ['-3', '+0', '+3'] | sign test @16: -3 dB 299:47 p=5.2e-46  +0 dB 112:18 p=8.9e-18  +3 dB 31:6 p=4.1e-05   pooled 442:71 p=1.7e-66
+    power guard: POWERED; second arm fewer failures at 3/3 points, first arm fewer failures at 0/3 points -> significant
+    SNR@0.1 gap (M-ours-bstar minus M-ours-dscore-C-V1-wide): +1.40 dB  [90% paired bootstrap +1.21, +1.63; censored replicates 0%]   -> label (i)   (flags ('ok', 'ok'))
+    decision points: sum F  b* 864  X 493  genie 125   R = 0.502030  [90% paired bootstrap B=2000 seed 20260926: 0.464, 0.538]
+    SUFFIX (§2.1 M3): none
+    PRIMARY LABELS: L1 (a) X fewer at both points (monotone yes)   L2 (i) (suffixes 0)
+  [report-only] M-ours-dscore-C-V1-clamp
+    L1 +18 dB 2258:0 p=0  +21 dB 2557:0 p=0   -> (a) X fewer at both points
+    MONOTONE (failures of M-ours-dscore-C-V1-clamp at +15 / +18 / +21 dB = 3 / 0 / 2 of 2560): no
+    L2 decision SNRs ['-3', '+0', '+3'] | sign test @16: -3 dB 302:50 p=4.7e-45  +0 dB 117:21 p=2.4e-17  +3 dB 35:7 p=1.5e-05   pooled 454:78 p=1.7e-65
+    power guard: POWERED; second arm fewer failures at 3/3 points, first arm fewer failures at 0/3 points -> significant
+    SNR@0.1 gap (M-ours-bstar minus M-ours-dscore-C-V1-clamp): +1.41 dB  [90% paired bootstrap +1.22, +1.64; censored replicates 0%]   -> label (i)   (flags ('ok', 'ok'))
+    decision points: sum F  b* 864  X 488  genie 125   R = 0.508796  [90% paired bootstrap B=2000 seed 20260926: 0.470, 0.545]
+    SUFFIX (§2.1 M3): none
+  [report-only] M-ours-dscore-C-V1-gmmfb
+    L1 +18 dB 2258:0 p=0  +21 dB 2552:0 p=0   -> (a) X fewer at both points
+    MONOTONE (failures of M-ours-dscore-C-V1-gmmfb at +15 / +18 / +21 dB = 3 / 0 / 7 of 2560): no
+    L2 decision SNRs ['-3', '+0', '+3'] | sign test @16: -3 dB 302:50 p=4.7e-45  +0 dB 117:21 p=2.4e-17  +3 dB 35:7 p=1.5e-05   pooled 454:78 p=1.7e-65
+    power guard: POWERED; second arm fewer failures at 3/3 points, first arm fewer failures at 0/3 points -> significant
+    SNR@0.1 gap (M-ours-bstar minus M-ours-dscore-C-V1-gmmfb): +1.41 dB  [90% paired bootstrap +1.22, +1.64; censored replicates 0%]   -> label (i)   (flags ('ok', 'ok'))
+    decision points: sum F  b* 864  X 488  genie 125   R = 0.508796  [90% paired bootstrap B=2000 seed 20260926: 0.470, 0.545]
+    SUFFIX (§2.1 M3): none
+  V1 -> C other points: -3 50:50 p=1  +0 17:19 p=0.87  +3 7:10 p=0.63  +6 3:2 p=1  +9 1:2 p=1  +12 2:2 p=1  +15 2:2 p=1; pooled <= +15 dB 82:87 p=0.76
+  b* -> C at +18 / +21: +18 3:1 p=0.62  +21 4:0 p=0.12
+  prediction 5: C <= +15 dB sum 524 vs V1 519 (limit 564.6) -> ok
+  prediction 4: V1 vs b* at +18 / +21: 2258 vs 4, 2559 vs 6 -> ok
+  largest decision-point p (PRIMARY): 4.126e-05; sign_p(53,27) = 0.004868
+
+==== D2LS16 (S2 16qam, grid [3, 6, 9, 12, 15, 18, 21], reference raw_D2QAM16) ====
+  files in raw_D2LS16: 448 (npz matching the run pattern: 448)
+  chunk plan: 448 chunks = 7 SNR x 64; issues: none
+  '|failed' keys: 0; non-finite blk_err entries: 0; blk_err values: [0, 1]; bad shapes: 0
+  acceptance ② (every chunk, distinct values):
+    OK  run|git: 1d706648
+    OK  meta|modulation: 16qam
+    OK  meta|lowsig_arms present: 448
+    OK  meta|lowsig_s_lo: 0.033062204571989696
+    OK  meta|wide_sigma_tag: HSUd
+    OK  meta|wide_ckpt_id (prefix): sha256[:16]=bd48a8860ca2543e epoch=1028 best_epoch=1008 role=last 8x4
+    OK  meta|wide_ckpt_id (full, distinct): sha256[:16]=bd48a8860ca2543e epoch=1028 best_epoch=1008 role=last 8x4 | evaluated = LAST epoch; the best-epoch weights are in the _best.pt sibling
+    OK  meta|stagec_ckpt_id (prefix): sha256[:16]=4443921ce8d5c4a1 epoch=1784 best_epoch=1764 role=legacy-last 8x4
+    OK  meta|kron_K: 1024
+    OK  meta|bstar: kron
+    OK  meta|ntrain: 160000.0
+    OK  meta|jobs: 96
+    OK  meta|worker_gb: 1.5
+    OK  run|n: 40
+    OK  run|iters: 16
+    OK  run|seed: 20260926
+    OK  run|dtype: complex128/float64
+    OK  meta|ll_val|kron (|d|<=1e-9): -11.459169831224418
+    OK  meta|payload_bits: 90
+    OK  meta|protocol: E5-qam16-v1
+  acceptance ③ vs raw_D2QAM16: 448 chunks (want 448), 11648 arrays of V1/b*/genie compared over keys ['alphaD', 'alphaD_clip', 'ber', 'blk_err', 'clip', 'guardH', 'nmse', 'tauL_clip_frac', 'tauL_gmean'], differing 0, keys present in only one file: none
+  failures @16 / 2560 per SNR (recomputed):
+    SNR              V1  M-ours-bstar      R5-genie      V1-clamp      V1-gmmfb       V1-wide
+     +3             828          1189           546           828           828           842
+     +6             470           675           317           470           470           463
+     +9             286           420           217           286           286           286
+    +12             184           288           140           184           184           194
+    +15             137           214           108           137           135           132
+    +18            2485           147            75            90            91            90
+    +21            2557           123            49            67           125            66
+  [PRIMARY] M-ours-dscore-C-V1-wide
+    L1 +18 dB 2396:1 p=0  +21 dB 2491:0 p=0   -> (a) X fewer at both points
+    MONOTONE (failures of M-ours-dscore-C-V1-wide at +15 / +18 / +21 dB = 132 / 90 / 66 of 2560): yes
+    L2 decision SNRs ['+9', '+12', '+15'] | sign test @16: +9 dB 160:26 p=9.8e-25  +12 dB 116:22 p=1.3e-16  +15 dB 93:11 p=2.5e-17   pooled 369:59 p=6.7e-56
+    power guard: POWERED; second arm fewer failures at 3/3 points, first arm fewer failures at 0/3 points -> significant
+    SNR@0.1 gap (M-ours-bstar minus M-ours-dscore-C-V1-wide): +3.33 dB  [90% paired bootstrap +2.51, +4.28; censored replicates 0%]   -> label (i)   (flags ('ok', 'ok'))
+    decision points: sum F  b* 922  X 612  genie 465   R = 0.678337  [90% paired bootstrap B=2000 seed 20260926: 0.631, 0.729]
+    SUFFIX (§2.1 M3): none
+    PRIMARY LABELS: L1 (a) X fewer at both points (monotone yes)   L2 (i) (suffixes 0)
+  [report-only] M-ours-dscore-C-V1-clamp
+    L1 +18 dB 2395:0 p=0  +21 dB 2490:0 p=0   -> (a) X fewer at both points
+    MONOTONE (failures of M-ours-dscore-C-V1-clamp at +15 / +18 / +21 dB = 137 / 90 / 67 of 2560): yes
+    L2 decision SNRs ['+9', '+12', '+15'] | sign test @16: +9 dB 157:23 p=1e-25  +12 dB 121:17 p=1.6e-20  +15 dB 93:16 p=2.2e-14   pooled 371:56 p=4.4e-58
+    power guard: POWERED; second arm fewer failures at 3/3 points, first arm fewer failures at 0/3 points -> significant
+    SNR@0.1 gap (M-ours-bstar minus M-ours-dscore-C-V1-clamp): +3.44 dB  [90% paired bootstrap +2.62, +4.33; censored replicates 0%]   -> label (i)   (flags ('ok', 'ok'))
+    decision points: sum F  b* 922  X 607  genie 465   R = 0.689278  [90% paired bootstrap B=2000 seed 20260926: 0.642, 0.736]
+    SUFFIX (§2.1 M3): none
+  [report-only] M-ours-dscore-C-V1-gmmfb
+    L1 +18 dB 2394:0 p=0  +21 dB 2433:1 p=0   -> (a) X fewer at both points
+    MONOTONE (failures of M-ours-dscore-C-V1-gmmfb at +15 / +18 / +21 dB = 135 / 91 / 125 of 2560): no
+    L2 decision SNRs ['+9', '+12', '+15'] | sign test @16: +9 dB 157:23 p=1e-25  +12 dB 121:17 p=1.6e-20  +15 dB 94:15 p=3.7e-15   pooled 372:55 p=6.6e-59
+    power guard: POWERED; second arm fewer failures at 3/3 points, first arm fewer failures at 0/3 points -> significant
+    SNR@0.1 gap (M-ours-bstar minus M-ours-dscore-C-V1-gmmfb): +3.44 dB  [90% paired bootstrap +2.62, +4.33; censored replicates 0%]   -> label (i)   (flags ('ok', 'ok'))
+    decision points: sum F  b* 922  X 605  genie 465   R = 0.693654  [90% paired bootstrap B=2000 seed 20260926: 0.648, 0.740]
+    SUFFIX (§2.1 M3): none
+  V1 -> C other points: +3 51:65 p=0.23  +6 50:43 p=0.53  +9 29:29 p=1  +12 23:33 p=0.23  +15 20:15 p=0.5; pooled <= +15 dB 173:185 p=0.56
+  b* -> C at +18 / +21: +18 68:11 p=3.5e-11  +21 64:7 p=1.3e-12
+  prediction 5: C <= +15 dB sum 1917 vs V1 1905 (limit 1992.3) -> ok
+  largest decision-point p (PRIMARY): 1.279e-16; sign_p(53,27) = 0.004868
+
+==== lowsig/SELECTION_RULE.md re-applied from the development screens (npz) ====
+  [select_lowsig.out] per point: U28 qpsk +15: V1 3 b* 3 A 3 B 3 C 2 | U28 qpsk +18: V1 118 b* 0 A 1 B 1 C 0 | U28 qpsk +21: V1 319 b* 1 A 1 B 1 C 0 | U28 16qam +15: V1 34 b* 40 A 34 B 34 C 33 | U28 16qam +18: V1 237 b* 23 A 21 B 21 C 20 | U28 16qam +21: V1 320 b* 11 A 9 B 11 C 9 | D2 qpsk +15: V1 0 b* 0 A 0 B 0 C 0 | D2 qpsk +18: V1 280 b* 0 A 0 B 0 C 0 | D2 qpsk +21: V1 320 b* 0 A 0 B 0 C 0 | D2 16qam +15: V1 18 b* 32 A 18 B 18 C 18 | D2 16qam +18: V1 312 b* 22 A 17 B 17 C 13 | D2 16qam +21: V1 318 b* 16 A 10 B 16 C 9
+  [select_lowsig.out] M: V1 2279  b* 148  A 114  B 122  C 104;  no-harm +15: V1 55 limit 69.83: A 55 pass  B 55 pass  C 53 pass  -> PRIMARY = C
+  [select_lowsig.out] paired a:b (a = first arm only fails : b = C only fails), 12 points: A:C 15:5 (p 0.041)  B:C 23:5 (p 0.00091)  b*:C 49:5 (p 3.9e-10)  V1:C 2178:3 (p 0) | +15 only: A:C 5:3  B:C 5:3  b*:C 24:2  V1:C 5:3 | +18/+21 only: A:C 10:2 (p 0.039)  B:C 18:2 (p 0.0004)  b*:C 25:3 (p 2.7e-05)  V1:C 2173:0 (p 0)
+  [select_lowsig_d.out] per point: U28 qpsk +15: V1 3 b* 3 A 3 B 3 C 3 | U28 qpsk +18: V1 118 b* 0 A 1 B 1 C 0 | U28 qpsk +21: V1 319 b* 1 A 1 B 1 C 0 | U28 16qam +15: V1 34 b* 40 A 34 B 34 C 33 | U28 16qam +18: V1 237 b* 23 A 21 B 21 C 21 | U28 16qam +21: V1 320 b* 11 A 9 B 11 C 9 | D2 qpsk +15: V1 0 b* 0 A 0 B 0 C 0 | D2 qpsk +18: V1 280 b* 0 A 0 B 0 C 0 | D2 qpsk +21: V1 320 b* 0 A 0 B 0 C 0 | D2 16qam +15: V1 18 b* 32 A 18 B 18 C 20 | D2 16qam +18: V1 312 b* 22 A 17 B 17 C 15 | D2 16qam +21: V1 318 b* 16 A 10 B 16 C 9
+  [select_lowsig_d.out] M: V1 2279  b* 148  A 114  B 122  C 110;  no-harm +15: V1 55 limit 69.83: A 55 pass  B 55 pass  C 56 pass  -> PRIMARY = C
+  [select_lowsig_d.out] paired a:b (a = first arm only fails : b = C only fails), 12 points: A:C 14:10 (p 0.54)  B:C 20:8 (p 0.036)  b*:C 45:7 (p 7e-08)  V1:C 2175:6 (p 0) | +15 only: A:C 5:6  B:C 5:6  b*:C 22:3  V1:C 5:6 | +18/+21 only: A:C 9:4 (p 0.27)  B:C 15:2 (p 0.0023)  b*:C 23:4 (p 0.00031)  V1:C 2170:0 (p 0)
+  prediction-7 table (b*:C per point, p): U28 qpsk +15 0:0 (p 1)  U28 qpsk +18 0:0 (p 1)  U28 qpsk +21 1:0 (p 1)  U28 16qam +15 8:1 (p 0.039)  U28 16qam +18 5:3 (p 0.73)  U28 16qam +21 2:0 (p 0.5)  D2 qpsk +15 0:0 (p 1)  D2 qpsk +18 0:0 (p 1)  D2 qpsk +21 0:0 (p 1)  D2 16qam +15 14:2 (p 0.0042)  D2 16qam +18 8:1 (p 0.039)  D2 16qam +21 7:0 (p 0.016)
+  C +15/+18/+21 failures per run: U28 qpsk 3/0/0  U28 16qam 33/21/9  D2 qpsk 0/0/0  D2 16qam 20/15/9
+  M4 U28 qpsk  SNR (3, 6, 9): V1 92  b* 107  A 92  B 92  C 92   PRIMARY C 92 vs limit 111.18 -> ok   paired V1:C 8:8  b*:C 20:5
+  M4 D2  qpsk  SNR (-3, 0, 3): V1 56  b* 107  A 56  B 56  C 60   PRIMARY C 60 vs limit 70.97 -> ok   paired V1:C 9:13  b*:C 58:11
+  M4 U28 16qam SNR (12,): V1 59  b* 68  A 59  B 59  C 60   PRIMARY C 60 vs limit 74.36 -> ok   paired V1:C 1:2  b*:C 8:0
+  M4 D2  16qam SNR (9, 12): V1 69  b* 90  A 69  B 69  C 67   PRIMARY C 67 vs limit 85.61 -> ok   paired V1:C 8:6  b*:C 34:11
+  screenCd grid key (s_lo, s_hi) at +18 dB: screenCd_D2_16qam_5120_320_snr18.npz: [0.011708983685839483, 0.8451555272508591]; screenCd_D2_qpsk_6000_320_snr18.npz: [0.011708983685839483, 0.8451555272508591]; screenCd_U28_16qam_5120_320_snr18.npz: [0.011747295782059717, 0.8372515002882972]; screenCd_U28_qpsk_6000_320_snr18.npz: [0.011747295782059717, 0.8372515002882972]
+
+==== §6.2 table, recomputed (PRIMARY = C) ====
+  U28LSQ: L1 929:0 · 2555:0 (a) | MONOTONE yes (24 / 5 / 1) | decision [3, 6, 9] | b*->C 81:37 · 53:27 · 35:10; 169:74 | L2 (i) | gap +0.58 [+0.30, +0.86] | sum F 800 / 705 / 215 | R 0.162 [0.121, 0.202] | SUFFIX none | pred5 2669 vs 2664 (2767.2)
+  U28LS16: L1 1693:3 · 2463:0 (a) | MONOTONE yes (273 / 154 / 80) | decision [12, 15, 18] | b*->C 69:18 · 52:19 · 44:16; 165:53 | L2 (i) | gap +0.69 [+0.43, +1.02] | sum F 1004 / 892 / 438 | R 0.198 [0.159, 0.236] | SUFFIX none | pred5 4006 vs 4027 (4153.9)
+  D2LSQ: L1 2256:0 · 2557:0 (a) | MONOTONE yes (3 / 2 / 2) | decision [-3, 0, 3] | b*->C 299:47 · 112:18 · 31:6; 442:71 | L2 (i) | gap +1.40 [+1.21, +1.63] | sum F 864 / 493 / 125 | R 0.502 [0.464, 0.538] | SUFFIX none | pred5 524 vs 519 (564.6)
+  D2LS16: L1 2396:1 · 2491:0 (a) | MONOTONE yes (132 / 90 / 66) | decision [9, 12, 15] | b*->C 160:26 · 116:22 · 93:11; 369:59 | L2 (i) | gap +3.33 [+2.51, +4.28] | sum F 922 / 612 / 465 | R 0.678 [0.631, 0.729] | SUFFIX none | pred5 1917 vs 1905 (1992.3)
+
+==== §6.4 / §6.7 report-only (A, B) ====
+  U28LSQ V1-clamp: L1 (a) MONOTONE yes (24 / 4 / 1) | L2 (i) gap +0.60 [+0.33, +0.85] | sum F 800 / 712 / 215 R 0.150 [0.110, 0.189] | SUFFIX none
+  U28LSQ V1-gmmfb: L1 (a) MONOTONE no (24 / 4 / 5) | L2 (i) gap +0.60 [+0.33, +0.85] | sum F 800 / 712 / 215 R 0.150 [0.110, 0.189] | SUFFIX none
+  U28LS16 V1-clamp: L1 (a) MONOTONE yes (277 / 160 / 83) | L2 (i) gap +0.60 [+0.36, +0.93] | sum F 1004 / 898 / 438 R 0.187 [0.148, 0.226] | SUFFIX none
+  U28LS16 V1-gmmfb: L1 (a) MONOTONE yes (277 / 160 / 107) | L2 (i) gap +0.60 [+0.36, +0.93] | sum F 1004 / 898 / 438 R 0.187 [0.148, 0.226] | SUFFIX none
+  D2LSQ V1-clamp: L1 (a) MONOTONE no (3 / 0 / 2) | L2 (i) gap +1.41 [+1.22, +1.64] | sum F 864 / 488 / 125 R 0.509 [0.470, 0.545] | SUFFIX none
+  D2LSQ V1-gmmfb: L1 (a) MONOTONE no (3 / 0 / 7) | L2 (i) gap +1.41 [+1.22, +1.64] | sum F 864 / 488 / 125 R 0.509 [0.470, 0.545] | SUFFIX none
+  D2LS16 V1-clamp: L1 (a) MONOTONE yes (137 / 90 / 67) | L2 (i) gap +3.44 [+2.62, +4.33] | sum F 922 / 607 / 465 R 0.689 [0.642, 0.736] | SUFFIX none
+  D2LS16 V1-gmmfb: L1 (a) MONOTONE no (135 / 91 / 125) | L2 (i) gap +3.44 [+2.62, +4.33] | sum F 922 / 605 / 465 R 0.694 [0.648, 0.740] | SUFFIX none
+
+==== TALLY: 350 checks matched, 0 mismatched ====

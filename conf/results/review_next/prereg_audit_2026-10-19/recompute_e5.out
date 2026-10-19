@@ -1,0 +1,309 @@
+
+====================================================================================================
+U28QAM16: 448 chunk files in /home/HTJ/t2/conf/raw_U28QAM16
+  [ok] U28QAM16 chunk count: 448
+  [ok] U28QAM16 SNR grid: [3, 6, 9, 12, 15, 18, 21]
+  [ok] U28QAM16 chunk plan {(40k, 40): k = 0..63} x 7 (no holes / duplicates): True
+  [ok] U28QAM16 '<arm>|failed' keys (raised trials): 0
+  [ok] U28QAM16 non-finite blk_err entries (five arms): 0
+  [ok] U28QAM16 five arms x KEYS_RAW shape != (40, 16): 0
+  [ok] U28QAM16 blk_err value set: [0, 1]
+  [ok] U28QAM16 run|git: {'13f05fb1'}
+  [ok] U28QAM16 meta|modulation: {'16qam'}
+  [ok] U28QAM16 meta|payload_bits: {90}
+  [ok] U28QAM16 meta|protocol: {'E5-qam16-v1'}
+  [ok] U28QAM16 meta|bstar: {'kron'}
+  [ok] U28QAM16 run|iters: {16}
+  [ok] U28QAM16 run|seed: {20260926}
+  [ok] U28QAM16 meta|ntrain: {160000.0}
+  [ok] U28QAM16 meta|jobs: {96}
+  [ok] U28QAM16 meta|kron_K: {4096}
+  [ok] U28QAM16 meta|ll_val|kron: {5.797910431000217}
+  [ok] U28QAM16 meta|worker_gb: {1.5}
+  [ok] U28QAM16 meta|stagec_ckpt_id: {'sha256[:16]=6f3a1b9490864af1 epoch=379 best_epoch=379 role=best 8x4'}
+  [ok] U28QAM16 meta|stagec_ckpt: {'/home/HTJ/t2/conf/ckpt/d2sx_UMi28_N160000_a1_best.pt'}
+  [ok] U28QAM16 run|n: {40}
+  [ok] U28QAM16 run|skip == file name: {True}
+  [ok] U28QAM16 run|snr == file name: {True}
+  [ok] U28QAM16 file-name prior / pilot / cell: ({'UMi28'}, {'eig'}, {'C2'})
+  [ok] U28QAM16 arm set (blk_err keys): {('M-ours-bstar', 'M-ours-dscore-C-V1', 'R2-ours-G', 'R5-genie', 'V1-pilot')}
+  info: run|dtype {'complex128/float64'}  run|beta {0.7}  run|t_in {5}  meta|em_sec {9133.61854147911}  Nr/T/Tp {'8'}/{'16'}/{'4'}
+
+  -- failures @16 / 2560 (V1, b*, R2, genie, V1-pilot)
+  [ok] U28QAM16 +3 dB failures: (1549, 1560, 1669, 1054, 1755)
+  [ok] U28QAM16 +6 dB failures: (1022, 1060, 1168, 704, 1107)
+  [ok] U28QAM16 +9 dB failures: (718, 753, 868, 428, 761)
+  [ok] U28QAM16 +12 dB failures: (461, 516, 611, 246, 501)
+  [ok] U28QAM16 +15 dB failures: (277, 306, 384, 136, 293)
+  [ok] U28QAM16 +18 dB failures: (1844, 182, 243, 56, 171)
+  [ok] U28QAM16 +21 dB failures: (2543, 107, 142, 29, 91)
+  info: V1 min BLER@16 on the grid = 0.1082 (277/2560) -> never reach 0.1
+  [ok] U28QAM16 V1 never reaches BLER 0.1 on the grid: True
+
+  -- paired comparisons (decision points anchored on the pair's baseline member)
+  [ok] U28QAM16 R2-ours-G -> M-ours-bstar decision SNRs: [15, 18, 21]
+  [ok] U28QAM16 R2-ours-G -> M-ours-bstar a:b: [(93, 15), (74, 13), (47, 12)]
+  [ok] U28QAM16 R2-ours-G -> M-ours-bstar p (%.2g): ['6.4e-15', '1.6e-11', '5.1e-06']
+  [ok] U28QAM16 R2-ours-G -> M-ours-bstar pooled a:b: (214, 40)
+  [ok] U28QAM16 R2-ours-G -> M-ours-bstar pooled p: '6.3e-30'
+  [ok] U28QAM16 R2-ours-G -> M-ours-bstar POWERED: True
+  [ok] U28QAM16 R2-ours-G -> M-ours-bstar (second fewer, first fewer) at p<.05: (3, 0)
+      verdict string: significant; log10 p per point: -14.2, -10.8, -5.3; pooled log10 p -29.2
+  [ok] U28QAM16 R2-ours-G -> M-ours-bstar SNR@0.1 gap text: '+1.63 dB  [90% paired bootstrap +1.22, +2.19; censored replicates 0%]'
+      SNR@0.1: R2-ours-G 17.66 (ok), M-ours-bstar 16.03 (ok)
+      independent-seed (1) bootstrap of the same gap: [+1.21, +2.20] (registered seed gives [+1.22, +2.19])
+  [ok] U28QAM16 M-ours-bstar -> R5-genie decision SNRs: [9, 12, 15]
+  [ok] U28QAM16 M-ours-bstar -> R5-genie a:b: [(332, 7), (270, 0), (174, 4)]
+  [ok] U28QAM16 M-ours-bstar -> R5-genie p (%.2g): ['1.7e-88', '1.1e-81', '2.2e-46']
+  [ok] U28QAM16 M-ours-bstar -> R5-genie pooled a:b: (776, 11)
+  [ok] U28QAM16 M-ours-bstar -> R5-genie pooled p: '4.2e-213'
+  [ok] U28QAM16 M-ours-bstar -> R5-genie POWERED: True
+  [ok] U28QAM16 M-ours-bstar -> R5-genie (second fewer, first fewer) at p<.05: (3, 0)
+      verdict string: significant; log10 p per point: -87.8, -81.0, -45.7; pooled log10 p -212.4
+  [ok] U28QAM16 M-ours-bstar -> R5-genie SNR@0.1 gap text: '+4.25 dB  [90% paired bootstrap +3.63, +4.87; censored replicates 0%]'
+      SNR@0.1: M-ours-bstar 16.03 (ok), R5-genie 11.78 (ok)
+      independent-seed (1) bootstrap of the same gap: [+3.59, +4.82] (registered seed gives [+3.63, +4.87])
+  [ok] U28QAM16 R2-ours-G -> M-ours-dscore-C-V1 decision SNRs: [15, 18, 21]
+  [ok] U28QAM16 R2-ours-G -> M-ours-dscore-C-V1 a:b: [(122, 15), (6, 1607), (0, 2401)]
+  [ok] U28QAM16 R2-ours-G -> M-ours-dscore-C-V1 p (%.2g): ['5.1e-22', '0', '0']
+  [ok] U28QAM16 R2-ours-G -> M-ours-dscore-C-V1 pooled a:b: (128, 4023)
+  [ok] U28QAM16 R2-ours-G -> M-ours-dscore-C-V1 pooled p: '0'
+  [ok] U28QAM16 R2-ours-G -> M-ours-dscore-C-V1 POWERED: True
+  [ok] U28QAM16 R2-ours-G -> M-ours-dscore-C-V1 (second fewer, first fewer) at p<.05: (1, 2)
+      verdict string: significant; log10 p per point: -21.3, -468.9, -722.5; pooled log10 p -1002.6
+  [ok] U28QAM16 R2-ours-G -> M-ours-dscore-C-V1 SNR@0.1 gap text: 'n/a (17.66 vs >  21) — extend the SNR grid'
+      SNR@0.1: R2-ours-G 17.66 (ok), M-ours-dscore-C-V1 >  21 (hi)
+  [ok] U28QAM16 M-ours-bstar -> M-ours-dscore-C-V1 decision SNRs: [12, 15, 18]
+  [ok] U28QAM16 M-ours-bstar -> M-ours-dscore-C-V1 a:b: [(72, 17), (49, 20), (4, 1666)]
+  [ok] U28QAM16 M-ours-bstar -> M-ours-dscore-C-V1 p (%.2g): ['3.2e-09', '0.00064', '0']
+  [ok] U28QAM16 M-ours-bstar -> M-ours-dscore-C-V1 pooled a:b: (125, 1703)
+  [ok] U28QAM16 M-ours-bstar -> M-ours-dscore-C-V1 pooled p: '0'
+  [ok] U28QAM16 M-ours-bstar -> M-ours-dscore-C-V1 POWERED: True
+  [ok] U28QAM16 M-ours-bstar -> M-ours-dscore-C-V1 (second fewer, first fewer) at p<.05: (2, 1)
+      verdict string: significant; log10 p per point: -8.5, -3.2, -490.9; pooled log10 p -353.4
+  [ok] U28QAM16 M-ours-bstar -> M-ours-dscore-C-V1 SNR@0.1 gap text: 'n/a (16.03 vs >  21) — extend the SNR grid'
+      SNR@0.1: M-ours-bstar 16.03 (ok), M-ours-dscore-C-V1 >  21 (hi)
+      §2.1 label from the recomputed values: (i)  (POWERED=True, second-arm-fewer 2/3, first-arm-fewer 1/3)
+  [ok] U28QAM16 §2.1 mechanical label: '(i)'
+  [ok] U28QAM16 M-ours-dscore-C-V1 -> R5-genie decision SNRs: [9, 12, 15]
+  [ok] U28QAM16 M-ours-dscore-C-V1 -> R5-genie a:b: [(294, 4), (217, 2), (146, 5)]
+  [ok] U28QAM16 M-ours-dscore-C-V1 -> R5-genie p (%.2g): ['1.3e-81', '5.7e-62', '4.4e-37']
+  [ok] U28QAM16 M-ours-dscore-C-V1 -> R5-genie pooled a:b: (657, 11)
+  [ok] U28QAM16 M-ours-dscore-C-V1 -> R5-genie pooled p: '4.5e-178'
+  [ok] U28QAM16 M-ours-dscore-C-V1 -> R5-genie POWERED: True
+  [ok] U28QAM16 M-ours-dscore-C-V1 -> R5-genie (second fewer, first fewer) at p<.05: (3, 0)
+      verdict string: significant; log10 p per point: -80.9, -61.2, -36.4; pooled log10 p -177.3
+  [ok] U28QAM16 M-ours-dscore-C-V1 -> R5-genie SNR@0.1 gap text: '>= +9.22 dB (M-ours-dscore-C-V1 never reaches 0.1 on the grid)'
+      SNR@0.1: M-ours-dscore-C-V1 >  21 (hi), R5-genie 11.78 (ok)
+  [ok] U28QAM16 M-ours-bstar -> V1-pilot decision SNRs: [12, 15, 18]
+  [ok] U28QAM16 M-ours-bstar -> V1-pilot a:b: [(50, 35), (41, 28), (33, 22)]
+  [ok] U28QAM16 M-ours-bstar -> V1-pilot p (%.2g): ['0.13', '0.15', '0.18']
+  [ok] U28QAM16 M-ours-bstar -> V1-pilot pooled a:b: (124, 85)
+  [ok] U28QAM16 M-ours-bstar -> V1-pilot pooled p: '0.0084'
+  [ok] U28QAM16 M-ours-bstar -> V1-pilot POWERED: True
+  [ok] U28QAM16 M-ours-bstar -> V1-pilot (second fewer, first fewer) at p<.05: (0, 0)
+      verdict string: not significant; log10 p per point: -0.9, -0.8, -0.8; pooled log10 p -2.1
+  [ok] U28QAM16 M-ours-bstar -> V1-pilot SNR@0.1 gap text: '+0.28 dB  [90% paired bootstrap +0.06, +0.53; censored replicates 0%]'
+      SNR@0.1: M-ours-bstar 16.03 (ok), V1-pilot 15.75 (ok)
+      independent-seed (1) bootstrap of the same gap: [+0.06, +0.55] (registered seed gives [+0.06, +0.53])
+  [ok] U28QAM16 sum F (b*, V1, genie) at [12, 15, 18]: (1004, 2582, 438)
+  [ok] U28QAM16 R: '-2.787986'
+  [ok] U28QAM16 R 90% paired bootstrap (seed 20260926): ('-3.027', '-2.572')
+      independent-seed (1) bootstrap of R: [-3.030, -2.576] (0 undefined); registered-seed replicates undefined: 0
+      per-point failures at the decision points: +12 dB b* 516 V1 461 genie 246; +15 dB b* 306 V1 277 genie 136; +18 dB b* 182 V1 1844 genie 56
+
+  -- trajectory (§6.4): failures at iterations 1/2/4/8/16, median NMSE @1/@16; compare with traj_U28QAM16.out
+  [ok] U28QAM16 traj_U28QAM16.out lines reproduced (35 lines x failures@1/2/4/8/16, n, raised, NMSE@1/@16): (35, 0)
+  [ok] U28QAM16 +18 dB failures @1 (V1, b*, R2, genie): (511, 542, 577, 310)
+  [ok] U28QAM16 +18 dB V1 failures @2: 1951
+  [ok] U28QAM16 +18 dB V1 median NMSE @1 -> @16: ('2.90e-03', '8.18e-02')
+  [ok] U28QAM16 +18 dB V1 success@1 -> fail@16 (and reverse): (1347, 14)
+  [ok] U28QAM16 +18 dB iteration-1 failures: V1 <= b*, R2 and V1 == V1-pilot: (True, True)
+  [ok] U28QAM16 +21 dB failures @1 (V1, b*, R2, genie): (361, 382, 393, 167)
+  [ok] U28QAM16 +21 dB V1 failures @2: 2458
+  [ok] U28QAM16 +21 dB V1 median NMSE @1 -> @16: ('1.54e-03', '4.33e+00')
+  [ok] U28QAM16 +21 dB V1 success@1 -> fail@16 (and reverse): (2183, 1)
+  [ok] U28QAM16 +21 dB iteration-1 failures: V1 <= b*, R2 and V1 == V1-pilot: (True, True)
+  [ok] U28QAM16 iteration-1 blk_err and nmse of V1 == V1-pilot at all 7 SNRs: True
+  [ok] U28QAM16 M-ours-bstar +18 dB failures non-increasing over the 16 iterations: True
+      sequence: [542, 337, 273, 245, 231, 219, 212, 205, 199, 193, 193, 191, 190, 185, 183, 182]
+  [ok] U28QAM16 M-ours-bstar +21 dB failures non-increasing over the 16 iterations: True
+      sequence: [382, 202, 161, 140, 133, 126, 120, 117, 116, 114, 114, 111, 110, 109, 108, 107]
+  [ok] U28QAM16 V1-pilot +18 dB failures non-increasing over the 16 iterations: True
+      sequence: [511, 305, 255, 220, 205, 197, 190, 188, 184, 182, 178, 175, 174, 173, 171, 171]
+  [ok] U28QAM16 V1-pilot +21 dB failures non-increasing over the 16 iterations: True
+      sequence: [361, 184, 139, 126, 111, 104, 101, 98, 96, 96, 95, 95, 94, 94, 92, 91]
+  info: V1 +3 dB failures per iteration non-increasing over 16 = True; at 1/2/4/8/16 = [2297, 1999, 1728, 1591, 1549]
+  [ok] U28QAM16 V1 +3 dB failures decrease over iterations 1/2/4/8/16: True
+  info: V1 +6 dB failures per iteration non-increasing over 16 = True; at 1/2/4/8/16 = [1729, 1385, 1158, 1063, 1022]
+  [ok] U28QAM16 V1 +6 dB failures decrease over iterations 1/2/4/8/16: True
+  info: V1 +9 dB failures per iteration non-increasing over 16 = True; at 1/2/4/8/16 = [1338, 1019, 833, 752, 718]
+  [ok] U28QAM16 V1 +9 dB failures decrease over iterations 1/2/4/8/16: True
+  info: V1 +12 dB failures per iteration non-increasing over 16 = True; at 1/2/4/8/16 = [1009, 723, 571, 497, 461]
+  [ok] U28QAM16 V1 +12 dB failures decrease over iterations 1/2/4/8/16: True
+  info: V1 +15 dB failures per iteration non-increasing over 16 = True; at 1/2/4/8/16 = [732, 465, 344, 302, 277]
+  [ok] U28QAM16 V1 +15 dB failures decrease over iterations 1/2/4/8/16: True
+  info: V1 +18 dB failures per iteration non-increasing over 16 = False; at 1/2/4/8/16 = [511, 1951, 1877, 1929, 1844]
+  info: V1 +21 dB failures per iteration non-increasing over 16 = False; at 1/2/4/8/16 = [361, 2458, 2547, 2554, 2543]
+  info: R2-ours-G +18 dB non-increasing over 16 = True; 1/2/4/8/16 = [577, 392, 297, 260, 243]
+  info: R2-ours-G +21 dB non-increasing over 16 = True; 1/2/4/8/16 = [393, 249, 173, 151, 142]
+  info: R5-genie +18 dB non-increasing over 16 = True; 1/2/4/8/16 = [310, 157, 92, 63, 56]
+  info: R5-genie +21 dB non-increasing over 16 = True; 1/2/4/8/16 = [167, 80, 48, 38, 29]
+
+====================================================================================================
+D2QAM16: 448 chunk files in /home/HTJ/t2/conf/raw_D2QAM16
+  [ok] D2QAM16 chunk count: 448
+  [ok] D2QAM16 SNR grid: [3, 6, 9, 12, 15, 18, 21]
+  [ok] D2QAM16 chunk plan {(40k, 40): k = 0..63} x 7 (no holes / duplicates): True
+  [ok] D2QAM16 '<arm>|failed' keys (raised trials): 0
+  [ok] D2QAM16 non-finite blk_err entries (five arms): 0
+  [ok] D2QAM16 five arms x KEYS_RAW shape != (40, 16): 0
+  [ok] D2QAM16 blk_err value set: [0, 1]
+  [ok] D2QAM16 run|git: {'13f05fb1'}
+  [ok] D2QAM16 meta|modulation: {'16qam'}
+  [ok] D2QAM16 meta|payload_bits: {90}
+  [ok] D2QAM16 meta|protocol: {'E5-qam16-v1'}
+  [ok] D2QAM16 meta|bstar: {'kron'}
+  [ok] D2QAM16 run|iters: {16}
+  [ok] D2QAM16 run|seed: {20260926}
+  [ok] D2QAM16 meta|ntrain: {160000.0}
+  [ok] D2QAM16 meta|jobs: {96}
+  [ok] D2QAM16 meta|kron_K: {1024}
+  [ok] D2QAM16 meta|ll_val|kron: {-11.459169831224418}
+  [ok] D2QAM16 meta|worker_gb: {1.0}
+  [MISMATCH] D2QAM16 meta|stagec_ckpt_id: {'sha256[:16]=4443921ce8d5c4a1 epoch=1784 best_epoch=1764 role=legacy-last 8x4 | BEST_WEIGHTS_UNAVAILABLE: evaluated = last-epoch EMA, reported best_val belongs to best_epoch'}   (expected {'sha256[:16]=4443921ce8d5c4a1 epoch=1784 best_epoch=1764 role=legacy-last 8x4'})
+  [ok] D2QAM16 meta|stagec_ckpt: {'/home/HTJ/t2/conf/ckpt/d2sx_N160000_a1.pt'}
+  [ok] D2QAM16 run|n: {40}
+  [ok] D2QAM16 run|skip == file name: {True}
+  [ok] D2QAM16 run|snr == file name: {True}
+  [ok] D2QAM16 file-name prior / pilot / cell: ({'S2'}, {'dft'}, {'C2'})
+  [ok] D2QAM16 arm set (blk_err keys): {('M-ours-bstar', 'M-ours-dscore-C-V1', 'R2-ours-G', 'R5-genie', 'V1-pilot')}
+  info: run|dtype {'complex128/float64'}  run|beta {0.7}  run|t_in {5}  meta|em_sec {107957.18832826614}  Nr/T/Tp {'8'}/{'16'}/{'4'}
+
+  -- failures @16 / 2560 (V1, b*, R2, genie, V1-pilot)
+  [ok] D2QAM16 +3 dB failures: (828, 1189, 1336, 546, 1000)
+  [ok] D2QAM16 +6 dB failures: (470, 675, 831, 317, 503)
+  [ok] D2QAM16 +9 dB failures: (286, 420, 522, 217, 307)
+  [ok] D2QAM16 +12 dB failures: (184, 288, 361, 140, 187)
+  [ok] D2QAM16 +15 dB failures: (137, 214, 285, 108, 135)
+  [ok] D2QAM16 +18 dB failures: (2485, 147, 202, 75, 97)
+  [ok] D2QAM16 +21 dB failures: (2557, 123, 166, 49, 72)
+  info: V1 min BLER@16 on the grid = 0.0535 (137/2560) -> does reach 0.1
+  [ok] D2QAM16 V1 never reaches BLER 0.1 on the grid: False
+
+  -- paired comparisons (decision points anchored on the pair's baseline member)
+  [ok] D2QAM16 R2-ours-G -> M-ours-bstar decision SNRs: [12, 15, 18]
+  [ok] D2QAM16 R2-ours-G -> M-ours-bstar a:b: [(105, 32), (101, 30), (76, 21)]
+  [ok] D2QAM16 R2-ours-G -> M-ours-bstar p (%.2g): ['2.9e-10', '3.5e-10', '1.7e-08']
+  [ok] D2QAM16 R2-ours-G -> M-ours-bstar pooled a:b: (282, 83)
+  [ok] D2QAM16 R2-ours-G -> M-ours-bstar pooled p: '1.8e-26'
+  [ok] D2QAM16 R2-ours-G -> M-ours-bstar POWERED: True
+  [ok] D2QAM16 R2-ours-G -> M-ours-bstar (second fewer, first fewer) at p<.05: (3, 0)
+      verdict string: significant; log10 p per point: -9.5, -9.5, -7.8; pooled log10 p -25.7
+  [ok] D2QAM16 R2-ours-G -> M-ours-bstar SNR@0.1 gap text: '+2.75 dB  [90% paired bootstrap +1.91, +3.68; censored replicates 0%]'
+      SNR@0.1: R2-ours-G 15.94 (ok), M-ours-bstar 13.19 (ok)
+      independent-seed (1) bootstrap of the same gap: [+1.93, +3.66] (registered seed gives [+1.91, +3.68])
+  [ok] D2QAM16 M-ours-bstar -> R5-genie decision SNRs: [6, 9, 12]
+  [ok] D2QAM16 M-ours-bstar -> R5-genie a:b: [(372, 14), (218, 15), (159, 11)]
+  [ok] D2QAM16 M-ours-bstar -> R5-genie p (%.2g): ['1.9e-91', '2.4e-47', '8.8e-35']
+  [ok] D2QAM16 M-ours-bstar -> R5-genie pooled a:b: (749, 40)
+  [ok] D2QAM16 M-ours-bstar -> R5-genie pooled p: '2.2e-170'
+  [ok] D2QAM16 M-ours-bstar -> R5-genie POWERED: True
+  [ok] D2QAM16 M-ours-bstar -> R5-genie (second fewer, first fewer) at p<.05: (3, 0)
+      verdict string: significant; log10 p per point: -90.7, -46.6, -34.1; pooled log10 p -169.7
+  [ok] D2QAM16 M-ours-bstar -> R5-genie SNR@0.1 gap text: '+5.50 dB  [90% paired bootstrap +4.41, +6.46; censored replicates 0%]'
+      SNR@0.1: M-ours-bstar 13.19 (ok), R5-genie 7.69 (ok)
+      independent-seed (1) bootstrap of the same gap: [+4.41, +6.48] (registered seed gives [+4.41, +6.46])
+  [ok] D2QAM16 R2-ours-G -> M-ours-dscore-C-V1 decision SNRs: [12, 15, 18]
+  [ok] D2QAM16 R2-ours-G -> M-ours-dscore-C-V1 a:b: [(190, 13), (161, 13), (1, 2284)]
+  [ok] D2QAM16 R2-ours-G -> M-ours-dscore-C-V1 p (%.2g): ['1.8e-41', '1.2e-33', '0']
+  [ok] D2QAM16 R2-ours-G -> M-ours-dscore-C-V1 pooled a:b: (352, 2310)
+  [ok] D2QAM16 R2-ours-G -> M-ours-dscore-C-V1 pooled p: '0'
+  [ok] D2QAM16 R2-ours-G -> M-ours-dscore-C-V1 POWERED: True
+  [ok] D2QAM16 R2-ours-G -> M-ours-dscore-C-V1 (second fewer, first fewer) at p<.05: (2, 1)
+      verdict string: significant; log10 p per point: -40.7, -32.9, -684.2; pooled log10 p -351.0
+  [ok] D2QAM16 R2-ours-G -> M-ours-dscore-C-V1 SNR@0.1 gap text: '+6.18 dB  [90% paired bootstrap +5.24, +7.03; censored replicates 0%]'
+      SNR@0.1: R2-ours-G 15.94 (ok), M-ours-dscore-C-V1 9.75 (ok)
+      independent-seed (1) bootstrap of the same gap: [+5.29, +7.09] (registered seed gives [+5.24, +7.03])
+  [ok] D2QAM16 M-ours-bstar -> M-ours-dscore-C-V1 decision SNRs: [9, 12, 15]
+  [ok] D2QAM16 M-ours-bstar -> M-ours-dscore-C-V1 a:b: [(157, 23), (121, 17), (93, 16)]
+  [ok] D2QAM16 M-ours-bstar -> M-ours-dscore-C-V1 p (%.2g): ['1e-25', '1.6e-20', '2.2e-14']
+  [ok] D2QAM16 M-ours-bstar -> M-ours-dscore-C-V1 pooled a:b: (371, 56)
+  [ok] D2QAM16 M-ours-bstar -> M-ours-dscore-C-V1 pooled p: '4.4e-58'
+  [ok] D2QAM16 M-ours-bstar -> M-ours-dscore-C-V1 POWERED: True
+  [ok] D2QAM16 M-ours-bstar -> M-ours-dscore-C-V1 (second fewer, first fewer) at p<.05: (3, 0)
+      verdict string: significant; log10 p per point: -25.0, -19.8, -13.7; pooled log10 p -57.4
+  [ok] D2QAM16 M-ours-bstar -> M-ours-dscore-C-V1 SNR@0.1 gap text: '+3.44 dB  [90% paired bootstrap +2.62, +4.33; censored replicates 0%]'
+      SNR@0.1: M-ours-bstar 13.19 (ok), M-ours-dscore-C-V1 9.75 (ok)
+      independent-seed (1) bootstrap of the same gap: [+2.61, +4.41] (registered seed gives [+2.62, +4.33])
+      §2.1 label from the recomputed values: (i)  (POWERED=True, second-arm-fewer 3/3, first-arm-fewer 0/3)
+      (D2: §2.2 gives no label; the rule's output would be (i))
+  [ok] D2QAM16 M-ours-dscore-C-V1 -> R5-genie decision SNRs: [6, 9, 12]
+  [ok] D2QAM16 M-ours-dscore-C-V1 -> R5-genie a:b: [(169, 16), (83, 14), (58, 14)]
+  [ok] D2QAM16 M-ours-dscore-C-V1 -> R5-genie p (%.2g): ['2.1e-33', '4.2e-13', '1.6e-07']
+  [ok] D2QAM16 M-ours-dscore-C-V1 -> R5-genie pooled a:b: (310, 44)
+  [ok] D2QAM16 M-ours-dscore-C-V1 -> R5-genie pooled p: '2.1e-50'
+  [ok] D2QAM16 M-ours-dscore-C-V1 -> R5-genie POWERED: True
+  [ok] D2QAM16 M-ours-dscore-C-V1 -> R5-genie (second fewer, first fewer) at p<.05: (3, 0)
+      verdict string: significant; log10 p per point: -32.7, -12.4, -6.8; pooled log10 p -49.7
+  [ok] D2QAM16 M-ours-dscore-C-V1 -> R5-genie SNR@0.1 gap text: '+2.06 dB  [90% paired bootstrap +1.49, +2.57; censored replicates 0%]'
+      SNR@0.1: M-ours-dscore-C-V1 9.75 (ok), R5-genie 7.69 (ok)
+      independent-seed (1) bootstrap of the same gap: [+1.51, +2.58] (registered seed gives [+1.49, +2.57])
+  [ok] D2QAM16 M-ours-bstar -> V1-pilot decision SNRs: [9, 12, 15]
+  [ok] D2QAM16 M-ours-bstar -> V1-pilot a:b: [(144, 31), (116, 15), (92, 13)]
+  [ok] D2QAM16 M-ours-bstar -> V1-pilot p (%.2g): ['1.3e-18', '1.6e-20', '8e-16']
+  [ok] D2QAM16 M-ours-bstar -> V1-pilot pooled a:b: (352, 59)
+  [ok] D2QAM16 M-ours-bstar -> V1-pilot pooled p: '6.8e-52'
+  [ok] D2QAM16 M-ours-bstar -> V1-pilot POWERED: True
+  [ok] D2QAM16 M-ours-bstar -> V1-pilot (second fewer, first fewer) at p<.05: (3, 0)
+      verdict string: significant; log10 p per point: -17.9, -19.8, -15.1; pooled log10 p -51.2
+  [ok] D2QAM16 M-ours-bstar -> V1-pilot SNR@0.1 gap text: '+3.09 dB  [90% paired bootstrap +2.34, +3.87; censored replicates 0%]'
+      SNR@0.1: M-ours-bstar 13.19 (ok), V1-pilot 10.10 (ok)
+      independent-seed (1) bootstrap of the same gap: [+2.33, +3.97] (registered seed gives [+2.34, +3.87])
+  [ok] D2QAM16 sum F (b*, V1, genie) at [9, 12, 15]: (922, 607, 465)
+  [ok] D2QAM16 R: '0.689278'
+  [ok] D2QAM16 R 90% paired bootstrap (seed 20260926): ('0.642', '0.736')
+      independent-seed (1) bootstrap of R: [0.641, 0.738] (0 undefined); registered-seed replicates undefined: 0
+      per-point failures at the decision points: +9 dB b* 420 V1 286 genie 217; +12 dB b* 288 V1 184 genie 140; +15 dB b* 214 V1 137 genie 108
+
+  -- trajectory (§6.4): failures at iterations 1/2/4/8/16, median NMSE @1/@16; compare with traj_D2QAM16.out
+  [ok] D2QAM16 traj_D2QAM16.out lines reproduced (35 lines x failures@1/2/4/8/16, n, raised, NMSE@1/@16): (35, 0)
+  [ok] D2QAM16 +18 dB failures @1 (V1, b*, R2, genie): (503, 619, 654, 459)
+  [ok] D2QAM16 +18 dB V1 failures @2: 2060
+  [ok] D2QAM16 +18 dB V1 median NMSE @1 -> @16: ('1.51e-03', '2.71e-01')
+  [ok] D2QAM16 +18 dB V1 success@1 -> fail@16 (and reverse): (1985, 3)
+  [ok] D2QAM16 +18 dB iteration-1 failures: V1 <= b*, R2 and V1 == V1-pilot: (True, True)
+  [ok] D2QAM16 +21 dB failures @1 (V1, b*, R2, genie): (460, 536, 575, 398)
+  [ok] D2QAM16 +21 dB V1 failures @2: 2336
+  [ok] D2QAM16 +21 dB V1 median NMSE @1 -> @16: ('8.16e-04', '4.59e+00')
+  [ok] D2QAM16 +21 dB V1 success@1 -> fail@16 (and reverse): (2098, 1)
+  [ok] D2QAM16 +21 dB iteration-1 failures: V1 <= b*, R2 and V1 == V1-pilot: (True, True)
+  [ok] D2QAM16 iteration-1 blk_err and nmse of V1 == V1-pilot at all 7 SNRs: True
+  [ok] D2QAM16 M-ours-bstar +18 dB failures non-increasing over the 16 iterations: True
+      sequence: [619, 313, 233, 201, 182, 175, 166, 162, 160, 158, 156, 155, 155, 150, 149, 147]
+  [ok] D2QAM16 M-ours-bstar +21 dB failures non-increasing over the 16 iterations: True
+      sequence: [536, 263, 191, 164, 153, 146, 141, 139, 138, 137, 137, 135, 130, 128, 125, 123]
+  [ok] D2QAM16 V1-pilot +18 dB failures non-increasing over the 16 iterations: True
+      sequence: [503, 197, 146, 123, 115, 112, 107, 104, 104, 100, 100, 99, 99, 99, 98, 97]
+  [ok] D2QAM16 V1-pilot +21 dB failures non-increasing over the 16 iterations: True
+      sequence: [460, 171, 110, 95, 87, 83, 79, 76, 75, 74, 73, 73, 72, 72, 72, 72]
+  info: V1 +3 dB failures per iteration non-increasing over 16 = True; at 1/2/4/8/16 = [2109, 1588, 1112, 904, 828]
+  [ok] D2QAM16 V1 +3 dB failures decrease over iterations 1/2/4/8/16: True
+  info: V1 +6 dB failures per iteration non-increasing over 16 = True; at 1/2/4/8/16 = [1506, 955, 614, 502, 470]
+  [ok] D2QAM16 V1 +6 dB failures decrease over iterations 1/2/4/8/16: True
+  info: V1 +9 dB failures per iteration non-increasing over 16 = True; at 1/2/4/8/16 = [1086, 582, 367, 306, 286]
+  [ok] D2QAM16 V1 +9 dB failures decrease over iterations 1/2/4/8/16: True
+  info: V1 +12 dB failures per iteration non-increasing over 16 = True; at 1/2/4/8/16 = [788, 384, 246, 203, 184]
+  [ok] D2QAM16 V1 +12 dB failures decrease over iterations 1/2/4/8/16: True
+  info: V1 +15 dB failures per iteration non-increasing over 16 = True; at 1/2/4/8/16 = [629, 296, 181, 146, 137]
+  [ok] D2QAM16 V1 +15 dB failures decrease over iterations 1/2/4/8/16: True
+  info: V1 +18 dB failures per iteration non-increasing over 16 = False; at 1/2/4/8/16 = [503, 2060, 2421, 2504, 2485]
+  info: V1 +21 dB failures per iteration non-increasing over 16 = False; at 1/2/4/8/16 = [460, 2336, 2543, 2555, 2557]
+  info: R2-ours-G +18 dB non-increasing over 16 = True; 1/2/4/8/16 = [654, 385, 274, 235, 202]
+  info: R2-ours-G +21 dB non-increasing over 16 = True; 1/2/4/8/16 = [575, 328, 225, 194, 166]
+  info: R5-genie +18 dB non-increasing over 16 = True; 1/2/4/8/16 = [459, 170, 109, 83, 75]
+  info: R5-genie +21 dB non-increasing over 16 = True; 1/2/4/8/16 = [398, 133, 76, 55, 49]
+
+====================================================================================================
+SUMMARY: 212 comparisons match, 1 mismatch
+  MISMATCH D2QAM16 meta|stagec_ckpt_id: got {'sha256[:16]=4443921ce8d5c4a1 epoch=1784 best_epoch=1764 role=legacy-last 8x4 | BEST_WEIGHTS_UNAVAILABLE: evaluated = last-epoch EMA, reported best_val belongs to best_epoch'} want {'sha256[:16]=4443921ce8d5c4a1 epoch=1784 best_epoch=1764 role=legacy-last 8x4'}

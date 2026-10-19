@@ -1,0 +1,61 @@
+# e5_compare: raw raw_D2QAM16  cell C2  prior S2  16-QAM K_b 90  grid ['+3', '+6', '+9', '+12', '+15', '+18', '+21']
+# checks: 7 points, n = 2560, five arms at every point, every chunk 16qam / 90 / E5-qam16-v1, no load_raw WARNING
+
+============================== TABLE B -- paired comparisons (08_SPEC §2) ==============================
+Only the pairs listed in 08_SPEC §2 are computed; all-pairs is not done (multiple-comparison problem).
+Sign test is paired per block (same channel/noise realisation, 06_SPEC §2). 'a:b' = only-first-fails : only-second-fails.
+POWER GUARD (R6/R7, pre-registered): >= 3 decision points AND >= 6 discordant pairs at >= 2 of them,
+otherwise UNDECIDED is printed and no significance call is made.
+The decision SNRs of a pair are anchored on its BASELINE member (exp_0925's pre-registered rule; never on one
+of our arms, which would let our own arm choose where it is evaluated). The anchor arm is printed on every row.
+
+--- cell C2  prior S2  testbed D2   SNR grid ['+3', '+6', '+9', '+12', '+15', '+18', '+21']
+  R2-ours-G -> M-ours-bstar        [decision-point anchor arm: R2-ours-G]
+    decision SNRs ['+12', '+15', '+18'] (anchor R2-ours-G: |log10(BLER@16 of R2-ours-G / 0.1)| smallest, BLER in [0.005, 0.9])
+    sign test @16: +12 dB 105:32 p=2.9e-10  +15 dB 101:30 p=3.5e-10  +18 dB 76:21 p=1.7e-08   pooled 282:83 p=1.8e-26
+    power guard: 3 decision points, 3 with >= 6 discordant pairs -> POWERED
+    two-sided sign test at p < .05: second arm fewer failures at 3/3 points, first arm fewer failures at 0/3 points -> significant
+    SNR@0.1 gap (R2-ours-G minus M-ours-bstar): +2.75 dB  [90% paired bootstrap +1.91, +3.68; censored replicates 0%]
+  M-ours-bstar -> R5-genie        [decision-point anchor arm: R5-genie]
+    decision SNRs ['+6', '+9', '+12'] (anchor R5-genie: |log10(BLER@16 of R5-genie / 0.1)| smallest, BLER in [0.005, 0.9])
+    sign test @16: +6 dB 372:14 p=1.9e-91  +9 dB 218:15 p=2.4e-47  +12 dB 159:11 p=8.8e-35   pooled 749:40 p=2.2e-170
+    power guard: 3 decision points, 3 with >= 6 discordant pairs -> POWERED
+    two-sided sign test at p < .05: second arm fewer failures at 3/3 points, first arm fewer failures at 0/3 points -> significant
+    SNR@0.1 gap (M-ours-bstar minus R5-genie): +5.50 dB  [90% paired bootstrap +4.41, +6.46; censored replicates 0%]
+  R2-ours-G -> M-ours-dscore-C-V1        [decision-point anchor arm: R2-ours-G]
+    decision SNRs ['+12', '+15', '+18'] (anchor R2-ours-G: |log10(BLER@16 of R2-ours-G / 0.1)| smallest, BLER in [0.005, 0.9])
+    sign test @16: +12 dB 190:13 p=1.8e-41  +15 dB 161:13 p=1.2e-33  +18 dB 1:2284 p=0   pooled 352:2310 p=0
+    power guard: 3 decision points, 3 with >= 6 discordant pairs -> POWERED
+    two-sided sign test at p < .05: second arm fewer failures at 2/3 points, first arm fewer failures at 1/3 points -> significant
+    SNR@0.1 gap (R2-ours-G minus M-ours-dscore-C-V1): +6.18 dB  [90% paired bootstrap +5.24, +7.03; censored replicates 0%]
+  M-ours-bstar -> M-ours-dscore-C-V1        [decision-point anchor arm: M-ours-bstar]
+    decision SNRs ['+9', '+12', '+15'] (anchor M-ours-bstar: |log10(BLER@16 of M-ours-bstar / 0.1)| smallest, BLER in [0.005, 0.9])
+    sign test @16: +9 dB 157:23 p=1e-25  +12 dB 121:17 p=1.6e-20  +15 dB 93:16 p=2.2e-14   pooled 371:56 p=4.4e-58
+    power guard: 3 decision points, 3 with >= 6 discordant pairs -> POWERED
+    two-sided sign test at p < .05: second arm fewer failures at 3/3 points, first arm fewer failures at 0/3 points -> significant
+    SNR@0.1 gap (M-ours-bstar minus M-ours-dscore-C-V1): +3.44 dB  [90% paired bootstrap +2.62, +4.33; censored replicates 0%]
+  M-ours-dscore-C-V1 -> R5-genie        [decision-point anchor arm: R5-genie]
+    decision SNRs ['+6', '+9', '+12'] (anchor R5-genie: |log10(BLER@16 of R5-genie / 0.1)| smallest, BLER in [0.005, 0.9])
+    sign test @16: +6 dB 169:16 p=2.1e-33  +9 dB 83:14 p=4.2e-13  +12 dB 58:14 p=1.6e-07   pooled 310:44 p=2.1e-50
+    power guard: 3 decision points, 3 with >= 6 discordant pairs -> POWERED
+    two-sided sign test at p < .05: second arm fewer failures at 3/3 points, first arm fewer failures at 0/3 points -> significant
+    SNR@0.1 gap (M-ours-dscore-C-V1 minus R5-genie): +2.06 dB  [90% paired bootstrap +1.49, +2.57; censored replicates 0%]
+
+[b* -> V1] decision SNRs ['+9', '+12', '+15']: sum F  b* 922  V1 607  genie 465   R = 0.689278  [90% paired bootstrap B=2000 seed 20260926: 0.642, 0.736]
+
+BLER@16 = failures / 2560 (a raised block is a failure):
+  SNR       M-ours-dscore-C-V1          M-ours-bstar             R2-ours-G              R5-genie              V1-pilot
+   +3                828 / 2560            1189 / 2560            1336 / 2560             546 / 2560            1000 / 2560
+   +6                470 / 2560             675 / 2560             831 / 2560             317 / 2560             503 / 2560
+   +9                286 / 2560             420 / 2560             522 / 2560             217 / 2560             307 / 2560
+  +12                184 / 2560             288 / 2560             361 / 2560             140 / 2560             187 / 2560
+  +15                137 / 2560             214 / 2560             285 / 2560             108 / 2560             135 / 2560
+  +18               2485 / 2560             147 / 2560             202 / 2560              75 / 2560              97 / 2560
+  +21               2557 / 2560             123 / 2560             166 / 2560              49 / 2560              72 / 2560
+
+######## report only (no label): b* -> V1-pilot, table_B's rule ########
+  M-ours-bstar -> V1-pilot        [decision-point anchor arm: M-ours-bstar]
+    decision SNRs ['+9', '+12', '+15']
+    sign test @16: +9 dB 144:31 p=1.3e-18  +12 dB 116:15 p=1.6e-20  +15 dB 92:13 p=8e-16   pooled 352:59 p=6.8e-52
+    power guard: POWERED; second arm fewer failures at 3/3 points, first arm fewer failures at 0/3 points -> significant
+    SNR@0.1 gap (M-ours-bstar minus V1-pilot): +3.09 dB  [90% paired bootstrap +2.34, +3.87; censored replicates 0%]

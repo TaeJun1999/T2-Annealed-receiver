@@ -1,0 +1,152 @@
+작성 2026-10-19 08:56:52 CDT
+E4 bench_cost.py 마무리 보고 — e4-cost worktree
+
+대상: /home/HTJ/t2_wtCost. 기준 HEAD 9dd8b5fefb7f8127bff41f209dfd59151e6b554d + 미커밋 변경.
+읽은 명세: /home/HTJ/t2/reviews/spec_cost_bench.md 및 main의 conf/results/review_next/prompts/PROMPT_SERVER_COST.md, gcap/PROMPT_SERVER_COMMON.md.
+과제 파일 두 개는 이 worktree에 없어 main에서 읽었다. main 파일·공유 수신기 코드·기존 출력은 수정하지 않았다. 커밋·삭제·push·test raw 열람 없음.
+
+1. 판정
+
+확인 1–5는 기존 로그에서 모두 실행 완료됐다. 계측값·Tap 결과 보존·1스레드·SHA 거부 검증은 통과했다.
+단, 명세의 모든 기대값이 일치했다고 판정할 수는 없다. 확인 1·2에서 score forward는 과제 기대 16이 아닌 실제 backbone 호출 32이며, forward_match=False를 유지했다. VJP 기대값은 일치한다.
+계측 로직을 16에 맞추는 변경은 하지 않았다. 이 차이는 아래 코드 경로와 별도 golden 관측이 설명한다.
+기존 완료 표식: conf/logs/cost/verify_20261018_222512_CDT_measure.log:1297 COST_CHECKS_DONE.
+
+2. 만든 파일과 이유
+
+이전 작업에서 생성, 이번에 보존:
+- conf/code/bench_cost.py: D2 및 UMi32의 동결 checkpoint·GMM·SBL을 기존 build_point 경로로 만들고, arm별 Tap·캐시·카운터를 분리한 CPU 벤치. SHA, 기존 출력, 다른 작업 거부 가드 및 재현용 metadata/NPZ 포함.
+- conf/results/review_next/cost/verify_20261018_222512_CDT.sh: 순차 개발 확인·SHA/부하/덮어쓰기 거부 및 로그 보존.
+- 같은 폴더 check_cost_20261018_222512_CDT.py: 실제 cotangent 배치 폭의 합산, 예외 시간 제외, 저장 배열·Tap/plain 동일성·스레드·K 확인. 구현자가 작성한 확인이며 독립 golden은 아님.
+- conf/results/gmm_fits_D2_COST_{D2_20261018_222512_CDT_D2_K1024,U32_20261018_222512_CDT_U32_K4096,U32_20261018_222512_CDT_U32_K8192}/: tag별 바이트 사본. D2는 기존 fits 폴더 전체, U32는 각각 fullK32+해당 kronK 두 파일. 새 적합 없음.
+- cost_{D2,U32}_20261018_222512_CDT.{txt,npz}, verify_* 로그, bad_checkpoint_*.pt: 구현 확인 출력 및 거부 사례. 기존 파일을 모두 유지.
+- cost/deps/: 이전 작업의 threadpoolctl 3.7.0 로컬 설치. 설치 성공 로그 conf/logs/cost/threadpoolctl_install_20261018_222512_CDT.log:5. 이번에 설치한 패키지는 없음.
+
+이번 변경:
+- conf/code/bench_cost.py:410–412: 머리말을 backbone forward / denoise 호출 / cache miss / 논리적 VJP 방향 / pullback 호출의 정의로 구분.
+- 같은 파일:418: H calls → H calls/block (score: denoise), forward/VJP → backbone forward/VJP directions; pullback batches or EM updates (per block).
+- 같은 파일:437: 출력의 batches= → pullback_batches=.
+- 같은 파일:445–448: 과제 기대값과 실제 backbone_forward·denoise_calls·VJP_directions를 함께 표시. 기존 forward_match=False 판정 그대로.
+- 계측·시간·SHA·거부 로직 결함은 이번 점검 범위에서 발견하지 못했다. 해당 함수들의 변경 전후 AST 동일성을 실행으로 확인했다. 변경 전 SHA ece1fd935b131da635c0f95d53999c19ccfdc7926eab634f4f3e9474aefcdb64; 변경 후 SHA f85be77e350fa86a612d8b7423e49615bc273db0dd336efcac6158ca202f2b83.
+- finish_20261019_084909_CDT/check_labels.py, verify_labels.sh: 저장된 개발 배열을 새 이름으로 재표기하고 수치·배열·기존 파일 보존을 확인. 수신기·checkpoint 로딩 없음.
+- 같은 폴더 cost_{D2,U32}_labels_20261019_084909_CDT.{txt,npz}: 보강한 표기의 출력. 원 측정 metadata를 유지하고 report_reformat에 원파일 SHA·재표기 시각·렌더러 SHA·수신기 실행 0을 기록. metadata_json 외 배열은 원본과 바이트 동일.
+- 같은 폴더 bench_cost.before.py, labels.patch, protected.sha256, git_status.before.txt, REPORT.txt: 변경 전 코드, 표시 변경 diff, 보존 증거, 보고.
+- docs/EXPERIMENTS.md: 누락됐던 기존 확인과 이번 저장 출력 재계산 기록을 추가. RESULTS·DECISIONS·등록 문서 변경 없음.
+
+3. 확인 1–5의 실제 명령과 출력
+
+아래는 이전 실행을 읽어 확인한 명령이다. 이번에 다시 수신기를 돌린 명령이 아니다.
+기존 verify_*.sh:5–6에서 CUDA_VISIBLE_DEVICES= 및 BLAS 1을 export했고, :18–19의 runpy는 아래와 같다.
+  py=/home/HTJ/miniforge3/envs/torch/bin/python
+  runpy() { taskset -c 66-67 "$py" -B "$@"; }
+
+[1] D2 출력·카운터·K — 계측 통과, forward 기대 16 불일치
+  runpy conf/code/bench_cost.py --cell D2 --tag D2_20261018_222512_CDT --trials 1 --ms-arm --force --verify-tap
+  근거: verify_*.sh:56.
+  measure.log:32  BLOCK D2 -3 trial=2561 M-ours-dscore-C-V1 H=16 forward=32 VJP=1024 EM=0 exception='' early=False
+  measure.log:30,42  V1-ms도 H=16 forward=32 VJP=1024; :44 V1 +6 dB도 동일.
+  measure.log:1212,1217  b* K=1024, 각 행 ok/exception/early/nonfinite=1/0/0/0.
+  measure.log:1285  AUDIT cost_D2_20261018_222512_CDT.npz: rows=6, all Tap/plain trajectories exact, one thread PASS
+  형식 사례(measure.log:1210, 개발 n=1이므로 보고용 비용 아님):
+  D2 | -3 | M-ours-dscore-C-V1 | 993.853 [993.853,993.853] | 95.673% | 59.168 [58.718,59.514]; 60.387 | 950.850 | 16 | 32/1024; batches=16 | — | 1/0/0/0
+
+[2] UMi32 출력·카운터·K·SBL — 계측 통과, forward 기대 16 불일치
+  runpy conf/code/bench_cost.py --cell U32 --tag U32_20261018_222512_CDT --trials 1 --gmm both --force --verify-tap
+  근거: verify_*.sh:57.
+  measure.log:1246,1260  V1 H=16 forward=32 VJP=4096 EM=0 exception='' early=False
+  measure.log:1244,1258  SBL-loop H=16 forward=0 VJP=0 EM=48 exception='' early=False
+  measure.log:1265–1266,1270–1271  GMM K=4096 및 8192, 각 행 1/0/0/0.
+  measure.log:1294  AUDIT cost_U32_20261018_222512_CDT.npz: rows=8, all Tap/plain trajectories exact, one thread PASS
+
+[3] 1스레드 — 통과
+  명령: [1]·[2]와 동일; 별도 수신기 실행 아님.
+  measure.log:27,39,1239,1253  THREADS torch=1, 표시된 numpy OpenBLAS·SciPy OpenBLAS·libgomp 모두 num_threads=1.
+  D2 txt:479–487  python=3.12.14, numpy=2.5.2, torch=2.14.0+cu130, threadpoolctl=3.7.0, torch_threads=1, torch_interop_threads=1, CUDA_VISIBLE_DEVICES="".
+  같은 txt:254 CPU Intel(R) Xeon(R) 6740P. :603–608 network parameters=torch.float64, device=cpu; :635–637 실제 q=complex128, nu=float64, network_input=torch.float64. GMM 복소 배열·SBL dictionary=complex128, 고윳값·가중치·실수 항등행렬=float64. dtype 변경 없음.
+
+[4] Tap 유무의 blk_err·nmse 궤적 — 통과
+  명령: [1]·[2]의 --verify-tap; 개발 trial 2561을 각 arm에서 plain으로 한 번 더 계산.
+  measure.log:29–45 (D2 6행), :1241–1261 (U32 8행): 모든 TAP_CHECK {'blk_err': True, 'nmse': True}.
+  저장 배열 확인 명령(verify_*.sh:58):
+  runpy conf/results/review_next/cost/check_cost_20261018_222512_CDT.py conf/results/review_next/cost/cost_D2_20261018_222512_CDT.npz conf/results/review_next/cost/cost_U32_20261018_222512_CDT.npz
+  출력: :1285 rows=6, :1294 rows=8, all Tap/plain trajectories exact, one thread PASS.
+  16반복의 전체 배열을 비교했으며, 최종 BLER 한 값만 비교한 것이 아니다. 성능 추정·신뢰구간 계산은 하지 않는다.
+
+[5] SHA 불일치 거부 — 통과
+  runpy conf/code/bench_cost.py --cell D2 --tag bad_20261018_222512_CDT --check-assets-only --checkpoint conf/results/review_next/cost/bad_checkpoint_20261018_222512_CDT.pt
+  근거: verify_*.sh:27–41, 원 checkpoint의 앞 128바이트만 새 파일에 복사. 원본 수정 없음.
+  guards.log:22  HASH_MISMATCH_REJECTION rc=2 PASS
+  guards.err:1  ABORT: SHA256 MISMATCH ... expected=4443921ce8d5c4a11c7cda879a53a66436f43bd76864734a3e6203cfb4b82f29 actual=73eb61d3d6674337c46621750ae3dce2d3ce94813606c37e66173c25cefea426; no receiver measurement
+  독립 golden 대조의 추가 증거: golden/r1a.log:7 U32 last 대체 거부, r1b.log:7 K·ll_val이 같지만 바이트가 다른 K4096 대체 거부, r1c2.log:7 1바이트 XOR 거부.
+  golden/r1c.log의 첫 시도는 원래 0인 바이트를 0으로 써 변경이 없었던 사례이며, 불일치 거부 증거로 세지 않았다.
+
+부가 거부 확인(기존 로그):
+  runpy conf/code/bench_cost.py --cell D2 --tag busy_20261018_222512_CDT --trials 1
+  guards.log:34 BUSY_WITHOUT_FORCE_REJECTION rc=2 PASS; guards.err:2 no receiver was loaded.
+  runpy conf/code/bench_cost.py --cell D2 --tag D2_20261018_222512_CDT --trials 1 --force
+  measure.log:1295 EXISTING_OUTPUT_REJECTION rc=2 PASS; measure.err:1 refusing existing output.
+
+4. forward/VJP 및 H의 정의와 센 위치
+
+forward:
+- bench_cost.py:237–240에서 count_forward가 1을 더하고 원 함수를 부른다. :282에서 감싼 대상은 rx.prior.model.net.forward다. ScoreModel의 __call__나 denoise 횟수를 forward로 대체한 것이 아니다.
+- score.py:1119의 f는 tweedie_real이고 :1120에서 jacrev(f)(x), :1121에서 평균을 위한 f(x)를 각각 실행한다. tweedie_real(:589–592) → score_real(:404 이하) → raw(:382–385) → net 호출이다.
+- 따라서 확인한 16개 캐시 미스 질의에서 backbone이 2회씩 실행되어 32. denoise 호출은 16.
+- _matrix_site가 denoise_full을 호출하는 위치는 Demo/t2_gmm.py:112–113. ScorePrior._eval(:1111–1113)의 캐시가 동일 (q,nu)를 돌려주므로 이것 때문에 backbone 2회가 더 추가되는 것은 아니다.
+- denoise 호출 16과 캐시 미스 16은 개념이 다르다. bench는 캐시 미스 수를 별도 저장하지 않는다. golden/golden_cost.md:114–123의 독립 n_query·jacrev 관측은 확인한 블록에서 16이다. 같은 질의가 반복되면 캐시로 forward/VJP가 줄 수 있으므로 모든 미래 블록이 반드시 32라는 주장은 하지 않는다.
+
+VJP:
+- bench_cost.py:283에서 torch._functorch.eager_transforms._vjp_with_argnums를 감싼다. :242–264에서 반환 pullback을 다시 감싸 실제 cotangent의 숨은 batch 폭을 읽고 성공한 pullback별 폭을 저장한다.
+- :385–386의 vjp=sum(vjp_widths)는 논리적 스칼라 방향 수, vjp_batches=len(vjp_widths)는 Python pullback 호출 수다. 구성값 16·2N을 카운터에 주입하지 않는다.
+- 저장 출력: D2 VJP=1024, U32=4096; pullback 호출은 둘 다 16. 이는 각각 64·16, 256·16 방향에 해당한다. VJP=16이라고 보고하거나 하드웨어 backward kernel 1024/4096회로 해석하면 안 된다.
+- measure.log:1275–1277의 분석적 확인은 dim=3/chunk=None → [3], dim=5/chunk=2 → [2,2,1], dim=2/chunk=1 → [1,1]을 관측하고 Jacobian도 확인했다. private torch API에 의존하므로 버전 변경 시 다시 확인해야 한다.
+
+module H와 시간:
+- score H = prior.denoise와 rx._matrix_site의 대응 호출 시간 합(bench_cost.py:284–285,295–299). H 호출 수는 denoise 진입 수.
+- GMM H = prior.ep_site 전체(:287).
+- SBL H = SparsePrior.ep_site 전체(arms.py:351–355): gamma 추정, Cx=A diag(gamma) A^H+eps I 구성, Hermitian 대칭화 및 Gaussian site 역행렬을 포함한다. 질의 (G,b) 구성·detector·BCJR는 H 밖이고 전체 rx.run 안에 포함된다.
+- SBL 단계 수는 bench_cost.py:266–275에서 gamma 실행 범위에만 np.linalg.inv를 감싼다. arms.py:337–345의 반복당 역행렬(:339) 1회를 센다. 최종 site 역행렬(:354)은 H 시간에 포함하지만 EM 카운터에는 제외한다.
+- 동결 SBL은 rho=4, n_em=3, cold이며 실제 update 기본값은 mackay(arms.py:296). 따라서 표의 EM=48은 여기서는 16×3 MacKay gamma 갱신 단계다. 엄밀한 EM 갱신식 48회라는 뜻은 아니다.
+- 전체 시간은 bench_cost.py:375–384의 rx.run 호출만 perf_counter로 잰다. 모델/fit 로딩과 채널·송신·잡음 생성은 앞 단계에 있어 제외된다. Tap 설정/해제는 전체 시간 밖이며, 호출 중 wrapper·카운터 오버헤드는 시간 안에 있다(빼지 않음).
+- 예외 블록은 시간 배열을 버리고 예외를 남긴다. early/nonfinite는 raw에 보존하고 요약에서 제외한다(:388–395,431). 이번 14행은 각각 개발 n=1, 예외/early/nonfinite=0.
+
+5. 과제·원래 명세와 차이
+
+- 과제는 기존 bench_moduleH_ep.py의 일반화를 적었고 상세 명세는 새 bench_cost.py 생성을 지시했다. 새 파일에 구현했고 역사적 bench는 유지했다.
+- forward=16 기대와 실제 backbone=32가 다르다. 현재 정의의 기대 불일치를 그대로 출력하며, 값을 16으로 재명명하거나 기대값을 32로 바꿔 통과시킨 것은 아니다.
+- 과제는 신경망 real64·수신기/GMM complex128을 요구하고 상세 명세는 실제 dtype을 읽으라고 했다. 확인된 network/복소 경로는 요구와 일치한다. 실수 행렬·고윳값까지 complex128이라고 과장하지 않는다.
+- 상세 명세의 threadpoolctl torch-env 설치 대신, 이전 구현은 worktree 밖 쓰기 금지에 맞춰 cost/deps에 설치·fallback import했다. 경로·버전·SHA가 출력에 남아 있다. torch env 자체 설치와는 다르다.
+- 실제 E4는 조용한 환경의 SNR별 24블록 조건이다. 기존 것은 --trials 1 --force 및 Tap/plain 확인이며 보고용 비용 측정이 아니다. 기존 CPU 66-67은 원래 확인 명세이고 이번 확인은 새 사용자 지시대로 1,97이다.
+- --check-assets-only·--verify-tap·자산 경로 override는 거부/보존 확인을 위한 추가 인자다. 대체 경로도 고정 SHA를 만족해야 한다. --out-dir는 worktree의 cost 아래로 제한한다.
+- D2 전체 fits에서 명세의 기준 SHA와 직접 대조하는 것은 실제 사용하는 fullK32와 kronK1024다. 나머지 파일은 읽은 SHA와 사본 SHA를 기록·대조하며 별도 사전 고정 SHA가 없다. 선택 객체가 kron K1024인지 추가 확인한다. U32는 각 태그에서 두 파일 모두 고정 SHA 대조.
+
+6. 이번 표기 변경 확인과 기존 실행의 상태
+
+실제 실행 명령:
+  tmux new-session -d -s cost_finish_084909_r2 'taskset -c 1,97 bash /home/HTJ/t2_wtCost/conf/results/review_next/cost/finish_20261019_084909_CDT/verify_labels.sh'
+그 스크립트의 Python 명령:
+  taskset -c 1,97 /home/HTJ/miniforge3/envs/torch/bin/python -B conf/results/review_next/cost/finish_20261019_084909_CDT/check_labels.py
+환경 CUDA_VISIBLE_DEVICES=, OMP/MKL/OPENBLAS_NUM_THREADS=1. 단일 Python 프로세스, 저장된 개발 NPZ만 읽음.
+
+conf/logs/cost/labels_20261019_084909_CDT_r2.log:
+  :9  RESOURCE ... affinity=[1, 97] CUDA_VISIBLE_DEVICES='' (/proc verified)
+  :10 THREADS torch=1 interop=1, 로드된 pool 모두 num_threads=1
+  :11 UNCHANGED_COUNTERS_TIMERS_HASH_REFUSALS_AST PASS
+  :18,30 기존 6행·8행 audit PASS
+  :19 FORMAT_CHECK D2: rows=6 raw_arrays=150 byte_identical; numerical table cells unchanged PASS
+  :31 FORMAT_CHECK U32: rows=8 raw_arrays=200 byte_identical; numerical table cells unchanged PASS
+  :34 LABEL_CHECKS_DONE receiver_runs=0 timing_measurements=0
+  :35 PROTECTED_FILES_SHA256_UNCHANGED_PASS
+  :36 SHARED_CODE_GIT_DIFF_EMPTY_PASS
+  :38 COST_FINISH_CHECKS_DONE
+
+첫 보강 확인은 verify_labels.sh의 set -e가 '잠기지 않음'을 뜻하는 lock id의 exit 1을 실패로 처리하여 Python 시작 전에 종료했다. labels_20261019_084909_CDT.{log,err}를 보존했다. 잠금 상태 조회가 검증을 중단하지 않게 래퍼를 고친 뒤 새 r2 로그로 완료했다. bench 결함이나 수신기 실행 실패는 아니다.
+기존 guard·측정 확인 출력은 구현 확인 근거로 유효하다. 표기만 바뀌어 기존 수치의 재평가는 필요하지 않다. 조용한 조건의 실제 비용 결과로 사용하는 것은 부적절하다.
+이번 작업은 저장 수치 재계산·배열 재비교이며, checkpoint 재평가·학습부터 재실행 또는 비용 측정의 재현이라고 부르지 않는다.
+
+7. 남은 불확실성과 관측 범위
+
+확인한 사실: 기존 개발 trial 2561, D2 2 SNR×3 arm 및 U32 2 SNR×4 arm에서 계측·결과 보존·스레드·K가 기록대로다. 독립 golden 보고와 관련 코드·거부 로그를 읽었으며, 이번에는 golden 수신기를 재실행하지 않았다. 공유 코드/기존 출력 보존은 SHA와 git diff로 확인했다.
+미실행/미검증: 10/22–23 사용자 조건의 24블록 실제 측정, 조용한 환경에서의 비용 분포, 계측 오버헤드 크기, 새 torch 버전의 private VJP API 호환성. 현재 cost benchmark 자체는 lock id 기준 잠기지 않은 경로다.
+개발 블록 수 1에서 만든 IQR은 rx.run에 대해 퇴화하므로 정식 비용 분포·서비스 지연·deadline/Pareto 결론을 내리지 않는다. GPU 더미 점유도 부하 가드의 다른 작업으로 잡히므로 실제 측정 조건은 별도로 충족해야 한다.
+명세의 forward 16이 'denoise/네트워크+Jacobian 평가 한 번'을 의도했을 가능성은 해석일 뿐이다. 실행으로 확인된 것은 backbone 32와 논리적 VJP 1024/4096이며, 이 값들을 과제 기대와 구분해 보고한다.

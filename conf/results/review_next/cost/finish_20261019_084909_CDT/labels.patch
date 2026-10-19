@@ -1,0 +1,40 @@
+--- bench_cost.before.py
++++ conf/code/bench_cost.py
+@@ -407,13 +407,15 @@
+     lines = ["# E4 receiver cost — development stream, CPU, batch=1, outer iterations=16",
+              "# Durations: milliseconds in table; seconds in NPZ. IQR=[Q25,Q75]; percentile method=linear.",
+              "# H: score=prior.denoise + rx._matrix_site (paired calls); GMM=prior.ep_site; SBL=SparsePrior.ep_site (gamma updates + Gaussian site inverse).",
+-             "# Forward: model.net.forward entries, including the forward inside jacrev. VJP: observed cotangent directions; vjp_batches counts pullback entries.",
++             "# Backbone forward: model.net.forward entries, including the forward inside jacrev; NPZ key=forward. This is not the denoise-call or cache-miss count.",
++             "# Score H calls/block counts prior.denoise entries. An uncached ScorePrior._eval query executes one backbone forward inside jacrev and another for the mean (score.py:1120-1121); denoise_full reuses the cached result.",
++             "# VJP directions: sum of observed cotangent batch widths (NPZ key=vjp). Pullback batches: actual pullback entries (NPZ key=vjp_batches), not scalar VJP directions or hardware kernel launches.",
+              "# SBL EM steps: completed inverses inside SparsePrior.gamma, one per MacKay iteration; the site inverse is excluded from this counter.",
+              "# Exception timings are discarded. Early/nonfinite returns remain in raw but are excluded from summaries. Warm-up timings are not saved.",
+              "# Timer/counter overhead is included; no overhead subtraction. Timing only; no cost claim or Pareto inference.",
+              "# Metadata (including load, hashes, dtype, threadpools, command, seed and git):",
+              json.dumps(metadata, ensure_ascii=False, indent=2, default=str), "",
+-             "cell | SNR | arm | rx median ms [IQR] | H share median | H/call median ms [IQR]; p90 | H/block median ms | H calls | forward/VJP; batches or EM | K | ok/exception/early/nonfinite"]
++             "cell | SNR | arm | rx median ms [IQR] | H share median | H/call median ms [IQR]; p90 | H/block median ms | H calls/block (score: denoise) | backbone forward/VJP directions; pullback batches or EM updates (per block) | K | ok/exception/early/nonfinite"]
+     for cell, snr, name, kind, k, records in rows:
+         prefix = f"{cell}|{snr:+g}|{name}|"
+         ragged = {"h_call_s", "denoise_s", "site_s", "vjp_widths"}
+@@ -432,7 +434,7 @@
+                                             [r["h_s"] * 1e3 for r in good])]
+         share = quantiles([r["h_s"] / r["run_s"] for r in good])[1]
+         counts = lambda key: ",".join(str(x) for x in sorted({r[key] for r in good})) or "NA"
+-        network = (f"{counts('forward')}/{counts('vjp')}; batches={counts('vjp_batches')}" if kind == "score"
++        network = (f"{counts('forward')}/{counts('vjp')}; pullback_batches={counts('vjp_batches')}" if kind == "score"
+                    else f"EM={counts('em_steps')}" if kind == "sbl" else "—")
+         lines.append(f"{cell} | {snr:+g} | {name} | {rq[1]:.3f} [{rq[0]:.3f},{rq[2]:.3f}] | {share:.3%} | "
+                      f"{hq[1]:.3f} [{hq[0]:.3f},{hq[2]:.3f}]; {hq[3]:.3f} | {bq[1]:.3f} | {counts('h_calls')} | "
+@@ -440,8 +442,8 @@
+                      f"{sum(r['early'] for r in records)}/{sum(r['nonfinite'] for r in records)}")
+         expected_vjp = NITER * 2 * (32 if cell == "D2" else 128)
+         if kind == "score":
+-            lines.append(f"# COUNT_CHECK {cell} {snr:+g} {name}: expected forward=16 VJP={expected_vjp}; "
+-                         f"observed forward={counts('forward')} VJP={counts('vjp')}; "
++            lines.append(f"# COUNT_CHECK {cell} {snr:+g} {name}: task expectation forward=16 VJP_directions={expected_vjp}; "
++                         f"observed backbone_forward={counts('forward')} denoise_calls={counts('h_calls')} VJP_directions={counts('vjp')}; "
+                          f"forward_match={bool(good) and all(r['forward'] == 16 for r in good)} "
+                          f"vjp_match={bool(good) and all(r['vjp'] == expected_vjp for r in good)}")
+     for key, values in checks.items():

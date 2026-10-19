@@ -1,0 +1,114 @@
+
+=== U28QAM16g: 224 chunks in /home/HTJ/t2_wtE5/conf/raw_U28QAM16g
+  [ok] U28QAM16g SNRs present: [3, 6, 9, 12, 15, 18, 21]
+  [ok] U28QAM16g plan: 32 chunks of 10 at skips 5120..5430 per SNR: True
+  [ok] U28QAM16g arm set: {('M-ours-bstar',)}
+  [ok] U28QAM16g blk_err shape: {(10, 16)}
+  [ok] U28QAM16g run|git: {'57eb1f22'}
+  [ok] U28QAM16g meta modulation/payload/protocol: ({'16qam'}, {90}, {'E5-qam16-v1'})
+  [ok] U28QAM16g meta bstar/kron_K/ll_val: ({'kron'}, {4096}, {5.797910431000217})
+  [ok] U28QAM16g run iters/n/seed: ({16}, {10}, {20260926})
+  [ok] U28QAM16g run|skip / run|snr == file name: ({True}, {True})
+  [ok] U28QAM16g file-name prior / cell: ({'UMi28'}, {'C2'})
+  [ok] U28QAM16g b* failures / 320 at +3..+21: (213, 129, 92, 68, 40, 23, 11)
+  [ok] U28QAM16g raised: 0
+  BLER(+3) = 0.665625, BLER(+21) = 0.034375; inside condition (BLER(+3) > 0.1 and BLER(+21) < 0.1) = True
+  [ok] U28QAM16g §1.2 rule -> G0 without shift: True
+  b* BLER per SNR: +3:0.665625  +6:0.403125  +9:0.287500  +12:0.212500  +15:0.125000  +18:0.071875  +21:0.034375; monotone non-increasing = True
+
+=== D2QAM16g: 224 chunks in /home/HTJ/t2_wtE5/conf/raw_D2QAM16g
+  [ok] D2QAM16g SNRs present: [3, 6, 9, 12, 15, 18, 21]
+  [ok] D2QAM16g plan: 32 chunks of 10 at skips 5120..5430 per SNR: True
+  [ok] D2QAM16g arm set: {('M-ours-bstar',)}
+  [ok] D2QAM16g blk_err shape: {(10, 16)}
+  [ok] D2QAM16g run|git: {'2e02fda0'}
+  [ok] D2QAM16g meta modulation/payload/protocol: ({'16qam'}, {90}, {'E5-qam16-v1'})
+  [ok] D2QAM16g meta bstar/kron_K/ll_val: ({'kron'}, {1024}, {-11.459169831224418})
+  [ok] D2QAM16g run iters/n/seed: ({16}, {10}, {20260926})
+  [ok] D2QAM16g run|skip / run|snr == file name: ({True}, {True})
+  [ok] D2QAM16g file-name prior / cell: ({'S2'}, {'C2'})
+  [ok] D2QAM16g b* failures / 320 at +3..+21: (150, 78, 48, 42, 32, 22, 16)
+  [ok] D2QAM16g raised: 0
+  BLER(+3) = 0.46875, BLER(+21) = 0.05; inside condition (BLER(+3) > 0.1 and BLER(+21) < 0.1) = True
+  [ok] D2QAM16g §1.2 rule -> G0 without shift: True
+  b* BLER per SNR: +3:0.468750  +6:0.243750  +9:0.150000  +12:0.131250  +15:0.100000  +18:0.068750  +21:0.050000; monotone non-increasing = True
+
+=== coverage_U28QAM16_16qam.npz
+  [ok] coverage_U28QAM16_16qam meta skip/n: (5440, 40)
+  [ok] coverage_U28QAM16_16qam meta modulation/payload: ('16qam', 90)
+  [ok] coverage_U28QAM16_16qam meta checkpoint_id: 'sha256[:16]=6f3a1b9490864af1 epoch=379 best_epoch=379 role=best 8x4'
+  meta sigma_tag 'UMi28' s_lo 0.032681101782796075 s_hi 0.8372515002882972 fit_tag 'U28QAM16g' convention 'sigma=sqrt(nu_q/2); per-iteration fraction among finite queries'
+  [ok] coverage_U28QAM16_16qam SNRs: [3, 6, 9, 12, 15, 18, 21]
+  [ok] coverage_U28QAM16_16qam sigma == sqrt(nu_q / 2) (stored convention): True
+  [ok] coverage_U28QAM16_16qam stored below/above/finite arrays == recomputed from sigma vs [s_lo, s_hi] (all 16 iterations): True
+  [ok] coverage_U28QAM16_16qam iteration-16 out-of-range per SNR: (0, 0, 0, 0, 7, 23, 40)
+  [ok] coverage_U28QAM16_16qam iteration-16 finite per SNR: (40, 40, 40, 40, 40, 40, 40)
+  pooled iteration 16: 70/280 = 0.250
+
+=== coverage_U28QAM16_qpsk.npz
+  [ok] coverage_U28QAM16_qpsk meta skip/n: (5440, 40)
+  [ok] coverage_U28QAM16_qpsk meta modulation/payload: ('qpsk', 42)
+  [ok] coverage_U28QAM16_qpsk meta checkpoint_id: 'sha256[:16]=6f3a1b9490864af1 epoch=379 best_epoch=379 role=best 8x4'
+  meta sigma_tag 'UMi28' s_lo 0.032681101782796075 s_hi 0.8372515002882972 fit_tag 'U28QAM16g' convention 'sigma=sqrt(nu_q/2); per-iteration fraction among finite queries'
+  [ok] coverage_U28QAM16_qpsk SNRs: [3, 6, 9, 12, 15, 18, 21]
+  [ok] coverage_U28QAM16_qpsk sigma == sqrt(nu_q / 2) (stored convention): True
+  [ok] coverage_U28QAM16_qpsk stored below/above/finite arrays == recomputed from sigma vs [s_lo, s_hi] (all 16 iterations): True
+  [ok] coverage_U28QAM16_qpsk iteration-16 out-of-range per SNR: (0, 0, 0, 0, 8, 39, 40)
+  [ok] coverage_U28QAM16_qpsk iteration-16 finite per SNR: (40, 40, 40, 40, 40, 40, 40)
+  pooled iteration 16: 87/280 = 0.311
+
+=== coverage_D2QAM16_16qam.npz
+  [ok] coverage_D2QAM16_16qam meta skip/n: (5440, 40)
+  [ok] coverage_D2QAM16_16qam meta modulation/payload: ('16qam', 90)
+  [MISMATCH] coverage_D2QAM16_16qam meta checkpoint_id: 'sha256[:16]=4443921ce8d5c4a1 epoch=1784 best_epoch=1764 role=legacy-last 8x4 | BEST_WEIGHTS_UNAVAILABLE: evaluated = last-epoch EMA, reported best_val belongs to best_epoch'   (expected 'sha256[:16]=4443921ce8d5c4a1 epoch=1784 best_epoch=1764 role=legacy-last 8x4')
+  meta sigma_tag '' s_lo 0.033062204571989696 s_hi 0.8451555272508591 fit_tag 'D2QAM16g' convention 'sigma=sqrt(nu_q/2); per-iteration fraction among finite queries'
+  [ok] coverage_D2QAM16_16qam SNRs: [3, 6, 9, 12, 15, 18, 21]
+  [ok] coverage_D2QAM16_16qam sigma == sqrt(nu_q / 2) (stored convention): True
+  [ok] coverage_D2QAM16_16qam stored below/above/finite arrays == recomputed from sigma vs [s_lo, s_hi] (all 16 iterations): True
+  [ok] coverage_D2QAM16_16qam iteration-16 out-of-range per SNR: (0, 0, 0, 0, 27, 26, 40)
+  [ok] coverage_D2QAM16_16qam iteration-16 finite per SNR: (40, 40, 40, 40, 40, 40, 40)
+  pooled iteration 16: 93/280 = 0.332
+
+=== coverage_D2QAM16_qpsk.npz
+  [ok] coverage_D2QAM16_qpsk meta skip/n: (5440, 40)
+  [ok] coverage_D2QAM16_qpsk meta modulation/payload: ('qpsk', 42)
+  [MISMATCH] coverage_D2QAM16_qpsk meta checkpoint_id: 'sha256[:16]=4443921ce8d5c4a1 epoch=1784 best_epoch=1764 role=legacy-last 8x4 | BEST_WEIGHTS_UNAVAILABLE: evaluated = last-epoch EMA, reported best_val belongs to best_epoch'   (expected 'sha256[:16]=4443921ce8d5c4a1 epoch=1784 best_epoch=1764 role=legacy-last 8x4')
+  meta sigma_tag '' s_lo 0.033062204571989696 s_hi 0.8451555272508591 fit_tag 'D2QAM16g' convention 'sigma=sqrt(nu_q/2); per-iteration fraction among finite queries'
+  [ok] coverage_D2QAM16_qpsk SNRs: [3, 6, 9, 12, 15, 18, 21]
+  [ok] coverage_D2QAM16_qpsk sigma == sqrt(nu_q / 2) (stored convention): True
+  [ok] coverage_D2QAM16_qpsk stored below/above/finite arrays == recomputed from sigma vs [s_lo, s_hi] (all 16 iterations): True
+  [ok] coverage_D2QAM16_qpsk iteration-16 out-of-range per SNR: (0, 0, 0, 0, 37, 37, 40)
+  [ok] coverage_D2QAM16_qpsk iteration-16 finite per SNR: (40, 40, 40, 40, 40, 40, 40)
+  pooled iteration 16: 114/280 = 0.407
+  [ok] prediction 4 UMi28: 16-QAM out fraction <= QPSK: ((70, 280), (87, 280), True)
+  [ok] prediction 4 D2: 16-QAM out fraction <= QPSK: ((93, 280), (114, 280), True)
+  [ok] U28: same [s_lo, s_hi] for 16-QAM and QPSK coverage: True
+  [ok] D2: same [s_lo, s_hi] for 16-QAM and QPSK coverage: True
+
+=== smoke logs (RSS -> G = ceil(RSS * 1.05 / 0.5) * 0.5), worker estimate, time estimate
+  [ok] smoke U28: chunk s, wall s, RSS GB, G (recomputed): (245, 247, 1.203, 1.5)
+  [ok] smoke U28: G printed in the log == recomputed: 1.5
+  MemAvailable 1003263876 kB = 956.8 GiB -> floor(0.8 * 956.8 / 1.5) = 510 (registered 510); estimate ceil(448/96) x 245 s = 20.4 min
+  [ok] smoke U28: worker bound: 510
+  [ok] smoke D2: chunk s, wall s, RSS GB, G (recomputed): (128, 134, 0.877, 1.0)
+  [ok] smoke D2: G printed in the log == recomputed: 1.0
+  MemAvailable 1003263876 kB = 956.8 GiB -> floor(0.8 * 956.8 / 1.0) = 765 (registered 765); estimate ceil(448/96) x 128 s = 10.7 min
+  [ok] smoke D2: worker bound: 765
+
+=== test runner logs
+  [ok] U28QAM16 log: 448 'done' lines, all 'arm-trial exceptions=0', all 'modulation=16qam K=90': (448, 448, True)
+  [ok] U28QAM16 log: chunk s mean / median / min / max: (388, 397, 252, 446)
+  [ok] U28QAM16 log: 'finished in' min (line 456): ('32.5', 456)
+  [ok] U28QAM16 log line 6: memory guard -> jobs: (529, 96)
+  [ok] U28QAM16 log line 7: '448 tasks on 96 workers': True
+  raw mtimes KST: first chunk 2026-10-19 04:52:01, last chunk 2026-10-19 05:18:17; span 26.3 min; mean 388.3 s median 397.0 s
+  [ok] D2QAM16 log: 448 'done' lines, all 'arm-trial exceptions=0', all 'modulation=16qam K=90': (448, 448, True)
+  [ok] D2QAM16 log: chunk s mean / median / min / max: (213, 225, 121, 244)
+  [ok] D2QAM16 log: 'finished in' min (line 456): ('17.7', 456)
+  [ok] D2QAM16 log line 6: memory guard -> jobs: (793, 96)
+  [ok] D2QAM16 log line 7: '448 tasks on 96 workers': True
+  raw mtimes KST: first chunk 2026-10-19 05:21:32, last chunk 2026-10-19 05:36:08; span 14.6 min; mean 213.3 s median 225.0 s
+
+SUMMARY: 76 comparisons match, 2 mismatch
+  MISMATCH coverage_D2QAM16_16qam meta checkpoint_id: got 'sha256[:16]=4443921ce8d5c4a1 epoch=1784 best_epoch=1764 role=legacy-last 8x4 | BEST_WEIGHTS_UNAVAILABLE: evaluated = last-epoch EMA, reported best_val belongs to best_epoch' want 'sha256[:16]=4443921ce8d5c4a1 epoch=1784 best_epoch=1764 role=legacy-last 8x4'
+  MISMATCH coverage_D2QAM16_qpsk meta checkpoint_id: got 'sha256[:16]=4443921ce8d5c4a1 epoch=1784 best_epoch=1764 role=legacy-last 8x4 | BEST_WEIGHTS_UNAVAILABLE: evaluated = last-epoch EMA, reported best_val belongs to best_epoch' want 'sha256[:16]=4443921ce8d5c4a1 epoch=1784 best_epoch=1764 role=legacy-last 8x4'

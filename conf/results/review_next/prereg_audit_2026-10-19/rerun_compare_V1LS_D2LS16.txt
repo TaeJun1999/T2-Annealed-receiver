@@ -1,0 +1,61 @@
+# v1ls_compare: raw raw_D2LS16  cell C2  prior S2  grid ['+3', '+6', '+9', '+12', '+15', '+18', '+21']  primary M-ours-dscore-C-V1-wide
+# checks: registered points, n = 2560, six arms at every point, no load_raw WARNING
+
+######## PRIMARY (M-ours-dscore-C-V1-wide) ########
+  L1  V1 -> M-ours-dscore-C-V1-wide   at +18 / +21 dB (a = only V1 fails : b = only M-ours-dscore-C-V1-wide fails)
+    +18 dB 2396:1 p=0  +21 dB 2491:0 p=0   -> (a) X fewer at both points
+    MONOTONE (failures of M-ours-dscore-C-V1-wide at +15 / +18 / +21 dB = 132 / 90 / 66 of 2560): yes
+  L2  M-ours-bstar -> M-ours-dscore-C-V1-wide        [decision-point anchor arm: M-ours-bstar]
+    decision SNRs ['+9', '+12', '+15']
+    sign test @16: +9 dB 160:26 p=9.8e-25  +12 dB 116:22 p=1.3e-16  +15 dB 93:11 p=2.5e-17   pooled 369:59 p=6.7e-56
+    power guard: POWERED; second arm fewer failures at 3/3 points, first arm fewer failures at 0/3 points -> significant
+    SNR@0.1 gap (M-ours-bstar minus M-ours-dscore-C-V1-wide): +3.33 dB  [90% paired bootstrap +2.51, +4.28; censored replicates 0%]   -> label (i)
+    decision points: sum F  b* 922  X 612  genie 465   R = 0.678337  [90% paired bootstrap B=2000 seed 20260926: 0.631, 0.729]
+    SUFFIX (§2.1 M3): none
+  PRIMARY LABELS: L1 (a) X fewer at both points (monotone yes)   L2 (i) (suffixes 0)
+
+######## report only: M-ours-dscore-C-V1-clamp ########
+  L1  V1 -> M-ours-dscore-C-V1-clamp   at +18 / +21 dB (a = only V1 fails : b = only M-ours-dscore-C-V1-clamp fails)
+    +18 dB 2395:0 p=0  +21 dB 2490:0 p=0   -> (a) X fewer at both points
+    MONOTONE (failures of M-ours-dscore-C-V1-clamp at +15 / +18 / +21 dB = 137 / 90 / 67 of 2560): yes
+  L2  M-ours-bstar -> M-ours-dscore-C-V1-clamp        [decision-point anchor arm: M-ours-bstar]
+    decision SNRs ['+9', '+12', '+15']
+    sign test @16: +9 dB 157:23 p=1e-25  +12 dB 121:17 p=1.6e-20  +15 dB 93:16 p=2.2e-14   pooled 371:56 p=4.4e-58
+    power guard: POWERED; second arm fewer failures at 3/3 points, first arm fewer failures at 0/3 points -> significant
+    SNR@0.1 gap (M-ours-bstar minus M-ours-dscore-C-V1-clamp): +3.44 dB  [90% paired bootstrap +2.62, +4.33; censored replicates 0%]   -> label (i)
+    decision points: sum F  b* 922  X 607  genie 465   R = 0.689278  [90% paired bootstrap B=2000 seed 20260926: 0.642, 0.736]
+    SUFFIX (§2.1 M3): none
+
+######## report only: M-ours-dscore-C-V1-gmmfb ########
+  L1  V1 -> M-ours-dscore-C-V1-gmmfb   at +18 / +21 dB (a = only V1 fails : b = only M-ours-dscore-C-V1-gmmfb fails)
+    +18 dB 2394:0 p=0  +21 dB 2433:1 p=0   -> (a) X fewer at both points
+    MONOTONE (failures of M-ours-dscore-C-V1-gmmfb at +15 / +18 / +21 dB = 135 / 91 / 125 of 2560): no
+  L2  M-ours-bstar -> M-ours-dscore-C-V1-gmmfb        [decision-point anchor arm: M-ours-bstar]
+    decision SNRs ['+9', '+12', '+15']
+    sign test @16: +9 dB 157:23 p=1e-25  +12 dB 121:17 p=1.6e-20  +15 dB 94:15 p=3.7e-15   pooled 372:55 p=6.6e-59
+    power guard: POWERED; second arm fewer failures at 3/3 points, first arm fewer failures at 0/3 points -> significant
+    SNR@0.1 gap (M-ours-bstar minus M-ours-dscore-C-V1-gmmfb): +3.44 dB  [90% paired bootstrap +2.62, +4.33; censored replicates 0%]   -> label (i)
+    decision points: sum F  b* 922  X 605  genie 465   R = 0.693654  [90% paired bootstrap B=2000 seed 20260926: 0.648, 0.740]
+    SUFFIX (§2.1 M3): none
+
+######## report only: V1 -> M-ours-dscore-C-V1-wide at the other grid points (a = only V1 fails : b = only X fails) ########
+   +3 dB  51:65  p=0.23
+   +6 dB  50:43  p=0.53
+   +9 dB  29:29  p=1
+  +12 dB  23:33  p=0.23
+  +15 dB  20:15  p=0.5
+  pooled over the points <= +15 dB: 173:185  p=0.56
+
+######## report only: M-ours-bstar -> M-ours-dscore-C-V1-wide at +18 / +21 dB ########
+  +18 dB  68:11  p=3.5e-11
+  +21 dB  64:7  p=1.3e-12
+
+BLER@16 = failures / 2560 (a raised block is a failure):
+  SNR               V1  M-ours-bstar      R5-genie      V1-clamp      V1-gmmfb       V1-wide
+   +3              828          1189           546           828           828           842
+   +6              470           675           317           470           470           463
+   +9              286           420           217           286           286           286
+  +12              184           288           140           184           184           194
+  +15              137           214           108           137           135           132
+  +18             2485           147            75            90            91            90
+  +21             2557           123            49            67           125            66
