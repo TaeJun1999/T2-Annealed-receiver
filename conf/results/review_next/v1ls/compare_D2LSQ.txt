@@ -1,0 +1,65 @@
+# v1ls_compare: raw raw_D2LSQ  cell C2  prior S2  grid ['-3', '+0', '+3', '+6', '+9', '+12', '+15', '+18', '+21']  primary M-ours-dscore-C-V1-wide
+# checks: registered points, n = 2560, six arms at every point, no load_raw WARNING
+
+######## PRIMARY (M-ours-dscore-C-V1-wide) ########
+  L1  V1 -> M-ours-dscore-C-V1-wide   at +18 / +21 dB (a = only V1 fails : b = only M-ours-dscore-C-V1-wide fails)
+    +18 dB 2256:0 p=0  +21 dB 2557:0 p=0   -> (a) X fewer at both points
+    MONOTONE (failures of M-ours-dscore-C-V1-wide at +15 / +18 / +21 dB = 3 / 2 / 2 of 2560): yes
+  L2  M-ours-bstar -> M-ours-dscore-C-V1-wide        [decision-point anchor arm: M-ours-bstar]
+    decision SNRs ['-3', '+0', '+3']
+    sign test @16: -3 dB 299:47 p=5.2e-46  +0 dB 112:18 p=8.9e-18  +3 dB 31:6 p=4.1e-05   pooled 442:71 p=1.7e-66
+    power guard: POWERED; second arm fewer failures at 3/3 points, first arm fewer failures at 0/3 points -> significant
+    SNR@0.1 gap (M-ours-bstar minus M-ours-dscore-C-V1-wide): +1.40 dB  [90% paired bootstrap +1.21, +1.63; censored replicates 0%]   -> label (i)
+    decision points: sum F  b* 864  X 493  genie 125   R = 0.502030  [90% paired bootstrap B=2000 seed 20260926: 0.464, 0.538]
+    SUFFIX (§2.1 M3): none
+  PRIMARY LABELS: L1 (a) X fewer at both points (monotone yes)   L2 (i) (suffixes 0)
+
+######## report only: M-ours-dscore-C-V1-clamp ########
+  L1  V1 -> M-ours-dscore-C-V1-clamp   at +18 / +21 dB (a = only V1 fails : b = only M-ours-dscore-C-V1-clamp fails)
+    +18 dB 2258:0 p=0  +21 dB 2557:0 p=0   -> (a) X fewer at both points
+    MONOTONE (failures of M-ours-dscore-C-V1-clamp at +15 / +18 / +21 dB = 3 / 0 / 2 of 2560): no
+  L2  M-ours-bstar -> M-ours-dscore-C-V1-clamp        [decision-point anchor arm: M-ours-bstar]
+    decision SNRs ['-3', '+0', '+3']
+    sign test @16: -3 dB 302:50 p=4.7e-45  +0 dB 117:21 p=2.4e-17  +3 dB 35:7 p=1.5e-05   pooled 454:78 p=1.7e-65
+    power guard: POWERED; second arm fewer failures at 3/3 points, first arm fewer failures at 0/3 points -> significant
+    SNR@0.1 gap (M-ours-bstar minus M-ours-dscore-C-V1-clamp): +1.41 dB  [90% paired bootstrap +1.22, +1.64; censored replicates 0%]   -> label (i)
+    decision points: sum F  b* 864  X 488  genie 125   R = 0.508796  [90% paired bootstrap B=2000 seed 20260926: 0.470, 0.545]
+    SUFFIX (§2.1 M3): none
+
+######## report only: M-ours-dscore-C-V1-gmmfb ########
+  L1  V1 -> M-ours-dscore-C-V1-gmmfb   at +18 / +21 dB (a = only V1 fails : b = only M-ours-dscore-C-V1-gmmfb fails)
+    +18 dB 2258:0 p=0  +21 dB 2552:0 p=0   -> (a) X fewer at both points
+    MONOTONE (failures of M-ours-dscore-C-V1-gmmfb at +15 / +18 / +21 dB = 3 / 0 / 7 of 2560): no
+  L2  M-ours-bstar -> M-ours-dscore-C-V1-gmmfb        [decision-point anchor arm: M-ours-bstar]
+    decision SNRs ['-3', '+0', '+3']
+    sign test @16: -3 dB 302:50 p=4.7e-45  +0 dB 117:21 p=2.4e-17  +3 dB 35:7 p=1.5e-05   pooled 454:78 p=1.7e-65
+    power guard: POWERED; second arm fewer failures at 3/3 points, first arm fewer failures at 0/3 points -> significant
+    SNR@0.1 gap (M-ours-bstar minus M-ours-dscore-C-V1-gmmfb): +1.41 dB  [90% paired bootstrap +1.22, +1.64; censored replicates 0%]   -> label (i)
+    decision points: sum F  b* 864  X 488  genie 125   R = 0.508796  [90% paired bootstrap B=2000 seed 20260926: 0.470, 0.545]
+    SUFFIX (§2.1 M3): none
+
+######## report only: V1 -> M-ours-dscore-C-V1-wide at the other grid points (a = only V1 fails : b = only X fails) ########
+   -3 dB  50:50  p=1
+   +0 dB  17:19  p=0.87
+   +3 dB  7:10  p=0.63
+   +6 dB  3:2  p=1
+   +9 dB  1:2  p=1
+  +12 dB  2:2  p=1
+  +15 dB  2:2  p=1
+  pooled over the points <= +15 dB: 82:87  p=0.76
+
+######## report only: M-ours-bstar -> M-ours-dscore-C-V1-wide at +18 / +21 dB ########
+  +18 dB  3:1  p=0.62
+  +21 dB  4:0  p=0.12
+
+BLER@16 = failures / 2560 (a raised block is a failure):
+  SNR               V1  M-ours-bstar      R5-genie      V1-clamp      V1-gmmfb       V1-wide
+   -3              371           623            87           371           371           371
+   +0               88           184            26            88            88            90
+   +3               29            57            12            29            29            32
+   +6               16            28             9            16            16            15
+   +9                7            17             2             7             7             8
+  +12                5            16             2             5             5             5
+  +15                3             8             2             3             3             3
+  +18             2258             4             1             0             0             2
+  +21             2559             6             0             2             7             2

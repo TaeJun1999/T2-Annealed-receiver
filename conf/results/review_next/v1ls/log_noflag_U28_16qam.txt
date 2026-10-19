@@ -1,0 +1,8 @@
+[run] M-ours-dscore: ABSENT -- no GATE-PASSING checkpoint (04_SPEC §5 gates GA-GD): no gate-passing checkpoint for D2; recorded PASS rows: none (searched conf/results/gate_D2.txt and LADDER.md)
+[run] M-ours-dscore is NOT in this run.  The reason is written to every raw file as 'meta|dscore_status', so analysis.py reports its slot as BLOCKED / FAILED-VERIFICATION instead of quietly printing a table without it (01_RULES §6).
+[run] Stage C arms (10_SPEC §3b/§3c): M-ours-dscore-C-{V0,V1,V4} + the mandatory GMM control M-ours-bstar-scalar, from /home/HTJ/t2/conf/ckpt/d2sx_UMi28_N160000_a1_best.pt (8x4) -- ON for ['C2'], ABSENT for []
+[run] Stage C checkpoint: sha256[:16]=6f3a1b9490864af1 epoch=379 best_epoch=379 role=best 8x4
+[run] Stage C gate record: NO GATE RECORD mentions d2sx_UMi28_N160000_a1_best.pt -- UNVERIFIED here.  (GA-GD are measurable on D1 only, 10_SPEC §5: a D2 re-train is qualified by its D1 sibling's gate row, which this string cannot prove.)
+[run] D2 1 points x n=40 -> 1 tasks on 1 workers (prior UMi28, cells ['C2'], chunk 40) -> /home/HTJ/t2_wtLS/conf/raw_U28LSnf16qam
+1/1 done    D2_C2_UMi28_Nr8_T16_Tp4_eig_snr18_skip5520_n40.npz  (242 s)  modulation=16qam K=90 arm-trial exceptions=0
+[run] finished in 4.0 min -> python runner.py analysis --testbed D2 --tag U28LSnf16qam
