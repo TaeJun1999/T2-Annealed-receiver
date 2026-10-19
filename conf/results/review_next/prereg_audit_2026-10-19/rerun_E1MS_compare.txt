@@ -1,0 +1,17 @@
+# e1ms_compare: raw raw_D2SITEMS (git 9a2c9fd4) + base raw_B16e4k (git manifest-head:cd241b7e/chunks-sha:78cbb59fc01ce520), cell C2, prior S2, SNR ['-3', '+0', '+3']; integrity: OK (points, n = 2560, arms, one clean commit per raw, R5-genie KEYS4 identical)
+
+[primary] M-ours-dscore-C-V1ms -> M-ours-dscore-C-V1  [decision SNRs FIXED; check: the anchor rule on M-ours-dscore-C-V1ms gives ['-3', '+0', '+3']]  decision SNRs ['-3', '+0', '+3']
+    sign test @16: -3 dB 53:35 p=0.069  +0 dB 22:12 p=0.12  +3 dB 8:10 p=0.81   pooled 83:57 p=0.034
+    POWERED=True  second arm fewer at 0/3, first arm fewer at 0/3  -> (iii)
+    SNR@0.1 gap (M-ours-dscore-C-V1ms minus M-ours-dscore-C-V1): +0.14 dB  [90% paired bootstrap +0.05, +0.22; censored replicates 0%]
+
+[secondary, report-only] M-ours-dscore-C-V4 -> M-ours-dscore-C-V1ms  [decision SNRs FIXED; check: the anchor rule on M-ours-dscore-C-V4 gives ['-3', '+0', '+3']]  decision SNRs ['-3', '+0', '+3']
+    sign test @16: -3 dB 6:1 p=0.12  +0 dB 4:6 p=0.75  +3 dB 0:6 p=0.031   pooled 10:13 p=0.68
+    POWERED=True  second arm fewer at 0/3, first arm fewer at 1/3  -> (iii)
+    SNR@0.1 gap (M-ours-dscore-C-V4 minus M-ours-dscore-C-V1ms): +0.01 dB  [90% paired bootstrap -0.04, +0.04; censored replicates 0%]
+
+BLER@16 = failures / 2560 (a raised block is a failure):
+  SNR           V1        V4      V1ms  R5-genie
+   -3          371       394       389        87
+   +0           88        96        98        26
+   +3           29        21        27        12

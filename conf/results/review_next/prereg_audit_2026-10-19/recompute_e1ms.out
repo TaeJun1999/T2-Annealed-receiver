@@ -1,0 +1,301 @@
+====================================================================================================
+recompute_e1ms.py  --  independent recomputation of NEXT_EXPERIMENTS_D2SITEMS §6 (tag D2SITEMS)
+date: 2026-10-19 23:19:37 KST | numpy 2.5.2
+
+### 1. raw_D2SITEMS: chunk plan, meta, arms, shapes, non-finite blk_err
+  [OK ] -3 dB chunk plan == {(40k, 40): k < 64}: got [(0, 40), (40, 40), (80, 40), (120, 40), (160, 40), (200, 40), (240, 40), (280, 40), (320, 40), (360, 40), (400, 40), (440, 40), (480, 40), (520, 40), (560, 40), (600, 40), (640, 40), (680, 40), (720, 40), (760, 40), (800, 40), (840, 40), (880, 40), (920, 40), (960, 40), (1000, 40), (1040, 40), (1080, 40), (1120, 40), (1160, 40), (1200, 40), (1240, 40), (1280, 40), (1320, 40), (1360, 40), (1400, 40), (1440, 40), (1480, 40), (1520, 40), (1560, 40), (1600, 40), (1640, 40), (1680, 40), (1720, 40), (1760, 40), (1800, 40), (1840, 40), (1880, 40), (1920, 40), (1960, 40), (2000, 40), (2040, 40), (2080, 40), (2120, 40), (2160, 40), (2200, 40), (2240, 40), (2280, 40), (2320, 40), (2360, 40), (2400, 40), (2440, 40), (2480, 40), (2520, 40)]
+  [OK ] -3 dB arms other than {V1ms, genie}: got []
+  [OK ] -3 dB '|failed' keys: got 0
+  [OK ] -3 dB non-finite blk_err entries: got 0
+  [OK ] -3 dB n (V1ms blk_err rows): got 2560
+  [OK ] -3 dB shapes (40,16) for 2 arms x 7 keys in every chunk: got True
+  [OK ] +0 dB chunk plan == {(40k, 40): k < 64}: got [(0, 40), (40, 40), (80, 40), (120, 40), (160, 40), (200, 40), (240, 40), (280, 40), (320, 40), (360, 40), (400, 40), (440, 40), (480, 40), (520, 40), (560, 40), (600, 40), (640, 40), (680, 40), (720, 40), (760, 40), (800, 40), (840, 40), (880, 40), (920, 40), (960, 40), (1000, 40), (1040, 40), (1080, 40), (1120, 40), (1160, 40), (1200, 40), (1240, 40), (1280, 40), (1320, 40), (1360, 40), (1400, 40), (1440, 40), (1480, 40), (1520, 40), (1560, 40), (1600, 40), (1640, 40), (1680, 40), (1720, 40), (1760, 40), (1800, 40), (1840, 40), (1880, 40), (1920, 40), (1960, 40), (2000, 40), (2040, 40), (2080, 40), (2120, 40), (2160, 40), (2200, 40), (2240, 40), (2280, 40), (2320, 40), (2360, 40), (2400, 40), (2440, 40), (2480, 40), (2520, 40)]
+  [OK ] +0 dB arms other than {V1ms, genie}: got []
+  [OK ] +0 dB '|failed' keys: got 0
+  [OK ] +0 dB non-finite blk_err entries: got 0
+  [OK ] +0 dB n (V1ms blk_err rows): got 2560
+  [OK ] +0 dB shapes (40,16) for 2 arms x 7 keys in every chunk: got True
+  [OK ] +3 dB chunk plan == {(40k, 40): k < 64}: got [(0, 40), (40, 40), (80, 40), (120, 40), (160, 40), (200, 40), (240, 40), (280, 40), (320, 40), (360, 40), (400, 40), (440, 40), (480, 40), (520, 40), (560, 40), (600, 40), (640, 40), (680, 40), (720, 40), (760, 40), (800, 40), (840, 40), (880, 40), (920, 40), (960, 40), (1000, 40), (1040, 40), (1080, 40), (1120, 40), (1160, 40), (1200, 40), (1240, 40), (1280, 40), (1320, 40), (1360, 40), (1400, 40), (1440, 40), (1480, 40), (1520, 40), (1560, 40), (1600, 40), (1640, 40), (1680, 40), (1720, 40), (1760, 40), (1800, 40), (1840, 40), (1880, 40), (1920, 40), (1960, 40), (2000, 40), (2040, 40), (2080, 40), (2120, 40), (2160, 40), (2200, 40), (2240, 40), (2280, 40), (2320, 40), (2360, 40), (2400, 40), (2440, 40), (2480, 40), (2520, 40)]
+  [OK ] +3 dB arms other than {V1ms, genie}: got []
+  [OK ] +3 dB '|failed' keys: got 0
+  [OK ] +3 dB non-finite blk_err entries: got 0
+  [OK ] +3 dB n (V1ms blk_err rows): got 2560
+  [OK ] +3 dB shapes (40,16) for 2 arms x 7 keys in every chunk: got True
+  [OK ] total chunks: got 192
+  [OK ] files in raw_D2SITEMS (all): got 192
+  [OK ] every file name matches the D2_C2_S2 pattern with snr in {-3,0,3}: got True
+  [OK ] run|git (all chunks): got ['9a2c9fd4']
+  [OK ] meta|ms_arm present in all chunks: got True
+  [OK ] meta|ms_arm string: got ['V1 with the site covariance C+ = nu J+ replaced by tr(C+)/N I (arms.MatchedScalarPrior): M-ours-dscore-C-V1ms']
+  [OK ] meta|stagec_ckpt_id: got ['sha256[:16]=4443921ce8d5c4a1 epoch=1784 best_epoch=1764 role=legacy-last 8x4 | BEST_WEIGHTS_UNAVAILABLE: evaluated = last-epoch EMA, reported best_val belongs to best_epoch']
+  [OK ] meta|stagec_ckpt: got ['/home/HTJ/t2/conf/ckpt/d2sx_N160000_a1.pt']
+  [OK ] meta|bstar: got ['kron']
+  [OK ] meta|kron_K: got ['1024']
+  [OK ] meta|ll_val|kron (|d| <= 1e-9 of -11.459169831224418): got True
+  [OK ] meta|ntrain: got ['160000.0']
+  [OK ] meta|em_sec: got ['107957.18832826614']
+  [OK ] meta|jobs: got ['96']
+  [OK ] meta|worker_gb: got ['1.5']
+  [OK ] run|iters: got ['16']
+  [OK ] run|n: got ['40']
+  [OK ] run|seed: got ['20260926']
+  [OK ] run|beta: got ['0.7']
+  [OK ] run|t_in: got ['5']
+  [OK ] run|dtype: got ['complex128/float64']
+  [OK ] run|skip == file name skip (all): got True
+  [OK ] run|snr == file name snr (all): got True
+  [OK ] meta|dscore_status present (ABSENT -- no GATE-PASSING ...): got True
+  chunk mtime range: 2026-10-19 22:44:08 .. 2026-10-19 22:47:29 KST
+
+### 2. base raw_B16e4k: 448 chunks, manifest, 3-point plan, arms, chunks-sha digest
+  [OK ] files in raw_B16e4k: got 448
+  [OK ] manifest written: got '2026-09-23 07:36:44 KST'
+  [OK ] manifest git_commit: got 'cd241b7e'
+  [OK ] manifest n_raw_files: got 448
+  [OK ] base chunks newer than manifest 'written': got 0
+  base chunk mtime range: 2026-09-22 21:23:28 .. 2026-09-22 21:39:55 KST
+  [OK ] chunks-sha digest (sha256 over sorted per-chunk sha256 hex, [:16]): got '78cbb59fc01ce520'
+  [OK ] base -3 dB chunk plan: got [(0, 40), (40, 40), (80, 40), (120, 40), (160, 40), (200, 40), (240, 40), (280, 40), (320, 40), (360, 40), (400, 40), (440, 40), (480, 40), (520, 40), (560, 40), (600, 40), (640, 40), (680, 40), (720, 40), (760, 40), (800, 40), (840, 40), (880, 40), (920, 40), (960, 40), (1000, 40), (1040, 40), (1080, 40), (1120, 40), (1160, 40), (1200, 40), (1240, 40), (1280, 40), (1320, 40), (1360, 40), (1400, 40), (1440, 40), (1480, 40), (1520, 40), (1560, 40), (1600, 40), (1640, 40), (1680, 40), (1720, 40), (1760, 40), (1800, 40), (1840, 40), (1880, 40), (1920, 40), (1960, 40), (2000, 40), (2040, 40), (2080, 40), (2120, 40), (2160, 40), (2200, 40), (2240, 40), (2280, 40), (2320, 40), (2360, 40), (2400, 40), (2440, 40), (2480, 40), (2520, 40)]
+  [OK ] base -3 dB '|failed' keys: got 0
+  [OK ] base -3 dB non-finite blk_err (V1,V4,genie): got 0
+  base -3 dB: run|git present in chunks? False (raw predates run|git -> manifest check applies); other arms ['M-ours-bstar', 'M-ours-bstar-scalar', 'M-ours-dscore-C-V0', 'M-ours-dscore-C-V4b', 'M-ours-gmm32', 'R0-pilot', 'R1-turbo', 'R2-ours-G', 'R3-bigamp', 'R4-llr', 'R4-scvamp']
+  [OK ] base +0 dB chunk plan: got [(0, 40), (40, 40), (80, 40), (120, 40), (160, 40), (200, 40), (240, 40), (280, 40), (320, 40), (360, 40), (400, 40), (440, 40), (480, 40), (520, 40), (560, 40), (600, 40), (640, 40), (680, 40), (720, 40), (760, 40), (800, 40), (840, 40), (880, 40), (920, 40), (960, 40), (1000, 40), (1040, 40), (1080, 40), (1120, 40), (1160, 40), (1200, 40), (1240, 40), (1280, 40), (1320, 40), (1360, 40), (1400, 40), (1440, 40), (1480, 40), (1520, 40), (1560, 40), (1600, 40), (1640, 40), (1680, 40), (1720, 40), (1760, 40), (1800, 40), (1840, 40), (1880, 40), (1920, 40), (1960, 40), (2000, 40), (2040, 40), (2080, 40), (2120, 40), (2160, 40), (2200, 40), (2240, 40), (2280, 40), (2320, 40), (2360, 40), (2400, 40), (2440, 40), (2480, 40), (2520, 40)]
+  [OK ] base +0 dB '|failed' keys: got 0
+  [OK ] base +0 dB non-finite blk_err (V1,V4,genie): got 0
+  base +0 dB: run|git present in chunks? False (raw predates run|git -> manifest check applies); other arms ['M-ours-bstar', 'M-ours-bstar-scalar', 'M-ours-dscore-C-V0', 'M-ours-dscore-C-V4b', 'M-ours-gmm32', 'R0-pilot', 'R1-turbo', 'R2-ours-G', 'R3-bigamp', 'R4-llr', 'R4-scvamp']
+  [OK ] base +3 dB chunk plan: got [(0, 40), (40, 40), (80, 40), (120, 40), (160, 40), (200, 40), (240, 40), (280, 40), (320, 40), (360, 40), (400, 40), (440, 40), (480, 40), (520, 40), (560, 40), (600, 40), (640, 40), (680, 40), (720, 40), (760, 40), (800, 40), (840, 40), (880, 40), (920, 40), (960, 40), (1000, 40), (1040, 40), (1080, 40), (1120, 40), (1160, 40), (1200, 40), (1240, 40), (1280, 40), (1320, 40), (1360, 40), (1400, 40), (1440, 40), (1480, 40), (1520, 40), (1560, 40), (1600, 40), (1640, 40), (1680, 40), (1720, 40), (1760, 40), (1800, 40), (1840, 40), (1880, 40), (1920, 40), (1960, 40), (2000, 40), (2040, 40), (2080, 40), (2120, 40), (2160, 40), (2200, 40), (2240, 40), (2280, 40), (2320, 40), (2360, 40), (2400, 40), (2440, 40), (2480, 40), (2520, 40)]
+  [OK ] base +3 dB '|failed' keys: got 0
+  [OK ] base +3 dB non-finite blk_err (V1,V4,genie): got 0
+  base +3 dB: run|git present in chunks? False (raw predates run|git -> manifest check applies); other arms ['M-ours-bstar', 'M-ours-bstar-scalar', 'M-ours-dscore-C-V0', 'M-ours-dscore-C-V4b', 'M-ours-gmm32', 'R0-pilot', 'R1-turbo', 'R2-ours-G', 'R3-bigamp', 'R4-llr', 'R4-scvamp']
+
+### 3. genie bit-identity raw_D2SITEMS vs raw_B16e4k (per chunk: 7 KEYS_RAW + guardH), and per-point KEYS4 on concatenated arrays
+  [OK ] genie arrays differing (of 1536 = 192 chunks x 8 arrays): got 0
+  [OK ] -3 dB genie KEYS4 identical (concatenated 2560 x 16): got True
+  [OK ] +0 dB genie KEYS4 identical (concatenated 2560 x 16): got True
+  [OK ] +3 dB genie KEYS4 identical (concatenated 2560 x 16): got True
+
+### 4. failures @16 / 2560 (record §6.2 table; §0.1 for V1 · V4 · genie)
+  [OK ] failures V1 (-3/0/+3): got (371, 88, 29)
+  [OK ] failures V4 (-3/0/+3): got (394, 96, 21)
+  [OK ] failures V1ms (-3/0/+3): got (389, 98, 27)
+  [OK ] failures R5-genie (-3/0/+3): got (87, 26, 12)
+  [OK ] genie failures counted from the base raw equal those from raw_D2SITEMS: got (87, 26, 12)
+  [OK ] BLER@16 V1 (§0.1, 5 dp): got (0.14492, 0.03438, 0.01133)
+  [OK ] BLER@16 V4 (§0.1, 5 dp): got (0.15391, 0.0375, 0.0082)
+
+### 5. paired sign tests, power guard, labels (§1.4 rule re-applied; record §6.2)
+ [primary] M-ours-dscore-C-V1ms -> M-ours-dscore-C-V1
+  [OK ]   a:b per point: got [(53, 35), (22, 12), (8, 10)]
+  [OK ]   p (%.2g) per point: got ['0.069', '0.12', '0.81']
+  [OK ]   p via scipy binomtest == own exact p (|d| < 1e-12): got True
+  [OK ]   pooled a:b: got (83, 57)
+  [OK ]   pooled p: got '0.034'
+  [OK ]   D = a+b: got (88, 34, 18)
+  [OK ]   POWERED (>=2 of 3 points with D >= 6): got True
+  [OK ]   second arm fewer (k/3): got 0
+  [OK ]   first arm fewer (k/3): got 0
+  [OK ]   label: got '(iii)'
+    p (full precision): ['0.069346', '0.121449', '0.814529'], pooled 0.0342357
+ [secondary] M-ours-dscore-C-V4 -> M-ours-dscore-C-V1ms
+  [OK ]   a:b per point: got [(6, 1), (4, 6), (0, 6)]
+  [OK ]   p (%.2g) per point: got ['0.12', '0.75', '0.031']
+  [OK ]   p via scipy binomtest == own exact p (|d| < 1e-12): got True
+  [OK ]   pooled a:b: got (10, 13)
+  [OK ]   pooled p: got '0.68'
+  [OK ]   D = a+b: got (7, 10, 6)
+  [OK ]   POWERED (>=2 of 3 points with D >= 6): got True
+  [OK ]   second arm fewer (k/3): got 0
+  [OK ]   first arm fewer (k/3): got 1
+  [OK ]   label: got '(iii)'
+    p (full precision): ['0.125', '0.753906', '0.03125'], pooled 0.677639
+
+### 6. anchor-rule check line (BLER in [0.005, 0.9], |log10(BLER/0.1)| smallest 3) on V1-ms and V4
+  [OK ] anchor rule on V1-ms: got ['-3', '+0', '+3']
+  [OK ] anchor rule on V4: got ['-3', '+0', '+3']
+  |log10(BLER/0.1)| V1-ms: [0.182, 0.417, 0.977]  V4: [0.187, 0.426, 1.086]
+
+### 7. SNR@0.1 (log-linear, first downward crossing, floor 0.5/n) and L; bootstrap B 2000 seed 20260925
+  SNR@0.1 M-ours-dscore-C-V1: -2.2264 dB (ok)
+  SNR@0.1 M-ours-dscore-C-V1ms: -2.0895 dB (ok)
+  SNR@0.1 M-ours-dscore-C-V4: -2.0839 dB (ok)
+  SNR@0.1 R5-genie: -3.0000 dB (lo)
+  [OK ] SNR@0.1 V1 (3 dp; §0.1 / §6.6): got np.float64(-2.226)
+  [OK ] SNR@0.1 V1-ms (3 dp; §6.6): got np.float64(-2.09)
+  [OK ] SNR@0.1 V4 (3 dp; §0.1): got np.float64(-2.084)
+  [OK ] kinds all ok (V1, V1-ms, V4): got ('ok', 'ok', 'ok')
+  [OK ] L = SNR_ms - SNR_V1 (%+.2f): got '+0.14'
+  [OK ] L (3 dp; §6.6 +0.137): got np.float64(0.137)
+  [OK ] secondary gap V4 - V1ms (%+.2f): got '+0.01'
+  [OK ] secondary gap (3 dp; §6.6 +0.006): got np.float64(0.006)
+  bootstrap wall 0.4 s
+  [OK ] L 90 % CI (%+.2f): got ('+0.05', '+0.22')
+  [OK ] L CI (3 dp; §6.6): got (np.float64(0.05), np.float64(0.225))
+  [OK ] L censored replicates: got '0%'
+  [OK ] secondary 90 % CI (%+.2f): got ('-0.04', '+0.04')
+  [OK ] secondary CI (3 dp; §6.6): got (np.float64(-0.037), np.float64(0.042))
+  [OK ] secondary censored: got '0%'
+  (robustness, not a record value) L CI with seed 1: [+0.047, +0.227]
+
+### 8. prediction scoring (§3) from the recomputed values
+  prediction 1: HIT
+  prediction 2: MISS
+  prediction 3: HIT
+  prediction 4: HIT
+  prediction 5: HIT
+  prediction 6: MISS
+  prediction 7: HIT
+  prediction 8: HIT
+  prediction 9: HIT
+  prediction 10: HIT
+  [OK ] hits among 1-10: got np.int64(8)
+  [OK ] misses are exactly {2, 6}: got [2, 6]
+  partials: pred 2 -> -3 dB a>b True but p 0.069; 0/+3 dB p>=.05 True; no V1-ms-side significant point True
+            pred 6 -> secondary label (iii) (D (7, 10, 6), all >= 6 -> POWERED); D <= 20/10/10 True
+
+### 9. §6.3 sentences vs §2.1 / §2.2 / §2.4 templates; §2.3 forbidden phrases in §6
+  [OK ] fixed explanation (§2.1) appears verbatim in §6.3: got True
+  [OK ] L sentence with recomputed x/l/u/c appears in §6.3: got True
+  [OK ] label (iii) string in §6.3: got True
+  [OK ] §2.4 (iii) English sentence verbatim in §6.3: got True
+  [OK ] §2.4 common sentence with recomputed numbers in §6.3: got True
+  [OK ] §2.2 fixed secondary clause in §6.3: got True
+  [OK ] §6.3 secondary numbers: got True
+  forbidden-phrase hits in §6 (line numbers): none
+  [OK ] §6 has no forbidden phrase used as a result statement: got True
+  (if '비열등' is listed it comes from the sentence '비열등 margin ...' style citation; see the audit file)
+
+### 10. test / development separation: V1-ms on test trials (skip < 2560) anywhere besides raw_D2SITEMS?
+  scanned 23001 npz files newer than 2026-10-19 11:00 KST under 862 raw folders (excluding raw_D2SITEMS)
+  V1-ms key in /home/HTJ/t2/conf/raw_E1MSmcb: 1 files, skip range 2560..2560
+  V1-ms key in /home/HTJ/t2_wtMS/conf/raw_E1MSdev: 24 files, skip range 2560..2840
+  V1-ms key in /home/HTJ/t2_wtMS/conf/raw_E1MSflow: 192 files, skip range 0..2520
+  V1-ms key in /home/HTJ/t2_wtMS/conf/raw_E1MSflowm: 191 files, skip range 0..2520
+  V1-ms key in /home/HTJ/t2_wtMS/conf/raw_E1MSsm: 1 files, skip range 2560..2560
+  V1-ms key in /tmp/claude-1005/-home-HTJ-t2/ac4d3602-6d72-4574-8052-16040bb635a9/scratchpad/e1ms/kat/raw_KAT: 192 files, skip range 0..2520
+  [OK ]   raw_E1MSflow: V1-ms arrays at test skips == base V1 arrays (synthetic rename; differing of 1344): got 0
+  [OK ]   raw_E1MSflowm: V1-ms arrays at test skips == base V1 arrays (synthetic rename; differing of 1337): got 0
+  [OK ]   raw_KAT: V1-ms arrays at test skips == base V1 arrays (synthetic rename; differing of 1344): got 0
+  [OK ] raw folders with a REAL V1-ms run on test trials (not synthetic flow/KAT): got []
+  dev-only V1-ms raws (skip >= 2560): {'raw_E1MSmcb': [2560], 'raw_E1MSdev': [2560, 2600, 2640, 2680, 2720, 2760, 2800, 2840], 'raw_E1MSsm': [2560]}
+
+### 11. merge check (a)(b) and 확인 3 raws: arms, trials, bit-identity
+  [OK ] raw_E1MSmcaon: one file, name: got ['D2_C2_S2_Nr8_T16_Tp4_dft_snr-3_skip0_n40.npz']
+  [OK ] raw_E1MSmcaon: arms exactly {V1, V4}: got ['M-ours-dscore-C-V1', 'M-ours-dscore-C-V4']
+  [OK ] raw_E1MSmcaon: 14 arrays == raw_B16e4k: got 0
+  [OK ] raw_E1MSmcaon: meta|ms_arm present: got True
+  [OK ] raw_E1MSmcaon: run|git: got 'fef2594a'
+  [OK ] raw_E1MSmcaon: run|skip, run|n, run|snr: got (0, 40, -3.0)
+  [OK ] raw_E1MSmcaoff: one file, name: got ['D2_C2_S2_Nr8_T16_Tp4_dft_snr-3_skip0_n40.npz']
+  [OK ] raw_E1MSmcaoff: arms exactly {V1, V4}: got ['M-ours-dscore-C-V1', 'M-ours-dscore-C-V4']
+  [OK ] raw_E1MSmcaoff: 14 arrays == raw_B16e4k: got 0
+  [OK ] raw_E1MSmcaoff: meta|ms_arm present: got False
+  [OK ] raw_E1MSmcaoff: run|git: got 'fef2594a'
+  [OK ] raw_E1MSmcaoff: run|skip, run|n, run|snr: got (0, 40, -3.0)
+  [OK ] raw_E1MSregon: one file, name: got ['D2_C2_S2_Nr8_T16_Tp4_dft_snr-3_skip0_n40.npz']
+  [OK ] raw_E1MSregon: arms exactly {V1, V4}: got ['M-ours-dscore-C-V1', 'M-ours-dscore-C-V4']
+  [OK ] raw_E1MSregon: 14 arrays == raw_B16e4k: got 0
+  [OK ] raw_E1MSregon: meta|ms_arm present: got True
+  [OK ] raw_E1MSregon: run|git: got '99f62bfb+dirty'
+  [OK ] raw_E1MSregon: run|skip, run|n, run|snr: got (0, 40, -3.0)
+  [OK ] raw_E1MSregoff: one file, name: got ['D2_C2_S2_Nr8_T16_Tp4_dft_snr-3_skip0_n40.npz']
+  [OK ] raw_E1MSregoff: arms exactly {V1, V4}: got ['M-ours-dscore-C-V1', 'M-ours-dscore-C-V4']
+  [OK ] raw_E1MSregoff: 14 arrays == raw_B16e4k: got 0
+  [OK ] raw_E1MSregoff: meta|ms_arm present: got False
+  [OK ] raw_E1MSregoff: run|git: got '99f62bfb+dirty'
+  [OK ] raw_E1MSregoff: run|skip, run|n, run|snr: got (0, 40, -3.0)
+  [OK ] raw_E1MSmcb: arms exactly {V1ms, genie}: got ['M-ours-dscore-C-V1ms', 'R5-genie']
+  [OK ] raw_E1MSmcb: run|git / skip: got ('fef2594a', 2560)
+  [OK ] raw_E1MSmcb vs worktree raw_E1MSdev: 14 arrays (V1ms, genie) differing: got 0
+  [OK ] worktree raw_E1MSdev run|git: got '2807dd23'
+  [OK ] raw_E1MSmcb vs worktree raw_E1MSsm: 14 arrays (V1ms, genie) differing: got 0
+  [OK ] worktree raw_E1MSsm run|git: got '2807dd23'
+  [OK ] merge-check verdict file: got 'E1MS_MERGECHK OK (0 problems)'
+
+### 12. development screen (§0.3, raw_E1MSdev, trials 2560..2879) recount
+  [OK ] dev -3 dB plan (2560 + 40k, k < 8): got [(2560, 40), (2600, 40), (2640, 40), (2680, 40), (2720, 40), (2760, 40), (2800, 40), (2840, 40)]
+  [OK ] dev +0 dB plan (2560 + 40k, k < 8): got [(2560, 40), (2600, 40), (2640, 40), (2680, 40), (2720, 40), (2760, 40), (2800, 40), (2840, 40)]
+  [OK ] dev +3 dB plan (2560 + 40k, k < 8): got [(2560, 40), (2600, 40), (2640, 40), (2680, 40), (2720, 40), (2760, 40), (2800, 40), (2840, 40)]
+  [OK ] dev failures V1 / V1-ms / V4 / genie (-3,0,+3): got {'V1': (38, 11, 2), 'V1ms': (38, 10, 4), 'V4': (37, 10, 4), 'R5-genie': (11, 5, 1)}
+  [OK ] dev V1-ms -> V1 a:b: got [(6, 6), (1, 2), (2, 0)]
+  [OK ] dev V4 -> V1-ms a:b: got [(0, 1), (0, 0), (0, 0)]
+  [OK ] dev V4 -> V1 a:b: got [(5, 6), (1, 2), (2, 0)]
+  [OK ] dev V4 vs V1-ms blocks differing at iteration 16 (total over 960): got 1
+
+### 13. assets: checkpoint sha256, fits copies, s5
+  [OK ] ckpt sha256: got '4443921ce8d5c4a11c7cda879a53a66436f43bd76864734a3e6203cfb4b82f29'
+  [OK ] fits copy sha256 fit_S2_Nr8_kronK1024_n160000.npz: got 'bf796b84037e1b3790ed5a6d7917ea2a79f2bee4a9f155f0d3385d856c950997'
+  [OK ] fits copy sha256 fit_S2_Nr8_fullK32_n160000.npz: got 'd4601650a888b4b355565a9010cf0a23499a3e92505e657e2cd79a1c152359f3'
+  [OK ] fits copy: count == original (24) and byte-identical, no symlinks: got (True, True, True)
+  [OK ] s5 content: got ['FREEZE', 'e6ac9e653dad4e15d2e781c9800a090cab529857', 'WGB', '1.5']
+  kron1024 fit keys: ['pi', 'covs', 'Chat', 'll', 'kappa', 'restart', 'it_best', 'n_iter', 'n_reseed', 'll_train', 'll_val', 'll_test']
+  fit ll_val = -11.459169831224418
+  fit ll = [-62.21397231 -49.35042864 -37.50446972 -30.25530008 -23.51235397
+ -19.19918697 -16.91115809 -15.559307   -14.66254809 -14.04311384
+ -13.54670954 -13.15548609 -12.84382861 -12.59085116 -12.37875811
+ -12.19467606 -12.03846738 -11.90023316 -11.77929789 -11.67178154
+ -11.57680601 -11.49025889 -11.41136797 -11.34011875 -11.2723263
+ -11.20612222 -11.1434557  -11.08088388 -11.02251815 -10.96870393
+ -10.91791911 -10.869763   -10.82661347 -10.78447738 -10.74405854
+ -10.70543843 -10.66946168 -10.63516322 -10.60333888 -10.57354156
+ -10.54487207 -10.51900048 -10.49561656 -10.47432507 -10.45244893
+ -10.43089567 -10.4114133  -10.39189089 -10.37235551 -10.35263235
+ -10.33293537 -10.31431172 -10.29801187 -10.28243532 -10.26662605
+ -10.25115541 -10.23619689 -10.2219534  -10.20771751 -10.19426243
+ -10.18164708 -10.16974186 -10.15857901 -10.14848833 -10.13893142
+ -10.13015512 -10.1214487  -10.11202846 -10.10230739 -10.09254628
+ -10.08253431 -10.07303913 -10.06388461 -10.05545108 -10.04789244
+ -10.0403883  -10.03208183 -10.02330751 -10.01406232 -10.0052146
+  -9.99560524  -9.98501903  -9.97514135  -9.96512629  -9.95521051
+  -9.94533634  -9.93645191  -9.92747229  -9.92012832  -9.91339836
+  -9.90598884  -9.89832679  -9.89138531  -9.88426118  -9.87754886
+  -9.8707002   -9.8637161   -9.85726451  -9.85150395  -9.84617467
+  -9.84074821  -9.83505319  -9.82916507  -9.82329832  -9.81747939
+  -9.81151898  -9.80563435  -9.80030905  -9.79499073  -9.78998594
+  -9.78541021  -9.780937    -9.77665102  -9.77283268  -9.76957038
+  -9.76659077  -9.76365517  -9.76049749  -9.75704991  -9.75319764
+  -9.74915175  -9.74528315  -9.741865    -9.739028    -9.73631475
+  -9.73339816  -9.73068648  -9.72770095  -9.72461276  -9.72101172
+  -9.71704874  -9.71381481  -9.71100419  -9.70818092  -9.70471208
+  -9.70170263  -9.69920508  -9.69686153  -9.69456857  -9.69140827
+  -9.68807805  -9.68505665  -9.6823773   -9.67978912  -9.67670479
+  -9.67307595  -9.66935986  -9.66592037  -9.66258315  -9.659754
+  -9.65730782  -9.65545765  -9.65367636  -9.65169615  -9.649284
+  -9.64677349  -9.64406191  -9.64145837  -9.63863872  -9.63627497
+  -9.63406887  -9.63171029  -9.62916369  -9.62674436  -9.62386003
+  -9.6207079   -9.61781329  -9.61478334  -9.61153259  -9.60851405
+  -9.60545342  -9.60221237  -9.59895184  -9.59587055  -9.59272827
+  -9.58959177  -9.58673237  -9.58409908  -9.58117525  -9.5780785
+  -9.5748539   -9.57154738  -9.56800666  -9.56412081  -9.55954225
+  -9.55461067  -9.54956478  -9.54496902  -9.54036969  -9.53663157
+  -9.53345298  -9.52999044  -9.52695216  -9.52357134  -9.52029476
+  -9.51713827  -9.51376646  -9.5108188   -9.50815719  -9.50526309
+  -9.50295176  -9.50111367  -9.49915     -9.49699721  -9.49460107
+  -9.49208507  -9.49002101  -9.48816044  -9.48630548  -9.48423869
+  -9.482384    -9.48036098  -9.47846134  -9.47646183  -9.47464413
+  -9.47278372  -9.4708893   -9.46902723  -9.46728781  -9.46567849
+  -9.46410418  -9.46264525  -9.46123949  -9.45971217  -9.45820998
+  -9.45687585  -9.45566681  -9.45442659  -9.45327865  -9.45214272
+  -9.45100068  -9.44974149  -9.44835672  -9.44681978  -9.44488816
+  -9.44300024  -9.44137055  -9.4401275   -9.43875779  -9.43725014
+  -9.43576814  -9.43441904  -9.43318972  -9.43196185  -9.43055229
+  -9.42899541  -9.42737881  -9.4255672   -9.42364847  -9.42192027
+  -9.41979663  -9.41774604  -9.4157822   -9.41383486  -9.41201201
+  -9.41036525  -9.40868375  -9.4070253   -9.40551944  -9.40450624
+  -9.40363242  -9.40251551  -9.40133822  -9.40025975  -9.39893712
+  -9.39753474  -9.39581954  -9.39418527  -9.39249359  -9.39048601
+  -9.38865082  -9.38648988  -9.38435162  -9.38221969  -9.38006993
+  -9.37816541  -9.37631338  -9.37456073  -9.37306442  -9.37162129
+  -9.3697799   -9.36768995  -9.36542198  -9.36297402  -9.3607046
+  -9.35858715  -9.35625083  -9.35381275  -9.35180191  -9.34982559
+  -9.34795663  -9.34606076  -9.34424167  -9.34257836  -9.34109866
+  -9.33984906  -9.33849672  -9.33742     -9.33676322  -9.33640513
+  -9.33609124  -9.33584995  -9.33553304  -9.33499209  -9.33423032
+  -9.3334594   -9.33268359  -9.33210578  -9.33155336  -9.33091794
+  -9.33014963  -9.32906511  -9.32790743  -9.32675502  -9.32553626
+  -9.32440196  -9.32338885  -9.32252463  -9.32160013  -9.3206684
+  -9.3196982   -9.31866831  -9.31766385  -9.3165557   -9.31535528
+  -9.3143123   -9.31339735  -9.31277499  -9.31229689  -9.3116878
+  -9.3109135 ]
+
+====================================================================================================
+TALLY: 162 match, 0 mismatch
