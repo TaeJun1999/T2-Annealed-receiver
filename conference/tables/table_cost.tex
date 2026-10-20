@@ -25,7 +25,7 @@ GMM ($K=1024$)           & 0.76\,s  & 94.6\%  & --\\
 Proposed (diffusion)     & 84.9\,s  & 99.7\%  & 32/4096\\
 GMM ($K=4096$)           & 90.0\,s  & 99.7\%  & --\\
 GMM ($K=8192$)           & 183.9\,s & 99.85\% & --\\
-SBL (in loop)            & 0.99\,s  & 74.7\%  & 48 EM\\
+SBL (in loop)            & 0.99\,s  & 74.7\%  & 48 MacKay\\
 \hline
 \end{tabular}
 
@@ -33,6 +33,6 @@ SBL (in loop)            & 0.99\,s  & 74.7\%  & 48 EM\\
 \begin{minipage}{\columnwidth}
 \scriptsize
 $^{\rm a}$Median over 24 development blocks at $-3$\,dB; batch 1, 16 outer iterations, one thread on an Intel Xeon 6740P, same checkpoints and GMM fits as the BLER results; the full receive call (detection, decoding, prior module), excluding training, fitting and model loading. On the same shared server, UMi $32\times4$ times varied between runs (proposed 70--91\,s, GMM $K=4096$ 77--114\,s per block); in the two diagnostic runs that logged memory placement, the run with more memory on remote NUMA nodes was 10--11\% (proposed) and 22--30\% (GMM) slower; the cause was not isolated. Sparse specular $8\times4$ times varied by at most 5\%.
-$^{\rm b}$Per block (16 calls of module H): backbone forward passes / vector--Jacobian product directions; one forward inside the Jacobian and one for the posterior mean per call. SBL: EM steps.
+$^{\rm b}$Per block (16 calls of module H): backbone forward passes / vector--Jacobian product directions; one forward inside the Jacobian and one for the posterior mean per call. SBL: hyperparameter updates (MacKay fixed point, 3 per call).
 \end{minipage}
 \end{table}

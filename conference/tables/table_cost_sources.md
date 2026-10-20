@@ -10,7 +10,7 @@
 | UMi 32×4 · Proposed 84.9 s · 99.7 % · 32 fwd, 4096 VJP | `cost_COST1022_U32.txt:662` | 84890.042 ms · 99.652 % · 32/4096 |
 | UMi 32×4 · GMM K 4096 90.0 s · 99.7 % | `cost_COST1022_U32.txt:664` | 90022.608 ms · 99.692 % |
 | UMi 32×4 · GMM K 8192 183.9 s · 99.85 % | `cost_COST1022_U32.txt:665` | 183947.251 ms · 99.850 % |
-| UMi 32×4 · SBL (in loop) 0.99 s · 74.7 % · 48 EM | `cost_COST1022_U32.txt:666` | 993.343 ms · 74.728 % · EM=48 |
+| UMi 32×4 · SBL (in loop) 0.99 s · 74.7 % · 48 MacKay | `cost_COST1022_U32.txt:666` | 993.343 ms · 74.728 % · EM=48 (bench 표기; 실제 = MacKay 갱신 16 × 3, `arms.py` SparsePrior update="mackay") |
 | 다른 SNR 의 차이 ≤ 1.9 % (최대 1.85 %) | 같은 파일 `:745,747,748` (D2 +6), `:667,669,670,671` (UMi +3) | 최대 b\* 759.228 → 773.246 ms (+1.85 %) |
 | 주석 a: UMi 70–91 s · 77–114 s, D2 ≤ 5 % | `cost_{D2,U32}_20261018_222512_CDT.txt` (10-18 확인 실행), `cost_COST1022_*.txt`, `numa_check/cost_NUMA_{a24,b6667}.txt`; DECISIONS 의 E4 NUMA 대조 줄 | V1 70.3–90.6 s, K 4096 76.8–114.1 s; D2 −4.9 … +4.3 % |
 | 주석 a: 배치를 기록한 두 대조 실행에서 원격 메모리가 많은 쪽이 10–11 % · 22–30 % 느림, 원인 미분리 | `conf/logs/cost/numa_check.log` (30 s 마다 numa_maps 표본), `numa_check/` 두 출력 | (a) CPU 24: 로컬 node1 64.5–90.9 % (끝 무렵 90 %) — V1 80.8 · 82.0 s, K 4096 87.5 · 86.7 s; (b) CPU 66-67: 로컬 node2 5.3–26.9 % — V1 90.0 · 90.6 s (+11.4 · +10.4 %), K 4096 114.1 · 105.5 s (+30.3 · +21.7 %) (−3 · +3 dB) |
