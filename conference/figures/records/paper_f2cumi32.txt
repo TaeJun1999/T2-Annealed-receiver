@@ -1,0 +1,42 @@
+F2cumi32 -- panel (c) of Fig. 2 of the manuscript as BLER vs SNR on 3GPP UMi 28 GHz, 32x4 (cell C9, prior UMi28, Nt 4, T 16, Tp 4, N' = 1.6e5), test trials 0..2559, n = 2560 per SNR -12 .. +6 dB, the same blocks for every curve; BLER after 16 outer iterations (Pilot-only LMMSE after the first).  The 7 curves of the legend band F2legend_sel without OMP (pilot-only), which was not run at 32x4.  Points counted from raw (frontier_ci.points / fails, as paper_f30.py (d); analysis.load_raw under the rules of paper_f16deep.raw); shapes = F2a_snr's curves of the same name (paper_f16deep.main() in a fresh interpreter, Figure.savefig disabled).  No new trial, no number changed.
+
+Reference record text = records/paper_f16deep.txt byte for byte (asserted; 136 lines, sha256[:16] 2d34a9ce08a13f22).
+
+Raws (read-only; path and commit from the header line of results/review_next/pairB_U28NR32SBL.txt and from results/review_next/run_manifest_U28NR32GCAPe.json; run|git of every point = that commit, asserted; content digest = sha256 of the sorted lines '<file> <sha256 of the file>'):
+  base (V1, Gaussian prior, Perfect CSI, Pilot-only LMMSE; its GMM prior is K = 4096, not drawn): /home/HTJ/t2_wtS/conf/raw_U28NR32B16e4  run|git b4433d3c  448 files  digest caaf3d0d8959b0f1753802c221453db0a0cd3458450af83eeb1532146020d88e  meta bstar kron kron_K 4096 ll_val|kron 152.23176788511105
+  PIL (pilot-only arms; read for the same-blocks check only): /home/HTJ/t2_wtS/conf/raw_PILU28NR32  run|git b4433d3c  448 files  digest e1a489215668e80f82acc65a6bf2caf73c8ddcb702193b5055adb4b3ecd9de29  meta bstar kron kron_K 4096 ll_val|kron 152.23176788511105
+  ALD (Annealed Langevin): /home/HTJ/t2_wtS/conf/raw_ALDU28NR32  run|git b4433d3c  448 files  digest 31bd1f3bc702317171112b7fe78154358c9fe69c627ff5f9ace14e4adbef1dcc  meta bstar kron kron_K 4096 ll_val|kron 152.23176788511105
+  GCAP (GMM prior, K = 8192): /home/HTJ/t2/conf/raw_U28NR32GCAPe  run|git 64b2912f  448 files  digest 74349399a131599e333e4f73293299343c66a5851ce16ff7edceaabd6530917c  meta bstar kron kron_K 8192 ll_val|kron 154.13990347772582
+  SBL (SBL in loop, rho 4, n_em 3, cold): /home/HTJ/t2/conf/raw_U28NR32SBL  run|git 13f05fb1  448 files  digest 9602ecd9eb9f7986d51a2ddd70cdfe604184d2a54ed1a1f5a9f14329b7b06bf8  meta bstar kron kron_K 4096 ll_val|kron 152.23176788511105
+  every raw: points C9 / UMi28 at -12 -9 -6 -3 +0 +3 +6 dB, chunks contiguous from trial 0 to 2560 (the test set; asserted); no load_raw WARNING; no NOTE line (no raised block).
+  same blocks: the Perfect CSI error arrays (blk_err, 2560 x 16 per point) of the five raws are identical (asserted).
+  Pilot-only LMMSE (R0-pilot) is read from the base raw: the PIL raw holds V1-pilot, bstar-pilot and Perfect CSI only (asserted; the task prompt named the PIL raw).
+
+Failures / 2560 per SNR -12 -9 -6 -3 +0 +3 +6 dB (drawn curves; counted from raw = the values asserted against):
+  Proposed (diffusion prior)   M-ours-dscore-C-V1    2219  1068   595   349   180    70    27   = the task prompt; pairB_U28NR32B16e4.txt; pairB_U28NR32SBL.txt; F30_scale_trend.txt (d); gcap/compare_U28NR32GCAP.txt [new b*]
+  Annealed Langevin (plug-in)  ALD-pilot             2545  1822   863   537   282   124    40   = the task prompt; pairB_U28NR32B16e4.txt; pairB_U28NR32SBL.txt
+  GMM prior                    M-ours-bstar          2277  1196   746   505   294   143    61   = the task prompt; gcap/compare_U28NR32GCAP.txt [new b*]
+  Gaussian prior               R2-ours-G             2460  1468   919   676   436   238   102   = the task prompt; pairB_U28NR32B16e4.txt; pairB_U28NR32SBL.txt; F30_scale_trend.txt (d)
+  Pilot-only LMMSE             R0-pilot@1            2559  2231  1342   930   621   369   190   = pairB_U28NR32B16e4.txt; tables_D2_U28NR32B16e4.txt Table A 'R0-pilot (@1)' (BLER to 3 decimals)  [after the first iteration]
+  SBL (in loop)                SBL-loop              2522  1772   979   671   386   174    83   = the task prompt; pairB_U28NR32SBL.txt
+  Perfect CSI                  R5-genie               846   423   227    88    30     9     3   = the task prompt; pairB_U28NR32B16e4.txt; pairB_U28NR32SBL.txt; F30_scale_trend.txt (d); gcap/compare_U28NR32GCAP.txt [new b*]
+  not drawn: R0-pilot after 16 iterations  2560  2073  1096   747   468   254   123 (= the R0-pilot rows of pairB_U28NR32B16e4.txt and pairB_U28NR32SBL.txt, the 'pilot_C (@16)' row of Table A, and the task prompt); GMM prior K = 4096 (base raw)  2280  1207   761   509   304   145    62 (= pairB_U28NR32B16e4.txt, pairB_U28NR32SBL.txt and F30_scale_trend.txt (d)).
+  over the decision points -3 / 0 / +3 dB (GMM anchor): K = 4096 958 failures, K = 8192 942 (asserted).
+
+File (saved at exactly figsize; PNG 300 dpi; PDF with TrueType fonts, no Type 3 -- asserted on the rendered bytes before the files were written):
+  F2c_umi32.pdf  2.0 x 2.0 in (144.00 x 144.00 pt)  9034 bytes  sha256 b836987ae7ec4db90bae6ff0c151ba1cca21cfe9bb3037ef15eb9dd4d07bdfb0
+  F2c_umi32.png  600 x 600 px  66932 bytes  sha256 839386b8889bcd3fd0a4aa940b0f97d2d0a8470847567a1001ab0bb8bca10904
+
+Axes, from the bottom-left corner of the file [in] (left, bottom, right, top):
+  F2c_umi32   [0.48, 0.36, 1.96, 1.95]
+  F2a_snr     [0.50, 0.36, 2.94, 1.95]   (records/paper_f2sub.txt)
+  F2b_budget  [0.47, 0.36, 1.98, 1.95]   (records/paper_f2sub.txt)
+  bottom 0.36 in / top 1.95 in = F2a_snr and F2b_budget (= F2a_snr_sel, F2b_budget_sel; asserted against the axes table of records/paper_f2sub.txt), so the three axes line up in a row; right end 1.96 in (<= 1.96 in); left end 0.48 in = the smallest multiple of 0.01 in that keeps the y tick labels and the y label 0.005 in or more inside the canvas (the drawn text takes 0.4739 in left of the axes, 0.0061 in to the canvas edge; the rule of paper_f2croom.py).
+
+Curves: Proposed (diffusion prior); Annealed Langevin (plug-in); GMM prior; Gaussian prior; Pilot-only LMMSE; SBL (in loop); Perfect CSI -- line + markers with the colour, marker, line style, fill, edge, line width, marker size, edge width and zorder of F2a_snr's curve of the same name (asserted), so the legend band F2legend_sel serves this panel.  No bar: no error-bar container, no collection, exactly 7 lines (asserted).  No legend, no panel label, no title (asserted).
+x (-13, 7), tick lines at every SNR point; tick labels: all seven, none overlapping (asserted); smallest gap between two neighbouring labels 4.64 pt.
+y log (0.0005, 1.2): the largest lower limit of 0.001 / 0.0005 / 0.0002 / 0.0001 that cuts no marker -- 0.001: Perfect CSI +6 dB cut; 0.0005: no marker cut; upper limit 1.2 as F2a_snr.  Tick labels 10^-3 10^-2 10^-1 10^0 (the default log labels, as F2a_snr); axis labels 'SNR [dB]' / 'BLER' (the strings of F2a_snr).
+Decision 7 -- markers of two drawn curves with centres closer than 1.5 pt at this panel size (positions unchanged): Proposed (diffusion prior) / GMM prior at -12 dB; Annealed Langevin (plug-in) / GMM prior at -3 dB, +0 dB; Annealed Langevin (plug-in) / Gaussian prior at -12 dB, -6 dB; Annealed Langevin (plug-in) / Pilot-only LMMSE at -12 dB; Annealed Langevin (plug-in) / SBL (in loop) at -12 dB, -9 dB; GMM prior / Gaussian prior at -12 dB; Gaussian prior / Pilot-only LMMSE at -12 dB; Gaussian prior / SBL (in loop) at -12 dB, -6 dB, -3 dB; Pilot-only LMMSE / SBL (in loop) at -12 dB.
+Every artist inside the canvas (tight bbox [in] [0.006, 0.041, 1.96, 1.963]); smallest visible text 8 pt (nominal size; the exponents of the 10^x tick labels are smaller, as in the reference figures); STIXGeneral / mathtext stix.
+
+Asserts passed (the script stops before saving otherwise): the reference record text; raw paths, commits, grid, test-trial chunks, no WARNING; same blocks (Perfect CSI arrays); K 8192 / 4096 from the raw meta; counted = the task prompt's values and the record files (every drawn curve against two or more); R0-pilot @16 = its record rows; decision-point sums 958 / 942; drawn = counted with F2a_snr's shapes; no bar artist; file size, axes box, bottom / top = F2a_snr and F2b_budget; markers inside the axes box; x tick labels clear of each other; every artist inside the canvas; text >= 7 pt; PNG / PDF sizes and fonts of the rendered bytes; PIL raw arms = V1-pilot, bstar-pilot, genie.

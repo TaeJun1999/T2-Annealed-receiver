@@ -22,6 +22,12 @@
 | ALDv-pilot / ALD-pilot | Annealed Langevin (error-aware) / Annealed Langevin (plug-in) | |
 | SBL-loop / SBL-pilot / OMP-pilot | SBL (in loop) / SBL (pilot-only) / OMP (pilot-only) | |
 | V1-edge / V1-clamp | Proposed, out-of-grid rule / Proposed, clamped queries | |
+| M-ours-dscore-C-V1-wide (V1LS C) | Proposed prior, retrained with a lower noise level; 좁은 곳 Proposed, retrained | V1 과 같은 rung · attempt (학습 추첨 시드) · 데이터 (같은 분할) · 레시피로 학습 σ 범위의 하한을 낮춰 다시 학습 (가중치 초기화는 통제 · 확인하지 않음; 학습 길이 · 정지 epoch 다름) — 등록 §2.1 설명을 캡션 · 본문에; V1 과의 차이를 σ 범위 하나로 돌리는 표현은 쓰지 않는다 (등록 §2.2) — 10/16 캠페인 (2026-10-20 CDT 추가) |
+| M-ours-dscore-C-V1-clamp (V1LS A) | Proposed, clamped queries (기존 행 재사용) | 보고 전용 변형 (report-only), 같은 test 블록 |
+| M-ours-dscore-C-V1-gmmfb (V1LS B) | Proposed, GMM fallback below the training range | 보고 전용 |
+| M-ours-dscore-C-V1ms (D2SITEMS) | Proposed prior, matched scalar site | 같은 가중치 · floor · damping, site 공분산만 trace 로 |
+| b\*(GCAP), kron K 8192 (U28NR32GCAP) | GMM prior (K = 8192) | "(K = 32)" 행과 같은 꼴 |
+| SBL-loop (U28NR32SBL, ρ 4 · n_em 3 · cold) | SBL (in loop), BLER-tuned; 범례 공유 시 SBL (in loop) + 캡션 | (a) 의 SBL (in loop) (파일럿 개발 NMSE 로 고름) 과 구별; n_em = 호출마다의 MacKay 갱신 횟수 (EM 아님) |
 | R5, R5-genie, genie, "known-channel reference" | **Perfect CSI** | 같은 검출기·루프에 참 H. bound 아님 (캡션에) |
 
 ## 데이터셋 (testbed)·셀
@@ -56,6 +62,7 @@
   - 꼭 필요한 유의성 표시는 기호로: (iii) → "n.s.", (iv) → "insuff." (캡션에서 정의).
 - 내부 공정 표시: "gate-FAIL recipe" 음영, "best-val weights" 계열 (같은 예산 점이 둘이 되지 않게 last-EMA 점만), "cited, STATIC16e4" 같은 출처 꼬리표.
 - 그림 제목 (패널 표시 (a), (b), … 만 남김).
+- 10/16 캠페인의 내부 이름 (2026-10-20 CDT 추가): V1-wide · V1-ms · GCAP · E5 · V1LS · D2SITEMS, 등록 라벨 "L1/L2" 와 V1LS 라벨 "(a)" (패널 표시 (a) 와는 별개).
 
 ## 그림 작업 중 추가된 이름 (2026-10-05 CDT, 논문 그림 에이전트 보고)
 
