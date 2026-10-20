@@ -1,6 +1,6 @@
 # 작업 큐 (review_next 이후; 갱신할 때마다 맨 위 시각을 바꾼다)
 
-갱신 2026-10-19 18:08 CDT (Opus 5.5). **10/16 보강 캠페인 끝 — 정리 단계.** 실험 실행 모두 끝 (E2′ GCAP · E3′ SBL32 · E5 · V1LS · E1+ · E4 COST1022 + NUMA 대조); 검토 · 기록 감사 끝. 사용자 "다 제안을 받아드릴테니까 그 대로 진행해" → Claude 제안 P1–P9 수용 (DECISIONS '남은 결정 일괄' 줄 + 정정 줄): P1 대기 7 = ① 캐비엇만 (해당 b\*: UMi28 C2 8×4 · C9 32×4 의 kron 4096; GCAP K8192 아님), P2 헤드라인 = 기존 V1 (V1LS 는 후속), P3 E1+ 한 문장, P4 E4 비용 표 (`conference/tables/table_cost.tex`), P5 16-QAM 서술, P6 대기 3 · 5 · 6 안 함, P7 대기 4 → arXiv, P8 GPU 더미 10-24 18:00 CDT 까지 (세션 cron 이 내림), P9 `docs/RESULTS.md` §26–§31 (verifier 대조 끝). 원고 수치 표 `CAMPAIGN_2026-10-16_NUMBERS.md`. 원고 반영 마감 10-24 18:00 CDT. 남은 사용자 결정: 없음 (원고에서의 자리는 사용자). **CPU 상한 168, 개발 실행 nice 10; GPU 0 · 1 · 2 더미 점유 유지 (P8)**.
+갱신 2026-10-19 21:11 CDT (Opus 5.5). **10/16 보강 캠페인 끝 — 정리 단계.** 실험 실행 모두 끝 (E2′ GCAP · E3′ SBL32 · E5 · V1LS · E1+ · E4 COST1022 + NUMA 대조); 검토 · 기록 감사 끝. 사용자 "다 제안을 받아드릴테니까 그 대로 진행해" → Claude 제안 P1–P9 수용 (DECISIONS '남은 결정 일괄' 줄 + 정정 줄): P1 대기 7 = ① 캐비엇만 (해당 b\*: UMi28 C2 8×4 · C9 32×4 의 kron 4096; GCAP K8192 아님), P2 헤드라인 = 기존 V1 (V1LS 는 후속), P3 E1+ 한 문장, P4 E4 비용 표 (`conference/tables/table_cost.tex`), P5 16-QAM 서술, P6 대기 3 · 5 · 6 안 함, P7 대기 4 → arXiv, P8 GPU 더미 10-24 18:00 CDT 까지 (세션 cron 이 내림), P9 `docs/RESULTS.md` §26–§31 (verifier 대조 끝). 원고 수치 표 `CAMPAIGN_2026-10-16_NUMBERS.md`. 원고 반영 마감 10-24 18:00 CDT. 남은 사용자 결정: 없음 (원고에서의 자리는 사용자). **CPU 상한 168, 개발 실행 nice 10; GPU 0 · 1 · 2 더미 점유 유지 (P8)**.
 
 ## 원고 목표 (사용자 10-05 CDT)
 - **IEEE ICC 2027** (Washington DC). 공식 call 페이지 기준 투고 마감 **2026-10-16**, 통지 2027-01-15, 최종본 2027-02-19. 투고본 **6 쪽 (10 pt) 상한** — 넘으면 심사 없이 거절. 저널판 없음 (DECISIONS 3a64d0ae) → 6 쪽에 못 넣는 것은 arXiv 확장판.
@@ -15,7 +15,7 @@
 |---|---|---|
 | **E4 COST1022 측정** (prompts/PROMPT_SERVER_COST.md; bench_cost.py 잠금 8498afe226c7) | CPU 24 한 코어 (1 스레드), GPU 없음 | **끝** (10-19 10:16:54–15:22:07 CDT, rc 0 ×2) — `conf/logs/cost/measure_COST1022.log`; D2 (V1 · b\* · V1-ms, −3 · +6 dB) → UMi32 (V1 · K4096 · K8192 · SBL, −3 · +3 dB), 24 블록 + 워밍업; GPU 더미 유지 + `--force` (사용자) |
 | **E1+ D2SITEMS test** (NEXT_EXPERIMENTS_D2SITEMS v2.3) | — (CPU 반납) | **끝** — 실행 커밋 9a2c9fd4 (FREEZE e6ac9e65), 10-19 08:42–08:47 CDT, E1MS_DONE ok=3 fail=0; 주 (iii), L +0.14 dB [+0.05, +0.22]; §6 · verifier 결함 0; 기록 감사 (NIT 2 정정) · Codex 교차 검토 (결함 0; 기록 정확성 1 수용) 끝 |
-| **V1LS test** (NEXT_EXPERIMENTS_V1LS v2.2; 네 run 체인) | — (CPU 반납) | **끝** — 실행 커밋 1d706648 (FREEZE 2a9b4d14), 10-18 22:13 – 10-19 03:13 CDT, 네 run ok=4 fail=0; §6 1659a0e4; 남은 것 verifier · Codex · 기록 감사 |
+| **V1LS test** (NEXT_EXPERIMENTS_V1LS v2.2; 네 run 체인) | — (CPU 반납) | **끝** — 실행 커밋 1d706648 (FREEZE 2a9b4d14), 10-18 22:13 – 10-19 03:13 CDT, 네 run ok=4 fail=0; §6 1659a0e4; verifier (§6.7) · Codex 교차 검토 (결함 0; DECISIONS 10-19 09:02 CDT 줄) · 기록 감사 (0/0/0, §6.8) 끝 |
 | **GPU 0 · 1 · 2 점유 (더미; P8 — 10-24 18:00 CDT 결과 반영 마감 뒤 내림, 세션 cron 10-24 18:03 CDT; 0 · 1 은 변형 (C) 학습 두 번 — 10-18 16:59–18:17 · 18:57–20:28 CDT — 동안 내렸다가 다시 잡음)** | GPU 0 · 1 · 2, CPU 0·96 / 22·118 / 23·119 (nice 10) | 사용자 지시 (2026-10-17 18:1x CDT, "이번만 규칙 어기자. 1, 2번 잡아둬"; 19:0x CDT "0번도 추가로 일단 점유") — AGENTS.md '자원이 놀아도 일을 억지로 만들지 않는다' 의 일회 예외. tmux `gpuhold0` · `gpuhold1` · `gpuhold2` 가 `gpuhold/gpu_hold.py` (256×256 matmul 5 s 마다, 596 MiB) 를 끊기면 다시 띄운다. 실제 GPU 작업 (E4 등) 을 그 GPU 에서 시작하기 전에 tmux Ctrl-C 로 내린다. 로그 `logs/gpuhold/` |
 | **FIGHSYDMI16e4** (DMI 그림의 +12 dB n = 327,680 · +15 dB n = 3,072,000; 보고 전용) | — (CPU·GPU 반납) | **접음 (사용자 10-16 CDT)**. FYDMIB16e4 · FYALDDMI ACCEPT OK (10-13 17:54 / 17:56 CDT). FZDMIB16e4 는 10-13 21:37 CDT 사용자 지시로 멈춘 3519 / 7680 청크에서 끝 (`logs/fighsydmi_watch.md`), 재개 안 함; FZALDDMI 미시작. raw (`raw_FY*` · `raw_FZ*`) 와 로그는 지우지 않는다. 그림·§6·EXPERIMENTS 정리는 사용자 지시가 있을 때. |
 | 등록 밖의 부분 체크포인트 (참고) | — |  `ckpt/d2sx_{SRB,SRP}_N160000_a{4,5}*.pt` (128 epoch 쯤에서 멈춤) 는 쓰지 않는다 |
@@ -24,7 +24,7 @@
 ## 대기열 (순서대로)
 | # | 작업 | 자원 | 선행 조건 | 비고 |
 |---|---|---|---|---|
-| 4 | RESULTS.md: SEEDS3·HISNR·SPARSE·SCALE 반영, CONTRIBUTIONS.md (09-27 이전에 머묾), 결과 요약 artifact 페이지, 그림 | — | 사용자 요청 시 (규칙: 요청 때 갱신) | |
+| 4 | (RESULTS.md 의 SEEDS3·HISNR·SPARSE·SCALE 은 §18–§23 에 반영됨) CONTRIBUTIONS.md (09-27 이전에 머묾), 결과 요약 artifact 페이지, 그림 | — | 사용자 요청 시 (규칙: 요청 때 갱신) | |
 
 ## 완료 (최근)
 - **E3′ U28NR32SBL** (2026-10-18 15:41 CDT 기록): 실행 커밋 13f05fb1 (FREEZE d6a76fbf) → 10-18 14:29–14:45 CDT `SBL32_DONE ok=4 fail=0` → §6: 표 B `SBL-loop → V1` **(i)** 651:19, SNR@0.1 격차 +3.14 dB [+2.78, +3.54]; 보고 전용 b\* → SBL-loop: b\* 3/3 적게 실패; baseline 14 개 전부 (i); 예측 3/4; verifier 결함 0.
